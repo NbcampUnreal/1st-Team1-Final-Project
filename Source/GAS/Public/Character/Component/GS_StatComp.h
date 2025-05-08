@@ -1,27 +1,64 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GS_StatComp.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentHPChangedDelegate, float);
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class GAS_API UGS_StatComp : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
+	FOnCurrentHPChangedDelegate OnCurrentHPChanged;
+
 	UGS_StatComp();
 
+	void InitStat();
+
+	void UpdateStat();
+
+	float CalculateDamage(float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
+
+	void PerformHit(AActor* DamagedActor, AActor* DamageCauser);
+
+	//getter
+	FORCEINLINE float GetMaxHealth()const { return MaxHealth; }
+	FORCEINLINE float GetCurrentHealth()const { return CurrentHealth; }
+	FORCEINLINE float GetAttackPower()const { return AttackPower; }
+	FORCEINLINE float GetDefense()const { return Defense; }
+	FORCEINLINE float GetAgility()const { return Agility; }
+	FORCEINLINE float GetAttackSpeed()const { return AttackSpeed; }
+
+	//setter
+	void SetCurrentHealth(float InHealth);
+	void SetMaxHealth(float InMaxHealth);
+	void SetAttackPower(float InAttackPower);
+	void SetDefense(float InDefense);
+	void SetAgility(float InAgility);
+	void SetAttackSpeed(float InAttackSpeed);
+
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
+private:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	float MaxHealth;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	float CurrentHealth;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	float AttackPower;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	float Defense;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	float Agility;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	float AttackSpeed;
 };
