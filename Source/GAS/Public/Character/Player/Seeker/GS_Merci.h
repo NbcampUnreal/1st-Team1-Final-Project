@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/GS_Character.h"
+#include "GS_Seeker.h"
 #include "GS_Merci.generated.h"
 
 UCLASS()
-class GAS_API AGS_Merci : public AGS_Character
+class GAS_API AGS_Merci : public AGS_Seeker
 {
 	GENERATED_BODY()
 

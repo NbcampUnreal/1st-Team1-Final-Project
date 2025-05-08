@@ -3,18 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/GS_Character.h"
-#include "GS_Ares.generated.h"
+#include "GS_Seeker.h"
+#include "GS_Chan.generated.h"
 
 UCLASS()
-class GAS_API AGS_Ares : public AGS_Character
+class GAS_API AGS_Chan : public AGS_Seeker
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	AGS_Ares();
-	
+	AGS_Chan();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
