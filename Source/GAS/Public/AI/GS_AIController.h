@@ -17,5 +17,23 @@ class GAS_API AGS_AIController : public AAIController
 public:
 	AGS_AIController();
 
+	static const FName HomePosKey;
 	static const FName TargetKey;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI Perception")
+	class UAISenseConfig_Sight* SightConfig;
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* InPawn) override;
+	
+	UFUNCTION()
+	void TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+private:
+	UPROPERTY(EditAnywhere)
+	UBehaviorTree* BTAsset;
+	
+	UPROPERTY(EditAnywhere)
+	UBlackboardData* BBAsset;
 };

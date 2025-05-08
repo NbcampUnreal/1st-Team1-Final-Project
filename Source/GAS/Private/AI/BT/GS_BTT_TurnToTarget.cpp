@@ -8,6 +8,7 @@
 
 UGS_BTT_TurnToTarget::UGS_BTT_TurnToTarget()
 {
+	NodeName = TEXT("TurnToTarget");
 	bNotifyTick = true;
 	
 	RotationSpeed = 360.f;
