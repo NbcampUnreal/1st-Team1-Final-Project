@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
-#include "SkillBase.generated.h"
+#include "Character/Skill/Seeker/GS_SeekerSkillBase.h"
+#include "GS_MerciAimingSkill.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GAS_API USkillBase : public UObject
+class GAS_API UGS_MerciAimingSkill : public UGS_SeekerSkillBase
 {
 	GENERATED_BODY()
 	

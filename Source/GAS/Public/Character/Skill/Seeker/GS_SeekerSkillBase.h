@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/Skill/Seeker/SeekerSkillBase.h"
-#include "ChanMovingSkill.generated.h"
+#include "Character/Skill/GS_SkillBase.h"
+#include "GS_SeekerSkillBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GAS_API UChanMovingSkill : public USeekerSkillBase
+class GAS_API UGS_SeekerSkillBase : public UGS_SkillBase
 {
 	GENERATED_BODY()
 	
