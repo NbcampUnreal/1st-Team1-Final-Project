@@ -35,19 +35,24 @@ public:
 
 	
 	void LoadTrapData();
-
-	virtual void ApplyTrapEffect(AActor* TargetActor);
-
-	//Tigger Box에 오버랩 되었을 때
+	
+	
+	//Damage Box에 오버랩 되었을 때
+	UFUNCTION()
 	void OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void DamageBoxEffect(AActor* OtherActor);
+	void DamageBoxEffect_Implementation(AActor* OtherActor);
+
 
 	void HandleTrapDamage(AActor* OtherActor);
 
 protected:
 
 	virtual void BeginPlay() override;
-	virtual void OnConstruction(const FTransform& Transform) override;
+	//virtual void OnConstruction(const FTransform& Transform) override;
 
 };

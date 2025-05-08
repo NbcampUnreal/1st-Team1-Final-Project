@@ -55,6 +55,6 @@ struct FTrapData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTrapEffect Effect;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UStaticMesh> TrapMesh;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//TSoftObjectPtr<UStaticMesh> TrapMesh;
 };
