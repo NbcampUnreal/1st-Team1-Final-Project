@@ -16,7 +16,7 @@ class GAS_API UGS_SeekerSkillBase : public UGS_SkillBase
 	
 protected:
 	virtual void ActiveSkill() override;
-	virtual void ApplyEffectToBoss();
-	virtual void ApplyEffectToDungeonMonster();
+	virtual void ApplyEffectToBoss(AActor* Target);
+	virtual void ApplyEffectToDungeonMonster(AActor* Target);
 	virtual void ExecuteSkillEffect() override;
 };

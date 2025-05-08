@@ -21,20 +21,23 @@ public:
 	// 공격
 	void OnShieldSlam();
 
-	// 스탠스 관리
+	// 스테미나 관리
 	void TickDrainStamina();
 
 protected:
+	// 스탠스 관리
 	void StartHoldUp();
 	void EndHoldUp();
 
-	virtual void ApplyEffectToDungeonMonster() override;
-	virtual void ApplyEffectToBoss() override;
+	// 공격
+	virtual void ApplyEffectToDungeonMonster(AActor* Target) override;
+	virtual void ApplyEffectToBoss(AActor* Target) override;
 
 private:
+	// 스탠스 관리
+	bool bIsHoldingUp;
 
 	// 스테미나 관리
-	bool bIsHoldingUp;
 	float MaxStamina;
 	float CurrentStamina;
 	float StaminaDrainRate; // 초당 소비량

@@ -3,6 +3,7 @@
 
 #include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
 #include "Character/GS_Character.h"
+#include "Character/Component/GS_DebuffComp.h"
 
 void UGS_ChanAimingSkill::ActiveSkill()
 {
@@ -14,7 +15,7 @@ void UGS_ChanAimingSkill::ActiveSkill()
 
 void UGS_ChanAimingSkill::ExecuteSkillEffect()
 {
-	TArray<AActor*> HitActors;
+	TArray<FHitResult> HitResults;
 
 	const FVector Start = OwnerCharacter->GetActorLocation();
 	const FVector Forward = OwnerCharacter->GetActorForwardVector();
@@ -24,13 +25,16 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
 
-	/*if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitActors, Start, Start + Forward * 100.f, FQuat::Identity, ECC_Pawn, Shape, Params))
+	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitResults, Start, Start + Forward * 100.f, FQuat::Identity, ECC_Pawn, Shape, Params))
 	{
-		for (AActor* Actor : HitActors)
+		for (const FHitResult& Hit : HitResults)
 		{
-			
+			AActor* HitActor = Hit.GetActor();
+			if (!HitActor) continue;
+
+			ApplyEffectToDungeonMonster(HitActor);
 		}
-	}*/
+	}
 }
 
 void UGS_ChanAimingSkill::OnShieldSlam()
@@ -76,10 +80,24 @@ void UGS_ChanAimingSkill::EndHoldUp()
 	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 }
 
-void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster()
+void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AActor* Target)
 {
+	if (!Target) return;
+
+	if (AGS_Character* TargetCharacter = Cast<AGS_Character>(Target))
+	{
+		// 넉백
+		const FVector LaunchDirection = (TargetCharacter->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
+		TargetCharacter->LaunchCharacter(LaunchDirection * 500.f + FVector(0, 0, 200.f), true, true);
+
+		// 경직 디버프
+		if (UGS_DebuffComp* DebuffComp = TargetCharacter->FindComponentByClass<UGS_DebuffComp>())
+		{
+			
+		}
+	}
 }
 
-void UGS_ChanAimingSkill::ApplyEffectToBoss()
+void UGS_ChanAimingSkill::ApplyEffectToBoss(AActor* Target)
 {
 }
