@@ -30,8 +30,8 @@ protected:
 	void EndHoldUp();
 
 	// 공격
-	virtual void ApplyEffectToDungeonMonster(AActor* Target) override;
-	virtual void ApplyEffectToBoss(AActor* Target) override;
+	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target) override;
+	virtual void ApplyEffectToGuardian(AGS_Guardian* Target) override;
 
 private:
 	// 스탠스 관리

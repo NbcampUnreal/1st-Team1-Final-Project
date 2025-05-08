@@ -4,6 +4,8 @@
 #include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_DebuffComp.h"
+#include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
 
 void UGS_ChanAimingSkill::ActiveSkill()
 {
@@ -32,7 +34,16 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 			AActor* HitActor = Hit.GetActor();
 			if (!HitActor) continue;
 
-			ApplyEffectToDungeonMonster(HitActor);
+			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
+			{
+				ApplyEffectToDungeonMonster(TargetMonster);
+			}
+			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
+			{
+				ApplyEffectToGuardian(TargetGuardian);
+			}
+
+			
 		}
 	}
 }
@@ -80,7 +91,7 @@ void UGS_ChanAimingSkill::EndHoldUp()
 	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 }
 
-void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AActor* Target)
+void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
 	if (!Target) return;
 
@@ -98,6 +109,6 @@ void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AActor* Target)
 	}
 }
 
-void UGS_ChanAimingSkill::ApplyEffectToBoss(AActor* Target)
+void UGS_ChanAimingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
 }
