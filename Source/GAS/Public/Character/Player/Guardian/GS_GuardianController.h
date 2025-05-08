@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -16,4 +14,14 @@ class GAS_API AGS_GuardianController : public AGS_TpsController
 	
 public:
 	AGS_GuardianController();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* TestAttackAction;
+
+	UFUNCTION()
+	void TestAttack(const FInputActionValue& InputValue);
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
 };

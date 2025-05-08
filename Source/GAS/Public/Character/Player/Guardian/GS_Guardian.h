@@ -13,6 +13,15 @@ class GAS_API AGS_Guardian : public AGS_Player
 public:
 	AGS_Guardian();
 
+	void TestMeleeAttack();
+
 protected:
 	virtual void BeginPlay() override;
+
+	//for fever mode
+	float FeverTime;
+	float FeverGage;
+
+
+private:
 };
