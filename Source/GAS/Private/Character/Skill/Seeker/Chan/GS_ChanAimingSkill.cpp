@@ -104,11 +104,15 @@ void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 		// 경직 디버프
 		if (UGS_DebuffComp* DebuffComp = TargetCharacter->FindComponentByClass<UGS_DebuffComp>())
 		{
-			
+			// 멈추고
+			// 스킬 잠시 못쓰고
 		}
 	}
 }
 
 void UGS_ChanAimingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
+	// 일반 공격만
+	// 움직임도 멈춤
+	// 스킬 못쓰고
 }
