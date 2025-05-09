@@ -18,7 +18,8 @@ public class GAS : ModuleRules
 			"UMG",
 			"OnlineSubsystem",
 			"OnlineSubsystemUtils",
-			"OnlineSubsystemSteam"
+			"OnlineSubsystemSteam",
+			"AkAudio"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
