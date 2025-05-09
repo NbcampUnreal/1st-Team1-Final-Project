@@ -1,6 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WwiseDocument Type="WorkUnit" ID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" SchemaVersion="123">
 	<AudioObjects>
-		<WorkUnit Name="Default Work Unit" ID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" PersistMode="Standalone"/>
+		<WorkUnit Name="Default Work Unit" ID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" PersistMode="Standalone">
+			<ChildrenList>
+				<Sound Name="waves" ID="{B4424FFC-C163-4A4B-9906-F144DCBF5E84}" ShortID="416651327">
+					<PropertyList>
+						<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<AudioFileSource Name="waves" ID="{0385D28F-A53E-4E30-AA29-37777C71690D}">
+							<Language>SFX</Language>
+							<AudioFile>waves.wav</AudioFile>
+							<MediaIDList>
+								<MediaID ID="750724736"/>
+							</MediaIDList>
+						</AudioFileSource>
+					</ChildrenList>
+					<ActiveSourceList>
+						<ActiveSource Name="waves" ID="{0385D28F-A53E-4E30-AA29-37777C71690D}" Platform="Linked"/>
+					</ActiveSourceList>
+				</Sound>
+			</ChildrenList>
+		</WorkUnit>
 	</AudioObjects>
 </WwiseDocument>

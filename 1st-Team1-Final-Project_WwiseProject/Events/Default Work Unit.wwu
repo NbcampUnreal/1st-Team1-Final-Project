@@ -1,6 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WwiseDocument Type="WorkUnit" ID="{8F441750-37AA-4CA2-9723-168A80C284C9}" SchemaVersion="123">
 	<Events>
-		<WorkUnit Name="Default Work Unit" ID="{8F441750-37AA-4CA2-9723-168A80C284C9}" PersistMode="Standalone"/>
+		<WorkUnit Name="Default Work Unit" ID="{8F441750-37AA-4CA2-9723-168A80C284C9}" PersistMode="Standalone">
+			<ChildrenList>
+				<Event Name="Play_waves" ID="{D4D99DFE-1AFF-4742-A8A6-B7C19192CD0A}">
+					<ChildrenList>
+						<Action Name="" ID="{C4813173-6457-4203-BDB1-595480746FD8}" ShortID="331683376">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="waves" ID="{B4424FFC-C163-4A4B-9906-F144DCBF5E84}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Stop_waves" ID="{CEB75CC5-195D-480A-8494-6222F467BB05}">
+					<ChildrenList>
+						<Action Name="" ID="{ECB2039B-E37A-4270-BE18-2604E82CE5EE}" ShortID="953075213">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="2"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="waves" ID="{B4424FFC-C163-4A4B-9906-F144DCBF5E84}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+			</ChildrenList>
+		</WorkUnit>
 	</Events>
 </WwiseDocument>
