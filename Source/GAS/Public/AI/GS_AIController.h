@@ -31,9 +31,9 @@ protected:
 	void TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY()
 	UBehaviorTree* BTAsset;
-	
-	UPROPERTY(EditAnywhere)
+
+	UPROPERTY()
 	UBlackboardData* BBAsset;
 };

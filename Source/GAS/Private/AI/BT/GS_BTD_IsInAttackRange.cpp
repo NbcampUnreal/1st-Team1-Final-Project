@@ -19,8 +19,15 @@ bool UGS_BTD_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent&
 		return false;
 	}
 	
-	const FVector TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(AGS_AIController::TargetKey);
-	const float DistanceToTarget = FVector::Dist(ControllingPawn->GetActorLocation(), TargetLocation);
+	AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(AGS_AIController::TargetKey));
+	if (!TargetActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[%s] No TargetActor in BB"), *GetName());
+		return false;
+	}
+	
+	float DistanceToTarget = FVector::Dist(ControllingPawn->GetActorLocation(), TargetActor->GetActorLocation());
+	UE_LOG(LogTemp, Warning, TEXT("[%s] Dist to target: %.1f"), *GetName(), DistanceToTarget);
 	
 	return DistanceToTarget <= AttackDistance;
 }

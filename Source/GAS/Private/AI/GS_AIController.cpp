@@ -3,6 +3,7 @@
 
 #include "AI/GS_AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Character/Player/Monster/GS_Monster.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
@@ -27,15 +28,32 @@ void AGS_AIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	
-	UBlackboardComponent* blackboardComponent = Blackboard;
-    
-	if (UseBlackboard(BBAsset, blackboardComponent))
-    {
-    	blackboardComponent->SetValueAsVector(HomePosKey, InPawn->GetActorLocation());
-    	RunBehaviorTree(BTAsset);
-    }
+	if (AGS_Monster* Monster = Cast<AGS_Monster>(InPawn))
+	{
+		BTAsset = Monster->BTAsset;
+		BBAsset = Monster->BBAsset;
+	}
+
+	UBlackboardComponent* BlackboardComponent = Blackboard;
+	if (BBAsset && UseBlackboard(BBAsset, BlackboardComponent))
+	{
+		BlackboardComponent->SetValueAsVector(HomePosKey, InPawn->GetActorLocation());
+
+		if (BTAsset)
+		{
+			RunBehaviorTree(BTAsset);
+		}
+	}
 }
 
 void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
+	if (Stimulus.WasSuccessfullySensed())
+	{
+		Blackboard->SetValueAsObject(TargetKey, Actor);
+	}
+	else
+	{
+		Blackboard->ClearValue(TargetKey);
+	}
 }
