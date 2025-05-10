@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
@@ -6,6 +6,7 @@
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
+#include "Character/Debuff/EDebuffType.h"
 
 void UGS_ChanAimingSkill::ActiveSkill()
 {
@@ -95,24 +96,23 @@ void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
 	if (!Target) return;
 
-	if (AGS_Character* TargetCharacter = Cast<AGS_Character>(Target))
-	{
-		// 넉백
-		const FVector LaunchDirection = (TargetCharacter->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
-		TargetCharacter->LaunchCharacter(LaunchDirection * 500.f + FVector(0, 0, 200.f), true, true);
+	// 넉백
+	const FVector LaunchDirection = (Target->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
+	Target->LaunchCharacter(LaunchDirection * 500.f + FVector(0, 0, 200.f), true, true);
 
-		// 경직 디버프
-		if (UGS_DebuffComp* DebuffComp = TargetCharacter->FindComponentByClass<UGS_DebuffComp>())
-		{
-			// 멈추고
-			// 스킬 잠시 못쓰고
-		}
+	// 경직 디버프
+	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
+	{
+		Target->DebuffComp->ApplyDebuff(EDebuffType::Stun);
 	}
+	
 }
 
 void UGS_ChanAimingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
-	// 일반 공격만
-	// 움직임도 멈춤
-	// 스킬 못쓰고
+	// 경직 디버프
+	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
+	{
+		Target->DebuffComp->ApplyDebuff(EDebuffType::Stun);
+	}
 }

@@ -25,4 +25,7 @@ struct GAS_API FDebuffData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<UGS_DebuffBase> DebuffClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bIsConcurrent;
 };
