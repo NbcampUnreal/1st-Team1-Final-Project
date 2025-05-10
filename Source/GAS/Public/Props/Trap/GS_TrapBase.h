@@ -23,6 +23,9 @@ public:
 	USceneComponent* RootScene;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
+	USceneComponent* RotationScene;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
 	UStaticMeshComponent* TrapStaticMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")

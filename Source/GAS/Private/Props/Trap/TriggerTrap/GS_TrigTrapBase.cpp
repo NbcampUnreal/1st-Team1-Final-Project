@@ -3,7 +3,7 @@
 AGS_TrigTrapBase::AGS_TrigTrapBase()
 {
 	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
-	TriggerBox->SetupAttachment(RootComponent);
+	TriggerBox->SetupAttachment(RotationScene);
 	TriggerBox->SetCollisionProfileName(TEXT("Trigger"));
 }
 
