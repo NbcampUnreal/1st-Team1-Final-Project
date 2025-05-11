@@ -4,6 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "GS_StatComp.generated.h"
 
+class AGS_Character;
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentHPChangedDelegate, float);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -20,7 +22,7 @@ public:
 
 	void UpdateStat();
 
-	float CalculateDamage(float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
+	float CalculateDamage(AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
 
 	void PerformHit(AActor* DamagedActor, AActor* DamageCauser);
 
