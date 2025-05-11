@@ -1,7 +1,0 @@
-Event	ID	Name			Wwise Object Path	Notes
-	153945882	Stop_waves			\Default Work Unit\Stop_waves	
-	374167564	Play_waves			\Default Work Unit\Play_waves	
-
-In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
-	750724736	waves	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A9\{A97BE36E-CAE5-7C1D-4425-4D510D9A1EF3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\waves		1288036
-

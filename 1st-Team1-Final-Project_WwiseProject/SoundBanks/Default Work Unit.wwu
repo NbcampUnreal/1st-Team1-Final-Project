@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WwiseDocument Type="WorkUnit" ID="{693018AF-BA33-4DC8-9573-081F88BCF9B8}" SchemaVersion="123">
 	<SoundBanks>
-		<WorkUnit Name="Default Work Unit" ID="{693018AF-BA33-4DC8-9573-081F88BCF9B8}" PersistMode="Standalone"/>
+		<WorkUnit Name="Default Work Unit" ID="{693018AF-BA33-4DC8-9573-081F88BCF9B8}" PersistMode="Standalone">
+			<ChildrenList>
+				<SoundBank Name="Main" ID="{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}">
+					<ObjectInclusionList>
+						<ObjectRef Name="Play_EV_Seeker_Footstep" ID="{575B2435-D782-43FD-A5DA-8DA59CD14A20}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Play_waves" ID="{D4D99DFE-1AFF-4742-A8A6-B7C19192CD0A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Stop_waves" ID="{CEB75CC5-195D-480A-8494-6222F467BB05}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="FootSteps" ID="{BF94A467-5B4A-4C18-8A80-37A713606011}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
+					</ObjectInclusionList>
+					<ObjectExclusionList/>
+					<GameSyncExclusionList/>
+				</SoundBank>
+			</ChildrenList>
+		</WorkUnit>
 	</SoundBanks>
 </WwiseDocument>
