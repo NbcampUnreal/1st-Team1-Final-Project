@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -10,7 +10,7 @@
 class UGS_ArcaneBoardManager;
 
 /**
- * 
+ * 룬 시스템을 관리하는 로컬 플레이어 서브 시스템
  */
 UCLASS()
 class GAS_API UGS_ArcaneBoardLPS : public ULocalPlayerSubsystem
