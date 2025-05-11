@@ -26,7 +26,7 @@ public:
 	USceneComponent* RotationSceneComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
-	UStaticMeshComponent* TrapStaticMeshComp;
+	USceneComponent* MeshParentSceneComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
 	UBoxComponent* DamageBoxComp;
@@ -50,12 +50,15 @@ public:
 	void DamageBoxEffect(AActor* OtherActor);
 	void DamageBoxEffect_Implementation(AActor* OtherActor);
 
-
+	//데미지 박스에 오버랩된 플레이어에게 데미지 주는 함수
 	void HandleTrapDamage(AActor* OtherActor);
+	//범위 내의 여러 플레이어에게 한 번에 데미지 주는 함수
+	virtual void HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors);
 
 protected:
 
 	virtual void BeginPlay() override;
-	//virtual void OnConstruction(const FTransform& Transform) override;
+	
+
 
 };

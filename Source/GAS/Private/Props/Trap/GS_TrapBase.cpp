@@ -10,11 +10,11 @@ AGS_TrapBase::AGS_TrapBase()
 	RotationSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("RotationScene"));
 	RotationSceneComp->SetupAttachment(RootComponent);
 
-	TrapStaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TrapStaticMesh"));
-	TrapStaticMeshComp->SetupAttachment(RotationSceneComp);
+	MeshParentSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("MeshParentSceneComp"));
+	MeshParentSceneComp->SetupAttachment(RotationSceneComp);
 
 	DamageBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("DamageBox"));
-	DamageBoxComp->SetupAttachment(TrapStaticMeshComp);
+	DamageBoxComp->SetupAttachment(MeshParentSceneComp);
 	//needs to be fixed
 	// DamageBox 콜리전 설정
 	DamageBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
