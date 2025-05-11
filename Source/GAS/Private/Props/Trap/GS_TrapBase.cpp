@@ -69,6 +69,10 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 	UE_LOG(LogTemp, Warning, TEXT("Player damaged"));
 }
 
+void AGS_TrapBase::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors)
+{
+
+}
 
 //후에 플레이어 데미지, 디버프와 연결용
 void AGS_TrapBase::LoadTrapData()
