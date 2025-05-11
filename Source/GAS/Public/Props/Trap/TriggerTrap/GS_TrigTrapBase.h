@@ -19,7 +19,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
-	UBoxComponent* TriggerBox;
+	UBoxComponent* TriggerBoxComp;
 
 	UFUNCTION()
 	void OnTriggerOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,

@@ -4,43 +4,43 @@ AGS_TrapBase::AGS_TrapBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	RootScene = CreateDefaultSubobject<USceneComponent>(TEXT("RootScene"));
-	RootComponent = RootScene;
+	RootSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComp"));
+	RootComponent = RootSceneComp;
 
-	RotationScene = CreateDefaultSubobject<USceneComponent>(TEXT("RotationScene"));
-	RotationScene->SetupAttachment(RootComponent);
+	RotationSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("RotationScene"));
+	RotationSceneComp->SetupAttachment(RootComponent);
 
-	TrapStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TrapStaticMesh"));
-	TrapStaticMesh->SetupAttachment(RotationScene);
+	TrapStaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TrapStaticMesh"));
+	TrapStaticMeshComp->SetupAttachment(RotationSceneComp);
 
-	DamageBox = CreateDefaultSubobject<UBoxComponent>(TEXT("DamageBox"));
-	DamageBox->SetupAttachment(TrapStaticMesh);
+	DamageBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("DamageBox"));
+	DamageBoxComp->SetupAttachment(TrapStaticMeshComp);
 	//needs to be fixed
 	// DamageBox 콜리전 설정
-	DamageBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	DamageBox->SetCollisionObjectType(ECC_Pawn); // Object Type을 Pawn으로 설정
+	DamageBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	DamageBoxComp->SetCollisionObjectType(ECC_Pawn); // Object Type을 Pawn으로 설정
 
 	// 기본 응답: 모두 무시
-	DamageBox->SetCollisionResponseToAllChannels(ECR_Ignore);
+	DamageBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 
 	// 트레이스 채널
-	DamageBox->SetCollisionResponseToChannel(ECC_Visibility, ECR_Overlap);
-	DamageBox->SetCollisionResponseToChannel(ECC_Camera, ECR_Overlap);
+	DamageBoxComp->SetCollisionResponseToChannel(ECC_Visibility, ECR_Overlap);
+	DamageBoxComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Overlap);
 
 	// 오브젝트 채널
-	DamageBox->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
-	DamageBox->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
-	DamageBox->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-	DamageBox->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
-	DamageBox->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Block);
-	DamageBox->SetCollisionResponseToChannel(ECC_Destructible, ECR_Overlap);
+	DamageBoxComp->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
+	DamageBoxComp->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+	DamageBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	DamageBoxComp->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
+	DamageBoxComp->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Block);
+	DamageBoxComp->SetCollisionResponseToChannel(ECC_Destructible, ECR_Overlap);
 }
 
 
 void AGS_TrapBase::BeginPlay()
 {
 	Super::BeginPlay();
-	DamageBox->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrapBase::OnDamageBoxOverlap);
+	DamageBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrapBase::OnDamageBoxOverlap);
 }
 
 

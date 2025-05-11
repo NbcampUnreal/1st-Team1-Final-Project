@@ -20,16 +20,16 @@ public:
 	FName TrapID;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
-	USceneComponent* RootScene;
+	USceneComponent* RootSceneComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
-	USceneComponent* RotationScene;
+	USceneComponent* RotationSceneComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
-	UStaticMeshComponent* TrapStaticMesh;
+	UStaticMeshComponent* TrapStaticMeshComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
-	UBoxComponent* DamageBox;
+	UBoxComponent* DamageBoxComp;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Trap")
 	UDataTable* TrapDataTable;

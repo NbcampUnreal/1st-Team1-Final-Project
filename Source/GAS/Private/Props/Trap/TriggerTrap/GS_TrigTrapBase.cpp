@@ -2,16 +2,16 @@
 
 AGS_TrigTrapBase::AGS_TrigTrapBase()
 {
-	TriggerBox = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
-	TriggerBox->SetupAttachment(RotationScene);
-	TriggerBox->SetCollisionProfileName(TEXT("Trigger"));
+	TriggerBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
+	TriggerBoxComp->SetupAttachment(RotationSceneComp);
+	TriggerBoxComp->SetCollisionProfileName(TEXT("Trigger"));
 }
 
 void AGS_TrigTrapBase::BeginPlay()
 {
 	Super::BeginPlay();
-	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrigTrapBase::OnTriggerOverlap);
-	TriggerBox->OnComponentEndOverlap.AddDynamic(this, &AGS_TrigTrapBase::OnTriggerEndOverlap);
+	TriggerBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrigTrapBase::OnTriggerOverlap);
+	TriggerBoxComp->OnComponentEndOverlap.AddDynamic(this, &AGS_TrigTrapBase::OnTriggerEndOverlap);
 
 }
 
