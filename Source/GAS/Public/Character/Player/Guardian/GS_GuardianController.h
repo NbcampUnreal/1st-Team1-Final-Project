@@ -16,10 +16,28 @@ public:
 	AGS_GuardianController();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* TestAttackAction;
+	UInputAction* ComboAttackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* Skill1Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* Skill2Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* UltimateSkillAction;
 
 	UFUNCTION()
-	void TestAttack(const FInputActionValue& InputValue);
+	void ComboAttack(const FInputActionValue& InputValue);
+
+	UFUNCTION()
+	void Skill1(const FInputActionValue& InputValue);
+
+	UFUNCTION()
+	void Skill2(const FInputActionValue& InputValue);
+
+	UFUNCTION()
+	void UltimateSkill(const FInputActionValue& InputValue);
 
 protected:
 	virtual void BeginPlay() override;
