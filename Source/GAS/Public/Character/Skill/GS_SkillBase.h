@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -16,28 +16,28 @@ class GAS_API UGS_SkillBase : public UObject
 	GENERATED_BODY()
 
 public:
-	// ÄğÅ¸ÀÓ °ü¸®
+	// ì¿¨íƒ€ì„ ê´€ë¦¬
 	float GetCoolTime();
 
-	// ½ºÅ³ ÃÊ±âÈ­
+	// ìŠ¤í‚¬ ì´ˆê¸°í™”
 	void InitSkill(AGS_Character* InOwner);
 
-	// ½ºÅ³ ÀÛµ¿
-	virtual void ActiveSkill(); // ¼­¹ö ±ÇÇÑ¿¡¼­¸¸ È£Ãâ
+	// ìŠ¤í‚¬ ì‘ë™
+	virtual void ActiveSkill(); // ì„œë²„ ê¶Œí•œì—ì„œë§Œ í˜¸ì¶œ
 	virtual void ExecuteSkillEffect();
 	virtual bool CanActive() const;
 
 protected:
-	// ÄğÅ¸ÀÓ °ü¸®
+	// ì¿¨íƒ€ì„ ê´€ë¦¬
 	FTimerHandle CooldownHandle;
 	float Cooltime;
 	bool bIsCoolingDown;
 	void StartCoolDown();
 
-	// ½ºÅ³ °ø°İ ¾Ö´Ï¸ŞÀÌ¼Ç
+	// ìŠ¤í‚¬ ê³µê²© ì• ë‹ˆë©”ì´ì…˜
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* SkillAnimMontage;
 
-	// ½ºÅ³ ¼ÒÀ¯ÀÚ
+	// ìŠ¤í‚¬ ì†Œìœ ì
 	AGS_Character* OwnerCharacter;
 };

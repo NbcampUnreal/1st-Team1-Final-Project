@@ -1,35 +1,98 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Character/Component/GS_StatComp.h"
 
-
-// Sets default values for this component's properties
 UGS_StatComp::UGS_StatComp()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
+}
+
+void UGS_StatComp::InitStat()
+{
+	//init default stats from data table
+}
+
+void UGS_StatComp::UpdateStat()
+{
+	//update stats by rune system
+}
+
+float UGS_StatComp::CalculateDamage(float InSkillCoefficient, float SlopeCoefficient)
+{
+	float Damage = 0.f;
+	Damage = (AttackPower * InSkillCoefficient) * (100.f / 100.f + SlopeCoefficient * Defense);
+
+	return Damage;
+}
+
+void UGS_StatComp::PerformHit(AActor* DamagedActor, AActor* DamageCauser)
+{
+	//UGameplayStatics::ApplyDamage(DamagedActor, Damage, EventInstigator, DamageCauser, UDamageType::StaticClass());
+
+	/*float Damage = CalculateDamage();
+	if (IsValid(DamagedActor))
+	{
+		AGS_Character* DamagedCharacter = Cast<AGS_Character>(DamagedActor);
+		if (IsValid(DamagedCharacter))
+		{
+			UGS_StatComp* DamagedActorStatComp = DamagedCharacter->GetStatComp();
+			if (IsValid(DamagedActorStatComp))
+			{
+				float DamagedActorCurrentHealth = DamagedActorStatComp->GetCurrentHealth();
+				DamagedActorStatComp->SetCurrentHealth(DamagedActorCurrentHealth - Damage);
+			}
+		}
+	}*/
 }
 
 
-// Called when the game starts
+void UGS_StatComp::SetCurrentHealth(float InHealth)
+{
+	if (!IsValid(GetOwner()) || !GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	CurrentHealth = InHealth;
+
+	//dead
+	if (CurrentHealth <= KINDA_SMALL_NUMBER)
+	{
+		CurrentHealth = 0.f;
+
+	}
+	OnCurrentHPChanged.Broadcast(CurrentHealth);
+}
+
+void UGS_StatComp::SetMaxHealth(float InMaxHealth)
+{
+	MaxHealth = InMaxHealth;
+}
+
+void UGS_StatComp::SetAttackPower(float InAttackPower)
+{
+	AttackPower = InAttackPower;
+}
+
+void UGS_StatComp::SetDefense(float InDefense)
+{
+	Defense = InDefense;
+}
+
+void UGS_StatComp::SetAgility(float InAgility)
+{
+	Agility = InAgility;
+}
+
+void UGS_StatComp::SetAttackSpeed(float InAttackSpeed)
+{
+	AttackSpeed = InAttackSpeed;
+}
+
 void UGS_StatComp::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
 }
 
 
-// Called every frame
-void UGS_StatComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
 
