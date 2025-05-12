@@ -10,7 +10,7 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	// ¼­ºê½Ã½ºÅÛ ÀÎ½ºÅÏ½º »ı¼º
+	// ì˜¤ë””ì˜¤ ì‹œìŠ¤í…œ ì¸ìŠ¤í„´ìŠ¤ ìƒì„±
 	CharacterAudio = NewObject<UGS_CharacterAudioSystem>(this);
 	UIAudio = NewObject<UGS_UIAudioSystem>(this);
 	EnvironmentAudio = NewObject<UGS_EnvironmentAudioSystem>(this);
@@ -18,7 +18,7 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 
 void UGS_AudioManager::Deinitialize()
 {
-	// ¸®¼Ò½º ÇØÁ¦ ·ÎÁ÷
+	// ë©”ëª¨ë¦¬ í•´ì œ ì²˜ë¦¬
 	CharacterAudio = nullptr;
 	UIAudio = nullptr;
 	EnvironmentAudio = nullptr;
@@ -26,15 +26,15 @@ void UGS_AudioManager::Deinitialize()
 	Super::Deinitialize();
 }
 
-// Wwise ÀÌº¥Æ®¸¦ È£ÃâÇÏ´Â ºÎºĞ
+// Wwise ì´ë²¤íŠ¸ í˜¸ì¶œ í•¨ìˆ˜
 void UGS_AudioManager::PlayEvent(UAkAudioEvent* Event, AActor* Context)
 {
-	if (!Event || !Context) // Wwise ÀÌº¥Æ®³ª ÄÁÅØ½ºÆ®°¡ À¯È¿ÇÏÁö ¾ÊÀº °æ¿ì
+	if (!Event || !Context) // Wwise ì´ë²¤íŠ¸ë‚˜ ì»¨í…ìŠ¤íŠ¸ê°€ ìœ íš¨í•˜ì§€ ì•Šì€ ê²½ìš°
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayEvent È£Ãâ ¿À·ù: Invalid Event or Context."));
+		UE_LOG(LogTemp, Warning, TEXT("PlayEvent í˜¸ì¶œ ì‹¤íŒ¨: Invalid Event or Context."));
 		return;
 	}
 	FOnAkPostEventCallback DummyCallback;
-	// Wwise¿¡ ÀÌº¥Æ® Æ÷½ºÆ®
+	// Wwiseì˜ ì´ë²¤íŠ¸ í¬ìŠ¤íŠ¸
 	UAkGameplayStatics::PostEvent(Event, Context, /*CallbackMask=*/0, /*PostEventCallback=*/DummyCallback);
 }
