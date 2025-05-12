@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -8,7 +8,7 @@
 #include "GS_ArcaneBoardManager.generated.h"
 
 /**
- * 
+ * 룬 시스템의 실질적인 로직을 처리하는 매니저
  */
 UCLASS()
 class GAS_API UGS_ArcaneBoardManager : public UObject
