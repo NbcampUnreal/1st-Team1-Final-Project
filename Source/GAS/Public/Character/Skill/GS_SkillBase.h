@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -30,7 +30,7 @@ public:
 protected:
 	// 쿨타임 관리
 	FTimerHandle CooldownHandle;
-	float Cooltime;
+	float Cooltime=10.0f;
 	bool bIsCoolingDown;
 	void StartCoolDown();
 

@@ -6,6 +6,15 @@
 #include "Components/ActorComponent.h"
 #include "GS_SkillComp.generated.h"
 
+class UGS_SkillBase;
+
+UENUM(BlueprintType)
+enum class ESkillSlot : uint8
+{
+	Moving,
+	Aiming,
+	Ultimate
+};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class GAS_API UGS_SkillComp : public UActorComponent
@@ -16,12 +25,25 @@ public:
 	// Sets default values for this component's properties
 	UGS_SkillComp();
 
+	UFUNCTION()
+	void TryActivateSkill(ESkillSlot Slot);
+
+	void SetSkill(ESkillSlot Slot, TSubclassOf<UGS_SkillBase> SkillClass);
+
+	void SetCanUseSkill(bool InCanUseSkill);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
+	UPROPERTY()
+	TMap<ESkillSlot, UGS_SkillBase*> SkillMap;
+
+	UFUNCTION(Server, Reliable)
+	void Server_TryActiveSkill(ESkillSlot Slot);
+
+	void InitSkills();
+
+	UPROPERTY()
+	bool bCanUseSkill = true;
 };

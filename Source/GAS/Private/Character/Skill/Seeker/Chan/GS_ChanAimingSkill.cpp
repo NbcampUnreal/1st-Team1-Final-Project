@@ -1,9 +1,12 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_DebuffComp.h"
+#include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
+#include "Character/Debuff/EDebuffType.h"
 
 void UGS_ChanAimingSkill::ActiveSkill()
 {
@@ -32,7 +35,16 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 			AActor* HitActor = Hit.GetActor();
 			if (!HitActor) continue;
 
-			ApplyEffectToDungeonMonster(HitActor);
+			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
+			{
+				ApplyEffectToDungeonMonster(TargetMonster);
+			}
+			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
+			{
+				ApplyEffectToGuardian(TargetGuardian);
+			}
+
+			
 		}
 	}
 }
@@ -56,7 +68,7 @@ void UGS_ChanAimingSkill::TickDrainStamina()
 {
 	CurrentStamina -= StaminaDrainRate;
 	// UI 업데이트
-
+	UE_LOG(LogTemp, Warning, TEXT("Stamina : %f"), CurrentStamina);
 	if (CurrentStamina <= 0.f)
 	{
 		EndHoldUp();
@@ -69,7 +81,7 @@ void UGS_ChanAimingSkill::StartHoldUp()
 	CurrentStamina = MaxStamina;
 
 	// UI 표시
-
+	UE_LOG(LogTemp, Warning, TEXT("Start Hold Up!!!!!!!"));
 	OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 1.0f, true);
 }
 
@@ -78,26 +90,30 @@ void UGS_ChanAimingSkill::EndHoldUp()
 	bIsHoldingUp = false;
 	// UI 숨기기
 	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+	UE_LOG(LogTemp, Warning, TEXT("End Hold Up!!!!!!"));
 }
 
-void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AActor* Target)
+void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
 	if (!Target) return;
 
-	if (AGS_Character* TargetCharacter = Cast<AGS_Character>(Target))
-	{
-		// 넉백
-		const FVector LaunchDirection = (TargetCharacter->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
-		TargetCharacter->LaunchCharacter(LaunchDirection * 500.f + FVector(0, 0, 200.f), true, true);
+	// 넉백
+	const FVector LaunchDirection = (Target->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
+	Target->LaunchCharacter(LaunchDirection * 500.f + FVector(0, 0, 200.f), true, true);
 
-		// 경직 디버프
-		if (UGS_DebuffComp* DebuffComp = TargetCharacter->FindComponentByClass<UGS_DebuffComp>())
-		{
-			
-		}
+	// 경직 디버프
+	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
+	{
+		Target->DebuffComp->ApplyDebuff(EDebuffType::Stun);
 	}
+	
 }
 
-void UGS_ChanAimingSkill::ApplyEffectToBoss(AActor* Target)
+void UGS_ChanAimingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
+	// 경직 디버프
+	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
+	{
+		Target->DebuffComp->ApplyDebuff(EDebuffType::Stun);
+	}
 }
