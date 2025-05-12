@@ -24,4 +24,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, Category = "AI")
 	UBlackboardData* BBAsset;
+
+	void SetSelected(bool bIsSelected);
+
+protected:
+	UPROPERTY(VisibleAnywhere)
+	UDecalComponent* SelectionDecal;
 };

@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "AI/RTS/GS_RTSCamera.h"
+#include "Character/Player/Monster/GS_Monster.h"
 
 AGS_RTSController::AGS_RTSController()
 {
@@ -147,4 +148,41 @@ void AGS_RTSController::InitCameraActor()
 	{
 		SetViewTarget(CameraActor);
 	}
+}
+
+void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
+{
+	if (!Unit)
+	{
+		return;
+	}
+	
+	if (UnitSelection.AddUnique(Unit) != INDEX_NONE)
+	{
+		Unit->SetSelected(true);
+	}
+}
+
+void AGS_RTSController::RemoveUnitFromSelection(AGS_Monster* Unit)
+{
+	if (!Unit)
+	{
+		return;
+	}
+	
+	UnitSelection.Remove(Unit);
+	Unit->SetSelected(false);
+}
+
+void AGS_RTSController::ClearUnitSelection()
+{
+	for (AGS_Monster* Unit : UnitSelection)
+	{
+		if (IsValid(Unit))
+		{
+			Unit->SetSelected(false);
+		}
+	}
+		
+	UnitSelection.Empty();
 }

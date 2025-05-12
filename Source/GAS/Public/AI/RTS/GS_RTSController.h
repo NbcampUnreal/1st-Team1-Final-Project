@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "GS_RTSController.generated.h"
 
+struct FInputActionValue;
+class AGS_Monster;
 class UInputMappingContext;
 class UInputAction;
 
@@ -29,6 +31,10 @@ public:
 	UFUNCTION()
 	void CameraMoveEnd();
 
+	void AddUnitToSelection(AGS_Monster* Unit);
+	void RemoveUnitFromSelection(AGS_Monster* Unit);
+	void ClearUnitSelection();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -46,6 +52,9 @@ private:
 	
 	UPROPERTY(EditAnywhere, Category = "Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float EdgeScreenRatio = 0.05f;
+
+	UPROPERTY()
+	TArray<AGS_Monster*> UnitSelection;
 
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
