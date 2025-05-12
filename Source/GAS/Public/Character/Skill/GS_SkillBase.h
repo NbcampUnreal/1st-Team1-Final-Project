@@ -25,12 +25,15 @@ public:
 	// 스킬 작동
 	virtual void ActiveSkill(); // 서버 권한에서만 호출
 	virtual void ExecuteSkillEffect();
+	virtual void OnSkillCommand();
 	virtual bool CanActive() const;
+	virtual bool IsActive() const;
 
 protected:
+	bool bIsActive = false;
 	// 쿨타임 관리
 	FTimerHandle CooldownHandle;
-	float Cooltime=10.0f;
+	float Cooltime=30.0f;
 	bool bIsCoolingDown;
 	void StartCoolDown();
 

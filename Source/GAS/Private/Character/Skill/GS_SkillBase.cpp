@@ -31,9 +31,18 @@ void UGS_SkillBase::ExecuteSkillEffect()
 	// Override
 }
 
+void UGS_SkillBase::OnSkillCommand()
+{
+}
+
 bool UGS_SkillBase::CanActive() const
 {
 	return OwnerCharacter && !bIsCoolingDown;
+}
+
+bool UGS_SkillBase::IsActive() const
+{
+	return bIsActive;
 }
 
 void UGS_SkillBase::StartCoolDown()
