@@ -7,7 +7,7 @@ AGS_LandMineTrap::AGS_LandMineTrap()
 	RadialForceComp->SetupAttachment(MeshParentSceneComp);
 
 	RadialForceComp->Radius = 300.0f;
-	RadialForceComp->ImpulseStrength = 1500.0f;
+	RadialForceComp->ImpulseStrength = 800.0f;
 	RadialForceComp->bImpulseVelChange = true;
 	RadialForceComp->bAutoActivate = false;
 	RadialForceComp->ForceStrength = 0.0f;
