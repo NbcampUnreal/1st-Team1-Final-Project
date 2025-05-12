@@ -46,11 +46,15 @@ void AGS_TpsController::WalkToggle(const FInputActionValue& InputValue)
 void AGS_TpsController::BeginPlay()
 {
 	Super::BeginPlay();
-	check(InputMappingContext);
 
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	check(Subsystem);
-	Subsystem->AddMappingContext(InputMappingContext, 0);
+	if (!HasAuthority() && IsLocalController())
+	{
+		check(InputMappingContext);
+
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+		check(Subsystem);
+		Subsystem->AddMappingContext(InputMappingContext, 0);
+	}
 }
 
 void AGS_TpsController::SetupInputComponent()

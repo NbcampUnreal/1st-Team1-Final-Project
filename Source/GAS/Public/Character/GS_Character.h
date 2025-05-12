@@ -18,22 +18,13 @@ public:
 
 	virtual void BeginPlay() override;
 
-	//component
-	UPROPERTY()
-	TObjectPtr<UGS_StatComp> StatComp;
-
-	UPROPERTY()
-	TObjectPtr<UGS_SkillComp> SkillComp;
-
-	UPROPERTY()
-	TObjectPtr<UGS_DebuffComp> DebuffComp;
-
 	//variable
 	float MaxSpeed;
 
 	//getter
-	UFUNCTION()
 	FORCEINLINE UGS_StatComp* GetStatComp() const { return StatComp; }
+	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }
+	FORCEINLINE UGS_DebuffComp* GetDebuffComp() const { return DebuffComp; }
 
 	//serverRPC
 	UFUNCTION(Server, Reliable)
@@ -46,4 +37,14 @@ protected:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+private:
+	//component
+	UPROPERTY()
+	TObjectPtr<UGS_StatComp> StatComp;
+
+	UPROPERTY()
+	TObjectPtr<UGS_SkillComp> SkillComp;
+
+	UPROPERTY()
+	TObjectPtr<UGS_DebuffComp> DebuffComp;
 };
