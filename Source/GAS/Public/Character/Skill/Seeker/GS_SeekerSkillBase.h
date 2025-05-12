@@ -6,6 +6,8 @@
 #include "Character/Skill/GS_SkillBase.h"
 #include "GS_SeekerSkillBase.generated.h"
 
+class AGS_Monster;
+class AGS_Guardian;
 /**
  * 
  */
@@ -16,7 +18,7 @@ class GAS_API UGS_SeekerSkillBase : public UGS_SkillBase
 	
 protected:
 	virtual void ActiveSkill() override;
-	virtual void ApplyEffectToBoss(AActor* Target);
-	virtual void ApplyEffectToDungeonMonster(AActor* Target);
+	virtual void ApplyEffectToGuardian(AGS_Guardian* Target);
+	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target);
 	virtual void ExecuteSkillEffect() override;
 };

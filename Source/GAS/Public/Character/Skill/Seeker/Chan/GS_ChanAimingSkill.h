@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -30,17 +30,17 @@ protected:
 	void EndHoldUp();
 
 	// 공격
-	virtual void ApplyEffectToDungeonMonster(AActor* Target) override;
-	virtual void ApplyEffectToBoss(AActor* Target) override;
+	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target) override;
+	virtual void ApplyEffectToGuardian(AGS_Guardian* Target) override;
 
 private:
 	// 스탠스 관리
 	bool bIsHoldingUp;
 
 	// 스테미나 관리
-	float MaxStamina;
+	float MaxStamina=10.0f;
 	float CurrentStamina;
-	float StaminaDrainRate; // 초당 소비량
+	float StaminaDrainRate=1.0f; // 초당 소비량
 	float SlamStaminaCost;
 	FTimerHandle StaminaDrainHandle;
 };
