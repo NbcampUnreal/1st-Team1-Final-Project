@@ -58,6 +58,7 @@ void AGS_Guardian::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
+	DOREPLIFETIME(ThisClass, IsAttacking);
 }
 
 void AGS_Guardian::ComboAttack()
@@ -115,6 +116,7 @@ void AGS_Guardian::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted
 {
 	IsAttacking = false;
 	AttackEndComboState();
+
 }
 
 void AGS_Guardian::AttackStartComboState()
@@ -135,11 +137,11 @@ void AGS_Guardian::OnRep_Attacking()
 {
 	if (IsAttacking)
 	{
-		GetCharacterMovement()->SetMovementMode(MOVE_None);
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 	}
 	else
 	{
-		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		GetCharacterMovement()->SetMovementMode(MOVE_None);
 	}
 }
 
