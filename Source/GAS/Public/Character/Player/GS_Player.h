@@ -7,6 +7,24 @@
 class USpringArmComponent;
 class UCameraComponent;
 
+USTRUCT(BlueprintType)
+struct FCharacterWantsToMove
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
+	bool WantsToSprint = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
+	bool WantsToWalk = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
+	bool WantsToAim = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
+	bool WantsToStrafe = false;
+};
+
 UCLASS()
 class GAS_API AGS_Player : public AGS_Character
 {
@@ -31,7 +49,12 @@ public:
 	UPROPERTY()
 	float RunSpeed;
 
-
+	//Wants To Move
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	FCharacterWantsToMove WantsToMove;
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	FCharacterWantsToMove GetWantsToMove();
 };

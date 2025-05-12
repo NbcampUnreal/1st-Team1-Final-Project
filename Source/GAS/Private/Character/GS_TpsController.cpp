@@ -11,6 +11,7 @@ AGS_TpsController::AGS_TpsController()
 	: InputMappingContext(nullptr)
 	, MoveAction(nullptr)
 	, LookAction(nullptr)
+	, WalkToggleAction(nullptr)
 {
 }
 
@@ -36,6 +37,10 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 		ControlledPawn->AddControllerYawInput(InputAxisVector.X);
 		ControlledPawn->AddControllerPitchInput(InputAxisVector.Y);
 	}
+}
+
+void AGS_TpsController::WalkToggle(const FInputActionValue& InputValue)
+{
 }
 
 void AGS_TpsController::BeginPlay()
