@@ -104,7 +104,7 @@ void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 	// 경직 디버프
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
 	{
-		Target->DebuffComp->ApplyDebuff(EDebuffType::Stun);
+		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Stun);
 	}
 	
 }
@@ -114,6 +114,6 @@ void UGS_ChanAimingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 	// 경직 디버프
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
 	{
-		Target->DebuffComp->ApplyDebuff(EDebuffType::Stun);
+		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Stun);
 	}
 }
