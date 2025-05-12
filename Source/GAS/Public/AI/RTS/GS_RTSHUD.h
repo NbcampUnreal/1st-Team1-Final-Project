@@ -30,7 +30,6 @@ private:
 	FVector2D PointA; // 마우스 시작 지점
 	FVector2D PointB; // 마우스 마지막 지점 
 	bool bIsDrawing;
-	bool bIsMarquee;
 	
 	TArray<AGS_Monster*> SelectionOfActors;
 

@@ -25,11 +25,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* CameraMoveAction;
 
-	UFUNCTION()
-	void CameraMove(const FInputActionValue& value);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* LeftClickAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* RightClickAction;
 	
-	UFUNCTION()
+	void CameraMove(const FInputActionValue& InputValue);
 	void CameraMoveEnd();
+	void OnLeftMousePressed();
+	void OnLeftMouseReleased();
+	void OnRightMousePressed();
 
 	void AddUnitToSelection(AGS_Monster* Unit);
 	void RemoveUnitFromSelection(AGS_Monster* Unit);
@@ -41,17 +47,17 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	FVector2D KeyboardDir = FVector2D::ZeroVector;
-	FVector2D MouseEdgeDir = FVector2D::ZeroVector;
+	FVector2D KeyboardDir;
+	FVector2D MouseEdgeDir;
 
 	UPROPERTY()
 	class AGS_RTSCamera* CameraActor = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
-	float CameraSpeed = 2000.f;
+	float CameraSpeed;
 	
 	UPROPERTY(EditAnywhere, Category = "Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float EdgeScreenRatio = 0.05f;
+	float EdgeScreenRatio;
 
 	UPROPERTY()
 	TArray<AGS_Monster*> UnitSelection;

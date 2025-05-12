@@ -12,7 +12,6 @@ AGS_RTSHUD::AGS_RTSHUD()
 	PointA = FVector2D::ZeroVector; 
 	PointB = FVector2D::ZeroVector; 
 	bIsDrawing = false;
-	bIsMarquee = false;
 }
 
 void AGS_RTSHUD::BeginPlay()
@@ -30,9 +29,7 @@ void AGS_RTSHUD::StartSelection()
 		return;
 	}
 
-	const float Scale = UWidgetLayoutLibrary::GetViewportScale(this);
-	PointA = FVector2D(MouseX * Scale, MouseY * Scale);
-
+	PointA = FVector2D(MouseX, MouseY);
 	bIsDrawing = true;	
 }
 
@@ -40,7 +37,7 @@ void AGS_RTSHUD::StopSelection()
 {
 	bIsDrawing = false;
 
-	if (!bIsMarquee || !RTSController)
+	if (!RTSController)
 	{
 		return;
 	}
@@ -50,8 +47,6 @@ void AGS_RTSHUD::StopSelection()
 	{
 		RTSController->AddUnitToSelection(Actor);
 	}
-	
-	bIsMarquee = false;
 }
 
 void AGS_RTSHUD::DrawHUD()
@@ -69,20 +64,12 @@ void AGS_RTSHUD::DrawHUD()
 		return;
 	}
 
-	const float Scale = UWidgetLayoutLibrary::GetViewportScale(this);
-	PointB = FVector2D(MouseX * Scale, MouseY * Scale);
-
-	bIsMarquee = FVector2D::Distance(PointA, PointB) > 200.0f;
-	if (!bIsMarquee)
-	{
-		return;
-	}
+	PointB = FVector2D(MouseX, MouseY);
 	
 	const float X = PointA.X;
 	const float Y = PointA.Y;
 	const float W = PointB.X - PointA.X;
 	const float H = PointB.Y - PointA.Y;
-		
 	DrawRect(FLinearColor(0,1,1,0.15f), X, Y, W, H);
 	
 	SelectionOfActors.Empty();

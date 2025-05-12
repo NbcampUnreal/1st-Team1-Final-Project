@@ -9,6 +9,10 @@ AGS_Monster::AGS_Monster()
 {
 	AIControllerClass = AGS_AIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	SelectionDecal = CreateDefaultSubobject<UDecalComponent>("SelectionDecal");
+	SelectionDecal->SetupAttachment(RootComponent);
+	SelectionDecal->SetVisibility(false);
 }
 
 void AGS_Monster::SetSelected(bool bIsSelected)

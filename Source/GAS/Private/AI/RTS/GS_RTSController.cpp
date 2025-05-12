@@ -6,11 +6,17 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "AI/RTS/GS_RTSCamera.h"
+#include "AI/RTS/GS_RTSHUD.h"
 #include "Character/Player/Monster/GS_Monster.h"
 
 AGS_RTSController::AGS_RTSController()
 {
 	bShowMouseCursor = true;
+
+	KeyboardDir = FVector2D::ZeroVector;
+	MouseEdgeDir = FVector2D::ZeroVector;
+	CameraSpeed = 2000.f;
+	EdgeScreenRatio = 0.05f;
 }
 
 void AGS_RTSController::BeginPlay()
@@ -41,6 +47,9 @@ void AGS_RTSController::SetupInputComponent()
 		{
 			EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &AGS_RTSController::CameraMove);
 			EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Completed, this, &AGS_RTSController::CameraMoveEnd);
+			EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnLeftMousePressed);
+			EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Completed, this, &AGS_RTSController::OnLeftMouseReleased);
+			EnhancedInputComponent->BindAction(RightClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnRightMousePressed);
 		}
 	}
 }
@@ -59,15 +68,43 @@ void AGS_RTSController::Tick(float DeltaTime)
 	}
 }
 
-void AGS_RTSController::CameraMove(const FInputActionValue& value)
+void AGS_RTSController::CameraMove(const FInputActionValue& InputValue)
 {
-	const FVector2D MoveInput = value.Get<FVector2D>();
+	const FVector2D MoveInput = InputValue.Get<FVector2D>();
 	KeyboardDir = MoveInput;
 }
 
 void AGS_RTSController::CameraMoveEnd()
 {
 	KeyboardDir = FVector2D::ZeroVector;
+}
+
+void AGS_RTSController::OnLeftMousePressed()
+{
+	if (AGS_RTSHUD* HUD = Cast<AGS_RTSHUD>(GetHUD()))
+	{
+		HUD->StartSelection();
+	}
+
+	/*
+	FHitResult Hit;
+	bool bHit = GetHitResultUnderCursorByChannel(, true, Hit);
+	if (!bHit)
+	{
+		ClearUnitSelection();
+	}*/
+}
+
+void AGS_RTSController::OnLeftMouseReleased()
+{
+	if (AGS_RTSHUD* HUD = Cast<AGS_RTSHUD>(GetHUD()))
+	{
+		HUD->StopSelection();
+	}
+}
+
+void AGS_RTSController::OnRightMousePressed()
+{
 }
 
 FVector2D AGS_RTSController::GetKeyboardDirection() const
