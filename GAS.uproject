@@ -1,31 +1,32 @@
 {
-	"FileVersion": 3,
-	"EngineAssociation": "5.4",
-	"Category": "",
-	"Description": "",
-	"Modules": [
-		{
-			"Name": "GAS",
-			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"Engine",
-				"CoreUObject",
-				"AIModule"
-			]
-		}
-	],
-	"Plugins": [
-		{
-			"Name": "ModelingToolsEditorMode",
-			"Enabled": true,
-			"TargetAllowList": [
-				"Editor"
-			]
-		},
-		{
-			"Name": "OnlineSubsystemSteam",
-			"Enabled": true
-		}
-	]
+    "FileVersion": 3,
+    "EngineAssociation": "5.4",
+    "Category": "",
+    "Description": "",
+    "Modules": [
+        {
+            "Name": "GAS",
+            "Type": "Runtime",
+            "LoadingPhase": "Default",
+            "AdditionalDependencies": [
+                "Engine",
+                "UMG",
+                "CoreUObject",
+                "AIModule"
+            ]
+        }
+    ],
+    "Plugins": [
+        {
+            "Name": "ModelingToolsEditorMode",
+            "Enabled": true,
+            "TargetAllowList": [
+                "Editor"
+            ]
+        },
+        {
+            "Name": "OnlineSubsystemSteam",
+            "Enabled": true
+        }
+    ]
 }

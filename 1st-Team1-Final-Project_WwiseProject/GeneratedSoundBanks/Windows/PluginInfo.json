@@ -4,6 +4,13 @@
   "BasePlatform": "Windows",
   "PluginLibs": [
    {
+    "LibName": "Wwise Time Stretch",
+    "LibId": "8519683",
+    "Type": "Effect",
+    "DLL": "AkTimeStretch",
+    "StaticLib": "AkTimeStretchFX"
+   },
+   {
     "LibName": "System",
     "LibId": "11403271",
     "Type": "AudioDevice"
@@ -14,6 +21,6 @@
     "Type": "AudioDevice"
    }
   ],
-  "FileHash": "{71F42CD2-2880-BF0B-D154-F41540A353AF}"
+  "FileHash": "{8A2A9ADA-2702-B595-2E58-BDD152E8AC04}"
  }
 }
