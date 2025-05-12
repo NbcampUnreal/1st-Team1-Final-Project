@@ -6,8 +6,8 @@ AGS_LandMineTrap::AGS_LandMineTrap()
 	RadialForceComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("RadialForce"));
 	RadialForceComp->SetupAttachment(MeshParentSceneComp);
 
-	RadialForceComp->Radius = 500.0f;
-	RadialForceComp->ImpulseStrength = 2000.0f;
+	RadialForceComp->Radius = 300.0f;
+	RadialForceComp->ImpulseStrength = 800.0f;
 	RadialForceComp->bImpulseVelChange = true;
 	RadialForceComp->bAutoActivate = false;
 	RadialForceComp->ForceStrength = 0.0f;
@@ -17,13 +17,14 @@ AGS_LandMineTrap::AGS_LandMineTrap()
 	//범위 감지용 Sphere Component 추가
 	DamageSphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("DamageRangeSphere"));
 	DamageSphereComp->SetupAttachment(MeshParentSceneComp);
-	DamageSphereComp->SetSphereRadius(500.f);
+	DamageSphereComp->SetSphereRadius(300.f);
 	DamageSphereComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 }
 
 
 void AGS_LandMineTrap::Explode()
 {
+	DestroyTrapEffect();
 	TArray<AActor*> OverlappingActors;
 	DamageSphereComp->GetOverlappingActors(OverlappingActors, AGS_Player::StaticClass());
 	HandleTrapAreaDamage(OverlappingActors);
@@ -36,4 +37,8 @@ void AGS_LandMineTrap::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActor
 	{
 		Super::HandleTrapDamage(Actor);
 	}
+}
+
+void AGS_LandMineTrap::DestroyTrapEffect_Implementation()
+{
 }
