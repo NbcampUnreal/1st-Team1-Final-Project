@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/Skill/GS_SkillBase.h"
@@ -42,5 +42,6 @@ void UGS_SkillBase::StartCoolDown()
 	OwnerCharacter->GetWorldTimerManager().SetTimer(CooldownHandle, [this]()
 		{
 			bIsCoolingDown = false;
+			UE_LOG(LogTemp, Warning, TEXT("Cool Down Complete"));
 		}, Cooltime, false);
 }

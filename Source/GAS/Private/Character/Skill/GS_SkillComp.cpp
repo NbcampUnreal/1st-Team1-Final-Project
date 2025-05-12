@@ -17,6 +17,7 @@ UGS_SkillComp::UGS_SkillComp()
 
 void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Skill TryActiveSkill"));
 	if (!bCanUseSkill)
 	{
 		return;

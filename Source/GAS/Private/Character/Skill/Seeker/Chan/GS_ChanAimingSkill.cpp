@@ -68,7 +68,7 @@ void UGS_ChanAimingSkill::TickDrainStamina()
 {
 	CurrentStamina -= StaminaDrainRate;
 	// UI 업데이트
-
+	UE_LOG(LogTemp, Warning, TEXT("Stamina : %f"), CurrentStamina);
 	if (CurrentStamina <= 0.f)
 	{
 		EndHoldUp();
@@ -81,7 +81,7 @@ void UGS_ChanAimingSkill::StartHoldUp()
 	CurrentStamina = MaxStamina;
 
 	// UI 표시
-
+	UE_LOG(LogTemp, Warning, TEXT("Start Hold Up!!!!!!!"));
 	OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 1.0f, true);
 }
 
@@ -90,6 +90,7 @@ void UGS_ChanAimingSkill::EndHoldUp()
 	bIsHoldingUp = false;
 	// UI 숨기기
 	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+	UE_LOG(LogTemp, Warning, TEXT("End Hold Up!!!!!!"));
 }
 
 void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)

@@ -6,6 +6,8 @@
 #include "Character/Player/GS_Player.h"
 #include "GS_Seeker.generated.h"
 
+class UGS_SkillInputHandlerComp;
+
 UCLASS()
 class GAS_API AGS_Seeker : public AGS_Player
 {
@@ -18,6 +20,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
+	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
 
 public:
 	// Called every frame
