@@ -1,24 +1,47 @@
 #include "Character/Player/Guardian/GS_GuardianController.h"
 
+#include "Character/GS_Character.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 
 #include "EnhancedInputComponent.h"
 
 AGS_GuardianController::AGS_GuardianController()
-	:TestAttackAction(nullptr)
 {
 
 }
 
-void AGS_GuardianController::TestAttack(const FInputActionValue& InputValue)
+void AGS_GuardianController::ComboAttack(const FInputActionValue& InputValue)
 {
-	AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
-	if (IsValid(Guardian))
+	if (IsLocalController())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Test Attack"));
+		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
 
-		Guardian->TestMeleeAttack();
+		if (IsValid(Guardian))
+		{
+			Guardian->ComboAttack();
+		}
 	}
+}
+
+void AGS_GuardianController::Skill1(const FInputActionValue& InputValue)
+{
+	if (IsLocalController())
+	{
+		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
+
+		if (IsValid(Guardian))
+		{
+			Guardian->Skill1();
+		}
+	}
+}
+
+void AGS_GuardianController::Skill2(const FInputActionValue& InputValue)
+{
+}
+
+void AGS_GuardianController::UltimateSkill(const FInputActionValue& InputValue)
+{
 }
 
 void AGS_GuardianController::BeginPlay()
@@ -31,8 +54,15 @@ void AGS_GuardianController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
-	if (TestAttackAction)
+	if (IsValid(EnhancedInputComponent))
 	{
-		EnhancedInputComponent->BindAction(TestAttackAction, ETriggerEvent::Started, this, &AGS_GuardianController::TestAttack);
+		if (IsValid(ComboAttackAction))
+		{
+			EnhancedInputComponent->BindAction(ComboAttackAction, ETriggerEvent::Started, this, &AGS_GuardianController::ComboAttack);
+		}
+		if (IsValid(Skill1Action))
+		{
+			EnhancedInputComponent->BindAction(Skill1Action, ETriggerEvent::Started, this, &AGS_GuardianController::Skill1);
+		}
 	}
 }

@@ -1,5 +1,7 @@
 #include "Character/Component/GS_StatComp.h"
 
+#include "Character/GS_Character.h"
+
 UGS_StatComp::UGS_StatComp()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -16,10 +18,11 @@ void UGS_StatComp::UpdateStat()
 	//update stats by rune system
 }
 
-float UGS_StatComp::CalculateDamage(float InSkillCoefficient, float SlopeCoefficient)
+float UGS_StatComp::CalculateDamage(AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
 {
 	float Damage = 0.f;
-	Damage = (AttackPower * InSkillCoefficient) * (100.f / 100.f + SlopeCoefficient * Defense);
+	float DamagedCharacterDefense = InDamagedCharacter->GetStatComp()->GetDefense();
+	Damage = (AttackPower * InSkillCoefficient) * (100.f / 100.f + SlopeCoefficient * DamagedCharacterDefense);
 
 	return Damage;
 }
