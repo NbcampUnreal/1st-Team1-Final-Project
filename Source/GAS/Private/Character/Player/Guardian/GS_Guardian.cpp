@@ -6,6 +6,7 @@
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
 AGS_Guardian::AGS_Guardian()
@@ -128,6 +129,18 @@ void AGS_Guardian::AttackEndComboState()
 	IsComboInputOn = false;
 	CanNextCombo = false;
 	CurrentCombo = 0;
+}
+
+void AGS_Guardian::OnRep_Attacking()
+{
+	if (IsAttacking)
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_None);
+	}
+	else
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
 }
 
 void AGS_Guardian::ServerRPCComboAttack_Implementation()
