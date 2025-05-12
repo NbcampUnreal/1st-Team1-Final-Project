@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{3E5D8CA4-8D2A-5CCE-A038-789551395C80}",
+    "Hash": "{E5BEC789-4D5D-FD67-10F3-3185CDBE2962}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -53,7 +53,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Saw.wav",
-      "CachePath": "04/{0480CE9C-6A5C-6096-CC23-C9D13AFF360A}.wem"
+      "CachePath": "DB/{DB2B05CB-A74E-B7B9-DE7B-2BFD9CC61328}.wem"
      },
      {
       "Id": "326406373",
@@ -88,6 +88,15 @@
       "CachePath": "DB/{DBAF297B-710A-AFC0-4C66-7EB7E4E0FB17}.wem"
      },
      {
+      "Id": "430856920",
+      "Language": "SFX",
+      "Streaming": "true",
+      "Location": "Loose",
+      "ShortName": "SFX_Axe_Swing.wav",
+      "Path": "Media/430856920.wem",
+      "CachePath": "00/{00204E58-B209-BC7B-F9D8-030BE0C8B26F}.wem"
+     },
+     {
       "Id": "660206576",
       "Language": "SFX",
       "Streaming": "false",
@@ -102,6 +111,14 @@
       "Location": "Memory",
       "ShortName": "waves.wav",
       "CachePath": "A9/{A97BE36E-CAE5-7C1D-4425-4D510D9A1EF3}.wem"
+     },
+     {
+      "Id": "769452809",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_Saw_Hit.wav",
+      "CachePath": "5D/{5DD8FE57-081B-56F4-0940-A65D0D78A2C1}.wem"
      },
      {
       "Id": "809366429",
@@ -159,6 +176,14 @@
        "Name": "Time Stretch (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\FootSteps\\Grass\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{C3BB77BD-F315-44E7-98EB-FC9BE8E30991}",
+       "LibName": "Wwise Time Stretch",
+       "LibId": "8519683"
+      },
+      {
+       "Id": "675983341",
+       "Name": "Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_Axe_Swing\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "GUID": "{90895E04-6C77-4899-B5E6-4F5F9A428296}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
       }
@@ -267,6 +292,26 @@
       ]
      },
      {
+      "Id": "2553920289",
+      "Name": "Play_Axe_Swing",
+      "ObjectPath": "\\Events\\Default Work Unit\\Play_Axe_Swing",
+      "GUID": "{597B061A-CE0A-4A56-8154-41280E86C596}",
+      "MaxAttenuation": "400",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "430856920"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "675983341"
+        }
+       ]
+      }
+     },
+     {
       "Id": "374167564",
       "Name": "Play_waves",
       "ObjectPath": "\\Events\\Default Work Unit\\Play_waves",
@@ -283,11 +328,23 @@
       "Name": "Props_Saw",
       "ObjectPath": "\\Events\\Default Work Unit\\Props_Saw",
       "GUID": "{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}",
-      "MaxAttenuation": "200",
+      "MaxAttenuation": "960.00006",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
         "Id": "318472292"
+       }
+      ]
+     },
+     {
+      "Id": "700338761",
+      "Name": "Props_Saw_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props_Saw_Hit",
+      "GUID": "{DFBB5823-D275-437F-99C5-623B934A4616}",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "769452809"
        }
       ]
      },
@@ -351,6 +408,6 @@
     ]
    }
   ],
-  "FileHash": "{A96E0E15-9579-033C-F6CC-373C43FA2A4D}"
+  "FileHash": "{6F106AD0-7188-E663-56FF-91670E91E042}"
  }
 }

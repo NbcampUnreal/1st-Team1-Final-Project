@@ -62,6 +62,29 @@
 						</Action>
 					</ChildrenList>
 				</Event>
+				<Event Name="Props_Saw_Hit" ID="{DFBB5823-D275-437F-99C5-623B934A4616}">
+					<Comment>플레이어가 함정에 닿았을 때</Comment>
+					<ChildrenList>
+						<Action Name="" ID="{9A5EADA5-6F38-4DE9-B836-BF942CA83ADC}" ShortID="96101203">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Saw_Hit" ID="{86E51F01-81CC-49A4-BD8B-40EDC288492F}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Play_Axe_Swing" ID="{597B061A-CE0A-4A56-8154-41280E86C596}">
+					<ChildrenList>
+						<Action Name="" ID="{6E25780F-87DB-48A7-B190-994F28F075A5}" ShortID="786140471">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Axe_Swing" ID="{C1BDC775-E001-4714-AB7D-D2BAEED57903}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>
