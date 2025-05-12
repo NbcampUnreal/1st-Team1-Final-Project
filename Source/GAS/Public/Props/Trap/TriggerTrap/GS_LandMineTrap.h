@@ -22,9 +22,14 @@ public:
 	USphereComponent* DamageSphereComp;
 
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void Explode();
 
+	UFUNCTION(BlueprintNativeEvent)
+	void DestroyTrapEffect();
+	void DestroyTrapEffect_Implemetation();
 
 	void HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors) override;
+	
+	
 };
