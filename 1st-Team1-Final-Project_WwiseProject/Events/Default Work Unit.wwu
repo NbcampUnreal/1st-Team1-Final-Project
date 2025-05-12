@@ -28,19 +28,7 @@
 						</Action>
 					</ChildrenList>
 				</Event>
-				<Event Name="Play_EV_Seeker_Footstep" ID="{575B2435-D782-43FD-A5DA-8DA59CD14A20}">
-					<Comment>발소리</Comment>
-					<ChildrenList>
-						<Action Name="" ID="{E5803AF2-1CC1-4CA8-A30A-44DA8D72365C}" ShortID="863635890">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="EV_Seeker_Footstep" ID="{B2B84B40-8941-4277-87F3-B6D79694A48C}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
-				<Event Name="Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}">
+				<Event Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}">
 					<Comment>횃불 소리</Comment>
 					<ChildrenList>
 						<Action Name="" ID="{49404C92-16D5-48EE-9F94-47B3C188EBA1}" ShortID="848011745">
@@ -58,6 +46,17 @@
 							<ReferenceList>
 								<Reference Name="Target">
 									<ObjectRef Name="FootSteps" ID="{BF94A467-5B4A-4C18-8A80-37A713606011}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_Saw" ID="{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}">
+					<ChildrenList>
+						<Action Name="" ID="{59A44036-0045-42D0-A5C6-016AD2610615}" ShortID="234166397">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Saw" ID="{91C078AB-FEA4-4EE1-A0C5-C1F2C62FF51C}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 								</Reference>
 							</ReferenceList>
 						</Action>

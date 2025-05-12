@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{3F886AFD-21AA-63A2-1F2A-09C6ABFD8664}",
+    "Hash": "{3E5D8CA4-8D2A-5CCE-A038-789551395C80}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -21,7 +21,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsDirt2.wav",
-      "CachePath": "CB/{CBE37176-9F88-994C-E84E-DFEC4A904014}.wem"
+      "CachePath": "D0/{D051ADA0-A3EB-3244-013C-8FF6CB548A5A}.wem"
      },
      {
       "Id": "199617062",
@@ -29,7 +29,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (1).wav",
-      "CachePath": "F1/{F16CF598-5591-3AA9-97C8-1F3DA0DAB15A}.wem"
+      "CachePath": "E0/{E051F6A9-B9D4-1234-ACBC-2DDEA78F7A02}.wem"
      },
      {
       "Id": "255360718",
@@ -45,7 +45,15 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepMetal1.wav",
-      "CachePath": "6E/{6E1F96CA-298A-443C-D46E-5A189010F26E}.wem"
+      "CachePath": "7F/{7FFAAD2D-3ED5-736D-9226-71F3ED7639BD}.wem"
+     },
+     {
+      "Id": "318472292",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_Saw.wav",
+      "CachePath": "04/{0480CE9C-6A5C-6096-CC23-C9D13AFF360A}.wem"
      },
      {
       "Id": "326406373",
@@ -53,7 +61,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (5).wav",
-      "CachePath": "69/{6972E9D6-96DA-0786-2888-72F195608127}.wem"
+      "CachePath": "F1/{F16E7F25-CB0E-0D4E-FB7A-B56E5E0FAC1D}.wem"
      },
      {
       "Id": "369007659",
@@ -69,7 +77,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (3).wav",
-      "CachePath": "AD/{AD5A0A39-45F3-8E12-A394-0E4DC723EE65}.wem"
+      "CachePath": "5C/{5C2C37EB-EE94-3E50-8887-0869C59AEE8E}.wem"
      },
      {
       "Id": "401627905",
@@ -77,7 +85,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepMetal2.wav",
-      "CachePath": "47/{473C5B23-FB90-2E39-C454-83FC03574005}.wem"
+      "CachePath": "DB/{DBAF297B-710A-AFC0-4C66-7EB7E4E0FB17}.wem"
      },
      {
       "Id": "660206576",
@@ -85,7 +93,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsDirt1.wav",
-      "CachePath": "B7/{B70B1623-6370-620D-6733-1C5B3907A585}.wem"
+      "CachePath": "A9/{A916246A-EB6D-550D-EB33-BCA01A350EA5}.wem"
      },
      {
       "Id": "750724736",
@@ -101,7 +109,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepMetal.wav",
-      "CachePath": "E2/{E245DA29-AB52-5954-3149-46ED0CD3FC9B}.wem"
+      "CachePath": "A1/{A127ADB0-265A-D67F-72E6-3CBFECC6C560}.wem"
      },
      {
       "Id": "866318197",
@@ -125,7 +133,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsDirt.wav",
-      "CachePath": "BF/{BFDD26CB-0FCD-9016-C966-6A39CD166BB7}.wem"
+      "CachePath": "B9/{B9D1A7FF-A493-0B19-EF9F-A5E6A8C3CF75}.wem"
      },
      {
       "Id": "1038282182",
@@ -133,7 +141,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (4).wav",
-      "CachePath": "EC/{EC251AA2-61DB-C468-2EE9-7AB3932C6418}.wem"
+      "CachePath": "EC/{ECC6DBEC-610D-00F2-22FF-C2DDE0C10D7D}.wem"
      },
      {
       "Id": "1069660761",
@@ -141,7 +149,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (2).wav",
-      "CachePath": "64/{64CFAD63-21D6-EE4B-114A-7C9C6B9F299E}.wem"
+      "CachePath": "85/{85899B0C-60C3-800B-F278-B3CD880C486D}.wem"
      }
     ],
     "Plugins": {
@@ -271,19 +279,22 @@
       ]
      },
      {
-      "Id": "153945882",
-      "Name": "Stop_waves",
-      "ObjectPath": "\\Events\\Default Work Unit\\Stop_waves",
-      "GUID": "{CEB75CC5-195D-480A-8494-6222F467BB05}",
-      "MaxAttenuation": "0",
-      "DurationType": "OneShot",
-      "DurationMin": "0",
-      "DurationMax": "0"
+      "Id": "2654270155",
+      "Name": "Props_Saw",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props_Saw",
+      "GUID": "{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}",
+      "MaxAttenuation": "200",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "318472292"
+       }
+      ]
      },
      {
-      "Id": "1904864137",
-      "Name": "Torch",
-      "ObjectPath": "\\Events\\Default Work Unit\\Torch",
+      "Id": "942444514",
+      "Name": "Props_Torch",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props_Torch",
       "GUID": "{0FE8AE3D-0C62-4903-9226-37A060EB1543}",
       "MaxAttenuation": "600",
       "DurationType": "Infinite",
@@ -292,6 +303,16 @@
         "Id": "369007659"
        }
       ]
+     },
+     {
+      "Id": "153945882",
+      "Name": "Stop_waves",
+      "ObjectPath": "\\Events\\Default Work Unit\\Stop_waves",
+      "GUID": "{CEB75CC5-195D-480A-8494-6222F467BB05}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
      }
     ],
     "SwitchGroups": [
@@ -330,6 +351,6 @@
     ]
    }
   ],
-  "FileHash": "{37220520-8EBA-AF2D-73D2-BEC739A3BD93}"
+  "FileHash": "{1D06DA59-D1AC-415D-E3B4-236D685EC40B}"
  }
 }
