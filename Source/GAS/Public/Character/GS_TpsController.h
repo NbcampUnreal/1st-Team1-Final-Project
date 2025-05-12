@@ -27,8 +27,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* LookAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* WalkToggleAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* LClickAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* RClickAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* LCtrlAction;
+
 	void Move(const FInputActionValue& InputValue);
 	void Look(const FInputActionValue& InputValue);
+	void WalkToggle(const FInputActionValue& InputValue);
 
 protected:
 	virtual void BeginPlay() override;

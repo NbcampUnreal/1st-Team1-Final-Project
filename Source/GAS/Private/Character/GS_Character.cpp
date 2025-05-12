@@ -27,7 +27,7 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 		UGS_StatComp* DamagedCharacterStat = InDamagedCharacter->GetStatComp();
 		if (IsValid(DamagedCharacterStat))
 		{
-			float Damage = DamagedCharacterStat->CalculateDamage();
+			float Damage = DamagedCharacterStat->CalculateDamage(InDamagedCharacter);
 			FDamageEvent DamageEvent;
 			InDamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
 		}
