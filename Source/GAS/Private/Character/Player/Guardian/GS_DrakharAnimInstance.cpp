@@ -10,13 +10,27 @@ UGS_DrakharAnimInstance::UGS_DrakharAnimInstance()
 
 void UGS_DrakharAnimInstance::PlayAttackMontage()
 {
-	Montage_Play(AttackMontage, 1.f);
+	if (AttackMontage)
+	{
+		Montage_Play(AttackMontage, 1.f);
+	}
 }
 
 void UGS_DrakharAnimInstance::JumpToAttackMontageSection(int32 NewSection)
 {
 	Montage_JumpToSection(GetAttackMontageSectionName(NewSection), AttackMontage);
 }
+
+void UGS_DrakharAnimInstance::PlayDashMontage()
+{
+	if (DashMontage)
+	{
+		float MontageLength = DashMontage->GetPlayLength();
+		float PlayRate = MontageLength > 0 ? MontageLength / 0.6f : 1.f;
+		Montage_Play(DashMontage, 1.f);
+	}
+}
+
 
 void UGS_DrakharAnimInstance::AnimNotify_AttackHitCheck()
 {
@@ -36,6 +50,19 @@ void UGS_DrakharAnimInstance::AnimNotify_AttackHitCheck()
 void UGS_DrakharAnimInstance::AnimNotify_NextAttackCheck()
 {
 	OnNextAttackCheck.Broadcast();
+}
+
+void UGS_DrakharAnimInstance::AnimNotify_DashHitCheck()
+{
+	AActor* Owner = GetOwningActor();
+	if (IsValid(Owner))
+	{
+		AGS_Guardian* Guardian = Cast<AGS_Guardian>(Owner);
+		if (IsValid(Guardian))
+		{
+			Guardian->MeleeAttackCheck();
+		}
+	}
 }
 
 

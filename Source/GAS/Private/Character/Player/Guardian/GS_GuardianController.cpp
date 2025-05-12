@@ -12,18 +12,28 @@ AGS_GuardianController::AGS_GuardianController()
 
 void AGS_GuardianController::ComboAttack(const FInputActionValue& InputValue)
 {
-	AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
-	if (IsValid(Guardian))
+	if (IsLocalController())
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Test Attack"));
+		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
 
-		Guardian->MulticastRPCComboAttack();
+		if (IsValid(Guardian))
+		{
+			Guardian->ComboAttack();
+		}
 	}
 }
 
 void AGS_GuardianController::Skill1(const FInputActionValue& InputValue)
 {
+	if (IsLocalController())
+	{
+		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
 
+		if (IsValid(Guardian))
+		{
+			Guardian->Skill1();
+		}
+	}
 }
 
 void AGS_GuardianController::Skill2(const FInputActionValue& InputValue)
@@ -46,9 +56,13 @@ void AGS_GuardianController::SetupInputComponent()
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 	if (IsValid(EnhancedInputComponent))
 	{
-		if (ComboAttackAction)
+		if (IsValid(ComboAttackAction))
 		{
 			EnhancedInputComponent->BindAction(ComboAttackAction, ETriggerEvent::Started, this, &AGS_GuardianController::ComboAttack);
+		}
+		if (IsValid(Skill1Action))
+		{
+			EnhancedInputComponent->BindAction(Skill1Action, ETriggerEvent::Started, this, &AGS_GuardianController::Skill1);
 		}
 	}
 }

@@ -16,18 +16,15 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	//[input action binding function]
-	UFUNCTION(NetMulticast,Unreliable)
-	virtual void MulticastRPCComboAttack();
+	virtual void ComboAttack();
 
-	UFUNCTION()
 	virtual void Skill1();
 
-	UFUNCTION()
 	virtual void Skill2();
 
-	UFUNCTION()
 	virtual void UltimateSkill();
 
 	//[test function]
@@ -38,27 +35,45 @@ public:
 	//check montage end
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
 	//set attack start state
+	UFUNCTION()
 	void AttackStartComboState();
+
 	//set attack end state
 	void AttackEndComboState();
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCComboAttack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCComboAttack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCJumpToAttackMontageSection(int32 ComboIndex);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRPCJumpToAttackMontageSection(int32 ComboIndex);
+
+
+	UPROPERTY()
 	bool IsAttacking;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	bool CanNextCombo;
 	
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UPROPERTY()
 	bool IsComboInputOn;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 CurrentCombo;
 
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 MaxCombo;
 
 protected:
+	UPROPERTY()
+	TObjectPtr<UGS_DrakharAnimInstance> GuardianAnim;
 
 
 
@@ -67,6 +82,4 @@ private:
 	float FeverTime;
 	float FeverGage;
 
-	UPROPERTY()
-	TObjectPtr<UGS_DrakharAnimInstance> GuardianAnim;
 };

@@ -6,6 +6,7 @@
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "Net/UnrealNetwork.h"
 
 AGS_Guardian::AGS_Guardian()
 {
@@ -22,8 +23,6 @@ void AGS_Guardian::BeginPlay()
 {
 	Super::BeginPlay();
 
-
-	//AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &AGS_Guardian::ComboAttackMontageNotifyBegin);
 }
 
 void AGS_Guardian::PostInitializeComponents()
@@ -40,33 +39,29 @@ void AGS_Guardian::PostInitializeComponents()
 				if (IsComboInputOn)
 				{
 					AttackStartComboState();
-					GuardianAnim->JumpToAttackMontageSection(CurrentCombo);
+
+					if (HasAuthority())
+					{
+						MulticastRPCJumpToAttackMontageSection(CurrentCombo);
+					}
+					else
+					{
+						ServerRPCJumpToAttackMontageSection(CurrentCombo);
+					}
 				}
 			});
 	}
+}
+
+void AGS_Guardian::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 }
 
-void AGS_Guardian::MulticastRPCComboAttack_Implementation()
+void AGS_Guardian::ComboAttack()
 {
-	/*if (IsLocallyControlled())
-	{		
-	}*/
-	if (IsAttacking)
-	{
 
-		if (CanNextCombo)
-		{
-			IsComboInputOn = true;
-		}
-	}
-	else
-	{
-		AttackStartComboState();
-		GuardianAnim->PlayAttackMontage();
-		GuardianAnim->JumpToAttackMontageSection(CurrentCombo);
-		IsAttacking = true;
-	}
 }
 
 void AGS_Guardian::Skill1()
@@ -133,4 +128,34 @@ void AGS_Guardian::AttackEndComboState()
 	IsComboInputOn = false;
 	CanNextCombo = false;
 	CurrentCombo = 0;
+}
+
+void AGS_Guardian::ServerRPCComboAttack_Implementation()
+{	
+	MulticastRPCComboAttack();
+}
+
+bool AGS_Guardian::ServerRPCComboAttack_Validate()
+{
+	return true;
+}
+
+void AGS_Guardian::MulticastRPCComboAttack_Implementation()
+{	
+	GuardianAnim->PlayAttackMontage();
+}
+
+void AGS_Guardian::MulticastRPCJumpToAttackMontageSection_Implementation(int32 ComboIndex)
+{
+	GuardianAnim->JumpToAttackMontageSection(ComboIndex);
+}
+
+void AGS_Guardian::ServerRPCJumpToAttackMontageSection_Implementation(int32 ComboIndex)
+{
+	MulticastRPCJumpToAttackMontageSection(ComboIndex);
+}
+
+bool AGS_Guardian::ServerRPCJumpToAttackMontageSection_Validate(int32 ComboIndex)
+{		
+	return ComboIndex > 0 && ComboIndex <= MaxCombo;
 }

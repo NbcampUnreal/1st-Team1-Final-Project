@@ -14,21 +14,31 @@ class GAS_API UGS_DrakharAnimInstance : public UAnimInstance
 public:
 	UGS_DrakharAnimInstance();
 
+	//combo attack
 	void PlayAttackMontage();
 	void JumpToAttackMontageSection(int32 NewSection);
 
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate  OnAttackHitCheck;
 
+	//dash 
+	void PlayDashMontage();
+
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack, Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* DashMontage;
 
 	UFUNCTION()
 	void AnimNotify_AttackHitCheck();
 
 	UFUNCTION()
 	void AnimNotify_NextAttackCheck();
+
+	UFUNCTION()
+	void AnimNotify_DashHitCheck();
 
 	FName GetAttackMontageSectionName(int32 Section);
 };
