@@ -54,6 +54,8 @@ void AGS_RTSController::SetupInputComponent()
 		
 		EnhancedInputComponent->BindAction(CtrlAction, ETriggerEvent::Started,   this, &AGS_RTSController::OnCtrlPressed);
 		EnhancedInputComponent->BindAction(CtrlAction, ETriggerEvent::Completed, this, &AGS_RTSController::OnCtrlReleased);
+		EnhancedInputComponent->BindAction(ShiftAction, ETriggerEvent::Started,   this, &AGS_RTSController::OnShiftPressed);
+		EnhancedInputComponent->BindAction(ShiftAction, ETriggerEvent::Completed, this, &AGS_RTSController::OnShiftReleased);
 		
 		for (int32 i = 0; i < GroupKeyActions.Num(); ++i)
 		{
@@ -92,11 +94,19 @@ void AGS_RTSController::CameraMoveEnd()
 
 void AGS_RTSController::OnLeftMousePressed()
 {
+	// Shift+클릭 → 현재 선택만 변경 
+	if (bShiftDown)
+	{
+		DoShiftClickToggle();
+		return;
+	}
+	
 	if (AGS_RTSHUD* HUD = Cast<AGS_RTSHUD>(GetHUD()))
 	{
 		HUD->StartSelection();
 	}
-	
+
+	// 클릭 시 빈 공간이면 기존 선택 해제
 	FHitResult Hit;
 	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, Hit);
 	if (!bHit)
@@ -107,10 +117,32 @@ void AGS_RTSController::OnLeftMousePressed()
 
 void AGS_RTSController::OnLeftMouseReleased()
 {
+	if (bShiftDown)
+	{
+		return;
+	}
+	
 	if (AGS_RTSHUD* HUD = Cast<AGS_RTSHUD>(GetHUD()))
 	{
 		HUD->StopSelection();
+		return;
 	}
+
+	// 단순 클릭 처리
+	FHitResult Hit;
+	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
+	if (bHit && Hit.GetActor())
+	{
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
+		{
+			ClearUnitSelection();
+			AddUnitToSelection(Monster);
+			return;
+		}
+	}
+
+	// 빈 공간 클릭
+	ClearUnitSelection();
 }
 
 void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
@@ -215,6 +247,27 @@ void AGS_RTSController::InitCameraActor()
 	}
 }
 
+void AGS_RTSController::DoShiftClickToggle()
+{
+	FHitResult ShiftHit;
+	if (!GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, ShiftHit))
+	{
+		return;
+	}
+
+	if (AGS_Monster* Monster = Cast<AGS_Monster>(ShiftHit.GetActor()))
+	{
+		if (UnitSelection.Contains(Monster))
+		{
+			RemoveUnitFromSelection(Monster);
+		}
+		else
+		{
+			AddUnitToSelection(Monster);
+		}
+	}
+}
+
 void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 {
 	if (!Unit)
@@ -222,10 +275,8 @@ void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 		return;
 	}
 	
-	if (UnitSelection.AddUnique(Unit) != INDEX_NONE)
-	{
-		Unit->SetSelected(true);
-	}
+	UnitSelection.AddUnique(Unit);
+	Unit->SetSelected(true);
 }
 
 void AGS_RTSController::RemoveUnitFromSelection(AGS_Monster* Unit)
@@ -252,6 +303,7 @@ void AGS_RTSController::ClearUnitSelection()
 	UnitSelection.Empty();
 }
 
+
 void AGS_RTSController::OnCtrlPressed(const FInputActionInstance& InputInstance)
 {
 	bCtrlDown = true;
@@ -261,6 +313,17 @@ void AGS_RTSController::OnCtrlReleased(const FInputActionInstance& InputInstance
 {
 	bCtrlDown = false;
 }
+
+void AGS_RTSController::OnShiftPressed(const FInputActionInstance& InputInstance)
+{
+	bShiftDown = true;
+}
+
+void AGS_RTSController::OnShiftReleased(const FInputActionInstance& InputInstance)
+{
+	bShiftDown = false;
+}
+
 
 void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, int32 GroupIdx)
 {

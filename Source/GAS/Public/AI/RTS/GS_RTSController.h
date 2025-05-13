@@ -44,6 +44,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* CtrlAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* ShiftAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	TArray<UInputAction*> GroupKeyActions;
@@ -65,6 +68,8 @@ public:
 	// 부대 지정, 호출 
 	void OnCtrlPressed(const FInputActionInstance& InputInstance);
 	void OnCtrlReleased(const FInputActionInstance& InputInstance);
+	void OnShiftPressed(const FInputActionInstance& InputInstance);
+	void OnShiftReleased(const FInputActionInstance& InputInstance);
 	void OnGroupKey(const FInputActionInstance& InputInstance, int32 GroupIdx);
 
 protected:
@@ -92,10 +97,14 @@ private:
 	TArray<FUnitGroup> UnitGroups; // 지정된 부대
 
 	bool bCtrlDown = false;
+	bool bShiftDown = false;
 
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
 	FVector2D GetFinalDirection() const;
 	void MoveCamera(const FVector2D& Direction, float DeltaTime);
 	void InitCameraActor();
+
+	void DoShiftClickToggle();
 };
+
