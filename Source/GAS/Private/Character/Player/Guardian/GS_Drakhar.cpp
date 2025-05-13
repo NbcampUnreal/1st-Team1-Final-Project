@@ -14,6 +14,10 @@ AGS_Drakhar::AGS_Drakhar()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
+	//stat init test
+	GetStatComp()->SetCurrentHealth(2000.f);
+	GetStatComp()->SetAttackPower(120.f);
+
 	DashPower = 1000.f;
 	bIsDashing = false;
 	DashInterpAlpha = 0.f;
