@@ -74,3 +74,8 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 		}
 	}
 }
+
+FGenericTeamId AGS_Character::GetGenericTeamId() const
+{
+	return TeamId;
+}

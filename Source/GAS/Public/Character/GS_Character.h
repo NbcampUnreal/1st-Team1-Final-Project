@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
 #include "GS_Character.generated.h"
 
@@ -11,7 +12,7 @@ class UGS_HPTextWidgetComp;
 class UGS_HPText;
 
 UCLASS()
-class GAS_API AGS_Character : public ACharacter
+class GAS_API AGS_Character : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -25,6 +26,10 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	/** 팀 ID (0: 중립, 1: 플레이어, 2: 몬스터) */
+	UPROPERTY(EditAnywhere, Category="Team")
+	FGenericTeamId TeamId;
 
 	//variable
 	float MaxSpeed;
@@ -41,8 +46,7 @@ public:
 	//HP widget
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
 
-protected:
-	//override function
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 private:
 	//component
