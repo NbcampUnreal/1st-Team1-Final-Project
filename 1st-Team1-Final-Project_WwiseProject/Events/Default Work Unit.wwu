@@ -74,12 +74,56 @@
 						</Action>
 					</ChildrenList>
 				</Event>
-				<Event Name="Play_Axe_Swing" ID="{597B061A-CE0A-4A56-8154-41280E86C596}">
+				<Event Name="Props_Axe" ID="{597B061A-CE0A-4A56-8154-41280E86C596}">
 					<ChildrenList>
 						<Action Name="" ID="{6E25780F-87DB-48A7-B190-994F28F075A5}" ShortID="786140471">
 							<ReferenceList>
 								<Reference Name="Target">
 									<ObjectRef Name="SFX_Axe_Swing" ID="{C1BDC775-E001-4714-AB7D-D2BAEED57903}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_StoneWall" ID="{9C89005A-CF4E-46F0-9A26-2606EC93E64B}">
+					<ChildrenList>
+						<Action Name="" ID="{99C1554E-6C82-410F-8563-2BCF2A7714A2}" ShortID="302038271">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_StoneTrap1" ID="{74EAE0B7-683C-4013-8639-C4EED1D2E519}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_StoneTrap_Hit" ID="{624349E1-2251-4E0E-8E91-39536798294E}">
+					<ChildrenList>
+						<Action Name="" ID="{DC419BB4-3FDC-483A-B993-EDCDFCF2EC08}" ShortID="49632125">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_StoneTrap_Hit" ID="{6232E52C-7117-4E48-96CB-99065188C99E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_Spike" ID="{87EFA3D2-5892-417F-A875-D06CCD556912}">
+					<ChildrenList>
+						<Action Name="" ID="{3D1ADF06-DF28-42A6-A305-9D0749263153}" ShortID="258217654">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_SpikeTrap" ID="{E06DA69C-FFED-49FC-9D34-7D81B986EAF5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_Spike_Hit" ID="{36F0066E-709B-487B-AB1C-AAC04B8F753C}">
+					<ChildrenList>
+						<Action Name="" ID="{59F7A33F-8634-4313-875F-EA9AE94ED1A1}" ShortID="310572861">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_SpikeTrap_Hit" ID="{F473346D-577A-43CC-A9FE-CF39A1BC99D7}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 								</Reference>
 							</ReferenceList>
 						</Action>
