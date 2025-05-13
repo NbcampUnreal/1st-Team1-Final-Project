@@ -13,5 +13,8 @@ UCLASS()
 class GAS_API UGS_BTT_Attack : public UBTTaskNode
 {
 	GENERATED_BODY()
+
+public:
+	UGS_BTT_Attack();
 	
 };
