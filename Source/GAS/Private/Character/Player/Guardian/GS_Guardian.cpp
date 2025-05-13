@@ -6,6 +6,7 @@
 #include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
 AGS_Guardian::AGS_Guardian()
@@ -57,6 +58,7 @@ void AGS_Guardian::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
+	DOREPLIFETIME(ThisClass, IsAttacking);
 }
 
 void AGS_Guardian::ComboAttack()
@@ -101,7 +103,6 @@ void AGS_Guardian::MeleeAttackCheck()
 			}
 		}
 
-		FDamageEvent DamageEvent;
 		for (auto const& DamagedCharacter : DamagedCharacters)
 		{
 			ServerRPCMeleeAttack(DamagedCharacter);
@@ -114,6 +115,7 @@ void AGS_Guardian::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted
 {
 	IsAttacking = false;
 	AttackEndComboState();
+
 }
 
 void AGS_Guardian::AttackStartComboState()
@@ -128,6 +130,18 @@ void AGS_Guardian::AttackEndComboState()
 	IsComboInputOn = false;
 	CanNextCombo = false;
 	CurrentCombo = 0;
+}
+
+void AGS_Guardian::OnRep_Attacking()
+{
+	if (IsAttacking)
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
+	else
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_None);
+	}
 }
 
 void AGS_Guardian::ServerRPCComboAttack_Implementation()
