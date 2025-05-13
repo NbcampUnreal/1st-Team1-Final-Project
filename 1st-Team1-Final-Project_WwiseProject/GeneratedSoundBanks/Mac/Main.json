@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{B273004C-43AD-56FD-374B-770E21EBEC34}",
+    "Hash": "{AFFAD562-9C06-2A5F-12F3-00B3CB602514}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -24,12 +24,36 @@
       "CachePath": "D0/{D051ADA0-A3EB-3244-013C-8FF6CB548A5A}.wem"
      },
      {
+      "Id": "120977185",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_GrenadeFuse.wav",
+      "CachePath": "00/{009E3F5C-AD40-CADF-8C54-71C61830F260}.wem"
+     },
+     {
+      "Id": "157399992",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_GrenadeTick.wav",
+      "CachePath": "E9/{E9FA5707-FF71-3A28-5632-AC27D02681D9}.wem"
+     },
+     {
       "Id": "199617062",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (1).wav",
       "CachePath": "E0/{E051F6A9-B9D4-1234-ACBC-2DDEA78F7A02}.wem"
+     },
+     {
+      "Id": "213946712",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_BearTrap_In1.wav",
+      "CachePath": "43/{43EF53B7-5ACE-B005-9D1E-6DDFE4175095}.wem"
      },
      {
       "Id": "255360718",
@@ -62,6 +86,22 @@
       "Location": "Memory",
       "ShortName": "SFX_Saw.wav",
       "CachePath": "DB/{DB2B05CB-A74E-B7B9-DE7B-2BFD9CC61328}.wem"
+     },
+     {
+      "Id": "321658963",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_BearTrap_Out.wav",
+      "CachePath": "81/{8140753E-704C-29AA-2BC1-8787564DF964}.wem"
+     },
+     {
+      "Id": "324020983",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_AxeSwing_Hit.wav",
+      "CachePath": "8E/{8E7E49E4-60D6-2AFF-36CE-1618F5F5868C}.wem"
      },
      {
       "Id": "326406373",
@@ -102,7 +142,23 @@
       "Location": "Loose",
       "ShortName": "SFX_Axe_Swing.wav",
       "Path": "Media/430856920.wem",
-      "CachePath": "FA/{FA28D5AD-39EF-E8AA-9166-FBBA0B17A6A8}.wem"
+      "CachePath": "8D/{8D39CF75-7589-421A-4FF7-B326BBC022E2}.wem"
+     },
+     {
+      "Id": "434604945",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_BearTrap_In0.wav",
+      "CachePath": "6C/{6C139F55-EB2F-F87E-72EA-6F67BBAD6E62}.wem"
+     },
+     {
+      "Id": "454704061",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_BearTrap_Hit.wav",
+      "CachePath": "8D/{8D083B54-D925-AF76-64A5-8F7449FFC4E1}.wem"
      },
      {
       "Id": "602204976",
@@ -111,6 +167,14 @@
       "Location": "Memory",
       "ShortName": "SFX_StoneTrap_Hit.wav",
       "CachePath": "B3/{B37D4729-24C4-142C-9B17-D4F31D6BA141}.wem"
+     },
+     {
+      "Id": "610202587",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_GrenadeExplosion.wav",
+      "CachePath": "34/{34A6CAC8-2918-8C03-32F3-D9FF3BFC7728}.wem"
      },
      {
       "Id": "655511879",
@@ -220,9 +284,17 @@
        "LibId": "8519683"
       },
       {
+       "Id": "356455906",
+       "Name": "Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_AxeSwing_Hit\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "GUID": "{79068F1E-BDD8-4FD5-8310-CF3249AD5587}",
+       "LibName": "Wwise Time Stretch",
+       "LibId": "8519683"
+      },
+      {
        "Id": "675983341",
        "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_Axe_Swing\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_AxeSwing\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{90895E04-6C77-4899-B5E6-4F5F9A428296}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
@@ -348,7 +420,7 @@
       "Name": "Props_Axe",
       "ObjectPath": "\\Events\\Default Work Unit\\Props_Axe",
       "GUID": "{597B061A-CE0A-4A56-8154-41280E86C596}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "800",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -362,6 +434,85 @@
         }
        ]
       }
+     },
+     {
+      "Id": "2662114774",
+      "Name": "Props_Axe_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props_Axe_Hit",
+      "GUID": "{E6A16F60-3008-4709-B717-1D97F028AB1C}",
+      "MaxAttenuation": "1000",
+      "DurationType": "OneShot",
+      "DurationMin": "0.67240876",
+      "DurationMax": "0.7547534",
+      "MediaRefs": [
+       {
+        "Id": "324020983"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "356455906"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "737601643",
+      "Name": "Props_BearTrap",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props_BearTrap",
+      "GUID": "{DCFFA37D-831E-4187-999F-FD2DB425816C}",
+      "MaxAttenuation": "1000",
+      "DurationType": "OneShot",
+      "DurationMin": "0.7761227",
+      "DurationMax": "0.79403806",
+      "MediaRefs": [
+       {
+        "Id": "213946712"
+       },
+       {
+        "Id": "434604945"
+       },
+       {
+        "Id": "454704061"
+       }
+      ]
+     },
+     {
+      "Id": "1721776362",
+      "Name": "Props_BearTrap_Out",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props_BearTrap_Out",
+      "GUID": "{A8F68B4C-166B-47F0-82AB-7DA87701254B}",
+      "MaxAttenuation": "1000",
+      "DurationType": "OneShot",
+      "DurationMin": "0.3267212",
+      "DurationMax": "0.34614906",
+      "MediaRefs": [
+       {
+        "Id": "321658963"
+       }
+      ]
+     },
+     {
+      "Id": "3400001789",
+      "Name": "Props_Mine",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props_Mine",
+      "GUID": "{59F8482E-4399-4E6E-B401-0432CFED7550}",
+      "MaxAttenuation": "2000",
+      "DurationType": "OneShot",
+      "DurationMin": "3.0468612",
+      "DurationMax": "3.104532",
+      "MediaRefs": [
+       {
+        "Id": "120977185"
+       },
+       {
+        "Id": "157399992"
+       },
+       {
+        "Id": "610202587"
+       }
+      ]
      },
      {
       "Id": "2654270155",
@@ -515,6 +666,6 @@
     ]
    }
   ],
-  "FileHash": "{3E10AB19-29AB-0E4D-5BDF-D010AB100B53}"
+  "FileHash": "{EB8A2B8E-4B9D-1138-DD3E-61F081572756}"
  }
 }

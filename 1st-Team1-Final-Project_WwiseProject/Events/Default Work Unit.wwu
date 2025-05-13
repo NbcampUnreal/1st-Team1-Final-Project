@@ -79,7 +79,7 @@
 						<Action Name="" ID="{6E25780F-87DB-48A7-B190-994F28F075A5}" ShortID="786140471">
 							<ReferenceList>
 								<Reference Name="Target">
-									<ObjectRef Name="SFX_Axe_Swing" ID="{C1BDC775-E001-4714-AB7D-D2BAEED57903}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+									<ObjectRef Name="SFX_AxeSwing" ID="{C1BDC775-E001-4714-AB7D-D2BAEED57903}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 								</Reference>
 							</ReferenceList>
 						</Action>
@@ -124,6 +124,50 @@
 							<ReferenceList>
 								<Reference Name="Target">
 									<ObjectRef Name="SFX_SpikeTrap_Hit" ID="{F473346D-577A-43CC-A9FE-CF39A1BC99D7}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_Axe_Hit" ID="{E6A16F60-3008-4709-B717-1D97F028AB1C}">
+					<ChildrenList>
+						<Action Name="" ID="{D3E40DAC-E979-4EF4-8D48-3F16EDC86F3E}" ShortID="745598978">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_AxeSwing_Hit" ID="{BF022B96-0D0E-4BA6-9AA8-E0B934FF2A41}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_Mine" ID="{59F8482E-4399-4E6E-B401-0432CFED7550}">
+					<ChildrenList>
+						<Action Name="" ID="{5CB5FC2A-A611-4283-B91A-F41FB6BEE5CB}" ShortID="843699091">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Grenade" ID="{C0AF94A0-A240-4583-AB59-31212ADAC0BF}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_BearTrap" ID="{DCFFA37D-831E-4187-999F-FD2DB425816C}">
+					<ChildrenList>
+						<Action Name="" ID="{2BAAB3FE-8DA0-4A9F-A1ED-37FA263C85D0}" ShortID="944004173">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_BearTrap" ID="{B3EA5DAE-A012-453C-BD81-FAF1F4CF82A5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_BearTrap_Out" ID="{A8F68B4C-166B-47F0-82AB-7DA87701254B}">
+					<ChildrenList>
+						<Action Name="" ID="{2A2C5DB5-E674-4B40-9F49-5CF18D261247}" ShortID="32656675">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_BearTrap_Out" ID="{B06F6092-F653-4DD6-A2F9-F7D1BDEDB916}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 								</Reference>
 							</ReferenceList>
 						</Action>
