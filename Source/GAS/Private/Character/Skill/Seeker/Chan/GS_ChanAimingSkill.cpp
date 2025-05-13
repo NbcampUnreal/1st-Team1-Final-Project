@@ -16,6 +16,15 @@ void UGS_ChanAimingSkill::ActiveSkill()
 	StartHoldUp();
 }
 
+void UGS_ChanAimingSkill::OnSkillCommand()
+{
+	if (!bIsHoldingUp || CurrentStamina < SlamStaminaCost)
+	{
+		return;
+	}
+	OnShieldSlam();
+}
+
 void UGS_ChanAimingSkill::ExecuteSkillEffect()
 {
 	TArray<FHitResult> HitResults;
@@ -27,6 +36,17 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 	FCollisionShape Shape = FCollisionShape::MakeSphere(Radius);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
+
+	// 테스트용
+	DrawDebugSphere(
+		GetWorld(),
+		Start + Forward * Radius,
+		Radius,
+		16,
+		FColor::Red,
+		false,
+		1.f
+	);
 
 	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitResults, Start, Start + Forward * 100.f, FQuat::Identity, ECC_Pawn, Shape, Params))
 	{
@@ -42,17 +62,19 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
 			{
 				ApplyEffectToGuardian(TargetGuardian);
-			}
-
-			
+			}	
 		}
 	}
 }
 
+bool UGS_ChanAimingSkill::IsActive() const
+{
+	return bIsHoldingUp;
+}
+
 void UGS_ChanAimingSkill::OnShieldSlam()
 {
-	if (!bIsHoldingUp || CurrentStamina < SlamStaminaCost) return;
-
+	UE_LOG(LogTemp, Warning, TEXT("Slam!!!!!!!"));
 	CurrentStamina -= SlamStaminaCost;
 	// UI 업데이트
 
