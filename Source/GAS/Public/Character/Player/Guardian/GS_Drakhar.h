@@ -12,10 +12,16 @@ class GAS_API AGS_Drakhar : public AGS_Guardian
 	
 public:
 	AGS_Drakhar();
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	//variables
+	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
+	bool bIsDashing;
 
+	//action binding function
 	virtual void ComboAttack() override;
 
 	virtual void Skill1() override;
@@ -29,10 +35,13 @@ public:
 	void ServerRPCDashCharacter();
 
 	UFUNCTION()
-	void EndDash();
+	void DashAttackCheck();
 
-	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
-	bool bIsDashing;
+	/*UFUNCTION(Server, Reliable)
+	void ServerRPCDashAttack();*/
+
+	UFUNCTION()
+	void EndDash();
 
 	UFUNCTION()
 	void OnRep_IsDashing();
@@ -40,8 +49,22 @@ public:
 protected:
 
 private:
-	float DashPower;
+	//[dash skill]
+	UPROPERTY()
+	TSet<AGS_Character*> DamagedCharacters;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* DashMontage;
+	TObjectPtr<UAnimMontage> DashMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	TObjectPtr<UCapsuleComponent> DashAttackCapsule;
+
+	FVector DashStartLocation;
+	FVector DashEndLocation;
+
+	float DashPower;
+	float DashInterpAlpha;
+	float DashDuration;
+
+	//[combo attack]
 };

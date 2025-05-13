@@ -103,7 +103,6 @@ void AGS_Guardian::MeleeAttackCheck()
 			}
 		}
 
-		FDamageEvent DamageEvent;
 		for (auto const& DamagedCharacter : DamagedCharacters)
 		{
 			ServerRPCMeleeAttack(DamagedCharacter);
