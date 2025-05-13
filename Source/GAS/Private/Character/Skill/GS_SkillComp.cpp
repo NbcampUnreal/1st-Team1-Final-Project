@@ -39,6 +39,23 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 	}
 }
 
+void UGS_SkillComp::TrySkillCommand(ESkillSlot Slot)
+{
+	if (GetOwnerRole() < ROLE_Authority)
+	{
+		Server_TrySkillCommand(Slot);
+		return;
+	}
+
+	if (SkillMap.Contains(Slot))
+	{
+		if (UGS_SkillBase* Skill = SkillMap[Slot])
+		{
+			Skill->OnSkillCommand();
+		}
+	}
+}
+
 void UGS_SkillComp::SetSkill(ESkillSlot Slot, TSubclassOf<UGS_SkillBase> SkillClass)
 {
 	if (!SkillClass) return;
@@ -55,6 +72,15 @@ void UGS_SkillComp::SetCanUseSkill(bool InCanUseSkill)
 	bCanUseSkill = InCanUseSkill;
 }
 
+bool UGS_SkillComp::IsSkillActive(ESkillSlot Slot) const
+{
+	if (const UGS_SkillBase* const* SkillPtr = SkillMap.Find(Slot))
+	{
+		return (*SkillPtr && (*SkillPtr)->IsActive());
+	}
+	return false;
+}
+
 
 // Called when the game starts
 void UGS_SkillComp::BeginPlay()
@@ -67,6 +93,11 @@ void UGS_SkillComp::BeginPlay()
 void UGS_SkillComp::Server_TryActiveSkill_Implementation(ESkillSlot Slot)
 {
 	TryActivateSkill(Slot);
+}
+
+void UGS_SkillComp::Server_TrySkillCommand_Implementation(ESkillSlot Slot)
+{
+	TrySkillCommand(Slot);
 }
 
 void UGS_SkillComp::InitSkills()

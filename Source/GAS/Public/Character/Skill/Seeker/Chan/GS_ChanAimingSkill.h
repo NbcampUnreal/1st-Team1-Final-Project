@@ -16,7 +16,9 @@ class GAS_API UGS_ChanAimingSkill : public UGS_SeekerSkillBase
 	
 public:
 	virtual void ActiveSkill() override;
+	virtual void OnSkillCommand() override;
 	virtual void ExecuteSkillEffect() override;
+	virtual bool IsActive() const override;
 
 	// 공격
 	void OnShieldSlam();
@@ -38,9 +40,9 @@ private:
 	bool bIsHoldingUp;
 
 	// 스테미나 관리
-	float MaxStamina=10.0f;
+	float MaxStamina=20.0f;
 	float CurrentStamina;
 	float StaminaDrainRate=1.0f; // 초당 소비량
-	float SlamStaminaCost;
+	float SlamStaminaCost=5.0f;
 	FTimerHandle StaminaDrainHandle;
 };

@@ -62,21 +62,39 @@ void UGS_SkillInputHandlerComp::BeginPlay()
 void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Right Click"));
-	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp()) return;
-	OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
+	{
+		return;
+	}
+	
+	UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp();
+	if (SkillComp->IsSkillActive(ESkillSlot::Aiming))
+	{
+		SkillComp->TrySkillCommand(ESkillSlot::Aiming);
+	}
+	else
+	{
+		SkillComp->TryActivateSkill(ESkillSlot::Aiming);
+	}
 }
 
 void UGS_SkillInputHandlerComp::OnCtrlLeftClick(const FInputActionInstance& Instance)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Ctrl+Left Click"));
-	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp()) return;
+	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
+	{
+		return;
+	}
 	OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 }
 
 void UGS_SkillInputHandlerComp::OnCtrlRightClick(const FInputActionInstance& Instance)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Ctrl+Right Click"));
-	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp()) return;
+	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
+	{
+		return;
+	}
 	OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
 }
 
