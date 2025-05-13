@@ -3,6 +3,8 @@
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "UI/Character/GS_HPTextWidgetComp.h"
+#include "UI/Character/GS_HPText.h"
 #include "Engine/DamageEvents.h"
 
 AGS_Character::AGS_Character()
@@ -12,12 +14,51 @@ AGS_Character::AGS_Character()
 	StatComp = CreateDefaultSubobject<UGS_StatComp>(TEXT("StatComp"));
 	SkillComp = CreateDefaultSubobject<UGS_SkillComp>(TEXT("SkillComp"));
 	DebuffComp = CreateDefaultSubobject<UGS_DebuffComp>(TEXT("DebuffComp"));
+	
+	HPTextWidgetComp = CreateDefaultSubobject<UGS_HPTextWidgetComp>(TEXT("TextWidgetComp"));
+	HPTextWidgetComp->SetupAttachment(RootComponent);
+	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
+	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGS_Character::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+void AGS_Character::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+
+}
+
+float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	float CurrentHealth = StatComp->GetCurrentHealth();
+
+	UE_LOG(LogTemp, Warning, TEXT("Damaged %s"), *GetName());
+
+	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage);
+
+	return ActualDamage;
+}
+
+void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AGS_Character::SetHPTextWidget(UGS_HPText* InHPTextWidget)
+{
+	UGS_HPText* HPTextWidget = Cast<UGS_HPText>(InHPTextWidget);
+	if (IsValid(HPTextWidget))
+	{
+		HPTextWidget->InitializeHPTextWidget(GetStatComp());
+		StatComp->OnCurrentHPChanged.AddUObject(HPTextWidget, &UGS_HPText::OnCurrentHPChanged);
+	}
 }
 
 void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamagedCharacter)
@@ -32,6 +73,7 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 			InDamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
 		}
 	}
+}
 }
 
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

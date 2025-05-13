@@ -55,8 +55,10 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerRPCJumpToAttackMontageSection(int32 ComboIndex);
 
+	UFUNCTION()
+	void OnRep_Attacking();
 
-	UPROPERTY()
+	UPROPERTY(ReplicatedUsing = OnRep_Attacking, VisibleAnywhere, BlueprintReadOnly)
 	bool IsAttacking;
 
 	UPROPERTY()
