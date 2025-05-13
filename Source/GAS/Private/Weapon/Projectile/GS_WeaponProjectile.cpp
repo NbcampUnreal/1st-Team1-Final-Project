@@ -11,10 +11,9 @@ AGS_WeaponProjectile::AGS_WeaponProjectile()
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionBox"));
 	SetRootComponent(CollisionComponent);
-	CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("PJEProjectile"));
 	CollisionComponent->OnComponentHit.AddDynamic(this, &AGS_WeaponProjectile::OnHit);
 
-	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Projectile Mesh"));
+	ProjectileMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Projectile Mesh"));
 	ProjectileMesh->SetupAttachment(CollisionComponent);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
