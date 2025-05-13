@@ -8,6 +8,7 @@
 
 UGS_BTT_TurnToTarget::UGS_BTT_TurnToTarget()
 {
+	NodeName = TEXT("TurnToTarget");
 	bNotifyTick = true;
 	
 	RotationSpeed = 360.f;
@@ -23,7 +24,7 @@ EBTNodeResult::Type UGS_BTT_TurnToTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 	}
 
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
-	AGS_Character* TargetActor = Cast<AGS_Character>(Blackboard->GetValueAsObject(AGS_AIController::TargetKey));
+	AGS_Character* TargetActor = Cast<AGS_Character>(Blackboard->GetValueAsObject(AGS_AIController::TargetActorKey));
 	if (!TargetActor)
 	{
 		return EBTNodeResult::Failed;
@@ -45,7 +46,7 @@ void UGS_BTT_TurnToTarget::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 	}
 
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
-	AGS_Character* TargetActor = Cast<AGS_Character>(Blackboard->GetValueAsObject(AGS_AIController::TargetKey));
+	AGS_Character* TargetActor = Cast<AGS_Character>(Blackboard->GetValueAsObject(AGS_AIController::TargetActorKey));
 	if (!TargetActor)
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
