@@ -50,3 +50,8 @@ void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
+
+FGenericTeamId AGS_Character::GetGenericTeamId() const
+{
+	return TeamId;
+}

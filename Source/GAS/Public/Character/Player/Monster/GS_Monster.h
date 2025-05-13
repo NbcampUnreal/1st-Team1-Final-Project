@@ -18,6 +18,9 @@ class GAS_API AGS_Monster : public AGS_Character
 
 public:
 	AGS_Monster();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RVO")
+	float AvoidanceRadius = 200.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "AI")
 	UBehaviorTree* BTAsset;

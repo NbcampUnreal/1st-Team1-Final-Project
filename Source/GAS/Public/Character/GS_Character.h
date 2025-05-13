@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
 #include "GS_Character.generated.h"
 
@@ -9,7 +10,7 @@ class UGS_SkillComp;
 class UGS_DebuffComp;
 
 UCLASS()
-class GAS_API AGS_Character : public ACharacter
+class GAS_API AGS_Character : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -17,6 +18,10 @@ public:
 	AGS_Character();
 
 	virtual void BeginPlay() override;
+
+	/** 팀 ID (0: 중립, 1: 플레이어, 2: 몬스터) */
+	UPROPERTY(EditAnywhere, Category="Team")
+	FGenericTeamId TeamId;
 
 	//variable
 	float MaxSpeed;
@@ -36,6 +41,7 @@ protected:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 private:
 	//component

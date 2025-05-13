@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "GS_AIController.generated.h"
 
+struct FAIStimulus;
 /**
  * 
  */
@@ -28,6 +29,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
 	
 	UFUNCTION()
 	void TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
