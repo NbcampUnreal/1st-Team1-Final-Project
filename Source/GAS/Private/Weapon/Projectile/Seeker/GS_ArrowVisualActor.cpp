@@ -8,18 +8,18 @@ AGS_ArrowVisualActor::AGS_ArrowVisualActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	ArrowMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ArrowMesh"));
+	ArrowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArrowMesh"));
 	SetRootComponent(ArrowMesh);
 
 	ArrowMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ArrowMesh->SetSimulatePhysics(false);
 }
 
-void AGS_ArrowVisualActor::SetArrowMesh(UStaticMesh* Mesh)
+void AGS_ArrowVisualActor::SetArrowMesh(USkeletalMesh* Mesh)
 {
 	if (ArrowMesh && Mesh)
 	{
-		ArrowMesh->SetStaticMesh(Mesh);
+		ArrowMesh->SetSkeletalMesh(Mesh);
 	}
 }
 

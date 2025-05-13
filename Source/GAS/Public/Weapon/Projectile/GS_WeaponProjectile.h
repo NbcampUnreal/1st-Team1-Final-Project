@@ -23,6 +23,8 @@ public:
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
 		const FHitResult& Hit);
 	
+	UPROPERTY(EditAnywhere)
+	USkeletalMeshComponent* ProjectileMesh;
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -30,8 +32,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* CollisionComponent;
 
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* ProjectileMesh;
 
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovementComponent;
