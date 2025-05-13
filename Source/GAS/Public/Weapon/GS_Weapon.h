@@ -1,26 +1,22 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "GameFramework/Actor.h"
 #include "GS_Weapon.generated.h"
 
-
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class GAS_API UGS_Weapon : public UActorComponent
+UCLASS()
+class GAS_API AGS_Weapon : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
-	UGS_Weapon();
+	// Sets default values for this actor's properties
+	AGS_Weapon();
 
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void Tick(float DeltaTime) override;
 
 protected:
-	// Called when the game starts
+	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 };

@@ -28,9 +28,14 @@ public:
 	UFUNCTION()
 	void TryActivateSkill(ESkillSlot Slot);
 
+	UFUNCTION()
+	void TrySkillCommand(ESkillSlot Slot);
+
 	void SetSkill(ESkillSlot Slot, TSubclassOf<UGS_SkillBase> SkillClass);
 
 	void SetCanUseSkill(bool InCanUseSkill);
+
+	bool IsSkillActive(ESkillSlot Slot) const;
 
 protected:
 	// Called when the game starts
@@ -41,6 +46,9 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Server_TryActiveSkill(ESkillSlot Slot);
+
+	UFUNCTION(Server, Reliable)
+	void Server_TrySkillCommand(ESkillSlot Slot);
 
 	void InitSkills();
 

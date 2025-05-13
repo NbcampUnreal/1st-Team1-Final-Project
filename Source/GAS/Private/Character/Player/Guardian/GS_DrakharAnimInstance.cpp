@@ -54,7 +54,7 @@ void UGS_DrakharAnimInstance::AnimNotify_NextAttackCheck()
 
 void UGS_DrakharAnimInstance::AnimNotify_DashHitCheck()
 {
-	AActor* Owner = GetOwningActor();
+	/*AActor* Owner = GetOwningActor();
 	if (IsValid(Owner))
 	{
 		AGS_Guardian* Guardian = Cast<AGS_Guardian>(Owner);
@@ -62,7 +62,7 @@ void UGS_DrakharAnimInstance::AnimNotify_DashHitCheck()
 		{
 			Guardian->MeleeAttackCheck();
 		}
-	}
+	}*/
 }
 
 
