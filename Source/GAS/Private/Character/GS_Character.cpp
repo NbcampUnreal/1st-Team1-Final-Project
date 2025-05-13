@@ -74,24 +74,6 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 		}
 	}
 }
-}
-
-float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	float CurrentHealth = StatComp->GetCurrentHealth();
-
-	UE_LOG(LogTemp, Warning, TEXT("Damaged"));
-
-	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage);
-
-	return ActualDamage;
-}
-
-void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
 
 FGenericTeamId AGS_Character::GetGenericTeamId() const
 {

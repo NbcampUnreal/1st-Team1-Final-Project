@@ -46,11 +46,6 @@ public:
 	//HP widget
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
 
-protected:
-	//override function
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
 private:

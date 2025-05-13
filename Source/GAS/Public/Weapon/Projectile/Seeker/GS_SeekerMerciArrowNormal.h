@@ -30,11 +30,10 @@ public:
 
 	UPROPERTY()
 	TSet<AActor*> HitActors;
-
-	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
+	
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
-		const FHitResult& Hit);
+		const FHitResult& Hit) override;
 
 protected:
 	virtual void BeginPlay() override;
