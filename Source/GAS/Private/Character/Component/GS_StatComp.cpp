@@ -2,10 +2,26 @@
 
 #include "Character/GS_Character.h"
 
+#include "Net/UnrealNetwork.h"
+
 UGS_StatComp::UGS_StatComp()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
+	SetIsReplicatedByDefault(true);
+}
+
+void UGS_StatComp::BeginPlay()
+{
+	Super::BeginPlay();
+
+}
+
+void UGS_StatComp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);	
+
+	DOREPLIFETIME(ThisClass, CurrentHealth);
 }
 
 void UGS_StatComp::InitStat()
@@ -91,11 +107,11 @@ void UGS_StatComp::SetAttackSpeed(float InAttackSpeed)
 	AttackSpeed = InAttackSpeed;
 }
 
-void UGS_StatComp::BeginPlay()
+void UGS_StatComp::OnRep_CurrentHealth()
 {
-	Super::BeginPlay();
-
+	OnCurrentHPChanged.Broadcast(CurrentHealth);
 }
+
 
 
 
