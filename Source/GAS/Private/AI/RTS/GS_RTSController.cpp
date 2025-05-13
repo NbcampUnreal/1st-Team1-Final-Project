@@ -19,6 +19,7 @@ AGS_RTSController::AGS_RTSController()
 	MouseEdgeDir = FVector2D::ZeroVector;
 	CameraSpeed = 2000.f;
 	EdgeScreenRatio = 0.05f;
+	UnitGroups.SetNum(9);
 }
 
 void AGS_RTSController::BeginPlay()
@@ -45,13 +46,21 @@ void AGS_RTSController::SetupInputComponent()
 	
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 	{
-		if (CameraMoveAction)
+		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &AGS_RTSController::CameraMove);
+		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Completed, this, &AGS_RTSController::CameraMoveEnd);
+		EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnLeftMousePressed);
+		EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Completed, this, &AGS_RTSController::OnLeftMouseReleased);
+		EnhancedInputComponent->BindAction(RightClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnRightMousePressed);
+		
+		EnhancedInputComponent->BindAction(CtrlAction, ETriggerEvent::Started,   this, &AGS_RTSController::OnCtrlPressed);
+		EnhancedInputComponent->BindAction(CtrlAction, ETriggerEvent::Completed, this, &AGS_RTSController::OnCtrlReleased);
+		
+		for (int32 i = 0; i < GroupKeyActions.Num(); ++i)
 		{
-			EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &AGS_RTSController::CameraMove);
-			EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Completed, this, &AGS_RTSController::CameraMoveEnd);
-			EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnLeftMousePressed);
-			EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Completed, this, &AGS_RTSController::OnLeftMouseReleased);
-			EnhancedInputComponent->BindAction(RightClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnRightMousePressed);
+			if (UInputAction* IA = GroupKeyActions[i])
+			{
+				EnhancedInputComponent->BindAction(GroupKeyActions[i], ETriggerEvent::Started, this, &AGS_RTSController::OnGroupKey, i);
+			}
 		}
 	}
 }
@@ -241,4 +250,39 @@ void AGS_RTSController::ClearUnitSelection()
 	}
 		
 	UnitSelection.Empty();
+}
+
+void AGS_RTSController::OnCtrlPressed(const FInputActionInstance& InputInstance)
+{
+	bCtrlDown = true;
+}
+
+void AGS_RTSController::OnCtrlReleased(const FInputActionInstance& InputInstance)
+{
+	bCtrlDown = false;
+}
+
+void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, int32 GroupIdx)
+{
+	if (bCtrlDown) // Ctrl+숫자 → 부대 저장
+	{
+		UnitGroups[GroupIdx].Units = UnitSelection;
+		UE_LOG(LogTemp, Log, TEXT("Saved group %d (%d units)"), GroupIdx+1, UnitSelection.Num());
+	}
+	else // 숫자만 → 부대 호출
+	{
+		if (!UnitGroups.IsValidIndex(GroupIdx))
+		{
+			return;
+		}
+		
+		ClearUnitSelection();
+		
+		UnitSelection = UnitGroups[GroupIdx].Units;
+		for (AGS_Monster* U : UnitSelection)
+		{
+			U->SetSelected(true);
+		}
+		UE_LOG(LogTemp, Log, TEXT("Loaded group %d (%d units)"), GroupIdx+1, UnitSelection.Num());
+	}
 }
