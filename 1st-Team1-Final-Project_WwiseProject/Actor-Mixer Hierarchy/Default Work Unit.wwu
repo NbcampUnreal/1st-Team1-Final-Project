@@ -151,7 +151,117 @@
 					</ActiveSourceList>
 				</Sound>
 				<SwitchContainer Name="FootSteps" ID="{BF94A467-5B4A-4C18-8A80-37A713606011}" ShortID="236000034">
+					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="MaxSoundPerInstance" Type="int16">
+							<ValueList>
+								<Value>2</Value>
+							</ValueList>
+						</Property>
+						<Property Name="UseMaxSoundPerInstance" Type="bool">
+							<ValueList>
+								<Value>True</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Volume" Type="Real64">
+							<ValueList>
+								<Value>-6</Value>
+							</ValueList>
+						</Property>
+					</PropertyList>
 					<ReferenceList>
+						<Reference Name="Attenuation">
+							<Custom>
+								<Attenuation Name="Attenuation (Custom)" ID="{ED8BFD64-C5F8-4018-A43F-C84893BC1AD3}" ShortID="495340725">
+									<PropertyList>
+										<Property Name="RadiusMax" Type="Real64" Value="800"/>
+									</PropertyList>
+									<CurveUsageInfoList>
+										<VolumeDryUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
+												<Curve Name="VolumeDry" ID="{E9574B26-2D52-46A2-9F32-90FFEFB6F910}">
+													<PropertyList>
+														<Property Name="Flags" Type="int32" Value="3"/>
+													</PropertyList>
+													<PointList>
+														<Point>
+															<XPos>0</XPos>
+															<YPos>0</YPos>
+															<Flags>5</Flags>
+															<SegmentShape>Exp2</SegmentShape>
+														</Point>
+														<Point>
+															<XPos>651.78765</XPos>
+															<YPos>-4.03826</YPos>
+															<Flags>0</Flags>
+														</Point>
+														<Point>
+															<XPos>800</XPos>
+															<YPos>-200</YPos>
+															<Flags>37</Flags>
+														</Point>
+													</PointList>
+												</Curve>
+											</CurveUsageInfo>
+										</VolumeDryUsage>
+										<VolumeWetGameUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseVolumeDry"/>
+										</VolumeWetGameUsage>
+										<VolumeWetUserUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseVolumeDry"/>
+										</VolumeWetUserUsage>
+										<LowPassFilterUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+										</LowPassFilterUsage>
+										<HighPassFilterUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+										</HighPassFilterUsage>
+										<SpreadUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+										</SpreadUsage>
+										<FocusUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+										</FocusUsage>
+										<ObstructionVolumeUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</ObstructionVolumeUsage>
+										<ObstructionLPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</ObstructionLPFUsage>
+										<ObstructionHPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</ObstructionHPFUsage>
+										<OcclusionVolumeUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</OcclusionVolumeUsage>
+										<OcclusionLPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</OcclusionLPFUsage>
+										<OcclusionHPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</OcclusionHPFUsage>
+										<DiffractionVolumeUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</DiffractionVolumeUsage>
+										<DiffractionLPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</DiffractionLPFUsage>
+										<DiffractionHPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</DiffractionHPFUsage>
+										<TransmissionVolumeUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</TransmissionVolumeUsage>
+										<TransmissionLPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</TransmissionLPFUsage>
+										<TransmissionHPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</TransmissionHPFUsage>
+									</CurveUsageInfoList>
+								</Attenuation>
+							</Custom>
+						</Reference>
 						<Reference Name="Conversion">
 							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
 						</Reference>
@@ -168,26 +278,30 @@
 					<ChildrenList>
 						<RandomSequenceContainer Name="Dirt" ID="{D35A1935-5722-4BA0-9D85-7FE633DD5274}" ShortID="176484208">
 							<PropertyList>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>10</Value>
+									</ValueList>
+								</Property>
 								<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
 								<Property Name="Pitch" Type="int32">
 									<ValueList>
-										<Value>-300</Value>
+										<Value>-100</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
 											<Modifier Name="" ID="{96324302-C291-4FC3-8812-F394547431FE}">
 												<PropertyList>
 													<Property Name="Enabled" Type="bool" Value="True"/>
-													<Property Name="Max" Type="Real64" Value="5"/>
-													<Property Name="Min" Type="Real64" Value="-10"/>
 												</PropertyList>
 											</Modifier>
 										</ModifierInfo>
 									</ModifierList>
 								</Property>
+								<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="2"/>
 								<Property Name="Volume" Type="Real64">
 									<ValueList>
-										<Value>-10</Value>
+										<Value>-5</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
@@ -212,6 +326,13 @@
 							</ReferenceList>
 							<ChildrenList>
 								<Sound Name="FootstepsDirt1" ID="{DCA1E27D-CD59-4DC6-A487-B5FDFCBB6C8C}" ShortID="307049804">
+									<PropertyList>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-5</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
 									<ReferenceList>
 										<Reference Name="Conversion">
 											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
@@ -223,10 +344,11 @@
 									<ChildrenList>
 										<AudioFileSource Name="FootstepsDirt1" ID="{B9C19071-908A-47D6-A187-C9794D9BC6DE}">
 											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.0587396505278893"/>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0184234854518727"/>
 												<Property Name="FadeOutDuration" Type="Real64" Value="0.0432818477573921"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.335434309629372"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.00158102608141243"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.499604231235906"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>FootstepsDirt1.wav</AudioFile>
@@ -251,11 +373,11 @@
 									<ChildrenList>
 										<AudioFileSource Name="FootstepsDirt2" ID="{E7B2C58F-61B9-47DA-94AA-38FB8B890FFA}">
 											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.0307981694579884"/>
-												<Property Name="FadeOutDuration" Type="Real64" Value="0.0205321129719922"/>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0159229768623729"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.0616576454422231"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
 												<Property Name="TrimBegin" Type="Real64" Value="0.027376150629323"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.501325740915449"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.549451364018912"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>FootstepsDirt2.wav</AudioFile>
@@ -280,11 +402,11 @@
 									<ChildrenList>
 										<AudioFileSource Name="FootstepsDirt" ID="{78AB2079-4D74-480D-B8AB-5CD16A78D900}">
 											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.0168405876291279"/>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0231040694361118"/>
 												<Property Name="FadeOutDuration" Type="Real64" Value="0.0505217628873837"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
 												<Property Name="TrimBegin" Type="Real64" Value="0.0260263626995613"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.459288743825981"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.507047792604233"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>FootstepsDirt.wav</AudioFile>
@@ -297,15 +419,129 @@
 										<ActiveSource Name="FootstepsDirt" ID="{78AB2079-4D74-480D-B8AB-5CD16A78D900}" Platform="Linked"/>
 									</ActiveSourceList>
 								</Sound>
+								<Sound Name="Footstep_Dirt3" ID="{FDAF95FF-DF29-4CCC-A3C1-F3ABD6D6B072}" ShortID="636957054">
+									<PropertyList>
+										<Property Name="MakeUpGain" Type="Real64">
+											<ValueList>
+												<Value>3</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="Footstep_Dirt3" ID="{1A4AC47B-D343-4EA5-BD8C-242EC486A598}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0111746821030732"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.0123509644297125"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.112334962194051"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>Footstep_Dirt3.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="518697165"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="Footstep_Dirt3" ID="{1A4AC47B-D343-4EA5-BD8C-242EC486A598}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="Footstep_Dirt4" ID="{8030C325-9481-4F95-8EF8-B0DCD25ED08E}" ShortID="462670368">
+									<PropertyList>
+										<Property Name="MakeUpGain" Type="Real64">
+											<ValueList>
+												<Value>3</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="Footstep_Dirt4" ID="{228D210E-4EC3-405C-86A4-8B013D386C95}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0129391055930321"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0952788684577818"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>Footstep_Dirt4.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="384388068"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="Footstep_Dirt4" ID="{228D210E-4EC3-405C-86A4-8B013D386C95}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="Footstep_Dirt5" ID="{FD601AC6-B983-4120-B807-240AB2F4AF6B}" ShortID="860820781">
+									<PropertyList>
+										<Property Name="MakeUpGain" Type="Real64">
+											<ValueList>
+												<Value>8</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Weight" Type="Real64">
+											<ValueList>
+												<Value>40</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="Footstep_Dirt5" ID="{4FE83778-F21B-4A38-AA30-180427570A35}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0202678241377674"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.0297683667023458"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.107672815731889"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>Footstep_Dirt5.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="790427616"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="Footstep_Dirt5" ID="{4FE83778-F21B-4A38-AA30-180427570A35}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
 							</ChildrenList>
 						</RandomSequenceContainer>
 						<RandomSequenceContainer Name="Grass" ID="{EAF8B345-DCA9-4A63-983C-083F3D5C86BD}" ShortID="979192656">
 							<PropertyList>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>10</Value>
+									</ValueList>
+								</Property>
 								<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
 								<Property Name="OverrideEffect" Type="bool" Value="True"/>
 								<Property Name="Pitch" Type="int32">
 									<ValueList>
-										<Value>-200</Value>
+										<Value>-100</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
@@ -321,7 +557,7 @@
 								</Property>
 								<Property Name="Volume" Type="Real64">
 									<ValueList>
-										<Value>-5</Value>
+										<Value>-10</Value>
 									</ValueList>
 								</Property>
 							</PropertyList>
@@ -349,7 +585,7 @@
 												<Property Name="FadeInDuration" Type="Real64" Value="0.0212314225053079"/>
 												<Property Name="FadeOutDuration" Type="Real64" Value="0.0185774946921444"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.322452229299364"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.221339308561036"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>Footstep_Grass (1).wav</AudioFile>
@@ -377,8 +613,8 @@
 												<Property Name="FadeInDuration" Type="Real64" Value="0.0362937249195804"/>
 												<Property Name="FadeOutDuration" Type="Real64" Value="0.0164971476907183"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimBegin" Type="Real64" Value="0.0329942953814367"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.312345975455711"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0656160167433653"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.284786245339599"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>Footstep_Grass (2).wav</AudioFile>
@@ -406,8 +642,8 @@
 												<Property Name="FadeInDuration" Type="Real64" Value="0.0214777068727335"/>
 												<Property Name="FadeOutDuration" Type="Real64" Value="0.0393757959333448"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimBegin" Type="Real64" Value="0.0429554137454671"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.458191085196858"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0804831008083841"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.412425613168911"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>Footstep_Grass (3).wav</AudioFile>
@@ -435,8 +671,8 @@
 												<Property Name="FadeInDuration" Type="Real64" Value="0.0297008350396612"/>
 												<Property Name="FadeOutDuration" Type="Real64" Value="0.0220006185478972"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimBegin" Type="Real64" Value="0.0275007731848715"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.314608861765284"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0719427392841498"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.251039973547329"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>Footstep_Grass (4).wav</AudioFile>
@@ -464,8 +700,8 @@
 												<Property Name="FadeInDuration" Type="Real64" Value="0.0233191795916061"/>
 												<Property Name="FadeOutDuration" Type="Real64" Value="0.0244851385711864"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimBegin" Type="Real64" Value="0.0326468514282486"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.278664183404036"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0380133010639065"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.297744893219708"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>Footstep_Grass (5).wav</AudioFile>
@@ -514,6 +750,16 @@
 									<ValueList>
 										<Value>-100</Value>
 									</ValueList>
+									<ModifierList>
+										<ModifierInfo>
+											<Modifier Name="" ID="{706CC8D1-6B15-4F19-B079-79329CD1D97E}">
+												<PropertyList>
+													<Property Name="Enabled" Type="bool" Value="True"/>
+													<Property Name="Min" Type="Real64" Value="-10"/>
+												</PropertyList>
+											</Modifier>
+										</ModifierInfo>
+									</ModifierList>
 								</Property>
 								<Property Name="Volume" Type="Real64">
 									<ValueList>
@@ -541,6 +787,13 @@
 									</ReferenceList>
 									<ChildrenList>
 										<AudioFileSource Name="FootstepsConcrete1" ID="{04E471FD-4597-4B36-8749-8BA4C5DC6D86}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.00993959270781725"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.0285362500321205"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0125046488904798"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.16736990622304"/>
+											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>FootstepsConcrete1.wav</AudioFile>
 											<MediaIDList>
@@ -563,6 +816,13 @@
 									</ReferenceList>
 									<ChildrenList>
 										<AudioFileSource Name="FootstepsConcrete2" ID="{85CCD05C-F323-4F4C-86D0-B772E84C2915}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0343182239677438"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.0523352915508092"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0128693339879039"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.376642484522021"/>
+											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>FootstepsConcrete2.wav</AudioFile>
 											<MediaIDList>
@@ -585,6 +845,13 @@
 									</ReferenceList>
 									<ChildrenList>
 										<AudioFileSource Name="FootstepsConcrete" ID="{0B9950C8-234D-4DE6-AB4D-EDD9A4BD07B4}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0297396620502948"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.0240448331470469"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0221465568459642"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.302458699540129"/>
+											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>FootstepsConcrete.wav</AudioFile>
 											<MediaIDList>
@@ -657,7 +924,8 @@
 												<Property Name="FadeInDuration" Type="Real64" Value="0.0201600976051039"/>
 												<Property Name="FadeOutDuration" Type="Real64" Value="0.0384874590642892"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.580977383528545"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0103098870488642"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.393524891731014"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>FootstepMetal1.wav</AudioFile>
@@ -685,7 +953,8 @@
 												<Property Name="FadeInDuration" Type="Real64" Value="0.0274815111403253"/>
 												<Property Name="FadeOutDuration" Type="Real64" Value="0.0212357131538877"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.231719103468958"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.00926290496164502"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.196903357233809"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>FootstepMetal2.wav</AudioFile>
@@ -713,7 +982,8 @@
 												<Property Name="FadeInDuration" Type="Real64" Value="0.0125793524861589"/>
 												<Property Name="FadeOutDuration" Type="Real64" Value="0.0217279724760926"/>
 												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.200126061326126"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.00438619708393606"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.141351020401383"/>
 											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>FootstepMetal.wav</AudioFile>
@@ -945,6 +1215,7 @@
 				</Sound>
 				<Sound Name="SFX_Saw_Hit" ID="{86E51F01-81CC-49A4-BD8B-40EDC288492F}" ShortID="75499252">
 					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="EnableAttenuation" Type="bool" Value="False"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
@@ -1116,18 +1387,13 @@
 				</Sound>
 				<Sound Name="SFX_AxeSwing" ID="{C1BDC775-E001-4714-AB7D-D2BAEED57903}" ShortID="342578347">
 					<PropertyList>
-						<Property Name="3DSpatialization" Type="int16" Value="2"/>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
 								<Value>10</Value>
 							</ValueList>
 						</Property>
 						<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
-						<Property Name="IsStreamingEnabled" Type="bool">
-							<ValueList>
-								<Value>True</Value>
-							</ValueList>
-						</Property>
 						<Property Name="Lowpass" Type="int16">
 							<ValueList>
 								<Value>20</Value>
@@ -1135,7 +1401,7 @@
 						</Property>
 						<Property Name="MakeUpGain" Type="Real64">
 							<ValueList>
-								<Value>-3</Value>
+								<Value>-5</Value>
 							</ValueList>
 						</Property>
 						<Property Name="Pitch" Type="int32">
@@ -1158,10 +1424,9 @@
 								<Value>0</Value>
 							</ValueList>
 						</Property>
-						<Property Name="SpeakerPanning" Type="int16" Value="1"/>
 						<Property Name="Volume" Type="Real64">
 							<ValueList>
-								<Value>-6</Value>
+								<Value>-8</Value>
 							</ValueList>
 							<ModifierList>
 								<ModifierInfo>
@@ -1195,13 +1460,11 @@
 															<XPos>0</XPos>
 															<YPos>0</YPos>
 															<Flags>5</Flags>
-															<SegmentShape>Exp2</SegmentShape>
 														</Point>
 														<Point>
-															<XPos>600.65003</XPos>
-															<YPos>-2.49763</YPos>
+															<XPos>599.78329</XPos>
+															<YPos>-5.78932</YPos>
 															<Flags>0</Flags>
-															<SegmentShape>Exp1</SegmentShape>
 														</Point>
 														<Point>
 															<XPos>800</XPos>
@@ -1298,8 +1561,8 @@
 					<ChildrenList>
 						<AudioFileSource Name="SFX_Axe_Swing" ID="{DCAA2CA8-1B56-468E-BFC7-083958B437D3}">
 							<PropertyList>
-								<Property Name="FadeInDuration" Type="Real64" Value="0.0261267081275178"/>
-								<Property Name="FadeOutDuration" Type="Real64" Value="0.257534694399819"/>
+								<Property Name="FadeInDuration" Type="Real64" Value="0.0761406922573376"/>
+								<Property Name="FadeOutDuration" Type="Real64" Value="0.245591056398668"/>
 								<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
 							</PropertyList>
 							<Language>SFX</Language>
@@ -1311,6 +1574,7 @@
 					</ChildrenList>
 					<PositioningInfo>
 						<Panner Name="" ID="{B8B38C6A-0816-43B0-A154-F01FD618E194}"/>
+						<Position Name="" ID="{DA764B34-2B04-4CA8-8B88-7AAB0DD8DE19}"/>
 					</PositioningInfo>
 					<ObjectLists>
 						<ObjectList Name="Effects">
@@ -1322,8 +1586,8 @@
 												<Custom>
 													<Effect Name="Time Stretch (Custom)" ID="{90895E04-6C77-4899-B5E6-4F5F9A428296}" ShortID="675983341" PluginName="Wwise Time Stretch" CompanyID="0" PluginID="130" PluginType="3">
 														<PropertyList>
-															<Property Name="TimeStretch" Type="Real32" Value="110"/>
-															<Property Name="TimeStretchRandom" Type="Real32" Value="10"/>
+															<Property Name="TimeStretch" Type="Real32" Value="105"/>
+															<Property Name="TimeStretchRandom" Type="Real32" Value="5"/>
 														</PropertyList>
 													</Effect>
 												</Custom>
@@ -1338,7 +1602,7 @@
 						<ActiveSource Name="SFX_Axe_Swing" ID="{DCAA2CA8-1B56-468E-BFC7-083958B437D3}" Platform="Linked"/>
 					</ActiveSourceList>
 				</Sound>
-				<Sound Name="SFX_StoneTrap1" ID="{74EAE0B7-683C-4013-8639-C4EED1D2E519}" ShortID="266270692">
+				<Sound Name="SFX_StoneTrap" ID="{74EAE0B7-683C-4013-8639-C4EED1D2E519}" ShortID="266270692">
 					<PropertyList>
 						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="Highpass" Type="int16">
@@ -1349,11 +1613,6 @@
 						<Property Name="Lowpass" Type="int16">
 							<ValueList>
 								<Value>20</Value>
-							</ValueList>
-						</Property>
-						<Property Name="MakeUpGain" Type="Real64">
-							<ValueList>
-								<Value>3</Value>
 							</ValueList>
 						</Property>
 						<Property Name="Pitch" Type="int32">
@@ -1373,7 +1632,7 @@
 						</Property>
 						<Property Name="Volume" Type="Real64">
 							<ValueList>
-								<Value>-2</Value>
+								<Value>-3</Value>
 							</ValueList>
 							<ModifierList>
 								<ModifierInfo>
@@ -1491,7 +1750,7 @@
 					<ChildrenList>
 						<AudioFileSource Name="SFX_StoneTrap1" ID="{B512A01E-AA8E-4BE2-BE31-2CE146964A28}">
 							<PropertyList>
-								<Property Name="FadeInDuration" Type="Real64" Value="0.0718175870458415"/>
+								<Property Name="FadeInDuration" Type="Real64" Value="0.110488595455141"/>
 								<Property Name="FadeOutDuration" Type="Real64" Value="0.104964165682384"/>
 								<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
 								<Property Name="TrimBegin" Type="Real64" Value="1.07726380568762"/>
@@ -1510,6 +1769,7 @@
 				</Sound>
 				<Sound Name="SFX_StoneTrap_Hit" ID="{6232E52C-7117-4E48-96CB-99065188C99E}" ShortID="360494137">
 					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
 								<Value>15</Value>
@@ -1677,6 +1937,7 @@
 				</Sound>
 				<Sound Name="SFX_SpikeTrap" ID="{E06DA69C-FFED-49FC-9D34-7D81B986EAF5}" ShortID="601389520">
 					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
 								<Value>10</Value>
@@ -1841,14 +2102,20 @@
 				</Sound>
 				<Sound Name="SFX_SpikeTrap_Hit" ID="{F473346D-577A-43CC-A9FE-CF39A1BC99D7}" ShortID="175669319">
 					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
-								<Value>20</Value>
+								<Value>15</Value>
 							</ValueList>
 						</Property>
 						<Property Name="Lowpass" Type="int16">
 							<ValueList>
 								<Value>15</Value>
+							</ValueList>
+						</Property>
+						<Property Name="MakeUpGain" Type="Real64">
+							<ValueList>
+								<Value>1</Value>
 							</ValueList>
 						</Property>
 						<Property Name="Pitch" Type="int32">
@@ -2024,6 +2291,7 @@
 				</Sound>
 				<Sound Name="SFX_AxeSwing_Hit" ID="{BF022B96-0D0E-4BA6-9AA8-E0B934FF2A41}" ShortID="802962240">
 					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
 								<Value>10</Value>
@@ -2031,7 +2299,7 @@
 						</Property>
 						<Property Name="Lowpass" Type="int16">
 							<ValueList>
-								<Value>5</Value>
+								<Value>10</Value>
 							</ValueList>
 						</Property>
 						<Property Name="MakeUpGain" Type="Real64">
@@ -2209,11 +2477,32 @@
 				</Sound>
 				<RandomSequenceContainer Name="SFX_Grenade" ID="{C0AF94A0-A240-4583-AB59-31212ADAC0BF}" ShortID="720704333">
 					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="Highpass" Type="int16">
+							<ValueList>
+								<Value>15</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Lowpass" Type="int16">
+							<ValueList>
+								<Value>5</Value>
+							</ValueList>
+						</Property>
+						<Property Name="MakeUpGain" Type="Real64">
+							<ValueList>
+								<Value>-1</Value>
+							</ValueList>
+						</Property>
 						<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
 						<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="2"/>
 						<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="5"/>
 						<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
 						<Property Name="RandomOrSequence" Type="int16" Value="0"/>
+						<Property Name="Volume" Type="Real64">
+							<ValueList>
+								<Value>-3</Value>
+							</ValueList>
+						</Property>
 					</PropertyList>
 					<ReferenceList>
 						<Reference Name="Attenuation">
@@ -2236,8 +2525,8 @@
 															<Flags>5</Flags>
 														</Point>
 														<Point>
-															<XPos>998.48321</XPos>
-															<YPos>-2.45525</YPos>
+															<XPos>1098.59155</XPos>
+															<YPos>-2.35297</YPos>
 															<Flags>0</Flags>
 														</Point>
 														<Point>
@@ -2395,10 +2684,15 @@
 										<Value>10</Value>
 									</ValueList>
 								</Property>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>-1</Value>
+									</ValueList>
+								</Property>
 								<Property Name="OverridePositioning" Type="bool" Value="True"/>
 								<Property Name="Pitch" Type="int32">
 									<ValueList>
-										<Value>-300</Value>
+										<Value>-100</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
@@ -2529,8 +2823,8 @@
 							<ChildrenList>
 								<AudioFileSource Name="SFX_GrenadeExplosion" ID="{B6EC1346-19F5-47B3-94B0-41E2F3B8A5BB}">
 									<PropertyList>
-										<Property Name="FadeInDuration" Type="Real64" Value="0.0391748096474348"/>
-										<Property Name="FadeOutDuration" Type="Real64" Value="0.349011940495329"/>
+										<Property Name="FadeInDuration" Type="Real64" Value="0.0569815413053597"/>
+										<Property Name="FadeOutDuration" Type="Real64" Value="0.299153091853139"/>
 										<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
 										<Property Name="TrimEnd" Type="Real64" Value="0.815548338543187"/>
 									</PropertyList>
@@ -2562,6 +2856,7 @@
 				</RandomSequenceContainer>
 				<RandomSequenceContainer Name="SFX_BearTrap" ID="{B3EA5DAE-A012-453C-BD81-FAF1F4CF82A5}" ShortID="982717154">
 					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
 								<Value>5</Value>
@@ -2603,14 +2898,14 @@
 					<ReferenceList>
 						<Reference Name="Attenuation">
 							<Custom>
-								<Attenuation Name="Attenuation (Custom)" ID="{4F95CC2D-55A9-4D47-8512-6C380662BB4E}" ShortID="345508132">
+								<Attenuation Name="Attenuation (Custom)" ID="{F4A08A9B-8581-4E8E-BFBF-69E894FB16AD}" ShortID="406460257">
 									<PropertyList>
 										<Property Name="RadiusMax" Type="Real64" Value="1000"/>
 									</PropertyList>
 									<CurveUsageInfoList>
 										<VolumeDryUsage>
 											<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
-												<Curve Name="VolumeDry" ID="{71BC8DB4-C2C4-4E47-87C3-8D9208F2E5ED}">
+												<Curve Name="VolumeDry" ID="{6D13EAF6-869A-4503-AB50-E97F4C72FACA}">
 													<PropertyList>
 														<Property Name="Flags" Type="int32" Value="3"/>
 													</PropertyList>
@@ -2881,6 +3176,7 @@
 				</RandomSequenceContainer>
 				<Sound Name="SFX_BearTrap_Out" ID="{B06F6092-F653-4DD6-A2F9-F7D1BDEDB916}" ShortID="830677303">
 					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
 								<Value>10</Value>

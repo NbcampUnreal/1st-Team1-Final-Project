@@ -90,7 +90,7 @@
 						<Action Name="" ID="{99C1554E-6C82-410F-8563-2BCF2A7714A2}" ShortID="302038271">
 							<ReferenceList>
 								<Reference Name="Target">
-									<ObjectRef Name="SFX_StoneTrap1" ID="{74EAE0B7-683C-4013-8639-C4EED1D2E519}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+									<ObjectRef Name="SFX_StoneTrap" ID="{74EAE0B7-683C-4013-8639-C4EED1D2E519}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 								</Reference>
 							</ReferenceList>
 						</Action>

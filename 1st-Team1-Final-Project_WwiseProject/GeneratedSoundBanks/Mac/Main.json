@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{AFFAD562-9C06-2A5F-12F3-00B3CB602514}",
+    "Hash": "{E6C216CB-0F4E-375E-566B-40A4F6935871}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -21,7 +21,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsDirt2.wav",
-      "CachePath": "D0/{D051ADA0-A3EB-3244-013C-8FF6CB548A5A}.wem"
+      "CachePath": "99/{993CC13C-4FFE-E28F-A89C-BDCCE6B2663C}.wem"
      },
      {
       "Id": "120977185",
@@ -29,7 +29,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeFuse.wav",
-      "CachePath": "00/{009E3F5C-AD40-CADF-8C54-71C61830F260}.wem"
+      "CachePath": "AE/{AEED0D73-D986-2FFE-1906-E6ADA92A4C88}.wem"
      },
      {
       "Id": "157399992",
@@ -37,7 +37,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeTick.wav",
-      "CachePath": "E9/{E9FA5707-FF71-3A28-5632-AC27D02681D9}.wem"
+      "CachePath": "9D/{9D1D7430-7695-F79D-CFED-62C578CC5256}.wem"
      },
      {
       "Id": "199617062",
@@ -45,7 +45,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (1).wav",
-      "CachePath": "E0/{E051F6A9-B9D4-1234-ACBC-2DDEA78F7A02}.wem"
+      "CachePath": "3B/{3BD48A74-3BD5-6D69-2308-EFB447372CDA}.wem"
      },
      {
       "Id": "213946712",
@@ -53,7 +53,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_In1.wav",
-      "CachePath": "43/{43EF53B7-5ACE-B005-9D1E-6DDFE4175095}.wem"
+      "CachePath": "66/{66974F7A-164D-7E0A-D574-C9F4FB0DB0A6}.wem"
      },
      {
       "Id": "255360718",
@@ -61,7 +61,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsConcrete2.wav",
-      "CachePath": "AF/{AF1E6700-CFC2-9CCE-9A41-523AA946625D}.wem"
+      "CachePath": "66/{66D96B90-BFDE-563F-0F4A-F593ACC089CB}.wem"
      },
      {
       "Id": "290212776",
@@ -69,7 +69,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepMetal1.wav",
-      "CachePath": "7F/{7FFAAD2D-3ED5-736D-9226-71F3ED7639BD}.wem"
+      "CachePath": "B5/{B56770EA-C91B-BEDE-65EB-24FFF23AECD1}.wem"
      },
      {
       "Id": "313983704",
@@ -77,7 +77,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_StoneTrap1.wav",
-      "CachePath": "BE/{BEA37E39-494E-2D99-5E6E-1CE49F2CA75B}.wem"
+      "CachePath": "2B/{2B0F53DD-AA34-B0E2-993E-634F2E312EAF}.wem"
      },
      {
       "Id": "318472292",
@@ -93,7 +93,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_Out.wav",
-      "CachePath": "81/{8140753E-704C-29AA-2BC1-8787564DF964}.wem"
+      "CachePath": "CA/{CABC276B-B97B-E16F-326E-6FCE9A1E8902}.wem"
      },
      {
       "Id": "324020983",
@@ -101,7 +101,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_AxeSwing_Hit.wav",
-      "CachePath": "8E/{8E7E49E4-60D6-2AFF-36CE-1618F5F5868C}.wem"
+      "CachePath": "BE/{BEAC21E8-2467-FFCB-E459-19332BFE3CA1}.wem"
      },
      {
       "Id": "326406373",
@@ -109,7 +109,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (5).wav",
-      "CachePath": "F1/{F16E7F25-CB0E-0D4E-FB7A-B56E5E0FAC1D}.wem"
+      "CachePath": "1F/{1FAAFD5E-6C89-9AF5-B6FF-221D1EEA6992}.wem"
      },
      {
       "Id": "369007659",
@@ -125,7 +125,15 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (3).wav",
-      "CachePath": "5C/{5C2C37EB-EE94-3E50-8887-0869C59AEE8E}.wem"
+      "CachePath": "D5/{D5EBFFC5-A8DE-B20C-1BD8-FDFC0AAC4BF8}.wem"
+     },
+     {
+      "Id": "384388068",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "Footstep_Dirt4.wav",
+      "CachePath": "01/{014470E5-1196-3BB8-D1FF-91CAF3829711}.wem"
      },
      {
       "Id": "401627905",
@@ -133,16 +141,15 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepMetal2.wav",
-      "CachePath": "DB/{DBAF297B-710A-AFC0-4C66-7EB7E4E0FB17}.wem"
+      "CachePath": "AD/{AD4D9F25-573E-64EA-33EE-62B63459D909}.wem"
      },
      {
       "Id": "430856920",
       "Language": "SFX",
-      "Streaming": "true",
-      "Location": "Loose",
+      "Streaming": "false",
+      "Location": "Memory",
       "ShortName": "SFX_Axe_Swing.wav",
-      "Path": "Media/430856920.wem",
-      "CachePath": "8D/{8D39CF75-7589-421A-4FF7-B326BBC022E2}.wem"
+      "CachePath": "67/{67E740BD-34A5-F821-1B78-BBAB34304518}.wem"
      },
      {
       "Id": "434604945",
@@ -150,7 +157,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_In0.wav",
-      "CachePath": "6C/{6C139F55-EB2F-F87E-72EA-6F67BBAD6E62}.wem"
+      "CachePath": "15/{15C54224-9E2A-14C5-57AE-8FE3B524A2F8}.wem"
      },
      {
       "Id": "454704061",
@@ -158,7 +165,15 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_Hit.wav",
-      "CachePath": "8D/{8D083B54-D925-AF76-64A5-8F7449FFC4E1}.wem"
+      "CachePath": "0F/{0F307BF2-F60B-0D42-0C31-CFA4412AF1E6}.wem"
+     },
+     {
+      "Id": "518697165",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "Footstep_Dirt3.wav",
+      "CachePath": "5B/{5B1D0707-CE0B-A918-4F5F-59FC92CD05E8}.wem"
      },
      {
       "Id": "602204976",
@@ -174,7 +189,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeExplosion.wav",
-      "CachePath": "34/{34A6CAC8-2918-8C03-32F3-D9FF3BFC7728}.wem"
+      "CachePath": "12/{12D5F01D-ECA9-9DCA-9E8D-BC2ED12F3318}.wem"
      },
      {
       "Id": "655511879",
@@ -182,7 +197,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_SpikeTrap_Hit.wav",
-      "CachePath": "9F/{9FA185DC-7598-BD11-10C0-C117883D6D2D}.wem"
+      "CachePath": "55/{555E4D62-0A1D-2AE1-C8BB-90268D05BFD5}.wem"
      },
      {
       "Id": "660206576",
@@ -190,7 +205,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsDirt1.wav",
-      "CachePath": "A9/{A916246A-EB6D-550D-EB33-BCA01A350EA5}.wem"
+      "CachePath": "F0/{F0429D6D-156A-B537-E3B0-571F317092FC}.wem"
      },
      {
       "Id": "694306221",
@@ -198,7 +213,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_SpikeTrap.wav",
-      "CachePath": "7C/{7CB945AC-492D-70FB-89C9-7F9B70420F06}.wem"
+      "CachePath": "05/{05CB506B-F9D5-53BB-16FA-5E2A7051E323}.wem"
      },
      {
       "Id": "750724736",
@@ -217,12 +232,20 @@
       "CachePath": "A0/{A001BF43-841B-640B-1EA8-1CFB00C0A0D5}.wem"
      },
      {
+      "Id": "790427616",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "Footstep_Dirt5.wav",
+      "CachePath": "1D/{1D9F86BC-8E90-8A3D-464F-A3F5EE056DBD}.wem"
+     },
+     {
       "Id": "809366429",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepMetal.wav",
-      "CachePath": "A1/{A127ADB0-265A-D67F-72E6-3CBFECC6C560}.wem"
+      "CachePath": "7E/{7E6713B1-C686-A293-12EC-FBB8199D1844}.wem"
      },
      {
       "Id": "866318197",
@@ -230,7 +253,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsConcrete1.wav",
-      "CachePath": "4D/{4D2874E0-B11B-48E8-9F5A-E62D04447557}.wem"
+      "CachePath": "63/{637AF970-1DC1-7675-5581-A3DE53B30A3A}.wem"
      },
      {
       "Id": "969253722",
@@ -238,7 +261,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsConcrete.wav",
-      "CachePath": "D9/{D9D21055-E5E0-CED5-B0AF-6638BE1D3FD7}.wem"
+      "CachePath": "08/{08E8A26C-1980-27BA-5D47-66A995927DD5}.wem"
      },
      {
       "Id": "995426383",
@@ -246,7 +269,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsDirt.wav",
-      "CachePath": "B9/{B9D1A7FF-A493-0B19-EF9F-A5E6A8C3CF75}.wem"
+      "CachePath": "94/{94734605-EF63-37F3-DC1D-5A67D54BA737}.wem"
      },
      {
       "Id": "1038282182",
@@ -254,7 +277,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (4).wav",
-      "CachePath": "EC/{ECC6DBEC-610D-00F2-22FF-C2DDE0C10D7D}.wem"
+      "CachePath": "EE/{EEBAB06C-E5B0-8FA7-9B53-90F8F286F8C8}.wem"
      },
      {
       "Id": "1069660761",
@@ -262,7 +285,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (2).wav",
-      "CachePath": "85/{85899B0C-60C3-800B-F278-B3CD880C486D}.wem"
+      "CachePath": "94/{9431CA35-587F-9AF3-3C94-9B0A9546A05B}.wem"
      }
     ],
     "Plugins": {
@@ -307,9 +330,10 @@
       "Name": "FootSteps",
       "ObjectPath": "\\Events\\Default Work Unit\\FootSteps",
       "GUID": "{ACB43239-CB8C-41BC-9AC2-2E9257233BFE}",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
-      "DurationMin": "0.21141471",
-      "DurationMax": "0.8371635",
+      "DurationMin": "0.14469069",
+      "DurationMax": "0.5531195",
       "SwitchContainers": [
        {
         "SwitchValue": {
@@ -324,7 +348,16 @@
           "Id": "112081368"
          },
          {
+          "Id": "384388068"
+         },
+         {
+          "Id": "518697165"
+         },
+         {
           "Id": "660206576"
+         },
+         {
+          "Id": "790427616"
          },
          {
           "Id": "995426383"
@@ -500,8 +533,8 @@
       "GUID": "{59F8482E-4399-4E6E-B401-0432CFED7550}",
       "MaxAttenuation": "2000",
       "DurationType": "OneShot",
-      "DurationMin": "3.0468612",
-      "DurationMax": "3.104532",
+      "DurationMin": "2.9410489",
+      "DurationMax": "2.9924273",
       "MediaRefs": [
        {
         "Id": "120977185"
@@ -666,6 +699,6 @@
     ]
    }
   ],
-  "FileHash": "{EB8A2B8E-4B9D-1138-DD3E-61F081572756}"
+  "FileHash": "{EC7F0C4A-D81A-DDEE-05DD-9AA2CC96A0B6}"
  }
 }
