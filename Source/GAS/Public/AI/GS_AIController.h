@@ -18,7 +18,9 @@ public:
 	AGS_AIController();
 
 	static const FName HomePosKey;
-	static const FName TargetKey;
+	static const FName TargetActorKey;
+	static const FName RTSTargetKey;
+	static const FName bUseRTSKey;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI Perception")
 	class UAISenseConfig_Sight* SightConfig;

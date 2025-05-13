@@ -30,4 +30,7 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere)
 	UDecalComponent* SelectionDecal;
+
+	virtual void NotifyActorOnClicked(FKey ButtonPressed) override;
 };
+

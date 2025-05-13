@@ -5,8 +5,10 @@
 #include "EngineUtils.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "AI/GS_AIController.h"
 #include "AI/RTS/GS_RTSCamera.h"
 #include "AI/RTS/GS_RTSHUD.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Player/Monster/GS_Monster.h"
 
 AGS_RTSController::AGS_RTSController()
@@ -85,14 +87,13 @@ void AGS_RTSController::OnLeftMousePressed()
 	{
 		HUD->StartSelection();
 	}
-
-	/*
+	
 	FHitResult Hit;
-	bool bHit = GetHitResultUnderCursorByChannel(, true, Hit);
+	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, Hit);
 	if (!bHit)
 	{
 		ClearUnitSelection();
-	}*/
+	}
 }
 
 void AGS_RTSController::OnLeftMouseReleased()
@@ -103,8 +104,26 @@ void AGS_RTSController::OnLeftMouseReleased()
 	}
 }
 
-void AGS_RTSController::OnRightMousePressed()
+void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 {
+	FHitResult GroundHit;
+	if (!GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, GroundHit))
+	{
+		return;
+	}
+
+	FVector TargetLocation = GroundHit.Location;
+	for (AGS_Monster* Unit : UnitSelection)
+	{
+		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->SetValueAsBool(AGS_AIController::bUseRTSKey, true);
+				BlackboardComp->SetValueAsVector(AGS_AIController::RTSTargetKey, TargetLocation);
+			}
+		}
+	}
 }
 
 FVector2D AGS_RTSController::GetKeyboardDirection() const

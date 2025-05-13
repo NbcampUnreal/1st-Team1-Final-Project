@@ -35,7 +35,7 @@ public:
 	void CameraMoveEnd();
 	void OnLeftMousePressed();
 	void OnLeftMouseReleased();
-	void OnRightMousePressed();
+	void OnRightMousePressed(const FInputActionValue& InputValue);
 
 	void AddUnitToSelection(AGS_Monster* Unit);
 	void RemoveUnitFromSelection(AGS_Monster* Unit);

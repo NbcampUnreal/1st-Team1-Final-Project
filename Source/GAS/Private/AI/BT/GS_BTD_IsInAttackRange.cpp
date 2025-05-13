@@ -19,7 +19,7 @@ bool UGS_BTD_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent&
 		return false;
 	}
 	
-	AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(AGS_AIController::TargetKey));
+	AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(AGS_AIController::TargetActorKey));
 	if (!TargetActor)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[%s] No TargetActor in BB"), *GetName());

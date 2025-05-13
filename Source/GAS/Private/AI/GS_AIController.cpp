@@ -8,7 +8,9 @@
 #include "Perception/AISenseConfig_Sight.h"
 
 const FName AGS_AIController::HomePosKey(TEXT("HomePos"));
-const FName AGS_AIController::TargetKey(TEXT("Target"));
+const FName AGS_AIController::TargetActorKey(TEXT("Target"));
+const FName AGS_AIController::RTSTargetKey(TEXT("RTSTarget"));
+const FName AGS_AIController::bUseRTSKey(TEXT("bUseRTS"));
 
 AGS_AIController::AGS_AIController()
 {
@@ -50,10 +52,10 @@ void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 {
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		Blackboard->SetValueAsObject(TargetKey, Actor);
+		Blackboard->SetValueAsObject(TargetActorKey, Actor);
 	}
 	else
 	{
-		Blackboard->ClearValue(TargetKey);
+		Blackboard->ClearValue(TargetActorKey);
 	}
 }

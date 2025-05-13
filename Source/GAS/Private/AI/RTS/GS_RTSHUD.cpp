@@ -4,7 +4,6 @@
 #include "AI/RTS/GS_RTSHUD.h"
 #include "AI/RTS/GS_RTSController.h"
 #include "Character/Player/Monster/GS_Monster.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
 
 AGS_RTSHUD::AGS_RTSHUD()
 {
