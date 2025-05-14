@@ -21,6 +21,9 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
 	bool bIsDashing;
 
+	UPROPERTY(ReplicatedUsing = OnRep_IsEarthquaking)
+	bool bIsEarthquaking;
+
 	//action binding function
 	virtual void ComboAttack() override;
 
@@ -30,15 +33,12 @@ public:
 
 	virtual void UltimateSkill() override;
 
-	//dash skill
+	//[dash skill]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCDashCharacter();
 
 	UFUNCTION()
 	void DashAttackCheck();
-
-	/*UFUNCTION(Server, Reliable)
-	void ServerRPCDashAttack();*/
 
 	UFUNCTION()
 	void EndDash();
@@ -46,15 +46,24 @@ public:
 	UFUNCTION()
 	void OnRep_IsDashing();
 
+	//[earthquake skill]
+	UFUNCTION(Server, Reliable)
+	void ServerRPCEarthquake();
+
+	UFUNCTION()
+	void OnRep_IsEarthquaking();
+
 protected:
 
 private:
+	//[combo attack] 
+	
 	//[dash skill]
 	UPROPERTY()
 	TSet<AGS_Character*> DamagedCharacters;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	TObjectPtr<UAnimMontage> DashMontage;
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	TObjectPtr<UAnimMontage> DashMontage;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	TObjectPtr<UCapsuleComponent> DashAttackCapsule;
@@ -66,5 +75,7 @@ private:
 	float DashInterpAlpha;
 	float DashDuration;
 
-	//[combo attack]
+	//[earthquake]
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> EarthquakeMontage;
 };
