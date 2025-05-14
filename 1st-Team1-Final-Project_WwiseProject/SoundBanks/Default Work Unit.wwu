@@ -8,6 +8,8 @@
 						<ObjectRef Name="Props_Spike" ID="{87EFA3D2-5892-417F-A875-D06CCD556912}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_BearTrap" ID="{DCFFA37D-831E-4187-999F-FD2DB425816C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Saw_Hit" ID="{DFBB5823-D275-437F-99C5-623B934A4616}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Props_Lava" ID="{6686274F-8432-44ED-A70C-2B145099B0E2}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Props_Lava_Hit" ID="{714D3788-7B53-452D-9C66-6FC35CD86958}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_StoneWall" ID="{9C89005A-CF4E-46F0-9A26-2606EC93E64B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Axe_Hit" ID="{E6A16F60-3008-4709-B717-1D97F028AB1C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Play_waves" ID="{D4D99DFE-1AFF-4742-A8A6-B7C19192CD0A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>

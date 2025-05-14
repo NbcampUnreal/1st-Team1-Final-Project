@@ -173,6 +173,28 @@
 						</Action>
 					</ChildrenList>
 				</Event>
+				<Event Name="Props_Lava" ID="{6686274F-8432-44ED-A70C-2B145099B0E2}">
+					<ChildrenList>
+						<Action Name="" ID="{3FA96047-6D65-4E5B-9E5E-C1C90E4A3DEE}" ShortID="1068416541">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Lava" ID="{6EBCA42F-E97F-4637-82DB-0EB5CE3561B0}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_Lava_Hit" ID="{714D3788-7B53-452D-9C66-6FC35CD86958}">
+					<ChildrenList>
+						<Action Name="" ID="{449C1F91-6272-489E-AB05-785BEC9F273D}" ShortID="606897860">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Lava_Hit" ID="{0D32CFBB-A13E-4E8D-983B-9A609616FC9B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>

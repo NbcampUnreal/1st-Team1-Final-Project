@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{B36DB06E-A395-6E5F-4431-DFB528DD1F3E}",
+    "Hash": "{69C2514E-300C-5559-3E3C-8188D0C62D12}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -50,6 +50,12 @@
       "GUID": "{0539FB0A-134D-4B40-896F-3535D04BFD6D}",
       "Switches": [
        {
+        "Id": "540301611",
+        "Name": "Lava",
+        "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Lava",
+        "GUID": "{9FA661EF-9442-48F6-B069-7B4141D21DE5}"
+       },
+       {
         "Id": "1216965916",
         "Name": "Stone",
         "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Stone",
@@ -78,6 +84,6 @@
     ]
    }
   ],
-  "FileHash": "{C3BBB737-C09D-F8AA-BCC6-6779CEF6F18E}"
+  "FileHash": "{79162D68-DE98-27A8-CA45-36E5E3A5BC5A}"
  }
 }
