@@ -3,6 +3,8 @@
 // Sets default values
 AGS_Weapon::AGS_Weapon()
 {
+	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMeshComponent"));
+	RootComponent = WeaponMeshComponent;
 	// Set this actor to call Tick() every frame.
 	PrimaryActorTick.bCanEverTick = true;
 }

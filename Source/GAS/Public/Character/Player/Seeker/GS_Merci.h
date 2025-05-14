@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GS_Seeker.h"
+#include "Character/Interface/AttackInterface.h"
 #include "GS_Merci.generated.h"
 
 UCLASS()
-class GAS_API AGS_Merci : public AGS_Seeker
+class GAS_API AGS_Merci : public AGS_Seeker, public IAttackInterface
 {
 	GENERATED_BODY()
 
@@ -18,8 +19,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	// Attack Interface
+	virtual void LeftClickPressed_Implementation() override;
+	virtual void LeftClickRelease_Implementation() override;
 
 protected:
 	// Called when the game starts or when spawned

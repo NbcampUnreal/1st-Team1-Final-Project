@@ -21,6 +21,9 @@ public:
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "CharacterState", meta = (BlueprintThreadSate))
+	bool IsCharacterAimming();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	TObjectPtr<AGS_Character> OwnerCharacter;

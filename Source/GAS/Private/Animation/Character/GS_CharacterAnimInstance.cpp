@@ -2,6 +2,8 @@
 
 
 #include "Animation/Character/GS_CharacterAnimInstance.h"
+
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 void UGS_CharacterAnimInstance::SetOwnerCharacter(AGS_Character* Character)
@@ -23,4 +25,17 @@ void UGS_CharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		const FVector Velocity = OwnerCharacterMovement->Velocity;
 		GroundSpeed = Velocity.Size2D();
 	}
+}
+
+bool UGS_CharacterAnimInstance::IsCharacterAimming()
+{
+	if (OwnerCharacter)
+	{
+		AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter);
+		if (Seeker)
+		{
+			return Seeker->GetAimState();
+		}
+	}
+	return false;
 }

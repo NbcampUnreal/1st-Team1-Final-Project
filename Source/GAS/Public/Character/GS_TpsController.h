@@ -31,17 +31,22 @@ public:
 	UInputAction* WalkToggleAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* LClickAction;
+	UInputAction* LAttackAction; // Left Click
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* RClickAction;
+	UInputAction* RAttackAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* LCAttackAction; // Left + Ctrl Click
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* LCtrlAction;
+	UInputAction* RCAttackAction;
 
 	void Move(const FInputActionValue& InputValue);
 	void Look(const FInputActionValue& InputValue);
 	void WalkToggle(const FInputActionValue& InputValue);
+	void LAttackPressed(const FInputActionValue& InputValue);
+	void LAttackRelease(const FInputActionValue& InputValue);
 
 protected:
 	virtual void BeginPlay() override;

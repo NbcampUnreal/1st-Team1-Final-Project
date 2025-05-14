@@ -6,6 +6,8 @@
 #include "GS_Seeker.h"
 #include "GS_Ares.generated.h"
 
+class AGS_Weapon;
+
 UCLASS()
 class GAS_API AGS_Ares : public AGS_Seeker
 {

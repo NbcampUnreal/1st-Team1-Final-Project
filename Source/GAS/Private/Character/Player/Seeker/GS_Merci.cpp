@@ -24,9 +24,21 @@ void AGS_Merci::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-// Called to bind functionality to input
-void AGS_Merci::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AGS_Merci::LeftClickPressed_Implementation()
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	IAttackInterface::LeftClickPressed_Implementation();
+
+	if(GetAttackMode() == ESeekerAttackMode::NonAttackMode)
+	{
+		SetAttackMode(ESeekerAttackMode::AimAttackMode);
+	}
+	SetAimState(true);
+}
+
+void AGS_Merci::LeftClickRelease_Implementation()
+{
+	IAttackInterface::LeftClickRelease_Implementation();
+
+	SetAimState(false);
 }
 
