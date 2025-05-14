@@ -10,11 +10,19 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{9F7CB333-7549-2EC0-9054-90215EDCA318}",
+    "Hash": "{88EA713A-713C-2EBF-1F42-43F1569F6FFC}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
     "Media": [
+     {
+      "Id": "5171484",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ArrowImpactWood_BW.54281.wav",
+      "CachePath": "D1/{D19BAAB3-D9BB-6BC8-D8A5-A250FF54720B}.wem"
+     },
      {
       "Id": "46724587",
       "Language": "SFX",
@@ -160,6 +168,14 @@
       "CachePath": "55/{559E03B1-4932-EBDC-CFF5-88FD3CA8B894}.wem"
      },
      {
+      "Id": "373316616",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_Arrow_Realse.wav",
+      "CachePath": "9C/{9C7DC015-FDAB-FFE3-AD86-081070741DAF}.wem"
+     },
+     {
       "Id": "377837800",
       "Language": "SFX",
       "Streaming": "false",
@@ -256,12 +272,28 @@
       "CachePath": "B7/{B7A60FA2-8632-2B7F-20A9-AB463C96761A}.wem"
      },
      {
+      "Id": "689500474",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ArrowImpactBody_BW.54264.wav",
+      "CachePath": "70/{704C3AB1-5A74-9917-C973-418E98BED500}.wem"
+     },
+     {
       "Id": "694306221",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_SpikeTrap.wav",
       "CachePath": "05/{05CB506B-F9D5-53BB-16FA-5E2A7051E323}.wem"
+     },
+     {
+      "Id": "710539305",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ArrowBy_BW.54273.wav",
+      "CachePath": "F2/{F2FE4698-49F6-EBE9-B9AC-F0D734732F5B}.wem"
      },
      {
       "Id": "750724736",
@@ -363,6 +395,14 @@
     "Plugins": {
      "Custom": [
       {
+       "Id": "5204649",
+       "Name": "Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_Arrow_By\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "GUID": "{AFAA64B4-BCA6-414C-AB98-3F33A17A2102}",
+       "LibName": "Wwise Time Stretch",
+       "LibId": "8519683"
+      },
+      {
        "Id": "188849779",
        "Name": "Time Stretch (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\FootSteps\\Grass\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
@@ -394,9 +434,91 @@
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
       }
+     ],
+     "ShareSets": [
+      {
+       "Id": "2805769450",
+       "Name": "Special_Effect_1",
+       "ObjectPath": "\\Effects\\Factory Effects\\Flanger\\Special_Effect_1",
+       "GUID": "{83317D8A-9D4C-438E-BE8C-BC7D27CAD1B0}",
+       "LibName": "Wwise Flanger",
+       "LibId": "8192003"
+      }
      ]
     },
     "Events": [
+     {
+      "Id": "3432958693",
+      "Name": "EV_ArrowBy",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowBy",
+      "GUID": "{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}",
+      "MaxAttenuation": "250",
+      "DurationType": "OneShot",
+      "DurationMin": "0.8015838",
+      "DurationMax": "0.8015838",
+      "MediaRefs": [
+       {
+        "Id": "710539305"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "5204649"
+        }
+       ],
+       "ShareSets": [
+        {
+         "Id": "2805769450"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "598060403",
+      "Name": "EV_ArrowImpact_Body",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Body",
+      "GUID": "{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}",
+      "MaxAttenuation": "300",
+      "DurationType": "OneShot",
+      "DurationMin": "0.33827296",
+      "DurationMax": "0.3583877",
+      "MediaRefs": [
+       {
+        "Id": "689500474"
+       }
+      ]
+     },
+     {
+      "Id": "2999099924",
+      "Name": "EV_ArrowImpact_Wood",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Wood",
+      "GUID": "{5AF6D827-D199-47C8-9BED-CC9DB12DEE69}",
+      "MaxAttenuation": "300",
+      "DurationType": "OneShot",
+      "DurationMin": "1.1009582",
+      "DurationMax": "1.1664246",
+      "MediaRefs": [
+       {
+        "Id": "5171484"
+       }
+      ]
+     },
+     {
+      "Id": "898284890",
+      "Name": "EV_ArrowRealse",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowRealse",
+      "GUID": "{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "1.6107165",
+      "DurationMax": "1.6200471",
+      "MediaRefs": [
+       {
+        "Id": "373316616"
+       }
+      ]
+     },
      {
       "Id": "2385628198",
       "Name": "FootSteps",
@@ -836,6 +958,6 @@
     ]
    }
   ],
-  "FileHash": "{2AEF063D-FBBC-BF34-1564-6D3C61CFDF43}"
+  "FileHash": "{50464197-E763-CCC3-D577-6CCF4A8CCA0F}"
  }
 }

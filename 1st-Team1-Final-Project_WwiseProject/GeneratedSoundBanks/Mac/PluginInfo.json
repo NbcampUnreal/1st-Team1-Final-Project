@@ -4,6 +4,13 @@
   "BasePlatform": "Mac",
   "PluginLibs": [
    {
+    "LibName": "Wwise Flanger",
+    "LibId": "8192003",
+    "Type": "Effect",
+    "DLL": "AkFlanger",
+    "StaticLib": "AkFlangerFX"
+   },
+   {
     "LibName": "Wwise Time Stretch",
     "LibId": "8519683",
     "Type": "Effect",
@@ -21,6 +28,6 @@
     "Type": "AudioDevice"
    }
   ],
-  "FileHash": "{2BEE8A7A-6C07-12A4-6921-B3B9DD03038D}"
+  "FileHash": "{9DCAD7AD-495F-F25A-940B-7790C6BA577B}"
  }
 }
