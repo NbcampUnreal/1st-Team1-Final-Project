@@ -52,6 +52,7 @@ public:
 	//Wants To Move
 	UPROPERTY(BlueprintReadWrite, Category = "Movement")
 	FCharacterWantsToMove WantsToMove;
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	

@@ -2,10 +2,26 @@
 
 #include "Character/GS_Character.h"
 
+#include "Net/UnrealNetwork.h"
+
 UGS_StatComp::UGS_StatComp()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
+	SetIsReplicatedByDefault(true);
+}
+
+void UGS_StatComp::BeginPlay()
+{
+	Super::BeginPlay();
+
+}
+
+void UGS_StatComp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);	
+
+	DOREPLIFETIME(ThisClass, CurrentHealth);
 }
 
 void UGS_StatComp::InitStat()
@@ -18,11 +34,12 @@ void UGS_StatComp::UpdateStat()
 	//update stats by rune system
 }
 
-float UGS_StatComp::CalculateDamage(AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
+float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
 {
 	float Damage = 0.f;
 	float DamagedCharacterDefense = InDamagedCharacter->GetStatComp()->GetDefense();
-	Damage = (AttackPower * InSkillCoefficient) * (100.f / 100.f + SlopeCoefficient * DamagedCharacterDefense);
+	float DamageCauserAttack = InDamageCauser->GetStatComp()->GetAttackPower();
+	Damage = (DamageCauserAttack * InSkillCoefficient) * (100.f / 100.f + SlopeCoefficient * DamagedCharacterDefense);
 
 	return Damage;
 }
@@ -91,11 +108,11 @@ void UGS_StatComp::SetAttackSpeed(float InAttackSpeed)
 	AttackSpeed = InAttackSpeed;
 }
 
-void UGS_StatComp::BeginPlay()
+void UGS_StatComp::OnRep_CurrentHealth()
 {
-	Super::BeginPlay();
-
+	OnCurrentHPChanged.Broadcast(CurrentHealth);
 }
+
 
 
 

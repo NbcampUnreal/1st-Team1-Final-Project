@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GS_EnumUtils.h"
 #include "GS_ArcaneBoardTypes.generated.h"
 
 UENUM(BlueprintType)

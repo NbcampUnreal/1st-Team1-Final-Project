@@ -12,10 +12,19 @@ class GAS_API AGS_Drakhar : public AGS_Guardian
 	
 public:
 	AGS_Drakhar();
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	//variables
+	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
+	bool bIsDashing;
 
+	UPROPERTY(ReplicatedUsing = OnRep_IsEarthquaking)
+	bool bIsEarthquaking;
+
+	//action binding function
 	virtual void ComboAttack() override;
 
 	virtual void Skill1() override;
@@ -24,24 +33,49 @@ public:
 
 	virtual void UltimateSkill() override;
 
-	//dash skill
+	//[dash skill]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCDashCharacter();
 
 	UFUNCTION()
-	void EndDash();
+	void DashAttackCheck();
 
-	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
-	bool bIsDashing;
+	UFUNCTION()
+	void EndDash();
 
 	UFUNCTION()
 	void OnRep_IsDashing();
 
+	//[earthquake skill]
+	UFUNCTION(Server, Reliable)
+	void ServerRPCEarthquake();
+
+	UFUNCTION()
+	void OnRep_IsEarthquaking();
+
 protected:
 
 private:
-	float DashPower;
+	//[combo attack] 
+	
+	//[dash skill]
+	UPROPERTY()
+	TSet<AGS_Character*> DamagedCharacters;
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	TObjectPtr<UAnimMontage> DashMontage;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* DashMontage;
+	TObjectPtr<UCapsuleComponent> DashAttackCapsule;
+
+	FVector DashStartLocation;
+	FVector DashEndLocation;
+
+	float DashPower;
+	float DashInterpAlpha;
+	float DashDuration;
+
+	//[earthquake]
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> EarthquakeMontage;
 };

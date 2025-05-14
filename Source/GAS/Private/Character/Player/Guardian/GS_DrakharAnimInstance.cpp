@@ -2,6 +2,7 @@
 
 
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 
 UGS_DrakharAnimInstance::UGS_DrakharAnimInstance()
@@ -31,12 +32,28 @@ void UGS_DrakharAnimInstance::PlayDashMontage()
 	}
 }
 
+void UGS_DrakharAnimInstance::StopDashMontage()
+{
+	if (DashMontage)
+	{
+		Montage_Stop(0.2f, DashMontage);
+	}
+}
+
+void UGS_DrakharAnimInstance::PlayEarthquakeMontage()
+{
+	if (EarthquakeMontage)
+	{
+		Montage_Play(EarthquakeMontage, 1.f);
+	}
+}
+
 
 void UGS_DrakharAnimInstance::AnimNotify_AttackHitCheck()
 {
 	OnAttackHitCheck.Broadcast();
 
-	AActor* Owner = GetOwningActor();
+	/*AActor* Owner = GetOwningActor();
 	if (IsValid(Owner))
 	{
 		AGS_Guardian* Guardian = Cast<AGS_Guardian>(Owner);
@@ -44,7 +61,7 @@ void UGS_DrakharAnimInstance::AnimNotify_AttackHitCheck()
 		{
 			Guardian->MeleeAttackCheck();
 		}
-	}
+	}*/
 }
 
 void UGS_DrakharAnimInstance::AnimNotify_NextAttackCheck()
@@ -54,13 +71,26 @@ void UGS_DrakharAnimInstance::AnimNotify_NextAttackCheck()
 
 void UGS_DrakharAnimInstance::AnimNotify_DashHitCheck()
 {
-	AActor* Owner = GetOwningActor();
+	/*AActor* Owner = GetOwningActor();
 	if (IsValid(Owner))
 	{
 		AGS_Guardian* Guardian = Cast<AGS_Guardian>(Owner);
 		if (IsValid(Guardian))
 		{
 			Guardian->MeleeAttackCheck();
+		}
+	}*/
+}
+
+void UGS_DrakharAnimInstance::AnimNotify_EarthquakeCheck()
+{
+	AActor* Owner = GetOwningActor();
+	if (IsValid(Owner))
+	{
+		AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner);
+		if (IsValid(Drakhar))
+		{
+			Drakhar->ServerRPCEarthquake();
 		}
 	}
 }

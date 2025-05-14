@@ -15,14 +15,19 @@ public:
 	UGS_DrakharAnimInstance();
 
 	//combo attack
-	void PlayAttackMontage();
-	void JumpToAttackMontageSection(int32 NewSection);
-
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate  OnAttackHitCheck;
 
-	//dash 
+	//combo attack
+	void PlayAttackMontage();
+	void JumpToAttackMontageSection(int32 NewSection);
+
+	//dash skill
 	void PlayDashMontage();
+	void StopDashMontage();
+
+	//earthquake
+	void PlayEarthquakeMontage();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
@@ -30,6 +35,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* DashMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* EarthquakeMontage;
+
+	//dash skill
+	//float DashMontageDuration;
 
 	UFUNCTION()
 	void AnimNotify_AttackHitCheck();
@@ -39,6 +50,9 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_DashHitCheck();
+
+	UFUNCTION()
+	void AnimNotify_EarthquakeCheck();
 
 	FName GetAttackMontageSectionName(int32 Section);
 };
