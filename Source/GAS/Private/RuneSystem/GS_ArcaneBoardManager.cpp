@@ -6,66 +6,207 @@
 
 UGS_ArcaneBoardManager::UGS_ArcaneBoardManager()
 {
+	//기본 초기화
 	CurrClass = ECharacterClass::Ares;
+	PlacedRunes.Empty();
+	AppliedStatEffects = FCharacterStats();
+	CurrStatEffects = FCharacterStats();
 	CurrGridLayout = nullptr;
 
+	// 데이터 테이블은 ArcaneBoardLPS에서 설정
 	RuneTable = nullptr;
 	GridLayoutTable = nullptr;
 }
 
 bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
 {
-	CurrClass = NewClass;
-
-	//캐시된 그리드 레이아웃이 있는지 확인
-	if (GridLayoutCache.Contains(NewClass))
+	if (CurrClass == NewClass && IsValid(CurrGridLayout))
 	{
-		CurrGridLayout = GridLayoutCache[NewClass];
 		return true;
 	}
 
-	//캐시에 없으면 그리드 레이아웃 데이터 로드
-	if (GridLayoutTable)
+	if (!GridLayoutCache.Contains(NewClass))
 	{
-		FString RowName = UGS_EnumUtils::GetEnumAsString(NewClass);
-		FGridLayoutTableRow* LayoutRow = GridLayoutTable->FindRow<FGridLayoutTableRow>(*RowName, TEXT("SetCurrClass"));
-
-		if (LayoutRow && LayoutRow->GridLayoutAsset.IsValid())
+		//캐시에 없으면 데이터 테이블에서 직접 로드
+		if (IsValid(GridLayoutTable))
 		{
-			//그리드 레이아웃 에셋 로드 및 캐싱
-			UGS_GridLayoutDataAsset* LayoutAsset = LayoutRow->GridLayoutAsset.LoadSynchronous();
-			if (LayoutAsset)
+			FString RowName = UGS_EnumUtils::GetEnumAsString(NewClass);
+			FGridLayoutTableRow* LayoutRow = GridLayoutTable->FindRow<FGridLayoutTableRow>(*RowName, TEXT("SetCurrClass"));
+
+			if (LayoutRow && !LayoutRow->GridLayoutAsset.IsNull())
 			{
-				GridLayoutCache.Add(NewClass, LayoutAsset);
-				CurrGridLayout = LayoutAsset;
-				return true;
+				UGS_GridLayoutDataAsset* LayoutAsset = LayoutRow->GridLayoutAsset.LoadSynchronous();
+				if (LayoutAsset)
+				{
+					GridLayoutCache.Add(NewClass, LayoutAsset);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Error, TEXT("그리드 레이아웃 에셋 로드 실패: %s"), *RowName);
+					return false;
+				}
 			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("그리드 레이아웃 데이터 없음: %s"), *RowName);
+				return false;
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("GridLayoutTable이 유효하지 않음"));
+			return false;
 		}
 	}
 
-	//레이아웃을 찾지 못했거나 로드에 실패한 경우
-	CurrGridLayout = nullptr;
-	return false;
+	CurrClass = NewClass;
+	CurrGridLayout = GridLayoutCache[NewClass];
+
+	InitGridState();
+
+	bHasUnsavedChanges = false;
+
+	CurrStatEffects = FCharacterStats();
+	AppliedStatEffects = FCharacterStats();
+
+	//후에 저장된 룬 배치 로드해야 함
+
+	return true;
 }
 
 bool UGS_ArcaneBoardManager::CanPlaceRuneAt(int32 RuneID, const FIntPoint& Pos)
 {
-	return false;
+	//룬 데이터 로드
+	FRuneTableRow RuneData;
+	if (!GetRuneData(RuneID, RuneData))
+	{
+		return false;
+	}
+
+	//룬이 차지하는 모든 셀 확인
+	for (const FIntPoint& Offset : RuneData.RuneShape)
+	{
+		FIntPoint CellPos(Pos.X + Offset.X, Pos.Y + Offset.Y);
+
+		if (!IsValidCell(CellPos))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 bool UGS_ArcaneBoardManager::PlaceRune(int32 RuneID, const FIntPoint& Pos)
 {
-	return false;
+	if (!CanPlaceRuneAt(RuneID, Pos))
+	{
+		return false;
+	}
+
+	FRuneTableRow RuneData;
+	if (!GetRuneData(RuneID, RuneData))
+	{
+		return false;
+	}
+
+	//룬 배치 정보 저장
+	FPlacedRuneInfo NewRune(RuneID, Pos);
+	PlacedRunes.Add(NewRune);
+
+	//셀 상태 업데이트
+	for (const FIntPoint& Offset : RuneData.RuneShape)
+	{
+		FIntPoint CellPos(Pos.X + Offset.X, Pos.Y + Offset.Y);
+		UpdateCellState(CellPos, EGridCellState::Occupied, RuneID);
+	}
+
+	bHasUnsavedChanges = true;
+
+	CurrStatEffects = CalculateStatEffects();
+
+	//스탯창 UI 업데이트 이벤트 호출
+	OnStatsChanged.Broadcast(CurrStatEffects);
+
+	return true;
 }
 
 bool UGS_ArcaneBoardManager::RemoveRune(int32 RuneID)
 {
+	//배치된 룬 목록에서 해당 룬 찾기
+	int32 RuneIndex = INDEX_NONE;
+	for (int32 i = 0; i < PlacedRunes.Num(); ++i)
+	{
+		if (PlacedRunes[i].RuneID == RuneID)
+		{
+			RuneIndex = i;
+			break;
+		}
+	}
+
+	if (RuneID == INDEX_NONE)
+	{
+		return false;
+	}
+
+	FRuneTableRow RuneData;
+	if (!GetRuneData(RuneID, RuneData))
+	{
+		return false;
+	}
+
+	FIntPoint RunePos = PlacedRunes[RuneIndex].Pos;
+	for (const FIntPoint& Offset : RuneData.RuneShape)
+	{
+		FIntPoint CellPos(RunePos.X + Offset.X, RunePos.X + Offset.X);
+		UpdateCellState(CellPos, EGridCellState::Empty);
+	}
+
+	PlacedRunes.RemoveAt(RuneIndex);
+
+	bHasUnsavedChanges = true;
+
+	CurrStatEffects = CalculateStatEffects();
+
+	//스탯창 UI 업데이트 이벤트 호출
+	OnStatsChanged.Broadcast(CurrStatEffects);
+
 	return false;
 }
 
-TMap<FName, float> UGS_ArcaneBoardManager::CalculateStatEffects()
+FCharacterStats UGS_ArcaneBoardManager::CalculateStatEffects()
 {
-	return TMap<FName, float>();
+	FCharacterStats Result;
+
+	for (const FPlacedRuneInfo& Rune : PlacedRunes)
+	{
+		FRuneTableRow RuneData;
+		if (GetRuneData(Rune.RuneID, RuneData))
+		{
+			if (RuneData.FStatEffect.StatName == FName("MaxHP"))
+			{
+				Result.MaxHP += RuneData.FStatEffect.Value;
+			}
+			else if (RuneData.FStatEffect.StatName == FName("ATK"))
+			{
+				Result.ATK += RuneData.FStatEffect.Value;
+			}
+			else if (RuneData.FStatEffect.StatName == FName("DEF"))
+			{
+				Result.DEF += RuneData.FStatEffect.Value;
+			}
+			else if (RuneData.FStatEffect.StatName == FName("AGL"))
+			{
+				Result.AGL += RuneData.FStatEffect.Value;
+			}
+			else if (RuneData.FStatEffect.StatName == FName("ATS"))
+			{
+				Result.ATS += RuneData.FStatEffect.Value;
+			}
+		}
+	}
+
+	return Result;
 }
 
 void UGS_ArcaneBoardManager::ApplyChanges()
@@ -76,7 +217,7 @@ void UGS_ArcaneBoardManager::ResetAllRune()
 {
 }
 
-void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes, const TMap<FName, float>& Stats)
+void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes, const FCharacterStats& Stats)
 {
 }
 
@@ -90,7 +231,7 @@ bool UGS_ArcaneBoardManager::GetRuneData(int32 RuneID, FRuneTableRow& OutData)
 	}
 
 	//캐시에 없으면 테이블에서 찾기
-	if (RuneTable)
+	if (IsValid(RuneTable))
 	{
 		FString RowName = FString::FromInt(RuneID);
 		FRuneTableRow* FoundRow = RuneTable->FindRow<FRuneTableRow>(*RowName, TEXT("GetRuneData"));
@@ -114,25 +255,14 @@ UGS_GridLayoutDataAsset* UGS_ArcaneBoardManager::GetCurrGridLayout() const
 
 bool UGS_ArcaneBoardManager::IsValidCell(const FIntPoint& Pos)
 {
-	if (!CurrGridLayout)
+	if (!IsValid(CurrGridLayout))
 	{
 		return false;
 	}
 
-	//그리드 범위 밖이면 무효
-	if (Pos.X < 0 || Pos.X >= CurrGridLayout->GridSize.X ||
-		Pos.Y < 0 || Pos.Y >= CurrGridLayout->GridSize.Y)
+	if (CurrGridState.Contains(Pos))
 	{
-		return false;
-	}
-
-	//해당 위치가 유효한 셀인지 확인
-	for (const FGridCellData& Cell : CurrGridLayout->GridCells)
-	{
-		if (Cell.Pos == Pos && Cell.State != EGridCellState::Locked)
-		{
-			return true;
-		}
+		return CurrGridState[Pos].State == EGridCellState::Empty;
 	}
 
 	return false;
@@ -144,55 +274,75 @@ void UGS_ArcaneBoardManager::InitDataCache()
 	GridLayoutCache.Empty();
 
 	//룬 데이터 캐싱
-	if (RuneTable)
+	if (IsValid(RuneTable))
 	{
-		TArray<FName> RowNames = RuneTable->GetRowNames();
-		for (const FName& RowName : RowNames)
+		TArray<FRuneTableRow*> RuneRows;
+		RuneTable->GetAllRows<FRuneTableRow>(TEXT("InitDataCache"), RuneRows);
+
+		for (FRuneTableRow* Row : RuneRows)
 		{
-			FRuneTableRow* Row = RuneTable->FindRow<FRuneTableRow>(RowName, TEXT("InitDataCache"));
 			if (Row)
 			{
-				int32 RuneID = FCString::Atoi(*RowName.ToString());
-				if (RuneID > 0)
-				{
-					RuneDataCache.Add(RuneID, *Row);
-				}
+				RuneDataCache.Add(Row->RuneID, *Row);
 			}
 		}
 	}
 
 	//그리드 레이아웃 캐싱
-	if (GridLayoutTable)
+	if (IsValid(GridLayoutTable))
 	{
-		TArray<FName> RowNames = GridLayoutTable->GetRowNames();
-		for (const FName& RowName : RowNames)
+		TArray<FGridLayoutTableRow*> GridRows;
+		GridLayoutTable->GetAllRows<FGridLayoutTableRow>(TEXT("InitDataCache"), GridRows);
+
+		for (FGridLayoutTableRow* Row : GridRows)
 		{
-			FGridLayoutTableRow* Row = GridLayoutTable->FindRow<FGridLayoutTableRow>(RowName, TEXT("InitDataCache"));
-			if (Row && Row->GridLayoutAsset.IsValid())
+			if (Row && !Row->GridLayoutAsset.IsNull())
 			{
-				UGS_GridLayoutDataAsset* Asset = Row->GridLayoutAsset.LoadSynchronous();
-				if (Asset)
+				UGS_GridLayoutDataAsset* LoadedAsset = Row->GridLayoutAsset.LoadSynchronous();
+				if (LoadedAsset)
 				{
-					int EnumCnt = UGS_EnumUtils::GetEnumCount<ECharacterClass>();
-					for (int32 i = 0; i < EnumCnt; i++)
-					{
-						ECharacterClass Class = static_cast<ECharacterClass>(i);
-						FString EnumStr = TEXT("ECharacterClass::") + UGS_EnumUtils::GetEnumAsString(Class);
-						
-						if (RowName.ToString() == EnumStr)
-						{
-							GridLayoutCache.Add(Class, Asset);
-							break;
-						}
-					}
+					GridLayoutCache.Add(LoadedAsset->CharacterClass, LoadedAsset);
 				}
 			}
 		}
 	}
 
-	if (GridLayoutCache.Contains(CurrClass))
+	//초기 클래스 설정
+	SetCurrClass(CurrClass);
+}
+
+void UGS_ArcaneBoardManager::InitGridState()
+{
+	CurrGridState.Empty();
+
+	if (IsValid(CurrGridLayout))
 	{
-		CurrGridLayout = GridLayoutCache[CurrClass];
+		for (const FGridCellData& Cell : CurrGridLayout->GridCells)
+		{
+			FGridCellData NewCell = Cell;
+			if (NewCell.State == EGridCellState::Empty)
+			{
+				NewCell.PlacedRuneID = 0;
+			}
+			CurrGridState.Add(Cell.Pos, NewCell);
+		}
+	}
+}
+
+void UGS_ArcaneBoardManager::UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID)
+{
+	if (CurrGridState.Contains(Pos))
+	{
+		CurrGridState[Pos].State = NewState;
+
+		if (NewState == EGridCellState::Occupied)
+		{
+			CurrGridState[Pos].PlacedRuneID = RuneID;
+		}
+		else
+		{
+			CurrGridState[Pos].PlacedRuneID = 0;
+		}
 	}
 }
 
@@ -216,4 +366,9 @@ bool UGS_ArcaneBoardManager::AreRunesAdjacent(const FPlacedRuneInfo& Rune1, cons
 
 void UGS_ArcaneBoardManager::ApplySpecialCellBonus(TMap<FName, float>& StatEffects)
 {
+}
+
+bool UGS_ArcaneBoardManager::HasActualChanges() const
+{
+	return false;
 }
