@@ -1,4 +1,4 @@
-﻿// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -25,7 +25,7 @@ public:
     UGS_ArcaneBoardManager* BoardManager;
 
     UPROPERTY()
-    TMap<FName, float> CalculatedStats;
+    FCharacterStats RuneSystemStats;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void ShowArcaneBoardUI();
@@ -34,18 +34,30 @@ public:
     void HideArcaneBoardUI();
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    bool TryCloseArcaneBoardUI();
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void UpdateStatsUI();
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void ApplyBoardChanges();
+
+    UFUNCTION()
+    void OnBoardStatsChanged(const FCharacterStats& NewStats);
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void SaveBoardConfig();
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void LoadPerkConfig();
+    void LoadBoardConfig();
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void UpdateCharacterStats();
 
 private:
+    UPROPERTY()
+    UUserWidget* CurrentBoardWidget;
+
     UPROPERTY()
     TSubclassOf<UUserWidget> ArcaneBoardWidgetClass;
 
