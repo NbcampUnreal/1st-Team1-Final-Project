@@ -30,3 +30,8 @@ void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+FCharacterWantsToMove AGS_Player::GetWantsToMove()
+{
+	return WantsToMove;
+}
+

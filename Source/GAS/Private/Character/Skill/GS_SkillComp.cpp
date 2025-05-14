@@ -2,16 +2,57 @@
 
 
 #include "Character/Skill/GS_SkillComp.h"
+#include "Character/GS_Character.h"
+#include "Character/Skill/GS_SkillBase.h"
+#include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
+#include "Character/Skill/Seeker/Chan/GS_ChanMovingSkill.h"
+#include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
 
 
 // Sets default values for this component's properties
 UGS_SkillComp::UGS_SkillComp()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
+}
 
-	// ...
+void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Skill TryActiveSkill"));
+	if (!bCanUseSkill)
+	{
+		return;
+	}
+
+	if (GetOwnerRole() < ROLE_Authority)
+	{
+		Server_TryActiveSkill(Slot);
+		return;
+	}
+
+	if (SkillMap.Contains(Slot))
+	{
+		UGS_SkillBase* Skill = SkillMap[Slot];
+		if (Skill && Skill->CanActive())
+		{
+			Skill->ActiveSkill();
+		}
+	}
+}
+
+void UGS_SkillComp::SetSkill(ESkillSlot Slot, TSubclassOf<UGS_SkillBase> SkillClass)
+{
+	if (!SkillClass) return;
+
+	UGS_SkillBase* Skill = NewObject<UGS_SkillBase>(this, SkillClass);
+	if (!Skill) return;
+
+	Skill->InitSkill(Cast<AGS_Character>(GetOwner()));
+	SkillMap.Add(Slot, Skill);
+}
+
+void UGS_SkillComp::SetCanUseSkill(bool InCanUseSkill)
+{
+	bCanUseSkill = InCanUseSkill;
 }
 
 
@@ -19,17 +60,24 @@ UGS_SkillComp::UGS_SkillComp()
 void UGS_SkillComp::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
+	SetIsReplicated(true);
+	InitSkills();
 }
 
-
-// Called every frame
-void UGS_SkillComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UGS_SkillComp::Server_TryActiveSkill_Implementation(ESkillSlot Slot)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	TryActivateSkill(Slot);
+}
 
-	// ...
+void UGS_SkillComp::InitSkills()
+{
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	if (!OwnerCharacter) return;
+
+	// Test용 방패병 클래스 설정
+	// Todo : 나중에는 클래스별로 다르게
+	SetSkill(ESkillSlot::Aiming, UGS_ChanAimingSkill::StaticClass());
+	SetSkill(ESkillSlot::Moving, UGS_ChanMovingSkill::StaticClass());
+	SetSkill(ESkillSlot::Ultimate, UGS_ChanUltimateSkill::StaticClass());
 }
 

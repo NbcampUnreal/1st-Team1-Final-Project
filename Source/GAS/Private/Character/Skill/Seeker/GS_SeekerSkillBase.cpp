@@ -8,11 +8,11 @@ void UGS_SeekerSkillBase::ActiveSkill()
 	Super::ActiveSkill();
 }
 
-void UGS_SeekerSkillBase::ApplyEffectToBoss(AActor* Target)
+void UGS_SeekerSkillBase::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
 }
 
-void UGS_SeekerSkillBase::ApplyEffectToDungeonMonster(AActor* Target)
+void UGS_SeekerSkillBase::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
 }
 
