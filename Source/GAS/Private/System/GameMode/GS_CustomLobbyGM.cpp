@@ -15,9 +15,6 @@ void AGS_CustomLobbyGM::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-    AGS_CustomLobbyPC* PC = Cast<AGS_CustomLobbyPC>(NewPlayer);
-    PC->fdsa();
-
 	AGS_PlayerState* PS = NewPlayer->GetPlayerState<AGS_PlayerState>();
 	if (PS)
 	{
