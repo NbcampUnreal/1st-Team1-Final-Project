@@ -11,6 +11,22 @@ class UGS_DebuffComp;
 class UGS_HPTextWidgetComp;
 class UGS_HPText;
 
+
+UENUM(BlueprintType)
+enum class ECharacterType : uint8
+{
+	Ares,
+	Chan,
+	Merci,
+	Reina,
+	SmallClaw,
+	NeedleFang,
+	IronFang,
+	ShadowFang,
+	StoneClaw
+};
+
+
 UCLASS()
 class GAS_API AGS_Character : public ACharacter, public IGenericTeamAgentInterface
 {
@@ -33,6 +49,11 @@ public:
 
 	//variable
 	float MaxSpeed;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	ECharacterType CharacterType;
+
+	ECharacterType GetCharacterType() const { return CharacterType; }
 
 	//getter
 	FORCEINLINE UGS_StatComp* GetStatComp() const { return StatComp; }
