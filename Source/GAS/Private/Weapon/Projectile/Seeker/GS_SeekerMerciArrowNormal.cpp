@@ -14,7 +14,7 @@ AGS_SeekerMerciArrowNormal::AGS_SeekerMerciArrowNormal()
 
 void AGS_SeekerMerciArrowNormal::BeginPlay()
 {
-
+	Super::BeginPlay();
 }
 
 void AGS_SeekerMerciArrowNormal::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)

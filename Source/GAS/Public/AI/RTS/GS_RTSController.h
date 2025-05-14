@@ -51,6 +51,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	TArray<UInputAction*> GroupKeyActions;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	TArray<UInputAction*> CameraKeyActions;
+
 	// 카메라 이동 입력 처리
 	void CameraMove(const FInputActionValue& InputValue);
 	void CameraMoveEnd();
@@ -71,6 +74,17 @@ public:
 	void OnShiftPressed(const FInputActionInstance& InputInstance);
 	void OnShiftReleased(const FInputActionInstance& InputInstance);
 	void OnGroupKey(const FInputActionInstance& InputInstance, int32 GroupIdx);
+
+	// 미니맵
+	void OnCameraKey(const FInputActionInstance& InputInstance, int32 CameraIndex);
+	
+	UFUNCTION(BlueprintCallable)
+	void MoveAIViaMinimap(const FVector& WorldLocation);
+	
+	UFUNCTION(BlueprintCallable)
+	void MoveCameraViaMinimap(const FVector& WorldLocation);
+
+	
 
 protected:
 	virtual void BeginPlay() override;
@@ -99,6 +113,12 @@ private:
 	bool bCtrlDown = false;
 	bool bShiftDown = false;
 
+	UPROPERTY()
+	TMap<int32, FVector> SavedCameraPositions; // 카메라 저장 위치
+
+	UPROPERTY(EditAnywhere, Category="UI")
+	TSubclassOf<UUserWidget> RTSWidgetClass;
+
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
 	FVector2D GetFinalDirection() const;
@@ -106,5 +126,6 @@ private:
 	void InitCameraActor();
 
 	void DoShiftClickToggle();
+
 };
 

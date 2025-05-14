@@ -15,7 +15,7 @@ public:
 	AGS_ArrowVisualActor();
 
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* ArrowMesh;
+	USkeletalMeshComponent* ArrowMesh;
 
-	void SetArrowMesh(UStaticMesh* Mesh);
+	void SetArrowMesh(USkeletalMesh* Mesh);
 };

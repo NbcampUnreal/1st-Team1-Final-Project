@@ -34,11 +34,12 @@ void UGS_StatComp::UpdateStat()
 	//update stats by rune system
 }
 
-float UGS_StatComp::CalculateDamage(AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
+float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
 {
 	float Damage = 0.f;
 	float DamagedCharacterDefense = InDamagedCharacter->GetStatComp()->GetDefense();
-	Damage = (AttackPower * InSkillCoefficient) * (100.f / 100.f + SlopeCoefficient * DamagedCharacterDefense);
+	float DamageCauserAttack = InDamageCauser->GetStatComp()->GetAttackPower();
+	Damage = (DamageCauserAttack * InSkillCoefficient) * (100.f / 100.f + SlopeCoefficient * DamagedCharacterDefense);
 
 	return Damage;
 }
