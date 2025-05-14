@@ -17,13 +17,13 @@ UGS_SkillComp::UGS_SkillComp()
 
 void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Skill TryActiveSkill"));
+	UE_LOG(LogTemp, Warning, TEXT("Skill : Skill TryActiveSkill"));
 	if (!bCanUseSkill)
 	{
 		return;
 	}
 
-	if (GetOwnerRole() < ROLE_Authority)
+	if (!GetOwner()->HasAuthority())
 	{
 		Server_TryActiveSkill(Slot);
 		return;
@@ -41,7 +41,7 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 
 void UGS_SkillComp::TrySkillCommand(ESkillSlot Slot)
 {
-	if (GetOwnerRole() < ROLE_Authority)
+	if (!GetOwner()->HasAuthority())
 	{
 		Server_TrySkillCommand(Slot);
 		return;
@@ -87,7 +87,11 @@ void UGS_SkillComp::BeginPlay()
 {
 	Super::BeginPlay();
 	SetIsReplicated(true);
-	InitSkills();
+
+	if (GetOwner()->HasAuthority())
+	{
+		InitSkills();
+	}
 }
 
 void UGS_SkillComp::Server_TryActiveSkill_Implementation(ESkillSlot Slot)
