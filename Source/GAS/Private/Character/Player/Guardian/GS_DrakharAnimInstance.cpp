@@ -9,25 +9,24 @@ UGS_DrakharAnimInstance::UGS_DrakharAnimInstance()
 {
 }
 
-void UGS_DrakharAnimInstance::PlayAttackMontage()
+void UGS_DrakharAnimInstance::PlayComboAttackMontage(int32 InCurrentComboIndex)
 {
-	if (AttackMontage)
+	if (InCurrentComboIndex >= ComboAttackMontages.Num())
 	{
-		Montage_Play(AttackMontage, 1.f);
+		return;
 	}
+	Montage_Play(ComboAttackMontages[InCurrentComboIndex], 1.f);
 }
 
-void UGS_DrakharAnimInstance::JumpToAttackMontageSection(int32 NewSection)
+void UGS_DrakharAnimInstance::StopComboAttackMontage(int32 InCurrentComboIndex)
 {
-	Montage_JumpToSection(GetAttackMontageSectionName(NewSection), AttackMontage);
+	Montage_Stop(0.2f, ComboAttackMontages[InCurrentComboIndex]);
 }
 
 void UGS_DrakharAnimInstance::PlayDashMontage()
 {
 	if (DashMontage)
 	{
-		float MontageLength = DashMontage->GetPlayLength();
-		float PlayRate = MontageLength > 0 ? MontageLength / 0.6f : 1.f;
 		Montage_Play(DashMontage, 1.f);
 	}
 }
@@ -56,25 +55,30 @@ void UGS_DrakharAnimInstance::StopEarthquakeMontage()
 	}
 }
 
-
-void UGS_DrakharAnimInstance::AnimNotify_AttackHitCheck()
+void UGS_DrakharAnimInstance::AnimNotify_ComboAttackCheckStart()
 {
-	OnAttackHitCheck.Broadcast();
-
-	/*AActor* Owner = GetOwningActor();
+	AActor* Owner = GetOwningActor();
 	if (IsValid(Owner))
 	{
-		AGS_Guardian* Guardian = Cast<AGS_Guardian>(Owner);
-		if (IsValid(Guardian))
+		AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner);
+		if (IsValid(Drakhar))
 		{
-			Guardian->MeleeAttackCheck();
+			Drakhar->ServerRPCComboAttackUpdate();
 		}
-	}*/
+	}
 }
 
-void UGS_DrakharAnimInstance::AnimNotify_NextAttackCheck()
+void UGS_DrakharAnimInstance::AnimNotify_ComboAttackCheckEnd()
 {
-	OnNextAttackCheck.Broadcast();
+	AActor* Owner = GetOwningActor();
+	if (IsValid(Owner))
+	{
+		AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner);
+		if (IsValid(Drakhar))
+		{
+			Drakhar->ServerRPCComboAttackEnd();
+		}
+	}
 }
 
 void UGS_DrakharAnimInstance::AnimNotify_DashHitCheck()
@@ -108,10 +112,3 @@ void UGS_DrakharAnimInstance::AnimNotify_EarthquakeCheckEnd()
 	}
 }
 
-
-FName UGS_DrakharAnimInstance::GetAttackMontageSectionName(int32 Section)
-{
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *FString::Printf(TEXT("Attack%d"), Section));
-
-	return FName(*FString::Printf(TEXT("Attack%d"), Section));
-}

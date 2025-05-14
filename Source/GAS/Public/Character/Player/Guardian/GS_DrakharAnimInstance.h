@@ -18,9 +18,13 @@ public:
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate  OnAttackHitCheck;
 
-	//combo attack
+	//[combo attack]
+	//legacy
 	void PlayAttackMontage();
 	void JumpToAttackMontageSection(int32 NewSection);
+	//new
+	void PlayComboAttackMontage(int32 InCurrentComboIndex);
+	void StopComboAttackMontage(int32 InCurrentComboIndex);
 
 	//dash skill
 	void PlayDashMontage();
@@ -32,7 +36,7 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* AttackMontage;
+	TArray<UAnimMontage*> ComboAttackMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* DashMontage;
@@ -40,23 +44,23 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* EarthquakeMontage;
 
-	//dash skill
-	//float DashMontageDuration;
 
+
+	//[combo attack]
 	UFUNCTION()
-	void AnimNotify_AttackHitCheck();
-
+	void AnimNotify_ComboAttackCheckStart();
 	UFUNCTION()
-	void AnimNotify_NextAttackCheck();
+	void AnimNotify_ComboAttackCheckEnd();
 
+	//[dash skill]
 	UFUNCTION()
 	void AnimNotify_DashHitCheck();
 
+	//[earthquake skill]
 	UFUNCTION()
 	void AnimNotify_EarthquakeCheck();
 
 	UFUNCTION()
 	void AnimNotify_EarthquakeCheckEnd();
 
-	FName GetAttackMontageSectionName(int32 Section);
 };

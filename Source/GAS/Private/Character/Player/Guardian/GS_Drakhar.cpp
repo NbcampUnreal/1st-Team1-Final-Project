@@ -9,6 +9,7 @@
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
@@ -18,6 +19,11 @@ AGS_Drakhar::AGS_Drakhar()
 	GetStatComp()->SetCurrentHealth(2000.f);
 	GetStatComp()->SetAttackPower(120.f);
 
+	//combo attack variables
+	CurrentComboAttackIndex = 0;
+	MaxComboAttackIndex = 3;
+	bIsComboAttacking = false;
+
 	//dash skill variables
 	DashPower = 1000.f;
 	bIsDashing = false;
@@ -26,11 +32,18 @@ AGS_Drakhar::AGS_Drakhar()
 
 	//earthquake skill variables
 	bIsEarthquaking = false;
+	EarthquakePower = 3000.f;
+	EarthquakeRadius = 500.f;
 }
 
 void AGS_Drakhar::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (GuardianAnim)
+	{
+		GuardianAnim->OnMontageEnded.AddDynamic(this, &AGS_Drakhar::OnMontageEnded);
+	}
 
 }
 
@@ -66,29 +79,17 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(ThisClass, bIsComboAttacking);
+	DOREPLIFETIME(ThisClass, CurrentComboAttackIndex);
 	DOREPLIFETIME(ThisClass, bIsDashing);
 	DOREPLIFETIME(ThisClass, bIsEarthquaking);
 }
 
 void AGS_Drakhar::ComboAttack()
 {
-	Super::ComboAttack();
-
 	if (IsLocallyControlled())
 	{
-		if (IsAttacking)
-		{
-			if (CanNextCombo)
-			{
-				IsComboInputOn = true;
-			}
-		}
-		else
-		{
-			AttackStartComboState();
-			ServerRPCComboAttack();
-			IsAttacking = true;
-		}
+		ServerRPCComboAttack();
 	}
 }
 
@@ -122,6 +123,56 @@ void AGS_Drakhar::UltimateSkill()
 
 }
 
+
+void AGS_Drakhar::ServerRPCComboAttack_Implementation()
+{
+	//prevent attack stacking
+	if (bIsComboAttacking)
+	{
+		return;
+	}
+	bIsComboAttacking = true;
+}
+
+void AGS_Drakhar::ServerRPCComboAttackUpdate_Implementation()
+{
+	CurrentComboAttackIndex++;
+	CurrentComboAttackIndex %= MaxComboAttackIndex;
+
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+}
+
+void AGS_Drakhar::ServerRPCComboAttackEnd_Implementation()
+{	
+	bIsComboAttacking = false;
+
+	MeleeAttackCheck();
+}
+
+void AGS_Drakhar::ServerRPCMovementSetting_Implementation()
+{
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+}
+
+void AGS_Drakhar::OnRep_IsComboAttacking()
+{
+	if (bIsComboAttacking)
+	{
+		GuardianAnim->PlayComboAttackMontage(CurrentComboAttackIndex);
+	}
+}
+
+void AGS_Drakhar::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{	
+	if (!bInterrupted)
+	{
+		ServerRPCMovementSetting();
+	}
+	else
+	{
+		CurrentComboAttackIndex = 0;
+	}
+}
 
 void AGS_Drakhar::ServerRPCDashCharacter_Implementation()
 {
@@ -225,7 +276,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 	FCollisionQueryParams Params(NAME_None, false, this);
 	Params.AddIgnoredActor(this);
 
-	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(400.f), Params);
+	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(EarthquakeRadius), Params);
 
 	if (bIsHitDetected)
 	{
@@ -254,7 +305,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			//Damage += SkillDamage;
 			FDamageEvent DamageEvent;
 			DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
-			DamagedCharacter->LaunchCharacter(GetActorForwardVector() * 3000.f, false, false);
+			DamagedCharacter->LaunchCharacter(GetActorForwardVector() * EarthquakePower, false, false);
 		}
 	}
 }
