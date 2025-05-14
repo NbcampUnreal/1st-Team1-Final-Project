@@ -5,7 +5,10 @@
 #include "Character/Skill/GS_SkillComp.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "UI/Character/GS_HPText.h"
+
 #include "Engine/DamageEvents.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AGS_Character::AGS_Character()
 {
@@ -31,6 +34,12 @@ void AGS_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (IsValid(HPTextWidgetComp) && !HasAuthority())
+	{
+		FVector WidgetComponentLocation = HPTextWidgetComp->GetComponentLocation();
+		FVector LocalPlayerCameraLocation = UGameplayStatics::GetPlayerCameraManager(this, 0)->GetCameraLocation();
+		HPTextWidgetComp->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(WidgetComponentLocation, LocalPlayerCameraLocation));
+	}
 
 }
 
@@ -68,7 +77,7 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 		UGS_StatComp* DamagedCharacterStat = InDamagedCharacter->GetStatComp();
 		if (IsValid(DamagedCharacterStat))
 		{
-			float Damage = DamagedCharacterStat->CalculateDamage(InDamagedCharacter);
+			float Damage = DamagedCharacterStat->CalculateDamage(this, InDamagedCharacter);
 			FDamageEvent DamageEvent;
 			InDamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
 		}

@@ -26,7 +26,7 @@ public:
 
 	void UpdateStat();
 
-	float CalculateDamage(AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
+	float CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
 
 	void PerformHit(AActor* DamagedActor, AActor* DamageCauser);
 
