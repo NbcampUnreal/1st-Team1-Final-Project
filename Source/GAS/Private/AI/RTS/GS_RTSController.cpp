@@ -9,7 +9,7 @@
 #include "AI/RTS/GS_RTSCamera.h"
 #include "AI/RTS/GS_RTSHUD.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Character/Player/GS_Player.h"
+#include "Blueprint/UserWidget.h"
 #include "Character/Player/Monster/GS_Monster.h"
 
 AGS_RTSController::AGS_RTSController()
@@ -19,7 +19,7 @@ AGS_RTSController::AGS_RTSController()
 	KeyboardDir = FVector2D::ZeroVector;
 	MouseEdgeDir = FVector2D::ZeroVector;
 	CameraSpeed = 2000.f;
-	EdgeScreenRatio = 0.05f;
+	EdgeScreenRatio = 0.02f;
 	UnitGroups.SetNum(9);
 }
 
@@ -39,6 +39,15 @@ void AGS_RTSController::BeginPlay()
 	}
 
 	InitCameraActor();
+
+	if (RTSWidgetClass)
+	{
+		UUserWidget* RTSWidget = CreateWidget<UUserWidget>(this, RTSWidgetClass);
+		if (RTSWidget)
+		{
+			RTSWidget->AddToViewport();
+		}
+	}
 }
 
 void AGS_RTSController::SetupInputComponent()
@@ -60,9 +69,17 @@ void AGS_RTSController::SetupInputComponent()
 		
 		for (int32 i = 0; i < GroupKeyActions.Num(); ++i)
 		{
-			if (UInputAction* IA = GroupKeyActions[i])
+			if (GroupKeyActions[i])
 			{
 				EnhancedInputComponent->BindAction(GroupKeyActions[i], ETriggerEvent::Started, this, &AGS_RTSController::OnGroupKey, i);
+			}
+		}
+
+		for (int32 i = 0; i < CameraKeyActions.Num(); ++i)
+		{
+			if (CameraKeyActions[i])
+			{
+				EnhancedInputComponent->BindAction(CameraKeyActions[i], ETriggerEvent::Started, this, &AGS_RTSController::OnCameraKey, i);
 			}
 		}
 	}
@@ -186,11 +203,6 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	FVector TargetLocation = GroundHit.Location;
 	for (AGS_Monster* Unit : UnitSelection)
 	{
-
-		UE_LOG(LogTemp, Warning, TEXT("Unit: %s | Controller: %s"),
-	*Unit->GetName(),
-	Unit->GetController() ? *Unit->GetController()->GetClass()->GetName() : TEXT("nullptr"));
-		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
@@ -257,7 +269,10 @@ void AGS_RTSController::MoveCamera(const FVector2D& Direction, float DeltaTime)
 {
 	FVector2D NormDir = Direction.GetSafeNormal();
 	FVector Delta = FVector(NormDir.Y, NormDir.X, 0.f) * CameraSpeed * DeltaTime;
-	CameraActor->AddActorWorldOffset(Delta, true);
+	if (CameraActor)
+	{
+		CameraActor->AddActorWorldOffset(Delta, true);
+	}
 }
 
 void AGS_RTSController::InitCameraActor()
@@ -382,5 +397,49 @@ void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, in
 			U->SetSelected(true);
 		}
 		UE_LOG(LogTemp, Log, TEXT("Loaded group %d (%d units)"), GroupIdx+1, UnitSelection.Num());
+	}
+}
+
+void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, int32 CameraIndex)
+{
+	if (bShiftDown) // 저장
+	{
+		if (CameraActor)
+		{
+			SavedCameraPositions.Add(CameraIndex, CameraActor->GetActorLocation());
+			UE_LOG(LogTemp, Log, TEXT("Saved camera pos %d: %s"), CameraIndex, *CameraActor->GetActorLocation().ToString());
+		}
+	}
+	else // 로드
+	{
+		if (CameraActor && SavedCameraPositions.Contains(CameraIndex))
+		{
+			CameraActor->SetActorLocation(SavedCameraPositions[CameraIndex]);
+			UE_LOG(LogTemp, Log, TEXT("Moved camera to saved pos %d: %s"), CameraIndex, *SavedCameraPositions[CameraIndex].ToString());
+		}
+	}
+}
+
+void AGS_RTSController::MoveAIViaMinimap(const FVector& WorldLocation)
+{
+	for (AGS_Monster* Unit : UnitSelection)
+	{
+		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->SetValueAsBool(AGS_AIController::bUseRTSKey, true);
+				BlackboardComp->SetValueAsVector(AGS_AIController::RTSTargetKey, WorldLocation);
+			}
+		}
+	}
+}
+
+void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)
+{
+	if (CameraActor)
+	{
+		FVector NewLocation = FVector(WorldLocation.X, WorldLocation.Y, CameraActor->GetActorLocation().Z);
+		CameraActor->SetActorLocation(NewLocation);
 	}
 }
