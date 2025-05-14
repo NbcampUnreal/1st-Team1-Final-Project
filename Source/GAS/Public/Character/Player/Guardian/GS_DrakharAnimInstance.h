@@ -24,7 +24,10 @@ public:
 
 	//dash skill
 	void PlayDashMontage();
-	//FORCEINLINE float GetDashMontageDuration() { return DashMontageDuration; }
+	void StopDashMontage();
+
+	//earthquake
+	void PlayEarthquakeMontage();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
@@ -32,6 +35,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* DashMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* EarthquakeMontage;
 
 	//dash skill
 	//float DashMontageDuration;
@@ -44,6 +50,9 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_DashHitCheck();
+
+	UFUNCTION()
+	void AnimNotify_EarthquakeCheck();
 
 	FName GetAttackMontageSectionName(int32 Section);
 };

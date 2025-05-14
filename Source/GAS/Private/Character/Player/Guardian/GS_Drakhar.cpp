@@ -112,11 +112,19 @@ void AGS_Drakhar::Skill1()
 //Earthquake
 void AGS_Drakhar::Skill2()
 {
+	Super::Skill2();
+
+	if (IsLocallyControlled())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Skill2 Drakhar"));
+		ServerRPCEarthquake();
+	}
 }
 
 //DraconicFury
 void AGS_Drakhar::UltimateSkill()
 {
+
 }
 
 
@@ -140,7 +148,6 @@ void AGS_Drakhar::DashAttackCheck()
 	TArray<FHitResult> OutHitResults;	
 	const FVector Start = GetActorLocation();
 	const FVector End = Start + GetActorForwardVector() * 100.f;
-	const FVector Extent = FVector();
 	FCollisionQueryParams Params(NAME_None, false, this);
 
 	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Camera, FCollisionShape::MakeCapsule(100.f, 200.f), Params);
@@ -167,6 +174,52 @@ void AGS_Drakhar::DashAttackCheck()
 	}
 }
 
+void AGS_Drakhar::ServerRPCEarthquake_Implementation()
+{
+	if (bIsEarthquaking)
+	{
+		return;
+	}
+
+	TSet<AGS_Character*> EarthquakeDamagedCharacters;
+	TArray<FHitResult> OutHitResults;
+	const FVector Start = GetActorLocation();
+	const FVector End = Start + GetActorForwardVector() * 100.f;
+	FCollisionQueryParams Params(NAME_None, false, this);
+	Params.AddIgnoredActor(this);
+
+	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(200.f), Params);
+
+	if (bIsHitDetected)
+	{
+		for (auto const& OutHitResult : OutHitResults)
+		{
+			AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
+			if (IsValid(DamagedCharacter))
+			{
+				EarthquakeDamagedCharacters.Add(DamagedCharacter);
+
+				DrawDebugPoint(
+					GetWorld(),
+					OutHitResult.ImpactPoint,
+					15.f,
+					FColor::Yellow,
+					false,
+					1.f
+				);
+			}
+		}
+		for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)
+		{
+			float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
+			//TODO
+			//Damage += SkillDamage;
+			FDamageEvent DamageEvent;
+			DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
+		}
+	}
+	DrawDebugSphere(GetWorld(), Start, 100.f, 10, FColor::Red, false, 2.f);
+}
 
 void AGS_Drakhar::EndDash()
 {
@@ -178,7 +231,7 @@ void AGS_Drakhar::EndDash()
 
 	for (auto const& DamagedCharacter : DamagedCharacters)
 	{
-		float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(DamagedCharacter);
+		float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
 		FDamageEvent DamageEvent;
 		DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
 	}
@@ -192,16 +245,23 @@ void AGS_Drakhar::OnRep_IsDashing()
 {
 	if (bIsDashing)
 	{
-		if (DashMontage)
+		GuardianAnim->PlayDashMontage();			
+		/*if (DashMontage)
 		{
-			GuardianAnim->PlayDashMontage();			
-		}
+
+		}*/
 	}
 	else
 	{
-		if (DashMontage)
+		GuardianAnim->StopDashMontage();
+		/*if (DashMontage)
 		{
 			StopAnimMontage(DashMontage);
-		}
+		}*/		
 	}
+}
+
+void AGS_Drakhar::OnRep_IsEarthquaking()
+{
+
 }

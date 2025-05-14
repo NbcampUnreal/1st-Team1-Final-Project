@@ -146,6 +146,7 @@ void AGS_Guardian::OnRep_Attacking()
 
 void AGS_Guardian::ServerRPCComboAttack_Implementation()
 {	
+	MeleeAttackCheck();
 	MulticastRPCComboAttack();
 }
 
