@@ -4,6 +4,13 @@
   "BasePlatform": "Mac",
   "PluginLibs": [
    {
+    "LibName": "Wwise Compressor",
+    "LibId": "7077891",
+    "Type": "Effect",
+    "DLL": "AkCompressor",
+    "StaticLib": "AkCompressorFX"
+   },
+   {
     "LibName": "Wwise Flanger",
     "LibId": "8192003",
     "Type": "Effect",
@@ -18,6 +25,13 @@
     "StaticLib": "AkTimeStretchFX"
    },
    {
+    "LibName": "Wwise Pitch Shifter",
+    "LibId": "8912899",
+    "Type": "Effect",
+    "DLL": "AkPitchShifter",
+    "StaticLib": "AkPitchShifterFX"
+   },
+   {
     "LibName": "System",
     "LibId": "11403271",
     "Type": "AudioDevice"
@@ -28,6 +42,6 @@
     "Type": "AudioDevice"
    }
   ],
-  "FileHash": "{9DCAD7AD-495F-F25A-940B-7790C6BA577B}"
+  "FileHash": "{17B7A703-9C9F-CF6A-5CD1-698B30484569}"
  }
 }

@@ -1607,7 +1607,7 @@
 						</Effect>
 						<Effect Name="Special_Effect_1" ID="{83317D8A-9D4C-438E-BE8C-BC7D27CAD1B0}" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
 							<PropertyList>
-								<Property Name="DelayTime" Type="Real32" Value="10"/>
+								<Property Name="DelayTime" Type="Real32" Value="20"/>
 								<Property Name="DryLevel" Type="Real32" Value="0"/>
 								<Property Name="ModDepth" Type="Real32" Value="80"/>
 								<Property Name="ModFrequency" Type="Real32" Value="2"/>
@@ -1618,8 +1618,9 @@
 							<ChildrenList>
 								<Effect Name="Few_Odd_Harm_Notches" ID="{3B5685A6-6274-4292-B5B9-32AFE28DB80B}" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
 									<PropertyList>
-										<Property Name="DelayTime" Type="Real32" Value="0.4"/>
+										<Property Name="DelayTime" Type="Real32" Value="1"/>
 										<Property Name="EnableLFO" Type="bool" Value="False"/>
+										<Property Name="WetDryMix" Type="Real32" Value="80"/>
 									</PropertyList>
 								</Effect>
 								<Effect Name="Many_Odd_Harm_Notches" ID="{773FA234-F683-4788-B7C1-4D272A8CDE69}" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">

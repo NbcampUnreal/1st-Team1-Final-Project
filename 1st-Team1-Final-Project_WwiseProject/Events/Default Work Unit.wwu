@@ -195,6 +195,61 @@
 						</Action>
 					</ChildrenList>
 				</Event>
+				<Event Name="EV_ArrowRealse" ID="{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}">
+					<ChildrenList>
+						<Action Name="" ID="{721F7F78-C850-4A0B-86CF-875DEA6A3BFA}" ShortID="1005313357">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Arrow_Realse" ID="{289AE22F-CBA5-41FF-86A8-052F39810660}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="EV_ArrowBy" ID="{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}">
+					<ChildrenList>
+						<Action Name="" ID="{7690A502-0437-4229-95E9-27A8C3C30382}" ShortID="206145139">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Arrow_By" ID="{3AF9A3F0-DE14-4EB3-AA03-2EBCC8FB07A2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="EV_ArrowImpact_Wood" ID="{5AF6D827-D199-47C8-9BED-CC9DB12DEE69}">
+					<ChildrenList>
+						<Action Name="" ID="{20F02EDD-C9E9-49BA-AA52-451CD2487311}" ShortID="277860454">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_ArrowImpact_Wood" ID="{2D5A0BBF-EF0F-46C3-ABCE-A07D1D0AF082}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="EV_ArrowImpact_Body" ID="{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}">
+					<ChildrenList>
+						<Action Name="" ID="{CE09FBC0-9B03-435A-9514-1053E61903DE}" ShortID="245893075">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_ArrowImpact_Body" ID="{DE6A5A1B-DCBE-4500-9C0F-8B184E9F72B3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="EV_Mon_SmallClaw" ID="{CBF98796-A6A2-4A10-8163-018B83F0EB4C}">
+					<ChildrenList>
+						<Action Name="" ID="{9BAF8D0E-5339-4455-AE34-2458A8A05BD4}" ShortID="737790231">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Mon_SmallClaw" ID="{E6C158E7-FEA7-42E8-A880-09B5C3262710}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>
