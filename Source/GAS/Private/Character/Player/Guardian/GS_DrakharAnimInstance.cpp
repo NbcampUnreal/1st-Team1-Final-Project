@@ -48,6 +48,14 @@ void UGS_DrakharAnimInstance::PlayEarthquakeMontage()
 	}
 }
 
+void UGS_DrakharAnimInstance::StopEarthquakeMontage()
+{
+	if (EarthquakeMontage)
+	{
+		Montage_Stop(0.2f, EarthquakeMontage);
+	}
+}
+
 
 void UGS_DrakharAnimInstance::AnimNotify_AttackHitCheck()
 {
@@ -71,15 +79,7 @@ void UGS_DrakharAnimInstance::AnimNotify_NextAttackCheck()
 
 void UGS_DrakharAnimInstance::AnimNotify_DashHitCheck()
 {
-	/*AActor* Owner = GetOwningActor();
-	if (IsValid(Owner))
-	{
-		AGS_Guardian* Guardian = Cast<AGS_Guardian>(Owner);
-		if (IsValid(Guardian))
-		{
-			Guardian->MeleeAttackCheck();
-		}
-	}*/
+	
 }
 
 void UGS_DrakharAnimInstance::AnimNotify_EarthquakeCheck()
@@ -90,7 +90,20 @@ void UGS_DrakharAnimInstance::AnimNotify_EarthquakeCheck()
 		AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner);
 		if (IsValid(Drakhar))
 		{
-			Drakhar->ServerRPCEarthquake();
+			Drakhar->ServerRPCEarthquakeAttackCheck();
+		}
+	}
+}
+
+void UGS_DrakharAnimInstance::AnimNotify_EarthquakeCheckEnd()
+{
+	AActor* Owner = GetOwningActor();
+	if (IsValid(Owner))
+	{
+		AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner);
+		if (IsValid(Drakhar))
+		{
+			Drakhar->ServerRPCEarthquakeEnd();
 		}
 	}
 }

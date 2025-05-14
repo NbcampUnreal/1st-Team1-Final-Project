@@ -28,6 +28,7 @@ public:
 
 	//earthquake
 	void PlayEarthquakeMontage();
+	void StopEarthquakeMontage();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
@@ -53,6 +54,9 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_EarthquakeCheck();
+
+	UFUNCTION()
+	void AnimNotify_EarthquakeCheckEnd();
 
 	FName GetAttackMontageSectionName(int32 Section);
 };

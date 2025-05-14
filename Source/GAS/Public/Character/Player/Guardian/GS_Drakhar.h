@@ -50,6 +50,12 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPCEarthquake();
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPCEarthquakeEnd();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCEarthquakeAttackCheck();
+
 	UFUNCTION()
 	void OnRep_IsEarthquaking();
 
@@ -62,12 +68,6 @@ private:
 	UPROPERTY()
 	TSet<AGS_Character*> DamagedCharacters;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	TObjectPtr<UAnimMontage> DashMontage;*/
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	TObjectPtr<UCapsuleComponent> DashAttackCapsule;
-
 	FVector DashStartLocation;
 	FVector DashEndLocation;
 
@@ -76,6 +76,5 @@ private:
 	float DashDuration;
 
 	//[earthquake]
-	UPROPERTY()
-	TObjectPtr<UAnimMontage> EarthquakeMontage;
+	
 };
