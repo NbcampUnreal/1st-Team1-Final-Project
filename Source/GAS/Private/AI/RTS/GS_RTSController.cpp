@@ -9,6 +9,7 @@
 #include "AI/RTS/GS_RTSCamera.h"
 #include "AI/RTS/GS_RTSHUD.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Character/Player/GS_Player.h"
 #include "Character/Player/Monster/GS_Monster.h"
 
 AGS_RTSController::AGS_RTSController()
@@ -94,6 +95,35 @@ void AGS_RTSController::CameraMoveEnd()
 
 void AGS_RTSController::OnLeftMousePressed()
 {
+	// Ctrl+클릭 → 같은 타입 전부 선택
+	if (bCtrlDown && !bShiftDown)
+	{
+		FHitResult Hit;		
+		bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, Hit);
+		if (bHit && Hit.GetActor())
+		{
+			if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
+			{
+				ClearUnitSelection();
+				
+				ECharacterType MonsterType = Monster->GetCharacterType();
+				
+				// 월드에 있는 모든 몬스터를 순회 
+				for (TActorIterator<AGS_Monster> It(GetWorld()); It; ++It)
+				{
+					AGS_Monster* M = *It;
+					if (M->GetCharacterType() != MonsterType)
+					{
+						continue;
+					}
+
+					AddUnitToSelection(M);
+				}
+			}
+		}
+		return;
+	}
+	
 	// Shift+클릭 → 현재 선택만 변경 
 	if (bShiftDown)
 	{
@@ -107,9 +137,9 @@ void AGS_RTSController::OnLeftMousePressed()
 	}
 
 	// 클릭 시 빈 공간이면 기존 선택 해제
-	FHitResult Hit;
-	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, Hit);
-	if (!bHit)
+	FHitResult GroundHit;
+	bool bGroundHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, GroundHit);
+	if (!bGroundHit)
 	{
 		ClearUnitSelection();
 	}
@@ -117,7 +147,7 @@ void AGS_RTSController::OnLeftMousePressed()
 
 void AGS_RTSController::OnLeftMouseReleased()
 {
-	if (bShiftDown)
+	if (bShiftDown || bCtrlDown)
 	{
 		return;
 	}
@@ -156,6 +186,11 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	FVector TargetLocation = GroundHit.Location;
 	for (AGS_Monster* Unit : UnitSelection)
 	{
+
+		UE_LOG(LogTemp, Warning, TEXT("Unit: %s | Controller: %s"),
+	*Unit->GetName(),
+	Unit->GetController() ? *Unit->GetController()->GetClass()->GetName() : TEXT("nullptr"));
+		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
