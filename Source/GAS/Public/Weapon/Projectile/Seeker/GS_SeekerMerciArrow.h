@@ -17,9 +17,5 @@ protected:
 	void StickWithVisualOnly(const FHitResult& Hit);
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AGS_ArrowVisualActor> VisualArrowClass;
-
-	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* ArrowMesh;
-	
+	TSubclassOf<AGS_ArrowVisualActor> VisualArrowClass;	
 };

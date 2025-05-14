@@ -6,6 +6,7 @@
 #include "Weapon/GS_Weapon.h"
 #include "GS_WeaponProjectile.generated.h"
 
+class UProjectileMovementComponent;
 /**
  * 
  */
@@ -13,5 +14,28 @@ UCLASS()
 class GAS_API AGS_WeaponProjectile : public AGS_Weapon
 {
 	GENERATED_BODY()
+
+public:
+	AGS_WeaponProjectile();
 	
+	UFUNCTION()
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
+		const FHitResult& Hit);
+	
+	UPROPERTY(EditAnywhere)
+	USkeletalMeshComponent* ProjectileMesh;
+protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+	
+	UPROPERTY(VisibleAnywhere)
+	class USphereComponent* CollisionComponent;
+
+
+	UPROPERTY(VisibleAnywhere)
+	UProjectileMovementComponent* ProjectileMovementComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Projectile")
+	float Damage;
 };

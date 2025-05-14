@@ -17,6 +17,10 @@ AGS_AIController::AGS_AIController()
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
 	PerceptionComponent->ConfigureSense(*SightConfig);
+	
+    SightConfig->DetectionByAffiliation.bDetectEnemies   = true;
+    SightConfig->DetectionByAffiliation.bDetectNeutrals  = false;
+    SightConfig->DetectionByAffiliation.bDetectFriendlies= false;
 }
 
 void AGS_AIController::BeginPlay()
@@ -46,6 +50,17 @@ void AGS_AIController::OnPossess(APawn* InPawn)
 			RunBehaviorTree(BTAsset);
 		}
 	}
+
+	SetGenericTeamId(GetGenericTeamId());
+}
+
+FGenericTeamId AGS_AIController::GetGenericTeamId() const
+{
+	if (AGS_Character* Char = Cast<AGS_Character>(GetPawn()))
+	{
+		return Char->TeamId;
+	}
+	return FGenericTeamId::NoTeam;
 }
 
 void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)

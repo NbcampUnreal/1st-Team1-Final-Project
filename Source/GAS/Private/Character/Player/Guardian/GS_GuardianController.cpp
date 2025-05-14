@@ -38,6 +38,15 @@ void AGS_GuardianController::Skill1(const FInputActionValue& InputValue)
 
 void AGS_GuardianController::Skill2(const FInputActionValue& InputValue)
 {
+	if (IsLocalController())
+	{
+		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
+
+		if (IsValid(Guardian))
+		{
+			Guardian->Skill2();
+		}
+	}
 }
 
 void AGS_GuardianController::UltimateSkill(const FInputActionValue& InputValue)
@@ -63,6 +72,10 @@ void AGS_GuardianController::SetupInputComponent()
 		if (IsValid(Skill1Action))
 		{
 			EnhancedInputComponent->BindAction(Skill1Action, ETriggerEvent::Started, this, &AGS_GuardianController::Skill1);
+		}
+		if (IsValid(Skill2Action))
+		{
+			EnhancedInputComponent->BindAction(Skill2Action, ETriggerEvent::Started, this, &AGS_GuardianController::Skill2);
 		}
 	}
 }
