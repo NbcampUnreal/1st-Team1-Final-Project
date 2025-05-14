@@ -11,13 +11,21 @@ void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 		return;
 	}
 
+	// 화살이 박힌 위치
 	FVector SpawnLocation = Hit.ImpactPoint;
-	FRotator SpawnRotation = Hit.ImpactNormal.Rotation();
+
+	// 방향 = 화살이 실제 날아온 방향
+	FVector ArrowDirection = GetVelocity().GetSafeNormal();
+	FRotator SpawnRotation = FRotationMatrix::MakeFromX(ArrowDirection).Rotator();
+
+	// 메시가 +Y 방향을 앞이라고 가정 시 Y축 기준 -90도 회전
+	FRotator AdjustedRotation = SpawnRotation + FRotator(0.f, -90.f, 0.f);
+	SpawnLocation -= ArrowDirection * 25.f; // 약간 파고들게
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	AGS_ArrowVisualActor* VisualArrow = GetWorld()->SpawnActor<AGS_ArrowVisualActor>(VisualArrowClass, SpawnLocation, SpawnRotation, Params);
+	AGS_ArrowVisualActor* VisualArrow = GetWorld()->SpawnActor<AGS_ArrowVisualActor>(VisualArrowClass, SpawnLocation, AdjustedRotation, Params);
 
 	if (VisualArrow)
 	{
