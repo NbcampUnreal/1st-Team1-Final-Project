@@ -4,6 +4,7 @@
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
+#include "Weapon/Projectile/Guardian/GS_DrakharProjectile.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
@@ -154,11 +155,23 @@ void AGS_Drakhar::ServerRPCMovementSetting_Implementation()
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
+void AGS_Drakhar::ServerRPCShootProjectile_Implementation()
+{
+	StartLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 50.f);
+	GetWorld()->SpawnActor<AGS_DrakharProjectile>(Projectile, StartLocation, GetActorRotation());
+}
+
 void AGS_Drakhar::OnRep_IsComboAttacking()
 {
 	if (bIsComboAttacking)
 	{
 		GuardianAnim->PlayComboAttackMontage(CurrentComboAttackIndex);
+
+		if (CurrentComboAttackIndex == 2)
+		{
+			//GetWorld()->SpawnActor<AGS_DrakharProjectile>(Projectile, GetActorLocation(), GetActorRotation());
+			ServerRPCShootProjectile();
+		}
 	}
 }
 
