@@ -31,57 +31,12 @@ public:
 	UFUNCTION()
 	void MeleeAttackCheck();
 
-	//[combo attack]
-	//check montage end
-	UFUNCTION()
-	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-	//set attack start state
-	UFUNCTION()
-	void AttackStartComboState();
-
-	//set attack end state
-	void AttackEndComboState();
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerRPCComboAttack();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPCComboAttack();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPCJumpToAttackMontageSection(int32 ComboIndex);
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerRPCJumpToAttackMontageSection(int32 ComboIndex);
-
-	UFUNCTION()
-	void OnRep_Attacking();
-
-	UPROPERTY(ReplicatedUsing = OnRep_Attacking, VisibleAnywhere, BlueprintReadOnly)
-	bool IsAttacking;
-
-	UPROPERTY()
-	bool CanNextCombo;
-	
-	UPROPERTY()
-	bool IsComboInputOn;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int32 CurrentCombo;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int32 MaxCombo;
-
 protected:
 	UPROPERTY()
 	TObjectPtr<UGS_DrakharAnimInstance> GuardianAnim;
-
-
 
 private:
 	//for fever mode
 	float FeverTime;
 	float FeverGage;
-
 };
