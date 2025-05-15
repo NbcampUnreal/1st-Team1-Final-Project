@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{0911F440-F7B1-609D-80A6-40933E8C3EF0}",
+    "Hash": "{DFA2F38E-CB79-6788-4207-36E649B1E33F}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -173,7 +173,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Saw.wav",
-      "CachePath": "89/{89E4AB44-4F2F-CCDD-82C3-4707EC8F0747}.wem"
+      "CachePath": "69/{693A7FE9-2F6E-0E1A-212B-D2B66629EC51}.wem"
      },
      {
       "Id": "321658963",
@@ -641,7 +641,7 @@
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "0.54591566",
-      "DurationMax": "0.71705043",
+      "DurationMax": "0.7596884",
       "MediaRefs": [
        {
         "Id": "578835809"
@@ -747,7 +747,7 @@
       "Name": "EV_Mon_SmallClaw",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Mon_SmallClaw",
       "GUID": "{CBF98796-A6A2-4A10-8163-018B83F0EB4C}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "600",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1296,6 +1296,6 @@
     ]
    }
   ],
-  "FileHash": "{C90028AB-7E47-7AF5-A278-272C3C52544F}"
+  "FileHash": "{F35DAF11-27D3-4423-668F-710A65644467}"
  }
 }

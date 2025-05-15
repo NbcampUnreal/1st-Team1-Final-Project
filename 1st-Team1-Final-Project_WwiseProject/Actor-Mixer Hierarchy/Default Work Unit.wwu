@@ -1298,7 +1298,7 @@
 						<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
 						<Property Name="Lowpass" Type="int16">
 							<ValueList>
-								<Value>10</Value>
+								<Value>15</Value>
 							</ValueList>
 						</Property>
 						<Property Name="MakeUpGain" Type="Real64">
@@ -1445,7 +1445,7 @@
 							<PropertyList>
 								<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
 								<Property Name="TrimBegin" Type="Real64" Value="1.17591846480352"/>
-								<Property Name="TrimEnd" Type="Real64" Value="3.88253290952657"/>
+								<Property Name="TrimEnd" Type="Real64" Value="3.79831342720293"/>
 							</PropertyList>
 							<Language>SFX</Language>
 							<AudioFile>SFX_Saw.wav</AudioFile>
@@ -4080,7 +4080,7 @@
 						</Property>
 						<Property Name="Volume" Type="Real64">
 							<ValueList>
-								<Value>-1</Value>
+								<Value>-2</Value>
 							</ValueList>
 							<ModifierList>
 								<ModifierInfo>
@@ -4725,29 +4725,68 @@
 				<RandomSequenceContainer Name="SFX_Mon_SmallClaw" ID="{E6C158E7-FEA7-42E8-A880-09B5C3262710}" ShortID="291590783">
 					<PropertyList>
 						<Property Name="3DSpatialization" Type="int16" Value="2"/>
+						<Property Name="GlobalOrPerObject" Type="int16" Value="0"/>
 						<Property Name="InitialDelay" Type="Real64">
 							<ModifierList>
 								<ModifierInfo>
 									<Modifier Name="" ID="{3F84F0A8-CC74-4BDF-A31B-4E7890974936}">
 										<PropertyList>
-											<Property Name="Max" Type="Real64" Value="10"/>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="3"/>
 										</PropertyList>
 									</Modifier>
 								</ModifierInfo>
 							</ModifierList>
 						</Property>
-						<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+						<Property Name="MaxSoundPerInstance" Type="int16">
+							<ValueList>
+								<Value>2</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Pitch" Type="int32">
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{9DF5E2BD-9D0D-490A-8D38-4793D3F7FD32}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="5"/>
+											<Property Name="Min" Type="Real64" Value="-5"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
 						<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
-						<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
 						<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="2"/>
 						<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+						<Property Name="SpeakerPanning" Type="int16" Value="1"/>
+						<Property Name="UseMaxSoundPerInstance" Type="bool">
+							<ValueList>
+								<Value>True</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Volume" Type="Real64">
+							<ValueList>
+								<Value>-5</Value>
+							</ValueList>
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{99804724-4AB6-42BF-A6E4-FDF33B371E58}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Min" Type="Real64" Value="-5"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
 					</PropertyList>
 					<ReferenceList>
 						<Reference Name="Attenuation">
 							<Custom>
 								<Attenuation Name="Attenuation (Custom)" ID="{219458A7-52A5-448E-9E18-79E50A37A64D}" ShortID="1001280742">
 									<PropertyList>
-										<Property Name="RadiusMax" Type="Real64" Value="800"/>
+										<Property Name="RadiusMax" Type="Real64" Value="600"/>
 									</PropertyList>
 									<CurveUsageInfoList>
 										<VolumeDryUsage>
@@ -4763,12 +4802,12 @@
 															<Flags>5</Flags>
 														</Point>
 														<Point>
-															<XPos>504.75138</XPos>
-															<YPos>-2.53083</YPos>
+															<XPos>500.96011</XPos>
+															<YPos>-5.99743</YPos>
 															<Flags>0</Flags>
 														</Point>
 														<Point>
-															<XPos>800</XPos>
+															<XPos>600</XPos>
 															<YPos>-200</YPos>
 															<Flags>37</Flags>
 														</Point>
@@ -4851,14 +4890,14 @@
 								</Property>
 								<Property Name="InitialDelay" Type="Real64">
 									<ValueList>
-										<Value>1</Value>
+										<Value>3</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
 											<Modifier Name="" ID="{D506FFB9-EE35-41B3-A4C1-7C16BAD11275}">
 												<PropertyList>
 													<Property Name="Enabled" Type="bool" Value="True"/>
-													<Property Name="Max" Type="Real64" Value="5"/>
+													<Property Name="Max" Type="Real64" Value="6"/>
 												</PropertyList>
 											</Modifier>
 										</ModifierInfo>
@@ -4936,14 +4975,14 @@
 							<PropertyList>
 								<Property Name="InitialDelay" Type="Real64">
 									<ValueList>
-										<Value>1</Value>
+										<Value>3</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
 											<Modifier Name="" ID="{F5F7B3AA-8D7E-4FAD-A31F-4DEB0ABBCFF0}">
 												<PropertyList>
 													<Property Name="Enabled" Type="bool" Value="True"/>
-													<Property Name="Max" Type="Real64" Value="5"/>
+													<Property Name="Max" Type="Real64" Value="6"/>
 												</PropertyList>
 											</Modifier>
 										</ModifierInfo>
@@ -5012,14 +5051,14 @@
 								</Property>
 								<Property Name="InitialDelay" Type="Real64">
 									<ValueList>
-										<Value>1</Value>
+										<Value>3</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
 											<Modifier Name="" ID="{47F51B34-9E58-4C5B-AB47-79CBD13CC05A}">
 												<PropertyList>
 													<Property Name="Enabled" Type="bool" Value="True"/>
-													<Property Name="Max" Type="Real64" Value="5"/>
+													<Property Name="Max" Type="Real64" Value="6"/>
 												</PropertyList>
 											</Modifier>
 										</ModifierInfo>
@@ -5076,14 +5115,14 @@
 								</Property>
 								<Property Name="InitialDelay" Type="Real64">
 									<ValueList>
-										<Value>1</Value>
+										<Value>3</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
 											<Modifier Name="" ID="{5992B92D-FB64-4B70-A51D-21FEA479DD2C}">
 												<PropertyList>
 													<Property Name="Enabled" Type="bool" Value="True"/>
-													<Property Name="Max" Type="Real64" Value="5"/>
+													<Property Name="Max" Type="Real64" Value="6"/>
 												</PropertyList>
 											</Modifier>
 										</ModifierInfo>
@@ -5140,14 +5179,14 @@
 								</Property>
 								<Property Name="InitialDelay" Type="Real64">
 									<ValueList>
-										<Value>1</Value>
+										<Value>3</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
 											<Modifier Name="" ID="{90AF7211-C3E9-49D5-8529-460503D111B4}">
 												<PropertyList>
 													<Property Name="Enabled" Type="bool" Value="True"/>
-													<Property Name="Max" Type="Real64" Value="5"/>
+													<Property Name="Max" Type="Real64" Value="6"/>
 												</PropertyList>
 											</Modifier>
 										</ModifierInfo>
@@ -5206,6 +5245,9 @@
 							</ActiveSourceList>
 						</Sound>
 					</ChildrenList>
+					<PositioningInfo>
+						<Panner Name="" ID="{244FF932-820F-4117-87B5-18E1FE952EC3}"/>
+					</PositioningInfo>
 					<ObjectLists>
 						<ObjectList Name="Effects">
 							<Reference>
@@ -5850,7 +5892,7 @@
 						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
-								<Value>10</Value>
+								<Value>15</Value>
 							</ValueList>
 						</Property>
 						<Property Name="Lowpass" Type="int16">
@@ -5858,16 +5900,28 @@
 								<Value>20</Value>
 							</ValueList>
 						</Property>
+						<Property Name="Pitch" Type="int32">
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{840753F5-2DFA-40A2-AFD8-54D255757CB0}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Min" Type="Real64" Value="-100"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
 						<Property Name="Volume" Type="Real64">
 							<ValueList>
-								<Value>-2</Value>
+								<Value>-5</Value>
 							</ValueList>
 							<ModifierList>
 								<ModifierInfo>
 									<Modifier Name="" ID="{74735752-CEED-4E2B-A62E-CBFD3C72AB07}">
 										<PropertyList>
 											<Property Name="Enabled" Type="bool" Value="True"/>
-											<Property Name="Min" Type="Real64" Value="-2"/>
+											<Property Name="Min" Type="Real64" Value="-5"/>
 										</PropertyList>
 									</Modifier>
 								</ModifierInfo>
