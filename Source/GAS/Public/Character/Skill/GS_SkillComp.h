@@ -72,6 +72,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_TrySkillCommand(ESkillSlot Slot);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
+	UDataTable* SkillDataTable;
+
 	void InitSkills();
 
 	UPROPERTY()
