@@ -37,6 +37,8 @@ void UGS_SkillBase::OnSkillCommand()
 
 bool UGS_SkillBase::CanActive() const
 {
+	UE_LOG(LogTemp, Warning, TEXT("CanActive() - Character = %s"), OwnerCharacter ? TEXT("true") : TEXT("false"));
+	UE_LOG(LogTemp, Warning, TEXT("CanActive() - !bIsCoolingDown = %s"), !bIsCoolingDown ? TEXT("true") : TEXT("false"));
 	return OwnerCharacter && !bIsCoolingDown;
 }
 

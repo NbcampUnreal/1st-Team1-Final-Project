@@ -16,6 +16,18 @@ enum class ESkillSlot : uint8
 	Ultimate
 };
 
+USTRUCT()
+struct FSkillRuntimeState
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	ESkillSlot Slot;
+
+	UPROPERTY()
+	bool bIsActive = false;
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class GAS_API UGS_SkillComp : public UActorComponent
 {
@@ -35,6 +47,8 @@ public:
 
 	void SetCanUseSkill(bool InCanUseSkill);
 
+	void SetSkillActiveState(ESkillSlot Slot, bool InIsActive);
+
 	bool IsSkillActive(ESkillSlot Slot) const;
 
 protected:
@@ -43,6 +57,14 @@ protected:
 
 	UPROPERTY()
 	TMap<ESkillSlot, UGS_SkillBase*> SkillMap;
+
+	UPROPERTY(ReplicatedUsing = OnRep_SkillStates)
+	TArray<FSkillRuntimeState> ReplicatedSkillStates;
+
+	TMap<ESkillSlot, FSkillRuntimeState> SkillStates;
+	
+	UFUNCTION()
+	void OnRep_SkillStates();
 
 	UFUNCTION(Server, Reliable)
 	void Server_TryActiveSkill(ESkillSlot Slot);
@@ -54,4 +76,7 @@ protected:
 
 	UPROPERTY()
 	bool bCanUseSkill = true;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 };

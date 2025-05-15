@@ -7,6 +7,7 @@
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Debuff/EDebuffType.h"
+#include "Character/Skill/GS_SkillComp.h"
 
 void UGS_ChanAimingSkill::ActiveSkill()
 {
@@ -100,6 +101,10 @@ void UGS_ChanAimingSkill::TickDrainStamina()
 void UGS_ChanAimingSkill::StartHoldUp()
 {
 	bIsHoldingUp = true;
+	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
+	{
+		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
+	}
 	CurrentStamina = MaxStamina;
 
 	// UI 표시
@@ -110,6 +115,10 @@ void UGS_ChanAimingSkill::StartHoldUp()
 void UGS_ChanAimingSkill::EndHoldUp()
 {
 	bIsHoldingUp = false;
+	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
+	{
+		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
+	}
 	// UI 숨기기
 	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 	UE_LOG(LogTemp, Warning, TEXT("End Hold Up!!!!!!"));
