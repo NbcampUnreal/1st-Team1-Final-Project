@@ -338,16 +338,16 @@ void AGS_BuildManager::SelectPlaceableObject()
 {
 	if (!bBuildToolEnabled)
 	{
-		if (PlaceableobjectUnderCursor)
+		if (PlaceableObjectUnderCursor)
 		{
 			if (SelectedPlacableObject)
 			{
-				if (PlaceableobjectUnderCursor != SelectedPlacableObject)
+				if (PlaceableObjectUnderCursor != SelectedPlacableObject)
 				{
 					SelectedPlacableObject->SetObjectSelectedState(false);
 				}
 			}
-			SelectedPlacableObject = PlaceableobjectUnderCursor;
+			SelectedPlacableObject = PlaceableObjectUnderCursor;
 			bPlaceableObjectSelected = true;
 			SelectedPlacableObject->SetObjectSelectedState(true);
 		}

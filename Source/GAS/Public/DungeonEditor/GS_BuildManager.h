@@ -103,7 +103,7 @@ private:
 
 	bool bInteractStarted;
 	UPROPERTY()
-	TObjectPtr<AGS_PlacerBase> PlaceableobjectUnderCursor;
+	TObjectPtr<AGS_PlacerBase> PlaceableObjectUnderCursor;
 	UPROPERTY()
 	TObjectPtr<AGS_PlacerBase> SelectedPlacableObject;
 	bool bPlaceableObjectSelected;
