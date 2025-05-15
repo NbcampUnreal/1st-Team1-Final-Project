@@ -38,4 +38,8 @@ public:
 	void Move(const FInputActionValue& Value);
 	UFUNCTION()
 	void Zoom(const FInputActionValue& Value);
+	UFUNCTION()
+	void ClickLMB(const FInputActionValue& Value);
+	UFUNCTION()
+	void ReleasedLMB(const FInputActionValue& Value);
 };
