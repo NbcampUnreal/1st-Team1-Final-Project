@@ -6,6 +6,7 @@
 #include "Character/GS_Character.h"
 #include "BehaviorTree/BehaviorTree.h"       
 #include "BehaviorTree/BlackboardData.h"
+#include "AkGameplayStatics.h"
 #include "GS_Monster.generated.h"
 
 /**
@@ -28,11 +29,17 @@ public:
 	UPROPERTY(EditAnywhere, Category = "AI")
 	UBlackboardData* BBAsset;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	UAkAudioEvent* ClickSoundEvent;
+
 	void SetSelected(bool bIsSelected);
 
 protected:
 	UPROPERTY(VisibleAnywhere)
 	UDecalComponent* SelectionDecal;
+
+	UPROPERTY(VisibleAnywhere)
+	UAkComponent* AkComponent;
 
 };
 

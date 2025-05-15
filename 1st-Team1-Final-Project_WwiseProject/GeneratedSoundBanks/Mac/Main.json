@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{95BE10FC-E6B1-8091-F710-F7C4C1EC5732}",
+    "Hash": "{8BF7E8F3-C3AD-C474-FA5B-D883F171341A}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -21,7 +21,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowImpactWood_BW.54281.wav",
-      "CachePath": "D1/{D19BAAB3-D9BB-6BC8-D8A5-A250FF54720B}.wem"
+      "CachePath": "0D/{0DC80136-E5CB-0FAC-1468-87D3C8CED86A}.wem"
      },
      {
       "Id": "45190972",
@@ -29,7 +29,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Dragon_Vocal_Fight_Painful_Growl_Monster_Creature_Voice.wav",
-      "CachePath": "E0/{E0D50C62-64BB-C213-AB54-671920C6B555}.wem"
+      "CachePath": "EA/{EA68F9E2-703A-9634-A72C-0A51AE4EF1FF}.wem"
      },
      {
       "Id": "46724587",
@@ -45,7 +45,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Lava_Hit0.wav",
-      "CachePath": "25/{255F327C-848F-1DBA-CAD0-6953FE82D541}.wem"
+      "CachePath": "84/{845FE753-80F0-6825-CB07-84F31B1EBEA8}.wem"
      },
      {
       "Id": "112081368",
@@ -61,7 +61,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeFuse.wav",
-      "CachePath": "60/{60DDF81C-35FC-32AF-BF9C-4B1F9C899082}.wem"
+      "CachePath": "64/{6476595C-ABCB-938E-38AD-F396C9316B9C}.wem"
      },
      {
       "Id": "149736104",
@@ -104,12 +104,20 @@
       "CachePath": "6B/{6BFC1F58-54BB-B2F0-4B65-E642B954B5FD}.wem"
      },
      {
+      "Id": "223150580",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy.wav",
+      "CachePath": "9A/{9A7122CE-4483-3B30-BD0F-9B23FD99731F}.wem"
+     },
+     {
       "Id": "223413545",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.268.wav",
-      "CachePath": "A8/{A8EC507C-B710-9D01-A656-F4B04B3F49ED}.wem"
+      "CachePath": "66/{6646DB2A-9B9D-7EF1-6740-41D5559C99DD}.wem"
      },
      {
       "Id": "245240366",
@@ -117,7 +125,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Lava1.wav",
-      "CachePath": "07/{07F59871-1742-1CC8-8845-F6FFBAD0CE54}.wem"
+      "CachePath": "42/{427C606B-003F-B8A9-D86C-33C51F7C4425}.wem"
      },
      {
       "Id": "255360718",
@@ -149,7 +157,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Saw.wav",
-      "CachePath": "5F/{5FD38AF9-597F-5550-DBE3-505F126045ED}.wem"
+      "CachePath": "89/{89E4AB44-4F2F-CCDD-82C3-4707EC8F0747}.wem"
      },
      {
       "Id": "321658963",
@@ -189,7 +197,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Arrow_Realse.wav",
-      "CachePath": "9C/{9C7DC015-FDAB-FFE3-AD86-081070741DAF}.wem"
+      "CachePath": "1B/{1BD5F843-7767-DF2E-45D6-3A67563F9E82}.wem"
      },
      {
       "Id": "377837800",
@@ -237,7 +245,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_Hit.wav",
-      "CachePath": "AF/{AFFA2C0D-440D-9126-49E7-0BB17ACF4F7F}.wem"
+      "CachePath": "D6/{D6097544-A114-11ED-7819-676E97EC36FF}.wem"
      },
      {
       "Id": "518697165",
@@ -293,7 +301,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowImpactBody_BW.54264.wav",
-      "CachePath": "70/{704C3AB1-5A74-9917-C973-418E98BED500}.wem"
+      "CachePath": "41/{41929C32-2443-5BF1-980C-CC04EAFD4E3D}.wem"
      },
      {
       "Id": "694306221",
@@ -309,7 +317,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowBy_BW.54273.wav",
-      "CachePath": "F2/{F2FE4698-49F6-EBE9-B9AC-F0D734732F5B}.wem"
+      "CachePath": "BF/{BF452479-DA1A-6BEB-20F0-427130D69200}.wem"
      },
      {
       "Id": "750724736",
@@ -325,7 +333,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Lava_Hit1.wav",
-      "CachePath": "4A/{4A3E7BFB-6244-EF8D-C72B-F42E4C82D505}.wem"
+      "CachePath": "75/{75ACA214-A2A4-1D99-50D1-AB1499E837FA}.wem"
      },
      {
       "Id": "769452809",
@@ -365,7 +373,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy.wav",
-      "CachePath": "3C/{3C98154C-74C8-5BB5-7A7A-95D8EFD62989}.wem"
+      "CachePath": "5B/{5B595419-272B-3B4D-B8B2-B9CF3017021E}.wem"
      },
      {
       "Id": "941890073",
@@ -373,7 +381,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Lava0.wav",
-      "CachePath": "36/{367FC079-C888-CBFD-D2A1-D05498691AD7}.wem"
+      "CachePath": "2D/{2D647CE2-A0BF-8541-BC1F-E57D5C522F8C}.wem"
      },
      {
       "Id": "956247085",
@@ -389,7 +397,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.267.wav",
-      "CachePath": "32/{32D9AD2D-2159-4CFE-5FDF-F91BD0150B6E}.wem"
+      "CachePath": "6F/{6F283E1B-2A67-A3B8-BDE8-E452EFFD5BB0}.wem"
      },
      {
       "Id": "969253722",
@@ -413,7 +421,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.269.wav",
-      "CachePath": "A4/{A4061C7E-CACA-2271-7E5C-54170E2D2744}.wem"
+      "CachePath": "D1/{D138EC47-9D77-318B-6516-A42C75C620F3}.wem"
      },
      {
       "Id": "1038282182",
@@ -441,6 +449,14 @@
        "GUID": "{AFAA64B4-BCA6-414C-AB98-3F33A17A2102}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
+      },
+      {
+       "Id": "133365297",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_Mon_SmallClaw_UI\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{2D24BA7A-966C-40EC-9B78-EF6A0C544C7A}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
       },
       {
        "Id": "188849779",
@@ -611,6 +627,47 @@
        "Custom": [
         {
          "Id": "459107489"
+        }
+       ],
+       "ShareSets": [
+        {
+         "Id": "2652646462"
+        },
+        {
+         "Id": "3157398371"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "1082319155",
+      "Name": "EV_Mon_SmallClaw_UI",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_Mon_SmallClaw_UI",
+      "GUID": "{23941479-25EC-40A0-81FC-A265BBDEF2B9}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.5147626",
+      "DurationMax": "1.3153316",
+      "MediaRefs": [
+       {
+        "Id": "45190972"
+       },
+       {
+        "Id": "223150580"
+       },
+       {
+        "Id": "223413545"
+       },
+       {
+        "Id": "958130278"
+       },
+       {
+        "Id": "1030029664"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "133365297"
         }
        ],
        "ShareSets": [
@@ -1062,6 +1119,6 @@
     ]
    }
   ],
-  "FileHash": "{BC8A9EF9-4F0D-4DB6-684F-9D19436D35AB}"
+  "FileHash": "{F34FE929-518C-074C-DCB6-BF101303681C}"
  }
 }
