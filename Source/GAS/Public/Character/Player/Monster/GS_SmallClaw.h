@@ -21,8 +21,9 @@ public:
 	class UBoxComponent* BiteCollision;
 	
 	virtual void Attack() override;
-
-	FORCEINLINE class UBoxComponent* GetBiteCollision() const { return BiteCollision; }
+	
+	UFUNCTION(Server, Reliable)
+	void Server_SetBiteCollision(bool bEnable);
 
 	UFUNCTION()
 	void OnAttackBiteboxOverlap(

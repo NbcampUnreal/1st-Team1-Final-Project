@@ -34,8 +34,16 @@ void AGS_SmallClaw::Attack()
 	Super::Attack();
 }
 
+void AGS_SmallClaw::Server_SetBiteCollision_Implementation(bool bEnable)
+{
+	if (BiteCollision)
+	{
+		BiteCollision->SetCollisionEnabled(bEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+	}
+}
+
 void AGS_SmallClaw::OnAttackBiteboxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!OtherActor || OtherActor == this) return;
 
