@@ -21,7 +21,7 @@ AGS_TrapBase::AGS_TrapBase()
 	DamageBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DamageBoxComp->SetCollisionObjectType(ECC_WorldDynamic);
 	DamageBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
-	DamageBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	DamageBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 }
 
 
