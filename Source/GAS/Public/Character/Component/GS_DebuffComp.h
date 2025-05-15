@@ -10,6 +10,18 @@
 class UGS_DebuffBase;
 struct FDebuffData;
 
+USTRUCT(BlueprintType)
+struct FDebuffRepInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	EDebuffType Type;
+
+	UPROPERTY(BlueprintReadOnly)
+	float RemainingTime;
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class GAS_API UGS_DebuffComp : public UActorComponent
 {
@@ -25,6 +37,12 @@ public:
 	// Type 디버프가 있는지 확인
 	bool IsDebuffActive(EDebuffType Type);
 
+	UPROPERTY(ReplicatedUsing = OnRep_DebuffList)
+	TArray<FDebuffRepInfo> ReplicatedDebuffs;
+
+	UFUNCTION()
+	void OnRep_DebuffList();
+
 protected:
 	const FDebuffData* GetDebuffData(EDebuffType Type) const;
 	UGS_DebuffBase* GetActiveDebuff(EDebuffType Type) const;
@@ -33,6 +51,7 @@ protected:
 	void CreateAndApplyConcurrentDebuff(UGS_DebuffBase* Debuff);
 	void AddDebuffToQueue(UGS_DebuffBase* Debuff);
 	void ApplyNextDebuff();
+	void UpdateReplicatedDebuffList();
 	
 
 	UPROPERTY(EditDefaultsOnly)
@@ -49,4 +68,6 @@ protected:
 
 	UPROPERTY()
 	TMap<UGS_DebuffBase*, FTimerHandle> DebuffTimers;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
