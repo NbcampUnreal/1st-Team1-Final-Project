@@ -18,6 +18,12 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	//variables
+	UPROPERTY(ReplicatedUsing = OnRep_IsComboAttacking, VisibleAnywhere, BlueprintReadOnly)
+	bool bIsComboAttacking;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	int32 CurrentComboAttackIndex;
+
 	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
 	bool bIsDashing;
 
@@ -32,6 +38,25 @@ public:
 	virtual void Skill2() override;
 
 	virtual void UltimateSkill() override;
+
+	//[combo attack]
+	UFUNCTION(Server, Reliable)
+	void ServerRPCComboAttack();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCComboAttackUpdate();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCComboAttackEnd();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCMovementSetting();
+
+	UFUNCTION()
+	void OnRep_IsComboAttacking();
+
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	//[dash skill]
 	UFUNCTION(Server, Reliable)
@@ -50,6 +75,12 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPCEarthquake();
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPCEarthquakeEnd();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCEarthquakeAttackCheck();
+
 	UFUNCTION()
 	void OnRep_IsEarthquaking();
 
@@ -57,25 +88,20 @@ protected:
 
 private:
 	//[combo attack] 
-	
+	//int32 CurrentComboAttackIndex;
+	int32 MaxComboAttackIndex;
+
 	//[dash skill]
 	UPROPERTY()
 	TSet<AGS_Character*> DamagedCharacters;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	TObjectPtr<UAnimMontage> DashMontage;*/
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	TObjectPtr<UCapsuleComponent> DashAttackCapsule;
-
 	FVector DashStartLocation;
 	FVector DashEndLocation;
-
 	float DashPower;
 	float DashInterpAlpha;
 	float DashDuration;
 
 	//[earthquake]
-	UPROPERTY()
-	TObjectPtr<UAnimMontage> EarthquakeMontage;
+	float EarthquakePower;
+	float EarthquakeRadius;
 };
