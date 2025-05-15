@@ -47,13 +47,6 @@ public:
 	virtual void UltimateSkill() override;
 
 	//[combo attack]
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FVector StartLocation;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	FRotator StartRotation;
-
 	UFUNCTION(Server, Reliable)
 	void ServerRPCComboAttack();
 
