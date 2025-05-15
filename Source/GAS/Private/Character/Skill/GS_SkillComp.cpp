@@ -7,6 +7,7 @@
 #include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
 #include "Character/Skill/Seeker/Chan/GS_ChanMovingSkill.h"
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
+#include "Character/Skill/GS_SkillSet.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -18,7 +19,6 @@ UGS_SkillComp::UGS_SkillComp()
 
 void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Skill : Skill TryActiveSkill"));
 	if (!bCanUseSkill)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("TryActivateSkill failed: bCanUseSkill = false"));
@@ -27,7 +27,6 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 
 	if (!GetOwner()->HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Calling Server_TryActiveSkill"));
 		Server_TryActiveSkill(Slot);
 		return;
 	}
@@ -37,10 +36,8 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 		UGS_SkillBase* Skill = SkillMap[Slot];
 		if (Skill)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Skill exists for slot"));
 			if (Skill->CanActive())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("CanActive() = true, calling ActiveSkill"));
 				Skill->ActiveSkill();
 			}
 			else
@@ -52,10 +49,6 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Skill is nullptr"));
 		}
-		/*if (Skill && Skill->CanActive())
-		{
-			Skill->ActiveSkill();
-		}*/
 	}
 	else
 	{
@@ -97,7 +90,6 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, TSubclassOf<UGS_SkillBase> SkillCl
 
 	Skill->InitSkill(Cast<AGS_Character>(GetOwner()));
 	SkillMap.Add(Slot, Skill);
-	UE_LOG(LogTemp, Warning, TEXT(">>> SetSkill: Skill for slot %d set successfully"), (uint8)Slot);
 }
 
 void UGS_SkillComp::SetCanUseSkill(bool InCanUseSkill)
@@ -147,7 +139,6 @@ void UGS_SkillComp::BeginPlay()
 
 	if (GetOwner()->HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT(">>> UGS_SkillComp: Calling InitSkills on server"));
 		InitSkills();
 	}
 }
@@ -163,7 +154,6 @@ void UGS_SkillComp::OnRep_SkillStates()
 
 void UGS_SkillComp::Server_TryActiveSkill_Implementation(ESkillSlot Slot)
 {
-	UE_LOG(LogTemp, Warning, TEXT(">>> Server_TryActiveSkill_Implementation called with slot: %d"), (uint8)Slot);
 	TryActivateSkill(Slot);
 }
 
@@ -174,21 +164,30 @@ void UGS_SkillComp::Server_TrySkillCommand_Implementation(ESkillSlot Slot)
 
 void UGS_SkillComp::InitSkills()
 {
-	UE_LOG(LogTemp, Warning, TEXT(">>> InitSkills called"));
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
 	if (!OwnerCharacter)
 	{
 		UE_LOG(LogTemp, Error, TEXT(">>> InitSkills: Invalid OwnerCharacter"));
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT(">>> InitSkills: CharacterType = %d"), (int32)OwnerCharacter->GetCharacterType());
-	// Test용 방패병 클래스 설정
-	SetSkill(ESkillSlot::Aiming, UGS_ChanAimingSkill::StaticClass());
-	SetSkill(ESkillSlot::Moving, UGS_ChanMovingSkill::StaticClass());
-	SetSkill(ESkillSlot::Ultimate, UGS_ChanUltimateSkill::StaticClass());
-	if (OwnerCharacter->GetCharacterType() == ECharacterType::Chan)
+
+	if (!SkillDataTable)
 	{
-		
+		UE_LOG(LogTemp, Error, TEXT(">>> SkillDataTable is null!"));
+		return;
+	}
+
+	FName RowName = FName(*UEnum::GetValueAsString(OwnerCharacter->GetCharacterType()).RightChop(
+		UEnum::GetValueAsString(OwnerCharacter->GetCharacterType()).Find(TEXT("::")) + 2));
+	FString Context;
+
+	FGS_SkillSet* SkillSet = SkillDataTable->FindRow<FGS_SkillSet>(RowName, Context);
+	if (SkillSet)
+	{
+		// 스킬 세팅
+		SetSkill(ESkillSlot::Aiming, SkillSet->AimingSkill);
+		SetSkill(ESkillSlot::Moving, SkillSet->MovingSkill);
+		SetSkill(ESkillSlot::Ultimate, SkillSet->UltimateSkill);
 	}
 }
 
