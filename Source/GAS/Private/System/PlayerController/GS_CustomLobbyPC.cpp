@@ -1,9 +1,12 @@
-﻿#include "System/PlayerController/GS_CustomLobbyPC.h"
+#include "System/PlayerController/GS_CustomLobbyPC.h"
 #include "System/GS_PlayerState.h"
-#include "Blueprint/UserWidget.h"
 #include "System/GameMode/GS_CustomLobbyGM.h"
 #include "UI/GS_CustomLobbyUI.h"
 #include "System/GS_PlayerRole.h"
+#include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Kismet/GameplayStatics.h"
 
 AGS_CustomLobbyPC::AGS_CustomLobbyPC()
 	: CachedPlayerState(nullptr)
