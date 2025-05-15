@@ -4,7 +4,14 @@ AGS_TrigTrapBase::AGS_TrigTrapBase()
 {
 	TriggerBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
 	TriggerBoxComp->SetupAttachment(RotationSceneComp);
-	TriggerBoxComp->SetCollisionProfileName(TEXT("Trigger"));
+	
+	//Trigger Box 설정
+	TriggerBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	TriggerBoxComp->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	TriggerBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	TriggerBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+
 }
 
 void AGS_TrigTrapBase::BeginPlay()
