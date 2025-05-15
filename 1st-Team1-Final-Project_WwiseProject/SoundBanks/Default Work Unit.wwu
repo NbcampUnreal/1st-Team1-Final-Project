@@ -20,11 +20,13 @@
 						<ObjectRef Name="Props_Saw" ID="{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Stop_waves" ID="{CEB75CC5-195D-480A-8494-6222F467BB05}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Spike_Hit" ID="{36F0066E-709B-487B-AB1C-AAC04B8F753C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="SFX_ArrowImpact_Stone" ID="{5B4DA841-68C7-48EF-90AB-20E344778912}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw" ID="{CBF98796-A6A2-4A10-8163-018B83F0EB4C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Axe" ID="{597B061A-CE0A-4A56-8154-41280E86C596}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_ArrowImpact_Body" ID="{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="FootSteps" ID="{BF94A467-5B4A-4C18-8A80-37A713606011}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_GameState" ID="{6CB15BE6-8B8A-4C5E-BD0C-81EB81C18C52}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_StoneTrap_Hit" ID="{624349E1-2251-4E0E-8E91-39536798294E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Mine" ID="{59F8482E-4399-4E6E-B401-0432CFED7550}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_Arrow_By" ID="{3AF9A3F0-DE14-4EB3-AA03-2EBCC8FB07A2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>

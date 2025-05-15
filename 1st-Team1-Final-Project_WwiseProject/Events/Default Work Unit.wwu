@@ -261,6 +261,28 @@
 						</Action>
 					</ChildrenList>
 				</Event>
+				<Event Name="EV_GameState" ID="{6CB15BE6-8B8A-4C5E-BD0C-81EB81C18C52}">
+					<ChildrenList>
+						<Action Name="" ID="{D715F06A-A77E-463C-A382-F867EE130546}" ShortID="826454007">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="BGM_Theme" ID="{C8B3A831-1A9D-4BDB-8BF8-46E57747CC19}" WorkUnitID="{805731CD-25EB-4476-9DAF-C545D2251845}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="EV_ArrowImpact_Stone" ID="{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}">
+					<ChildrenList>
+						<Action Name="" ID="{3C81E8EE-4321-4A80-AB47-1CCE3A98E483}" ShortID="188686223">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_ArrowImpact_Stone" ID="{5B4DA841-68C7-48EF-90AB-20E344778912}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>
