@@ -29,8 +29,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "AI")
 	UBlackboardData* BBAsset;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	UAkAudioEvent* ClickSoundEvent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	UAkAudioEvent* MoveSoundEvent;
 
 	void SetSelected(bool bIsSelected);
 

@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{8BF7E8F3-C3AD-C474-FA5B-D883F171341A}",
+    "Hash": "{C5740437-9BC3-AC4E-8270-FD3930CA83DA}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -645,8 +645,8 @@
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Mon_SmallClaw_UI",
       "GUID": "{23941479-25EC-40A0-81FC-A265BBDEF2B9}",
       "DurationType": "OneShot",
-      "DurationMin": "0.5147626",
-      "DurationMax": "1.3153316",
+      "DurationMin": "0.5117977",
+      "DurationMax": "1.5229512",
       "MediaRefs": [
        {
         "Id": "45190972"
@@ -1119,6 +1119,6 @@
     ]
    }
   ],
-  "FileHash": "{F34FE929-518C-074C-DCB6-BF101303681C}"
+  "FileHash": "{6461763C-01A5-254A-003B-F4649BF0C653}"
  }
 }

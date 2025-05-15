@@ -15,6 +15,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
 	UAkAudioEvent* SmallClawClickSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	UAkAudioEvent* SmallClawMoveSound;
+
 protected:
 	virtual void BeginPlay() override;
 }; 
