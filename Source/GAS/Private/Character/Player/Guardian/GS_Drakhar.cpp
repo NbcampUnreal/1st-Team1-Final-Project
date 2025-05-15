@@ -16,9 +16,6 @@ AGS_Drakhar::AGS_Drakhar()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
-	//stat init test
-	GetStatComp()->InitStat(FName("Drakhar"));
-
 	//combo attack variables
 	CurrentComboAttackIndex = 0;
 	MaxComboAttackIndex = 3;
@@ -73,7 +70,7 @@ void AGS_Drakhar::Tick(float DeltaTime)
 				DashStartLocation = NewLocation;
 			}
 		}
-	}	
+	}
 }
 
 void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -162,7 +159,7 @@ void AGS_Drakhar::ServerRPCComboAttackCheck_Implementation()
 
 	if (CurrentComboAttackIndex == MaxComboAttackIndex - 1)
 	{
-		StartLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 50.f);
+		const FVector StartLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 50.f);
 		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(Projectile, StartLocation, GetActorRotation());
 		if (DrakharProjectile)
 		{
