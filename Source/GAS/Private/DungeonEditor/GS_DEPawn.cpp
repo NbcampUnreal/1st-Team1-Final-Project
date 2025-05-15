@@ -64,6 +64,19 @@ void AGS_DEPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 					,this
 					, &AGS_DEPawn::Zoom);
 			}
+			
+			if (PlayerController->ClickLMBAction)
+			{
+				EnhancedInput->BindAction(PlayerController->ClickLMBAction
+					, ETriggerEvent::Triggered
+					,this
+					, &AGS_DEPawn::ClickLMB);
+
+				EnhancedInput->BindAction(PlayerController->ClickLMBAction
+					, ETriggerEvent::Completed
+					,this
+					, &AGS_DEPawn::ReleasedLMB);
+			}
 		}
 	}
 }
@@ -100,3 +113,32 @@ void AGS_DEPawn::Zoom(const FInputActionValue& Value)
 	}
 }
 
+void AGS_DEPawn::ClickLMB(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+
+	if (AGS_DEController* DEController = Cast<AGS_DEController>(Controller))
+	{
+		const bool IsClickLBT = Value.Get<bool>();
+
+		if (IsClickLBT)
+		{
+			DEController->GetBuildManager()->PressedLMB();
+		}
+	}
+}
+
+void AGS_DEPawn::ReleasedLMB(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+
+	if (AGS_DEController* DEController = Cast<AGS_DEController>(Controller))
+	{
+		const bool IsClickLBT = Value.Get<bool>();
+
+		if (!IsClickLBT)
+		{
+			DEController->GetBuildManager()->ReleasedLMB();
+		}
+	}
+}
