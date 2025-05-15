@@ -4,6 +4,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "GS_Drakhar.generated.h"
 
+class AGS_DrakharProjectile;
 
 UCLASS()
 class GAS_API AGS_Drakhar : public AGS_Guardian
@@ -22,6 +23,9 @@ public:
 	bool bIsComboAttacking;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	bool bCanDoNextComboAttack;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentComboAttackIndex, VisibleAnywhere, BlueprintReadOnly)
 	int32 CurrentComboAttackIndex;
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
@@ -29,6 +33,9 @@ public:
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsEarthquaking)
 	bool bIsEarthquaking;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<AGS_DrakharProjectile> Projectile;
 
 	//action binding function
 	virtual void ComboAttack() override;
@@ -40,20 +47,30 @@ public:
 	virtual void UltimateSkill() override;
 
 	//[combo attack]
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FVector StartLocation;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FRotator StartRotation;
+
 	UFUNCTION(Server, Reliable)
 	void ServerRPCComboAttack();
 
 	UFUNCTION(Server, Reliable)
-	void ServerRPCComboAttackUpdate();
+	void ServerRPCComboAttackCheck();
 
 	UFUNCTION(Server, Reliable)
-	void ServerRPCComboAttackEnd();
+	void ServerRPCComboReset();
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPCMovementSetting();
 
 	UFUNCTION()
 	void OnRep_IsComboAttacking();
+
+	UFUNCTION()
+	void OnRep_CurrentComboAttackIndex();
 
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -90,6 +107,7 @@ private:
 	//[combo attack] 
 	//int32 CurrentComboAttackIndex;
 	int32 MaxComboAttackIndex;
+	int32 ClientComboAttackIndex;
 
 	//[dash skill]
 	UPROPERTY()
