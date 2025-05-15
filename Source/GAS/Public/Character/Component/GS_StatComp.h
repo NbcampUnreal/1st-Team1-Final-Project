@@ -22,7 +22,11 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void InitStat();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat")
+	TObjectPtr<UDataTable> StatDataTable;
+
+	void InitStat(FName RowName);
 
 	void UpdateStat();
 
@@ -70,5 +74,4 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
 	float AttackSpeed;
-
 };

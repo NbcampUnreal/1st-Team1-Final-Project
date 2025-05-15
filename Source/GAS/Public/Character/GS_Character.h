@@ -69,16 +69,18 @@ public:
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_SkillComp> SkillComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_DebuffComp> DebuffComp;
+
 private:
 	//component
 	UPROPERTY()
 	TObjectPtr<UGS_StatComp> StatComp;
 
-	UPROPERTY()
-	TObjectPtr<UGS_SkillComp> SkillComp;
-
-	UPROPERTY()
-	TObjectPtr<UGS_DebuffComp> DebuffComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
 	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
