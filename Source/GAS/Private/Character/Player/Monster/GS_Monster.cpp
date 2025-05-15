@@ -7,6 +7,7 @@
 #include "Character/Component/GS_StatComp.h"
 #include "Components/DecalComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "AkComponent.h"
 
 AGS_Monster::AGS_Monster()
 {
@@ -16,6 +17,9 @@ AGS_Monster::AGS_Monster()
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>("SelectionDecal");
 	SelectionDecal->SetupAttachment(RootComponent);
 	SelectionDecal->SetVisibility(false);
+
+	AkComponent = CreateDefaultSubobject<UAkComponent>("AkComponent");
+	AkComponent->SetupAttachment(RootComponent);
 
 	GetStatComp()->SetCurrentHealth(2000.f);
 	
@@ -35,5 +39,10 @@ void AGS_Monster::SetSelected(bool bIsSelected)
 	if (SelectionDecal)
 	{
 		SelectionDecal->SetVisibility(bIsSelected);
+	}
+
+	if (bIsSelected && ClickSoundEvent)
+	{
+		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
 	}
 }
