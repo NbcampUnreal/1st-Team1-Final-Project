@@ -16,7 +16,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AGS_PlacerBase> ObjectPlacerClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FIntPoint ObjectSize;
+	FIntPoint ObjectSize = FIntPoint(1, 1);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UTexture> Icon;
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -26,7 +26,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Description;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ZOffSet;
+	float ZOffSet = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ConstructionCost;
+	float ConstructionCost = 0.0f;
 };
