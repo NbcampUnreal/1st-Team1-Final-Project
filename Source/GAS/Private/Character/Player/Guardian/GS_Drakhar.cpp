@@ -158,7 +158,11 @@ void AGS_Drakhar::ServerRPCMovementSetting_Implementation()
 void AGS_Drakhar::ServerRPCShootProjectile_Implementation()
 {
 	StartLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 50.f);
-	GetWorld()->SpawnActor<AGS_DrakharProjectile>(Projectile, StartLocation, GetActorRotation());
+	AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(Projectile, StartLocation, GetActorRotation());
+	if (DrakharProjectile)
+	{
+		DrakharProjectile->SetOwner(this);
+	}
 }
 
 void AGS_Drakhar::OnRep_IsComboAttacking()
@@ -169,7 +173,6 @@ void AGS_Drakhar::OnRep_IsComboAttacking()
 
 		if (CurrentComboAttackIndex == 2)
 		{
-			//GetWorld()->SpawnActor<AGS_DrakharProjectile>(Projectile, GetActorLocation(), GetActorRotation());
 			ServerRPCShootProjectile();
 		}
 	}
