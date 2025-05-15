@@ -9,12 +9,15 @@ AGS_WeaponProjectile::AGS_WeaponProjectile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	bReplicates = true;
+	SetReplicateMovement(true);
+
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionBox"));
 	SetRootComponent(CollisionComponent);
-	CollisionComponent->BodyInstance.SetCollisionProfileName(TEXT("PJEProjectile"));
 	CollisionComponent->OnComponentHit.AddDynamic(this, &AGS_WeaponProjectile::OnHit);
+	CollisionComponent->SetNotifyRigidBodyCollision(true);
 
-	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Projectile Mesh"));
+	ProjectileMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Projectile Mesh"));
 	ProjectileMesh->SetupAttachment(CollisionComponent);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
