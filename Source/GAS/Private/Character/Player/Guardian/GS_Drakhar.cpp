@@ -17,13 +17,14 @@ AGS_Drakhar::AGS_Drakhar()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	//stat init test
-	GetStatComp()->SetCurrentHealth(2000.f);
-	GetStatComp()->SetAttackPower(120.f);
+	GetStatComp()->InitStat(FName("Drakhar"));
 
 	//combo attack variables
 	CurrentComboAttackIndex = 0;
 	MaxComboAttackIndex = 3;
+
 	bIsComboAttacking = false;
+	bCanDoNextComboAttack = false;
 
 	//dash skill variables
 	DashPower = 1000.f;
@@ -45,7 +46,6 @@ void AGS_Drakhar::BeginPlay()
 	{
 		GuardianAnim->OnMontageEnded.AddDynamic(this, &AGS_Drakhar::OnMontageEnded);
 	}
-
 }
 
 void AGS_Drakhar::Tick(float DeltaTime)
@@ -81,8 +81,11 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, bIsComboAttacking);
+	DOREPLIFETIME(ThisClass, bCanDoNextComboAttack);
 	DOREPLIFETIME(ThisClass, CurrentComboAttackIndex);
+
 	DOREPLIFETIME(ThisClass, bIsDashing);
+
 	DOREPLIFETIME(ThisClass, bIsEarthquaking);
 }
 
@@ -121,7 +124,12 @@ void AGS_Drakhar::Skill2()
 //DraconicFury
 void AGS_Drakhar::UltimateSkill()
 {
+	Super::UltimateSkill();
 
+	if (IsLocallyControlled())
+	{
+		
+	}
 }
 
 
@@ -130,24 +138,52 @@ void AGS_Drakhar::ServerRPCComboAttack_Implementation()
 	//prevent attack stacking
 	if (bIsComboAttacking)
 	{
+		bCanDoNextComboAttack = true;
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 		return;
 	}
+
 	bIsComboAttacking = true;
-}
-
-void AGS_Drakhar::ServerRPCComboAttackUpdate_Implementation()
-{
-	CurrentComboAttackIndex++;
-	CurrentComboAttackIndex %= MaxComboAttackIndex;
-
+	bCanDoNextComboAttack = false;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 }
 
-void AGS_Drakhar::ServerRPCComboAttackEnd_Implementation()
-{	
-	bIsComboAttacking = false;
-
+void AGS_Drakhar::ServerRPCComboAttackCheck_Implementation()
+{
+	if (bCanDoNextComboAttack)
+	{
+		CurrentComboAttackIndex++;
+		CurrentComboAttackIndex %= MaxComboAttackIndex;
+	}
+	
 	MeleeAttackCheck();
+
+	UE_LOG(LogTemp, Warning, TEXT("%d"), CurrentComboAttackIndex);
+
+	if (CurrentComboAttackIndex == MaxComboAttackIndex - 1)
+	{
+		StartLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 50.f);
+		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(Projectile, StartLocation, GetActorRotation());
+		if (DrakharProjectile)
+		{
+			DrakharProjectile->SetOwner(this);
+		}
+	}
+
+	bIsComboAttacking = false;
+	//bCanDoNextComboAttack = false;
+}
+
+void AGS_Drakhar::ServerRPCComboReset_Implementation()
+{
+	if (!bCanDoNextComboAttack)
+	{
+		CurrentComboAttackIndex = 0;
+	}
+
+	bIsComboAttacking = false;
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	bCanDoNextComboAttack = false;
 }
 
 void AGS_Drakhar::ServerRPCMovementSetting_Implementation()
@@ -155,38 +191,32 @@ void AGS_Drakhar::ServerRPCMovementSetting_Implementation()
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
-void AGS_Drakhar::ServerRPCShootProjectile_Implementation()
-{
-	StartLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 50.f);
-	AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(Projectile, StartLocation, GetActorRotation());
-	if (DrakharProjectile)
-	{
-		DrakharProjectile->SetOwner(this);
-	}
-}
-
 void AGS_Drakhar::OnRep_IsComboAttacking()
 {
 	if (bIsComboAttacking)
 	{
-		GuardianAnim->PlayComboAttackMontage(CurrentComboAttackIndex);
-
-		if (CurrentComboAttackIndex == 2)
-		{
-			ServerRPCShootProjectile();
-		}
+		GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
 	}
+}
+
+void AGS_Drakhar::OnRep_CurrentComboAttackIndex()
+{
+	ClientComboAttackIndex = CurrentComboAttackIndex;
+
+	/*if (bIsComboAttacking)
+	{
+		GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
+	}*/
 }
 
 void AGS_Drakhar::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {	
+	//montage end normally
 	if (!bInterrupted)
-	{
-		ServerRPCMovementSetting();
-	}
-	else
-	{
-		CurrentComboAttackIndex = 0;
+	{		
+		//reset combo attack
+		//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("montage end")), true, true, FLinearColor::Green, 5.f);
+		ServerRPCComboReset();
 	}
 }
 

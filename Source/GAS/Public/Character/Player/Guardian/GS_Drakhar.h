@@ -23,6 +23,9 @@ public:
 	bool bIsComboAttacking;
 
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	bool bCanDoNextComboAttack;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentComboAttackIndex, VisibleAnywhere, BlueprintReadOnly)
 	int32 CurrentComboAttackIndex;
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
@@ -55,19 +58,19 @@ public:
 	void ServerRPCComboAttack();
 
 	UFUNCTION(Server, Reliable)
-	void ServerRPCComboAttackUpdate();
+	void ServerRPCComboAttackCheck();
 
 	UFUNCTION(Server, Reliable)
-	void ServerRPCComboAttackEnd();
+	void ServerRPCComboReset();
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPCMovementSetting();
 
-	UFUNCTION(Server, Reliable)
-	void ServerRPCShootProjectile();
-
 	UFUNCTION()
 	void OnRep_IsComboAttacking();
+
+	UFUNCTION()
+	void OnRep_CurrentComboAttackIndex();
 
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
@@ -104,6 +107,7 @@ private:
 	//[combo attack] 
 	//int32 CurrentComboAttackIndex;
 	int32 MaxComboAttackIndex;
+	int32 ClientComboAttackIndex;
 
 	//[dash skill]
 	UPROPERTY()

@@ -46,9 +46,9 @@ private:
 
 	//[combo attack]
 	UFUNCTION()
-	void AnimNotify_ComboAttackCheckStart();
-	UFUNCTION()
-	void AnimNotify_ComboAttackCheckEnd();
+	void AnimNotify_ComboAttackCheck();
+	//UFUNCTION()
+	//void AnimNotify_ComboAttackCheckEnd();
 
 	//[dash skill]
 	UFUNCTION()
