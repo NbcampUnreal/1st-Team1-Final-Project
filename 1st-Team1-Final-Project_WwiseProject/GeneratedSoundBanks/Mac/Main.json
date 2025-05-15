@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{C5740437-9BC3-AC4E-8270-FD3930CA83DA}",
+    "Hash": "{DFA2F38E-CB79-6788-4207-36E649B1E33F}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -21,7 +21,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowImpactWood_BW.54281.wav",
-      "CachePath": "0D/{0DC80136-E5CB-0FAC-1468-87D3C8CED86A}.wem"
+      "CachePath": "E9/{E9A0306C-74B0-95A4-24C1-7A6D4631DE7F}.wem"
      },
      {
       "Id": "45190972",
@@ -46,6 +46,14 @@
       "Location": "Memory",
       "ShortName": "SFX_Lava_Hit0.wav",
       "CachePath": "84/{845FE753-80F0-6825-CB07-84F31B1EBEA8}.wem"
+     },
+     {
+      "Id": "81623842",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Wind_Loop_Distant_Air_Steady_1.wav",
+      "CachePath": "08/{0801B149-5EAE-81E6-B35F-AEFA8B3A8891}.wem"
      },
      {
       "Id": "112081368",
@@ -80,6 +88,14 @@
       "CachePath": "9D/{9D1D7430-7695-F79D-CFED-62C578CC5256}.wem"
      },
      {
+      "Id": "177130386",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am.wav",
+      "CachePath": "C4/{C4AB8AED-E27C-80B7-9E61-568BCEA89233}.wem"
+     },
+     {
       "Id": "199617062",
       "Language": "SFX",
       "Streaming": "false",
@@ -109,7 +125,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy.wav",
-      "CachePath": "9A/{9A7122CE-4483-3B30-BD0F-9B23FD99731F}.wem"
+      "CachePath": "1F/{1F15E0D9-61EF-E966-A2B3-C1AC144AC6BC}.wem"
      },
      {
       "Id": "223413545",
@@ -157,7 +173,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Saw.wav",
-      "CachePath": "89/{89E4AB44-4F2F-CCDD-82C3-4707EC8F0747}.wem"
+      "CachePath": "69/{693A7FE9-2F6E-0E1A-212B-D2B66629EC51}.wem"
      },
      {
       "Id": "321658963",
@@ -264,6 +280,22 @@
       "CachePath": "71/{71ED084E-15F1-56C7-8948-167F1ED51B3C}.wem"
      },
      {
+      "Id": "578835809",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_10.wav",
+      "CachePath": "B9/{B99E2758-A8B2-5CA2-E0ED-621D272B348E}.wem"
+     },
+     {
+      "Id": "600873638",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_04.wav",
+      "CachePath": "E4/{E488852C-3A2D-20BA-2D8D-D1923AB7DEA2}.wem"
+     },
+     {
       "Id": "602204976",
       "Language": "SFX",
       "Streaming": "false",
@@ -278,6 +310,14 @@
       "Location": "Memory",
       "ShortName": "SFX_GrenadeExplosion.wav",
       "CachePath": "BF/{BF182761-C6AF-AA4D-AE77-1F457BEF8B48}.wem"
+     },
+     {
+      "Id": "624593524",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj.wav",
+      "CachePath": "96/{96300078-EC08-B39A-D34F-1F977C3540F7}.wem"
      },
      {
       "Id": "655511879",
@@ -301,7 +341,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowImpactBody_BW.54264.wav",
-      "CachePath": "41/{41929C32-2443-5BF1-980C-CC04EAFD4E3D}.wem"
+      "CachePath": "1E/{1E97C395-CA7D-645E-78E3-30B32586749B}.wem"
      },
      {
       "Id": "694306221",
@@ -317,7 +357,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowBy_BW.54273.wav",
-      "CachePath": "BF/{BF452479-DA1A-6BEB-20F0-427130D69200}.wem"
+      "CachePath": "85/{85FA927D-784C-2651-ADA3-A8B3AD9B3887}.wem"
      },
      {
       "Id": "750724736",
@@ -358,6 +398,14 @@
       "Location": "Memory",
       "ShortName": "FootstepMetal.wav",
       "CachePath": "F0/{F00849BB-91D3-0573-A268-7AF8B52292AD}.wem"
+     },
+     {
+      "Id": "848033451",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_01.wav",
+      "CachePath": "BD/{BDE88CFA-EF11-5D91-5EC2-42E5CC07CD1E}.wem"
      },
      {
       "Id": "866318197",
@@ -483,6 +531,14 @@
        "LibId": "8519683"
       },
       {
+       "Id": "372897391",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Interactive Music Hierarchy\\Default Work Unit\\BGM_Theme\\BGM_Temp\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{A5478D08-348B-4DE2-99AC-DD93BBFC8FEE}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
+      },
+      {
        "Id": "459107489",
        "Name": "Pitch Shifter (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_Mon_SmallClaw\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
@@ -497,6 +553,14 @@
        "GUID": "{90895E04-6C77-4899-B5E6-4F5F9A428296}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
+      },
+      {
+       "Id": "819178014",
+       "Name": "Standard (Custom)",
+       "ObjectPath": "\\Interactive Music Hierarchy\\Default Work Unit\\BGM_Theme\\BGM_Temp\\[Effect Slot [1]: (Flanger)]\\Standard (Custom)",
+       "GUID": "{9C58A6F3-1787-4264-BBEF-11128E22A730}",
+       "LibName": "Wwise Flanger",
+       "LibId": "8192003"
       }
      ],
      "ShareSets": [
@@ -532,10 +596,10 @@
       "Name": "EV_ArrowBy",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowBy",
       "GUID": "{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}",
-      "MaxAttenuation": "250",
+      "MaxAttenuation": "300",
       "DurationType": "OneShot",
-      "DurationMin": "0.8015838",
-      "DurationMax": "0.8015838",
+      "DurationMin": "0.75643444",
+      "DurationMax": "0.75643444",
       "MediaRefs": [
        {
         "Id": "710539305"
@@ -559,13 +623,34 @@
       "Name": "EV_ArrowImpact_Body",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Body",
       "GUID": "{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}",
-      "MaxAttenuation": "300",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
-      "DurationMin": "0.33827296",
-      "DurationMax": "0.3583877",
+      "DurationMin": "0.30958745",
+      "DurationMax": "0.32799646",
       "MediaRefs": [
        {
         "Id": "689500474"
+       }
+      ]
+     },
+     {
+      "Id": "3834184178",
+      "Name": "EV_ArrowImpact_Stone",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Stone",
+      "GUID": "{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.54591566",
+      "DurationMax": "0.7596884",
+      "MediaRefs": [
+       {
+        "Id": "578835809"
+       },
+       {
+        "Id": "600873638"
+       },
+       {
+        "Id": "848033451"
        }
       ]
      },
@@ -574,10 +659,10 @@
       "Name": "EV_ArrowImpact_Wood",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Wood",
       "GUID": "{5AF6D827-D199-47C8-9BED-CC9DB12DEE69}",
-      "MaxAttenuation": "300",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
-      "DurationMin": "1.1009582",
-      "DurationMax": "1.1664246",
+      "DurationMin": "0.85634214",
+      "DurationMax": "0.9072629",
       "MediaRefs": [
        {
         "Id": "5171484"
@@ -600,11 +685,69 @@
       ]
      },
      {
+      "Id": "1613532296",
+      "Name": "EV_GameState",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_GameState",
+      "GUID": "{6CB15BE6-8B8A-4C5E-BD0C-81EB81C18C52}",
+      "DurationType": "Infinite",
+      "SwitchContainers": [
+       {
+        "SwitchValue": {
+         "GroupType": "State",
+         "GroupId": "1750343382",
+         "Id": "1160234136",
+         "GUID": "{BE7DC584-CBCD-4792-90E4-ECC03BDFDE72}"
+        },
+        "MediaRefs": [
+         {
+          "Id": "81623842"
+         }
+        ]
+       },
+       {
+        "SwitchValue": {
+         "GroupType": "State",
+         "GroupId": "1750343382",
+         "Id": "221232726",
+         "GUID": "{CD8F9588-1DFB-4A53-A477-E69169C457B2}"
+        },
+        "MediaRefs": [
+         {
+          "Id": "177130386"
+         }
+        ]
+       },
+       {
+        "SwitchValue": {
+         "GroupType": "State",
+         "GroupId": "1750343382",
+         "Id": "979765101",
+         "GUID": "{81F47699-C275-4308-BF58-11F7741DB094}"
+        },
+        "MediaRefs": [
+         {
+          "Id": "624593524"
+         }
+        ],
+        "PluginRefs": {
+         "Custom": [
+          {
+           "Id": "372897391"
+          },
+          {
+           "Id": "819178014"
+          }
+         ]
+        }
+       }
+      ]
+     },
+     {
       "Id": "831579122",
       "Name": "EV_Mon_SmallClaw",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Mon_SmallClaw",
       "GUID": "{CBF98796-A6A2-4A10-8163-018B83F0EB4C}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "600",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1077,6 +1220,40 @@
       "DurationMax": "0"
      }
     ],
+    "StateGroups": [
+     {
+      "Id": "1750343382",
+      "Name": "GameTheme",
+      "ObjectPath": "\\States\\Default Work Unit\\GameTheme",
+      "GUID": "{FFD09951-7D67-4226-84C5-E7A89E41F513}",
+      "States": [
+       {
+        "Id": "221232726",
+        "Name": "Lose",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Lose",
+        "GUID": "{CD8F9588-1DFB-4A53-A477-E69169C457B2}"
+       },
+       {
+        "Id": "748895195",
+        "Name": "None",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\None",
+        "GUID": "{979859DB-348B-4CDB-99E7-60D08A1C9ABA}"
+       },
+       {
+        "Id": "979765101",
+        "Name": "Win",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Win",
+        "GUID": "{81F47699-C275-4308-BF58-11F7741DB094}"
+       },
+       {
+        "Id": "1160234136",
+        "Name": "Normal",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Normal",
+        "GUID": "{BE7DC584-CBCD-4792-90E4-ECC03BDFDE72}"
+       }
+      ]
+     }
+    ],
     "SwitchGroups": [
      {
       "Id": "2385628198",
@@ -1119,6 +1296,6 @@
     ]
    }
   ],
-  "FileHash": "{6461763C-01A5-254A-003B-F4649BF0C653}"
+  "FileHash": "{174CAA36-BD48-FC65-BB9C-6AF9ABCD5ABE}"
  }
 }

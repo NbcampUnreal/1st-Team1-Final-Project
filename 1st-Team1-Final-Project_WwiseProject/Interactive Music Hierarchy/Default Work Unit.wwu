@@ -19,7 +19,30 @@
 									</PropertyList>
 									<ChildrenList>
 										<MusicTransition Name="Transition" ID="{433989BA-8AA6-43CF-A4D3-D0D37747BE9B}">
-											<TransitionInfo/>
+											<PropertyList>
+												<Property Name="EnableDestinationFadeIn" Type="bool" Value="True"/>
+												<Property Name="EnableSourceFadeOut" Type="bool" Value="True"/>
+												<Property Name="ExitSourceAt" Type="int16" Value="0"/>
+											</PropertyList>
+											<TransitionInfo>
+												<SourceFadeOut>
+													<MusicFade Name="Source Fade-out" ID="{21597847-D02D-45D6-A758-75A6B72F0FF0}">
+														<PropertyList>
+															<Property Name="FadeOffset" Type="Real64" Value="1"/>
+															<Property Name="FadeTime" Type="Real64" Value="2"/>
+															<Property Name="FadeType" Type="int16" Value="1"/>
+														</PropertyList>
+													</MusicFade>
+												</SourceFadeOut>
+												<DestinationFadeIn>
+													<MusicFade Name="Destination Fade-in" ID="{46A79DDD-E1E5-4128-932E-DBFCD887C9F2}">
+														<PropertyList>
+															<Property Name="FadeOffset" Type="Real64" Value="-1"/>
+															<Property Name="FadeTime" Type="Real64" Value="2"/>
+														</PropertyList>
+													</MusicFade>
+												</DestinationFadeIn>
+											</TransitionInfo>
 										</MusicTransition>
 									</ChildrenList>
 									<TransitionInfo/>
@@ -78,8 +101,8 @@
 																		<MusicClip Name="MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am" ID="{B1244063-CD3D-4E88-B72D-61392AF3E88B}">
 																			<PropertyList>
 																				<Property Name="EndTrimOffset" Type="Real64" Value="50514.7845804989"/>
-																				<Property Name="FadeInDuration" Type="Real64" Value="2349.52491937682"/>
-																				<Property Name="FadeOutDuration" Type="Real64" Value="4560.842490555"/>
+																				<Property Name="FadeInDuration" Type="Real64" Value="3869.80574956182"/>
+																				<Property Name="FadeOutDuration" Type="Real64" Value="4975.46453515092"/>
 																			</PropertyList>
 																			<AudioSourceRef Name="MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am" ID="{19CC5C6A-52D8-4BCB-9947-BBBB1D0C5F01}"/>
 																		</MusicClip>
@@ -165,8 +188,8 @@
 																		<MusicClip Name="MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj" ID="{20FA5B13-1010-4230-9B0D-1251D1073D6A}">
 																			<PropertyList>
 																				<Property Name="EndTrimOffset" Type="Real64" Value="14117.664399093"/>
-																				<Property Name="FadeInDuration" Type="Real64" Value="869.076463983747"/>
-																				<Property Name="FadeOutDuration" Type="Real64" Value="1236.019859888"/>
+																				<Property Name="FadeInDuration" Type="Real64" Value="1293.95829082025"/>
+																				<Property Name="FadeOutDuration" Type="Real64" Value="1371.20953206325"/>
 																			</PropertyList>
 																			<AudioSourceRef Name="MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj" ID="{C57CABAE-88E0-43C2-89CD-D2D946EB11F0}"/>
 																		</MusicClip>
@@ -293,8 +316,8 @@
 																		<MusicClip Name="ESM_Wind_Loop_Distant_Air_Steady_1" ID="{5A54AE5C-5B09-4B50-8CDC-4540C7386DA3}">
 																			<PropertyList>
 																				<Property Name="EndTrimOffset" Type="Real64" Value="47000"/>
-																				<Property Name="FadeInDuration" Type="Real64" Value="2250.34199726402"/>
-																				<Property Name="FadeOutDuration" Type="Real64" Value="3986.32010943913"/>
+																				<Property Name="FadeInDuration" Type="Real64" Value="4629.27496580027"/>
+																				<Property Name="FadeOutDuration" Type="Real64" Value="4629.27496580028"/>
 																			</PropertyList>
 																			<AudioSourceRef Name="ESM_Wind_Loop_Distant_Air_Steady_1" ID="{75E5EF2A-D2C0-48BC-AF97-15B3F17278A5}"/>
 																		</MusicClip>
