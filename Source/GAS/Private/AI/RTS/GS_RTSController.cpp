@@ -10,6 +10,7 @@
 #include "AI/RTS/GS_RTSHUD.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
+#include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
 
 AGS_RTSController::AGS_RTSController()
@@ -209,6 +210,12 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 			{
 				BlackboardComp->SetValueAsBool(AGS_AIController::bUseRTSKey, true);
 				BlackboardComp->SetValueAsVector(AGS_AIController::RTSTargetKey, TargetLocation);
+
+				// 이동 사운드 재생
+				if (Unit->MoveSoundEvent)
+				{
+					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
+				}
 			}
 		}
 	}
