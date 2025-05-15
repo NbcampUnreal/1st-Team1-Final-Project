@@ -1,4 +1,6 @@
-﻿#include "Props/Trap/GS_TrapBase.h"
+#include "Props/Trap/GS_TrapBase.h"
+#include "Character/Player/GS_Player.h"
+
 
 AGS_TrapBase::AGS_TrapBase()
 {
@@ -52,9 +54,13 @@ void AGS_TrapBase::OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	UE_LOG(LogTemp, Warning, TEXT("DamageBox 1"));
 	if (OtherActor && OtherActor != this)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DamageBox 2"));
-		DamageBoxEffect(OtherActor);
-		HandleTrapDamage(OtherActor);
+		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
+		if (Player)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("DamageBox 2"));
+			DamageBoxEffect(OtherActor);
+			HandleTrapDamage(OtherActor);
+		}
 	}
 }
 

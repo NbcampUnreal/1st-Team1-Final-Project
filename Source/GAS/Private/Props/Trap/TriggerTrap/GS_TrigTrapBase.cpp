@@ -1,5 +1,5 @@
-﻿#include "Props/Trap/TriggerTrap/GS_TrigTrapBase.h"
-
+#include "Props/Trap/TriggerTrap/GS_TrigTrapBase.h"
+#include "Character/Player/GS_Player.h"
 AGS_TrigTrapBase::AGS_TrigTrapBase()
 {
 	TriggerBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
@@ -22,7 +22,12 @@ void AGS_TrigTrapBase::OnTriggerOverlap(UPrimitiveComponent* OverlappedComp, AAc
 	//change it to Player Character later
 	if (OtherActor && OtherActor != this)
 	{
-		ApplyTrapEffect(OtherActor);
+		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
+		if (Player)
+		{
+			ApplyTrapEffect(OtherActor);
+		}
+		
 	}
 }
 
@@ -33,7 +38,11 @@ void AGS_TrigTrapBase::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, 
 	//change it to Player Character later
 	if (OtherActor && OtherActor != this)
 	{
-		EndTrapEffect(OtherActor);
+		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
+		if (Player)
+		{
+			EndTrapEffect(OtherActor);
+		}
 	}
 }
 
