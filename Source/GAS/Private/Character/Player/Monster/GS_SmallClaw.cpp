@@ -1,7 +1,17 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
 #include "Character/Player/Monster/GS_SmallClaw.h"
+#include "Character/Component/GS_StatComp.h"
+#include "Components/BoxComponent.h"
+#include "Engine/DamageEvents.h"
 
 AGS_SmallClaw::AGS_SmallClaw()
 {
+	BiteCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BiteCollision"));
+	BiteCollision->SetupAttachment(GetMesh(), TEXT("head"));
+	BiteCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BiteCollision->OnComponentBeginOverlap.AddDynamic(this, &AGS_SmallClaw::OnAttackBiteboxOverlap);
 }
 
 void AGS_SmallClaw::BeginPlay()
@@ -18,3 +28,21 @@ void AGS_SmallClaw::BeginPlay()
 		MoveSoundEvent = SmallClawMoveSound;
 	}
 } 
+
+void AGS_SmallClaw::Attack()
+{
+	Super::Attack();
+}
+
+void AGS_SmallClaw::OnAttackBiteboxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!OtherActor || OtherActor == this) return;
+
+	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
+	float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
+	FDamageEvent DamageEvent;
+	OtherActor->TakeDamage(Damage, DamageEvent, GetController(), this);
+	
+	BiteCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
