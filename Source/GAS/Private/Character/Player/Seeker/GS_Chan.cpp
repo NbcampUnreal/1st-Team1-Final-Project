@@ -2,6 +2,7 @@
 
 
 #include "Character/Player/Seeker/GS_Chan.h"
+#include "Character/Component/Seeker/GS_ChanSkillInputHandlerComp.h"
 
 
 // Sets default values
@@ -10,6 +11,7 @@ AGS_Chan::AGS_Chan()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	CharacterType = ECharacterType::Chan;
+	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_ChanSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 }
 
 // Called when the game starts or when spawned
