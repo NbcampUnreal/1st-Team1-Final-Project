@@ -1,4 +1,5 @@
 #include "Props/Trap/GS_TrapBase.h"
+#include "Character/Component/GS_StatComp.h"
 #include "Character/Player/GS_Player.h"
 
 
@@ -59,6 +60,27 @@ void AGS_TrapBase::DamageBoxEffect_Implementation(AActor* OtherActor)
 void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player damaged"));
+	//AGS_Player* Victim = Cast<AGS_Player>(OtherActor);
+	////둘 다 유효하면
+	//if (Victim && TrapDataTable)
+	//{
+	//	//trapdata 불러와서 
+	//	const FTrapData* TrapData = TrapDataTable->FindRow<FTrapData>(TrapID, TEXT("HandleTrapDamage"));
+	//	if (TrapData)
+	//	{
+	//		//stat comp
+	//		UGS_StatComp* VictimStatComp = Victim->GetStatComp();
+	//		if (VictimStatComp)
+	//		{
+	//			VictimStatComp->PerformHit(Victim, this);
+	//		}
+
+	//		//여기서 디버프 연결
+
+	//	}
+	//}
+
+
 }
 
 void AGS_TrapBase::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors)
