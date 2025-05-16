@@ -84,6 +84,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MoveCameraViaMinimap(const FVector& WorldLocation);
 
+	// Server
+	UFUNCTION(Server, Reliable)
+	void Server_RTSMove(const TArray<AGS_Monster*>& Units, const FVector& Dest);
 	
 
 protected:
