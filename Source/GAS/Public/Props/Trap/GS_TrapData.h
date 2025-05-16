@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
@@ -50,7 +50,7 @@ struct FTrapData : public FTableRowBase
 	FName TrapID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ETrapPlacement Placement;
+	ETrapPlacement Placement = ETrapPlacement::Wall;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTrapEffect Effect;
