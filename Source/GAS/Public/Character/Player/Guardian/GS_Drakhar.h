@@ -4,6 +4,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "GS_Drakhar.generated.h"
 
+class AGS_DrakharProjectile;
 
 UCLASS()
 class GAS_API AGS_Drakhar : public AGS_Guardian
@@ -12,10 +13,31 @@ class GAS_API AGS_Drakhar : public AGS_Guardian
 	
 public:
 	AGS_Drakhar();
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	//variables
+	UPROPERTY(ReplicatedUsing = OnRep_IsComboAttacking, VisibleAnywhere, BlueprintReadOnly)
+	bool bIsComboAttacking;
 
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	bool bCanDoNextComboAttack;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentComboAttackIndex, VisibleAnywhere, BlueprintReadOnly)
+	int32 CurrentComboAttackIndex;
+
+	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
+	bool bIsDashing;
+
+	UPROPERTY(ReplicatedUsing = OnRep_IsEarthquaking)
+	bool bIsEarthquaking;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<AGS_DrakharProjectile> Projectile;
+
+	//action binding function
 	virtual void ComboAttack() override;
 
 	virtual void Skill1() override;
@@ -24,24 +46,73 @@ public:
 
 	virtual void UltimateSkill() override;
 
-	//dash skill
+	//[combo attack]
+	UFUNCTION(Server, Reliable)
+	void ServerRPCComboAttack();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCComboAttackCheck();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCComboReset();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCMovementSetting();
+
+	UFUNCTION()
+	void OnRep_IsComboAttacking();
+
+	UFUNCTION()
+	void OnRep_CurrentComboAttackIndex();
+
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	//[dash skill]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCDashCharacter();
 
 	UFUNCTION()
-	void EndDash();
+	void DashAttackCheck();
 
-	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
-	bool bIsDashing;
+	UFUNCTION()
+	void EndDash();
 
 	UFUNCTION()
 	void OnRep_IsDashing();
 
+	//[earthquake skill]
+	UFUNCTION(Server, Reliable)
+	void ServerRPCEarthquake();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCEarthquakeEnd();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCEarthquakeAttackCheck();
+
+	UFUNCTION()
+	void OnRep_IsEarthquaking();
+
 protected:
 
 private:
-	float DashPower;
+	//[combo attack] 
+	//int32 CurrentComboAttackIndex;
+	int32 MaxComboAttackIndex;
+	int32 ClientComboAttackIndex;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* DashMontage;
+	//[dash skill]
+	UPROPERTY()
+	TSet<AGS_Character*> DamagedCharacters;
+
+	FVector DashStartLocation;
+	FVector DashEndLocation;
+	float DashPower;
+	float DashInterpAlpha;
+	float DashDuration;
+
+	//[earthquake]
+	float EarthquakePower;
+	float EarthquakeRadius;
 };

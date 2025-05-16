@@ -16,6 +16,8 @@ AGS_Player::AGS_Player()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->bUsePawnControlRotation = false;
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
+
+	TeamId = FGenericTeamId(1);
 }
 
 void AGS_Player::BeginPlay()

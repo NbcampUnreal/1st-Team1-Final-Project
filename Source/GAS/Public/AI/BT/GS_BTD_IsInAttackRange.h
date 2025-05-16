@@ -14,6 +14,9 @@ class GAS_API UGS_BTD_IsInAttackRange : public UBTDecorator
 {
 	GENERATED_BODY()
 
+public:
+	UGS_BTD_IsInAttackRange();
+
 protected:
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;
 

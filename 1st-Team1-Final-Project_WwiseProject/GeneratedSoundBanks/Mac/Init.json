@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{B36DB06E-A395-6E5F-4431-DFB528DD1F3E}",
+    "Hash": "{B9AB128B-B97F-C182-F0E9-80FFD2FCD522}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -42,6 +42,40 @@
       "GUID": "{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}"
      }
     ],
+    "StateGroups": [
+     {
+      "Id": "1750343382",
+      "Name": "GameTheme",
+      "ObjectPath": "\\States\\Default Work Unit\\GameTheme",
+      "GUID": "{FFD09951-7D67-4226-84C5-E7A89E41F513}",
+      "States": [
+       {
+        "Id": "221232726",
+        "Name": "Lose",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Lose",
+        "GUID": "{CD8F9588-1DFB-4A53-A477-E69169C457B2}"
+       },
+       {
+        "Id": "748895195",
+        "Name": "None",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\None",
+        "GUID": "{979859DB-348B-4CDB-99E7-60D08A1C9ABA}"
+       },
+       {
+        "Id": "979765101",
+        "Name": "Win",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Win",
+        "GUID": "{81F47699-C275-4308-BF58-11F7741DB094}"
+       },
+       {
+        "Id": "1160234136",
+        "Name": "Normal",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Normal",
+        "GUID": "{BE7DC584-CBCD-4792-90E4-ECC03BDFDE72}"
+       }
+      ]
+     }
+    ],
     "SwitchGroups": [
      {
       "Id": "2385628198",
@@ -49,6 +83,12 @@
       "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps",
       "GUID": "{0539FB0A-134D-4B40-896F-3535D04BFD6D}",
       "Switches": [
+       {
+        "Id": "540301611",
+        "Name": "Lava",
+        "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Lava",
+        "GUID": "{9FA661EF-9442-48F6-B069-7B4141D21DE5}"
+       },
        {
         "Id": "1216965916",
         "Name": "Stone",
@@ -78,6 +118,6 @@
     ]
    }
   ],
-  "FileHash": "{C3BBB737-C09D-F8AA-BCC6-6779CEF6F18E}"
+  "FileHash": "{A2CDD9FD-3570-59F5-7C26-ECA98FE12194}"
  }
 }

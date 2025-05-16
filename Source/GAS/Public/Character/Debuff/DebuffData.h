@@ -28,4 +28,14 @@ struct GAS_API FDebuffData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bIsConcurrent;
+
+	// 기본 생성자
+	FDebuffData()
+		: DebuffType(EDebuffType::None) // None 등 안전한 기본값 필요
+		, Duration(0.f)
+		, Priority(0)
+		, DebuffClass(nullptr)
+		, bIsConcurrent(false)
+	{
+	}
 };

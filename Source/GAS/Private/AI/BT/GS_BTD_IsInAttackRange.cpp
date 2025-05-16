@@ -5,6 +5,12 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "AI/GS_AIController.h"
 
+UGS_BTD_IsInAttackRange::UGS_BTD_IsInAttackRange()
+{
+	NodeName = TEXT("IsInAttackRange");
+	AttackDistance = 50.0f;
+}
+
 bool UGS_BTD_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const
 {
 	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
@@ -13,8 +19,12 @@ bool UGS_BTD_IsInAttackRange::CalculateRawConditionValue(UBehaviorTreeComponent&
 		return false;
 	}
 	
-	const FVector TargetLocation = OwnerComp.GetBlackboardComponent()->GetValueAsVector(AGS_AIController::TargetKey);
-	const float DistanceToTarget = FVector::Dist(ControllingPawn->GetActorLocation(), TargetLocation);
+	AActor* TargetActor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(AGS_AIController::TargetActorKey));
+	if (!TargetActor)
+	{
+		return false;
+	}
 	
+	float DistanceToTarget = FVector::Dist(ControllingPawn->GetActorLocation(), TargetActor->GetActorLocation());
 	return DistanceToTarget <= AttackDistance;
 }

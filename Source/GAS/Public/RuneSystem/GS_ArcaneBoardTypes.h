@@ -1,8 +1,9 @@
-﻿// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GS_EnumUtils.h"
 #include "GS_ArcaneBoardTypes.generated.h"
 
 UENUM(BlueprintType)
@@ -29,6 +30,26 @@ enum class EPreviewState : uint8
 	Invalid		UMETA(DisplayName = "Invalid")
 };
 
+USTRUCT(Atomic, BlueprintType)
+struct FCharacterStats
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	float MaxHP = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	float ATK = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	float DEF = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	float AGL = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	float ATS = 0.0f;
+};
 
 USTRUCT(Atomic, BlueprintType)
 struct FStatEffect
@@ -60,14 +81,14 @@ struct FPlacedRuneInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 RuneID;
+	uint8 RuneID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FIntPoint Pos;
 
 	FPlacedRuneInfo()
 	{
-		RuneID = -1;
+		RuneID = 0;
 		Pos = { 0, 0 };
 	}
 
@@ -92,11 +113,15 @@ struct FGridCellData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsSpecialCell;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 PlacedRuneID;
+
 	FGridCellData()
 	{
 		Pos = { 0, 0 };
 		State = EGridCellState::Empty;
 		bIsSpecialCell = false;
+		PlacedRuneID = 0;
 	}
 
 	FGridCellData(const FIntPoint& InPos, EGridCellState InState, bool InIsSpecialCell = false)
@@ -104,5 +129,17 @@ struct FGridCellData
 		Pos = InPos;
 		State = InState;
 		bIsSpecialCell = InIsSpecialCell;
+		PlacedRuneID = 0;
 	}
+};
+
+USTRUCT(Atomic, BlueprintType)
+struct FRunePlacementData
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TArray<FPlacedRuneInfo> PlacedRunes;
+
+	FRunePlacementData() {}
 };

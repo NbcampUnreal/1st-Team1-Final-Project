@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "GS_AIController.generated.h"
 
+struct FAIStimulus;
 /**
  * 
  */
@@ -17,5 +18,26 @@ class GAS_API AGS_AIController : public AAIController
 public:
 	AGS_AIController();
 
-	static const FName TargetKey;
+	static const FName HomePosKey;
+	static const FName TargetActorKey;
+	static const FName RTSTargetKey;
+	static const FName bUseRTSKey;
+
+	UPROPERTY(VisibleAnywhere, Category = "AI Perception")
+	class UAISenseConfig_Sight* SightConfig;
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	
+	UFUNCTION()
+	void TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+private:
+	UPROPERTY()
+	UBehaviorTree* BTAsset;
+
+	UPROPERTY()
+	UBlackboardData* BBAsset;
 };

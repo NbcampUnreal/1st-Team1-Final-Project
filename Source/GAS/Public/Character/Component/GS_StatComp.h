@@ -18,11 +18,19 @@ public:
 
 	UGS_StatComp();
 
-	void InitStat();
+	virtual void BeginPlay() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat")
+	TObjectPtr<UDataTable> StatDataTable;
+
+	void InitStat(FName RowName);
 
 	void UpdateStat();
 
-	float CalculateDamage(AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
+	float CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
 
 	void PerformHit(AActor* DamagedActor, AActor* DamageCauser);
 
@@ -41,15 +49,18 @@ public:
 	void SetDefense(float InDefense);
 	void SetAgility(float InAgility);
 	void SetAttackSpeed(float InAttackSpeed);
+	
+	//OnRep Function
+	UFUNCTION()
+	void OnRep_CurrentHealth();
 
 protected:
-	virtual void BeginPlay() override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
 	float MaxHealth;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))

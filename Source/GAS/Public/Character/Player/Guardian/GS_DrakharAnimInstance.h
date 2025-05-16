@@ -15,30 +15,50 @@ public:
 	UGS_DrakharAnimInstance();
 
 	//combo attack
-	void PlayAttackMontage();
-	void JumpToAttackMontageSection(int32 NewSection);
-
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate  OnAttackHitCheck;
 
-	//dash 
+	//[combo attack]
+	//legacy
+	void PlayAttackMontage();
+	void JumpToAttackMontageSection(int32 NewSection);
+	//new
+	void PlayComboAttackMontage(int32 InCurrentComboIndex);
+	void StopComboAttackMontage(int32 InCurrentComboIndex);
+
+	//dash skill
 	void PlayDashMontage();
+	void StopDashMontage();
+
+	//earthquake
+	void PlayEarthquakeMontage();
+	void StopEarthquakeMontage();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	UAnimMontage* AttackMontage;
+	TArray<UAnimMontage*> ComboAttackMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* DashMontage;
 
-	UFUNCTION()
-	void AnimNotify_AttackHitCheck();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* EarthquakeMontage;
 
+	//[combo attack]
 	UFUNCTION()
-	void AnimNotify_NextAttackCheck();
+	void AnimNotify_ComboAttackCheck();
+	//UFUNCTION()
+	//void AnimNotify_ComboAttackCheckEnd();
 
+	//[dash skill]
 	UFUNCTION()
 	void AnimNotify_DashHitCheck();
 
-	FName GetAttackMontageSectionName(int32 Section);
+	//[earthquake skill]
+	UFUNCTION()
+	void AnimNotify_EarthquakeCheck();
+
+	UFUNCTION()
+	void AnimNotify_EarthquakeCheckEnd();
+
 };

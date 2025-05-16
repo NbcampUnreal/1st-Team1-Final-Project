@@ -1,4 +1,6 @@
-﻿#include "Props/Trap/GS_TrapBase.h"
+#include "Props/Trap/GS_TrapBase.h"
+#include "Character/Player/GS_Player.h"
+
 
 AGS_TrapBase::AGS_TrapBase()
 {
@@ -15,25 +17,11 @@ AGS_TrapBase::AGS_TrapBase()
 
 	DamageBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("DamageBox"));
 	DamageBoxComp->SetupAttachment(MeshParentSceneComp);
-	//needs to be fixed
 	// DamageBox 콜리전 설정
 	DamageBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	DamageBoxComp->SetCollisionObjectType(ECC_Pawn); // Object Type을 Pawn으로 설정
-
-	// 기본 응답: 모두 무시
+	DamageBoxComp->SetCollisionObjectType(ECC_WorldDynamic);
 	DamageBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
-
-	// 트레이스 채널
-	DamageBoxComp->SetCollisionResponseToChannel(ECC_Visibility, ECR_Overlap);
-	DamageBoxComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Overlap);
-
-	// 오브젝트 채널
-	DamageBoxComp->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
-	DamageBoxComp->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	DamageBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-	DamageBoxComp->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
-	DamageBoxComp->SetCollisionResponseToChannel(ECC_Vehicle, ECR_Block);
-	DamageBoxComp->SetCollisionResponseToChannel(ECC_Destructible, ECR_Overlap);
 }
 
 
@@ -52,9 +40,13 @@ void AGS_TrapBase::OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	UE_LOG(LogTemp, Warning, TEXT("DamageBox 1"));
 	if (OtherActor && OtherActor != this)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DamageBox 2"));
-		DamageBoxEffect(OtherActor);
-		HandleTrapDamage(OtherActor);
+		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
+		if (Player)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("DamageBox 2"));
+			DamageBoxEffect(OtherActor);
+			HandleTrapDamage(OtherActor);
+		}
 	}
 }
 
