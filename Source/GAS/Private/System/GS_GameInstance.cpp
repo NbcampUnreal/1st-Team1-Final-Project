@@ -2,6 +2,7 @@
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemUtils.h"
 #include "OnlineSessionSettings.h"
+#include "Online/OnlineSessionNames.h" //SETTING_GAMEMODE 이런 거 쓸라면 필요. 앞으로 까먹지 말기
 #include "Interfaces/OnlineFriendsInterface.h"
 #include "Interfaces/OnlineExternalUIInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -68,11 +69,15 @@ void UGS_GameInstance::HostSession(int32 MaxPlayers, FName SessionCustomName, co
     HostSessionSettings->bShouldAdvertise = true;
     HostSessionSettings->bAllowJoinInProgress = true;
     HostSessionSettings->bIsLANMatch = false;
-    HostSessionSettings->bUsesPresence = true;
+    HostSessionSettings->bUsesPresence = false; // 스팀데디에서 이거 꺼야한다는 얘기가 있음. 제발
+    HostSessionSettings->bAllowJoinViaPresence = false;
+    HostSessionSettings->bAllowInvites = true;
     HostSessionSettings->bIsDedicated = IsDedicatedServerInstance();
     HostSessionSettings->bAllowInvites = true;
-    HostSessionSettings->Set(FName(TEXT("SETTING_MAPNAME")), MapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-    HostSessionSettings->Set(FName(TEXT("SETTING_GAMEMODE")), GameModePath, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+    HostSessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+    HostSessionSettings->Set(SETTING_GAMEMODE, GameModePath, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+    //HostSessionSettings->Set(FName(TEXT("IINGS")), FString(TEXT("SpartaFinal")), EOnlineDataAdvertisementType::ViaOnlineService);
+	HostSessionSettings->Set(SEARCH_KEYWORDS, FString("SpartaFinal"), EOnlineDataAdvertisementType::ViaOnlineService);
 
     UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::HostSession - SessionSettings: PublicSlots=%d, PrivateSlots=%d, bIsDedicated=%s"),
         HostSessionSettings->NumPublicConnections, HostSessionSettings->NumPrivateConnections, HostSessionSettings->bIsDedicated ? TEXT("true") : TEXT("false"));
@@ -117,6 +122,15 @@ void UGS_GameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSucce
     if (bWasSuccessful)
     {
         UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Session '%s' created successfully on the backend."), *SessionName.ToString());
+		if (SessionInterface.IsValid())
+		{
+			SessionInterface->StartSession(SessionName);
+			UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Session '%s' started successfully."), *SessionName.ToString());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance: SessionInterface is not valid when starting session '%s'."), *SessionName.ToString());
+		}
     }
     else
     {
@@ -135,9 +149,11 @@ void UGS_GameInstance::FindSession(APlayerController* RequestingPlayer)
     PlayerSearchingSession = RequestingPlayer;
 
     SessionSearchSettings = MakeShareable(new FOnlineSessionSearch());
-    SessionSearchSettings->MaxSearchResults = 7777; // 이전 값 유지
+    SessionSearchSettings->MaxSearchResults = 7777;
     SessionSearchSettings->bIsLanQuery = false;
-    SessionSearchSettings->QuerySettings.Set(FName(TEXT("SEARCH_PRESENCE")), true, EOnlineComparisonOp::Equals); // 이전 값 유지
+    SessionSearchSettings->QuerySettings.SearchParams.Remove(SEARCH_PRESENCE);
+	//SessionSearchSettings->QuerySettings.Set(FName(TEXT("IINGS")), FString(TEXT("SpartaFinal")), EOnlineComparisonOp::Equals);
+	SessionSearchSettings->QuerySettings.Set(SEARCH_KEYWORDS, FString("SpartaFinal"), EOnlineComparisonOp::Equals);
     UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::FindSession - SearchSettings: MaxResults=%d, LANQuery=%s, PresenceQuery=%s"),
         SessionSearchSettings->MaxSearchResults, SessionSearchSettings->bIsLanQuery ? TEXT("true") : TEXT("false"), TEXT("true"));
 
@@ -202,11 +218,25 @@ void UGS_GameInstance::OnFindSessionsComplete(bool bWasSuccessful)
             {
                 if (SearchResult.IsValid() && SearchResult.Session.SessionSettings.bIsDedicated && SearchResult.Session.NumOpenPublicConnections > 0)
                 {
-                    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnFindSessionsComplete - Suitable DEDICATED session found: SessionID: %s, OwningUserName: %s, NumOpenPublicConnections: %d. Attempting to join."),
-                        *SearchResult.GetSessionIdStr(), *SearchResult.Session.OwningUserName, SearchResult.Session.NumOpenPublicConnections);
-                    JoinSession(PC, SearchResult);
-                    bFoundSuitableSession = true;
-                    return;
+                    FString CustomKeyCheck;
+                    bool bCustomKeyFound = SearchResult.Session.SessionSettings.Get(SEARCH_KEYWORDS, CustomKeyCheck);
+
+                    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnFindSessionsComplete - Checking SessionID: %s, OwningUser: %s, OpenPublic: %d, CustomKeyFound: %s, CustomKeyValue: %s"),
+                        *SearchResult.GetSessionIdStr(),
+                        *SearchResult.Session.OwningUserName,
+                        SearchResult.Session.NumOpenPublicConnections,
+                        bCustomKeyFound ? TEXT("true") : TEXT("false"),
+                        bCustomKeyFound ? *CustomKeyCheck : TEXT("N/A"));
+
+                    if (bCustomKeyFound && CustomKeyCheck == TEXT("SpartaFinal"))
+                    {
+                        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnFindSessionsComplete - YOUR DEDICATED session with matching custom key found! Attempting to join."));
+
+                        SessionToJoin = SearchResult;
+                        JoinSession(PC, SearchResult);
+                        bFoundSuitableSession = true;
+                        return;
+                    }
                 }
                 else
                 {
@@ -308,33 +338,26 @@ void UGS_GameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCo
         if (SessionInterface->GetResolvedConnectString(SessionName, ConnectString))
         {
             UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnJoinSessionComplete - Resolved ConnectString: %s"), *ConnectString);
-            FString MapToTravel = DefaultLobbyMapName;
-            FString GameModeToTravel = DefaultLobbyGameModePath;
+            FString MapToTravel = DefaultLobbyMapName; // 기본값
+            FString GameModeToTravel = DefaultLobbyGameModePath; // 기본값
 
-            FString FoundMapName;
-            FString FoundGameMode;
-
-            // OnJoinSessionComplete 콜백에서는 JoinSession에 사용된 SearchResult에 직접 접근하기 어렵습니다.
-            // 가장 좋은 방법은 JoinSession 함수 호출 시 SearchResult의 정보를 멤버 변수에 저장해두거나,
-            // 세션 인터페이스를 통해 현재 참여한 세션의 설정을 다시 읽어오는 것입니다.
-            // 여기서는 SessionSearchSettings의 첫 번째 결과를 임시로 사용하지만, 정확하지 않을 수 있습니다.
-            // 실제로는 JoinSession 호출 시 사용한 SearchResult를 통해 맵/모드 정보를 가져와야 합니다.
-            if (SessionSearchSettings.IsValid() && SessionSearchSettings->SearchResults.Num() > 0)
+            if (SessionToJoin.IsValid()) // 저장된 세션 정보 사용
             {
-                const FOnlineSessionSearchResult& JoinedSessionResult = SessionSearchSettings->SearchResults[0]; // 부정확할 수 있음
-                if (JoinedSessionResult.Session.SessionSettings.Get(FName("SETTING_MAPNAME"), FoundMapName))
+                FString MapNameFromSession;
+                if (SessionToJoin.Session.SessionSettings.Get(SETTING_MAPNAME, MapNameFromSession) && !MapNameFromSession.IsEmpty())
                 {
-                    MapToTravel = FoundMapName;
+                    MapToTravel = MapNameFromSession;
                 }
-                if (JoinedSessionResult.Session.SessionSettings.Get(FName("SETTING_GAMEMODE"), FoundGameMode))
+                FString GameModeFromSession;
+                if (SessionToJoin.Session.SessionSettings.Get(SETTING_GAMEMODE, GameModeFromSession) && !GameModeFromSession.IsEmpty())
                 {
-                    GameModeToTravel = FoundGameMode;
+                    GameModeToTravel = GameModeFromSession;
                 }
-                UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnJoinSessionComplete - Using Map: %s, GameMode: %s (potentially from last search result, needs verification for actual joined session)."), *MapToTravel, *GameModeToTravel);
+                UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnJoinSessionComplete - Using Map: %s, GameMode: %s from actual joined session settings."), *MapToTravel, *GameModeToTravel);
             }
             else
             {
-                UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnJoinSessionComplete - SessionSearchSettings invalid or empty, using default Map/GameMode for travel."));
+                UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnJoinSessionComplete - SessionToJoin was not valid, using default Map/GameMode for travel."));
             }
 
             FString TravelURL;

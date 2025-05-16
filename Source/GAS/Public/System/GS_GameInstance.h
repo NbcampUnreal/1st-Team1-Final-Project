@@ -28,6 +28,7 @@ public:
 
 protected:
     IOnlineSessionPtr SessionInterface;
+    FOnlineSessionSearchResult SessionToJoin;
 
     UPROPERTY()
     TWeakObjectPtr<APlayerController> PlayerSearchingSession;
