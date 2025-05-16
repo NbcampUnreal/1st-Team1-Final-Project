@@ -20,6 +20,7 @@ UGS_DebuffComp::UGS_DebuffComp()
 
 void UGS_DebuffComp::ApplyDebuff(EDebuffType Type)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Apply Debuff"));
 	if (!GetOwner()->HasAuthority())
 	{
 		return;
@@ -43,7 +44,8 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type)
 	// 적용중이 아닌 디버프라면
 	UGS_DebuffBase* NewDebuff = NewObject<UGS_DebuffBase>(this, Row->DebuffClass);
 	NewDebuff->Initialize(Cast<AGS_Character>(GetOwner()), Row->Duration, Row->Priority, Type);
-	
+	NewDebuff->StartTime = GetWorld()->GetTimeSeconds();
+
 	// 우선순위와 관련 없다면
 	if (Row->bIsConcurrent)
 	{
@@ -72,6 +74,7 @@ const FDebuffData* UGS_DebuffComp::GetDebuffData(EDebuffType Type) const
 	
 	// 디버프 데이터 Row 반환
 	FName RowName = *UEnum::GetValueAsString(Type).RightChop(13);
+	UE_LOG(LogTemp, Warning, TEXT("Get Debuff Data"));
 	return DebuffDataTable->FindRow<FDebuffData>(RowName, TEXT(""));
 }
 
@@ -134,6 +137,7 @@ void UGS_DebuffComp::CreateAndApplyConcurrentDebuff(UGS_DebuffBase* Debuff)
 
 	// 타이머 추가
 	DebuffTimers.Add(Debuff, Handle);
+	UE_LOG(LogTemp, Warning, TEXT("Create And Apply Concurrent Debuff"));
 }
 
 void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
@@ -162,10 +166,13 @@ void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
 	{
 		ApplyNextDebuff();
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Add Debuff Queue"));
 }
 
 void UGS_DebuffComp::ApplyNextDebuff()
 {
+	UE_LOG(LogTemp, Warning, TEXT("ApplyNextDebuff"));
 	// 디버프 큐에 없으면 리턴
 	if (DebuffQueue.Num() == 0) return;
 
