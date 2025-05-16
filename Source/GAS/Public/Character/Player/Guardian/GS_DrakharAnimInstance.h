@@ -44,13 +44,11 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* EarthquakeMontage;
 
-
-
 	//[combo attack]
 	UFUNCTION()
-	void AnimNotify_ComboAttackCheckStart();
-	UFUNCTION()
-	void AnimNotify_ComboAttackCheckEnd();
+	void AnimNotify_ComboAttackCheck();
+	//UFUNCTION()
+	//void AnimNotify_ComboAttackCheckEnd();
 
 	//[dash skill]
 	UFUNCTION()

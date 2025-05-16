@@ -11,7 +11,6 @@ class UGS_DebuffComp;
 class UGS_HPTextWidgetComp;
 class UGS_HPText;
 
-
 UENUM(BlueprintType)
 enum class ECharacterType : uint8
 {
@@ -19,6 +18,7 @@ enum class ECharacterType : uint8
 	Chan,
 	Merci,
 	Reina,
+	Drakhar,
 	SmallClaw,
 	NeedleFang,
 	IronFang,

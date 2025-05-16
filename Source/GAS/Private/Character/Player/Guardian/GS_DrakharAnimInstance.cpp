@@ -55,7 +55,7 @@ void UGS_DrakharAnimInstance::StopEarthquakeMontage()
 	}
 }
 
-void UGS_DrakharAnimInstance::AnimNotify_ComboAttackCheckStart()
+void UGS_DrakharAnimInstance::AnimNotify_ComboAttackCheck()
 {
 	AActor* Owner = GetOwningActor();
 	if (IsValid(Owner))
@@ -63,20 +63,7 @@ void UGS_DrakharAnimInstance::AnimNotify_ComboAttackCheckStart()
 		AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner);
 		if (IsValid(Drakhar))
 		{
-			Drakhar->ServerRPCComboAttackUpdate();
-		}
-	}
-}
-
-void UGS_DrakharAnimInstance::AnimNotify_ComboAttackCheckEnd()
-{
-	AActor* Owner = GetOwningActor();
-	if (IsValid(Owner))
-	{
-		AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner);
-		if (IsValid(Drakhar))
-		{
-			Drakhar->ServerRPCComboAttackEnd();
+			Drakhar->ServerRPCComboAttackCheck();
 		}
 	}
 }
