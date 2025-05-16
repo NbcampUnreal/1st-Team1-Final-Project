@@ -50,14 +50,14 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPCComboAttack();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCPlayComboAttackMontage();
+
 	UFUNCTION(Server, Reliable)
 	void ServerRPCComboAttackCheck();
 
 	UFUNCTION(Server, Reliable)
-	void ServerRPCComboReset();
-
-	UFUNCTION(Server, Reliable)
-	void ServerRPCMovementSetting();
+	void ServerRPCComboAttackEnd();
 
 	UFUNCTION()
 	void OnRep_IsComboAttacking();
@@ -101,6 +101,7 @@ private:
 	//int32 CurrentComboAttackIndex;
 	int32 MaxComboAttackIndex;
 	int32 ClientComboAttackIndex;
+	bool ClientComboAttacking;
 
 	//[dash skill]
 	UPROPERTY()

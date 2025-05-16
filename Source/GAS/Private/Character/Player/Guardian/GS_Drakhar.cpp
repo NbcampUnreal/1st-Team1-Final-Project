@@ -90,6 +90,12 @@ void AGS_Drakhar::ComboAttack()
 {
 	if (IsLocallyControlled())
 	{
+		//play montage immediately
+		if (!ClientComboAttacking)
+		{
+			GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);			
+		}
+		//server RPC for check variables
 		ServerRPCComboAttack();
 	}
 }
@@ -129,7 +135,6 @@ void AGS_Drakhar::UltimateSkill()
 	}
 }
 
-
 void AGS_Drakhar::ServerRPCComboAttack_Implementation()
 {
 	//prevent attack stacking
@@ -140,22 +145,24 @@ void AGS_Drakhar::ServerRPCComboAttack_Implementation()
 		return;
 	}
 
+	MulticastRPCPlayComboAttackMontage();
 	bIsComboAttacking = true;
 	bCanDoNextComboAttack = false;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 }
 
+void AGS_Drakhar::MulticastRPCPlayComboAttackMontage_Implementation()
+{
+	if (IsLocallyControlled() || GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+	GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
+}
+
 void AGS_Drakhar::ServerRPCComboAttackCheck_Implementation()
 {
-	if (bCanDoNextComboAttack)
-	{
-		CurrentComboAttackIndex++;
-		CurrentComboAttackIndex %= MaxComboAttackIndex;
-	}
-	
 	MeleeAttackCheck();
-
-	UE_LOG(LogTemp, Warning, TEXT("%d"), CurrentComboAttackIndex);
 
 	if (CurrentComboAttackIndex == MaxComboAttackIndex - 1)
 	{
@@ -166,54 +173,45 @@ void AGS_Drakhar::ServerRPCComboAttackCheck_Implementation()
 			DrakharProjectile->SetOwner(this);
 		}
 	}
-
-	bIsComboAttacking = false;
-	//bCanDoNextComboAttack = false;
 }
 
-void AGS_Drakhar::ServerRPCComboReset_Implementation()
+void AGS_Drakhar::ServerRPCComboAttackEnd_Implementation()
 {
-	if (!bCanDoNextComboAttack)
+	if (bCanDoNextComboAttack)
+	{
+		CurrentComboAttackIndex++;
+		CurrentComboAttackIndex %= MaxComboAttackIndex;
+		UE_LOG(LogTemp, Warning, TEXT("combo attack input"));
+	}
+	else
 	{
 		CurrentComboAttackIndex = 0;
+		//not call
+		UE_LOG(LogTemp, Warning, TEXT("combo attack end %d"), CurrentComboAttackIndex);
 	}
-
 	bIsComboAttacking = false;
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	bCanDoNextComboAttack = false;
-}
-
-void AGS_Drakhar::ServerRPCMovementSetting_Implementation()
-{
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
 void AGS_Drakhar::OnRep_IsComboAttacking()
 {
-	if (bIsComboAttacking)
-	{
-		GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
-	}
+	ClientComboAttacking = bIsComboAttacking;
+	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("client combo attacking index %d"), ClientComboAttackIndex), true, true, FLinearColor::Green, 5.f);
 }
 
 void AGS_Drakhar::OnRep_CurrentComboAttackIndex()
 {
 	ClientComboAttackIndex = CurrentComboAttackIndex;
 
-	/*if (bIsComboAttacking)
-	{
-		GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
-	}*/
+	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("client combo attacking index %d"), ClientComboAttackIndex), true, true, FLinearColor::Green, 5.f);
 }
 
 void AGS_Drakhar::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{	
-	//montage end normally
+{
 	if (!bInterrupted)
-	{		
-		//reset combo attack
-		//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("montage end")), true, true, FLinearColor::Green, 5.f);
-		ServerRPCComboReset();
+	{
+		ClientComboAttacking = false;
 	}
 }
 
