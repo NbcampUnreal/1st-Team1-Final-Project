@@ -1,34 +1,36 @@
 Event	ID	Name			Wwise Object Path	Notes
 	153945882	Stop_waves			\Default Work Unit\Stop_waves	
-	254810222	Props_Spike			\Default Work Unit\Props_Spike	
+	254810222	Props_Spike			\Default Work Unit\Props\Props_Spike	
 	374167564	Play_waves			\Default Work Unit\Play_waves	
-	551192008	Props_MineExplode			\Default Work Unit\Props_MineExplode	
+	551192008	Props_MineExplode			\Default Work Unit\Props\Props_MineExplode	
 	598060403	EV_ArrowImpact_Body			\Default Work Unit\EV_ArrowImpact_Body	
-	700338761	Props_Saw_Hit			\Default Work Unit\Props_Saw_Hit	플레이어가 함정에 닿았을 때
-	737601643	Props_BearTrap			\Default Work Unit\Props_BearTrap	
-	831579122	EV_Mon_SmallClaw			\Default Work Unit\EV_Mon_SmallClaw	
-	898284890	EV_ArrowRealse			\Default Work Unit\EV_ArrowRealse	
+	700338761	Props_Saw_Hit			\Default Work Unit\Props\Props_Saw_Hit	플레이어가 함정에 닿았을 때
+	737601643	Props_BearTrap			\Default Work Unit\Props\Props_BearTrap	
+	831579122	EV_Mon_SmallClaw			\Default Work Unit\Monster\EV_Mon_SmallClaw	
 	942444514	Props_Torch			\Default Work Unit\Props_Torch	횃불 소리
-	1046362180	Props_StoneTrap_Hit			\Default Work Unit\Props_StoneTrap_Hit	
-	1082319155	EV_Mon_SmallClaw_UI			\Default Work Unit\EV_Mon_SmallClaw_UI	
-	1341033136	Props_Spike_Hit			\Default Work Unit\Props_Spike_Hit	
+	1046362180	Props_StoneTrap_Hit			\Default Work Unit\Props\Props_StoneTrap_Hit	
+	1082319155	EV_Mon_SmallClaw_UI			\Default Work Unit\Monster\EV_Mon_SmallClaw_UI	
+	1341033136	Props_Spike_Hit			\Default Work Unit\Props\Props_Spike_Hit	
 	1613532296	EV_GameState			\Default Work Unit\EV_GameState	
-	1721776362	Props_BearTrap_Out			\Default Work Unit\Props_BearTrap_Out	
-	2021162518	Props_Lava			\Default Work Unit\Props_Lava	
-	2240580818	Props_MineTick			\Default Work Unit\Props_MineTick	
+	1721776362	Props_BearTrap_Out			\Default Work Unit\Props\Props_BearTrap_Out	
+	1852963041	EV_Bow_Pull			\Default Work Unit\EV_Bow_Pull	
+	2021162518	Props_Lava			\Default Work Unit\Props\Props_Lava	
+	2240580818	Props_MineTick			\Default Work Unit\Props\Props_MineTick	
 	2385628198	FootSteps			\Default Work Unit\FootSteps	
-	2509596040	Props_Lava_Hit			\Default Work Unit\Props_Lava_Hit	
-	2600979968	Props_Axe			\Default Work Unit\Props_Axe	
-	2654270155	Props_Saw			\Default Work Unit\Props_Saw	
-	2662114774	Props_Axe_Hit			\Default Work Unit\Props_Axe_Hit	
+	2509596040	Props_Lava_Hit			\Default Work Unit\Props\Props_Lava_Hit	
+	2600979968	Props_Axe			\Default Work Unit\Props\Props_Axe	
+	2654270155	Props_Saw			\Default Work Unit\Props\Props_Saw	
+	2662114774	Props_Axe_Hit			\Default Work Unit\Props\Props_Axe_Hit	
+	2897876713	EV_Arrow_Shot			\Default Work Unit\EV_Arrow_Shot	
 	2999099924	EV_ArrowImpact_Wood			\Default Work Unit\EV_ArrowImpact_Wood	
 	3070546402	EV_Fire_Extinguish			\Default Work Unit\EV_Fire_Extinguish	
 	3369981961	EV_Fire_Burn			\Default Work Unit\EV_Fire_Burn	
 	3432958693	EV_ArrowBy			\Default Work Unit\EV_ArrowBy	
 	3834184178	EV_ArrowImpact_Stone			\Default Work Unit\EV_ArrowImpact_Stone	
-	3944187859	Props_StoneWall			\Default Work Unit\Props_StoneWall	
-	3970649718	Props_MineFuse			\Default Work Unit\Props_MineFuse	
-	4061399480	Props_FlameTrap			\Default Work Unit\Props_FlameTrap	
+	3944187859	Props_StoneWall			\Default Work Unit\Props\Props_StoneWall	
+	3970649718	Props_MineFuse			\Default Work Unit\Props\Props_MineFuse	
+	4061399480	Props_FlameTrap			\Default Work Unit\Props\Props_FlameTrap	
+	4137582580	EV_Bow_Realse			\Default Work Unit\EV_Bow_Realse	
 
 Switch Group	ID	Name			Wwise Object Path	Notes
 	2385628198	FootSteps			\Default Work Unit\FootSteps	
@@ -65,67 +67,71 @@ Effect plug-ins	ID	Name	Type				Notes
 
 In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	5171484	SFX_ArrowImpact_Wood	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E7\{E75C8D0E-0A44-9599-0179-8FADEEB33D76}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Wood		164512
-	45190972	SFX_SmallClaw_Idle0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\EA\{EA68F9E2-703A-9634-A72C-0A51AE4EF1FF}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Mon_SmallClaw_UI\SFX_SmallClaw_Idle0		118312
+	45190972	SFX_SmallClaw_Idle0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\EA\{EA68F9E2-703A-9634-A72C-0A51AE4EF1FF}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\SFX_Mon_SmallClaw_UI\SFX_SmallClaw_Idle0		118312
 	46724587	FootSteps_Lava (1)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\1C\{1CD67C2A-6001-8EB3-6708-3CBD931C56EB}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Lava\FootSteps_Lava (1)		183572
-	65595387	SFX_Lava_Hit0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\84\{845FE753-80F0-6825-CB07-84F31B1EBEA8}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Lava_Hit\SFX_Lava_Hit0		743340
+	65595387	SFX_Lava_Hit0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\84\{845FE753-80F0-6825-CB07-84F31B1EBEA8}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Lava_Hit\SFX_Lava_Hit0		743340
 	81623842	ESM_Wind_Loop_Distant_Air_Steady_1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\08\{0801B149-5EAE-81E6-B35F-AEFA8B3A8891}.wem		\Interactive Music Hierarchy\Default Work Unit\BGM_Theme\Amb_Wind\ESM_Wind_Loop_Distant_Air_Steady_1		9024160
 	112081368	FootstepsDirt2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\65\{65019945-3BB6-6A43-0831-6B8CC7FF5E38}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\FootstepsDirt2		100332
-	120977185	SFX_GrenadeFuse	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F9\{F9051406-A06F-D44F-4AFA-D8FDB8BB7600}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_GrenadeFuse		92016
+	120977185	SFX_GrenadeFuse	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\4D\{4D5CACE9-FBC6-8F58-6453-5C3BC9B32A8B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_GrenadeFuse		92016
 	149736104	FootSteps_Lava (4)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A7\{A7763ECF-E602-CB21-7F7F-96E9079E8E03}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Lava\FootSteps_Lava (4)		185284
-	157399992	SFX_GrenadeTick	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\08\{0817B025-06BA-8BFC-48AE-8280E50F759C}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_GrenadeTick		18480
+	157399992	SFX_GrenadeTick	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\78\{783A3204-F3A4-EE0B-047A-830C3280BA2A}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_GrenadeTick		18480
 	177130386	MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\C4\{C4AB8AED-E27C-80B7-9E61-568BCEA89233}.wem		\Interactive Music Hierarchy\Default Work Unit\BGM_Theme\Amb_BassDrone\MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am		8910968
 	199617062	Footstep_Grass (1)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\D8\{D8198CFD-2383-6DA8-9D53-C82E9BE174F6}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Grass\Footstep_Grass (1)		42656
-	213946712	SFX_BearTrap_In1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\66\{66974F7A-164D-7E0A-D574-C9F4FB0DB0A6}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_BearTrap\SFX_BearTrap_In1		61688
+	213946712	SFX_BearTrap_In1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\66\{66974F7A-164D-7E0A-D574-C9F4FB0DB0A6}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_BearTrap\SFX_BearTrap_In1		61688
 	222843135	FootSteps_Lava (3)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\6B\{6BFC1F58-54BB-B2F0-4B65-E642B954B5FD}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Lava\FootSteps_Lava (3)		140716
-	223150580	SFX_SmallClaw_Idle1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\1F\{1F15E0D9-61EF-E966-A2B3-C1AC144AC6BC}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Mon_SmallClaw_UI\SFX_SmallClaw_Idle1		177696
-	223413545	MonsterSnarlGrowl1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\66\{6646DB2A-9B9D-7EF1-6740-41D5559C99DD}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Mon_SmallClaw\MonsterSnarlGrowl1		122976
-	245240366	SFX_Lava1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\42\{427C606B-003F-B8A9-D86C-33C51F7C4425}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Lava\SFX_Lava1		2037828
-	246210322	FlameMovementHeavy	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A7\{A7D57E0B-64C5-F83D-378B-5B81C10FF0EB}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_FlameShot\FlameMovementHeavy		1341084
+	223150580	SFX_SmallClaw_Idle1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\1F\{1F15E0D9-61EF-E966-A2B3-C1AC144AC6BC}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\SFX_Mon_SmallClaw_UI\SFX_SmallClaw_Idle1		177696
+	223413545	MonsterSnarlGrowl1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\66\{6646DB2A-9B9D-7EF1-6740-41D5559C99DD}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\SFX_Mon_SmallClaw\MonsterSnarlGrowl1		122976
+	245240366	SFX_Lava1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\42\{427C606B-003F-B8A9-D86C-33C51F7C4425}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Lava\SFX_Lava1		2037828
+	246210322	FlameMovementHeavy	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\4A\{4A5F7EC4-9B70-DF47-BB41-4EAC7BA92D4D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_FlameShot\FlameMovementHeavy		1341084
 	255360718	FootstepsConcrete2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A5\{A5CE27AF-12AC-80AA-5CFE-039A21E1E6C4}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Stone\FootstepsConcrete2		69940
 	290212776	FootstepMetal1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\75\{758138DC-BF20-3EAF-9803-773285868A26}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Metal\FootstepMetal1		73672
-	313983704	SFX_StoneTrap	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BC\{BC693F83-11C1-F5DA-8473-9D2EF5636125}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_StoneTrap		264208
-	318472292	SFX_Saw	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\3A\{3A350892-0AA0-1D88-2880-65128FDBEE62}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Saw		503596
-	321658963	SFX_BearTrap_Out	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CA\{CABC276B-B97B-E16F-326E-6FCE9A1E8902}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_BearTrap_Out		62828
-	324020983	SFX_AxeSwing_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BE\{BEAC21E8-2467-FFCB-E459-19332BFE3CA1}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_AxeSwing_Hit		136872
+	313983704	SFX_StoneTrap	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BC\{BC693F83-11C1-F5DA-8473-9D2EF5636125}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_StoneTrap		264208
+	318472292	SFX_Saw	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\3A\{3A350892-0AA0-1D88-2880-65128FDBEE62}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Saw		503596
+	321658963	SFX_BearTrap_Out	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CA\{CABC276B-B97B-E16F-326E-6FCE9A1E8902}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_BearTrap_Out		62828
+	324020983	SFX_AxeSwing_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BE\{BEAC21E8-2467-FFCB-E459-19332BFE3CA1}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_AxeSwing_Hit		136872
 	326406373	Footstep_Grass (5)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BC\{BC18A9E6-8F90-CE54-6711-E48D3BC8E7E3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Grass\Footstep_Grass (5)		49964
 	369007659	TorchFlicker	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\55\{559E03B1-4932-EBDC-CFF5-88FD3CA8B894}.wem		\Actor-Mixer Hierarchy\Default Work Unit\TorchFlicker		17299552
-	373316616	SFX_Arrow_Realse	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\1B\{1BD5F843-7767-DF2E-45D6-3A67563F9E82}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Arrow_Realse		310296
+	373316616	SFX_Arrow_Shot	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\1B\{1BD5F843-7767-DF2E-45D6-3A67563F9E82}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Arrow_Shot		310296
 	377837800	Footstep_Grass (3)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\0D\{0D02EE03-BBCD-6A58-0CFD-E5FC05CAFA57}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Grass\Footstep_Grass (3)		63828
 	384388068	Footstep_Dirt4	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\EC\{EC658BD6-2331-30DB-B09E-43B888A45B5D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\Footstep_Dirt4		78840
 	401627905	FootstepMetal2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\9A\{9A513CC8-FF0F-3BA5-9FD4-F3E8CBE9A384}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Metal\FootstepMetal2		36124
-	430856920	SFX_AxeSwing	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\AB\{AB49C123-70BE-130E-D873-B25018D39E87}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_AxeSwing		121372
-	434604945	SFX_BearTrap_In0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\15\{15C54224-9E2A-14C5-57AE-8FE3B524A2F8}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_BearTrap\SFX_BearTrap_Blend\SFX_BearTrap_In0		67352
+	430856920	SFX_AxeSwing	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\AB\{AB49C123-70BE-130E-D873-B25018D39E87}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_AxeSwing		121372
+	434604945	SFX_BearTrap_In0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\15\{15C54224-9E2A-14C5-57AE-8FE3B524A2F8}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_BearTrap\SFX_BearTrap_Blend\SFX_BearTrap_In0		67352
 	454432692	SFX_Fire_Extinguish	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\1A\{1AE56785-54D9-9793-74C0-18450B969302}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Fire_Extinguish		440664
-	454704061	SFX_BearTrap_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\D6\{D6097544-A114-11ED-7819-676E97EC36FF}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_BearTrap\SFX_BearTrap_Blend\SFX_BearTrap_Hit		40256
-	457873650	Burn_fire	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\41\{4110B358-6594-C96B-FE8A-140D61157BB2}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_FlameShot\Burn_fire		223936
+	454704061	SFX_BearTrap_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\D6\{D6097544-A114-11ED-7819-676E97EC36FF}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_BearTrap\SFX_BearTrap_Blend\SFX_BearTrap_Hit		40256
+	457873650	Burn_fire	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CB\{CBF1F095-B4AE-0527-A1B3-9B95BB070A3A}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_FlameShot\Burn_fire		223936
+	460690503	BowPullString_02	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\18\{1854698C-BDCE-A5F8-3354-CC63F0DBB371}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_BowPull\BowPullString_02		131752
 	518697165	Footstep_Dirt3	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\6E\{6E6E02EA-5019-68F8-642F-516169F4C419}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\Footstep_Dirt3		75832
 	537148971	FootSteps_Lava (2)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\71\{71ED084E-15F1-56C7-8948-167F1ED51B3C}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Lava\FootSteps_Lava (2)		134716
 	578835809	ArrowImpact_Stone2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\C1\{C1E7FFF6-4ED9-0743-C0CF-0A9CB01DD0C3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Stone\ArrowImpact_Stone2		104912
 	600873638	ArrowImpact_Stone1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E0\{E0FAD87A-96A5-3AD3-53F5-0C73CBF0230B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Stone\ArrowImpact_Stone1		130044
-	602204976	SFX_StoneTrap_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B3\{B37D4729-24C4-142C-9B17-D4F31D6BA141}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_StoneTrap_Hit		175960
-	610202587	SFX_GrenadeExplosion	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\3C\{3C84F845-3654-B23C-3424-DCF3F105DD63}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_GrenadeExplosion		156680
+	602204976	SFX_StoneTrap_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B3\{B37D4729-24C4-142C-9B17-D4F31D6BA141}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_StoneTrap_Hit		175960
+	610202587	SFX_GrenadeExplosion	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\7D\{7DE9D145-CD71-CEC1-60A2-7D5A2AEBE7A9}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_GrenadeExplosion		421556
+	613319137	BowPullString_01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\95\{950B6C7A-92B2-C521-D2BA-B510AC380721}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_BowPull\BowPullString_01		97864
 	624593524	MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\96\{96300078-EC08-B39A-D34F-1F977C3540F7}.wem		\Interactive Music Hierarchy\Default Work Unit\BGM_Theme\BGM_Temp\MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj		2490452
-	655511879	SFX_SpikeTrap_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\55\{555E4D62-0A1D-2AE1-C8BB-90268D05BFD5}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_SpikeTrap_Hit		92496
+	655511879	SFX_SpikeTrap_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\55\{555E4D62-0A1D-2AE1-C8BB-90268D05BFD5}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_SpikeTrap_Hit		92496
 	660206576	FootstepsDirt1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B7\{B7A60FA2-8632-2B7F-20A9-AB463C96761A}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\FootstepsDirt1		95716
 	689500474	SFX_ArrowImpact_Body	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F0\{F0FA6C86-B765-797F-D8C2-EDDAD1E730CA}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Body		66816
-	694306221	SFX_SpikeTrap	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\05\{05CB506B-F9D5-53BB-16FA-5E2A7051E323}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_SpikeTrap		112100
+	694306221	SFX_SpikeTrap	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\05\{05CB506B-F9D5-53BB-16FA-5E2A7051E323}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_SpikeTrap		112100
 	710539305	SFX_Arrow_By	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A7\{A793D2E2-DCF5-5582-7F08-A334538F83FA}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Arrow_By		172812
+	733375653	BowPullString_03	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\41\{41E1DCB4-ED7F-AF60-8A7D-B2E4FB2A3E7D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_BowPull\BowPullString_03		100248
 	750724736	waves	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A9\{A97BE36E-CAE5-7C1D-4425-4D510D9A1EF3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\waves		1288036
-	763229215	SFX_Lava_Hit1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\75\{75ACA214-A2A4-1D99-50D1-AB1499E837FA}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Lava_Hit\SFX_Lava_Hit1		130148
-	769452809	SFX_Saw_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A0\{A001BF43-841B-640B-1EA8-1CFB00C0A0D5}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Saw_Hit		212588
+	763229215	SFX_Lava_Hit1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\75\{75ACA214-A2A4-1D99-50D1-AB1499E837FA}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Lava_Hit\SFX_Lava_Hit1		130148
+	769452809	SFX_Saw_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A0\{A001BF43-841B-640B-1EA8-1CFB00C0A0D5}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Saw_Hit		212588
 	790427616	Footstep_Dirt5	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\5F\{5FCB1406-F0D3-E367-DD3D-7C90A7DF287B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\Footstep_Dirt5		84004
+	797000384	SFX_Arrow_Realse	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\65\{656DBBB6-6758-73FE-11F9-8ED71DFC9348}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Arrow_Realse		145504
 	809366429	FootstepMetal	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F0\{F00849BB-91D3-0573-A268-7AF8B52292AD}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Metal\FootstepMetal		26392
 	848033451	ArrowImpact_Stone0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\AA\{AA0EA770-6250-7262-D44F-148E619702A0}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Stone\ArrowImpact_Stone0		115900
 	866318197	FootstepsConcrete1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\2A\{2A32EEA4-4A01-5437-B624-1983B1D272A6}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Stone\FootstepsConcrete1		29832
-	872852181	SFX_SmallClaw_Idle1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\5B\{5B595419-272B-3B4D-B8B2-B9CF3017021E}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Mon_SmallClaw\SFX_SmallClaw_Idle1		177696
+	872852181	SFX_SmallClaw_Idle1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\5B\{5B595419-272B-3B4D-B8B2-B9CF3017021E}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\SFX_Mon_SmallClaw\SFX_SmallClaw_Idle1		177696
 	919997465	SFX_Fire_Burn	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\33\{335EF1C3-0385-1EB3-AF6C-8D1199FD097D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Fire_Burn		265740
-	941890073	SFX_Lava0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\2D\{2D647CE2-A0BF-8541-BC1F-E57D5C522F8C}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Lava\SFX_Lava0		4009652
+	941890073	SFX_Lava0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\2D\{2D647CE2-A0BF-8541-BC1F-E57D5C522F8C}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Lava\SFX_Lava0		4009652
 	956247085	FootSteps_Lava (5)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E6\{E6F3A076-3CE6-D0D8-C7A4-243B47BF9E63}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Lava\FootSteps_Lava (5)		185284
-	958130278	MonsterSnarlGrowl0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\6F\{6F283E1B-2A67-A3B8-BDE8-E452EFFD5BB0}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Mon_SmallClaw\MonsterSnarlGrowl0		183392
+	958130278	MonsterSnarlGrowl0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\6F\{6F283E1B-2A67-A3B8-BDE8-E452EFFD5BB0}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\SFX_Mon_SmallClaw\MonsterSnarlGrowl0		183392
 	969253722	FootstepsConcrete	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\EA\{EA7E8CD3-7DE7-F01C-7693-5637D7851CC2}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Stone\FootstepsConcrete		53916
 	995426383	FootstepsDirt	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\13\{13A5521D-59F7-9A3E-377F-D279FBC8696A}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\FootstepsDirt		92452
-	997628724	LighterIgniteFlame	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B7\{B7A0A1BC-FAEE-89D5-5923-9DD89B9B03B7}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_FlameShot\LighterIgniteFlame		208216
-	1030029664	MonsterSnarlGrowl2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\D1\{D138EC47-9D77-318B-6516-A42C75C620F3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Mon_SmallClaw_UI\MonsterSnarlGrowl2		367712
+	997628724	LighterIgniteFlame	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\50\{50E90512-7895-A028-9CA9-75CDD5C2A5BE}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_FlameShot\LighterIgniteFlame		208216
+	1030029664	MonsterSnarlGrowl2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\D1\{D138EC47-9D77-318B-6516-A42C75C620F3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\SFX_Mon_SmallClaw_UI\MonsterSnarlGrowl2		367712
 	1038282182	Footstep_Grass (4)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\72\{72800A1A-7261-FD60-8F95-A01A6B9E5295}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Grass\Footstep_Grass (4)		34480
 	1069660761	Footstep_Grass (2)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\55\{55D5DF1A-EA9F-51EF-B2F4-2AFAC4BC2C54}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Grass\Footstep_Grass (2)		42176
 
