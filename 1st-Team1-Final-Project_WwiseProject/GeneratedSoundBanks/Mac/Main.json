@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{C5740437-9BC3-AC4E-8270-FD3930CA83DA}",
+    "Hash": "{FF6B6CB8-7E42-782F-4F8C-421CEA79834F}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -21,7 +21,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowImpactWood_BW.54281.wav",
-      "CachePath": "0D/{0DC80136-E5CB-0FAC-1468-87D3C8CED86A}.wem"
+      "CachePath": "E7/{E75C8D0E-0A44-9599-0179-8FADEEB33D76}.wem"
      },
      {
       "Id": "45190972",
@@ -48,6 +48,14 @@
       "CachePath": "84/{845FE753-80F0-6825-CB07-84F31B1EBEA8}.wem"
      },
      {
+      "Id": "81623842",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Wind_Loop_Distant_Air_Steady_1.wav",
+      "CachePath": "08/{0801B149-5EAE-81E6-B35F-AEFA8B3A8891}.wem"
+     },
+     {
       "Id": "112081368",
       "Language": "SFX",
       "Streaming": "false",
@@ -61,7 +69,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeFuse.wav",
-      "CachePath": "64/{6476595C-ABCB-938E-38AD-F396C9316B9C}.wem"
+      "CachePath": "4D/{4D5CACE9-FBC6-8F58-6453-5C3BC9B32A8B}.wem"
      },
      {
       "Id": "149736104",
@@ -77,7 +85,15 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeTick.wav",
-      "CachePath": "9D/{9D1D7430-7695-F79D-CFED-62C578CC5256}.wem"
+      "CachePath": "78/{783A3204-F3A4-EE0B-047A-830C3280BA2A}.wem"
+     },
+     {
+      "Id": "177130386",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am.wav",
+      "CachePath": "C4/{C4AB8AED-E27C-80B7-9E61-568BCEA89233}.wem"
      },
      {
       "Id": "199617062",
@@ -109,7 +125,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy.wav",
-      "CachePath": "9A/{9A7122CE-4483-3B30-BD0F-9B23FD99731F}.wem"
+      "CachePath": "1F/{1F15E0D9-61EF-E966-A2B3-C1AC144AC6BC}.wem"
      },
      {
       "Id": "223413545",
@@ -126,6 +142,14 @@
       "Location": "Memory",
       "ShortName": "SFX_Lava1.wav",
       "CachePath": "42/{427C606B-003F-B8A9-D86C-33C51F7C4425}.wem"
+     },
+     {
+      "Id": "246210322",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FlameMovementHeavy_SFXB.651.wav",
+      "CachePath": "4A/{4A5F7EC4-9B70-DF47-BB41-4EAC7BA92D4D}.wem"
      },
      {
       "Id": "255360718",
@@ -157,7 +181,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Saw.wav",
-      "CachePath": "89/{89E4AB44-4F2F-CCDD-82C3-4707EC8F0747}.wem"
+      "CachePath": "3A/{3A350892-0AA0-1D88-2880-65128FDBEE62}.wem"
      },
      {
       "Id": "321658963",
@@ -240,12 +264,36 @@
       "CachePath": "15/{15C54224-9E2A-14C5-57AE-8FE3B524A2F8}.wem"
      },
      {
+      "Id": "454432692",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_flame_extinguish_short_01_burn_fire_flame.wav",
+      "CachePath": "1A/{1AE56785-54D9-9793-74C0-18450B969302}.wem"
+     },
+     {
       "Id": "454704061",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_Hit.wav",
       "CachePath": "D6/{D6097544-A114-11ED-7819-676E97EC36FF}.wem"
+     },
+     {
+      "Id": "457873650",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_inflammation_light_02_burn_fire_flame.wav",
+      "CachePath": "CB/{CBF1F095-B4AE-0527-A1B3-9B95BB070A3A}.wem"
+     },
+     {
+      "Id": "460690503",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "BowPullString_BW.54384.wav",
+      "CachePath": "D5/{D5FBD559-460A-3B3D-9297-73DB1210EB08}.wem"
      },
      {
       "Id": "518697165",
@@ -264,6 +312,22 @@
       "CachePath": "71/{71ED084E-15F1-56C7-8948-167F1ED51B3C}.wem"
      },
      {
+      "Id": "578835809",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_10.wav",
+      "CachePath": "C1/{C1E7FFF6-4ED9-0743-C0CF-0A9CB01DD0C3}.wem"
+     },
+     {
+      "Id": "600873638",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_04.wav",
+      "CachePath": "E0/{E0FAD87A-96A5-3AD3-53F5-0C73CBF0230B}.wem"
+     },
+     {
       "Id": "602204976",
       "Language": "SFX",
       "Streaming": "false",
@@ -277,7 +341,23 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeExplosion.wav",
-      "CachePath": "BF/{BF182761-C6AF-AA4D-AE77-1F457BEF8B48}.wem"
+      "CachePath": "B2/{B29D1EE3-D558-F9A8-3B17-0D4ED773C676}.wem"
+     },
+     {
+      "Id": "613319137",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "BowPullString_BW.54383.wav",
+      "CachePath": "1B/{1B0F98C4-D217-ABB5-FEEF-5EB7D1EF9383}.wem"
+     },
+     {
+      "Id": "624593524",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj.wav",
+      "CachePath": "96/{96300078-EC08-B39A-D34F-1F977C3540F7}.wem"
      },
      {
       "Id": "655511879",
@@ -301,7 +381,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowImpactBody_BW.54264.wav",
-      "CachePath": "41/{41929C32-2443-5BF1-980C-CC04EAFD4E3D}.wem"
+      "CachePath": "F0/{F0FA6C86-B765-797F-D8C2-EDDAD1E730CA}.wem"
      },
      {
       "Id": "694306221",
@@ -317,7 +397,15 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowBy_BW.54273.wav",
-      "CachePath": "BF/{BF452479-DA1A-6BEB-20F0-427130D69200}.wem"
+      "CachePath": "A7/{A793D2E2-DCF5-5582-7F08-A334538F83FA}.wem"
+     },
+     {
+      "Id": "733375653",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "BowPullString_BW.54386.wav",
+      "CachePath": "FA/{FA1F08A4-553C-7493-FDB6-7321F0463487}.wem"
      },
      {
       "Id": "750724736",
@@ -352,12 +440,28 @@
       "CachePath": "5F/{5FCB1406-F0D3-E367-DD3D-7C90A7DF287B}.wem"
      },
      {
+      "Id": "797000384",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "BowSnap_BW.54387.wav",
+      "CachePath": "65/{656DBBB6-6758-73FE-11F9-8ED71DFC9348}.wem"
+     },
+     {
       "Id": "809366429",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepMetal.wav",
       "CachePath": "F0/{F00849BB-91D3-0573-A268-7AF8B52292AD}.wem"
+     },
+     {
+      "Id": "848033451",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_01.wav",
+      "CachePath": "AA/{AA0EA770-6250-7262-D44F-148E619702A0}.wem"
      },
      {
       "Id": "866318197",
@@ -374,6 +478,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy.wav",
       "CachePath": "5B/{5B595419-272B-3B4D-B8B2-B9CF3017021E}.wem"
+     },
+     {
+      "Id": "919997465",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_inflammation_light_02_burn_fire_flame.wav",
+      "CachePath": "33/{335EF1C3-0385-1EB3-AF6C-8D1199FD097D}.wem"
      },
      {
       "Id": "941890073",
@@ -416,6 +528,14 @@
       "CachePath": "13/{13A5521D-59F7-9A3E-377F-D279FBC8696A}.wem"
      },
      {
+      "Id": "997628724",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "LighterIgniteFlame_BW.9029.wav",
+      "CachePath": "50/{50E90512-7895-A028-9CA9-75CDD5C2A5BE}.wem"
+     },
+     {
       "Id": "1030029664",
       "Language": "SFX",
       "Streaming": "false",
@@ -453,7 +573,7 @@
       {
        "Id": "133365297",
        "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_Mon_SmallClaw_UI\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\SFX_Mon_SmallClaw_UI\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
        "GUID": "{2D24BA7A-966C-40EC-9B78-EF6A0C544C7A}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -469,7 +589,7 @@
       {
        "Id": "281650181",
        "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_SpikeTrap_Hit\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Props\\SFX_SpikeTrap_Hit\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{5D5C8854-CDA1-418F-AFDA-09A2E666C3F0}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
@@ -477,15 +597,23 @@
       {
        "Id": "356455906",
        "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_AxeSwing_Hit\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Props\\SFX_AxeSwing_Hit\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{79068F1E-BDD8-4FD5-8310-CF3249AD5587}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
       },
       {
+       "Id": "372897391",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Interactive Music Hierarchy\\Default Work Unit\\BGM_Theme\\BGM_Temp\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{A5478D08-348B-4DE2-99AC-DD93BBFC8FEE}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
+      },
+      {
        "Id": "459107489",
        "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_Mon_SmallClaw\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\SFX_Mon_SmallClaw\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
        "GUID": "{B9F32824-BE46-4DB1-B718-C38A0CAB5DF8}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -493,10 +621,18 @@
       {
        "Id": "675983341",
        "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_AxeSwing\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Props\\SFX_AxeSwing\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{90895E04-6C77-4899-B5E6-4F5F9A428296}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
+      },
+      {
+       "Id": "819178014",
+       "Name": "Standard (Custom)",
+       "ObjectPath": "\\Interactive Music Hierarchy\\Default Work Unit\\BGM_Theme\\BGM_Temp\\[Effect Slot [1]: (Flanger)]\\Standard (Custom)",
+       "GUID": "{9C58A6F3-1787-4264-BBEF-11128E22A730}",
+       "LibName": "Wwise Flanger",
+       "LibId": "8192003"
       }
      ],
      "ShareSets": [
@@ -528,14 +664,29 @@
     },
     "Events": [
      {
+      "Id": "2897876713",
+      "Name": "EV_Arrow_Shot",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_Arrow_Shot",
+      "GUID": "{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "1.6107165",
+      "DurationMax": "1.6200471",
+      "MediaRefs": [
+       {
+        "Id": "373316616"
+       }
+      ]
+     },
+     {
       "Id": "3432958693",
       "Name": "EV_ArrowBy",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowBy",
       "GUID": "{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}",
-      "MaxAttenuation": "250",
+      "MaxAttenuation": "300",
       "DurationType": "OneShot",
-      "DurationMin": "0.8015838",
-      "DurationMax": "0.8015838",
+      "DurationMin": "0.75643444",
+      "DurationMax": "0.75643444",
       "MediaRefs": [
        {
         "Id": "710539305"
@@ -559,13 +710,34 @@
       "Name": "EV_ArrowImpact_Body",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Body",
       "GUID": "{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}",
-      "MaxAttenuation": "300",
+      "MaxAttenuation": "1200",
       "DurationType": "OneShot",
-      "DurationMin": "0.33827296",
-      "DurationMax": "0.3583877",
+      "DurationMin": "0.30958745",
+      "DurationMax": "0.32799646",
       "MediaRefs": [
        {
         "Id": "689500474"
+       }
+      ]
+     },
+     {
+      "Id": "3834184178",
+      "Name": "EV_ArrowImpact_Stone",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Stone",
+      "GUID": "{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}",
+      "MaxAttenuation": "1200",
+      "DurationType": "OneShot",
+      "DurationMin": "0.54591566",
+      "DurationMax": "0.7596884",
+      "MediaRefs": [
+       {
+        "Id": "578835809"
+       },
+       {
+        "Id": "600873638"
+       },
+       {
+        "Id": "848033451"
        }
       ]
      },
@@ -574,10 +746,10 @@
       "Name": "EV_ArrowImpact_Wood",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Wood",
       "GUID": "{5AF6D827-D199-47C8-9BED-CC9DB12DEE69}",
-      "MaxAttenuation": "300",
+      "MaxAttenuation": "1200",
       "DurationType": "OneShot",
-      "DurationMin": "1.1009582",
-      "DurationMax": "1.1664246",
+      "DurationMin": "0.85634214",
+      "DurationMax": "0.9072629",
       "MediaRefs": [
        {
         "Id": "5171484"
@@ -585,26 +757,135 @@
       ]
      },
      {
-      "Id": "898284890",
-      "Name": "EV_ArrowRealse",
-      "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowRealse",
-      "GUID": "{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}",
-      "MaxAttenuation": "800",
+      "Id": "1852963041",
+      "Name": "EV_Bow_Pull",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_Bow_Pull",
+      "GUID": "{70E298F1-D671-45D2-BDB8-C18312B3AFC5}",
+      "MaxAttenuation": "300",
       "DurationType": "OneShot",
-      "DurationMin": "1.6107165",
-      "DurationMax": "1.6200471",
+      "DurationMin": "0.5092074",
+      "DurationMax": "0.81546146",
       "MediaRefs": [
        {
-        "Id": "373316616"
+        "Id": "460690503"
+       },
+       {
+        "Id": "613319137"
+       },
+       {
+        "Id": "733375653"
+       }
+      ]
+     },
+     {
+      "Id": "4137582580",
+      "Name": "EV_Bow_Realse",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_Bow_Realse",
+      "GUID": "{77A06439-AF10-4A18-AA52-5B5A3A9E5468}",
+      "MaxAttenuation": "30",
+      "DurationType": "OneShot",
+      "DurationMin": "0.7148274",
+      "DurationMax": "0.75733334",
+      "MediaRefs": [
+       {
+        "Id": "797000384"
+       }
+      ]
+     },
+     {
+      "Id": "3369981961",
+      "Name": "EV_Fire_Burn",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Burn",
+      "GUID": "{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}",
+      "MaxAttenuation": "300",
+      "DurationType": "OneShot",
+      "DurationMin": "1.3835624",
+      "DurationMax": "1.3835624",
+      "MediaRefs": [
+       {
+        "Id": "919997465"
+       }
+      ]
+     },
+     {
+      "Id": "3070546402",
+      "Name": "EV_Fire_Extinguish",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Extinguish",
+      "GUID": "{1261AE45-6B7B-489A-93E1-50AC8218A43C}",
+      "MaxAttenuation": "300",
+      "DurationType": "OneShot",
+      "DurationMin": "2.2946355",
+      "DurationMax": "2.2946355",
+      "MediaRefs": [
+       {
+        "Id": "454432692"
+       }
+      ]
+     },
+     {
+      "Id": "1613532296",
+      "Name": "EV_GameState",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_GameState",
+      "GUID": "{6CB15BE6-8B8A-4C5E-BD0C-81EB81C18C52}",
+      "DurationType": "Infinite",
+      "SwitchContainers": [
+       {
+        "SwitchValue": {
+         "GroupType": "State",
+         "GroupId": "1750343382",
+         "Id": "1160234136",
+         "GUID": "{BE7DC584-CBCD-4792-90E4-ECC03BDFDE72}"
+        },
+        "MediaRefs": [
+         {
+          "Id": "81623842"
+         }
+        ]
+       },
+       {
+        "SwitchValue": {
+         "GroupType": "State",
+         "GroupId": "1750343382",
+         "Id": "221232726",
+         "GUID": "{CD8F9588-1DFB-4A53-A477-E69169C457B2}"
+        },
+        "MediaRefs": [
+         {
+          "Id": "177130386"
+         }
+        ]
+       },
+       {
+        "SwitchValue": {
+         "GroupType": "State",
+         "GroupId": "1750343382",
+         "Id": "979765101",
+         "GUID": "{81F47699-C275-4308-BF58-11F7741DB094}"
+        },
+        "MediaRefs": [
+         {
+          "Id": "624593524"
+         }
+        ],
+        "PluginRefs": {
+         "Custom": [
+          {
+           "Id": "372897391"
+          },
+          {
+           "Id": "819178014"
+          }
+         ]
+        }
        }
       ]
      },
      {
       "Id": "831579122",
       "Name": "EV_Mon_SmallClaw",
-      "ObjectPath": "\\Events\\Default Work Unit\\EV_Mon_SmallClaw",
+      "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_Mon_SmallClaw",
       "GUID": "{CBF98796-A6A2-4A10-8163-018B83F0EB4C}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "600",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -642,7 +923,7 @@
      {
       "Id": "1082319155",
       "Name": "EV_Mon_SmallClaw_UI",
-      "ObjectPath": "\\Events\\Default Work Unit\\EV_Mon_SmallClaw_UI",
+      "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_Mon_SmallClaw_UI",
       "GUID": "{23941479-25EC-40A0-81FC-A265BBDEF2B9}",
       "DurationType": "OneShot",
       "DurationMin": "0.5117977",
@@ -831,7 +1112,7 @@
      {
       "Id": "2600979968",
       "Name": "Props_Axe",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_Axe",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe",
       "GUID": "{597B061A-CE0A-4A56-8154-41280E86C596}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -853,7 +1134,7 @@
      {
       "Id": "2662114774",
       "Name": "Props_Axe_Hit",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_Axe_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe_Hit",
       "GUID": "{E6A16F60-3008-4709-B717-1D97F028AB1C}",
       "MaxAttenuation": "1000",
       "DurationType": "OneShot",
@@ -875,7 +1156,7 @@
      {
       "Id": "737601643",
       "Name": "Props_BearTrap",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_BearTrap",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_BearTrap",
       "GUID": "{DCFFA37D-831E-4187-999F-FD2DB425816C}",
       "MaxAttenuation": "1000",
       "DurationType": "OneShot",
@@ -896,7 +1177,7 @@
      {
       "Id": "1721776362",
       "Name": "Props_BearTrap_Out",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_BearTrap_Out",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_BearTrap_Out",
       "GUID": "{A8F68B4C-166B-47F0-82AB-7DA87701254B}",
       "MaxAttenuation": "1000",
       "DurationType": "OneShot",
@@ -909,11 +1190,32 @@
       ]
      },
      {
+      "Id": "4061399480",
+      "Name": "Props_FlameTrap",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_FlameTrap",
+      "GUID": "{E933E0D7-C994-4F16-A665-499CBF190223}",
+      "MaxAttenuation": "600",
+      "DurationType": "OneShot",
+      "DurationMin": "6.5923166",
+      "DurationMax": "6.984317",
+      "MediaRefs": [
+       {
+        "Id": "246210322"
+       },
+       {
+        "Id": "457873650"
+       },
+       {
+        "Id": "997628724"
+       }
+      ]
+     },
+     {
       "Id": "2021162518",
       "Name": "Props_Lava",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_Lava",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Lava",
       "GUID": "{6686274F-8432-44ED-A70C-2B145099B0E2}",
-      "MaxAttenuation": "1000",
+      "MaxAttenuation": "800",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -927,7 +1229,7 @@
      {
       "Id": "2509596040",
       "Name": "Props_Lava_Hit",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_Lava_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Lava_Hit",
       "GUID": "{714D3788-7B53-452D-9C66-6FC35CD86958}",
       "MaxAttenuation": "1000",
       "DurationType": "Infinite",
@@ -941,32 +1243,56 @@
       ]
      },
      {
-      "Id": "3400001789",
-      "Name": "Props_Mine",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_Mine",
+      "Id": "551192008",
+      "Name": "Props_MineExplode",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_MineExplode",
       "GUID": "{59F8482E-4399-4E6E-B401-0432CFED7550}",
       "MaxAttenuation": "2000",
       "DurationType": "OneShot",
-      "DurationMin": "2.9565113",
-      "DurationMax": "3.0078897",
+      "DurationMin": "2.3256478",
+      "DurationMax": "2.463938",
       "MediaRefs": [
-       {
-        "Id": "120977185"
-       },
-       {
-        "Id": "157399992"
-       },
        {
         "Id": "610202587"
        }
       ]
      },
      {
+      "Id": "3970649718",
+      "Name": "Props_MineFuse",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_MineFuse",
+      "GUID": "{A35527D0-C2F4-47A0-BDE7-2C8FA15D748C}",
+      "MaxAttenuation": "1200",
+      "DurationType": "OneShot",
+      "DurationMin": "0.47876656",
+      "DurationMax": "0.47876656",
+      "MediaRefs": [
+       {
+        "Id": "120977185"
+       }
+      ]
+     },
+     {
+      "Id": "2240580818",
+      "Name": "Props_MineTick",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_MineTick",
+      "GUID": "{74D1A5FF-BF72-4F0B-9EF1-9D75B1CBC0BA}",
+      "MaxAttenuation": "1200",
+      "DurationType": "OneShot",
+      "DurationMin": "0.09575816",
+      "DurationMax": "0.09575816",
+      "MediaRefs": [
+       {
+        "Id": "157399992"
+       }
+      ]
+     },
+     {
       "Id": "2654270155",
       "Name": "Props_Saw",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_Saw",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Saw",
       "GUID": "{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}",
-      "MaxAttenuation": "960.00006",
+      "MaxAttenuation": "700",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -977,7 +1303,7 @@
      {
       "Id": "700338761",
       "Name": "Props_Saw_Hit",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_Saw_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Saw_Hit",
       "GUID": "{DFBB5823-D275-437F-99C5-623B934A4616}",
       "DurationType": "Infinite",
       "MediaRefs": [
@@ -989,7 +1315,7 @@
      {
       "Id": "254810222",
       "Name": "Props_Spike",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_Spike",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Spike",
       "GUID": "{87EFA3D2-5892-417F-A875-D06CCD556912}",
       "MaxAttenuation": "1200",
       "DurationType": "OneShot",
@@ -1004,7 +1330,7 @@
      {
       "Id": "1341033136",
       "Name": "Props_Spike_Hit",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_Spike_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Spike_Hit",
       "GUID": "{36F0066E-709B-487B-AB1C-AAC04B8F753C}",
       "MaxAttenuation": "1500",
       "DurationType": "OneShot",
@@ -1026,7 +1352,7 @@
      {
       "Id": "1046362180",
       "Name": "Props_StoneTrap_Hit",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_StoneTrap_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneTrap_Hit",
       "GUID": "{624349E1-2251-4E0E-8E91-39536798294E}",
       "MaxAttenuation": "1200",
       "DurationType": "OneShot",
@@ -1041,7 +1367,7 @@
      {
       "Id": "3944187859",
       "Name": "Props_StoneWall",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_StoneWall",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneWall",
       "GUID": "{9C89005A-CF4E-46F0-9A26-2606EC93E64B}",
       "MaxAttenuation": "1500",
       "DurationType": "OneShot",
@@ -1075,6 +1401,40 @@
       "DurationType": "OneShot",
       "DurationMin": "0",
       "DurationMax": "0"
+     }
+    ],
+    "StateGroups": [
+     {
+      "Id": "1750343382",
+      "Name": "GameTheme",
+      "ObjectPath": "\\States\\Default Work Unit\\GameTheme",
+      "GUID": "{FFD09951-7D67-4226-84C5-E7A89E41F513}",
+      "States": [
+       {
+        "Id": "221232726",
+        "Name": "Lose",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Lose",
+        "GUID": "{CD8F9588-1DFB-4A53-A477-E69169C457B2}"
+       },
+       {
+        "Id": "748895195",
+        "Name": "None",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\None",
+        "GUID": "{979859DB-348B-4CDB-99E7-60D08A1C9ABA}"
+       },
+       {
+        "Id": "979765101",
+        "Name": "Win",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Win",
+        "GUID": "{81F47699-C275-4308-BF58-11F7741DB094}"
+       },
+       {
+        "Id": "1160234136",
+        "Name": "Normal",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Normal",
+        "GUID": "{BE7DC584-CBCD-4792-90E4-ECC03BDFDE72}"
+       }
+      ]
      }
     ],
     "SwitchGroups": [
@@ -1119,6 +1479,6 @@
     ]
    }
   ],
-  "FileHash": "{6461763C-01A5-254A-003B-F4649BF0C653}"
+  "FileHash": "{697D3FFB-0543-3498-6FFB-10C3C21070FD}"
  }
 }
