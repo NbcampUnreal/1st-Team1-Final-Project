@@ -140,12 +140,12 @@
 						</Action>
 					</ChildrenList>
 				</Event>
-				<Event Name="Props_Mine" ID="{59F8482E-4399-4E6E-B401-0432CFED7550}">
+				<Event Name="Props_MineExplode" ID="{59F8482E-4399-4E6E-B401-0432CFED7550}">
 					<ChildrenList>
 						<Action Name="" ID="{5CB5FC2A-A611-4283-B91A-F41FB6BEE5CB}" ShortID="843699091">
 							<ReferenceList>
 								<Reference Name="Target">
-									<ObjectRef Name="SFX_Grenade" ID="{C0AF94A0-A240-4583-AB59-31212ADAC0BF}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+									<ObjectRef Name="SFX_GrenadeExplosion" ID="{611E6FF4-0073-4C79-9A94-D76F510F0993}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 								</Reference>
 							</ReferenceList>
 						</Action>
@@ -278,6 +278,51 @@
 							<ReferenceList>
 								<Reference Name="Target">
 									<ObjectRef Name="SFX_ArrowImpact_Stone" ID="{5B4DA841-68C7-48EF-90AB-20E344778912}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_MineTick" ID="{74D1A5FF-BF72-4F0B-9EF1-9D75B1CBC0BA}">
+					<ChildrenList>
+						<Action Name="" ID="{8F0EF89B-4107-4A1B-9DF5-419226E5ABF3}" ShortID="719083748">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_GrenadeTick" ID="{032BB249-4018-4415-AE23-D5223963CE2B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_MineFuse" ID="{A35527D0-C2F4-47A0-BDE7-2C8FA15D748C}">
+					<ChildrenList>
+						<Action Name="" ID="{FC063C7F-121C-4A98-AD16-1683D829FE3F}" ShortID="241425375">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_GrenadeFuse" ID="{F132EACB-2D2B-46AD-A69A-7A9E5F8BA8C2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="Props_FlameTrap" ID="{E933E0D7-C994-4F16-A665-499CBF190223}"/>
+				<Event Name="EV_Fire_Burn" ID="{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}">
+					<ChildrenList>
+						<Action Name="" ID="{D2FA98EC-5A68-4637-83C2-72D8C056E220}" ShortID="495966144">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Fire_Burn" ID="{FEB4D4C7-8CE2-48DA-B308-EAA571DC9D18}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="EV_Fire_Extinguish" ID="{1261AE45-6B7B-489A-93E1-50AC8218A43C}">
+					<ChildrenList>
+						<Action Name="" ID="{CC333081-7CF9-4058-853F-98697CB21FD0}" ShortID="429770673">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_Fire_Extinguish" ID="{11A74A67-676A-442A-9E86-ED45D354EA37}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 								</Reference>
 							</ReferenceList>
 						</Action>

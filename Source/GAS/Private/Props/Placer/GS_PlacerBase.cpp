@@ -185,13 +185,8 @@ void AGS_PlacerBase::DrawPlacementIndicators()
 		 {
 		 	bUpdatePlaceIndicators = false;
 		 	bCanBuild = true;
-		 	// float BaseBuildLevel = BuildManagerRef->GetCellLocation(BuildManagerRef->GetCellUnderCursor()).Z;
-		 	// FVector2d Center = BuildManagerRef->GetCenterOfRectArea(BuildManagerRef->GetCellUnderCursor(), ObjectSize);
-			 //
-		 	// StaticMeshCompo->SetWorldLocation(FVector(Center.X, Center.Y, BaseBuildLevel));
 
 			TArray<FIntPoint> IntPointArray;
-		 	//BuildManagerRef->GetCellsInRectArea(IntPointArray, BuildManagerRef->GetCellUnderCursor(), ObjectSize);
 		 	CalCellsInRectArea(IntPointArray);
 		 	
 		 	for (int i = 0; i < IntPointArray.Num(); i++)
