@@ -85,6 +85,25 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void InitDataCache();
 
+	//UI 관련 함수
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	bool PreviewRunePlacement(uint8 RuneID, const FIntPoint& Pos, TArray<FIntPoint>& OutAffectedCells);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void GetGridDimensions(int32& OutWidth, int32& OutHeight);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	bool GetCellData(const FIntPoint& Pos, FGridCellData& OutCellData);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	bool GetRuneShape(uint8 RuneID, TArray<FIntPoint>& OutShape);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	UTexture2D* GetRuneTexture(uint8 RuneID);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void InitializeForTesting();
+
 private:
 
 	TMap<uint8, FRuneTableRow> RuneDataCache;
