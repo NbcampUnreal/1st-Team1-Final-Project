@@ -235,12 +235,11 @@ void AGS_CustomLobbyPC::ShowCustomLobbyUI()
 
 		if (CustomLobbyWidgetInstance)
 		{
-			// 생성된 위젯을 뷰포트에 추가하여 화면에 표시합니다.
 			CustomLobbyWidgetInstance->AddToViewport();
 			UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: CustomLobbyUI created and added to viewport."));
 
 			FInputModeUIOnly InputModeData;
-			InputModeData.SetWidgetToFocus(CustomLobbyWidgetInstance->TakeWidget()); // 키보드 포커스 설정
+			//InputModeData.SetWidgetToFocus(CustomLobbyWidgetInstance->TakeWidget()); // 키보드 포커스 설정
 			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock); // 마우스 락 해제
 			SetInputMode(InputModeData);
 			SetShowMouseCursor(true);
@@ -262,7 +261,6 @@ void AGS_CustomLobbyPC::Client_UpdateDynamicButtonUI_Implementation(EPlayerRole 
 
 	if (CustomLobbyWidgetInstance)
 	{
-		// CustomLobbyWidgetInstance를 UGS_CustomLobbyUI 타입으로 캐스팅합니다.
 		UGS_CustomLobbyUI* LobbyUI = Cast<UGS_CustomLobbyUI>(CustomLobbyWidgetInstance);
 		if (LobbyUI)
 		{
