@@ -1,10 +1,17 @@
-﻿#include "Props/Trap/TriggerTrap/GS_TrigTrapBase.h"
-
+#include "Props/Trap/TriggerTrap/GS_TrigTrapBase.h"
+#include "Character/Player/GS_Player.h"
 AGS_TrigTrapBase::AGS_TrigTrapBase()
 {
 	TriggerBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
 	TriggerBoxComp->SetupAttachment(RotationSceneComp);
-	TriggerBoxComp->SetCollisionProfileName(TEXT("Trigger"));
+	
+	//Trigger Box 설정
+	TriggerBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	TriggerBoxComp->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	TriggerBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	TriggerBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+
 }
 
 void AGS_TrigTrapBase::BeginPlay()
@@ -22,7 +29,12 @@ void AGS_TrigTrapBase::OnTriggerOverlap(UPrimitiveComponent* OverlappedComp, AAc
 	//change it to Player Character later
 	if (OtherActor && OtherActor != this)
 	{
-		ApplyTrapEffect(OtherActor);
+		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
+		if (Player)
+		{
+			ApplyTrapEffect(OtherActor);
+		}
+		
 	}
 }
 
@@ -33,7 +45,11 @@ void AGS_TrigTrapBase::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, 
 	//change it to Player Character later
 	if (OtherActor && OtherActor != this)
 	{
-		EndTrapEffect(OtherActor);
+		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
+		if (Player)
+		{
+			EndTrapEffect(OtherActor);
+		}
 	}
 }
 

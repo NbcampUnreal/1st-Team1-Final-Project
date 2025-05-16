@@ -9,6 +9,7 @@
 #include "AkGameplayStatics.h"
 #include "GS_Monster.generated.h"
 
+class UGS_MonsterAnimInstance;
 /**
  * 
  */
@@ -29,20 +30,35 @@ public:
 	UPROPERTY(EditAnywhere, Category = "AI")
 	UBlackboardData* BBAsset;
 
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	UAnimMontage* AttackMontage;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	UAkAudioEvent* ClickSoundEvent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	UAkAudioEvent* MoveSoundEvent;
-
+	
 	void SetSelected(bool bIsSelected);
 
+	UFUNCTION(BlueprintCallable, Category = "AI")
+	virtual void Attack();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayAttackMontage();
+	
 protected:
+	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
+	
+	UPROPERTY()
+	TObjectPtr<UGS_MonsterAnimInstance> MonsterAnim;
+	
 	UPROPERTY(VisibleAnywhere)
 	UDecalComponent* SelectionDecal;
 
 	UPROPERTY(VisibleAnywhere)
 	UAkComponent* AkComponent;
-
+	
 };
 

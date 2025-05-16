@@ -28,6 +28,14 @@ void AGS_Character::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Set Default Stats to Character
+	const UEnum* CharacterEnum = FindObject<UEnum>(ANY_PACKAGE, TEXT("ECharacterType"), true);
+
+	if (CharacterEnum)
+	{
+		FString EnumToName = CharacterEnum->GetNameStringByValue((int64)CharacterType);
+		StatComp->InitStat(FName(EnumToName));
+	}
 }
 
 void AGS_Character::Tick(float DeltaTime)
@@ -48,7 +56,6 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	float CurrentHealth = StatComp->GetCurrentHealth();
 
-	//UE_LOG(LogTemp, Warning, TEXT("Damaged %s"), *GetName());
 	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f"), *GetName(), ActualDamage);
 
 	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage);
