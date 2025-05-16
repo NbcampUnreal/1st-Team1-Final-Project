@@ -13,9 +13,22 @@ UGS_ArcaneBoardManager::UGS_ArcaneBoardManager()
 	CurrStatEffects = FCharacterStats();
 	CurrGridLayout = nullptr;
 
-	// 데이터 테이블은 ArcaneBoardLPS에서 설정
-	RuneTable = nullptr;
-	GridLayoutTable = nullptr;
+	//데이터 테이블은 ArcaneBoardLPS에서 설정
+	/*RuneTable = nullptr;
+	GridLayoutTable = nullptr;*/
+
+	//임시
+	static ConstructorHelpers::FObjectFinder<UDataTable> RuneTableFinder(TEXT("/Game/DataTable/RuneSystem/DT_RuneTable"));
+	if (RuneTableFinder.Succeeded())
+	{
+		RuneTable = RuneTableFinder.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> GridLayoutTableFinder(TEXT("/Game/DataTable/RuneSystem/DT_GridLayoutTable"));
+	if (GridLayoutTableFinder.Succeeded())
+	{
+		GridLayoutTable = GridLayoutTableFinder.Object;
+	}
 }
 
 bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
@@ -309,6 +322,85 @@ void UGS_ArcaneBoardManager::InitDataCache()
 
 	//초기 클래스 설정
 	SetCurrClass(CurrClass);
+}
+
+bool UGS_ArcaneBoardManager::PreviewRunePlacement(uint8 RuneID, const FIntPoint& Pos, TArray<FIntPoint>& OutAffectedCells)
+{
+	OutAffectedCells.Empty();
+
+	FRuneTableRow RuneData;
+	if (!GetRuneData(RuneID, RuneData))
+	{
+		return false;
+	}
+
+	bool bCanPlace = true;
+	for (const FIntPoint& Offset : RuneData.RuneShape)
+	{
+		FIntPoint CellPos(Pos.X + Offset.X, Pos.Y + Offset.Y);
+		OutAffectedCells.Add(CellPos);
+
+		if (!IsValidCell(CellPos))
+		{
+			bCanPlace = false;
+		}
+	}
+
+	return bCanPlace;
+}
+
+void UGS_ArcaneBoardManager::GetGridDimensions(int32& OutWidth, int32& OutHeight)
+{
+	if (IsValid(CurrGridLayout))
+	{
+		OutWidth = CurrGridLayout->GridSize.X;
+		OutHeight = CurrGridLayout->GridSize.Y;
+	}
+	else
+	{
+		OutWidth = 0;
+		OutHeight = 0;
+	}
+}
+
+bool UGS_ArcaneBoardManager::GetCellData(const FIntPoint& Pos, FGridCellData& OutCellData)
+{
+	if (CurrGridState.Contains(Pos))
+	{
+		OutCellData = CurrGridState[Pos];
+		return true;
+	}
+
+	return false;
+}
+
+bool UGS_ArcaneBoardManager::GetRuneShape(uint8 RuneID, TArray<FIntPoint>& OutShape)
+{
+	FRuneTableRow RuneData;
+	if (GetRuneData(RuneID, RuneData))
+	{
+		OutShape = RuneData.RuneShape;
+		return true;
+	}
+
+	return false;
+}
+
+UTexture2D* UGS_ArcaneBoardManager::GetRuneTexture(uint8 RuneID)
+{
+	FRuneTableRow RuneData;
+	if (GetRuneData(RuneID, RuneData))
+	{
+		return RuneData.RuneTexture.LoadSynchronous();
+	}
+
+	return nullptr;
+}
+
+void UGS_ArcaneBoardManager::InitializeForTesting()
+{
+	InitDataCache();
+	SetCurrClass(ECharacterClass::Ares);
 }
 
 void UGS_ArcaneBoardManager::InitGridState()
