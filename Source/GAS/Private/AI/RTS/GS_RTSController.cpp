@@ -200,25 +200,8 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	{
 		return;
 	}
-
-	FVector TargetLocation = GroundHit.Location;
-	for (AGS_Monster* Unit : UnitSelection)
-	{
-		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
-		{
-			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
-			{
-				BlackboardComp->SetValueAsBool(AGS_AIController::bUseRTSKey, true);
-				BlackboardComp->SetValueAsVector(AGS_AIController::RTSTargetKey, TargetLocation);
-
-				// 이동 사운드 재생
-				if (Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
-			}
-		}
-	}
+	
+	Server_RTSMove(UnitSelection, GroundHit.Location);
 }
 
 FVector2D AGS_RTSController::GetKeyboardDirection() const
@@ -429,17 +412,7 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 
 void AGS_RTSController::MoveAIViaMinimap(const FVector& WorldLocation)
 {
-	for (AGS_Monster* Unit : UnitSelection)
-	{
-		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
-		{
-			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
-			{
-				BlackboardComp->SetValueAsBool(AGS_AIController::bUseRTSKey, true);
-				BlackboardComp->SetValueAsVector(AGS_AIController::RTSTargetKey, WorldLocation);
-			}
-		}
-	}
+	Server_RTSMove(UnitSelection, WorldLocation);
 }
 
 void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)
@@ -448,5 +421,28 @@ void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)
 	{
 		FVector NewLocation = FVector(WorldLocation.X, WorldLocation.Y, CameraActor->GetActorLocation().Z);
 		CameraActor->SetActorLocation(NewLocation);
+	}
+}
+
+void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>& Units, const FVector& Dest)
+{
+	for (AGS_Monster* Unit : Units)
+	{
+		if (!IsValid(Unit)) continue;
+		
+		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->SetValueAsBool(AGS_AIController::bUseRTSKey, true);
+				BlackboardComp->SetValueAsVector(AGS_AIController::RTSTargetKey, Dest);
+
+				// 이동 사운드 재생
+				if (Unit->MoveSoundEvent)
+				{
+					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
+				}
+			}
+		}
 	}
 }
