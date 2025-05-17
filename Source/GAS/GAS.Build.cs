@@ -15,6 +15,8 @@ public class GAS : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			//"GameLiftSDK",
+			"SlateCore",
+			"Slate",
 			"UMG",
 			"OnlineSubsystem",
 			"OnlineSubsystemUtils",
