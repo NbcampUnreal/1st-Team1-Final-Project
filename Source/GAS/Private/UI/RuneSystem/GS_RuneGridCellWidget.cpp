@@ -17,11 +17,6 @@ void UGS_RuneGridCellWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	ParentBoardWidget = Cast<UGS_ArcaneBoardWidget>(GetParent()->GetParent());
-
-	if (IsValid(RuneImage))
-	{
-		RuneImage->SetVisibility(ESlateVisibility::Hidden);
-	}
 }
 
 void UGS_RuneGridCellWidget::SetCellData(const FGridCellData& InCellData)
@@ -64,15 +59,10 @@ void UGS_RuneGridCellWidget::SetVisualState(EGridCellVisualState NewState)
 
 void UGS_RuneGridCellWidget::SetRuneTexture(UTexture2D* Texture)
 {
-	if (IsValid(RuneImage))
+	if (IsValid(DropZone))
 	{
-		RuneImage->SetBrushFromTexture(Texture);
-		RuneImage->SetVisibility(ESlateVisibility::Visible);
+		FButtonStyle ButtonStyle = DropZone->WidgetStyle;
+		ButtonStyle.Normal.SetResourceObject(Texture);
+		DropZone->SetStyle(ButtonStyle);
 	}
-	else
-	{
-		RuneImage->SetVisibility(ESlateVisibility::Hidden);
-	}
-
-	OnRuneTextureSet(Texture);
 }

@@ -102,6 +102,9 @@ public:
 	UTexture2D* GetRuneTexture(uint8 RuneID);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	bool GetFragmentedRuneTexture(uint8 RuneID, TMap<FIntPoint, UTexture2D*>& OutShape);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void InitializeForTesting();
 
 private:
@@ -118,7 +121,9 @@ private:
 
 	void InitGridState();
 
-	void UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID = 0);
+	void UpdateCellState(const FIntPoint& Pos, EGridCellState NewState);
+
+	void UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID, UTexture2D* RuneTextureFrag);
 
 	//특수 셀과 연결된 룬 ID들의 배열
 	UPROPERTY()

@@ -50,18 +50,9 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category = "ArcaneBoard")
     void OnVisualStateChanged(EGridCellVisualState NewState);
 
-    UFUNCTION(BlueprintImplementableEvent, Category = "ArcaneBoard")
-    void OnRuneTextureSet(UTexture2D* Texture);
-
 protected:
     UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
     FGridCellData CellData;
-
-    UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-    UImage* CellBG;
-
-    UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-    UImage* RuneImage;
 
     UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
     UButton* DropZone;

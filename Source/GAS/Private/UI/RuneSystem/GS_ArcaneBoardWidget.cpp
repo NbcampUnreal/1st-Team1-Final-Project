@@ -65,7 +65,7 @@ void UGS_ArcaneBoardWidget::GenerateGridLayout()
 
 			if (CellData.State == EGridCellState::Occupied && CellData.PlacedRuneID > 0)
 			{
-				UTexture2D* RuneTexture = BoardManager->GetRuneTexture(CellData.PlacedRuneID);
+				UTexture2D* RuneTexture = CellData.RuneTextureFrag;
 				if (RuneTexture)
 				{
 					CellWidget->SetRuneTexture(RuneTexture);
