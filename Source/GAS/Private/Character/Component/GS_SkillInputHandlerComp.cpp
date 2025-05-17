@@ -66,16 +66,6 @@ void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instanc
 	{
 		return;
 	}
-	
-	UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp();
-	if (SkillComp->IsSkillActive(ESkillSlot::Aiming))
-	{
-		SkillComp->TrySkillCommand(ESkillSlot::Aiming);
-	}
-	else
-	{
-		SkillComp->TryActivateSkill(ESkillSlot::Aiming);
-	}
 }
 
 void UGS_SkillInputHandlerComp::OnCtrlLeftClick(const FInputActionInstance& Instance)
@@ -85,7 +75,6 @@ void UGS_SkillInputHandlerComp::OnCtrlLeftClick(const FInputActionInstance& Inst
 	{
 		return;
 	}
-	OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 }
 
 void UGS_SkillInputHandlerComp::OnCtrlRightClick(const FInputActionInstance& Instance)
@@ -95,6 +84,5 @@ void UGS_SkillInputHandlerComp::OnCtrlRightClick(const FInputActionInstance& Ins
 	{
 		return;
 	}
-	OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
 }
 
