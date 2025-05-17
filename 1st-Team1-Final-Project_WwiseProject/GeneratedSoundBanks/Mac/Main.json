@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{FF6B6CB8-7E42-782F-4F8C-421CEA79834F}",
+    "Hash": "{81B38E94-21D6-927D-1E6D-4ADFB27D63D4}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -1479,6 +1479,6 @@
     ]
    }
   ],
-  "FileHash": "{697D3FFB-0543-3498-6FFB-10C3C21070FD}"
+  "FileHash": "{1BEBFFA9-B72D-ABEB-EC12-DFC286872042}"
  }
 }

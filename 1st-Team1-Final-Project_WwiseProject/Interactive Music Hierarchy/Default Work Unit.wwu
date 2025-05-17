@@ -129,7 +129,7 @@
 																			<PropertyList>
 																				<Property Name="EndTrimOffset" Type="Real64" Value="50514.7845804989"/>
 																				<Property Name="FadeInDuration" Type="Real64" Value="1105.65878558909"/>
-																				<Property Name="FadeOutDuration" Type="Real64" Value="4975.46453515092"/>
+																				<Property Name="FadeOutDuration" Type="Real64" Value="1385.58128270208"/>
 																			</PropertyList>
 																			<AudioSourceRef Name="MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am" ID="{19CC5C6A-52D8-4BCB-9947-BBBB1D0C5F01}"/>
 																		</MusicClip>
