@@ -195,5 +195,6 @@ void UGS_SkillComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UGS_SkillComp, ReplicatedSkillStates);
+	DOREPLIFETIME(UGS_SkillComp, bCanUseSkill);
 }
 

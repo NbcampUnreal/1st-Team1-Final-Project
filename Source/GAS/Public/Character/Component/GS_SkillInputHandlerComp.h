@@ -25,16 +25,17 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	void OnRightClick(const struct FInputActionInstance& Instance);
+	virtual void OnRightClick(const struct FInputActionInstance& Instance);
 
 	UFUNCTION()
-	void OnCtrlLeftClick(const struct FInputActionInstance& Instance);
+	virtual void OnCtrlLeftClick(const struct FInputActionInstance& Instance);
 
 	UFUNCTION()
-	void OnCtrlRightClick(const struct FInputActionInstance& Instance);
+	virtual void OnCtrlRightClick(const struct FInputActionInstance& Instance);
+
+	TObjectPtr<AGS_Character> OwnerCharacter;
 
 private:
-	TObjectPtr<AGS_Character> OwnerCharacter;
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> IA_RightClick;
 
