@@ -7,7 +7,7 @@
 UGS_ArcaneBoardManager::UGS_ArcaneBoardManager()
 {
 	//기본 초기화
-	CurrClass = ECharacterClass::Ares;
+	CurrClass = ECharacterClass::Merci;
 	PlacedRunes.Empty();
 	AppliedStatEffects = FCharacterStats();
 	CurrStatEffects = FCharacterStats();
@@ -400,7 +400,6 @@ UTexture2D* UGS_ArcaneBoardManager::GetRuneTexture(uint8 RuneID)
 void UGS_ArcaneBoardManager::InitializeForTesting()
 {
 	InitDataCache();
-	SetCurrClass(ECharacterClass::Ares);
 }
 
 void UGS_ArcaneBoardManager::InitGridState()
