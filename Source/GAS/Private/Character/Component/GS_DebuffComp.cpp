@@ -15,7 +15,7 @@ UGS_DebuffComp::UGS_DebuffComp()
 	SetIsReplicatedByDefault(true);
 }
 
-void UGS_DebuffComp::ApplyDebuff(EDebuffType Type)
+void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AGS_Character* Attacker)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Apply Debuff"));
 	if (!GetOwner()->HasAuthority())
@@ -40,7 +40,7 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type)
 
 	// 적용중이 아닌 디버프라면
 	UGS_DebuffBase* NewDebuff = NewObject<UGS_DebuffBase>(this, Row->DebuffClass);
-	NewDebuff->Initialize(Cast<AGS_Character>(GetOwner()), Row->Duration, Row->Priority, Type);
+	NewDebuff->Initialize(Cast<AGS_Character>(GetOwner()), Attacker, Row->Duration, Row->Priority, Type);
 	NewDebuff->StartTime = GetWorld()->GetTimeSeconds();
 
 	// 우선순위와 관련 없다면
