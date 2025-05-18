@@ -11,16 +11,9 @@ void UGS_CustomLobbyUI::NativeConstruct()
 	Super::NativeConstruct();
 
 	if (JobSelectionButton) JobSelectionButton->OnClicked.AddDynamic(this, &UGS_CustomLobbyUI::OnJobSelectionButtonClicked);
-	else UE_LOG(LogTemp, Error, TEXT("UGS_CustomLobbyUI: JobSelectionButton is not bound in Blueprint!"));
-
 	if (PerkOrDungeonButton) PerkOrDungeonButton->OnClicked.AddDynamic(this, &UGS_CustomLobbyUI::OnPerkOrDungeonButtonClicked);
-	else UE_LOG(LogTemp, Error, TEXT("UGS_CustomLobbyUI: PerkOrDungeonButton is not bound in Blueprint!"));
-
 	if (ReadyButton) ReadyButton->OnClicked.AddDynamic(this, &UGS_CustomLobbyUI::OnReadyButtonClicked);
-	else UE_LOG(LogTemp, Error, TEXT("UGS_CustomLobbyUI: ReadyButton is not bound in Blueprint!"));
-
 	if (RoleChangeButton) RoleChangeButton->OnClicked.AddDynamic(this, &UGS_CustomLobbyUI::OnRoleChangeButtonClicked);
-	else UE_LOG(LogTemp, Error, TEXT("UGS_CustomLobbyUI: RoleChangeButton is not bound in Blueprint!"));
 
 	if (PerkDungeonText) UpdateRoleSpecificText(EPlayerRole::PR_None);
 }

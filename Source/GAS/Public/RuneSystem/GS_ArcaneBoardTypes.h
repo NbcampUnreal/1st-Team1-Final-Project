@@ -116,12 +116,16 @@ struct FGridCellData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 PlacedRuneID;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* RuneTextureFrag;
+
 	FGridCellData()
 	{
 		Pos = { 0, 0 };
 		State = EGridCellState::Empty;
 		bIsSpecialCell = false;
 		PlacedRuneID = 0;
+		RuneTextureFrag = nullptr;
 	}
 
 	FGridCellData(const FIntPoint& InPos, EGridCellState InState, bool InIsSpecialCell = false)
@@ -130,6 +134,7 @@ struct FGridCellData
 		State = InState;
 		bIsSpecialCell = InIsSpecialCell;
 		PlacedRuneID = 0;
+		RuneTextureFrag = nullptr;
 	}
 };
 

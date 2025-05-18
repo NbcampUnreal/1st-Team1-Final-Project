@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{56ECF8DF-E560-E7DD-251F-867C79A9DCD6}",
+    "Hash": "{FF6B6CB8-7E42-782F-4F8C-421CEA79834F}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -293,7 +293,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "BowPullString_BW.54384.wav",
-      "CachePath": "18/{1854698C-BDCE-A5F8-3354-CC63F0DBB371}.wem"
+      "CachePath": "D5/{D5FBD559-460A-3B3D-9297-73DB1210EB08}.wem"
      },
      {
       "Id": "518697165",
@@ -341,7 +341,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeExplosion.wav",
-      "CachePath": "7D/{7DE9D145-CD71-CEC1-60A2-7D5A2AEBE7A9}.wem"
+      "CachePath": "B2/{B29D1EE3-D558-F9A8-3B17-0D4ED773C676}.wem"
      },
      {
       "Id": "613319137",
@@ -349,7 +349,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "BowPullString_BW.54383.wav",
-      "CachePath": "95/{950B6C7A-92B2-C521-D2BA-B510AC380721}.wem"
+      "CachePath": "1B/{1B0F98C4-D217-ABB5-FEEF-5EB7D1EF9383}.wem"
      },
      {
       "Id": "624593524",
@@ -405,7 +405,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "BowPullString_BW.54386.wav",
-      "CachePath": "41/{41E1DCB4-ED7F-AF60-8A7D-B2E4FB2A3E7D}.wem"
+      "CachePath": "FA/{FA1F08A4-553C-7493-FDB6-7321F0463487}.wem"
      },
      {
       "Id": "750724736",
@@ -1479,6 +1479,6 @@
     ]
    }
   ],
-  "FileHash": "{AB3CF7DE-9C5A-4FD3-F4BA-EBB95AAF247F}"
+  "FileHash": "{697D3FFB-0543-3498-6FFB-10C3C21070FD}"
  }
 }

@@ -21,5 +21,6 @@ void UGS_DebuffBase::OnExpire()
 
 float UGS_DebuffBase::GetRemainingTime(float CurrentTime) const
 {
+	UE_LOG(LogTemp, Warning, TEXT("RemainingTime : %f"), Duration - (CurrentTime - StartTime));
 	return FMath::Max(0.0f, Duration - (CurrentTime - StartTime));
 }

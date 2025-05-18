@@ -5,36 +5,44 @@
 #include "Character/Debuff/DebuffData.h"
 #include "Character/GS_Character.h"
 #include "Character/Debuff/GS_DebuffBase.h"
+#include "Net/UnrealNetwork.h"
 
 
-// Sets default values for this component's properties
 UGS_DebuffComp::UGS_DebuffComp()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
+	SetIsReplicatedByDefault(true);
 }
 
 void UGS_DebuffComp::ApplyDebuff(EDebuffType Type)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Apply Debuff"));
+	if (!GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
 	// 해당 디버프 타입의 데이터 가져오기
 	const FDebuffData* Row = GetDebuffData(Type);
 	if (!Row || !Row->DebuffClass) return;
 	
 	// 이미 적용중인 디버프라면
-	if (UGS_DebuffBase* Existing = GetActiveDebuff(Type))
+	UGS_DebuffBase* Existing = GetActiveDebuff(Type);
+
+	if (Existing)
 	{
 		Existing->StartTime = GetWorld()->GetTimeSeconds(); // 시작 시간 재저장
 		RefreshDebuffTimer(Existing, Row->Duration);
+		UpdateReplicatedDebuffList(); // 복제 정보 갱신
 		return;
 	}
 
 	// 적용중이 아닌 디버프라면
 	UGS_DebuffBase* NewDebuff = NewObject<UGS_DebuffBase>(this, Row->DebuffClass);
 	NewDebuff->Initialize(Cast<AGS_Character>(GetOwner()), Row->Duration, Row->Priority, Type);
-	
+	NewDebuff->StartTime = GetWorld()->GetTimeSeconds();
+
 	// 우선순위와 관련 없다면
 	if (Row->bIsConcurrent)
 	{
@@ -44,11 +52,17 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type)
 	{
 		AddDebuffToQueue(NewDebuff);
 	}
+	UpdateReplicatedDebuffList(); // 복제 정보 갱신
 }
 
 bool UGS_DebuffComp::IsDebuffActive(EDebuffType Type)
 {
 	return GetActiveDebuff(Type) != nullptr;
+}
+
+void UGS_DebuffComp::OnRep_DebuffList()
+{
+	// TODO : 클라이언트 UI 갱신 로직 들어가는 곳
 }
 
 const FDebuffData* UGS_DebuffComp::GetDebuffData(EDebuffType Type) const
@@ -57,6 +71,7 @@ const FDebuffData* UGS_DebuffComp::GetDebuffData(EDebuffType Type) const
 	
 	// 디버프 데이터 Row 반환
 	FName RowName = *UEnum::GetValueAsString(Type).RightChop(13);
+	UE_LOG(LogTemp, Warning, TEXT("Get Debuff Data"));
 	return DebuffDataTable->FindRow<FDebuffData>(RowName, TEXT(""));
 }
 
@@ -94,6 +109,7 @@ void UGS_DebuffComp::RefreshDebuffTimer(UGS_DebuffBase* Debuff, float Duration)
 				Debuff->OnExpire();
 				ConcurrentDebuffs.Remove(Debuff);
 				DebuffTimers.Remove(Debuff);
+				UpdateReplicatedDebuffList();
 			}, Duration, false);
 	}
 }
@@ -113,10 +129,12 @@ void UGS_DebuffComp::CreateAndApplyConcurrentDebuff(UGS_DebuffBase* Debuff)
 			Debuff->OnExpire();
 			ConcurrentDebuffs.Remove(Debuff);
 			DebuffTimers.Remove(Debuff);
+			UpdateReplicatedDebuffList();
 		}, Debuff->GetDuration(), false);
 
 	// 타이머 추가
 	DebuffTimers.Add(Debuff, Handle);
+	UE_LOG(LogTemp, Warning, TEXT("Create And Apply Concurrent Debuff"));
 }
 
 void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
@@ -145,10 +163,13 @@ void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
 	{
 		ApplyNextDebuff();
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Add Debuff Queue"));
 }
 
 void UGS_DebuffComp::ApplyNextDebuff()
 {
+	UE_LOG(LogTemp, Warning, TEXT("ApplyNextDebuff"));
 	// 디버프 큐에 없으면 리턴
 	if (DebuffQueue.Num() == 0) return;
 
@@ -177,8 +198,56 @@ void UGS_DebuffComp::ApplyNextDebuff()
 			CurrentDebuff->OnExpire();
 			DebuffTimers.Remove(CurrentDebuff);
 			CurrentDebuff = nullptr;
+			UpdateReplicatedDebuffList();
 			ApplyNextDebuff();
 		}, Remaining, false);
 
 	DebuffTimers.Add(CurrentDebuff, NewHandle);
+}
+
+void UGS_DebuffComp::UpdateReplicatedDebuffList()
+{
+	ReplicatedDebuffs.Empty();
+	float Now = GetWorld()->GetTimeSeconds();
+
+	// Concurrent 디버프 추가
+	for (UGS_DebuffBase* Debuff : ConcurrentDebuffs)
+	{
+		if (!Debuff) continue;
+		FDebuffRepInfo Info;
+		Info.Type = Debuff->GetDebuffType();
+		Info.RemainingTime = Debuff->GetRemainingTime(Now);
+		ReplicatedDebuffs.Add(Info);
+	}
+
+	// CurrentDebuff 디버프도 추가
+	if (CurrentDebuff)
+	{
+		FDebuffRepInfo Info;
+		Info.Type = CurrentDebuff->GetDebuffType();
+		Info.RemainingTime = CurrentDebuff->GetRemainingTime(Now);
+		ReplicatedDebuffs.Add(Info);
+	}
+
+	// DebuffQueue의 디버프 추가
+	for (UGS_DebuffBase* Debuff : DebuffQueue)
+	{
+		if (!Debuff) continue;
+		FDebuffRepInfo Info;
+		Info.Type = Debuff->GetDebuffType();
+		Info.RemainingTime = Debuff->GetRemainingTime(Now);
+		ReplicatedDebuffs.Add(Info);
+	}
+
+	if (GetNetMode() != NM_DedicatedServer)
+	{
+		OnRep_DebuffList();
+	}
+}
+
+void UGS_DebuffComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UGS_DebuffComp, ReplicatedDebuffs);
 }

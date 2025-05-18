@@ -77,7 +77,7 @@ protected:
 
 	void InitSkills();
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool bCanUseSkill = true;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
