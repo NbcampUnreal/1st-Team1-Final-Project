@@ -1,0 +1,32 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Character/Player/Monster/GS_Monster.h"
+#include "GS_ShadowFang.generated.h"
+
+/**
+ * 
+ */
+UCLASS()
+class GAS_API AGS_ShadowFang : public AGS_Monster
+{
+	GENERATED_BODY()
+
+public:
+	AGS_ShadowFang();
+
+	UFUNCTION()
+	AGS_WeaponSword* GetCurrentWeapon() const { return CurrentWeapon; }
+
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(EditAnywhere, Category="Weapon")
+	TSubclassOf<AGS_WeaponSword> WeaponClass;	
+
+	UPROPERTY()
+	AGS_WeaponSword* CurrentWeapon;
+};

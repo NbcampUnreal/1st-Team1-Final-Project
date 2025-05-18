@@ -8,8 +8,6 @@ AGS_InGameGS::AGS_InGameGS()
 {
 	TotalGameTime = 900.0f;
 	CurrentTime = 0.0f;
-	
-	//bReplicates = true;
 }
 
 void AGS_InGameGS::BeginPlay()
@@ -32,7 +30,6 @@ void AGS_InGameGS::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 void AGS_InGameGS::UpdateGameTime()
 {
 	CurrentTime += 1.0f;
-	//UE_LOG(LogTemp, Error, TEXT("Time: %f"), CurrentTime);
 
 	if (CurrentTime >= TotalGameTime)
 	{
