@@ -29,7 +29,7 @@ void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 
 	if (VisualArrow)
 	{
-		VisualArrow->SetArrowMesh(ProjectileMesh->SkeletalMesh);
+		VisualArrow->SetArrowMesh(ProjectileMesh->GetSkeletalMeshAsset());
 		VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
 	}
 

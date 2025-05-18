@@ -63,7 +63,19 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
 			{
 				ApplyEffectToGuardian(TargetGuardian);
-			}	
+			}
+			else if(AGS_Character* Target = Cast<AGS_Character>(HitActor))
+			{
+				// 넉백
+				const FVector LaunchDirection = (Target->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
+				Target->LaunchCharacter(LaunchDirection * 500.f + FVector(0, 0, 200.f), true, true);
+
+				// 경직 디버프
+				if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
+				{
+					Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Stun);
+				}
+			}
 		}
 	}
 }

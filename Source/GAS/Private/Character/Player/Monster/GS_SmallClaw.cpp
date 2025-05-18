@@ -45,7 +45,10 @@ void AGS_SmallClaw::Server_SetBiteCollision_Implementation(bool bEnable)
 void AGS_SmallClaw::OnAttackBiteboxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!OtherActor || OtherActor == this) return;
+	if (!OtherActor || OtherActor == this)
+	{
+		return;
+	}
 
 	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
 	float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
