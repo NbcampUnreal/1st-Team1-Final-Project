@@ -29,6 +29,9 @@ public:
 	void GenerateGridLayout();
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void InitInventory();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void UpdateStatsDisplay(const FCharacterStats& Stats);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")

@@ -18,7 +18,7 @@ UGS_ArcaneBoardManager::UGS_ArcaneBoardManager()
 	GridLayoutTable = nullptr;*/
 
 	//임시
-	static ConstructorHelpers::FObjectFinder<UDataTable> RuneTableFinder(TEXT("/Game/DataTable/RuneSystem/DT_RuneTable"));
+	static ConstructorHelpers::FObjectFinder<UDataTable> RuneTableFinder(TEXT("/Game/DataTable/RuneSystem/DT_RuneDataTable"));
 	if (RuneTableFinder.Succeeded())
 	{
 		RuneTable = RuneTableFinder.Object;
