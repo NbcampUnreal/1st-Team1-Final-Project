@@ -3,7 +3,6 @@
 
 #include "Animation/Notifies/GS_ANS_Bite.h"
 #include "Character/Player/Monster/GS_SmallClaw.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 void UGS_ANS_Bite::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                float TotalDuration)
