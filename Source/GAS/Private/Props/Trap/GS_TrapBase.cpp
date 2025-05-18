@@ -37,13 +37,11 @@ void AGS_TrapBase::OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("DamageBox 1"));
 	if (OtherActor && OtherActor != this)
 	{
 		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
 		if (Player)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("DamageBox 2"));
 			DamageBoxEffect(OtherActor);
 			HandleTrapDamage(OtherActor);
 		}
@@ -66,9 +64,11 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 	FTrapData* FoundTrapData = TrapDataTable->FindRow<FTrapData>(TrapID, TEXT("Damage"));
 	if (!FoundTrapData) return;
 
+	//기본 데미지 부여
 	FDamageEvent DamageEvent;
 	DamagedPlayer->TakeDamage(FoundTrapData->Effect.Damage, DamageEvent, nullptr, this);
 
+	//디버프 추가
 
 }
 
