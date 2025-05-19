@@ -28,25 +28,28 @@ void AGS_RTSController::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+	if (!HasAuthority() && IsLocalController())
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
 		{
-			if (InputMappingContext)
+			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 			{
-				Subsystem->AddMappingContext(InputMappingContext, 0);
+				if (InputMappingContext)
+				{
+					Subsystem->AddMappingContext(InputMappingContext, 0);
+				}
 			}
 		}
-	}
 
-	InitCameraActor();
+		InitCameraActor();
 
-	if (RTSWidgetClass)
-	{
-		UUserWidget* RTSWidget = CreateWidget<UUserWidget>(this, RTSWidgetClass);
-		if (RTSWidget)
+		if (RTSWidgetClass)
 		{
-			RTSWidget->AddToViewport();
+			UUserWidget* RTSWidget = CreateWidget<UUserWidget>(this, RTSWidgetClass);
+			if (RTSWidget)
+			{
+				RTSWidget->AddToViewport();
+			}
 		}
 	}
 }
