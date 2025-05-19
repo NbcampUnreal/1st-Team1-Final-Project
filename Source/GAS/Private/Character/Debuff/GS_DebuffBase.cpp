@@ -3,9 +3,10 @@
 
 #include "Character/Debuff/GS_DebuffBase.h"
 
-void UGS_DebuffBase::Initialize(AGS_Character* InTarget, float InDuration, int32 InPriority, EDebuffType InDebuffType)
+void UGS_DebuffBase::Initialize(AGS_Character* InTarget, AGS_Character* InOwnerCharacter, float InDuration, int32 InPriority, EDebuffType InDebuffType)
 {
 	TargetCharacter = InTarget;
+	OwnerCharacter = InOwnerCharacter;
 	Duration = InDuration;
 	Priority = InPriority;
 	DebuffType = InDebuffType;

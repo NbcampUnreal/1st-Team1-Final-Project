@@ -17,7 +17,7 @@ class GAS_API UGS_DebuffBase : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void Initialize(AGS_Character* InTarget, float InDuration, int32 InPriority, EDebuffType InDebuffType);
+	virtual void Initialize(AGS_Character* InTarget, AGS_Character* InOwnerCharacter, float InDuration, int32 InPriority, EDebuffType InDebuffType);
 	virtual void OnApply();
 	virtual void OnExpire();
 	
@@ -29,6 +29,9 @@ public:
 	UPROPERTY()
 	float StartTime;
 protected:
+	UPROPERTY()
+	AGS_Character* OwnerCharacter;
+
 	UPROPERTY()
 	AGS_Character* TargetCharacter;
 
