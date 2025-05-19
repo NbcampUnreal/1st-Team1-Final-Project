@@ -32,6 +32,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Effect")
 	UParticleSystemComponent* ParticleSystemComp;
 
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	AGS_Character* Caster;
 
 	float Duration;
@@ -42,6 +50,8 @@ protected:
 	void DestroySelf();
 
 	virtual void ApplyFieldEffectToMonster(AGS_Monster* Target);
+	virtual void RemoveFieldEffectFromMonster(AGS_Monster* Target);
 	virtual void ApplyFieldEffectToGuardian(AGS_Guardian* Target);
+	virtual void RemoveFieldEffectFromGuardian(AGS_Guardian* Target);
 
 };

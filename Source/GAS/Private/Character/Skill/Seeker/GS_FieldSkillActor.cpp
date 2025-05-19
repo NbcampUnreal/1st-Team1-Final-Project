@@ -27,9 +27,42 @@ void AGS_FieldSkillActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_FieldSkillActor::OnOverlapBegin);
+	SphereComp->OnComponentEndOverlap.AddDynamic(this, &AGS_FieldSkillActor::OnOverlapEnd);
+
+	ApplyFieldEffect();
+
 	// 지속 시간 후 제거
 	GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AGS_FieldSkillActor::DestroySelf, Duration);
 	
+}
+
+void AGS_FieldSkillActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor == Caster) return;
+
+	if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(OtherActor))
+	{
+		ApplyFieldEffectToMonster(TargetMonster);
+	}
+	else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(OtherActor))
+	{
+		ApplyFieldEffectToGuardian(TargetGuardian);
+	}
+}
+
+void AGS_FieldSkillActor::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor == Caster) return;
+
+	if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(OtherActor))
+	{
+		RemoveFieldEffectFromMonster(TargetMonster);
+	}
+	else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(OtherActor))
+	{
+		RemoveFieldEffectFromGuardian(TargetGuardian);
+	}
 }
 
 void AGS_FieldSkillActor::ApplyFieldEffect()
@@ -66,7 +99,15 @@ void AGS_FieldSkillActor::ApplyFieldEffectToMonster(AGS_Monster* Target)
 {
 }
 
+void AGS_FieldSkillActor::RemoveFieldEffectFromMonster(AGS_Monster* Target)
+{
+}
+
 void AGS_FieldSkillActor::ApplyFieldEffectToGuardian(AGS_Guardian* Target)
+{
+}
+
+void AGS_FieldSkillActor::RemoveFieldEffectFromGuardian(AGS_Guardian* Target)
 {
 }
 

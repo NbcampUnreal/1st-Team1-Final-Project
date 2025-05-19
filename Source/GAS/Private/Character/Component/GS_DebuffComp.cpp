@@ -23,6 +23,8 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AGS_Character* Attacker)
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Apply Debuff: %s"), *UEnum::GetValueAsString(Type));
+
 	// 해당 디버프 타입의 데이터 가져오기
 	const FDebuffData* Row = GetDebuffData(Type);
 	if (!Row || !Row->DebuffClass) return;
@@ -53,6 +55,47 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AGS_Character* Attacker)
 		AddDebuffToQueue(NewDebuff);
 	}
 	UpdateReplicatedDebuffList(); // 복제 정보 갱신
+}
+
+void UGS_DebuffComp::RemoveDebuff(EDebuffType Type)
+{
+	if (!GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Remove Debuff: %s"), *UEnum::GetValueAsString(Type));
+
+	UGS_DebuffBase* Debuff = GetActiveDebuff(Type);
+	if (!Debuff)
+	{
+		return;
+	}
+
+	if (FTimerHandle* Handle = DebuffTimers.Find(Debuff))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(*Handle);
+		DebuffTimers.Remove(Debuff);
+	}
+
+	if (ConcurrentDebuffs.Contains(Debuff))
+	{
+		Debuff->OnExpire();
+		ConcurrentDebuffs.Remove(Debuff);
+	}
+	else if (DebuffQueue.Contains(Debuff))
+	{
+		Debuff->OnExpire();
+		DebuffQueue.Remove(Debuff);
+	}
+	else if (Debuff == CurrentDebuff)
+	{
+		CurrentDebuff->OnExpire();
+		CurrentDebuff = nullptr;
+		ApplyNextDebuff();
+	}
+
+	UpdateReplicatedDebuffList();
 }
 
 bool UGS_DebuffComp::IsDebuffActive(EDebuffType Type)
