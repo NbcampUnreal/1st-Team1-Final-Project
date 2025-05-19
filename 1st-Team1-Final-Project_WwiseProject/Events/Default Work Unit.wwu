@@ -366,6 +366,28 @@
 								</Action>
 							</ChildrenList>
 						</Event>
+						<Event Name="Props_Portal" ID="{9141DA7A-2D2F-449C-88E2-C9754D09EDA8}">
+							<ChildrenList>
+								<Action Name="" ID="{487CC211-14A8-4ECF-BB98-B5806E9CFD08}" ShortID="821686714">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_Portal" ID="{5A8B2DE9-4541-4C6A-83D3-08FE49DC1DC2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="Props_Portal_Trigger" ID="{3DFD4CDA-F232-4F79-B00F-324E80CF48AF}">
+							<ChildrenList>
+								<Action Name="" ID="{9054C610-3408-46EF-91BE-F40F46AA5207}" ShortID="57729274">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_PortalTrigger" ID="{D6B65CF6-F612-4727-809B-A8822FBA29F3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
 					</ChildrenList>
 				</Folder>
 			</ChildrenList>

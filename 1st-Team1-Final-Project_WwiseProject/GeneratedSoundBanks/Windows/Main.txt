@@ -1,6 +1,7 @@
 Event	ID	Name			Wwise Object Path	Notes
 	153945882	Stop_waves			\Default Work Unit\Stop_waves	
 	254810222	Props_Spike			\Default Work Unit\Props\Props_Spike	
+	374018819	Props_Portal_Trigger			\Default Work Unit\Props\Props_Portal_Trigger	
 	374167564	Play_waves			\Default Work Unit\Play_waves	
 	551192008	Props_MineExplode			\Default Work Unit\Props\Props_MineExplode	
 	598060403	EV_ArrowImpact_Body			\Default Work Unit\EV_ArrowImpact_Body	
@@ -24,6 +25,7 @@ Event	ID	Name			Wwise Object Path	Notes
 	2897876713	EV_Arrow_Shot			\Default Work Unit\EV_Arrow_Shot	
 	2999099924	EV_ArrowImpact_Wood			\Default Work Unit\EV_ArrowImpact_Wood	
 	3070546402	EV_Fire_Extinguish			\Default Work Unit\EV_Fire_Extinguish	
+	3196207142	Props_Portal			\Default Work Unit\Props\Props_Portal	
 	3369981961	EV_Fire_Burn			\Default Work Unit\EV_Fire_Burn	
 	3432958693	EV_ArrowBy			\Default Work Unit\EV_ArrowBy	
 	3834184178	EV_ArrowImpact_Stone			\Default Work Unit\EV_ArrowImpact_Stone	
@@ -104,6 +106,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	518697165	Footstep_Dirt3	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\6E\{6E6E02EA-5019-68F8-642F-516169F4C419}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\Footstep_Dirt3		75832
 	537148971	FootSteps_Lava (2)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\71\{71ED084E-15F1-56C7-8948-167F1ED51B3C}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Lava\FootSteps_Lava (2)		134716
 	578835809	ArrowImpact_Stone2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\C1\{C1E7FFF6-4ED9-0743-C0CF-0A9CB01DD0C3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Stone\ArrowImpact_Stone2		104912
+	595941273	FX_Texture_One_Shot	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\EC\{EC0DC842-5DBA-FBF4-7D82-825014658598}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Portal\FX_Texture_One_Shot		5796336
 	600873638	ArrowImpact_Stone1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E0\{E0FAD87A-96A5-3AD3-53F5-0C73CBF0230B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Stone\ArrowImpact_Stone1		130044
 	602204976	SFX_StoneTrap_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B3\{B37D4729-24C4-142C-9B17-D4F31D6BA141}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_StoneTrap_Hit		175960
 	610202587	SFX_GrenadeExplosion	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B2\{B29D1EE3-D558-F9A8-3B17-0D4ED773C676}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_GrenadeExplosion		421556
@@ -119,6 +122,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	763229215	SFX_Lava_Hit1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\75\{75ACA214-A2A4-1D99-50D1-AB1499E837FA}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Lava_Hit\SFX_Lava_Hit1		130148
 	769452809	SFX_Saw_Hit	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A0\{A001BF43-841B-640B-1EA8-1CFB00C0A0D5}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Saw_Hit		212588
 	790427616	Footstep_Dirt5	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\5F\{5FCB1406-F0D3-E367-DD3D-7C90A7DF287B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\Footstep_Dirt5		84004
+	795056826	SFX_PortalTrigger	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\0C\{0CFCD810-E6F8-70B4-80DE-32460AD3969D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_PortalTrigger		1035408
 	797000384	SFX_Arrow_Realse	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\65\{656DBBB6-6758-73FE-11F9-8ED71DFC9348}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_Arrow_Realse		145504
 	809366429	FootstepMetal	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F0\{F00849BB-91D3-0573-A268-7AF8B52292AD}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Metal\FootstepMetal		26392
 	848033451	ArrowImpact_Stone0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\AA\{AA0EA770-6250-7262-D44F-148E619702A0}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Stone\ArrowImpact_Stone0		115900
@@ -131,6 +135,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	969253722	FootstepsConcrete	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\EA\{EA7E8CD3-7DE7-F01C-7693-5637D7851CC2}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Stone\FootstepsConcrete		53916
 	995426383	FootstepsDirt	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\13\{13A5521D-59F7-9A3E-377F-D279FBC8696A}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\FootstepsDirt		92452
 	997628724	LighterIgniteFlame	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\50\{50E90512-7895-A028-9CA9-75CDD5C2A5BE}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_FlameShot\LighterIgniteFlame		208216
+	1021834988	Rortal_drone	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\24\{24BD38E9-4E2B-4DDE-F84B-FE24029ED557}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Portal\Rortal_drone		11056796
 	1030029664	MonsterSnarlGrowl2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\D1\{D138EC47-9D77-318B-6516-A42C75C620F3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\SFX_Mon_SmallClaw_UI\MonsterSnarlGrowl2		367712
 	1038282182	Footstep_Grass (4)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\72\{72800A1A-7261-FD60-8F95-A01A6B9E5295}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Grass\Footstep_Grass (4)		34480
 	1069660761	Footstep_Grass (2)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\55\{55D5DF1A-EA9F-51EF-B2F4-2AFAC4BC2C54}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Grass\Footstep_Grass (2)		42176
