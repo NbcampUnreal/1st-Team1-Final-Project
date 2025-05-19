@@ -6,6 +6,7 @@
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
 #include "GS_SeekerMerciArrowSmoke.generated.h"
 
+class AGS_SmokeFieldSkill;
 /**
  * 
  */
@@ -19,5 +20,9 @@ public:
 		UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult) override;
-	
+protected:
+	void SpawnSmokeArea(FVector SpawnLocation);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite);
+	TSubclassOf<AGS_SmokeFieldSkill> SmokeAreaClass;
 };

@@ -10,11 +10,12 @@
 // Sets default values
 AGS_FieldSkillActor::AGS_FieldSkillActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	bReplicates = true;
+	SetReplicateMovement(true);
 	PrimaryActorTick.bCanEverTick = false;
 
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("AreaShpere"));
-	SphereComp->InitSphereRadius(200.0f);
+	SphereComp->InitSphereRadius(Radius);
 	SphereComp->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	RootComponent = SphereComp;
 
@@ -32,6 +33,10 @@ void AGS_FieldSkillActor::BeginPlay()
 
 	ApplyFieldEffect();
 
+	if (HasAuthority())
+	{
+		Multicast_DrawDebugSphere();
+	}
 	// 지속 시간 후 제거
 	GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AGS_FieldSkillActor::DestroySelf, Duration);
 	
@@ -109,5 +114,18 @@ void AGS_FieldSkillActor::ApplyFieldEffectToGuardian(AGS_Guardian* Target)
 
 void AGS_FieldSkillActor::RemoveFieldEffectFromGuardian(AGS_Guardian* Target)
 {
+}
+
+void AGS_FieldSkillActor::Multicast_DrawDebugSphere_Implementation()
+{
+	DrawDebugSphere(
+		GetWorld(),
+		GetActorLocation(),
+		Radius,
+		16,
+		FColor::Red,
+		false,
+		Duration
+	);
 }
 

@@ -33,6 +33,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AGS_ArrowVisualActor> VisualArrowClass;
 
+	UFUNCTION()
 	virtual void OnBeginOverlap(
 		UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,

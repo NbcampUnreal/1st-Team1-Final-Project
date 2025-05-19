@@ -11,7 +11,10 @@
 void AGS_SeekerMerciArrow::BeginPlay()
 {
 	Super::BeginPlay();
-	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AGS_SeekerMerciArrow::OnBeginOverlap);
+	if (HasAuthority())
+	{
+		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AGS_SeekerMerciArrow::OnBeginOverlap);
+	}
 }
 
 void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
@@ -49,6 +52,11 @@ void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 
 void AGS_SeekerMerciArrow::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!HasAuthority()) 
+	{
+		return;
+	}
+
 	if (!OtherActor || OtherActor == this || HitActors.Contains(OtherActor))
 	{
 		return;
