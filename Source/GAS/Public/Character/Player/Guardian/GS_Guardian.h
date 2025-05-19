@@ -27,6 +27,10 @@ public:
 
 	virtual void UltimateSkill();
 
+	virtual void Ctrl();
+
+	virtual void RightMouse();
+
 	//[test function]
 	UFUNCTION()
 	void MeleeAttackCheck();
