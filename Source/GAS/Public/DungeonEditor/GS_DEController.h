@@ -3,9 +3,9 @@
 #include "CoreMinimal.h"
 #include "GS_BuildManager.h"
 #include "GameFramework/PlayerController.h"
-#include "UI/DungeonEditor/GS_BuildingIconSlotWidget.h"
 #include "GS_DEController.generated.h"
 
+class UGS_PropsSelector;
 class UInputMappingContext;
 class UInputAction;
 
@@ -37,9 +37,9 @@ public:
 
 	// Widget
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UGS_BuildingIconSlotWidget> BuildingIconSlotWidgetClass;
+	TSubclassOf<UGS_PropsSelector> PropsSelectorWidgetClass;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-	TObjectPtr<UGS_BuildingIconSlotWidget> BuildingIconSlotWidget;
+	TObjectPtr<UGS_PropsSelector> PropsSelectorWidget;
 	
 protected:
 	void BeginPlay() override;

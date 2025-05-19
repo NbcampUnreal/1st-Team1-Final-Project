@@ -5,6 +5,18 @@
 #include "GameFramework/Actor.h"
 #include "GS_BuildManager.generated.h"
 
+UENUM(BlueprintType)
+enum class ECellType : uint8
+{
+	None	UMETA(DisplayName = "None"),
+	VerticalPlaceable	UMETA(DisplayName = "VerticalPlaceable"),
+	Horizontalplaceable	UMETA(DisplayName = "Horizontalplaceable"),
+	Wall UMETA(DisplayName = "Wall"),
+	Floor UMETA(DisplayName = "Floor"),
+	Door UMETA(DisplayName = "Door"),
+	Ceiling UMETA(DisplayName = "Ceiling")
+};
+
 struct FGS_PlaceableObjectsRow;
 
 UCLASS()
@@ -16,33 +28,38 @@ public:
 	AGS_BuildManager();
 	virtual void Tick(float DeltaTime) override;
 
+#if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
 	TObjectPtr<UBillboardComponent> BillboardCompo;
+#endif
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
 	TObjectPtr<UStaticMeshComponent> StaticMeshCompo;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Setting")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting")
 	TArray<FDataTableRowHandle> BuildingsRows;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Setting")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting")
 	bool bTraceComplex;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Setting|Grid")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting|Grid")
 	FIntPoint GridSize;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Setting|Grid")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting|Grid")
 	float CellSize;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Setting|Grid")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting|Grid")
 	float StartTraceHeight;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Setting|Grid")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting|Grid")
 	float EndTraceHeight;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Setting|Grid")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting|Grid")
 	TObjectPtr<UMaterialInterface> GridMaterial;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Setting|Grid")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting|Grid")
 	TObjectPtr<UTexture> GridTexture;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Setting|Grid")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting|Grid")
 	FLinearColor GridColor;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Setting|Grid")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting|Grid")
 	float GridOpacity;
 
+	TArray<FDataTableRowHandle>* GetBuildingsRows() { return &BuildingsRows; }
+	
 	float GetGridCellSize() { return CellSize; }
 	bool IsCellUnderSursorChanged(){ return bIsCellUnderCursorChanged; }
 	void SetCellUnderCursorChanged(bool InChanged) { bIsCellUnderCursorChanged = InChanged; }
