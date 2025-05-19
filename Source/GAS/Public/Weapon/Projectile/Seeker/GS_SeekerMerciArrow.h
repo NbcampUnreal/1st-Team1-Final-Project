@@ -17,5 +17,10 @@ protected:
 	void StickWithVisualOnly(const FHitResult& Hit);
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AGS_ArrowVisualActor> VisualArrowClass;	
+	TSubclassOf<AGS_ArrowVisualActor> VisualArrowClass;
+
+	virtual void OnBeginOverlap(
+		UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
 };
