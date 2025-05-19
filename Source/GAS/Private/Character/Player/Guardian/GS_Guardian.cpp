@@ -52,6 +52,16 @@ void AGS_Guardian::UltimateSkill()
 {
 }
 
+void AGS_Guardian::Ctrl()
+{
+
+}
+
+void AGS_Guardian::RightMouse()
+{
+
+}
+
 void AGS_Guardian::MeleeAttackCheck()
 {
 	TArray<FHitResult> OutHitResults;

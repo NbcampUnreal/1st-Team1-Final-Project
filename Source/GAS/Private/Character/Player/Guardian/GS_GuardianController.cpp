@@ -7,7 +7,7 @@
 
 AGS_GuardianController::AGS_GuardianController()
 {
-
+	
 }
 
 void AGS_GuardianController::ComboAttack(const FInputActionValue& InputValue)
@@ -53,6 +53,32 @@ void AGS_GuardianController::UltimateSkill(const FInputActionValue& InputValue)
 {
 }
 
+void AGS_GuardianController::CtrlInput(const FInputActionValue& InputValue)
+{
+	if (IsLocalController())
+	{
+		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
+
+		if (IsValid(Guardian))
+		{
+			Guardian->Ctrl();
+		}
+	}
+}
+
+void AGS_GuardianController::RightMouseInput(const FInputActionValue& InputValue)
+{
+	if (IsLocalController())
+	{
+		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
+
+		if (IsValid(Guardian))
+		{
+			Guardian->RightMouse();
+		}
+	}
+}
+
 void AGS_GuardianController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -77,5 +103,14 @@ void AGS_GuardianController::SetupInputComponent()
 		{
 			EnhancedInputComponent->BindAction(Skill2Action, ETriggerEvent::Started, this, &AGS_GuardianController::Skill2);
 		}
+		if (IsValid(CtrlInputAction))
+		{
+			EnhancedInputComponent->BindAction(CtrlInputAction, ETriggerEvent::Started, this, &AGS_GuardianController::CtrlInput);
+		}
+		if (IsValid(RightMouseInputAction))
+		{
+			EnhancedInputComponent->BindAction(RightMouseInputAction, ETriggerEvent::Started, this, &AGS_GuardianController::RightMouseInput);
+		}
+
 	}
 }

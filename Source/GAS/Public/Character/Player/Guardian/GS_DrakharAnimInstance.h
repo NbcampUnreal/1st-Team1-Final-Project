@@ -33,6 +33,10 @@ public:
 	//earthquake
 	void PlayEarthquakeMontage();
 	void StopEarthquakeMontage();
+	
+	//draconicfury
+	void PlayDraconicFuryMontage(int32 InPlayIndex);
+	void StopDraconicFuryMontage(int32 InPlayIndex);
 
 private:
 	UPROPERTY()
@@ -46,6 +50,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* EarthquakeMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	TArray<UAnimMontage*> DraconicFuryMontages;
 
 	//[combo attack]
 	UFUNCTION()

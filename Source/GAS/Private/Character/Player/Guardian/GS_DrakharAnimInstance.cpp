@@ -32,7 +32,7 @@ void UGS_DrakharAnimInstance::PlayComboAttackMontage(int32 InCurrentComboIndex)
 
 void UGS_DrakharAnimInstance::StopComboAttackMontage(int32 InCurrentComboIndex)
 {
-	Montage_Stop(0.2f, ComboAttackMontages[InCurrentComboIndex]);
+	Montage_Stop(0.f, ComboAttackMontages[InCurrentComboIndex]);
 }
 
 void UGS_DrakharAnimInstance::PlayDashMontage()
@@ -65,6 +65,20 @@ void UGS_DrakharAnimInstance::StopEarthquakeMontage()
 	{
 		Montage_Stop(0.2f, EarthquakeMontage);
 	}
+}
+
+void UGS_DrakharAnimInstance::PlayDraconicFuryMontage(int32 InPlayIndex)
+{
+	if (InPlayIndex >= DraconicFuryMontages.Num())
+	{
+		return;
+	}
+	Montage_Play(DraconicFuryMontages[InPlayIndex], 1.f);
+}
+
+void UGS_DrakharAnimInstance::StopDraconicFuryMontage(int32 InPlayIndex)
+{
+	Montage_Stop(0.1f, DraconicFuryMontages[InPlayIndex]);
 }
 
 void UGS_DrakharAnimInstance::AnimNotify_ComboAttackCheck()

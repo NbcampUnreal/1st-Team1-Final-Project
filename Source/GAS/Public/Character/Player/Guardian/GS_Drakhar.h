@@ -18,7 +18,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	//variables
+	//[combo attack variables]
 	UPROPERTY(ReplicatedUsing = OnRep_IsComboAttacking, VisibleAnywhere, BlueprintReadOnly)
 	bool bIsComboAttacking;
 
@@ -28,14 +28,29 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentComboAttackIndex, VisibleAnywhere, BlueprintReadOnly)
 	int32 CurrentComboAttackIndex;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<AGS_DrakharProjectile> Projectile;
+
+	//[dash attack variables]
 	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
 	bool bIsDashing;
 
+	//[earthquake variables]
 	UPROPERTY(ReplicatedUsing = OnRep_IsEarthquaking)
 	bool bIsEarthquaking;
 
+	//[draconic fury variables]
+	UPROPERTY(ReplicatedUsing = OnRep_IsFlying)
+	bool bIsFlying;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CanDraconicFuryAttack)
+	bool bCanDraconicFuryAttack;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSubclassOf<AGS_DrakharProjectile> Projectile;
+	TSubclassOf<AActor> TargetActor;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<AGS_DrakharProjectile> DraconicProjectile;
 
 	//action binding function
 	virtual void ComboAttack() override;
@@ -45,6 +60,10 @@ public:
 	virtual void Skill2() override;
 
 	virtual void UltimateSkill() override;
+
+	virtual void Ctrl() override;
+
+	virtual void RightMouse() override;
 
 	//[combo attack]
 	UFUNCTION(Server, Reliable)
@@ -93,6 +112,26 @@ public:
 
 	UFUNCTION()
 	void OnRep_IsEarthquaking();
+	
+	//[draconic fury skill]
+	UFUNCTION(Server, Reliable)
+	void ServerRPCDraconicFuryFly();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCDraconicFuryAttack();
+
+
+	UFUNCTION()
+	void EndFlying();
+
+	UFUNCTION()
+	void EndDraconicAttack();
+
+	UFUNCTION()
+	void OnRep_IsFlying();
+
+	UFUNCTION()
+	void OnRep_CanDraconicFuryAttack();
 
 protected:
 
@@ -116,4 +155,18 @@ private:
 	//[earthquake]
 	float EarthquakePower;
 	float EarthquakeRadius;
+
+	//[DraconicFury]
+	FTimerHandle FlyingTimerHandle;
+	FTimerHandle DraconicAttackTimer;
+	float FlyingPersistenceTime;
+	float DraconicAttackPersistenceTime;
+
+	//[Draconic Fury]
+	TArray<FTransform> DraconicFuryTargetArray;
+	/*FTimerHandle SpawnDraconicFuryTimer;
+	int32 SpawnCount = 0;*/
+
+	void GetRandomDraconicFuryTarget();
+	//void SpawnDraconicFury();
 };

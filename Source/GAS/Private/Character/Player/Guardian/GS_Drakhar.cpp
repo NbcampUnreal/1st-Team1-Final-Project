@@ -7,6 +7,7 @@
 #include "Weapon/Projectile/Guardian/GS_DrakharProjectile.h"
 
 #include "Components/CapsuleComponent.h"
+#include "Components/DecalComponent.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -33,6 +34,15 @@ AGS_Drakhar::AGS_Drakhar()
 	bIsEarthquaking = false;
 	EarthquakePower = 3000.f;
 	EarthquakeRadius = 500.f;
+
+	//draconic fury variables
+	bIsFlying = false;
+	FlyingPersistenceTime = 5.f;
+	DraconicAttackPersistenceTime = 3.f; //몽타주 끝나는 시간
+
+	/*DraconicFuryArray.Push(FVector(0.f, 0.f, 50.f));
+	DraconicFuryArray.Push(FVector(0.f, 0.f, 50.f));
+	DraconicFuryArray.Push(FVector(0.f, 0.f, 50.f));*/
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -71,6 +81,16 @@ void AGS_Drakhar::Tick(float DeltaTime)
 			}
 		}
 	}
+	if (!HasAuthority() && IsLocallyControlled())
+	{
+		if (bIsFlying)
+		{
+			if (TargetActor)
+			{
+				
+			}			
+		}
+	}
 }
 
 void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -84,6 +104,9 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	DOREPLIFETIME(ThisClass, bIsDashing);
 
 	DOREPLIFETIME(ThisClass, bIsEarthquaking);
+
+	DOREPLIFETIME(ThisClass, bIsFlying);
+	DOREPLIFETIME(ThisClass, bCanDraconicFuryAttack);
 }
 
 void AGS_Drakhar::ComboAttack()
@@ -132,6 +155,23 @@ void AGS_Drakhar::UltimateSkill()
 	if (IsLocallyControlled())
 	{
 		
+	}
+}
+
+void AGS_Drakhar::Ctrl()
+{
+	if (IsLocallyControlled())
+	{
+		//server RPC
+		ServerRPCDraconicFuryFly();
+	}
+}
+
+void AGS_Drakhar::RightMouse()
+{
+	if (IsLocallyControlled())
+	{
+		ServerRPCDraconicFuryAttack();
 	}
 }
 
@@ -285,7 +325,7 @@ void AGS_Drakhar::OnRep_IsDashing()
 {
 	if (bIsDashing)
 	{
-		GuardianAnim->PlayDashMontage();			
+		GuardianAnim->PlayDashMontage();				
 	}
 	else
 	{
@@ -363,3 +403,98 @@ void AGS_Drakhar::OnRep_IsEarthquaking()
 	}
 }
 
+void AGS_Drakhar::ServerRPCDraconicFuryFly_Implementation()
+{
+	if (bIsFlying)
+	{
+		return;
+	}
+	bIsFlying = true;
+
+	GetWorld()->GetTimerManager().SetTimer(FlyingTimerHandle, this, &AGS_Drakhar::EndFlying, FlyingPersistenceTime, false);
+
+	//show target point
+	
+}
+
+void AGS_Drakhar::ServerRPCDraconicFuryAttack_Implementation()
+{
+	if (!bIsFlying)
+	{
+		return;
+	}
+
+	bCanDraconicFuryAttack = true;
+	bIsFlying = false;
+	
+	GetWorld()->GetTimerManager().SetTimer(DraconicAttackTimer, this, &AGS_Drakhar::EndDraconicAttack, DraconicAttackPersistenceTime, false);
+	
+	//get random meteor transform
+	GetRandomDraconicFuryTarget();
+
+	//spawn meteor
+	for (int i = 0; i < DraconicFuryTargetArray.Num(); ++i)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("%d x y z : (%f %f %f)"), i, DrakharProjectile->GetLocation().X, DrakharProjectile->GetLocation().Y, DrakharProjectile.GetLocation().Z);
+		
+		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[i].GetLocation(), DraconicFuryTargetArray[i].Rotator());
+		if (DrakharProjectile)
+		{
+			DrakharProjectile->SetOwner(this);
+		}
+	}
+}
+
+void AGS_Drakhar::EndFlying()
+{
+	bIsFlying = false;
+	GetWorld()->GetTimerManager().ClearTimer(FlyingTimerHandle);
+}
+
+void AGS_Drakhar::EndDraconicAttack()
+{
+	bCanDraconicFuryAttack = false;
+	GetWorld()->GetTimerManager().ClearTimer(DraconicAttackTimer);
+}
+
+void AGS_Drakhar::OnRep_IsFlying()
+{
+	if (bIsFlying)
+	{
+		GuardianAnim->PlayDraconicFuryMontage(0);				
+	}
+	else
+	{
+		//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("client flying %d"), bIsFlying), true, true, FLinearColor::Green, 5.f);
+		GuardianAnim->StopDraconicFuryMontage(0);		
+	}
+}
+
+void AGS_Drakhar::OnRep_CanDraconicFuryAttack()
+{
+	if (bCanDraconicFuryAttack)
+	{
+		//GuardianAnim->StopDraconicFuryMontage(0);
+		GuardianAnim->PlayDraconicFuryMontage(1);		
+	}
+}
+
+void AGS_Drakhar::GetRandomDraconicFuryTarget()
+{
+	DraconicFuryTargetArray.Empty();
+
+	for (int i = 0; i < 5; ++i)
+	{
+		FVector StartLocation = GetActorLocation();
+		FVector Offset = GetActorForwardVector() * 200.f + FVector(FMath::FRandRange(-300.f, 300.f), FMath::FRandRange(-300.f, 300.f), FMath::FRandRange(500.f, 600.f));
+
+		StartLocation += Offset;
+
+		FRotator StartRotation = GetActorRotation();
+		float RandomPitch = FMath::FRandRange(-35.f, -30.f);
+		StartRotation.Pitch += RandomPitch;
+
+		FTransform StartTransform = FTransform(StartRotation, StartLocation);
+		DraconicFuryTargetArray.Add(StartTransform);
+	}
+}
