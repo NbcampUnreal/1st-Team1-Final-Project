@@ -2,6 +2,8 @@
 
 #include "EngineUtils.h"
 #include "EnhancedInputSubsystems.h"
+#include "Blueprint/UserWidget.h"
+#include "UI/DungeonEditor/GS_PropsSelector.h"
 
 AGS_DEController::AGS_DEController()
 {
@@ -37,10 +39,10 @@ void AGS_DEController::BeginPlay()
 	// Create Widget
 	if (IsLocalController())
 	{
-		BuildingIconSlotWidget = CreateWidget<UGS_BuildingIconSlotWidget>(this, BuildingIconSlotWidgetClass);
-		if (BuildingIconSlotWidget)
+		PropsSelectorWidget = CreateWidget<UGS_PropsSelector>(this, PropsSelectorWidgetClass);
+		if (PropsSelectorWidget)
 		{
-			BuildingIconSlotWidget->AddToViewport();
+			PropsSelectorWidget->AddToViewport();
 		}
 	}
 }

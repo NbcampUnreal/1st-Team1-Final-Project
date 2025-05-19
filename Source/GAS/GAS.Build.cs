@@ -18,6 +18,8 @@ public class GAS : ModuleRules
 			"SlateCore",
 			"Slate",
 			"UMG",
+			"Slate",
+			"SlateCore",
 			"OnlineSubsystem",
 			"OnlineSubsystemUtils",
 			"OnlineSubsystemSteam",

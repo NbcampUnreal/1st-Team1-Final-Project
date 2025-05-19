@@ -64,7 +64,7 @@ void UGS_GameInstance::HostSession(int32 MaxPlayers, FName SessionCustomName, co
     }
 
     HostSessionSettings = MakeShareable(new FOnlineSessionSettings());
-    HostSessionSettings->NumPublicConnections = 1;
+    HostSessionSettings->NumPublicConnections = 5;
     HostSessionSettings->NumPrivateConnections = MaxPlayers - 1;
     HostSessionSettings->bShouldAdvertise = true;
     HostSessionSettings->bAllowJoinInProgress = true;
