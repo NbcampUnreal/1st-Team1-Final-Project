@@ -42,7 +42,7 @@ protected:
 
 	AGS_Character* Caster;
 
-	float Duration;
+	float Duration = 10.f;
 
 	FTimerHandle DestroyTimerHandle;
 
@@ -53,5 +53,11 @@ protected:
 	virtual void RemoveFieldEffectFromMonster(AGS_Monster* Target);
 	virtual void ApplyFieldEffectToGuardian(AGS_Guardian* Target);
 	virtual void RemoveFieldEffectFromGuardian(AGS_Guardian* Target);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DrawDebugSphere();
+
+	UPROPERTY(EditAnywhere)
+	float Radius = 300.0f;
 
 };
