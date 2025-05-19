@@ -18,91 +18,6 @@ AGS_SeekerMerciArrowNormal::AGS_SeekerMerciArrowNormal()
 void AGS_SeekerMerciArrowNormal::BeginPlay()
 {
 	Super::BeginPlay();
-	CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AGS_SeekerMerciArrowNormal::OnBeginOverlap);
-}
-
-void AGS_SeekerMerciArrowNormal::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	
-	if (!OtherActor || OtherActor == this || HitActors.Contains(OtherActor))
-	{
-		return;
-	}
-
-	// 중복 데미지 들어가지 않도록 맞은 사람들 저장(관통)
-	HitActors.Add(OtherActor);
-
-	ETargetType TargetType;
-	// 가디언인지 구분
-	if (Cast<AGS_Monster>(OtherActor))
-	{
-		TargetType = ETargetType::DungeonMonster;
-	}
-	else if (Cast<AGS_Guardian>(OtherActor))
-	{
-		TargetType = ETargetType::Guardian;
-	}
-	else if (Cast<AGS_Seeker>(OtherActor))
-	{
-		TargetType = ETargetType::Seeker;
-	}
-	else
-	{
-		TargetType = ETargetType::Etc;
-	}
-	const bool bIsGuardian = Cast<AGS_Guardian>(OtherActor) != nullptr;
-
-	// 데미지
-	float DamageToApply = BaseDamage;
-	TSubclassOf<UDamageType> DamageTypeClass = UDamageType::StaticClass();
-
-	switch (ArrowType)
-	{
-	case EArrowType::Normal:
-		if (TargetType == ETargetType::Guardian)
-		{
-			DamageToApply *= 0.5; // 화살 데미지 감소
-			Destroy(); // 삭제
-		}
-		else if (TargetType == ETargetType::DungeonMonster)
-		{
-			StickWithVisualOnly(Hit); // 화살 박힘
-		}
-		break;
-	case EArrowType::Axe:
-		if (TargetType == ETargetType::Guardian || TargetType == ETargetType::DungeonMonster)
-		{
-			DamageTypeClass = UGS_IgnoreDefenceDamageType::StaticClass(); // 방어력 무시 데미지 타입 설정
-			StickWithVisualOnly(Hit); // 화살 박힘
-		}
-		break;
-	case EArrowType::Child:
-		if (TargetType == ETargetType::Guardian)
-		{
-			StickWithVisualOnly(Hit); // 화살 박힘
-		}
-		else if (TargetType == ETargetType::DungeonMonster)
-		{
-			// 관통 = 아무것도 적용하지 X
-		}
-		break;
-	default:
-		break;
-	}
-	
-
-	if (TargetType == ETargetType::Etc)
-	{
-		StickWithVisualOnly(Hit); // 화살 박힘
-	}
-	else if (TargetType == ETargetType::Seeker)
-	{
-
-	}
-	else if (TargetType == ETargetType::DungeonMonster || TargetType == ETargetType::Guardian)
-	{
-		UGameplayStatics::ApplyPointDamage(OtherActor, DamageToApply, GetActorForwardVector(), Hit, GetInstigatorController(), this, DamageTypeClass);
-	}
 }
 
 void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
@@ -110,32 +25,12 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!OtherActor || OtherActor == this || HitActors.Contains(OtherActor))
-	{
-		return;
-	}
-
-	HitActors.Add(OtherActor);
-
-	ETargetType TargetType;
-	// 가디언인지 구분
-	if (Cast<AGS_Monster>(OtherActor))
-	{
-		TargetType = ETargetType::DungeonMonster;
-	}
-	else if (Cast<AGS_Guardian>(OtherActor))
-	{
-		TargetType = ETargetType::Guardian;
-	}
-	else if (Cast<AGS_Seeker>(OtherActor))
-	{
-		TargetType = ETargetType::Seeker;
-	}
-	else
-	{
-		TargetType = ETargetType::Etc;
-	}
-
+	Super::OnBeginOverlap(OverlappedComp, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+	
+	// 맞은 대상 구분
+	ETargetType TargetType = DetermineTargetType(OtherActor);
+	
+	// 추가 세부 처리
 	float DamageToApply = BaseDamage;
 	TSubclassOf<UDamageType> DamageTypeClass = UDamageType::StaticClass();
 
