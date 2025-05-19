@@ -5,6 +5,7 @@
 #include "RuneSystem/GS_GridLayoutDataAsset.h"
 #include "Components/UniformGridPanel.h"
 #include "UI/RuneSystem/GS_RuneGridCellWidget.h"
+#include "UI/RuneSystem/GS_RuneInventoryWidget.h"
 
 UGS_ArcaneBoardWidget::UGS_ArcaneBoardWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -36,6 +37,8 @@ void UGS_ArcaneBoardWidget::NativeConstruct()
 	}
 
 	GenerateGridLayout();
+
+	InitInventory();
 }
 
 void UGS_ArcaneBoardWidget::GenerateGridLayout()
@@ -75,6 +78,14 @@ void UGS_ArcaneBoardWidget::GenerateGridLayout()
 	}
 
 
+}
+
+void UGS_ArcaneBoardWidget::InitInventory()
+{
+	if (IsValid(RuneInven) && IsValid(BoardManager))
+	{
+		RuneInven->InitInven(BoardManager);
+	}
 }
 
 void UGS_ArcaneBoardWidget::UpdateStatsDisplay(const FCharacterStats& Stats)
