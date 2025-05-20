@@ -3,6 +3,19 @@
 
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
 #include "Weapon/Projectile/Seeker/GS_ArrowVisualActor.h"
+#include "Components/SphereComponent.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
+#include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+
+void AGS_SeekerMerciArrow::BeginPlay()
+{
+	Super::BeginPlay();
+	if (HasAuthority())
+	{
+		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AGS_SeekerMerciArrow::OnBeginOverlap);
+	}
+}
 
 void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 {
@@ -39,4 +52,55 @@ void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 
 void AGS_SeekerMerciArrow::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!HasAuthority()) 
+	{
+		return;
+	}
+
+	if (!OtherActor || OtherActor == this || HitActors.Contains(OtherActor))
+	{
+		return;
+	}
+
+	HitActors.Add(OtherActor);
+
+	// 맞은 대상 구분
+	ETargetType TargetType = DetermineTargetType(OtherActor);
+
+	// 공통 처리
+	HandleTargetTypeGeneric(TargetType, SweepResult);
+}
+
+ETargetType AGS_SeekerMerciArrow::DetermineTargetType(AActor* OtherActor) const
+{
+	if (Cast<AGS_Monster>(OtherActor))
+	{
+		return ETargetType::DungeonMonster;
+	}
+	else if (Cast<AGS_Guardian>(OtherActor))
+	{
+		return ETargetType::Guardian;
+	}
+	else if (Cast<AGS_Seeker>(OtherActor))
+	{
+		return ETargetType::Seeker;
+	}
+	else
+	{
+		return ETargetType::Etc;
+	}
+}
+
+void AGS_SeekerMerciArrow::HandleTargetTypeGeneric(ETargetType TargetType, const FHitResult& SweepResult)
+{
+	switch (TargetType)
+	{
+	case ETargetType::Etc:
+		StickWithVisualOnly(SweepResult);
+		break;
+	case ETargetType::Seeker:
+		break;
+	default:
+		break;
+	}
 }
