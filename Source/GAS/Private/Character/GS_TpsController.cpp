@@ -6,13 +6,16 @@
 #include "EnhancedInputComponent.h"
 #include "GameFramework/Controller.h"
 #include "Character/GS_Character.h"
+#include "Character/Player/GS_Player.h"
+#include "Character/Interface/GS_AttackInterface.h"
 
 AGS_TpsController::AGS_TpsController()
-	: InputMappingContext(nullptr)
-	, MoveAction(nullptr)
-	, LookAction(nullptr)
-	, WalkToggleAction(nullptr)
 {
+	InputMappingContext = nullptr;
+	MoveAction = nullptr;
+	LookAction = nullptr;
+	WalkToggleAction = nullptr;
+	LClickAction = nullptr;
 }
 
 void AGS_TpsController::Move(const FInputActionValue& InputValue)
@@ -41,6 +44,29 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 
 void AGS_TpsController::WalkToggle(const FInputActionValue& InputValue)
 {
+	
+}
+
+void AGS_TpsController::LClickPressed(const FInputActionValue& InputValue)
+{
+	if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
+	{
+		if (ControlledPlayer->GetClass()->ImplementsInterface(UGS_AttackInterface::StaticClass()))
+		{
+			IGS_AttackInterface::Execute_LeftClickPressed(ControlledPlayer);
+		}
+	}
+}
+
+void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
+{
+	if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
+	{
+		if (ControlledPlayer->GetClass()->ImplementsInterface(UGS_AttackInterface::StaticClass()))
+		{
+			IGS_AttackInterface::Execute_LeftClickRelease(ControlledPlayer);
+		}
+	}
 }
 
 void AGS_TpsController::BeginPlay()
@@ -68,5 +94,10 @@ void AGS_TpsController::SetupInputComponent()
 	if (LookAction)
 	{
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGS_TpsController::Look);
+	}
+	if (LClickAction)
+	{
+		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Started, this, &AGS_TpsController::LClickPressed);
+		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Completed, this, &AGS_TpsController::LClickRelease);
 	}
 }

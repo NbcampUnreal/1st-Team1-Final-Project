@@ -2,20 +2,27 @@
 
 
 #include "Character/Player/Seeker/GS_Merci.h"
-
+//#include "Weapon/Equipable/"
 
 // Sets default values
 AGS_Merci::AGS_Merci()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	Weapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("MerciBow"));
+	Weapon->SetupAttachment(GetMesh(), TEXT("BowSocket"));
+	
+	Quiver = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("QuiverMesh"));
+	Quiver->SetupAttachment(GetMesh(), TEXT("QuiverSocket"));
+	Quiver->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Quiver->SetSimulatePhysics(false);
 }
 
 // Called when the game starts or when spawned
 void AGS_Merci::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -28,5 +35,15 @@ void AGS_Merci::Tick(float DeltaTime)
 void AGS_Merci::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AGS_Merci::LeftClickPressed_Implementation()
+{
+	IGS_AttackInterface::LeftClickPressed_Implementation();
+}
+
+void AGS_Merci::LeftClickRelease_Implementation()
+{
+	IGS_AttackInterface::LeftClickRelease_Implementation();
 }
 

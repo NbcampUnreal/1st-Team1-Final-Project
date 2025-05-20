@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GS_Seeker.h"
+#include "Character/Interface/GS_AttackInterface.h"
 #include "GS_Merci.generated.h"
 
 UCLASS()
-class GAS_API AGS_Merci : public AGS_Seeker
+class GAS_API AGS_Merci : public AGS_Seeker, public IGS_AttackInterface
 {
 	GENERATED_BODY()
 
@@ -20,6 +21,16 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	// Attack Interface
+	virtual void LeftClickPressed_Implementation() override;
+	virtual void LeftClickRelease_Implementation() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
+	UUserWidget* WidgetCrosshair;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess="true"))
+	USkeletalMeshComponent* Quiver;
 
 protected:
 	// Called when the game starts or when spawned
