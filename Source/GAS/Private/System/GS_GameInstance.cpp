@@ -99,7 +99,7 @@ void UGS_GameInstance::HostSession(int32 MaxPlayers, FName SessionCustomName, co
     HostSessionSettings->bAllowJoinInProgress = true;
     HostSessionSettings->bIsLANMatch = false;
     HostSessionSettings->bUsesPresence = true; // 스팀데디에서 이거 꺼야된다던데, 오버레이로 초대하려면 이거 켜야됨
-    HostSessionSettings->bAllowJoinViaPresence = true;
+    HostSessionSettings->bAllowJoinViaPresence = true; //이거도 오버레이 초대 하려면 켜야됨
     HostSessionSettings->bAllowInvites = true;
     HostSessionSettings->bIsDedicated = IsDedicatedServerInstance();
     HostSessionSettings->bAllowInvites = true;
