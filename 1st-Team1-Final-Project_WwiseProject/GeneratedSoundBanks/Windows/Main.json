@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{02C4E77D-9E30-80E3-9B12-31E63C6A621B}",
+    "Hash": "{74B83A0B-65EA-7A4F-3F96-313F286E76C8}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -951,7 +951,7 @@
       "GUID": "{23941479-25EC-40A0-81FC-A265BBDEF2B9}",
       "DurationType": "OneShot",
       "DurationMin": "0.5117977",
-      "DurationMax": "1.5229512",
+      "DurationMax": "1.3229512",
       "MediaRefs": [
        {
         "Id": "45190972"
@@ -1534,6 +1534,6 @@
     ]
    }
   ],
-  "FileHash": "{D66AC44B-0A23-3356-D24A-6FC5379CCC72}"
+  "FileHash": "{E5EFF604-BE7E-BF6D-8A48-09BDAEF882BB}"
  }
 }
