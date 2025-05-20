@@ -7,7 +7,7 @@
 UGS_ArcaneBoardManager::UGS_ArcaneBoardManager()
 {
 	//기본 초기화
-	CurrClass = ECharacterClass::Merci;
+	CurrClass = ECharacterClass::Ares;
 	PlacedRunes.Empty();
 	AppliedStatEffects = FCharacterStats();
 	CurrStatEffects = FCharacterStats();

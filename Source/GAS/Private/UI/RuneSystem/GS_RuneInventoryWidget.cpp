@@ -26,7 +26,7 @@ void UGS_RuneInventoryWidget::NativeConstruct()
 	}
 }
 
-void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager)
+void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager, UGS_ArcaneBoardWidget* InBoardWidget)
 {
 	BoardManager = InBoardManager;
 
@@ -46,12 +46,10 @@ void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager)
 			UGS_DraggableRuneWidget* RuneWidget = CreateWidget<UGS_DraggableRuneWidget>(this, RuneWidgetClass);
 			if (RuneWidget)
 			{
-				RuneWidget->SetRuneID(RuneID);
-
 				UTexture2D* RuneTexture = BoardManager->GetRuneTexture(RuneID);
 				if (RuneTexture)
 				{
-					RuneWidget->SetRuneTexture(RuneTexture);
+					RuneWidget->InitRuneWidget(RuneID, RuneTexture, InBoardWidget);
 				}
 
 				RuneScrollBox->AddChild(RuneWidget);
