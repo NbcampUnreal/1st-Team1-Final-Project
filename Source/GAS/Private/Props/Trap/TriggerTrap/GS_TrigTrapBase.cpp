@@ -49,11 +49,6 @@ void AGS_TrigTrapBase::OnTriggerOverlap(UPrimitiveComponent* OverlappedComp, AAc
 
 void AGS_TrigTrapBase::Server_ApplyTrapEffect_Implementation(AActor* TargetActor)
 {
-	Multicast_PlayTrapEffect(TargetActor);
-}
-
-void AGS_TrigTrapBase::Multicast_PlayTrapEffect_Implementation(AActor* TargetActor)
-{
 	ApplyTrapEffect(TargetActor);
 }
 

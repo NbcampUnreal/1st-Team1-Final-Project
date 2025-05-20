@@ -31,29 +31,57 @@ AGS_TrapBase::AGS_TrapBase()
 void AGS_TrapBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	LoadTrapData();
 	DamageBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrapBase::OnDamageBoxOverlap);
 }
 
+void AGS_TrapBase::LoadTrapData()
+{
+	if (!TrapDataTable) return;
+	FTrapData* FoundTrapData = TrapDataTable->FindRow<FTrapData>(TrapID, TEXT("LoadTrapData"));
+	if (FoundTrapData)
+	{
+		TrapData = *FoundTrapData;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TrapData not found for TrapID : %s"), *TrapID.ToString());
+	}
+}
 
 //데미지 박스에 오버랩된 경우 HandleTrapDamage 함수 실행
 void AGS_TrapBase::OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor != this)
+	if (!OtherActor || OtherActor == this)
 	{
-		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
-		if (Player)
-		{
-			DamageBoxEffect(OtherActor);
-			HandleTrapDamage(OtherActor);
-		}
+		return;
+	}
+
+	AGS_Player* Player = Cast<AGS_Player>(OtherActor);
+	if (!Player)
+	{
+		return;
+	}
+	if (!HasAuthority())
+	{
+		//클라이언트
+		Server_HandleTrapDamage(Player);
+		Server_DamageBoxEffect(Player);
+	}
+	else
+	{
+		//서버
+		DamageBoxEffect(Player);
+		HandleTrapDamage(Player);
 	}
 }
 
-void AGS_TrapBase::DamageBoxEffect_Implementation(AActor* OtherActor)
+void AGS_TrapBase::Server_HandleTrapDamage_Implementation(AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("DamageBoxEffect Applied"));
+	HandleTrapDamage(OtherActor);
 }
 
 
@@ -63,13 +91,11 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 	if (!OtherActor) return;
 	AGS_Player* DamagedPlayer = Cast<AGS_Player>(OtherActor);
 	if (!DamagedPlayer) return;
+	if (TrapData.Effect.Damage <= 0.f) return;
 
-	FTrapData* FoundTrapData = TrapDataTable->FindRow<FTrapData>(TrapID, TEXT("Damage"));
-	if (!FoundTrapData) return;
-
-	//기본 데미지 부여
+ 	//기본 데미지 부여
 	FDamageEvent DamageEvent;
-	DamagedPlayer->TakeDamage(FoundTrapData->Effect.Damage, DamageEvent, nullptr, this);
+	DamagedPlayer->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
 
 	//디버프 추가
 
@@ -77,14 +103,23 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 
 void AGS_TrapBase::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors)
 {
-	//for 루프 써서 안에 있는 모든 affectedActors에게 HandleTrapDamage 호출
-	//for (AActor* Actor : AffectedActors)
-	//{
-	//	HandleTrapDamage(Actor);
-	//}
 }
 
-//후에 플레이어 데미지, 디버프와 연결용
-void AGS_TrapBase::LoadTrapData()
+
+void AGS_TrapBase::Server_DamageBoxEffect_Implementation(AActor* OtherActor)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Server_DamageBoxEffect_Implementation called"));
+	Multicast_DamageBoxEffect(OtherActor);
+}
+
+
+void AGS_TrapBase::Multicast_DamageBoxEffect_Implementation(AActor* TargetActor)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Multicast_DamageBoxEffect_Implementation called"));
+	DamageBoxEffect(TargetActor);
+}
+
+void AGS_TrapBase::DamageBoxEffect_Implementation(AActor* OtherActor)
+{
+	UE_LOG(LogTemp, Warning, TEXT("DamageBoxEffect Applied"));
 }

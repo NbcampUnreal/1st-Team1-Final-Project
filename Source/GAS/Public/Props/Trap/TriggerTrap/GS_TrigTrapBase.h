@@ -36,9 +36,9 @@ protected:
 	void Server_ApplyTrapEffect(AActor* TargetActor);
 	void Server_ApplyTrapEffect_Implementation(AActor* TargetActor);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayTrapEffect(AActor* TargetActor);
-	void Multicast_PlayTrapEffect_Implementation(AActor* TargetActor);
+	//UFUNCTION(NetMulticast, Reliable)
+	//void Multicast_PlayTrapEffect(AActor* TargetActor);
+	//void Multicast_PlayTrapEffect_Implementation(AActor* TargetActor);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void ApplyTrapEffect(AActor* TargetActor);
