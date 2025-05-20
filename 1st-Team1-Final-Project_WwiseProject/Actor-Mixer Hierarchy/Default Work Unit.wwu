@@ -3306,6 +3306,16 @@
 									<ValueList>
 										<Value>-5</Value>
 									</ValueList>
+									<ModifierList>
+										<ModifierInfo>
+											<Modifier Name="" ID="{5F5E804F-857C-4AD6-8739-72A65FE1D63D}">
+												<PropertyList>
+													<Property Name="Enabled" Type="bool" Value="True"/>
+													<Property Name="Min" Type="Real64" Value="-2"/>
+												</PropertyList>
+											</Modifier>
+										</ModifierInfo>
+									</ModifierList>
 								</Property>
 							</PropertyList>
 							<ReferenceList>
@@ -3773,6 +3783,21 @@
 						<BlendContainer Name="SFX_Lava_Hit" ID="{0D32CFBB-A13E-4E8D-983B-9A609616FC9B}" ShortID="1049398185">
 							<PropertyList>
 								<Property Name="3DSpatialization" Type="int16" Value="1"/>
+								<Property Name="Volume" Type="Real64">
+									<ValueList>
+										<Value>-2</Value>
+									</ValueList>
+									<ModifierList>
+										<ModifierInfo>
+											<Modifier Name="" ID="{56DE687B-5E45-4B41-8025-C638A2E13843}">
+												<PropertyList>
+													<Property Name="Enabled" Type="bool" Value="True"/>
+													<Property Name="Min" Type="Real64" Value="-3"/>
+												</PropertyList>
+											</Modifier>
+										</ModifierInfo>
+									</ModifierList>
+								</Property>
 							</PropertyList>
 							<ReferenceList>
 								<Reference Name="Attenuation">
@@ -3953,7 +3978,7 @@
 										</Property>
 										<Property Name="MakeUpGain" Type="Real64">
 											<ValueList>
-												<Value>2</Value>
+												<Value>1</Value>
 											</ValueList>
 										</Property>
 										<Property Name="Pitch" Type="int32">
@@ -3970,7 +3995,7 @@
 										</Property>
 										<Property Name="Volume" Type="Real64">
 											<ValueList>
-												<Value>-2</Value>
+												<Value>-3</Value>
 											</ValueList>
 											<ModifierList>
 												<ModifierInfo>
@@ -6671,15 +6696,11 @@
 								<Property Name="InitialDelay" Type="Real64">
 									<ModifierList>
 										<ModifierInfo>
-											<Modifier Name="" ID="{C7A9DFB2-E551-4EEB-B951-68658B68FF2F}">
-												<PropertyList>
-													<Property Name="Enabled" Type="bool" Value="True"/>
-													<Property Name="Max" Type="Real64" Value="0.2"/>
-												</PropertyList>
-											</Modifier>
+											<Modifier Name="" ID="{C7A9DFB2-E551-4EEB-B951-68658B68FF2F}"/>
 										</ModifierInfo>
 									</ModifierList>
 								</Property>
+								<Property Name="IsGlobalLimit" Type="int16" Value="1"/>
 								<Property Name="ListenerRelativeRouting" Type="bool" Value="False"/>
 								<Property Name="Lowpass" Type="int16">
 									<ValueList>
@@ -7012,7 +7033,7 @@
 										</Property>
 										<Property Name="Volume" Type="Real64">
 											<ValueList>
-												<Value>-3</Value>
+												<Value>-5</Value>
 											</ValueList>
 										</Property>
 									</PropertyList>
