@@ -6,6 +6,7 @@
 #include "GS_BuildManager.generated.h"
 
 struct FGS_PlaceableObjectsRow;
+class UBillboardComponent;
 
 UCLASS()
 class GAS_API AGS_BuildManager : public AActor
