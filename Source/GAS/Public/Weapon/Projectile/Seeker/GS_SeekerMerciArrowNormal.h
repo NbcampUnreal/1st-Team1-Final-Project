@@ -14,15 +14,6 @@ enum class EArrowType : uint8
 	Child	UMETA(DisplayName = "Child")
 };
 
-UENUM(BlueprintType)
-enum class ETargetType : uint8
-{
-	Guardian		UMETA(DisplayName = "Guardian"),
-	DungeonMonster	UMETA(DisplayName = "DungeonMonster"),
-	Seeker			UMETA(DisplayName = "Seeker"),
-	Etc				UMETA(DisplayName = "Etc")
-};
-
 UCLASS()
 class GAS_API AGS_SeekerMerciArrowNormal : public AGS_SeekerMerciArrow
 {
@@ -37,18 +28,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arrow")
 	float BaseDamage = 10.0f;
 
-	UPROPERTY()
-	TSet<AActor*> HitActors;
-	
-	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
-		const FHitResult& Hit) override;
-
-	UFUNCTION()
-	void OnBeginOverlap(
+	virtual void OnBeginOverlap(
 		UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-		bool bFromSweep, const FHitResult& SweepResult);
+		bool bFromSweep, const FHitResult& SweepResult) override;
 
 protected:
 	virtual void BeginPlay() override;

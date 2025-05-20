@@ -13,7 +13,6 @@ UCLASS()
 class GAS_API AGS_SmokeFieldSkill : public AGS_FieldSkillActor
 {
 	GENERATED_BODY()
-	
 protected:
 	virtual void ApplyFieldEffectToMonster(AGS_Monster* Target);
 	virtual void RemoveFieldEffectFromMonster(AGS_Monster* Target);

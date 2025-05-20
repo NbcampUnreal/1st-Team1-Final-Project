@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{81B38E94-21D6-927D-1E6D-4ADFB27D63D4}",
+    "Hash": "{02C4E77D-9E30-80E3-9B12-31E63C6A621B}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -320,6 +320,14 @@
       "CachePath": "C1/{C1E7FFF6-4ED9-0743-C0CF-0A9CB01DD0C3}.wem"
      },
      {
+      "Id": "595941273",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MA_POR_FX_Texture_One_Shot_Agitate.wav",
+      "CachePath": "EC/{EC0DC842-5DBA-FBF4-7D82-825014658598}.wem"
+     },
+     {
       "Id": "600873638",
       "Language": "SFX",
       "Streaming": "false",
@@ -440,6 +448,14 @@
       "CachePath": "5F/{5FCB1406-F0D3-E367-DD3D-7C90A7DF287B}.wem"
      },
      {
+      "Id": "795056826",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "Portal.wav",
+      "CachePath": "0C/{0CFCD810-E6F8-70B4-80DE-32460AD3969D}.wem"
+     },
+     {
       "Id": "797000384",
       "Language": "SFX",
       "Streaming": "false",
@@ -534,6 +550,14 @@
       "Location": "Memory",
       "ShortName": "LighterIgniteFlame_BW.9029.wav",
       "CachePath": "50/{50E90512-7895-A028-9CA9-75CDD5C2A5BE}.wem"
+     },
+     {
+      "Id": "1021834988",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_SGAL3_Cinematic_FX_scifi_loop_tonal_portal_drone_steady_smooth_tone.wav",
+      "CachePath": "24/{24BD38E9-4E2B-4DDE-F84B-FE24029ED557}.wem"
      },
      {
       "Id": "1030029664",
@@ -1288,6 +1312,37 @@
       ]
      },
      {
+      "Id": "3196207142",
+      "Name": "Props_Portal",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Portal",
+      "GUID": "{9141DA7A-2D2F-449C-88E2-C9754D09EDA8}",
+      "MaxAttenuation": "600",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "595941273"
+       },
+       {
+        "Id": "1021834988"
+       }
+      ]
+     },
+     {
+      "Id": "374018819",
+      "Name": "Props_Portal_Trigger",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Portal_Trigger",
+      "GUID": "{3DFD4CDA-F232-4F79-B00F-324E80CF48AF}",
+      "MaxAttenuation": "700",
+      "DurationType": "OneShot",
+      "DurationMin": "5.0896153",
+      "DurationMax": "5.0896153",
+      "MediaRefs": [
+       {
+        "Id": "795056826"
+       }
+      ]
+     },
+     {
       "Id": "2654270155",
       "Name": "Props_Saw",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Saw",
@@ -1479,6 +1534,6 @@
     ]
    }
   ],
-  "FileHash": "{1BEBFFA9-B72D-ABEB-EC12-DFC286872042}"
+  "FileHash": "{46B45A3E-F54F-D592-6A97-23EAE541676A}"
  }
 }
