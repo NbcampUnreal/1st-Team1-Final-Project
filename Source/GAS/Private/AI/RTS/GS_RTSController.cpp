@@ -316,6 +316,7 @@ void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 	}
 	
 	UnitSelection.AddUnique(Unit);
+	OnSelectionChanged.Broadcast(UnitSelection);
 	Unit->SetSelected(true);
 }
 
@@ -327,6 +328,7 @@ void AGS_RTSController::RemoveUnitFromSelection(AGS_Monster* Unit)
 	}
 	
 	UnitSelection.Remove(Unit);
+	OnSelectionChanged.Broadcast(UnitSelection);
 	Unit->SetSelected(false);
 }
 
@@ -341,6 +343,7 @@ void AGS_RTSController::ClearUnitSelection()
 	}
 		
 	UnitSelection.Empty();
+	OnSelectionChanged.Broadcast(UnitSelection);
 }
 
 

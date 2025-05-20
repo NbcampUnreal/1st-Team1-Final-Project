@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Character/GS_Character.h"
-#include "BehaviorTree/BehaviorTree.h"       
 #include "BehaviorTree/BlackboardData.h"
 #include "AkGameplayStatics.h"
+#include "MonsterDataAsset.h"
 #include "GS_Monster.generated.h"
 
 class UGS_MonsterAnimInstance;
@@ -38,6 +38,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	UAkAudioEvent* MoveSoundEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Data")
+	UMonsterDataAsset* MonsterData;
 	
 	void SetSelected(bool bIsSelected);
 
@@ -46,6 +49,18 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayAttackMontage();
+
+	UFUNCTION(BlueprintCallable, Category="Data")
+	UTexture2D* GetPortrait() const { return MonsterData ? MonsterData->Portrait : nullptr; }
+	
+	UFUNCTION(BlueprintCallable, Category="Data")
+	FText GetMonsterName() const { return MonsterData ? MonsterData->MonsterName : FText::GetEmpty(); }
+
+	UFUNCTION(BlueprintCallable, Category="Data")
+	FText GetDescription() const { return MonsterData ? MonsterData->Description : FText::GetEmpty(); }
+
+	UFUNCTION(BlueprintCallable, Category="Data")
+	FText GetTypeName() const { return MonsterData ? MonsterData->TypeName : FText::GetEmpty(); }
 	
 protected:
 	virtual void BeginPlay() override;
