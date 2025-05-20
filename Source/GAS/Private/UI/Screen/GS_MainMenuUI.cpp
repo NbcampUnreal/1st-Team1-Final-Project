@@ -1,4 +1,4 @@
-#include "UI/GS_MainMenuUI.h"
+#include "UI/Screen/GS_MainMenuUI.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
