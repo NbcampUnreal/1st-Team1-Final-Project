@@ -50,10 +50,12 @@ void AGS_SmallClaw::OnAttackBiteboxOverlap(UPrimitiveComponent* OverlappedCompon
 		return;
 	}
 
-	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
-	float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
-	FDamageEvent DamageEvent;
-	OtherActor->TakeDamage(Damage, DamageEvent, GetController(), this);
-	
+	if (AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor))
+	{
+		float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
+		FDamageEvent DamageEvent;
+		OtherActor->TakeDamage(Damage, DamageEvent, GetController(), this);
+
+	}
 	BiteCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
