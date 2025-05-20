@@ -54,6 +54,35 @@ void UGS_GameInstance::Init()
     }
 }
 
+//void UGS_GameInstance::Shutdown()
+//{
+//	Super::Shutdown();
+//    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Shutdown() CALLED."));
+//    // Clear all delegate handles
+//    if (SessionInterface.IsValid())
+//    {
+//        if (CreateSessionCompleteDelegateHandle.IsValid())
+//        {
+//            SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
+//            CreateSessionCompleteDelegateHandle.Reset();
+//        }
+//        if (FindSessionsCompleteDelegateHandle.IsValid())
+//        {
+//            SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
+//            FindSessionsCompleteDelegateHandle.Reset();
+//        }
+//        if (JoinSessionCompleteDelegateHandle.IsValid())
+//        {
+//            SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
+//            JoinSessionCompleteDelegateHandle.Reset();
+//        }
+//        if (OnSessionUserInviteAcceptedDelegateHandle.IsValid())
+//        {
+//            SessionInterface->ClearOnSessionUserInviteAcceptedDelegate_Handle(OnSessionUserInviteAcceptedDelegateHandle);
+//            OnSessionUserInviteAcceptedDelegateHandle.Reset();
+//        }
+//}
+
 void UGS_GameInstance::HostSession(int32 MaxPlayers, FName SessionCustomName, const FString& MapName, const FString& GameModePath)
 {
     UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: HostSession() CALLED - MaxPlayers: %d, SessionName: %s, Map: %s, GameMode: %s"), MaxPlayers, *SessionCustomName.ToString(), *MapName, *GameModePath);
@@ -64,13 +93,13 @@ void UGS_GameInstance::HostSession(int32 MaxPlayers, FName SessionCustomName, co
     }
 
     HostSessionSettings = MakeShareable(new FOnlineSessionSettings());
-    HostSessionSettings->NumPublicConnections = 1;
+    HostSessionSettings->NumPublicConnections = 5;
     HostSessionSettings->NumPrivateConnections = MaxPlayers - 1;
     HostSessionSettings->bShouldAdvertise = true;
     HostSessionSettings->bAllowJoinInProgress = true;
     HostSessionSettings->bIsLANMatch = false;
-    HostSessionSettings->bUsesPresence = false; // 스팀데디에서 이거 꺼야한다는 얘기가 있음. 제발
-    HostSessionSettings->bAllowJoinViaPresence = false;
+    HostSessionSettings->bUsesPresence = true; // 스팀데디에서 이거 꺼야된다던데, 오버레이로 초대하려면 이거 켜야됨
+    HostSessionSettings->bAllowJoinViaPresence = true;
     HostSessionSettings->bAllowInvites = true;
     HostSessionSettings->bIsDedicated = IsDedicatedServerInstance();
     HostSessionSettings->bAllowInvites = true;
