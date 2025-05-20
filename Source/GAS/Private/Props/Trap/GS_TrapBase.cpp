@@ -6,6 +6,9 @@ AGS_TrapBase::AGS_TrapBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	bReplicates = true;
+	SetReplicateMovement(true);
+
 	RootSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComp"));
 	RootComponent = RootSceneComp;
 
