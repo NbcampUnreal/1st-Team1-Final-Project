@@ -12,6 +12,26 @@ AGS_Seeker::AGS_Seeker()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+void AGS_Seeker::SetAimState(bool IsAim)
+{
+	SeekerState.IsAim = IsAim;
+}
+
+bool AGS_Seeker::GetAimState()
+{
+	return SeekerState.IsAim;
+}
+
+void AGS_Seeker::SetDrawState(bool IsDraw)
+{
+	SeekerState.IsDraw = IsDraw;
+}
+
+bool AGS_Seeker::GetDrawState()
+{
+	return SeekerState.IsDraw;
+}
+
 // Called when the game starts or when spawned
 void AGS_Seeker::BeginPlay()
 {

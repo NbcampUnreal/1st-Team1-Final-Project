@@ -24,7 +24,7 @@ public:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void InitInven(UGS_ArcaneBoardManager* InBoardManager);
+	void InitInven(UGS_ArcaneBoardManager* InBoardManager, UGS_ArcaneBoardWidget* InBoardWidget);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))

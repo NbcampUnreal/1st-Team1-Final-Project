@@ -23,9 +23,7 @@ AGS_Player::AGS_Player()
 void AGS_Player::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
-
 
 void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

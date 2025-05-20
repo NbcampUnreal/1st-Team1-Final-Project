@@ -36,12 +36,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* RClickAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* LCtrlAction;
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* LCtrlAction;*/
 
 	void Move(const FInputActionValue& InputValue);
 	void Look(const FInputActionValue& InputValue);
 	void WalkToggle(const FInputActionValue& InputValue);
+	void LClickPressed(const FInputActionValue& InputValue);
+	void LClickRelease(const FInputActionValue& InputValue);
+	
 
 protected:
 	virtual void BeginPlay() override;
