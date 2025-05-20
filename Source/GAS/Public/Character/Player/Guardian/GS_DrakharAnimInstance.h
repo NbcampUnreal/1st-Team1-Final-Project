@@ -4,6 +4,8 @@
 #include "Animation/AnimInstance.h"
 #include "GS_DrakharAnimInstance.generated.h"
 
+class AGS_Drakhar;
+
 DECLARE_MULTICAST_DELEGATE(FOnNextAttackCheckDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDelegate);
 
@@ -14,15 +16,13 @@ class GAS_API UGS_DrakharAnimInstance : public UAnimInstance
 public:
 	UGS_DrakharAnimInstance();
 
+	virtual void NativeInitializeAnimation() override;
+
 	//combo attack
 	FOnNextAttackCheckDelegate OnNextAttackCheck;
 	FOnAttackHitCheckDelegate  OnAttackHitCheck;
 
 	//[combo attack]
-	//legacy
-	void PlayAttackMontage();
-	void JumpToAttackMontageSection(int32 NewSection);
-	//new
 	void PlayComboAttackMontage(int32 InCurrentComboIndex);
 	void StopComboAttackMontage(int32 InCurrentComboIndex);
 
@@ -33,8 +33,15 @@ public:
 	//earthquake
 	void PlayEarthquakeMontage();
 	void StopEarthquakeMontage();
+	
+	//draconicfury
+	void PlayDraconicFuryMontage(int32 InPlayIndex);
+	void StopDraconicFuryMontage(int32 InPlayIndex);
 
 private:
+	UPROPERTY()
+	TObjectPtr<AGS_Drakhar> Drakhar;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	TArray<UAnimMontage*> ComboAttackMontages;
 
@@ -44,11 +51,15 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* EarthquakeMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	TArray<UAnimMontage*> DraconicFuryMontages;
+
 	//[combo attack]
 	UFUNCTION()
 	void AnimNotify_ComboAttackCheck();
-	//UFUNCTION()
-	//void AnimNotify_ComboAttackCheckEnd();
+	
+	UFUNCTION()
+	void AnimNotify_ComboAttackEnd();
 
 	//[dash skill]
 	UFUNCTION()
@@ -60,5 +71,4 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_EarthquakeCheckEnd();
-
 };

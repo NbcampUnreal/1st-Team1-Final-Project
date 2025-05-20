@@ -27,6 +27,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* UltimateSkillAction;
 
+	//new input system
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* CtrlInputAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* RightMouseInputAction;
+
 	UFUNCTION()
 	void ComboAttack(const FInputActionValue& InputValue);
 
@@ -39,7 +46,15 @@ public:
 	UFUNCTION()
 	void UltimateSkill(const FInputActionValue& InputValue);
 
+	//new input system
+	UFUNCTION()
+	void CtrlInput(const FInputActionValue& InputValue);
+
+	UFUNCTION()
+	void RightMouseInput(const FInputActionValue& InputValue);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+
 };

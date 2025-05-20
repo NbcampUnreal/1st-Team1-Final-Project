@@ -8,11 +8,13 @@ AGS_BuildManager::AGS_BuildManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+#if WITH_EDITORONLY_DATA
 	BillboardCompo = CreateDefaultSubobject<UBillboardComponent>("BillBoard");
 	SetRootComponent(BillboardCompo);
+#endif
 	StaticMeshCompo = CreateDefaultSubobject<UStaticMeshComponent>("GridMesh");
-	StaticMeshCompo->SetupAttachment(BillboardCompo);
-
+	StaticMeshCompo->SetupAttachment(RootComponent);
+	
 	// static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshFinder(
 	// 	TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"));
 	// if (MeshFinder.Succeeded())
@@ -37,17 +39,17 @@ AGS_BuildManager::AGS_BuildManager()
 	InitGrid();
 }
 
-#if WITH_EDITOR
 void AGS_BuildManager::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-
+	
+#if WITH_EDITOR
 	if (nullptr != MIDGrid)
 	{
 		StaticMeshCompo->SetMaterial(0, MIDGrid);
 	}
-}
 #endif
+}
 
 void AGS_BuildManager::BeginPlay()
 {

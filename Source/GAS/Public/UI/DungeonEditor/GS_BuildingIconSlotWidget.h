@@ -21,6 +21,11 @@ public:
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly, Category="Property|Data")
 	FDataTableRowHandle Data;
 
+	void SetButtonImage();
+	
 protected:
 	virtual void NativeConstruct() override;
+
+private:
+	// void SetButtonImage();
 };
