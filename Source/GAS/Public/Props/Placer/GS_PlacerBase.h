@@ -64,6 +64,9 @@ private:
 	void DrawPlacementIndicators();
 
 	void CalCellsInRectArea(TArray<FIntPoint>& InIntPointArray);
+
+	EDEditorCellType GetTargetCellType();
+	EDEditorCellType GetRoomCellInfo(int InIdx);
 	
 	bool bObjectSelected;
 };
