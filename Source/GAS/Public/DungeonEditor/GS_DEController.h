@@ -5,7 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GS_DEController.generated.h"
 
-class UGS_PropsSelector;
+class UGS_PropWidget;
 class UInputMappingContext;
 class UInputAction;
 
@@ -37,9 +37,9 @@ public:
 
 	// Widget
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UGS_PropsSelector> PropsSelectorWidgetClass;
+	TSubclassOf<UGS_PropWidget> PropWidgetClass;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
-	TObjectPtr<UGS_PropsSelector> PropsSelectorWidget;
+	TObjectPtr<UGS_PropWidget> PropWidget;
 	
 protected:
 	void BeginPlay() override;
