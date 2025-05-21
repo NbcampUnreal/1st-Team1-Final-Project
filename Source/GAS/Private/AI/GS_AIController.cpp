@@ -4,6 +4,7 @@
 #include "AI/GS_AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
@@ -11,6 +12,7 @@ const FName AGS_AIController::HomePosKey(TEXT("HomePos"));
 const FName AGS_AIController::TargetActorKey(TEXT("Target"));
 const FName AGS_AIController::RTSTargetKey(TEXT("RTSTarget"));
 const FName AGS_AIController::bUseRTSKey(TEXT("bUseRTS"));
+const FName AGS_AIController::TargetLockedKey(TEXT("bTargetLocked"));
 
 AGS_AIController::AGS_AIController()
 {
@@ -65,6 +67,12 @@ FGenericTeamId AGS_AIController::GetGenericTeamId() const
 
 void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
+	if (Blackboard->GetValueAsBool(TargetLockedKey))
+	{
+		return;
+	}
+
+	// 현재위치 가장 가까운 애한테 타겟을 걸도록 ! 
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		Blackboard->SetValueAsObject(TargetActorKey, Actor);
@@ -73,4 +81,37 @@ void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 	{
 		Blackboard->ClearValue(TargetActorKey);
 	}
+}
+
+void AGS_AIController::LockTarget(AGS_Character* Target)
+{
+	Blackboard->SetValueAsObject(TargetActorKey, Target);
+	Blackboard->SetValueAsBool(TargetLockedKey, true);
+}
+
+void AGS_AIController::UnlockTarget()
+{
+	Blackboard->SetValueAsBool(TargetLockedKey, false);
+}
+
+void AGS_AIController::EnterConfuseState()
+{
+	PrevTargetActor = Cast<AActor>(Blackboard->GetValueAsObject(TargetActorKey));
+	Blackboard->ClearValue(TargetActorKey);
+	PerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), false);
+}
+
+void AGS_AIController::ExitConfuseState()
+{
+	PerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), true);
+	
+	if (PrevTargetActor.IsValid())
+	{
+		Blackboard->SetValueAsObject(TargetActorKey, PrevTargetActor.Get());
+	}
+	else
+	{
+		PerceptionComponent->RequestStimuliListenerUpdate();
+	}
+	PrevTargetActor.Reset();     
 }

@@ -22,6 +22,8 @@ struct FUnitGroup
 	TArray<AGS_Monster*> Units;
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, const TArray<AGS_Monster*>&, NewSelection);
+
 UCLASS()
 class GAS_API AGS_RTSController : public APlayerController
 {
@@ -53,6 +55,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	TArray<UInputAction*> CameraKeyActions;
+
+	UPROPERTY(BlueprintAssignable, Category="Selection")
+	FOnSelectionChanged OnSelectionChanged;
+
+	const TArray<AGS_Monster*>& GetUnitSelection() const { return UnitSelection; }
 
 	// 카메라 이동 입력 처리
 	void CameraMove(const FInputActionValue& InputValue);
@@ -87,7 +94,10 @@ public:
 	// Server
 	UFUNCTION(Server, Reliable)
 	void Server_RTSMove(const TArray<AGS_Monster*>& Units, const FVector& Dest);
-	
+
+	// 명령 가능한 유닛들
+	void GatherCommandableUnits(TArray<AGS_Monster*>& Out) const;
+	bool IsSelectable(AGS_Monster* Monster) const;
 
 protected:
 	virtual void BeginPlay() override;
