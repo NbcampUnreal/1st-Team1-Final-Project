@@ -41,6 +41,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Data")
 	UMonsterDataAsset* MonsterData;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
+	bool bCommandLocked = false;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
+	bool bSelectionLocked = false;
+
+	FORCEINLINE bool IsCommandable() const { return !bCommandLocked; }
+	FORCEINLINE bool IsSelectable() const { return !bSelectionLocked; }
 	
 	void SetSelected(bool bIsSelected);
 
@@ -65,6 +74,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	UPROPERTY()
 	TObjectPtr<UGS_MonsterAnimInstance> MonsterAnim;

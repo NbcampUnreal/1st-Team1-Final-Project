@@ -94,7 +94,10 @@ public:
 	// Server
 	UFUNCTION(Server, Reliable)
 	void Server_RTSMove(const TArray<AGS_Monster*>& Units, const FVector& Dest);
-	
+
+	// 명령 가능한 유닛들
+	void GatherCommandableUnits(TArray<AGS_Monster*>& Out) const;
+	bool IsSelectable(AGS_Monster* Monster) const;
 
 protected:
 	virtual void BeginPlay() override;
