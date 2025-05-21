@@ -42,7 +42,7 @@ protected:
 
 	AGS_Character* Caster;
 
-	float Duration = 10.f;
+	float Duration = 20.f;
 
 	FTimerHandle DestroyTimerHandle;
 

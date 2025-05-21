@@ -12,6 +12,7 @@ void AGS_SmokeFieldSkill::ApplyFieldEffectToMonster(AGS_Monster* Target)
 {
 	if (!HasAuthority() || !Target) 
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Client or Target is null - ApplyFieldEffectToMonster"));
 		return;
 	}
 
@@ -24,7 +25,11 @@ void AGS_SmokeFieldSkill::ApplyFieldEffectToMonster(AGS_Monster* Target)
 
 void AGS_SmokeFieldSkill::RemoveFieldEffectFromMonster(AGS_Monster* Target)
 {
-	if (!HasAuthority() || !IsValid(Target)) return;
+	if (!HasAuthority() || !IsValid(Target))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Client or Target is null - RemoveFieldEffectFromMonster"));
+		return;
+	}
 
 	if (UGS_DebuffComp* DebuffComp = Target->GetDebuffComp())
 	{
@@ -34,27 +39,29 @@ void AGS_SmokeFieldSkill::RemoveFieldEffectFromMonster(AGS_Monster* Target)
 
 void AGS_SmokeFieldSkill::ApplyFieldEffectToGuardian(AGS_Guardian* Target)
 {
-	if (!HasAuthority() || !IsValid(Target)) return;
+	if (!HasAuthority() || !IsValid(Target)) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Client or Target is null - ApplyFieldEffectToGuardian"));
+		return;
+	}
 
 	// 가디언의 "머리" 본 위치가 장판 안에 있을 때만 효과 적용
 	FVector HeadLocation = Target->GetMesh()->GetBoneLocation(TEXT("head"));
 	float DistToCenter = FVector::Dist(HeadLocation, GetActorLocation());
-
-	if (DistToCenter <= SphereComp->GetScaledSphereRadius())
+	UE_LOG(LogTemp, Warning, TEXT("Dist To Centher : %f, Scaled Sphere : %f"), DistToCenter, SphereComp->GetScaledSphereRadius());
+	if (DistToCenter-200.0f <= SphereComp->GetScaledSphereRadius())
 	{
 		if (UGS_DebuffComp* DebuffComp = Target->GetDebuffComp())
 		{
 			DebuffComp->ApplyDebuff(EDebuffType::Obscure, Caster);
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Is Not in Head"));
+	}
 }
 
 void AGS_SmokeFieldSkill::RemoveFieldEffectFromGuardian(AGS_Guardian* Target)
 {
-	if (!HasAuthority() || !IsValid(Target)) return;
-
-	if (UGS_DebuffComp* DebuffComp = Target->GetDebuffComp())
-	{
-		DebuffComp->RemoveDebuff(EDebuffType::Obscure);
-	}
 }
