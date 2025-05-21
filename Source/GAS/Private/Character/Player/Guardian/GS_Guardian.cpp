@@ -3,11 +3,7 @@
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 
 #include "Animation/AnimInstance.h"
-#include "Engine/DamageEvents.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/SphereComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Net/UnrealNetwork.h"
 
 AGS_Guardian::AGS_Guardian()
 {
@@ -35,26 +31,18 @@ void AGS_Guardian::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 	
 }
 
-void AGS_Guardian::ComboAttack()
+void AGS_Guardian::LeftMouse()
 {
-
-}
-
-void AGS_Guardian::Skill1()
-{	
-}
-
-void AGS_Guardian::Skill2()
-{
-}
-
-void AGS_Guardian::UltimateSkill()
-{
+	
 }
 
 void AGS_Guardian::Ctrl()
 {
 
+}
+
+void AGS_Guardian::CtrlStop()
+{
 }
 
 void AGS_Guardian::RightMouse()

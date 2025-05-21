@@ -5,6 +5,7 @@
 #include "GS_StatComp.generated.h"
 
 class AGS_Character;
+class UAkAudioEvent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentHPChangedDelegate, float);
 
@@ -22,17 +23,20 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat")
 	TObjectPtr<UDataTable> StatDataTable;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TArray<UAnimMontage*> TakeDamageMontages;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	UAkAudioEvent* HitSoundEvent;
+	
 	void InitStat(FName RowName);
 
 	void UpdateStat();
 
 	float CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
-
-	void PerformHit(AActor* DamagedActor, AActor* DamageCauser);
 
 	//getter
 	FORCEINLINE float GetMaxHealth()const { return MaxHealth; }
@@ -50,6 +54,10 @@ public:
 	void SetAgility(float InAgility);
 	void SetAttackSpeed(float InAttackSpeed);
 	
+	//rpc
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCPlayTakeDamageMontage();
+
 	//OnRep Function
 	UFUNCTION()
 	void OnRep_CurrentHealth();
@@ -74,4 +82,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
 	float AttackSpeed;
+
+	UFUNCTION()
+	void OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	
+	float CharacterWalkSpeed;
 };

@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GS_PropsSelector.generated.h"
 
+struct FGS_PlaceableObjectsRow;
 class UGS_BuildingIconSlotWidget;
 class UUniformGridPanel;
 class UTextBlock;
@@ -24,6 +25,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int SlotCount;
 
+	void SetTitle(FText InText);
+	void CreateIconSlot(const FDataTableRowHandle& InData);
+	
 protected:
 	virtual void NativeConstruct() override;
 
