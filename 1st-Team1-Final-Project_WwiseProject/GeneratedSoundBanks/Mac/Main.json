@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{AC4B13B0-CDB6-8E1F-44C8-58A371A95DC1}",
+    "Hash": "{D5CFB296-EDA5-9BA3-F3CC-D22C3DDA3E60}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -1548,7 +1548,7 @@
       "Name": "Props_Torch",
       "ObjectPath": "\\Events\\Default Work Unit\\Props_Torch",
       "GUID": "{0FE8AE3D-0C62-4903-9226-37A060EB1543}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "800",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1643,6 +1643,6 @@
     ]
    }
   ],
-  "FileHash": "{EF6FA5C8-6AC0-5AFF-3AD5-526059997B63}"
+  "FileHash": "{6EE42446-68EC-D683-C9B9-E56202C3000B}"
  }
 }
