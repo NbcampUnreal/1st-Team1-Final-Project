@@ -1,6 +1,5 @@
 #include "Character/Player/Guardian/GS_GuardianController.h"
 
-#include "Character/GS_Character.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 
 #include "EnhancedInputComponent.h"
@@ -8,49 +7,6 @@
 AGS_GuardianController::AGS_GuardianController()
 {
 	
-}
-
-void AGS_GuardianController::ComboAttack(const FInputActionValue& InputValue)
-{
-	if (IsLocalController())
-	{
-		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
-
-		if (IsValid(Guardian))
-		{
-			Guardian->ComboAttack();
-		}
-	}
-}
-
-void AGS_GuardianController::Skill1(const FInputActionValue& InputValue)
-{
-	if (IsLocalController())
-	{
-		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
-
-		if (IsValid(Guardian))
-		{
-			Guardian->Skill1();
-		}
-	}
-}
-
-void AGS_GuardianController::Skill2(const FInputActionValue& InputValue)
-{
-	if (IsLocalController())
-	{
-		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
-
-		if (IsValid(Guardian))
-		{
-			Guardian->Skill2();
-		}
-	}
-}
-
-void AGS_GuardianController::UltimateSkill(const FInputActionValue& InputValue)
-{
 }
 
 void AGS_GuardianController::CtrlInput(const FInputActionValue& InputValue)
@@ -62,6 +18,31 @@ void AGS_GuardianController::CtrlInput(const FInputActionValue& InputValue)
 		if (IsValid(Guardian))
 		{
 			Guardian->Ctrl();
+		}
+	}
+}
+
+void AGS_GuardianController::CtrlStop(const FInputActionValue& InputValue)
+{
+	if (IsLocalController())
+	{
+		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
+
+		if (IsValid(Guardian))
+		{
+			Guardian->CtrlStop();
+		}
+	}
+}
+
+void AGS_GuardianController::LeftMouseInput(const FInputActionValue& InputValue)
+{
+	if (IsLocalController())
+	{
+		AGS_Guardian* Guardian = Cast<AGS_Guardian>(GetPawn());
+		if (IsValid(Guardian))
+		{
+			Guardian->LeftMouse();
 		}
 	}
 }
@@ -91,26 +72,18 @@ void AGS_GuardianController::SetupInputComponent()
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
 	if (IsValid(EnhancedInputComponent))
 	{
-		if (IsValid(ComboAttackAction))
-		{
-			EnhancedInputComponent->BindAction(ComboAttackAction, ETriggerEvent::Started, this, &AGS_GuardianController::ComboAttack);
-		}
-		if (IsValid(Skill1Action))
-		{
-			EnhancedInputComponent->BindAction(Skill1Action, ETriggerEvent::Started, this, &AGS_GuardianController::Skill1);
-		}
-		if (IsValid(Skill2Action))
-		{
-			EnhancedInputComponent->BindAction(Skill2Action, ETriggerEvent::Started, this, &AGS_GuardianController::Skill2);
-		}
 		if (IsValid(CtrlInputAction))
 		{
-			EnhancedInputComponent->BindAction(CtrlInputAction, ETriggerEvent::Started, this, &AGS_GuardianController::CtrlInput);
+			EnhancedInputComponent->BindAction(CtrlInputAction, ETriggerEvent::Triggered, this, &AGS_GuardianController::CtrlInput);
+			EnhancedInputComponent->BindAction(CtrlInputAction, ETriggerEvent::Completed, this, &AGS_GuardianController::CtrlStop);
+		}
+		if (IsValid(LeftMouseInputAction))
+		{
+			EnhancedInputComponent->BindAction(LeftMouseInputAction, ETriggerEvent::Started, this, &AGS_GuardianController::LeftMouseInput);
 		}
 		if (IsValid(RightMouseInputAction))
 		{
 			EnhancedInputComponent->BindAction(RightMouseInputAction, ETriggerEvent::Started, this, &AGS_GuardianController::RightMouseInput);
 		}
-
 	}
 }

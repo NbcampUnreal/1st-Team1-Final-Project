@@ -11,6 +11,7 @@ class UGS_SkillBase;
 UENUM(BlueprintType)
 enum class ESkillSlot : uint8
 {
+	Ready,
 	Moving,
 	Aiming,
 	Ultimate
@@ -40,6 +41,9 @@ public:
 	UFUNCTION()
 	void TryActivateSkill(ESkillSlot Slot);
 
+	UFUNCTION(Server, Reliable)
+	void Server_TryDeactiveSkill(ESkillSlot Slot);
+
 	UFUNCTION()
 	void TrySkillCommand(ESkillSlot Slot);
 
@@ -50,7 +54,6 @@ public:
 	void SetSkillActiveState(ESkillSlot Slot, bool InIsActive);
 
 	bool IsSkillActive(ESkillSlot Slot) const;
-
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -81,5 +84,4 @@ protected:
 	bool bCanUseSkill = true;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
 };

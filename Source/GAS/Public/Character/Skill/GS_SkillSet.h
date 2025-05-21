@@ -17,6 +17,9 @@ struct GAS_API FGS_SkillSet : public FTableRowBase
 	ECharacterType CharacterType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UGS_SkillBase> ReadySkill;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UGS_SkillBase> AimingSkill;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -27,6 +30,7 @@ struct GAS_API FGS_SkillSet : public FTableRowBase
 
 	FGS_SkillSet()
 		: CharacterType(ECharacterType::Chan)
+		, ReadySkill(nullptr)
 		, AimingSkill(nullptr)
 		, MovingSkill(nullptr)
 		, UltimateSkill(nullptr)

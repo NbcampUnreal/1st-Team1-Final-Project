@@ -69,19 +69,25 @@ public:
 
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
+	//play skill montage
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastRPCPlaySkillMontage(UAnimMontage* SkillMontage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulicastRPCStopCurrentSkillMontage(UAnimMontage* CurrentSkillMontage);
+	
 protected:
+	//component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_SkillComp> SkillComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_DebuffComp> DebuffComp;
 
-private:
-	//component
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_StatComp> StatComp;
 
-
+private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
 	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
 };
