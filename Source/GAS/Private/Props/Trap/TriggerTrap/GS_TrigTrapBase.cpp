@@ -32,11 +32,33 @@ void AGS_TrigTrapBase::OnTriggerOverlap(UPrimitiveComponent* OverlappedComp, AAc
 		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
 		if (Player)
 		{
-			ApplyTrapEffect(OtherActor);
+			if (!HasAuthority())
+			{
+				//클라이언트
+				Server_ApplyTrapEffect(OtherActor);
+			}
+			else
+			{
+				//서버
+				ApplyTrapEffect(OtherActor);
+			}
 		}
 		
 	}
 }
+
+void AGS_TrigTrapBase::Server_ApplyTrapEffect_Implementation(AActor* TargetActor)
+{
+	ApplyTrapEffect(TargetActor);
+}
+
+void AGS_TrigTrapBase::ApplyTrapEffect_Implementation(AActor* TargetActor)
+{
+	UE_LOG(LogTemp, Warning, TEXT("TrapEffect Applied"));
+}
+
+
+
 
 
 void AGS_TrigTrapBase::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -48,16 +70,31 @@ void AGS_TrigTrapBase::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, 
 		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
 		if (Player)
 		{
-			EndTrapEffect(OtherActor);
+			if(!HasAuthority())
+			{
+				Server_EndTrapEffect(OtherActor);
+			}
+			else
+			{
+				EndTrapEffect(OtherActor);
+			}
+			
 		}
 	}
 }
 
 
-void AGS_TrigTrapBase::ApplyTrapEffect_Implementation(AActor* TargetActor)
+void AGS_TrigTrapBase::Server_EndTrapEffect_Implementation(AActor* TargetActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("TrapEffect Applied"));
+	Multicast_EndTrapEffect(TargetActor);
 }
+
+void AGS_TrigTrapBase::Multicast_EndTrapEffect_Implementation(AActor* TargetActor)
+{
+	EndTrapEffect(TargetActor);
+}
+
+
 
 void AGS_TrigTrapBase::EndTrapEffect_Implementation(AActor* TargetActor)
 {

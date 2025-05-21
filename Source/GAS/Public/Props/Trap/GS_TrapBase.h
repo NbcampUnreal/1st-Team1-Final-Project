@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -55,10 +55,22 @@ public:
 	//범위 내의 여러 플레이어에게 한 번에 데미지 주는 함수
 	virtual void HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors);
 
+	UFUNCTION(Server, Reliable)
+	void Server_HandleTrapDamage(AActor* TargetActor);
+	void Server_HandleTrapDamage_Implementation(AActor* TargetActor);
+
+	UFUNCTION(Server, Reliable)
+	void Server_DamageBoxEffect(AActor* TargetActor);
+	void Server_DamageBoxEffect_Implementation(AActor* TargetActor);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DamageBoxEffect(AActor* TargetActor);
+	void Multicast_DamageBoxEffect_Implementation(AActor* TargetActor);
+
 protected:
 
 	virtual void BeginPlay() override;
 	
-
+	
 
 };

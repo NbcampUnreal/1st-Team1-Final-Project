@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Props/Trap/GS_TrapBase.h"
@@ -31,9 +31,29 @@ protected:
 							UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 
+	//BeginOverlap with TriggerBoxComp
+	UFUNCTION(Server, Reliable)
+	void Server_ApplyTrapEffect(AActor* TargetActor);
+	void Server_ApplyTrapEffect_Implementation(AActor* TargetActor);
+
+	//UFUNCTION(NetMulticast, Reliable)
+	//void Multicast_PlayTrapEffect(AActor* TargetActor);
+	//void Multicast_PlayTrapEffect_Implementation(AActor* TargetActor);
+
 	UFUNCTION(BlueprintNativeEvent)
 	void ApplyTrapEffect(AActor* TargetActor);
 	void ApplyTrapEffect_Implementation(AActor* TargetActor);
+
+
+
+	//EndOverlap with TriggerBoxComp
+	UFUNCTION(Server, Reliable)
+	void Server_EndTrapEffect(AActor* TargetActor);
+	void Server_EndTrapEffect_Implementation(AActor* TargetActor);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_EndTrapEffect(AActor* TargetActor);
+	void Multicast_EndTrapEffect_Implementation(AActor* TargetActor);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void EndTrapEffect(AActor* TargetActor);
