@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{74B83A0B-65EA-7A4F-3F96-313F286E76C8}",
+    "Hash": "{AC4B13B0-CDB6-8E1F-44C8-58A371A95DC1}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -168,6 +168,14 @@
       "CachePath": "75/{758138DC-BF20-3EAF-9803-773285868A26}.wem"
      },
      {
+      "Id": "307021949",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MonsterSnarl_S011HO.324.wav",
+      "CachePath": "E3/{E391EB12-B3CA-D68E-3F2E-9551486CA58C}.wem"
+     },
+     {
       "Id": "313983704",
       "Language": "SFX",
       "Streaming": "false",
@@ -296,6 +304,14 @@
       "CachePath": "D5/{D5FBD559-460A-3B3D-9297-73DB1210EB08}.wem"
      },
      {
+      "Id": "485972195",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Horror_Game_Vocal_Creature_Bloated_Zombie_Short_Attack_Dry_Mutant_Dead_Undead_Monster_Fat.wav",
+      "CachePath": "6C/{6CB05A2D-18F5-3A83-EDB5-4EF3CDCFF6BC}.wem"
+     },
+     {
       "Id": "518697165",
       "Language": "SFX",
       "Streaming": "false",
@@ -310,6 +326,14 @@
       "Location": "Memory",
       "ShortName": "FootSteps_Lava (2).wav",
       "CachePath": "71/{71ED084E-15F1-56C7-8948-167F1ED51B3C}.wem"
+     },
+     {
+      "Id": "548015621",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Undead_Vocal_Jump_2_Long_Raaa_2.wav",
+      "CachePath": "98/{989B03C8-F0BE-965E-DF56-6077F0B884B4}.wem"
      },
      {
       "Id": "578835809",
@@ -384,6 +408,14 @@
       "CachePath": "B7/{B7A60FA2-8632-2B7F-20A9-AB463C96761A}.wem"
      },
      {
+      "Id": "674316476",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Attack_Dry.wav",
+      "CachePath": "04/{04FDD220-B725-EDC6-CDCF-5E356F782895}.wem"
+     },
+     {
       "Id": "689500474",
       "Language": "SFX",
       "Streaming": "false",
@@ -398,6 +430,14 @@
       "Location": "Memory",
       "ShortName": "SFX_SpikeTrap.wav",
       "CachePath": "05/{05CB506B-F9D5-53BB-16FA-5E2A7051E323}.wem"
+     },
+     {
+      "Id": "696638021",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Undead_Vocal_I_Hunger_.wav",
+      "CachePath": "E8/{E8EF9AA2-76D6-3592-F11B-2CCC3BC62A80}.wem"
      },
      {
       "Id": "710539305",
@@ -416,12 +456,28 @@
       "CachePath": "FA/{FA1F08A4-553C-7493-FDB6-7321F0463487}.wem"
      },
      {
+      "Id": "749540455",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
+      "CachePath": "FD/{FD4FABE6-F580-20D2-138D-5A3E35E27A9E}.wem"
+     },
+     {
       "Id": "750724736",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "waves.wav",
       "CachePath": "A9/{A97BE36E-CAE5-7C1D-4425-4D510D9A1EF3}.wem"
+     },
+     {
+      "Id": "756368802",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Undead_Vocal_You_Cannot_Outrun_Death.wav",
+      "CachePath": "BA/{BA9D38FB-07FE-A530-4695-64375BC6A244}.wem"
      },
      {
       "Id": "763229215",
@@ -472,12 +528,28 @@
       "CachePath": "F0/{F00849BB-91D3-0573-A268-7AF8B52292AD}.wem"
      },
      {
+      "Id": "810864320",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Undead_Vocal_Hurt_Throaty_Rah.wav",
+      "CachePath": "A2/{A2837895-F257-F5A9-C10F-8FBF908C8D9F}.wem"
+     },
+     {
       "Id": "848033451",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_01.wav",
       "CachePath": "AA/{AA0EA770-6250-7262-D44F-148E619702A0}.wem"
+     },
+     {
+      "Id": "849513322",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
+      "CachePath": "9B/{9BD57A1B-287F-BB37-285E-2B0C12A1F6C7}.wem"
      },
      {
       "Id": "866318197",
@@ -582,6 +654,14 @@
       "Location": "Memory",
       "ShortName": "Footstep_Grass (2).wav",
       "CachePath": "55/{55D5DF1A-EA9F-51EF-B2F4-2AFAC4BC2C54}.wem"
+     },
+     {
+      "Id": "1072008213",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
+      "CachePath": "DE/{DEC75FBA-B9AE-3DF8-C92E-F24681AEEFF1}.wem"
      }
     ],
     "Plugins": {
@@ -593,14 +673,6 @@
        "GUID": "{AFAA64B4-BCA6-414C-AB98-3F33A17A2102}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
-      },
-      {
-       "Id": "133365297",
-       "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\SFX_Mon_SmallClaw_UI\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
-       "GUID": "{2D24BA7A-966C-40EC-9B78-EF6A0C544C7A}",
-       "LibName": "Wwise Pitch Shifter",
-       "LibId": "8912899"
       },
       {
        "Id": "188849779",
@@ -905,6 +977,58 @@
       ]
      },
      {
+      "Id": "1129758503",
+      "Name": "EV_Mon_IronFang_UI",
+      "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_Mon_IronFang_UI",
+      "GUID": "{9F56E300-4B73-41DA-82E0-47C233DEC99F}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.3779348",
+      "DurationMax": "0.8333011",
+      "MediaRefs": [
+       {
+        "Id": "485972195"
+       },
+       {
+        "Id": "674316476"
+       },
+       {
+        "Id": "749540455"
+       },
+       {
+        "Id": "849513322"
+       },
+       {
+        "Id": "1072008213"
+       }
+      ]
+     },
+     {
+      "Id": "3101410501",
+      "Name": "EV_Mon_ShadowFang_UI",
+      "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_Mon_ShadowFang_UI",
+      "GUID": "{FB6892C7-53B4-41AA-9001-6655B1697F98}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.92951137",
+      "DurationMax": "2.051789",
+      "MediaRefs": [
+       {
+        "Id": "307021949"
+       },
+       {
+        "Id": "548015621"
+       },
+       {
+        "Id": "696638021"
+       },
+       {
+        "Id": "756368802"
+       },
+       {
+        "Id": "810864320"
+       }
+      ]
+     },
+     {
       "Id": "831579122",
       "Name": "EV_Mon_SmallClaw",
       "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_Mon_SmallClaw",
@@ -968,22 +1092,7 @@
        {
         "Id": "1030029664"
        }
-      ],
-      "PluginRefs": {
-       "Custom": [
-        {
-         "Id": "133365297"
-        }
-       ],
-       "ShareSets": [
-        {
-         "Id": "2652646462"
-        },
-        {
-         "Id": "3157398371"
-        }
-       ]
-      }
+      ]
      },
      {
       "Id": "2385628198",
@@ -1534,6 +1643,6 @@
     ]
    }
   ],
-  "FileHash": "{E6693EEF-F30A-ABCF-9FC0-E90999FDC9E3}"
+  "FileHash": "{EF6FA5C8-6AC0-5AFF-3AD5-526059997B63}"
  }
 }
