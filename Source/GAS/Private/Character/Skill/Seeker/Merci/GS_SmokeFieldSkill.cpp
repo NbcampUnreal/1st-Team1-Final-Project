@@ -8,6 +8,49 @@
 #include "Character/Debuff/EDebuffType.h"
 #include "Components/SphereComponent.h"
 
+AGS_SmokeFieldSkill::AGS_SmokeFieldSkill()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+void AGS_SmokeFieldSkill::BeginPlay()
+{
+	Super::BeginPlay();
+
+	FHitResult Hit;
+	FVector Start = GetActorLocation();
+	FVector End = Start - FVector(0, 0, 10000); // 아래로 충분히 긴 거리
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
+	{
+		TargetGroundLocation = Hit.Location; // 목표 위치 저장
+		bShouldDescendToGround = true;       // Tick에서 움직일지 여부
+	}
+}
+
+void AGS_SmokeFieldSkill::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bShouldDescendToGround)
+	{
+		FVector CurrentLocation = GetActorLocation();
+		FVector NewLocation = FMath::VInterpTo(CurrentLocation, TargetGroundLocation, DeltaTime, DescendSpeed); // 부드럽게 내려오기
+
+		SetActorLocation(NewLocation);
+
+		float Dist = FVector::Dist(NewLocation, TargetGroundLocation);
+		if (Dist < 5.0f) // 거의 다 내려왔으면 정지
+		{
+			SetActorLocation(TargetGroundLocation);
+			bShouldDescendToGround = false;
+		}
+	}
+}
+
 void AGS_SmokeFieldSkill::ApplyFieldEffectToMonster(AGS_Monster* Target)
 {
 	if (!HasAuthority() || !Target) 
