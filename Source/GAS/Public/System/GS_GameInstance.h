@@ -23,19 +23,19 @@ class GAS_API UGS_GameInstance : public UGameInstance
 public:
     UGS_GameInstance();
     virtual void Init() override;
-    //virtual void Shutdown() override;
+    virtual void Shutdown() override;
 
 
-    //서버 생성, 참여(1인)
-
-    UFUNCTION(BlueprintCallable, Category = "Network|Session")
-    void HostSession(int32 MaxPlayers, FName SessionCustomName, const FString& MapName, const FString& GameModePath);
+    //서버 생성, 참여
 
     UFUNCTION(BlueprintCallable, Category = "Network|Session")
-    void FindSession(APlayerController* RequestingPlayer);
+    void GSHostSession(int32 MaxPlayers, FName SessionCustomName, const FString& MapName, const FString& GameModePath);
+
+    UFUNCTION(BlueprintCallable, Category = "Network|Session")
+    void GSFindSession(APlayerController* RequestingPlayer);
 
     //UFUNCTION(BlueprintCallable, Category = "Network|Session")
-    void JoinSession(APlayerController* RequestingPlayer, const FOnlineSessionSearchResult& SearchResultToJoin);
+    void GSJoinSession(APlayerController* RequestingPlayer, const FOnlineSessionSearchResult& SearchResultToJoin);
 
 protected:
     IOnlineSessionPtr SessionInterface;
@@ -67,6 +67,22 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Network|Session Settings")
     int32 DefaultMaxLobbyPlayers;
 
+    // 스팀 오버레이 초대
+protected:
+    FString PendingConnectStringFromCmd;
+public:
+    FString GetAndClearPendingConnectString();
+
+protected:
+    FOnDestroySessionCompleteDelegate DestroySessionCompleteDelegateForInvite;
+    FDelegateHandle DestroySessionCompleteDelegateForInviteHandle;
+
+    TWeakObjectPtr<APlayerController> PlayerJoiningFromInvite;
+    FOnlineSessionSearchResult InviteSessionToJoinAfterDestroy;
+
+    void LeaveCurrentSessionAndJoin(APlayerController* RequestingPlayer, const FOnlineSessionSearchResult& SearchResultToJoin);
+    virtual void OnDestroySessionCompleteForInvite(FName SessionName, bool bWasSuccessful);
+
 //    //초대
 //public:
 //    UFUNCTION(BlueprintCallable, Category = "Network|Friends")
@@ -84,8 +100,8 @@ protected:
 //    FDelegateHandle ReadFriendsCompleteDelegateHandle;
 //    virtual void OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
 //
-//    FOnSessionUserInviteAcceptedDelegate OnSessionUserInviteAcceptedDelegate;
-//    FDelegateHandle OnSessionUserInviteAcceptedDelegateHandle;
-//    virtual void OnSessionUserInviteAccepted_Impl(const bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
+    FOnSessionUserInviteAcceptedDelegate OnSessionUserInviteAcceptedDelegate;
+    FDelegateHandle OnSessionUserInviteAcceptedDelegateHandle;
+    virtual void OnSessionUserInviteAccepted_Impl(const bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
 
 };

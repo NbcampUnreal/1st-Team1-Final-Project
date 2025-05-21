@@ -7,6 +7,11 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Kismet/GameplayStatics.h"
+#include "Interfaces/OnlinePresenceInterface.h"
+#include "Interfaces/OnlineIdentityInterface.h"
+#include "Engine/NetConnection.h"
+#include "OnlineSubsystem.h"
+
 
 AGS_CustomLobbyPC::AGS_CustomLobbyPC()
 	: CachedPlayerState(nullptr)
@@ -31,13 +36,17 @@ void AGS_CustomLobbyPC::OnRep_PlayerState()
 
 	if (IsLocalController() && PlayerState && !bHasInitializedUI)
 	{
-		// UI 생성 및 표시
 		ShowCustomLobbyUI();
-
-		// PlayerState의 델리게이트에 바인딩 시도
 		TryBindToPlayerStateDelegates();
 
 		bHasInitializedUI = true;
+
+		if (!bHasSetInitialRichPresence)
+		{
+			UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: PlayerState replicated. Setting initial Rich Presence."));
+			UpdateRichPresenceForServerInvite();
+			bHasSetInitialRichPresence = true;
+		}
 	}
 	else if (IsLocalController() && PlayerState && bHasInitializedUI)
 	{
@@ -68,6 +77,128 @@ void AGS_CustomLobbyPC::TryBindToPlayerStateDelegates()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("AGS_CustomLobbyPC::TryBindToPlayerStateDelegates - Cast to AGS_PlayerState FAILED for PC %s."), *GetNameSafe(this));
+	}
+}
+
+void AGS_CustomLobbyPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (IsLocalController())
+	{
+		ClearRichPresenceForServerInvite();
+	}
+	Super::EndPlay(EndPlayReason);
+}
+
+void AGS_CustomLobbyPC::UpdateRichPresenceForServerInvite()
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	UNetConnection* ServerConnection = GetNetConnection(); //서버의 IP와 Port가 같이 딸려옴
+
+	if (ServerConnection && !ServerConnection->URL.Host.IsEmpty() && ServerConnection->URL.Port > 0)
+	{
+		FString ServerIP = ServerConnection->URL.Host;
+		int32 ServerPort = ServerConnection->URL.Port;
+
+		UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: Updating Rich Presence for server invite. Server IP: %s, Port: %d"), *ServerIP, ServerPort);
+
+		IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+		if (OnlineSub)
+		{
+			IOnlinePresencePtr PresenceInterface = OnlineSub->GetPresenceInterface();
+			IOnlineIdentityPtr IdentityInterface = OnlineSub->GetIdentityInterface();
+
+			if (PresenceInterface.IsValid() && IdentityInterface.IsValid())
+			{
+				TSharedPtr<const FUniqueNetId> UserId = IdentityInterface->GetUniquePlayerId(0);
+				if (UserId.IsValid())
+				{
+					FOnlineUserPresenceStatus PresenceStatusData;
+					PresenceStatusData.State = EOnlinePresenceState::Online;
+					PresenceStatusData.StatusStr = FString(TEXT("GridGames_Alpha"));
+
+					// "connect" 명령을 위한 Rich Presence 속성 추가
+					FString ConnectCmd = FString::Printf(TEXT("+connect %s:%d"), *ServerIP, ServerPort);
+					PresenceStatusData.Properties.Add(TEXT("connect"), FVariantData(ConnectCmd));
+
+					UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: Setting Rich Presence for user %s with connect string: %s"), *UserId->ToString(), *ConnectCmd);
+
+					PresenceInterface->SetPresence(
+						*UserId,
+						PresenceStatusData,
+						IOnlinePresence::FOnPresenceTaskCompleteDelegate::CreateLambda(
+							[](const FUniqueNetId& InUserId, const bool bSuccess)
+							{
+								UE_LOG(LogTemp, Log, TEXT("%s Rich Presence %s"),
+									*InUserId.ToString(),
+									bSuccess ? TEXT("OK") : TEXT("FAILED"));
+							}
+						)
+					);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyPC: Cannot get UniquePlayerId for Rich Presence."));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyPC: Online Presence or Identity interface is not valid."));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyPC: OnlineSubsystem not found."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyPC: Not connected to a server or connection details are invalid. Cannot set Rich Presence for invite."));
+		if (ServerConnection)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyPC: ServerConnection URL Host: '%s', Port: %d"), *ServerConnection->URL.Host, ServerConnection->URL.Port);
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyPC: ServerConnection is NULL."));
+		}
+	}
+}
+
+void AGS_CustomLobbyPC::ClearRichPresenceForServerInvite()
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: Clearing Rich Presence for server invite."));
+
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub)
+	{
+		IOnlinePresencePtr PresenceInterface = OnlineSub->GetPresenceInterface();
+		IOnlineIdentityPtr IdentityInterface = OnlineSub->GetIdentityInterface();
+
+		if (PresenceInterface.IsValid() && IdentityInterface.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> UserId = IdentityInterface->GetUniquePlayerId(0);
+			if (UserId.IsValid())
+			{
+				FOnlineUserPresenceStatus PresenceStatusData;
+				PresenceStatusData.State = EOnlinePresenceState::Online;
+				PresenceStatusData.StatusStr = TEXT("온라인");      // 기본 메시지
+				// connect 키를 **넣지 않으면** 기존 connect 값이 사라짐
+
+				PresenceInterface->SetPresence(*UserId, PresenceStatusData);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Cannot get UniquePlayerId."));
+			}
+		}
 	}
 }
 

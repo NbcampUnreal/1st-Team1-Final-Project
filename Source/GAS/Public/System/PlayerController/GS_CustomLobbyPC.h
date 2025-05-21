@@ -22,15 +22,16 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	//virtual void SetupInputComponent() override; // Å°º¸µå ±â´É. ³ªÁß¿¡ esc ³ÖÀ»¶§ ÁÖ¼® ÇØÁ¦
+	//virtual void SetupInputComponent() override; // í‚¤ë³´ë“œ ê¸°ëŠ¥. ë‚˜ì¤‘ì— esc ë„£ì„ë•Œ ì£¼ì„ í•´ì œ
 	virtual void OnRep_PlayerState() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY()
 	AGS_PlayerState* CachedPlayerState;
 
 	AGS_PlayerState* GetCachedPlayerState();
 	
-	//ui °ü·Ã
+	//ui ê´€ë ¨
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> JobSelectionWidgetClass;
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -67,6 +68,12 @@ public:
 	void Client_UpdateReadyButtonUI(bool bIsReady);
 
 
+	// ì˜¤ë²„ë ˆì´ ì´ˆëŒ€
+private:
+	void UpdateRichPresenceForServerInvite();
+	void ClearRichPresenceForServerInvite();
+
+	bool bHasSetInitialRichPresence = false;
 
 public:
 	//addtoviewport
