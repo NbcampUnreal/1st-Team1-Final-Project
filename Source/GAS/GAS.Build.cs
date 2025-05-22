@@ -23,7 +23,9 @@ public class GAS : ModuleRules
 			"OnlineSubsystem",
 			"OnlineSubsystemUtils",
 			"OnlineSubsystemSteam",
-			"AkAudio"
+			"AkAudio",
+            "Niagara",
+            "PhysicsCore"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

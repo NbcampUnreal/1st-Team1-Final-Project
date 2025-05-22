@@ -44,7 +44,7 @@
 							<Custom>
 								<Attenuation Name="Attenuation (Custom)" ID="{E98A9B7D-3AF3-4F57-BFBF-2C8BE459C0AD}" ShortID="562164368">
 									<PropertyList>
-										<Property Name="RadiusMax" Type="Real64" Value="600"/>
+										<Property Name="RadiusMax" Type="Real64" Value="800"/>
 									</PropertyList>
 									<CurveUsageInfoList>
 										<VolumeDryUsage>
@@ -61,7 +61,7 @@
 															<SegmentShape>Log3</SegmentShape>
 														</Point>
 														<Point>
-															<XPos>600</XPos>
+															<XPos>800</XPos>
 															<YPos>-200</YPos>
 															<Flags>37</Flags>
 														</Point>
@@ -1028,7 +1028,7 @@
 								</Property>
 								<Property Name="Volume" Type="Real64">
 									<ValueList>
-										<Value>-7</Value>
+										<Value>-8</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
@@ -2272,7 +2272,7 @@
 						<Property Name="SpeakerPanning" Type="int16" Value="1"/>
 						<Property Name="Volume" Type="Real64">
 							<ValueList>
-								<Value>-5</Value>
+								<Value>-6</Value>
 							</ValueList>
 						</Property>
 					</PropertyList>
@@ -2394,10 +2394,30 @@
 				<Sound Name="SFX_Fire_Extinguish" ID="{11A74A67-676A-442A-9E86-ED45D354EA37}" ShortID="912654211">
 					<PropertyList>
 						<Property Name="3DSpatialization" Type="int16" Value="2"/>
+						<Property Name="Highpass" Type="int16">
+							<ValueList>
+								<Value>5</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Lowpass" Type="int16">
+							<ValueList>
+								<Value>5</Value>
+							</ValueList>
+						</Property>
 						<Property Name="Volume" Type="Real64">
 							<ValueList>
-								<Value>-5</Value>
+								<Value>-8</Value>
 							</ValueList>
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{2DC8009B-ACF5-49D7-A4DC-8C8FA2E8A5D5}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Min" Type="Real64" Value="-2"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
 						</Property>
 					</PropertyList>
 					<ReferenceList>
@@ -6685,578 +6705,6 @@
 				</Folder>
 				<Folder Name="Monster" ID="{2F460FB0-3AEB-459B-B84B-E74A4F20ED9D}" ShortID="853611708">
 					<ChildrenList>
-						<RandomSequenceContainer Name="SFX_Mon_SmallClaw_UI" ID="{9F91CF19-E3D0-44E4-AB7B-AA5DE1A9EA71}" ShortID="67404698">
-							<PropertyList>
-								<Property Name="EnableAttenuation" Type="bool" Value="False"/>
-								<Property Name="Highpass" Type="int16">
-									<ValueList>
-										<Value>5</Value>
-									</ValueList>
-								</Property>
-								<Property Name="InitialDelay" Type="Real64">
-									<ModifierList>
-										<ModifierInfo>
-											<Modifier Name="" ID="{C7A9DFB2-E551-4EEB-B951-68658B68FF2F}"/>
-										</ModifierInfo>
-									</ModifierList>
-								</Property>
-								<Property Name="IsGlobalLimit" Type="int16" Value="1"/>
-								<Property Name="ListenerRelativeRouting" Type="bool" Value="False"/>
-								<Property Name="Lowpass" Type="int16">
-									<ValueList>
-										<Value>5</Value>
-									</ValueList>
-								</Property>
-								<Property Name="MaxSoundPerInstance" Type="int16">
-									<ValueList>
-										<Value>1</Value>
-									</ValueList>
-								</Property>
-								<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
-								<Property Name="Pitch" Type="int32">
-									<ModifierList>
-										<ModifierInfo>
-											<Modifier Name="" ID="{50211666-51A4-46F5-B734-219B85D0A75C}">
-												<PropertyList>
-													<Property Name="Enabled" Type="bool" Value="True"/>
-													<Property Name="Max" Type="Real64" Value="10"/>
-													<Property Name="Min" Type="Real64" Value="-10"/>
-												</PropertyList>
-											</Modifier>
-										</ModifierInfo>
-									</ModifierList>
-								</Property>
-								<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
-								<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
-								<Property Name="RandomOrSequence" Type="int16" Value="0"/>
-								<Property Name="UseMaxSoundPerInstance" Type="bool">
-									<ValueList>
-										<Value>True</Value>
-									</ValueList>
-								</Property>
-								<Property Name="Volume" Type="Real64">
-									<ValueList>
-										<Value>-3</Value>
-									</ValueList>
-									<ModifierList>
-										<ModifierInfo>
-											<Modifier Name="" ID="{724C000F-8AB0-4384-AD7E-A8E8B088BCD1}">
-												<PropertyList>
-													<Property Name="Enabled" Type="bool" Value="True"/>
-													<Property Name="Min" Type="Real64" Value="-2"/>
-												</PropertyList>
-											</Modifier>
-										</ModifierInfo>
-									</ModifierList>
-								</Property>
-							</PropertyList>
-							<ReferenceList>
-								<Reference Name="Attenuation">
-									<Custom>
-										<Attenuation Name="Attenuation (Custom)" ID="{49598013-44D6-4EAD-A1AB-F0A1E6550F77}" ShortID="999456319">
-											<PropertyList>
-												<Property Name="RadiusMax" Type="Real64" Value="800"/>
-											</PropertyList>
-											<CurveUsageInfoList>
-												<VolumeDryUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
-														<Curve Name="VolumeDry" ID="{3DEFC95A-4044-408F-995A-B0985BA24B28}">
-															<PropertyList>
-																<Property Name="Flags" Type="int32" Value="3"/>
-															</PropertyList>
-															<PointList>
-																<Point>
-																	<XPos>0</XPos>
-																	<YPos>0</YPos>
-																	<Flags>5</Flags>
-																</Point>
-																<Point>
-																	<XPos>504.75138</XPos>
-																	<YPos>-2.53083</YPos>
-																	<Flags>0</Flags>
-																</Point>
-																<Point>
-																	<XPos>800</XPos>
-																	<YPos>-200</YPos>
-																	<Flags>37</Flags>
-																</Point>
-															</PointList>
-														</Curve>
-													</CurveUsageInfo>
-												</VolumeDryUsage>
-												<VolumeWetGameUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseVolumeDry"/>
-												</VolumeWetGameUsage>
-												<VolumeWetUserUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseVolumeDry"/>
-												</VolumeWetUserUsage>
-												<LowPassFilterUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
-												</LowPassFilterUsage>
-												<HighPassFilterUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
-												</HighPassFilterUsage>
-												<SpreadUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
-												</SpreadUsage>
-												<FocusUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
-												</FocusUsage>
-												<ObstructionVolumeUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</ObstructionVolumeUsage>
-												<ObstructionLPFUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</ObstructionLPFUsage>
-												<ObstructionHPFUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</ObstructionHPFUsage>
-												<OcclusionVolumeUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</OcclusionVolumeUsage>
-												<OcclusionLPFUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</OcclusionLPFUsage>
-												<OcclusionHPFUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</OcclusionHPFUsage>
-												<DiffractionVolumeUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</DiffractionVolumeUsage>
-												<DiffractionLPFUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</DiffractionLPFUsage>
-												<DiffractionHPFUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</DiffractionHPFUsage>
-												<TransmissionVolumeUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</TransmissionVolumeUsage>
-												<TransmissionLPFUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</TransmissionLPFUsage>
-												<TransmissionHPFUsage>
-													<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
-												</TransmissionHPFUsage>
-											</CurveUsageInfoList>
-										</Attenuation>
-									</Custom>
-								</Reference>
-								<Reference Name="Conversion">
-									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-								</Reference>
-								<Reference Name="OutputBus">
-									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-								</Reference>
-							</ReferenceList>
-							<ChildrenList>
-								<Sound Name="SFX_SmallClaw_Idle0" ID="{18953F4E-8749-4112-BBE4-A21BB63635F9}" ShortID="928080241">
-									<PropertyList>
-										<Property Name="Highpass" Type="int16">
-											<ValueList>
-												<Value>14</Value>
-											</ValueList>
-										</Property>
-										<Property Name="InitialDelay" Type="Real64">
-											<ModifierList>
-												<ModifierInfo>
-													<Modifier Name="" ID="{49588338-9B44-4E26-ADF8-BC2F0D4F7716}">
-														<PropertyList>
-															<Property Name="Max" Type="Real64" Value="5"/>
-														</PropertyList>
-													</Modifier>
-												</ModifierInfo>
-											</ModifierList>
-										</Property>
-										<Property Name="Lowpass" Type="int16">
-											<ValueList>
-												<Value>11</Value>
-											</ValueList>
-										</Property>
-										<Property Name="MakeUpGain" Type="Real64">
-											<ValueList>
-												<Value>1</Value>
-											</ValueList>
-										</Property>
-										<Property Name="Pitch" Type="int32">
-											<ValueList>
-												<Value>300</Value>
-											</ValueList>
-											<ModifierList>
-												<ModifierInfo>
-													<Modifier Name="" ID="{5DCE854D-2304-47B5-949B-CF92610575CC}">
-														<PropertyList>
-															<Property Name="Enabled" Type="bool" Value="True"/>
-															<Property Name="Max" Type="Real64" Value="10"/>
-															<Property Name="Min" Type="Real64" Value="-10"/>
-														</PropertyList>
-													</Modifier>
-												</ModifierInfo>
-											</ModifierList>
-										</Property>
-										<Property Name="Volume" Type="Real64">
-											<ValueList>
-												<Value>3</Value>
-											</ValueList>
-											<ModifierList>
-												<ModifierInfo>
-													<Modifier Name="" ID="{DF199B7B-8170-418C-B2D8-B8C0B370AD9A}">
-														<PropertyList>
-															<Property Name="Enabled" Type="bool" Value="True"/>
-															<Property Name="Min" Type="Real64" Value="-5"/>
-														</PropertyList>
-													</Modifier>
-												</ModifierInfo>
-											</ModifierList>
-										</Property>
-									</PropertyList>
-									<ReferenceList>
-										<Reference Name="Conversion">
-											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-										</Reference>
-										<Reference Name="OutputBus">
-											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-										</Reference>
-									</ReferenceList>
-									<ChildrenList>
-										<AudioFileSource Name="ESM_Dragon_Vocal_Fight_Painful_Growl_Monster_Creature_Voice" ID="{0C6C1531-55B5-4236-A21F-CC56850A10AE}">
-											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.0150375829582595"/>
-												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimBegin" Type="Real64" Value="0.13867993172617"/>
-											</PropertyList>
-											<Language>SFX</Language>
-											<AudioFile>ESM_Dragon_Vocal_Fight_Painful_Growl_Monster_Creature_Voice.wav</AudioFile>
-											<MediaIDList>
-												<MediaID ID="45190972"/>
-											</MediaIDList>
-										</AudioFileSource>
-									</ChildrenList>
-									<ActiveSourceList>
-										<ActiveSource Name="ESM_Dragon_Vocal_Fight_Painful_Growl_Monster_Creature_Voice" ID="{0C6C1531-55B5-4236-A21F-CC56850A10AE}" Platform="Linked"/>
-									</ActiveSourceList>
-								</Sound>
-								<Sound Name="SFX_SmallClaw_Idle1" ID="{D7E15CCB-D41E-461C-A58F-B18B1BB64047}" ShortID="447238219">
-									<PropertyList>
-										<Property Name="InitialDelay" Type="Real64">
-											<ModifierList>
-												<ModifierInfo>
-													<Modifier Name="" ID="{0903D74E-D5C4-4793-9CCF-6A8EDF415D32}">
-														<PropertyList>
-															<Property Name="Max" Type="Real64" Value="5"/>
-														</PropertyList>
-													</Modifier>
-												</ModifierInfo>
-											</ModifierList>
-										</Property>
-										<Property Name="Pitch" Type="int32">
-											<ModifierList>
-												<ModifierInfo>
-													<Modifier Name="" ID="{2F11ED3B-C964-426C-829F-361CB697B8CD}">
-														<PropertyList>
-															<Property Name="Enabled" Type="bool" Value="True"/>
-															<Property Name="Min" Type="Real64" Value="-100"/>
-														</PropertyList>
-													</Modifier>
-												</ModifierInfo>
-											</ModifierList>
-										</Property>
-										<Property Name="Volume" Type="Real64">
-											<ValueList>
-												<Value>5</Value>
-											</ValueList>
-											<ModifierList>
-												<ModifierInfo>
-													<Modifier Name="" ID="{F0B7E709-7869-4CFC-AE1E-2DB5BC266C2F}">
-														<PropertyList>
-															<Property Name="Enabled" Type="bool" Value="True"/>
-															<Property Name="Min" Type="Real64" Value="-5"/>
-														</PropertyList>
-													</Modifier>
-												</ModifierInfo>
-											</ModifierList>
-										</Property>
-									</PropertyList>
-									<ReferenceList>
-										<Reference Name="Conversion">
-											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-										</Reference>
-										<Reference Name="OutputBus">
-											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-										</Reference>
-									</ReferenceList>
-									<ChildrenList>
-										<AudioFileSource Name="ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy" ID="{0E65EE71-713C-4665-9F96-8B2067A207C7}">
-											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.0594130683182878"/>
-												<Property Name="FadeOutDuration" Type="Real64" Value="0.129069769105246"/>
-												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-											</PropertyList>
-											<Language>SFX</Language>
-											<AudioFile>ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy.wav</AudioFile>
-											<MediaIDList>
-												<MediaID ID="223150580"/>
-											</MediaIDList>
-										</AudioFileSource>
-									</ChildrenList>
-									<ActiveSourceList>
-										<ActiveSource Name="ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy" ID="{0E65EE71-713C-4665-9F96-8B2067A207C7}" Platform="Linked"/>
-									</ActiveSourceList>
-								</Sound>
-								<Sound Name="MonsterSnarlGrowl0" ID="{4B3F62E4-4D03-46D8-B70F-0D3ED0710E45}" ShortID="166602650">
-									<PropertyList>
-										<Property Name="Highpass" Type="int16">
-											<ValueList>
-												<Value>17</Value>
-											</ValueList>
-										</Property>
-										<Property Name="InitialDelay" Type="Real64">
-											<ModifierList>
-												<ModifierInfo>
-													<Modifier Name="" ID="{36AE76CD-E99D-406E-977F-BA9093367B4D}">
-														<PropertyList>
-															<Property Name="Max" Type="Real64" Value="5"/>
-														</PropertyList>
-													</Modifier>
-												</ModifierInfo>
-											</ModifierList>
-										</Property>
-										<Property Name="Lowpass" Type="int16">
-											<ValueList>
-												<Value>13</Value>
-											</ValueList>
-										</Property>
-										<Property Name="Pitch" Type="int32">
-											<ValueList>
-												<Value>100</Value>
-											</ValueList>
-										</Property>
-										<Property Name="Volume" Type="Real64">
-											<ValueList>
-												<Value>-5</Value>
-											</ValueList>
-										</Property>
-									</PropertyList>
-									<ReferenceList>
-										<Reference Name="Conversion">
-											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-										</Reference>
-										<Reference Name="OutputBus">
-											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-										</Reference>
-									</ReferenceList>
-									<ChildrenList>
-										<AudioFileSource Name="MonsterSnarlGrowl_S08AN_267" ID="{9FB7CF91-E9FA-4D92-81CB-BD351A349305}">
-											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.0803484686981404"/>
-												<Property Name="FadeOutDuration" Type="Real64" Value="0.158582504009488"/>
-												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-											</PropertyList>
-											<Language>SFX</Language>
-											<AudioFile>MonsterSnarlGrowl_S08AN.267.wav</AudioFile>
-											<MediaIDList>
-												<MediaID ID="958130278"/>
-											</MediaIDList>
-										</AudioFileSource>
-									</ChildrenList>
-									<ActiveSourceList>
-										<ActiveSource Name="MonsterSnarlGrowl_S08AN_267" ID="{9FB7CF91-E9FA-4D92-81CB-BD351A349305}" Platform="Linked"/>
-									</ActiveSourceList>
-								</Sound>
-								<Sound Name="MonsterSnarlGrowl2" ID="{F9B00B52-4D71-46B8-BA46-0798DDCDEF61}" ShortID="538464073">
-									<PropertyList>
-										<Property Name="Highpass" Type="int16">
-											<ValueList>
-												<Value>30</Value>
-											</ValueList>
-										</Property>
-										<Property Name="InitialDelay" Type="Real64">
-											<ModifierList>
-												<ModifierInfo>
-													<Modifier Name="" ID="{7A97E4CD-3D39-46BB-BE79-1908E2D22659}">
-														<PropertyList>
-															<Property Name="Max" Type="Real64" Value="5"/>
-														</PropertyList>
-													</Modifier>
-												</ModifierInfo>
-											</ModifierList>
-										</Property>
-										<Property Name="Lowpass" Type="int16">
-											<ValueList>
-												<Value>20</Value>
-											</ValueList>
-										</Property>
-										<Property Name="Pitch" Type="int32">
-											<ValueList>
-												<Value>650</Value>
-											</ValueList>
-										</Property>
-										<Property Name="Volume" Type="Real64">
-											<ValueList>
-												<Value>-2</Value>
-											</ValueList>
-										</Property>
-									</PropertyList>
-									<ReferenceList>
-										<Reference Name="Conversion">
-											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-										</Reference>
-										<Reference Name="OutputBus">
-											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-										</Reference>
-									</ReferenceList>
-									<ChildrenList>
-										<AudioFileSource Name="MonsterSnarlGrowl_S08AN_269" ID="{E75A84DA-2890-40A6-BA35-17F2B4A9188E}">
-											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.142062752745872"/>
-												<Property Name="FadeOutDuration" Type="Real64" Value="0.12934071518654"/>
-												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-											</PropertyList>
-											<Language>SFX</Language>
-											<AudioFile>MonsterSnarlGrowl_S08AN.269.wav</AudioFile>
-											<MediaIDList>
-												<MediaID ID="1030029664"/>
-											</MediaIDList>
-										</AudioFileSource>
-									</ChildrenList>
-									<ActiveSourceList>
-										<ActiveSource Name="MonsterSnarlGrowl_S08AN_269" ID="{E75A84DA-2890-40A6-BA35-17F2B4A9188E}" Platform="Linked"/>
-									</ActiveSourceList>
-								</Sound>
-								<Sound Name="MonsterSnarlGrowl1" ID="{D2A03947-A822-4ABA-9378-492EAE69E80E}" ShortID="727609861">
-									<PropertyList>
-										<Property Name="Highpass" Type="int16">
-											<ValueList>
-												<Value>25</Value>
-											</ValueList>
-										</Property>
-										<Property Name="InitialDelay" Type="Real64">
-											<ModifierList>
-												<ModifierInfo>
-													<Modifier Name="" ID="{D7D48C7E-F327-48B5-B8EC-DD37107354F9}">
-														<PropertyList>
-															<Property Name="Max" Type="Real64" Value="5"/>
-														</PropertyList>
-													</Modifier>
-												</ModifierInfo>
-											</ModifierList>
-										</Property>
-										<Property Name="Lowpass" Type="int16">
-											<ValueList>
-												<Value>20</Value>
-											</ValueList>
-										</Property>
-										<Property Name="Pitch" Type="int32">
-											<ValueList>
-												<Value>300</Value>
-											</ValueList>
-										</Property>
-										<Property Name="Volume" Type="Real64">
-											<ValueList>
-												<Value>-5</Value>
-											</ValueList>
-											<ModifierList>
-												<ModifierInfo>
-													<Modifier Name="" ID="{0CE06A50-CFF1-4E27-B96D-B6D918BBC1E8}">
-														<PropertyList>
-															<Property Name="Enabled" Type="bool" Value="True"/>
-															<Property Name="Min" Type="Real64" Value="-5"/>
-														</PropertyList>
-													</Modifier>
-												</ModifierInfo>
-											</ModifierList>
-										</Property>
-									</PropertyList>
-									<ReferenceList>
-										<Reference Name="Conversion">
-											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-										</Reference>
-										<Reference Name="OutputBus">
-											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-										</Reference>
-									</ReferenceList>
-									<ChildrenList>
-										<AudioFileSource Name="MonsterSnarlGrowl_S08AN_268" ID="{D3AD9134-7B9F-4B8B-8EC8-66096BDB5072}">
-											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.0221383642850432"/>
-												<Property Name="LoopBegin" Type="Real64" Value="0"/>
-												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-											</PropertyList>
-											<Language>SFX</Language>
-											<AudioFile>MonsterSnarlGrowl_S08AN.268.wav</AudioFile>
-											<MediaIDList>
-												<MediaID ID="223413545"/>
-											</MediaIDList>
-										</AudioFileSource>
-									</ChildrenList>
-									<ActiveSourceList>
-										<ActiveSource Name="MonsterSnarlGrowl_S08AN_268" ID="{D3AD9134-7B9F-4B8B-8EC8-66096BDB5072}" Platform="Linked"/>
-									</ActiveSourceList>
-								</Sound>
-							</ChildrenList>
-							<ObjectLists>
-								<ObjectList Name="Effects">
-									<Reference>
-										<Local>
-											<EffectSlot Name="" ID="{FBAB6801-A1B6-4DAF-B4BA-7B4D44708EE8}" ShortID="473084994">
-												<ReferenceList>
-													<Reference Name="Effect" PluginName="Wwise Compressor" CompanyID="0" PluginID="108" PluginType="3">
-														<ObjectRef Name="Dialog_Leveler_Soft" ID="{9C1D0FCF-896E-4739-A8E8-B1E908F51CE6}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
-													</Reference>
-												</ReferenceList>
-											</EffectSlot>
-										</Local>
-									</Reference>
-									<Reference>
-										<Local>
-											<EffectSlot Name="" ID="{BA9E07BD-72E8-4059-B7F7-8FE933869F56}" ShortID="201578516">
-												<ReferenceList>
-													<Reference Name="Effect" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
-														<ObjectRef Name="Few_Odd_Harm_Notches" ID="{3B5685A6-6274-4292-B5B9-32AFE28DB80B}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
-													</Reference>
-												</ReferenceList>
-											</EffectSlot>
-										</Local>
-									</Reference>
-									<Reference>
-										<Local>
-											<EffectSlot Name="" ID="{DA4E4E77-EBB1-41F8-ABEC-9A311480935B}" ShortID="884622882">
-												<ReferenceList>
-													<Reference Name="Effect">
-														<Custom>
-															<Effect Name="Pitch Shifter (Custom)" ID="{2D24BA7A-966C-40EC-9B78-EF6A0C544C7A}" ShortID="133365297" PluginName="Wwise Pitch Shifter" CompanyID="0" PluginID="136" PluginType="3">
-																<PropertyList>
-																	<Property Name="FilterFrequency" Type="Real32" Value="100"/>
-																	<Property Name="FilterType" Type="int32" Value="5"/>
-																	<Property Name="Pitch" Type="Real32" Value="200"/>
-																</PropertyList>
-															</Effect>
-														</Custom>
-													</Reference>
-												</ReferenceList>
-											</EffectSlot>
-										</Local>
-									</Reference>
-								</ObjectList>
-								<ObjectList Name="Playlist">
-									<Reference>
-										<ObjectRef Name="MonsterSnarlGrowl0" ID="{4B3F62E4-4D03-46D8-B70F-0D3ED0710E45}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-									</Reference>
-									<Reference>
-										<ObjectRef Name="MonsterSnarlGrowl1" ID="{D2A03947-A822-4ABA-9378-492EAE69E80E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-									</Reference>
-									<Reference>
-										<ObjectRef Name="MonsterSnarlGrowl2" ID="{F9B00B52-4D71-46B8-BA46-0798DDCDEF61}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-									</Reference>
-									<Reference>
-										<ObjectRef Name="SFX_SmallClaw_Idle0" ID="{18953F4E-8749-4112-BBE4-A21BB63635F9}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-									</Reference>
-									<Reference>
-										<ObjectRef Name="SFX_SmallClaw_Idle1" ID="{D7E15CCB-D41E-461C-A58F-B18B1BB64047}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-									</Reference>
-								</ObjectList>
-							</ObjectLists>
-						</RandomSequenceContainer>
 						<RandomSequenceContainer Name="SFX_Mon_SmallClaw" ID="{E6C158E7-FEA7-42E8-A880-09B5C3262710}" ShortID="291590783">
 							<PropertyList>
 								<Property Name="3DSpatialization" Type="int16" Value="2"/>
@@ -7846,6 +7294,1397 @@
 								</ObjectList>
 							</ObjectLists>
 						</RandomSequenceContainer>
+						<SwitchContainer Name="RTS_Monster" ID="{374F33B7-CC1F-425C-9FE7-5D4D526F2165}" ShortID="683822960">
+							<PropertyList>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MaxSoundPerInstance" Type="int16">
+									<ValueList>
+										<Value>1</Value>
+									</ValueList>
+								</Property>
+								<Property Name="UseMaxSoundPerInstance" Type="bool">
+									<ValueList>
+										<Value>True</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<RandomSequenceContainer Name="SFX_Mon_SmallClaw_UI" ID="{9F91CF19-E3D0-44E4-AB7B-AA5DE1A9EA71}" ShortID="67404698">
+									<PropertyList>
+										<Property Name="EnableAttenuation" Type="bool" Value="False"/>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="InitialDelay" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{C7A9DFB2-E551-4EEB-B951-68658B68FF2F}"/>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="MaxSoundPerInstance" Type="int16">
+											<ValueList>
+												<Value>1</Value>
+											</ValueList>
+										</Property>
+										<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+										<Property Name="OverLimitBehavior" Type="int16" Value="1"/>
+										<Property Name="Pitch" Type="int32">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{50211666-51A4-46F5-B734-219B85D0A75C}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="10"/>
+															<Property Name="Min" Type="Real64" Value="-10"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="UseMaxSoundPerInstance" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-5</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{724C000F-8AB0-4384-AD7E-A8E8B088BCD1}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-2"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="SFX_SmallClaw_Idle0" ID="{18953F4E-8749-4112-BBE4-A21BB63635F9}" ShortID="928080241">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>14</Value>
+													</ValueList>
+												</Property>
+												<Property Name="InitialDelay" Type="Real64">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{49588338-9B44-4E26-ADF8-BC2F0D4F7716}">
+																<PropertyList>
+																	<Property Name="Max" Type="Real64" Value="5"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>11</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>1</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>300</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{5DCE854D-2304-47B5-949B-CF92610575CC}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="10"/>
+																	<Property Name="Min" Type="Real64" Value="-10"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>3</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{DF199B7B-8170-418C-B2D8-B8C0B370AD9A}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-5"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Dragon_Vocal_Fight_Painful_Growl_Monster_Creature_Voice" ID="{0C6C1531-55B5-4236-A21F-CC56850A10AE}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0150375829582595"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.13867993172617"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Dragon_Vocal_Fight_Painful_Growl_Monster_Creature_Voice.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="45190972"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Dragon_Vocal_Fight_Painful_Growl_Monster_Creature_Voice" ID="{0C6C1531-55B5-4236-A21F-CC56850A10AE}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="SFX_SmallClaw_Idle1" ID="{D7E15CCB-D41E-461C-A58F-B18B1BB64047}" ShortID="447238219">
+											<PropertyList>
+												<Property Name="InitialDelay" Type="Real64">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{0903D74E-D5C4-4793-9CCF-6A8EDF415D32}">
+																<PropertyList>
+																	<Property Name="Max" Type="Real64" Value="5"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{2F11ED3B-C964-426C-829F-361CB697B8CD}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-100"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{F0B7E709-7869-4CFC-AE1E-2DB5BC266C2F}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-5"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy" ID="{0E65EE71-713C-4665-9F96-8B2067A207C7}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0594130683182878"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.129069769105246"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="223150580"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy" ID="{0E65EE71-713C-4665-9F96-8B2067A207C7}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="MonsterSnarlGrowl0" ID="{4B3F62E4-4D03-46D8-B70F-0D3ED0710E45}" ShortID="166602650">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>17</Value>
+													</ValueList>
+												</Property>
+												<Property Name="InitialDelay" Type="Real64">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{36AE76CD-E99D-406E-977F-BA9093367B4D}">
+																<PropertyList>
+																	<Property Name="Max" Type="Real64" Value="5"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>13</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>100</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-5</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="MonsterSnarlGrowl_S08AN_267" ID="{9FB7CF91-E9FA-4D92-81CB-BD351A349305}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0803484686981404"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.158582504009488"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>MonsterSnarlGrowl_S08AN.267.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="958130278"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="MonsterSnarlGrowl_S08AN_267" ID="{9FB7CF91-E9FA-4D92-81CB-BD351A349305}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="MonsterSnarlGrowl2" ID="{F9B00B52-4D71-46B8-BA46-0798DDCDEF61}" ShortID="538464073">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>30</Value>
+													</ValueList>
+												</Property>
+												<Property Name="InitialDelay" Type="Real64">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{7A97E4CD-3D39-46BB-BE79-1908E2D22659}">
+																<PropertyList>
+																	<Property Name="Max" Type="Real64" Value="5"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>20</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>650</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-2</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="MonsterSnarlGrowl_S08AN_269" ID="{E75A84DA-2890-40A6-BA35-17F2B4A9188E}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.142062752745872"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.12934071518654"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>MonsterSnarlGrowl_S08AN.269.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="1030029664"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="MonsterSnarlGrowl_S08AN_269" ID="{E75A84DA-2890-40A6-BA35-17F2B4A9188E}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="MonsterSnarlGrowl1" ID="{D2A03947-A822-4ABA-9378-492EAE69E80E}" ShortID="727609861">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>25</Value>
+													</ValueList>
+												</Property>
+												<Property Name="InitialDelay" Type="Real64">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{D7D48C7E-F327-48B5-B8EC-DD37107354F9}">
+																<PropertyList>
+																	<Property Name="Max" Type="Real64" Value="5"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>20</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>300</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-5</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{0CE06A50-CFF1-4E27-B96D-B6D918BBC1E8}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-5"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="MonsterSnarlGrowl_S08AN_268" ID="{D3AD9134-7B9F-4B8B-8EC8-66096BDB5072}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0221383642850432"/>
+														<Property Name="LoopBegin" Type="Real64" Value="0"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>MonsterSnarlGrowl_S08AN.268.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="223413545"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="MonsterSnarlGrowl_S08AN_268" ID="{D3AD9134-7B9F-4B8B-8EC8-66096BDB5072}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+									<ObjectLists>
+										<ObjectList Name="Effects">
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{FBAB6801-A1B6-4DAF-B4BA-7B4D44708EE8}" ShortID="473084994">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Compressor" CompanyID="0" PluginID="108" PluginType="3">
+																<ObjectRef Name="Dialog_Leveler_Soft" ID="{9C1D0FCF-896E-4739-A8E8-B1E908F51CE6}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{BA9E07BD-72E8-4059-B7F7-8FE933869F56}" ShortID="201578516">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
+																<ObjectRef Name="Few_Odd_Harm_Notches" ID="{3B5685A6-6274-4292-B5B9-32AFE28DB80B}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{DA4E4E77-EBB1-41F8-ABEC-9A311480935B}" ShortID="884622882">
+														<ReferenceList>
+															<Reference Name="Effect">
+																<Custom>
+																	<Effect Name="Pitch Shifter (Custom)" ID="{2D24BA7A-966C-40EC-9B78-EF6A0C544C7A}" ShortID="133365297" PluginName="Wwise Pitch Shifter" CompanyID="0" PluginID="136" PluginType="3">
+																		<PropertyList>
+																			<Property Name="FilterFrequency" Type="Real32" Value="100"/>
+																			<Property Name="FilterType" Type="int32" Value="5"/>
+																			<Property Name="Pitch" Type="Real32" Value="200"/>
+																		</PropertyList>
+																	</Effect>
+																</Custom>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+										</ObjectList>
+										<ObjectList Name="Playlist">
+											<Reference>
+												<ObjectRef Name="MonsterSnarlGrowl0" ID="{4B3F62E4-4D03-46D8-B70F-0D3ED0710E45}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+											<Reference>
+												<ObjectRef Name="MonsterSnarlGrowl1" ID="{D2A03947-A822-4ABA-9378-492EAE69E80E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+											<Reference>
+												<ObjectRef Name="MonsterSnarlGrowl2" ID="{F9B00B52-4D71-46B8-BA46-0798DDCDEF61}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+											<Reference>
+												<ObjectRef Name="SFX_SmallClaw_Idle0" ID="{18953F4E-8749-4112-BBE4-A21BB63635F9}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+											<Reference>
+												<ObjectRef Name="SFX_SmallClaw_Idle1" ID="{D7E15CCB-D41E-461C-A58F-B18B1BB64047}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+										</ObjectList>
+									</ObjectLists>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="SFX_Mon_ShadowFang_UI" ID="{7B76D522-CE9F-47C0-BB97-49831B85EC39}" ShortID="515311285">
+									<PropertyList>
+										<Property Name="EnableAttenuation" Type="bool" Value="False"/>
+										<Property Name="InitialDelay" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{E95657D7-2D7D-47C6-8C00-044E4B86676A}"/>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="MakeUpGain" Type="Real64">
+											<ValueList>
+												<Value>1</Value>
+											</ValueList>
+										</Property>
+										<Property Name="MaxSoundPerInstance" Type="int16">
+											<ValueList>
+												<Value>1</Value>
+											</ValueList>
+										</Property>
+										<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+										<Property Name="OverLimitBehavior" Type="int16" Value="1"/>
+										<Property Name="Pitch" Type="int32">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{4A235F0A-A405-407F-8114-813F228861FB}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="10"/>
+															<Property Name="Min" Type="Real64" Value="-10"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="UseMaxSoundPerInstance" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-5</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{F85D50D2-DFC9-4189-B4F9-B135E0441A35}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-2"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="MonsterSnarl" ID="{5B791A2D-3B0C-413A-AB58-90D74924C5DB}" ShortID="955523564">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>20</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>600</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-2</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>70</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="MonsterSnarl_S011HO_324" ID="{A4281BEC-BC1A-4049-9FBC-3FC1A3EDFC98}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0588627478071288"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.272627463527754"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.0154901967913497"/>
+														<Property Name="TrimEnd" Type="Real64" Value="1.8681176166885"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>MonsterSnarl_S011HO.324.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="307021949"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="MonsterSnarl_S011HO_324" ID="{A4281BEC-BC1A-4049-9FBC-3FC1A3EDFC98}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="Undead_Vocal_Jump" ID="{FCF99E75-D6A5-48E9-849A-FC06A9476AB6}" ShortID="477633955">
+											<PropertyList>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>-400</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>70</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Undead_Vocal_Jump_2_Long_Raaa_2" ID="{14D07527-4D89-4685-9268-6409FA34BC37}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0429594841073541"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.0468648917534772"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.186157764465201"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.92818517081644"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Undead_Vocal_Jump_2_Long_Raaa_2.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="548015621"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Undead_Vocal_Jump_2_Long_Raaa_2" ID="{14D07527-4D89-4685-9268-6409FA34BC37}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="Undead_Vocal_Hurt_Throaty_Rah" ID="{DE7442A3-7D5C-4DC7-ABF6-3F30F37CB9E4}" ShortID="108065866">
+											<PropertyList>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>-800</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>70</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Undead_Vocal_Hurt_Throaty_Rah" ID="{20B32207-ECCA-44D3-8D3E-83FC6F3CB70D}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0178915437530069"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.0477107833413517"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.171460627632982"/>
+														<Property Name="TrimEnd" Type="Real64" Value="1.01236320881984"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Undead_Vocal_Hurt_Throaty_Rah.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="810864320"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Undead_Vocal_Hurt_Throaty_Rah" ID="{20B32207-ECCA-44D3-8D3E-83FC6F3CB70D}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="ESM_Undead_Vocal_I_Hunger" ID="{39DB8BE2-6A7A-4396-A32D-48EA3F39D7E4}" ShortID="167864505">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>15</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>-200</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{AB02E1A0-42C1-43C3-A9EE-E64828AE247A}"/>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-2</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{7D1FE52E-F746-45FE-9E56-C3C1B856004F}"/>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>70</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Undead_Vocal_I_Hunger_" ID="{5DA7E45D-AB85-4F75-970C-D769F25329FC}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0392159298062325"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.106113692416864"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.27220468924326"/>
+														<Property Name="TrimEnd" Type="Real64" Value="1.61015989409007"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Undead_Vocal_I_Hunger_.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="696638021"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Undead_Vocal_I_Hunger_" ID="{5DA7E45D-AB85-4F75-970C-D769F25329FC}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="ESM_Undead_Vocal_You_Cannot_Outrun" ID="{286244CE-A861-4D48-921D-F465387A8699}" ShortID="906653175">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>1</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>-300</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>70</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Undead_Vocal_You_Cannot_Outrun_Death" ID="{5FEE44B8-1530-4F43-A804-F39C37786E4A}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0457441292557062"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.140499825571098"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.169906765806908"/>
+														<Property Name="TrimEnd" Type="Real64" Value="1.88531153151568"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Undead_Vocal_You_Cannot_Outrun_Death.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="756368802"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Undead_Vocal_You_Cannot_Outrun_Death" ID="{5FEE44B8-1530-4F43-A804-F39C37786E4A}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+									<ObjectLists>
+										<ObjectList Name="Effects">
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{055B71AA-CC48-462B-B5FA-834D740900B6}" ShortID="86805396">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Compressor" CompanyID="0" PluginID="108" PluginType="3">
+																<ObjectRef Name="Dialog_Leveler_Soft" ID="{9C1D0FCF-896E-4739-A8E8-B1E908F51CE6}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{D4E14D57-FF09-45FC-AC24-E2B03A1368F5}" ShortID="95546706">
+														<ReferenceList>
+															<Reference Name="Effect">
+																<Custom>
+																	<Effect Name="Pitch Shifter (Custom)" ID="{AE5C7F2D-B685-445C-9E15-6BB50915C05D}" ShortID="204105325" PluginName="Wwise Pitch Shifter" CompanyID="0" PluginID="136" PluginType="3">
+																		<PropertyList>
+																			<Property Name="FilterFrequency" Type="Real32" Value="100"/>
+																			<Property Name="FilterType" Type="int32" Value="5"/>
+																			<Property Name="Pitch" Type="Real32" Value="100"/>
+																		</PropertyList>
+																	</Effect>
+																</Custom>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{54FB0FF8-0C41-40C6-A395-276917B12FD5}" ShortID="541913674">
+														<ReferenceList>
+															<Reference Name="Effect">
+																<Custom>
+																	<Effect Name="Time Stretch (Custom)" ID="{02C0AFA9-0983-4966-95AD-85EB4FE85DFD}" ShortID="296962076" PluginName="Wwise Time Stretch" CompanyID="0" PluginID="130" PluginType="3">
+																		<PropertyList>
+																			<Property Name="TimeStretch" Type="Real32" Value="90"/>
+																		</PropertyList>
+																	</Effect>
+																</Custom>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+										</ObjectList>
+									</ObjectLists>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="SFX_Mon_IronFang_UI" ID="{608693E5-55B3-4BF2-A0C9-717B70825A0D}" ShortID="659764567">
+									<PropertyList>
+										<Property Name="EnableAttenuation" Type="bool" Value="False"/>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="InitialDelay" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{A4CA168B-47B2-4D55-AD69-659820DF7321}"/>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="MaxSoundPerInstance" Type="int16">
+											<ValueList>
+												<Value>1</Value>
+											</ValueList>
+										</Property>
+										<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+										<Property Name="OverLimitBehavior" Type="int16" Value="1"/>
+										<Property Name="Pitch" Type="int32">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{AEC08DFE-0971-4F81-96A1-8D743D963BE5}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="10"/>
+															<Property Name="Min" Type="Real64" Value="-10"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="UseMaxSoundPerInstance" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-2</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{6D4AE672-C75F-4B9F-BCFF-2B5D6ECB0336}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-2"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="Undead_Monster_Fat" ID="{8189CE93-240E-491B-A3C5-1A3F6DD5B95C}" ShortID="583621500">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>1</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>150</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{3A371D8B-C1C9-4DDF-8BA8-147E217ED4B3}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-50"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-3</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{01FC75E5-D3DB-4688-833B-3D8189F0B87F}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-2"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>60</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Horror_Game_Vocal_Creature_Bloated_Zombie_Short_Attack_Dry_Mutant_Dead_Undead_Monster_Fat" ID="{1C34A03A-06D6-4567-86A2-3E2BA2B48274}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0609498792419247"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.149724703355163"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.145749711230689"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.946048184434574"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Horror_Game_Vocal_Creature_Bloated_Zombie_Short_Attack_Dry_Mutant_Dead_Undead_Monster_Fat.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="485972195"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Horror_Game_Vocal_Creature_Bloated_Zombie_Short_Attack_Dry_Mutant_Dead_Undead_Monster_Fat" ID="{1C34A03A-06D6-4567-86A2-3E2BA2B48274}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="Beast_Attack_Dry" ID="{C126AB5E-D04E-4778-A001-DF913037650E}" ShortID="49830980">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>15</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>200</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{0F9DB6A2-A6D9-467F-A914-7E39724AB1C0}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="50"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-3</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>60</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Horror_Game_Vocal_Creature_Beast_Attack_Dry" ID="{FB4609B0-617C-4978-9504-FD92EEF10531}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0490000002524433"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.0877916671189607"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.698250003597316"/>
+														<Property Name="TrimEnd" Type="Real64" Value="1.61291666639319"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Horror_Game_Vocal_Creature_Beast_Attack_Dry.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="674316476"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Horror_Game_Vocal_Creature_Beast_Attack_Dry" ID="{FB4609B0-617C-4978-9504-FD92EEF10531}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="Beast_Growl_Attack_Dry_00" ID="{F3B76378-EE07-4BBA-A84F-864901AA0CE9}" ShortID="1047191893">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>1</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>300</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{987CDCE9-8E3E-4D25-8E0F-A0408E9AE1E1}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="50"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>4</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>60</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry" ID="{DAAA5BA9-F547-4CD9-9495-523707CE8A1F}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0857117561733022"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.0795894878752091"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.0489781463847443"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.514270488084531"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="749540455"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry" ID="{DAAA5BA9-F547-4CD9-9495-523707CE8A1F}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="Beast_Growl_Attack_Dry_01" ID="{593C3EE0-E3D9-489A-AE80-4A54F5CFE45F}" ShortID="149141861">
+											<PropertyList>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>200</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{52E0A4C0-D7D0-4723-816F-4FF0C03A27FB}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="50"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-2</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{6785B7A2-1D47-4ACF-9E6B-06DCF2C0044C}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>60</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry" ID="{5D102508-B5F3-42AD-AB4B-23131D855E52}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0581615488318836"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.0581615488318836"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.46529239065507"/>
+														<Property Name="TrimEnd" Type="Real64" Value="1.17547546427858"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="1072008213"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry" ID="{5D102508-B5F3-42AD-AB4B-23131D855E52}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="Beast_Growl_Attack_Dry_02" ID="{BD328506-B898-4209-A737-2D1210616BD3}" ShortID="318792308">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>500</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{156FFA17-02B5-4D01-B41C-3415D2C14250}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-100"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{E77F1414-A042-43AB-8F95-E06006F1EE25}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>60</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry" ID="{AA869B50-A72A-4743-94A7-B3DAE8940D1D}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0581615488318836"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.0887728903223488"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="1.27343180600335"/>
+														<Property Name="TrimEnd" Type="Real64" Value="2.31727850187292"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="849513322"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry" ID="{AA869B50-A72A-4743-94A7-B3DAE8940D1D}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+									<ObjectLists>
+										<ObjectList Name="Effects">
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{9E1E680E-F043-4E13-ACE3-D9817D4BE9BB}" ShortID="1046214906">
+														<PropertyList>
+															<Property Name="Render" Type="bool" Value="True"/>
+														</PropertyList>
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Compressor" CompanyID="0" PluginID="108" PluginType="3">
+																<ObjectRef Name="Dialog_Leveler_Soft" ID="{9C1D0FCF-896E-4739-A8E8-B1E908F51CE6}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{278E269E-E99C-4555-8C3A-D12CC859F573}" ShortID="718122052">
+														<ReferenceList>
+															<Reference Name="Effect">
+																<Custom>
+																	<Effect Name="Pitch Shifter (Custom)" ID="{30E3210D-1A3F-4B49-A940-0E14020D0E47}" ShortID="975136076" PluginName="Wwise Pitch Shifter" CompanyID="0" PluginID="136" PluginType="3">
+																		<PropertyList>
+																			<Property Name="FilterFrequency" Type="Real32" Value="100"/>
+																			<Property Name="FilterType" Type="int32" Value="5"/>
+																			<Property Name="Pitch" Type="Real32" Value="200"/>
+																		</PropertyList>
+																	</Effect>
+																</Custom>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+										</ObjectList>
+										<ObjectList Name="Playlist">
+											<Reference>
+												<ObjectRef Name="Beast_Attack_Dry" ID="{C126AB5E-D04E-4778-A001-DF913037650E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+											<Reference>
+												<ObjectRef Name="Beast_Growl_Attack_Dry_00" ID="{F3B76378-EE07-4BBA-A84F-864901AA0CE9}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+											<Reference>
+												<ObjectRef Name="Beast_Growl_Attack_Dry_01" ID="{593C3EE0-E3D9-489A-AE80-4A54F5CFE45F}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+											<Reference>
+												<ObjectRef Name="Beast_Growl_Attack_Dry_02" ID="{BD328506-B898-4209-A737-2D1210616BD3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+											<Reference>
+												<ObjectRef Name="Undead_Monster_Fat" ID="{8189CE93-240E-491B-A3C5-1A3F6DD5B95C}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+										</ObjectList>
+									</ObjectLists>
+								</RandomSequenceContainer>
+							</ChildrenList>
+							<GroupingInfo>
+								<GroupingBehaviorList>
+									<GroupingBehavior>
+										<ItemRef Name="SFX_Mon_SmallClaw_UI" ID="{9F91CF19-E3D0-44E4-AB7B-AA5DE1A9EA71}"/>
+									</GroupingBehavior>
+									<GroupingBehavior>
+										<ItemRef Name="SFX_Mon_ShadowFang_UI" ID="{7B76D522-CE9F-47C0-BB97-49831B85EC39}"/>
+									</GroupingBehavior>
+									<GroupingBehavior>
+										<ItemRef Name="SFX_Mon_IronFang_UI" ID="{608693E5-55B3-4BF2-A0C9-717B70825A0D}"/>
+									</GroupingBehavior>
+								</GroupingBehaviorList>
+							</GroupingInfo>
+						</SwitchContainer>
 					</ChildrenList>
 				</Folder>
 			</ChildrenList>
