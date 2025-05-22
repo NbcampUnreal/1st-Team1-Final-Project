@@ -18,6 +18,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Trap")
+	bool bIsTriggered = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
+	float CooldownTime = 3.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
 	UBoxComponent* TriggerBoxComp;
 
@@ -59,4 +65,8 @@ protected:
 	void EndTrapEffect(AActor* TargetActor);
 	void EndTrapEffect_Implementation(AActor* TargetActor);
 
+
+
+	UFUNCTION()
+	void ResetCoolDown();
 };

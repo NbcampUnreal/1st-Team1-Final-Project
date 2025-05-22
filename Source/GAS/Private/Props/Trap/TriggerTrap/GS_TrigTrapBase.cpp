@@ -32,16 +32,20 @@ void AGS_TrigTrapBase::OnTriggerOverlap(UPrimitiveComponent* OverlappedComp, AAc
 		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
 		if (Player)
 		{
-			if (!HasAuthority())
-			{
-				//클라이언트
-				Server_ApplyTrapEffect(OtherActor);
-			}
-			else
-			{
-				//서버
-				ApplyTrapEffect(OtherActor);
-			}
+			/*if (!bIsTriggered)
+			{*/
+				if (!HasAuthority())
+				{
+					//클라이언트
+					Server_ApplyTrapEffect(OtherActor);
+				}
+				else
+				{
+					//서버
+					ApplyTrapEffect(OtherActor);
+				}
+			//}
+			
 		}
 		
 	}
@@ -99,4 +103,10 @@ void AGS_TrigTrapBase::Multicast_EndTrapEffect_Implementation(AActor* TargetActo
 void AGS_TrigTrapBase::EndTrapEffect_Implementation(AActor* TargetActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("TrapEffect Ended"));
+}
+
+
+void AGS_TrigTrapBase::ResetCoolDown()
+{
+	bIsTriggered = false;
 }
