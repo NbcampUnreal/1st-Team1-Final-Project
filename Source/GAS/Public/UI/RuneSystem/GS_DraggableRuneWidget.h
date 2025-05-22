@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GS_DraggableRuneWidget.generated.h"
 
-class UButton;
+class UImage;
 class UGS_ArcaneBoardWidget;
 class UGS_DragVisualWidget;
 
@@ -22,14 +22,13 @@ public:
 	UGS_DraggableRuneWidget(const FObjectInitializer& ObjectInitializer);
 
 	virtual void NativeConstruct() override;
-	
-	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void InitRuneWidget(uint8 InRuneID, UTexture2D* InRuneTexture, UGS_ArcaneBoardWidget* BoardWidget=nullptr);
-	
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void SetRuneID(uint8 InRuneID);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	uint8 GetRuneID() const;
@@ -38,17 +37,20 @@ public:
 	void SetRuneTexture(UTexture2D* Texture);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void SetRuneVisualState(bool bHovered, bool bDisabled = false);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void SetPlaced(bool bPlaced);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
 	uint8 RuneID;
 
-	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
-	UTexture2D* RuneTexture;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UImage* RuneImage;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	UButton* DragHandleButton;
+	UImage* SelectionIndicator;
 
 	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
 	bool bIsPlaced;

@@ -5,7 +5,7 @@
 
 AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
 {
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> ArrowMeshObj(TEXT("/Game/Weapons/Bow_02_Quiver/SKM_Arrow_02.SKM_Arrow_02"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> ArrowMeshObj(TEXT("/Game/Props/Trap/WallTrap/ArrowTrap/Mesh/SM_CrystalArrow.SM_CrystalArrow"));
 	if (ArrowMeshObj.Succeeded())
 	{
 		ProjectileMesh->SetSkeletalMesh(ArrowMeshObj.Object);
@@ -63,22 +63,22 @@ void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
 	if (VisualArrowClass)
 	{
 		AGS_ArrowVisualActor* VisualArrow = GetWorld()->SpawnActor<AGS_ArrowVisualActor>(VisualArrowClass, SpawnLocation, AdjustedRotation, Params);
-		UE_LOG(LogTemp, Warning, TEXT("VisualArrowClass exist"));
+		/*UE_LOG(LogTemp, Warning, TEXT("VisualArrowClass exist"));*/
 		if (VisualArrow)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("VisualArrow exist"));
 			VisualArrow->SetArrowMesh(ProjectileMesh->GetSkeletalMeshAsset());
 			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("No VisualArrow"));
-		}
+		//else
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("No VisualArrow"));
+		//}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No VisualArrowClass"));
-	}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("No VisualArrowClass"));
+	//}
 	
 
 	// 본 화살 제거

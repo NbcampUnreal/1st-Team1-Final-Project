@@ -29,7 +29,7 @@ public:
 
 	//마우스 이벤트
 	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-	virtual FReply NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
 	//기본 기능
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -58,7 +58,7 @@ public:
 	void EndRuneSelection(bool bPlaceRune = false);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	UGS_RuneGridCellWidget* GetCellAtPos(const FVector2D& ScreenPosition);
+	UGS_RuneGridCellWidget* GetCellAtPos(const FVector2D& ViewportPos);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void ClearPreview();
@@ -100,5 +100,10 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
 	UGS_DragVisualWidget* SelectionVisualWidget;
 
+private:
 	void UpdateGridVisuals();
+	void UpdateInvenState();
+
+	FVector2D ScreenToViewport(const FVector2D& ScreenPos) const;
+	FVector2D ViewportToScreen(const FVector2D& ViewportPos) const;
 };

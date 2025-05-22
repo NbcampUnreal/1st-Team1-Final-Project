@@ -2,8 +2,9 @@
 
 
 #include "UI/RuneSystem/GS_RuneGridCellWidget.h"
-#include "Components/Button.h"
 #include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
+#include "Components/Image.h"
+#include "Components/Border.h"
 
 UGS_RuneGridCellWidget::UGS_RuneGridCellWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -14,30 +15,32 @@ UGS_RuneGridCellWidget::UGS_RuneGridCellWidget(const FObjectInitializer& ObjectI
 void UGS_RuneGridCellWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+}
 
-	ParentBoardWidget = Cast<UGS_ArcaneBoardWidget>(GetParent()->GetParent());
+void UGS_RuneGridCellWidget::InitCell(const FGridCellData& InCellData, UGS_ArcaneBoardWidget* InParentBoard)
+{
+	ParentBoardWidget = InParentBoard;
+	SetCellData(InCellData);
+	RuneImage->SetVisibility(ESlateVisibility::Hidden);
+	PreviewImage->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UGS_RuneGridCellWidget::SetCellData(const FGridCellData& InCellData)
 {
 	CellData = InCellData;
 
-	switch (CellData.State)
+	if (CellData.State == EGridCellState::Occupied && CellData.PlacedRuneID > 0)
 	{
-	case EGridCellState::Occupied:
-		SetVisualState(EGridCellVisualState::Occupied);
-		break;
-	case EGridCellState::Locked:
-		SetVisualState(EGridCellVisualState::Invalid);
-		break;
-	default:
-		SetVisualState(EGridCellVisualState::Normal);
-		break;
+		UTexture2D* RuneTexture = CellData.RuneTextureFrag;
+		if (RuneTexture)
+		{
+			SetRuneTexture(RuneTexture);
+		}
 	}
 
 	if (CellData.bIsSpecialCell)
 	{
-		OnVisualStateChanged(EGridCellVisualState::Special);
+		CellBG->SetColorAndOpacity(FLinearColor(0.f, 0.f, 1.f, 0.5f));
 	}
 }
 
@@ -46,22 +49,42 @@ FIntPoint UGS_RuneGridCellWidget::GetCellPos() const
 	return CellData.Pos;
 }
 
-void UGS_RuneGridCellWidget::SetVisualState(EGridCellVisualState NewState)
+void UGS_RuneGridCellWidget::SetPreviewVisualState(EGridCellVisualState NewState)
 {
 	if (VisualState != NewState)
 	{
 		VisualState = NewState;
 
-		OnVisualStateChanged(NewState);
+		switch (NewState)
+		{
+		case EGridCellVisualState::Normal:
+			CellBG->SetVisibility(ESlateVisibility::Visible);
+			PreviewImage->SetVisibility(ESlateVisibility::Hidden);
+			break;
+		case EGridCellVisualState::Valid:
+			CellBG->SetVisibility(ESlateVisibility::Hidden);
+			PreviewImage->SetVisibility(ESlateVisibility::Visible);
+			PreviewImage->SetColorAndOpacity(FLinearColor(0.f, 1.f, 0.f, 0.2f));
+			break;
+		case EGridCellVisualState::Invalid:
+			CellBG->SetVisibility(ESlateVisibility::Hidden);
+			PreviewImage->SetVisibility(ESlateVisibility::Visible);
+			PreviewImage->SetColorAndOpacity(FLinearColor(1.f, 0.f, 0.f, 0.2f));
+			break;
+		default:
+			break;
+		}
 	}
 }
 
 void UGS_RuneGridCellWidget::SetRuneTexture(UTexture2D* Texture)
 {
-	if (IsValid(DropZone))
+	if (IsValid(RuneImage))
 	{
-		FButtonStyle ButtonStyle = DropZone->WidgetStyle;
-		ButtonStyle.Normal.SetResourceObject(Texture);
-		DropZone->SetStyle(ButtonStyle);
+		if (Texture)
+		{
+			RuneImage->SetBrushFromTexture(Texture);
+			RuneImage->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 }

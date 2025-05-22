@@ -8,6 +8,7 @@
 
 class UTextBlock;
 class UScrollBox;
+class UGS_ArcaneBoardWidget;
 class UGS_DraggableRuneWidget;
 class UGS_ArcaneBoardManager;
 /**
@@ -35,6 +36,9 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<UGS_DraggableRuneWidget> RuneWidgetClass;
+
+	UPROPERTY()
+	UGS_ArcaneBoardWidget* BoardWidget;
 
 	UPROPERTY()
 	UGS_ArcaneBoardManager* BoardManager;

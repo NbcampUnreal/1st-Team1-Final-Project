@@ -21,7 +21,7 @@ void UGS_DebuffStun::OnApply()
 		TargetCharacter->GetCharacterMovement()->DisableMovement();
 		// 스킬 못쓰고
 		// 스킬을 끊지는 않음
-		if (UGS_SkillComp* SkillComp = TargetCharacter->FindComponentByClass<UGS_SkillComp>())
+		if (UGS_SkillComp* SkillComp = TargetCharacter->GetSkillComp())
 		{
 			SkillComp->SetCanUseSkill(false);
 		}
@@ -45,7 +45,7 @@ void UGS_DebuffStun::OnExpire()
 		TargetCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 
 		// 스킬 사용 가능
-		if (UGS_SkillComp* SkillComp = TargetCharacter->FindComponentByClass<UGS_SkillComp>())
+		if (UGS_SkillComp* SkillComp = TargetCharacter->GetSkillComp())
 		{
 			SkillComp->SetCanUseSkill(true);
 		}
