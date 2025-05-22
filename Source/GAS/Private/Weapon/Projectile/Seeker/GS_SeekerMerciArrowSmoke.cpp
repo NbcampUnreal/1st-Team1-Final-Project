@@ -10,7 +10,7 @@ void AGS_SeekerMerciArrowSmoke::OnBeginOverlap(UPrimitiveComponent* OverlappedCo
 
 	ETargetType TargetType = DetermineTargetType(OtherActor);
 
-	if (TargetType == ETargetType::Guardian)
+	if (TargetType == ETargetType::Guardian || TargetType == ETargetType::DungeonMonster)
 	{
 		SpawnSmokeArea(SweepResult.ImpactPoint);
 		StickWithVisualOnly(SweepResult);
