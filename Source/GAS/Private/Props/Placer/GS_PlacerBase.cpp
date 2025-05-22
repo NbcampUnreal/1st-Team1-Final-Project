@@ -119,7 +119,7 @@ void AGS_PlacerBase::BuildObject()
 		bUpdatePlaceIndicators = true;
 
 		FIntPoint CursorPoint = BuildManagerRef->GetCellUnderCursor();
-		FVector2d CenterLocation = BuildManagerRef->GetCenterOfRectArea(CursorPoint, ObjectSize, GetActorRotation().Yaw);
+		FVector2d CenterLocation = BuildManagerRef->GetCenterOfRectArea(CursorPoint, ObjectSize, RotateYaw);
 		FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, ObjectData.ZOffSet);
 		//FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
 		FRotator SpawnRotator = GetActorRotation();
