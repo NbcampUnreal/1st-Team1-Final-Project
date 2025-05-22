@@ -24,7 +24,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* ZoomAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* PropRotationAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* ClickLMBAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* ClickRMBAction;
 
 	// Zoom
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
