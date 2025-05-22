@@ -8,24 +8,32 @@
 void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
 	Super::OnRightClick(Instance);
-	if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
+	if (!bCtrlHeld)
 	{
-		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+		if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
+		{
+			OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+		}
+		else
+		{
+			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+		}
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
 	}
 }
 
-void UGS_ChanSkillInputHandlerComp::OnCtrlLeftClick(const FInputActionInstance& Instance)
+void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
-	Super::OnCtrlLeftClick(Instance);
-	OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+	if (!bCtrlHeld)
+	{
+
+	}
+	else
+	{
+		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+	}
 }
 
-void UGS_ChanSkillInputHandlerComp::OnCtrlRightClick(const FInputActionInstance& Instance)
-{
-	Super::OnCtrlRightClick(Instance);
-	OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
-}
