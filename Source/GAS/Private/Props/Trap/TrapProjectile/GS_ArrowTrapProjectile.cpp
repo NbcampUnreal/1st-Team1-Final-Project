@@ -5,7 +5,7 @@
 
 AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
 {
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> ArrowMeshObj(TEXT("/Game/Props/Trap/WallTrap/ArrowTrap/Mesh/Crystal_Arrow.Crystal_Arrow"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> ArrowMeshObj(TEXT("/Game/Props/Trap/WallTrap/ArrowTrap/Mesh/SM_CrystalArrow.SM_CrystalArrow"));
 	if (ArrowMeshObj.Succeeded())
 	{
 		ProjectileMesh->SetSkeletalMesh(ArrowMeshObj.Object);
