@@ -18,12 +18,16 @@ void UGS_SkillBase::ActiveSkill()
 {
 	if (!CanActive()) return;
 
-	if (SkillAnimMontage)
+	/*if (SkillAnimMontage)
 	{
 		OwnerCharacter->PlayAnimMontage(SkillAnimMontage);
-	}
+	}*/
 
 	StartCoolDown();
+}
+
+void UGS_SkillBase::DeactiveSkill()
+{
 }
 
 void UGS_SkillBase::ExecuteSkillEffect()

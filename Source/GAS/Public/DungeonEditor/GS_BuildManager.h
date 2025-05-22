@@ -5,19 +5,8 @@
 #include "GameFramework/Actor.h"
 #include "GS_BuildManager.generated.h"
 
-UENUM(BlueprintType)
-enum class ECellType : uint8
-{
-	None	UMETA(DisplayName = "None"),
-	VerticalPlaceable	UMETA(DisplayName = "VerticalPlaceable"),
-	Horizontalplaceable	UMETA(DisplayName = "Horizontalplaceable"),
-	Wall UMETA(DisplayName = "Wall"),
-	Floor UMETA(DisplayName = "Floor"),
-	Door UMETA(DisplayName = "Door"),
-	Ceiling UMETA(DisplayName = "Ceiling")
-};
-
 struct FGS_PlaceableObjectsRow;
+class UBillboardComponent;
 
 UCLASS()
 class GAS_API AGS_BuildManager : public AActor
@@ -71,8 +60,9 @@ public:
 	void GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FIntPoint InCenterAreaCell, FIntPoint InAreaSize);
 
 	// 나중에 배치한 애들의 타입을 넣어주어야 할 때 이용하면 괜찮을 것 같다.
-	void SetOccupancyData(FIntPoint InCellPoint, bool InbOccipied);
-	bool CheckOccupancyData(FIntPoint InCellPoint);
+	void SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType, bool InIsRoom = false);
+	bool CheckOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType);
+	void ConvertFindOccupancyData(EDEditorCellType InTargetType, EDEditorCellType& InOutFindType);
 	
 	// 나중에 BuildableBoundaryEnabled bool 변수 추가할 경우 함수 구현해야 함.
 	// bool CheckCellInBuildableBoundary(FIntPoint Cell);
@@ -110,7 +100,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<AActor> ActorUnderCursor;
 
-	TMap<FIntPoint, int> OccupancyData;
+	TMap<FIntPoint, FDEOccupancyData> OccupancyData;
 
 	FDataTableRowHandle* ObjectForPlacement;
 	FGS_PlaceableObjectsRow PlaceableObjectData;

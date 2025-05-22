@@ -10,8 +10,6 @@ void UGS_BuildingIconSlotWidget::NativeConstruct()
 	if (TempBtn)
 	{
 		TempBtn->OnClicked.AddDynamic(this, &UGS_BuildingIconSlotWidget::PressedTempBtn);
-
-		//SetButtonImage();
 	}
 }
 

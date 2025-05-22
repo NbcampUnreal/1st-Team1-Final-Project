@@ -1,0 +1,57 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GS_DungeonEditorTypes.generated.h"
+
+UENUM(BlueprintType)
+enum class EDEditorCellType : uint8
+{
+	None	UMETA(DisplayName = "None"),
+	VerticalPlaceable	UMETA(DisplayName = "VerticalPlaceable"),
+	HorizontalPlaceable	UMETA(DisplayName = "HorizontalPlaceable"),
+	WallAndDoorPlaceable	UMETA(DisplayName = "WallAndDoorPlaceable"),
+	WallPlace UMETA(DisplayName = "WallPlace"),
+	FloorPlace UMETA(DisplayName = "FloorPlace"),
+	CeilingPlace UMETA(DisplayName = "CeilingPlace"),
+	Wall UMETA(DisplayName = "Wall"),
+	Door UMETA(DisplayName = "Door")
+};
+
+UENUM(BlueprintType)
+enum class EObjectType : uint8
+{
+	Room	UMETA(DisplayName = "Room"),
+	Trap	UMETA(DisplayName = "Trap"),
+	Monster UMETA(DisplayName = "Monster"),
+	DoorAndWall UMETA(DisplayName = "DoorAndWall"),
+	None	UMETA(DisplayName = "None")
+};
+
+UENUM(BlueprintType)
+enum class EMonsterType : uint8
+{
+	Normal	UMETA(DisplayName = "Normal"),
+	Elite	UMETA(DisplayName = "Elite"),
+	None	UMETA(DisplayName = "None")
+};
+
+UENUM(BlueprintType)
+enum class ERoomType : uint8
+{
+	Default	UMETA(DisplayName = "Default"),
+	BossRoom UMETA(DisplayName = "BossRoom"),
+	Template UMETA(DisplayName = "Template"),
+	None	UMETA(DisplayName = "None")
+};
+
+USTRUCT(Atomic, BlueprintType)
+struct FDEOccupancyData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	EDEditorCellType FloorOccupancyData;
+	UPROPERTY()
+	EDEditorCellType CeilingOccupancyData;
+};

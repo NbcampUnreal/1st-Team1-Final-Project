@@ -4,9 +4,6 @@
 #include "Character/GS_TpsController.h"
 #include "GS_GuardianController.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class GAS_API AGS_GuardianController : public AGS_TpsController
 {
@@ -14,47 +11,29 @@ class GAS_API AGS_GuardianController : public AGS_TpsController
 	
 public:
 	AGS_GuardianController();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* ComboAttackAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* Skill1Action;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* Skill2Action;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* UltimateSkillAction;
-
-	//new input system
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* CtrlInputAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* LeftMouseInputAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* RightMouseInputAction;
-
-	UFUNCTION()
-	void ComboAttack(const FInputActionValue& InputValue);
-
-	UFUNCTION()
-	void Skill1(const FInputActionValue& InputValue);
-
-	UFUNCTION()
-	void Skill2(const FInputActionValue& InputValue);
-
-	UFUNCTION()
-	void UltimateSkill(const FInputActionValue& InputValue);
-
-	//new input system
+	
 	UFUNCTION()
 	void CtrlInput(const FInputActionValue& InputValue);
 
+	UFUNCTION()
+	void CtrlStop(const FInputActionValue& InputValue);
+
+	UFUNCTION()
+	void LeftMouseInput(const FInputActionValue& InputValue);
+	
 	UFUNCTION()
 	void RightMouseInput(const FInputActionValue& InputValue);
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
-
 };

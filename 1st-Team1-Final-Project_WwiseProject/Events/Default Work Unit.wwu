@@ -185,6 +185,28 @@
 								</Action>
 							</ChildrenList>
 						</Event>
+						<Event Name="EV_Mon_IronFang_UI" ID="{9F56E300-4B73-41DA-82E0-47C233DEC99F}">
+							<ChildrenList>
+								<Action Name="" ID="{F5A55DCC-C1EB-4EE0-8AE6-452814847B3A}" ShortID="616702917">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_Mon_IronFang_UI" ID="{608693E5-55B3-4BF2-A0C9-717B70825A0D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_Mon_ShadowFang_UI" ID="{FB6892C7-53B4-41AA-9001-6655B1697F98}">
+							<ChildrenList>
+								<Action Name="" ID="{1BB8DD05-EC18-4868-836A-DC093C0759C6}" ShortID="327343643">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_Mon_ShadowFang_UI" ID="{7B76D522-CE9F-47C0-BB97-49831B85EC39}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
 					</ChildrenList>
 				</Folder>
 				<Folder Name="Props" ID="{0E04C431-8B91-44C6-B10A-6CC72F56E83F}" ShortID="225733664">

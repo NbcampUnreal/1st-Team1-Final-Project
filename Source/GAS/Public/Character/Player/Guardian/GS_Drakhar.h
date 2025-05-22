@@ -14,15 +14,13 @@ class GAS_API AGS_Drakhar : public AGS_Guardian
 public:
 	AGS_Drakhar();
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
-
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	//[combo attack variables]
 	UPROPERTY(ReplicatedUsing = OnRep_IsComboAttacking, VisibleAnywhere, BlueprintReadOnly)
 	bool bIsComboAttacking;
 
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(ReplicatedUsing = OnRep_CanDoNextComboAttack, VisibleAnywhere, BlueprintReadOnly)
 	bool bCanDoNextComboAttack;
 
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentComboAttackIndex, VisibleAnywhere, BlueprintReadOnly)
@@ -31,38 +29,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> Projectile;
 
-	//[dash attack variables]
-	UPROPERTY(ReplicatedUsing = OnRep_IsDashing)
-	bool bIsDashing;
-
-	//[earthquake variables]
-	UPROPERTY(ReplicatedUsing = OnRep_IsEarthquaking)
-	bool bIsEarthquaking;
-
-	//[draconic fury variables]
-	UPROPERTY(ReplicatedUsing = OnRep_IsFlying)
-	bool bIsFlying;
-
-	UPROPERTY(ReplicatedUsing = OnRep_CanDraconicFuryAttack)
-	bool bCanDraconicFuryAttack;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSubclassOf<AActor> TargetActor;
-
+	//[Draconic Fury Variables]
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> DraconicProjectile;
 
-	//action binding function
-	virtual void ComboAttack() override;
-
-	virtual void Skill1() override;
-
-	virtual void Skill2() override;
-
-	virtual void UltimateSkill() override;
-
+	//[Input Binding Function]
 	virtual void Ctrl() override;
 
+	virtual void CtrlStop() override;
+
+	virtual void LeftMouse() override;
+	
 	virtual void RightMouse() override;
 
 	//[combo attack]
@@ -85,62 +62,38 @@ public:
 	void OnRep_CurrentComboAttackIndex();
 
 	UFUNCTION()
+	void OnRep_CanDoNextComboAttack();
+
+	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	//[dash skill]
+	//[Dash Skill]
 	UFUNCTION(Server, Reliable)
-	void ServerRPCDashCharacter();
+	void ServerRPCDoDash(float DeltaTime);
+	
+	UFUNCTION(Server, Reliable)
+	void ServerRPCEndDash();
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPCCalculateDashLocation();
+	
 	UFUNCTION()
 	void DashAttackCheck();
 
-	UFUNCTION()
-	void EndDash();
-
-	UFUNCTION()
-	void OnRep_IsDashing();
-
-	//[earthquake skill]
-	UFUNCTION(Server, Reliable)
-	void ServerRPCEarthquake();
-
-	UFUNCTION(Server, Reliable)
-	void ServerRPCEarthquakeEnd();
-
+	//[Earthquake Skill]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCEarthquakeAttackCheck();
 
-	UFUNCTION()
-	void OnRep_IsEarthquaking();
-	
-	//[draconic fury skill]
+	//[DraconicFury Skill]
 	UFUNCTION(Server, Reliable)
-	void ServerRPCDraconicFuryFly();
-
-	UFUNCTION(Server, Reliable)
-	void ServerRPCDraconicFuryAttack();
-
-
-	UFUNCTION()
-	void EndFlying();
-
-	UFUNCTION()
-	void EndDraconicAttack();
-
-	UFUNCTION()
-	void OnRep_IsFlying();
-
-	UFUNCTION()
-	void OnRep_CanDraconicFuryAttack();
-
-protected:
+	void ServerRPCSpawnDraconicFury();
 
 private:
-	//[combo attack] 
-	//int32 CurrentComboAttackIndex;
+	//[combo attack]
 	int32 MaxComboAttackIndex;
 	int32 ClientComboAttackIndex;
 	bool ClientComboAttacking;
+	bool ClientNextComboAttack;
 
 	//[dash skill]
 	UPROPERTY()
@@ -164,9 +117,5 @@ private:
 
 	//[Draconic Fury]
 	TArray<FTransform> DraconicFuryTargetArray;
-	/*FTimerHandle SpawnDraconicFuryTimer;
-	int32 SpawnCount = 0;*/
-
 	void GetRandomDraconicFuryTarget();
-	//void SpawnDraconicFury();
 };

@@ -1,8 +1,10 @@
 #include "Character/Component/GS_StatComp.h"
 
+#include "AkGameplayStatics.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatRow.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
 UGS_StatComp::UGS_StatComp()
@@ -67,34 +69,20 @@ float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character
 	return Damage;
 }
 
-void UGS_StatComp::PerformHit(AActor* DamagedActor, AActor* DamageCauser)
-{
-	//UGameplayStatics::ApplyDamage(DamagedActor, Damage, EventInstigator, DamageCauser, UDamageType::StaticClass());
-
-	/*float Damage = CalculateDamage();
-	if (IsValid(DamagedActor))
-	{
-		AGS_Character* DamagedCharacter = Cast<AGS_Character>(DamagedActor);
-		if (IsValid(DamagedCharacter))
-		{
-			UGS_StatComp* DamagedActorStatComp = DamagedCharacter->GetStatComp();
-			if (IsValid(DamagedActorStatComp))
-			{
-				float DamagedActorCurrentHealth = DamagedActorStatComp->GetCurrentHealth();
-				DamagedActorStatComp->SetCurrentHealth(DamagedActorCurrentHealth - Damage);
-			}
-		}
-	}*/
-}
-
-
 void UGS_StatComp::SetCurrentHealth(float InHealth)
 {
 	if (!IsValid(GetOwner()) || !GetOwner()->HasAuthority())
 	{
 		return;
 	}
+	
+	//play take damage montage
+	if (!TakeDamageMontages.IsEmpty())
+	{
+		MulticastRPCPlayTakeDamageMontage();
+	}	
 
+	//update health
 	CurrentHealth = InHealth;
 
 	//dead
@@ -131,7 +119,52 @@ void UGS_StatComp::SetAttackSpeed(float InAttackSpeed)
 	AttackSpeed = InAttackSpeed;
 }
 
+void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
+{
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+
+	if (HitSoundEvent)
+	{
+		UAkGameplayStatics::PostEvent(HitSoundEvent, OwnerCharacter, 0, FOnAkPostEventCallback());
+	}
+	
+	int32 idx = FMath::RandRange(0, TakeDamageMontages.Num() - 1);
+	UAnimMontage* AnimMontage = TakeDamageMontages[idx];
+
+	if (IsValid(OwnerCharacter))
+	{
+		OwnerCharacter->PlayAnimMontage(AnimMontage);
+		if(OwnerCharacter->HasAuthority())
+		{
+			//stop character during damage animation
+			CharacterWalkSpeed = OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
+			OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = 0.f;
+		}
+		
+		if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
+		{
+			FOnMontageBlendingOutStarted BlendOut;
+			BlendOut.BindUObject(this, &UGS_StatComp::OnDamageMontageEnded);
+			AnimInstance->Montage_SetBlendingOutDelegate(BlendOut, AnimMontage);
+		}
+	}
+}
+
 void UGS_StatComp::OnRep_CurrentHealth()
 {
 	OnCurrentHPChanged.Broadcast(CurrentHealth);
+}
+
+void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	if (!IsValid(OwnerCharacter))
+	{
+		return;
+	}
+	if (OwnerCharacter->HasAuthority())
+	{
+		//can move
+		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CharacterWalkSpeed;
+	}
 }

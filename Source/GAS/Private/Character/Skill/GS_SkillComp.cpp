@@ -56,6 +56,18 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 	}
 }
 
+void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
+{
+	if (SkillMap.Contains(Slot))
+	{
+		UGS_SkillBase* Skill = SkillMap[Slot];
+		if (Skill)
+		{
+			Skill->DeactiveSkill();
+		}		
+	}	
+}
+
 void UGS_SkillComp::TrySkillCommand(ESkillSlot Slot)
 {
 	if (!GetOwner()->HasAuthority())
@@ -130,7 +142,6 @@ bool UGS_SkillComp::IsSkillActive(ESkillSlot Slot) const
 	return false;
 }
 
-
 // Called when the game starts
 void UGS_SkillComp::BeginPlay()
 {
@@ -185,6 +196,7 @@ void UGS_SkillComp::InitSkills()
 	if (SkillSet)
 	{
 		// 스킬 세팅
+		SetSkill(ESkillSlot::Ready, SkillSet->ReadySkill);
 		SetSkill(ESkillSlot::Aiming, SkillSet->AimingSkill);
 		SetSkill(ESkillSlot::Moving, SkillSet->MovingSkill);
 		SetSkill(ESkillSlot::Ultimate, SkillSet->UltimateSkill);

@@ -67,42 +67,39 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 		return Reply;
 	}
 
-	if(GetWorld())
+	FVector2D MousePos = ScreenToViewport(InMouseEvent.GetScreenSpacePosition());
+	SelectionVisualWidget->SetPositionInViewport(MousePos-FVector2D(50.f, 50.f), false);
+
+	UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
+
+	if (CellUnderMouse)
 	{
-		FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
-
-		SelectionVisualWidget->SetPositionInViewport(MousePos, false);
-
-		UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
-
-		if (CellUnderMouse)
-		{
-			UpdateGridPreview(SelectedRuneID, CellUnderMouse->GetCellPos());
-		}
-		else
-		{
-			ClearPreview();
-		}
+		UpdateGridPreview(SelectedRuneID, CellUnderMouse->GetCellPos());
+	}
+	else
+	{
+		ClearPreview();
 	}
 
 	return Reply;
 }
 
-FReply UGS_ArcaneBoardWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+FReply UGS_ArcaneBoardWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	FReply Reply = Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
-	/*if (!bIsInSelectionMode)
+	FReply Reply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+	if (!bIsInSelectionMode)
 	{
 		return Reply;
-	}*/
+	}
 
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
+		FVector2D MousePos = ScreenToViewport(InMouseEvent.GetScreenSpacePosition());
 		UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
 
 		if (CellUnderMouse)
 		{
+			//배치 로직
 			EndRuneSelection(true);
 			return FReply::Handled();
 		}
@@ -137,7 +134,7 @@ void UGS_ArcaneBoardWidget::GenerateGridLayout()
 		UGS_RuneGridCellWidget* CellWidget = CreateWidget<UGS_RuneGridCellWidget>(this, GridCellWidgetClass);
 		if (CellWidget)
 		{
-			CellWidget->SetCellData(CellData);
+			CellWidget->InitCell(CellData, this);
 			GridPanel->AddChildToUniformGrid(CellWidget, CellData.Pos.X, CellData.Pos.Y);
 			GridCells.Add(CellData.Pos, CellWidget);
 
@@ -167,6 +164,32 @@ void UGS_ArcaneBoardWidget::UpdateStatsDisplay(const FCharacterStats& Stats)
 
 void UGS_ArcaneBoardWidget::UpdateGridPreview(uint8 RuneID, const FIntPoint& GridPos)
 {
+	if (!IsValid(BoardManager))
+	{
+		return;
+	}
+
+	ClearPreview();
+
+	TArray<FIntPoint> AffectedCells;
+	bool bCanPlace = BoardManager->PreviewRunePlacement(RuneID, GridPos, AffectedCells);
+
+	for (const FIntPoint& CellPos : AffectedCells)
+	{
+		if (GridCells.Contains(CellPos))
+		{
+			UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
+			if (IsValid(CellWidget))
+			{
+				EGridCellVisualState PreviewState = bCanPlace ? 
+					EGridCellVisualState::Valid : EGridCellVisualState::Invalid;
+
+				CellWidget->SetPreviewVisualState(PreviewState);
+			}
+		}
+	}
+
+	PreviewCells = AffectedCells;
 }
 
 void UGS_ArcaneBoardWidget::ApplyChanges()
@@ -220,28 +243,90 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 {
 	if(!bPlaceRune)
 	{
-		if (SelectionVisualWidget)
+		if (IsValid(SelectionVisualWidget))
 		{
 			SelectionVisualWidget->RemoveFromParent();
 			SelectionVisualWidget = nullptr;
 		}
+		ClearPreview();
 	}
 	else
 	{
-		//배치
+		if (IsValid(BoardManager) && SelectedRuneID > 0)
+		{
+			FVector2D MousePos = FVector2D::ZeroVector;
+			if (GetWorld())
+			{
+				MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
+			}
+
+			UGS_RuneGridCellWidget* TargetCell = GetCellAtPos(MousePos);
+
+			if (IsValid(TargetCell))
+			{
+				FIntPoint CellPos = TargetCell->GetCellPos();
+
+				bool bPlaceSuccess = BoardManager->PlaceRune(SelectedRuneID, CellPos);
+
+				if (bPlaceSuccess)
+				{
+					UE_LOG(LogTemp, Display, TEXT("룬 배치 성공: ID=%d, Pos=(%d,%d)"), SelectedRuneID, CellPos.X, CellPos.Y);
+					UpdateGridVisuals();
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("룬 배치 실패: ID=%d"), SelectedRuneID);
+				}
+			}
+
+			if (IsValid(SelectionVisualWidget))
+			{
+				SelectionVisualWidget->RemoveFromParent();
+				SelectionVisualWidget = nullptr;
+			}
+		}
+		ClearPreview();
 	}
 
 	bIsInSelectionMode = false;
 	SelectedRuneID = 0;
 }
 
-UGS_RuneGridCellWidget* UGS_ArcaneBoardWidget::GetCellAtPos(const FVector2D& ScreenPosition)
+UGS_RuneGridCellWidget* UGS_ArcaneBoardWidget::GetCellAtPos(const FVector2D& ViewportPos)
 {
+	FVector2D ScreenPos = ViewportToScreen(ViewportPos);
+
+	for (auto& CellPair : GridCells)
+	{
+		UGS_RuneGridCellWidget* CellWidget = CellPair.Value;
+		FGeometry CellGeometry = CellWidget->GetCachedGeometry();
+		FVector2D LocalMousePos = CellGeometry.AbsoluteToLocal(ScreenPos);
+
+		FVector2D LocalSize = CellGeometry.GetLocalSize();
+		if (LocalMousePos.X >= 0 && LocalMousePos.Y >= 0 &&
+			LocalMousePos.X <= LocalSize.X && LocalMousePos.Y <= LocalSize.Y)
+		{
+			return CellWidget;
+		}
+	}
 	return nullptr;
 }
 
 void UGS_ArcaneBoardWidget::ClearPreview()
 {
+	for (const FIntPoint& CellPos : PreviewCells)
+	{
+		if(GridCells.Contains(CellPos))
+		{
+			UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
+			if (IsValid(CellWidget))
+			{
+				CellWidget->SetPreviewVisualState(EGridCellVisualState::Normal);
+			}
+		}
+	}
+
+	PreviewCells.Empty();
 }
 
 uint8 UGS_ArcaneBoardWidget::GetSelectedRuneID() const
@@ -251,4 +336,47 @@ uint8 UGS_ArcaneBoardWidget::GetSelectedRuneID() const
 
 void UGS_ArcaneBoardWidget::UpdateGridVisuals()
 {
+	if (!IsValid(BoardManager))
+	{
+		return;
+	}
+
+	for (const FIntPoint& CellPos : PreviewCells)
+	{
+		if (GridCells.Contains(CellPos))
+		{
+			UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
+			FGridCellData UpdatedCellData;
+
+			if (BoardManager->GetCellData(CellPos, UpdatedCellData))
+			{
+				CellWidget->SetCellData(UpdatedCellData);
+			}
+		}
+	}
+}
+
+void UGS_ArcaneBoardWidget::UpdateInvenState()
+{
+	
+}
+
+FVector2D UGS_ArcaneBoardWidget::ScreenToViewport(const FVector2D& ScreenPos) const
+{
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
+		return ScreenGeometry.AbsoluteToLocal(ScreenPos);
+	}
+	return ScreenPos;
+}
+
+FVector2D UGS_ArcaneBoardWidget::ViewportToScreen(const FVector2D& ViewportPos) const
+{
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
+		return ScreenGeometry.LocalToAbsolute(ViewportPos);
+	}
+	return ViewportPos;
 }

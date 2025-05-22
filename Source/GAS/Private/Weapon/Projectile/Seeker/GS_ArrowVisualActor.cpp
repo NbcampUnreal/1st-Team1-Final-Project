@@ -7,6 +7,8 @@
 AGS_ArrowVisualActor::AGS_ArrowVisualActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
+	SetReplicateMovement(true);
 
 	ArrowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArrowMesh"));
 	SetRootComponent(ArrowMesh);

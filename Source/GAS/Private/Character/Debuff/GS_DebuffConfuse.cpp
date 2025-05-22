@@ -7,7 +7,7 @@
 #include "Character/GS_Character.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-void UGS_DebuffConfuse::OnApply()
+void UGS_DebuffConfuse::OnApply() 
 {
 	Super::OnApply();
 
@@ -15,17 +15,16 @@ void UGS_DebuffConfuse::OnApply()
 	{
 		// 타겟 잃어버리기
 		AGS_AIController* AIController = Cast<AGS_AIController>(TargetCharacter->GetController());
-		if (!AIController) return;
+		if (AIController)
+		{
+			AIController->EnterConfuseState();
+		}
 
-		UBlackboardComponent* BB = AIController->GetBlackboardComponent();
-		if (!BB) return;
-
-		BB->ClearValue(AGS_AIController::TargetActorKey);
-
-		// Todo: Target이 비어 있도록 Lock
-
-		// 선택 불가
-		// Todo: 몬스터를 선택할 수 없습니다.
+		// rts 몬스터 선택 불가
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(TargetCharacter))
+		{
+			Monster->bSelectionLocked = true;
+		}
 	}
 }
 
@@ -33,21 +32,17 @@ void UGS_DebuffConfuse::OnExpire()
 {
 	if (TargetCharacter)
 	{
-		// Todo: Lock 해제
-		
+		// 타겟을 잃어버리기 전 타겟 설정 
 		AGS_AIController* AIController = Cast<AGS_AIController>(TargetCharacter->GetController());
-		if (!AIController)
+		if (AIController)
 		{
-			return;
+			AIController->ExitConfuseState();
 		}
 
-		UBlackboardComponent* BB = AIController->GetBlackboardComponent();
-		if (!BB)
+		// rts 몬스터 선택 불가 해제 
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(TargetCharacter))
 		{
-			return;
+			Monster->bSelectionLocked = false;
 		}
-		// Todo: 타겟을 잃어버리기 전 타겟을 다시 가진다.
-
-		// Todo: 몬스터를 선택할 수 있습니다.
 	}
 }

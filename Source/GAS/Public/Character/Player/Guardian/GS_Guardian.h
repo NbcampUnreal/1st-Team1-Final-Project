@@ -17,25 +17,18 @@ public:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
-	//[input action binding function]
-	virtual void ComboAttack();
-
-	virtual void Skill1();
-
-	virtual void Skill2();
-
-	virtual void UltimateSkill();
-
+	virtual void LeftMouse();
+	
 	virtual void Ctrl();
 
-	virtual void RightMouse();
+	virtual void CtrlStop();
+
+	virtual void RightMouse();	
 
 	//[test function]
 	UFUNCTION()
 	void MeleeAttackCheck();
 
-protected:
 	UPROPERTY()
 	TObjectPtr<UGS_DrakharAnimInstance> GuardianAnim;
 

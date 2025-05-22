@@ -208,37 +208,64 @@ void AGS_BuildManager::GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FI
 	}
 }
 
-void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, bool InbOccipied)
+void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType, bool InIsRoom)
 {
-	if (InbOccipied)
+	FDEOccupancyData& CellInfo = OccupancyData.FindOrAdd(InCellPoint);
+
+	if ((InIsRoom && InTargetType == EDEditorCellType::HorizontalPlaceable) ||
+		InTargetType == EDEditorCellType::CeilingPlace)
 	{
-		OccupancyData.FindOrAdd(InCellPoint) = 1;
+		CellInfo.CeilingOccupancyData = InTargetType;
 	}
-	else
-	{
-		if (OccupancyData.Find(InCellPoint))
-		{
-			if (OccupancyData[InCellPoint] < 2)
-			{
-				OccupancyData.Remove(InCellPoint);
-			}
-			else
-			{
-				OccupancyData[InCellPoint]--;
-			}
-		}
-	}
+
+	CellInfo.FloorOccupancyData = InTargetType;
 }
 
-bool AGS_BuildManager::CheckOccupancyData(FIntPoint InCellPoint)
+bool AGS_BuildManager::CheckOccupancyData(FIntPoint InCellPoint,EDEditorCellType InTargetType)
 {
-	if (OccupancyData.Find(InCellPoint))
+	EDEditorCellType FindOccupancyType;
+	ConvertFindOccupancyData(InTargetType, FindOccupancyType);
+
+	if (auto* CellData = OccupancyData.Find(InCellPoint))
 	{
-		return true;
+		const EDEditorCellType Current = 
+			(InTargetType == EDEditorCellType::CeilingPlace)
+				? CellData->CeilingOccupancyData
+				: CellData->FloorOccupancyData;
+
+		return Current != FindOccupancyType;
 	}
-	else
+
+	return InTargetType != EDEditorCellType::None;
+}
+
+void AGS_BuildManager::ConvertFindOccupancyData(EDEditorCellType InTargetType, EDEditorCellType& InOutFindType)
+{
+	switch (InTargetType)
 	{
-		return false;
+	case EDEditorCellType::None:
+		InOutFindType = EDEditorCellType::None;
+		break;
+		
+	case EDEditorCellType::WallPlace:
+		InOutFindType = EDEditorCellType::VerticalPlaceable;
+		break;
+
+	case EDEditorCellType::FloorPlace:
+		InOutFindType = EDEditorCellType::HorizontalPlaceable;
+		break;
+		
+	case EDEditorCellType::CeilingPlace:
+		InOutFindType = EDEditorCellType::HorizontalPlaceable;
+		break;
+		
+	case EDEditorCellType::Wall:
+	case EDEditorCellType::Door:
+		InOutFindType = EDEditorCellType::WallAndDoorPlaceable;
+		break;
+
+	default:
+		break;
 	}
 }
 

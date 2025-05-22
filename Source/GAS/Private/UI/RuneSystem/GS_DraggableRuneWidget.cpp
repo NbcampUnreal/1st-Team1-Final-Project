@@ -6,13 +6,17 @@
 #include "UI/RuneSystem/GS_DragVisualWidget.h"
 #include "UI/RuneSystem/GS_RuneDragOperation.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Components/Button.h"
+#include "Components/Image.h"
 
 UGS_DraggableRuneWidget::UGS_DraggableRuneWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	RuneID = 0;
 	bIsPlaced = false;
+	if (IsValid(SelectionIndicator))
+	{
+
+	}
 }
 
 void UGS_DraggableRuneWidget::NativeConstruct()
@@ -32,11 +36,11 @@ void UGS_DraggableRuneWidget::NativeConstruct()
 	}
 }
 
-FReply UGS_DraggableRuneWidget::NativeOnPreviewMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+FReply UGS_DraggableRuneWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	FReply Reply = Super::NativeOnPreviewMouseButtonDown(InGeometry, InMouseEvent);
+	FReply Reply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 
-	if (bIsPlaced)
+	if (bIsPlaced || !ParentBoardWidget)
 	{
 		return Reply;
 	}
@@ -49,12 +53,11 @@ FReply UGS_DraggableRuneWidget::NativeOnPreviewMouseButtonDown(const FGeometry& 
 			return FReply::Handled();
 		}
 	}
-
-	if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+	else if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
 	{
 		if (ParentBoardWidget)
 		{
-			ParentBoardWidget->StartRuneSelection(RuneID);
+			ParentBoardWidget->EndRuneSelection(false);
 			return FReply::Handled();
 		}
 	}
@@ -62,16 +65,31 @@ FReply UGS_DraggableRuneWidget::NativeOnPreviewMouseButtonDown(const FGeometry& 
 	return Reply;
 }
 
-void UGS_DraggableRuneWidget::InitRuneWidget(uint8 InRuneID, UTexture2D* InRuneTexture, UGS_ArcaneBoardWidget* BoardWidget)
+void UGS_DraggableRuneWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	SetRuneID(InRuneID);
-	SetRuneTexture(InRuneTexture);
-	ParentBoardWidget = BoardWidget;
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+
+	if (!bIsPlaced)
+	{
+		SetRuneVisualState(true, false);
+	}
 }
 
-void UGS_DraggableRuneWidget::SetRuneID(uint8 InRuneID)
+void UGS_DraggableRuneWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseLeave(InMouseEvent);
+
+	if (!bIsPlaced)
+	{
+		SetRuneVisualState(false, false);
+	}
+}
+
+void UGS_DraggableRuneWidget::InitRuneWidget(uint8 InRuneID, UTexture2D* InRuneTexture, UGS_ArcaneBoardWidget* BoardWidget)
 {
 	RuneID = InRuneID;
+	SetRuneTexture(InRuneTexture);
+	ParentBoardWidget = BoardWidget;
 }
 
 uint8 UGS_DraggableRuneWidget::GetRuneID() const
@@ -81,14 +99,34 @@ uint8 UGS_DraggableRuneWidget::GetRuneID() const
 
 void UGS_DraggableRuneWidget::SetRuneTexture(UTexture2D* Texture)
 {
-	if (IsValid(DragHandleButton) && Texture)
+	if (IsValid(RuneImage) && Texture)
 	{
-		FButtonStyle ButtonStyle = DragHandleButton->WidgetStyle;
-		ButtonStyle.Normal.SetResourceObject(Texture);
-		DragHandleButton->SetStyle(ButtonStyle);
-
-		RuneTexture = Texture;
+		RuneImage->SetBrushFromTexture(Texture);
 	}
+}
+
+void UGS_DraggableRuneWidget::SetRuneVisualState(bool bHovered, bool bDisabled)
+{
+	if (!IsValid(RuneImage))
+	{
+		return;
+	}
+
+	FLinearColor NewColor;
+	if (bDisabled)
+	{
+		NewColor = FLinearColor(0.5f, 0.5f, 0.5f, 0.7f);
+	}
+	else if (bHovered)
+	{
+		NewColor = FLinearColor(1.2f, 1.2f, 1.0f, 1.0f);
+	}
+	else
+	{
+		NewColor = FLinearColor::White;
+	}
+
+	RuneImage->SetBrushTintColor(NewColor);
 }
 
 void UGS_DraggableRuneWidget::SetPlaced(bool bPlaced)
@@ -96,10 +134,6 @@ void UGS_DraggableRuneWidget::SetPlaced(bool bPlaced)
 	if (bIsPlaced != bPlaced)
 	{
 		bIsPlaced = bPlaced;
-
-		if (IsValid(DragHandleButton))
-		{
-			DragHandleButton->SetIsEnabled(!bIsPlaced);
-		}
+		SetRuneVisualState(false, bIsPlaced);
 	}
 }
