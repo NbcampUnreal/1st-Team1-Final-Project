@@ -18,11 +18,15 @@ AGS_RTSController::AGS_RTSController()
 {
 	bShowMouseCursor = true;
 
+	CurrentCommand = ERTSCommand::None;
 	KeyboardDir = FVector2D::ZeroVector;
 	MouseEdgeDir = FVector2D::ZeroVector;
+	CameraActor = nullptr;
 	CameraSpeed = 2000.f;
 	EdgeScreenRatio = 0.02f;
 	UnitGroups.SetNum(9);
+	bCtrlDown = false;
+	bShiftDown = false;
 }
 
 void AGS_RTSController::BeginPlay()
@@ -63,6 +67,12 @@ void AGS_RTSController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &AGS_RTSController::CameraMove);
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Completed, this, &AGS_RTSController::CameraMoveEnd);
+
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandMove);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandAttack);
+		EnhancedInputComponent->BindAction(StopAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandStop);
+		EnhancedInputComponent->BindAction(SkillAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandSkill);
+		
 		EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnLeftMousePressed);
 		EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Completed, this, &AGS_RTSController::OnLeftMouseReleased);
 		EnhancedInputComponent->BindAction(RightClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnRightMousePressed);
@@ -115,9 +125,56 @@ void AGS_RTSController::CameraMoveEnd()
 	KeyboardDir = FVector2D::ZeroVector;
 }
 
+
+void AGS_RTSController::OnCommandMove(const FInputActionValue& Value)
+{
+	MoveSelectedUnits();
+}
+
+void AGS_RTSController::MoveSelectedUnits()
+{
+	CurrentCommand = ERTSCommand::Move;
+	UE_LOG(LogTemp, Log, TEXT("Move Command!!!"));
+}
+
+void AGS_RTSController::OnCommandAttack(const FInputActionValue& Value)
+{
+	AttackSelectedUnits();
+}
+
+void AGS_RTSController::AttackSelectedUnits()
+{
+	CurrentCommand = ERTSCommand::Attack;
+	UE_LOG(LogTemp, Log, TEXT("Attack Command!!!"));
+}
+
+void AGS_RTSController::OnCommandStop(const FInputActionValue& Value)
+{
+	StopSelectedUnits();
+}
+
+void AGS_RTSController::StopSelectedUnits()
+{
+	TArray<AGS_Monster*> Commandables;
+	GatherCommandableUnits(Commandables);
+
+	Server_RTSStop(Commandables);
+}
+
+void AGS_RTSController::OnCommandSkill(const FInputActionValue& Value)
+{
+	SkillSelectedUnits();
+}
+
+void AGS_RTSController::SkillSelectedUnits()
+{
+	CurrentCommand = ERTSCommand::Skill;
+}
+
+
 void AGS_RTSController::OnLeftMousePressed()
 {
-	// Ctrl+클릭 → 같은 타입 전부 선택
+	// Ctrl+클릭 → 같은 유닛 타입 전체 선택
 	if (bCtrlDown && !bShiftDown)
 	{
 		FHitResult Hit;		
@@ -204,6 +261,14 @@ void AGS_RTSController::OnLeftMouseReleased()
 
 void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 {
+	// 커맨드 모드 중이면 취소
+	if (CurrentCommand != ERTSCommand::None)
+	{
+		CurrentCommand = ERTSCommand::None;
+		UE_LOG(LogTemp, Log, TEXT("Reset"));
+		return;
+	}
+	
 	FHitResult GroundHit;
 	if (!GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, GroundHit))
 	{
@@ -216,6 +281,7 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 
 	Server_RTSMove(Commandables, GroundHit.Location);
 }
+
 
 FVector2D AGS_RTSController::GetKeyboardDirection() const
 {
@@ -300,6 +366,7 @@ void AGS_RTSController::InitCameraActor()
 	}
 }
 
+
 void AGS_RTSController::DoShiftClickToggle()
 {
 	FHitResult ShiftHit;
@@ -320,6 +387,7 @@ void AGS_RTSController::DoShiftClickToggle()
 		}
 	}
 }
+
 
 void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 {
@@ -381,6 +449,7 @@ void AGS_RTSController::OnShiftReleased(const FInputActionInstance& InputInstanc
 }
 
 
+// 유닛 그룹 저장 + 불러오기 
 void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, int32 GroupIdx)
 {
 	if (bCtrlDown) // Ctrl+숫자 → 부대 저장
@@ -406,6 +475,7 @@ void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, in
 	}
 }
 
+// 카메라 위치 저장 + 불러오기 
 void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, int32 CameraIndex)
 {
 	if (bShiftDown) // 저장
@@ -426,6 +496,7 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 	}
 }
 
+
 void AGS_RTSController::MoveAIViaMinimap(const FVector& WorldLocation)
 {
 	// 명령 가능한 유닛들만 
@@ -443,6 +514,7 @@ void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)
 		CameraActor->SetActorLocation(NewLocation);
 	}
 }
+
 
 void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>& Units, const FVector& Dest)
 {
@@ -466,6 +538,33 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 		}
 	}
 }
+
+void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc)
+{
+}
+
+void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>& Units)
+{
+	for (AGS_Monster* Unit : Units)
+	{
+		if (!IsValid(Unit)) continue;
+		
+		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			AIController->StopMovement();
+
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->ClearValue(AGS_AIController::RTSTargetKey);
+			}
+		}
+	}
+}
+
+void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc)
+{
+}
+
 
 void AGS_RTSController::GatherCommandableUnits(TArray<AGS_Monster*>& Out) const
 {

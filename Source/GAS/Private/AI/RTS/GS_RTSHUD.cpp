@@ -75,7 +75,7 @@ void AGS_RTSHUD::DrawHUD()
 	GetActorsInSelectionRectangle<AGS_Monster>(
 		PointA, PointB,
 		SelectionOfActors, 
-		true,               
+		false,               
 		false               
 	);
 }

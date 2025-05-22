@@ -22,6 +22,16 @@ struct FUnitGroup
 	TArray<AGS_Monster*> Units;
 };
 
+// 명령 모드 
+UENUM(BlueprintType)
+enum class ERTSCommand : uint8
+{
+	None    UMETA(DisplayName="None"),
+	Move    UMETA(DisplayName="Move"), 
+	Attack  UMETA(DisplayName="Attack"), 
+	Skill   UMETA(DisplayName="Skill") 
+};
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, const TArray<AGS_Monster*>&, NewSelection);
 
 UCLASS()
@@ -37,6 +47,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* CameraMoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* AttackAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* StopAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* SkillAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* LeftClickAction;
@@ -56,14 +78,35 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	TArray<UInputAction*> CameraKeyActions;
 
-	UPROPERTY(BlueprintAssignable, Category="Selection")
+	// 선택 변경 델리게이트
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Selection")
 	FOnSelectionChanged OnSelectionChanged;
 
+	// 현재 선택된 유닛들
 	const TArray<AGS_Monster*>& GetUnitSelection() const { return UnitSelection; }
 
 	// 카메라 이동 입력 처리
 	void CameraMove(const FInputActionValue& InputValue);
 	void CameraMoveEnd();
+
+	// 명령 모드 전환
+	void OnCommandMove(const FInputActionValue& Value);
+	void OnCommandAttack(const FInputActionValue& Value);
+	void OnCommandStop(const FInputActionValue& Value);
+	void OnCommandSkill(const FInputActionValue& Value);
+
+	// 실제 구현 + HUD 버튼 클릭시
+	UFUNCTION(BlueprintCallable, Category="RTS")
+	void MoveSelectedUnits();
+	
+	UFUNCTION(BlueprintCallable, Category="RTS")
+	void AttackSelectedUnits();
+	
+	UFUNCTION(BlueprintCallable, Category="RTS")
+	void StopSelectedUnits();
+
+	UFUNCTION(BlueprintCallable, Category="RTS")
+	void SkillSelectedUnits();
 
 	// 마우스 클릭 처리
 	void OnLeftMousePressed();
@@ -95,9 +138,14 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_RTSMove(const TArray<AGS_Monster*>& Units, const FVector& Dest);
 
-	// 명령 가능한 유닛들
-	void GatherCommandableUnits(TArray<AGS_Monster*>& Out) const;
-	bool IsSelectable(AGS_Monster* Monster) const;
+	UFUNCTION(Server, Reliable)
+	void Server_RTSAttack(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RTSStop(const TArray<AGS_Monster*>& Units);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RTSSkill(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc);
 
 protected:
 	virtual void BeginPlay() override;
@@ -105,11 +153,15 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 
 private:
+	// 입력 상태
+	ERTSCommand CurrentCommand;
+
+	// 카메라 
 	FVector2D KeyboardDir;
 	FVector2D MouseEdgeDir;
 
 	UPROPERTY()
-	class AGS_RTSCamera* CameraActor = nullptr;
+	class AGS_RTSCamera* CameraActor;
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	float CameraSpeed;
@@ -123,8 +175,8 @@ private:
 	UPROPERTY()
 	TArray<FUnitGroup> UnitGroups; // 지정된 부대
 
-	bool bCtrlDown = false;
-	bool bShiftDown = false;
+	bool bCtrlDown;
+	bool bShiftDown;
 
 	UPROPERTY()
 	TMap<int32, FVector> SavedCameraPositions; // 카메라 저장 위치
@@ -139,6 +191,10 @@ private:
 	void InitCameraActor();
 
 	void DoShiftClickToggle();
+	
+	// 명령 가능한 유닛들
+	void GatherCommandableUnits(TArray<AGS_Monster*>& Out) const;
+	bool IsSelectable(AGS_Monster* Monster) const;
 
 };
 
