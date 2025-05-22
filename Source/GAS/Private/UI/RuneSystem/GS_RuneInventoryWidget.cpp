@@ -3,6 +3,7 @@
 
 #include "UI/RuneSystem/GS_RuneInventoryWidget.h"
 #include "UI/RuneSystem/GS_DraggableRuneWidget.h"
+#include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
 #include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "Components/ScrollBox.h"
 
@@ -29,6 +30,7 @@ void UGS_RuneInventoryWidget::NativeConstruct()
 void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager, UGS_ArcaneBoardWidget* InBoardWidget)
 {
 	BoardManager = InBoardManager;
+	BoardWidget = InBoardWidget;
 
 	if (!IsValid(BoardManager) || !IsValid(RuneScrollBox))
 	{

@@ -89,23 +89,8 @@ bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
 
 bool UGS_ArcaneBoardManager::CanPlaceRuneAt(uint8 RuneID, const FIntPoint& Pos)
 {
-	//룬 데이터 로드
-	TArray<FIntPoint> RuneShape;
-	if (GetRuneShape(RuneID, RuneShape))
-	{
-		//룬이 차지하는 모든 셀 확인
-		for (const FIntPoint& Offset : RuneShape)
-		{
-			FIntPoint CellPos(Pos.X + Offset.X, Pos.Y + Offset.Y);
-
-			if (!IsValidCell(CellPos))
-			{
-				return false;
-			}
-		}
-	}
-
-	return true;
+	TArray<FIntPoint> AffectedCells;
+	return PreviewRunePlacement(RuneID, Pos, AffectedCells);
 }
 
 bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
@@ -114,7 +99,6 @@ bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
 	{
 		return false;
 	}
-
 	TMap<FIntPoint, UTexture2D*> RuneShape;
 	if (!GetFragmentedRuneTexture(RuneID, RuneShape))
 	{
@@ -124,6 +108,11 @@ bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
 	//룬 배치 정보 저장
 	FPlacedRuneInfo NewRune(RuneID, Pos);
 	PlacedRunes.Add(NewRune);
+	
+	for(const FPlacedRuneInfo& rune : PlacedRunes)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%d"), rune.RuneID);
+	}
 
 	TArray<FIntPoint> RuneShapePos;
 	RuneShape.GenerateKeyArray(RuneShapePos);
@@ -132,7 +121,7 @@ bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
 	for (const FIntPoint& Offset : RuneShapePos)
 	{
 		FIntPoint CellPos(Pos.X + Offset.X, Pos.Y + Offset.Y);
-		UpdateCellState(CellPos, EGridCellState::Occupied, RuneID, RuneShape[Pos]);
+		UpdateCellState(CellPos, EGridCellState::Occupied, RuneID, RuneShape[Offset]);
 	}
 
 	bHasUnsavedChanges = true;
@@ -350,17 +339,17 @@ bool UGS_ArcaneBoardManager::PreviewRunePlacement(uint8 RuneID, const FIntPoint&
 	return bCanPlace;
 }
 
-void UGS_ArcaneBoardManager::GetGridDimensions(int32& OutWidth, int32& OutHeight)
+void UGS_ArcaneBoardManager::GetGridDimensions(int32& OutRows, int32& OutColumns)
 {
 	if (IsValid(CurrGridLayout))
 	{
-		OutWidth = CurrGridLayout->GridSize.X;
-		OutHeight = CurrGridLayout->GridSize.Y;
+		OutRows = CurrGridLayout->GridSize.X;
+		OutColumns = CurrGridLayout->GridSize.Y;
 	}
 	else
 	{
-		OutWidth = 0;
-		OutHeight = 0;
+		OutRows = 0;
+		OutColumns = 0;
 	}
 }
 
@@ -427,6 +416,10 @@ void UGS_ArcaneBoardManager::InitGridState()
 			if (NewCell.State == EGridCellState::Empty)
 			{
 				NewCell.PlacedRuneID = 0;
+			}
+			else if (NewCell.State == EGridCellState::Occupied)
+			{
+				PlacedRunes.Add(FPlacedRuneInfo(Cell.PlacedRuneID, Cell.Pos));
 			}
 			CurrGridState.Add(Cell.Pos, NewCell);
 		}
