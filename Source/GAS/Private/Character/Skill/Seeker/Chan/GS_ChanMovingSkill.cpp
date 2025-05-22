@@ -69,4 +69,9 @@ void UGS_ChanMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 
 void UGS_ChanMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
+	// 뮤트 디버프
+	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
+	{
+		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Mute, OwnerCharacter);
+	}
 }
