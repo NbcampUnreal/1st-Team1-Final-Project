@@ -54,8 +54,28 @@ void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager, 
 					RuneWidget->InitRuneWidget(RuneID, RuneTexture, InBoardWidget);
 				}
 
+				for (const FPlacedRuneInfo& Rune : BoardManager->PlacedRunes)
+				{
+					if (Rune.RuneID == RuneID)
+					{
+						RuneWidget->SetPlaced(true);
+					}
+				}
+
 				RuneScrollBox->AddChild(RuneWidget);
+				OwnsRuneList.Add(RuneID, RuneWidget);
 			}
 		}
 	}
+}
+
+bool UGS_RuneInventoryWidget::UpdatePlacedStateOfRune(uint8 RuneID, bool bIsPlaced)
+{
+	if (OwnsRuneList.Contains(RuneID))
+	{
+		OwnsRuneList[RuneID]->SetPlaced(bIsPlaced);
+		return true;
+	}
+
+	return false;
 }

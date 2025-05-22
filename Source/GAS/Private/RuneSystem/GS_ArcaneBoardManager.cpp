@@ -95,12 +95,13 @@ bool UGS_ArcaneBoardManager::CanPlaceRuneAt(uint8 RuneID, const FIntPoint& Pos)
 
 bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
 {
-	if (!CanPlaceRuneAt(RuneID, Pos))
+	TMap<FIntPoint, UTexture2D*> RuneShape;
+	if (!GetFragmentedRuneTexture(RuneID, RuneShape))
 	{
 		return false;
 	}
-	TMap<FIntPoint, UTexture2D*> RuneShape;
-	if (!GetFragmentedRuneTexture(RuneID, RuneShape))
+
+	if (!CanPlaceRuneAt(RuneID, Pos))
 	{
 		return false;
 	}
