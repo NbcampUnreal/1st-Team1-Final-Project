@@ -41,11 +41,14 @@ void AGS_RTSHUD::StopSelection()
 		return;
 	}
 
-	RTSController->ClearUnitSelection();
-	for (AGS_Monster* Actor : SelectionOfActors)
+	if (SelectionOfActors.Num() > 0)
 	{
-		RTSController->AddUnitToSelection(Actor);
-	}
+		RTSController->ClearUnitSelection();
+		for (AGS_Monster* Actor : SelectionOfActors)
+		{
+			RTSController->AddUnitToSelection(Actor);
+		}
+	}	
 }
 
 void AGS_RTSHUD::DrawHUD()

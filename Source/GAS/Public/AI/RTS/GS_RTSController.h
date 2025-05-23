@@ -9,6 +9,7 @@
 struct FInputActionInstance;
 struct FInputActionValue;
 class AGS_Monster;
+class AGS_Character;
 class UInputMappingContext;
 class UInputAction;
 
@@ -33,6 +34,7 @@ enum class ERTSCommand : uint8
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, const TArray<AGS_Monster*>&, NewSelection);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRTSCommandChanged, ERTSCommand, NewCommand);
 
 UCLASS()
 class GAS_API AGS_RTSController : public APlayerController
@@ -81,6 +83,9 @@ public:
 	// 선택 변경 델리게이트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Selection")
 	FOnSelectionChanged OnSelectionChanged;
+
+	UPROPERTY(BlueprintAssignable, Category="Command")
+	FOnRTSCommandChanged OnRTSCommandChanged;
 
 	// 현재 선택된 유닛들
 	const TArray<AGS_Monster*>& GetUnitSelection() const { return UnitSelection; }
@@ -139,7 +144,10 @@ public:
 	void Server_RTSMove(const TArray<AGS_Monster*>& Units, const FVector& Dest);
 
 	UFUNCTION(Server, Reliable)
-	void Server_RTSAttack(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc);
+	void Server_RTSAttackMove(const TArray<AGS_Monster*>& Units, const FVector& Dest);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RTSAttack(const TArray<AGS_Monster*>& Units, AGS_Character* TargetActor);
 
 	UFUNCTION(Server, Reliable)
 	void Server_RTSStop(const TArray<AGS_Monster*>& Units);
@@ -189,12 +197,13 @@ private:
 	FVector2D GetFinalDirection() const;
 	void MoveCamera(const FVector2D& Direction, float DeltaTime);
 	void InitCameraActor();
-
-	void DoShiftClickToggle();
+	
+	void SelectOnCtrlClick();
+	void ToggleOnShiftClick();
 	
 	// 명령 가능한 유닛들
 	void GatherCommandableUnits(TArray<AGS_Monster*>& Out) const;
 	bool IsSelectable(AGS_Monster* Monster) const;
-
+	void UnlockTargets(const TArray<AGS_Monster*>& Units);
 };
 

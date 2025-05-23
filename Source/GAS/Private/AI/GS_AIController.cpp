@@ -4,7 +4,6 @@
 #include "AI/GS_AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Player/Monster/GS_Monster.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
@@ -65,6 +64,7 @@ FGenericTeamId AGS_AIController::GetGenericTeamId() const
 	return FGenericTeamId::NoTeam;
 }
 
+//TODO: 캐릭터들로 나중에 테스트하기
 void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	if (Blackboard->GetValueAsBool(TargetLockedKey))
@@ -72,14 +72,34 @@ void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 		return;
 	}
 
-	// 현재위치 가장 가까운 애한테 타겟을 걸도록 ! 
-	if (Stimulus.WasSuccessfullySensed())
-	{
-		Blackboard->SetValueAsObject(TargetActorKey, Actor);
-	}
-	else
+	// 지금 시야 감지 범위 안에 있는 타겟들
+	TArray<AActor*> Targets;
+	PerceptionComponent->GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), Targets);
+
+	if (Targets.IsEmpty()) 
 	{
 		Blackboard->ClearValue(TargetActorKey);
+		return;
+	}
+	
+	// 가장 가까운 타겟 찾기
+	APawn* ControlledPawn = GetPawn();
+	float ClosestDist = TNumericLimits<float>::Max();
+	AActor* NearestTarget = nullptr;
+
+	for (AActor* Target : Targets)
+	{
+		const float Dist = FVector::DistSquared(ControlledPawn->GetActorLocation(),	Target->GetActorLocation());
+		if (Dist < ClosestDist)
+		{
+			ClosestDist = Dist;
+			NearestTarget = Target;
+		}
+	}
+
+	if (NearestTarget)
+	{
+		Blackboard->SetValueAsObject(TargetActorKey, NearestTarget);
 	}
 }
 
