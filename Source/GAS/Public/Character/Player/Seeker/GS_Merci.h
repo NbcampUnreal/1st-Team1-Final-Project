@@ -5,7 +5,11 @@
 #include "CoreMinimal.h"
 #include "GS_Seeker.h"
 #include "Character/Interface/GS_AttackInterface.h"
+#include "AkGameplayTypes.h"
 #include "GS_Merci.generated.h"
+
+class AGS_SeekerMerciArrow;
+class UAkComponent;
 
 UCLASS()
 class GAS_API AGS_Merci : public AGS_Seeker, public IGS_AttackInterface
@@ -32,7 +36,52 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess="true"))
 	USkeletalMeshComponent* Quiver;
 
+	UFUNCTION(BlueprintCallable)
+	void LeftClickPressedAttack(UAnimMontage* DrawMontage);
+
+	UFUNCTION(BlueprintCallable)
+	void LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+
+	void FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// 타임라인 관련
+	FTimeline ZoomTimeline;
+
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* ZoomCurve;
+
+	UFUNCTION()
+	void UpdateZoom(float Alpha);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	class UAkAudioEvent* ArrowShotSound_C;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* ShotSoundComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* PullSoundComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* ReleaseSoundComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	UAkAudioEvent* BowPullEvent;
+
+	/*UFUNCTION()
+	void PlayBowPullSound(UAkComponent* AkComp);*/
+
+private:
+	bool bWidgetVisibility = false;
+	USkeletalMeshComponent* Mesh;
+
+	void OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	void SetWidgetVisibility(bool bVisible);
+
+	void StartZoom();
+	void StopZoom();
 };

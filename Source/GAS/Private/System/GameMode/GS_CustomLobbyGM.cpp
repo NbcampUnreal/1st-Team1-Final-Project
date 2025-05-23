@@ -2,13 +2,17 @@
 #include "System/PlayerController/GS_CustomLobbyPC.h"
 #include "System/GS_PlayerState.h"
 #include "System/GameState/GS_CustomLobbyGS.h"
+#include "System/GS_GameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "System/GameState/GS_InGameGS.h"
 
 AGS_CustomLobbyGM::AGS_CustomLobbyGM()
 {
+    DefaultPawnClass = nullptr;
 	PlayerStateClass = AGS_PlayerState::StaticClass();
 	PlayerControllerClass = AGS_CustomLobbyPC::StaticClass();
 	GameStateClass = AGS_CustomLobbyGS::StaticClass();
+    bUseSeamlessTravel = true;
 }
 
 void AGS_CustomLobbyGM::PostLogin(APlayerController* NewPlayer)
@@ -54,7 +58,7 @@ void AGS_CustomLobbyGM::UpdatePlayerReadyStatus(APlayerState* Player, bool bIsRe
 	}
 }
 
-void AGS_CustomLobbyGM::CheckAllPlayersReady() //°¡µğ¾ğ 1¸í ¾Æ´Ï¸é ½ÃÀÛ ¾È µÇ´Â ·ÎÁ÷ Ãß°¡ÇØ¾ßÇÔ
+void AGS_CustomLobbyGM::CheckAllPlayersReady() //ê°€ë””ì–¸ 1ëª… ì•„ë‹ˆë©´ ì‹œì‘ ì•ˆ ë˜ëŠ” ë¡œì§ ì¶”ê°€í•´ì•¼í•¨
 {
     AGS_CustomLobbyGS* LGS = GetGameState<AGS_CustomLobbyGS>();
     if (!LGS)
@@ -67,7 +71,7 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //°¡µğ¾ğ 1¸í ¾Æ´Ï¸é ½ÃÀÛ ¾È µÇ´Â 
     UE_LOG(LogTemp, Verbose, TEXT("LobbyGM: Checking ready status for %d players in GameState. Min players: %d. Players in local map: %d"),
         CurrentPlayerCount, MinPlayersToStart, PlayerReadyStates.Num());
 
-    // ÃÖ¼Ò ½ÃÀÛ ÀÎ¿ø È®ÀÎ
+    // ìµœì†Œ ì‹œì‘ ì¸ì› í™•ì¸
     if (CurrentPlayerCount < MinPlayersToStart)
     {
         UE_LOG(LogTemp, Log, TEXT("LobbyGM: Not enough players to start (%d / %d)."), CurrentPlayerCount, MinPlayersToStart);
@@ -82,14 +86,14 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //°¡µğ¾ğ 1¸í ¾Æ´Ï¸é ½ÃÀÛ ¾È µÇ´Â 
             UE_LOG(LogTemp, Warning, TEXT("LobbyGM: Null PlayerState found in GameState PlayerArray."));
             bAllReady = false;
             break;
-            // Áö±İÃ³·³ Null PlayerState´Â ÁØºñ ¾ÈµÈ °ÍÀ¸·Î °£ÁÖÇØ¾ß µÇ³ª? µğ¹ö±ë ÇÏ°í ³ª¼­ °áÁ¤.
+            // ì§€ê¸ˆì²˜ëŸ¼ Null PlayerStateëŠ” ì¤€ë¹„ ì•ˆëœ ê²ƒìœ¼ë¡œ ê°„ì£¼í•´ì•¼ ë˜ë‚˜? ë””ë²„ê¹… í•˜ê³  ë‚˜ì„œ ê²°ì •.
         }
 
-        // ¸Ê¿¡ ÇØ´ç ÇÃ·¹ÀÌ¾î°¡ µî·ÏµÇ¾î ÀÖ´ÂÁö, »óÅÂ°¡ trueÀÎÁö È®ÀÎ
+        // ë§µì— í•´ë‹¹ í”Œë ˆì´ì–´ê°€ ë“±ë¡ë˜ì–´ ìˆëŠ”ì§€, ìƒíƒœê°€ trueì¸ì§€ í™•ì¸
         const bool* PlayerStatusInMap = PlayerReadyStates.Find(Player);
         if (PlayerStatusInMap == nullptr)
         {
-            // GameState¿¡´Â ÀÖÁö¸¸ ¿ì¸® ¸Ê¿¡ ¾ø´Â °æ¿ì (PostLogin¿¡¼­ ¹º°¡ Àß¸øµÇ¾úÀ» ¼ö ÀÖÀ½) ¹æ ´Ù½Ã ÆÄ¾ß ÇÏ³ª?
+            // GameStateì—ëŠ” ìˆì§€ë§Œ ìš°ë¦¬ ë§µì— ì—†ëŠ” ê²½ìš° (PostLoginì—ì„œ ë­”ê°€ ì˜ëª»ë˜ì—ˆì„ ìˆ˜ ìˆìŒ) ë°© ë‹¤ì‹œ íŒŒì•¼ í•˜ë‚˜?
             UE_LOG(LogTemp, Error, TEXT("LobbyGM: Player %s from GameState NOT FOUND in local PlayerReadyStates map. Assuming not ready."), *Player->GetPlayerName());
             bAllReady = false;
             break;
@@ -109,6 +113,12 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //°¡µğ¾ğ 1¸í ¾Æ´Ï¸é ½ÃÀÛ ¾È µÇ´Â 
         UWorld* World = GetWorld();
         if (World)
         {
+            if (auto* GI = GetGameInstance<UGS_GameInstance>())
+            {
+                GI->ExpectedPlayers = PlayerReadyStates.Num();
+                UE_LOG(LogTemp, Warning, TEXT("LobbyGM: GI->ExpectedPlayers = %d"), GI->ExpectedPlayers);
+            }
+            UE_LOG(LogTemp, Warning, TEXT("LobbyGM: ServerTravel Start ***"));
             bUseSeamlessTravel = true;
             World->ServerTravel(NextLevelName.ToString() + "?listen", true);
         }
@@ -119,7 +129,7 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //°¡µğ¾ğ 1¸í ¾Æ´Ï¸é ½ÃÀÛ ¾È µÇ´Â 
     }
     else
     {
-        if (CurrentPlayerCount > 0) // ÇÃ·¹ÀÌ¾î°¡ ÀÖÀ» ¶§¸¸ "¾ÆÁ÷ ÁØºñ ¾ÈµÊ" ·Î±× Ãâ·Â
+        if (CurrentPlayerCount > 0) // í”Œë ˆì´ì–´ê°€ ìˆì„ ë•Œë§Œ "ì•„ì§ ì¤€ë¹„ ì•ˆë¨" ë¡œê·¸ ì¶œë ¥
         {
             UE_LOG(LogTemp, Log, TEXT("LobbyGM: Not all players are ready yet or no players connected."));
         }

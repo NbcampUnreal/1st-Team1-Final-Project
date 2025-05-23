@@ -41,6 +41,9 @@ public:
     FIntPoint GetCellPos() const;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    uint8 GetPlacedRuneID() const;
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void SetPreviewVisualState(EGridCellVisualState NewState);
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")

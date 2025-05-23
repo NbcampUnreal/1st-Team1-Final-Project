@@ -36,6 +36,12 @@ protected:
 	UFUNCTION()
 	void OnCtrlModifierEnded();
 
+	UFUNCTION()
+	virtual void OnRightClickRelease(const struct FInputActionInstance& Instance);
+
+	UFUNCTION()
+	virtual void OnLeftClickRelease(const struct FInputActionInstance& Instance);
+
 	TObjectPtr<AGS_Character> OwnerCharacter;
 
 	bool bCtrlHeld = false;
