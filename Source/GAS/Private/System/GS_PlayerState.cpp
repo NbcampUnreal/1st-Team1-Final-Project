@@ -21,6 +21,33 @@ void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
     DOREPLIFETIME(AGS_PlayerState, bIsReady);
 }
 
+void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
+{
+    Super::CopyProperties(NewPlayerState);
+
+    // this  == Old PlayerState
+    // NewPlayerState == Newly-created PlayerState
+    if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
+    {
+        NewPS->CurrentPlayerRole = CurrentPlayerRole;
+        NewPS->CurrentSeekerJob = CurrentSeekerJob;
+        NewPS->CurrentGuardianJob = CurrentGuardianJob;
+    }
+}
+
+void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
+{
+    Super::SeamlessTravelTo(NewPlayerState);
+
+    // 여기서는 this == Old, NewPlayerState == New 와 동일.
+    if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
+    {
+        NewPS->CurrentPlayerRole = CurrentPlayerRole;
+        NewPS->CurrentSeekerJob = CurrentSeekerJob;
+        NewPS->CurrentGuardianJob = CurrentGuardianJob;
+    }
+}
+
 void AGS_PlayerState::InitializeDefaults()
 {
     CurrentPlayerRole = EPlayerRole::PR_Seeker;
