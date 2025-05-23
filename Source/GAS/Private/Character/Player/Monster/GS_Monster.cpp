@@ -33,6 +33,8 @@ AGS_Monster::AGS_Monster()
 	}
 
 	TeamId = FGenericTeamId(2);
+
+	Tags.Add("Monster");
 }
 
 void AGS_Monster::BeginPlay()
