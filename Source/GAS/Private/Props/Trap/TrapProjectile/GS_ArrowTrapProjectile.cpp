@@ -63,7 +63,7 @@ void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
 
 	// 메시가 +Y 방향을 앞이라고 가정 시 Y축 기준 -90도 회전
 	FRotator AdjustedRotation = SpawnRotation + FRotator(0.f, -90.f, 0.f);
-	SpawnLocation -= ArrowDirection * 20.f; // 약간 파고들게
+	SpawnLocation -= ArrowDirection * 5.f; // 약간 파고들게
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;

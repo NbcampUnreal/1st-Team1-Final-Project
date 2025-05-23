@@ -12,7 +12,7 @@ AGS_TrapVisualProjectile::AGS_TrapVisualProjectile()
 	ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ProjectileMesh->SetSimulatePhysics(false);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> ArrowMeshObj(TEXT("/Game/Props/Trap/WallTrap/ArrowTrap/Mesh/SM_CrystalArrow.SM_CrystalArrow"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ArrowMeshObj(TEXT("/Game/Props/Trap/WallTrap/ArrowTrap/Mesh/SM_Arrow_old.SM_Arrow_old"));
 	if (ArrowMeshObj.Succeeded())
 	{
 		ProjectileMesh->SetStaticMesh(ArrowMeshObj.Object);
