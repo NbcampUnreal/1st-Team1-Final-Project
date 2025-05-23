@@ -1,6 +1,8 @@
 #include "Props/Trap/TrapProjectile/GS_ArrowTrapProjectile.h"
 #include "Components/SphereComponent.h"
 #include "Character/Player/GS_Player.h"
+#include "Props/Trap/TrapProjectile/GS_TrapVisualProjectile.h"
+#include "Net/UnrealNetwork.h"
 
 
 AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
@@ -11,6 +13,7 @@ AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
 		ProjectileMesh->SetSkeletalMesh(ArrowMeshObj.Object);
 	}
 }
+
 
 void AGS_ArrowTrapProjectile::Init(AGS_TrigTrapBase* InTrap)
 {
@@ -27,7 +30,14 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!OtherActor || OtherActor == this) return;
+	if (!HasAuthority())
+	{
+		return;
+	}
+	if (!OtherActor || OtherActor == this)
+	{
+		return;
+	}
 
 	AGS_Player* Player = Cast<AGS_Player>(OtherActor);
 	if (Player && OwningTrap)
@@ -53,33 +63,23 @@ void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
 
 	// 메시가 +Y 방향을 앞이라고 가정 시 Y축 기준 -90도 회전
 	FRotator AdjustedRotation = SpawnRotation + FRotator(0.f, -90.f, 0.f);
-	SpawnLocation -= ArrowDirection * 25.f; // 약간 파고들게
+	SpawnLocation -= ArrowDirection * 20.f; // 약간 파고들게
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
-	TSubclassOf<AGS_ArrowVisualActor> VisualArrowClass = AGS_ArrowVisualActor::StaticClass();
+	TSubclassOf<AGS_TrapVisualProjectile> VisualArrowClass = AGS_TrapVisualProjectile::StaticClass();
 
 	if (VisualArrowClass)
 	{
-		AGS_ArrowVisualActor* VisualArrow = GetWorld()->SpawnActor<AGS_ArrowVisualActor>(VisualArrowClass, SpawnLocation, AdjustedRotation, Params);
-		/*UE_LOG(LogTemp, Warning, TEXT("VisualArrowClass exist"));*/
+		AGS_TrapVisualProjectile* VisualArrow = GetWorld()->SpawnActor<AGS_TrapVisualProjectile>(VisualArrowClass, SpawnLocation, AdjustedRotation, Params);
 		if (VisualArrow)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("VisualArrow exist"));
-			VisualArrow->SetArrowMesh(ProjectileMesh->GetSkeletalMeshAsset());
+			UE_LOG(LogTemp, Warning, TEXT("VisaulArrow GetName : %s"), *VisualArrow->GetName());
 			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
+
 		}
-		//else
-		//{
-		//	UE_LOG(LogTemp, Warning, TEXT("No VisualArrow"));
-		//}
 	}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("No VisualArrowClass"));
-	//}
-	
 
 	// 본 화살 제거
 	Destroy();

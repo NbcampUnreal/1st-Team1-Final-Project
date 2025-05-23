@@ -3,6 +3,7 @@
 #include "Character/Player/Monster/GS_IronFang.h"
 #include "DungeonEditor/GS_DEController.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
+#include "RuneSystem/GS_EnumUtils.h"
 
 AGS_PlacerBase::AGS_PlacerBase()
 {
@@ -54,6 +55,7 @@ AGS_PlacerBase::AGS_PlacerBase()
 	}
 
 	bUpdatePlaceIndicators = false;
+	Direction = EPlacerDirectionType::Forward;
 }
 
 void AGS_PlacerBase::BeginPlay()
@@ -117,11 +119,12 @@ void AGS_PlacerBase::BuildObject()
 		bUpdatePlaceIndicators = true;
 
 		FIntPoint CursorPoint = BuildManagerRef->GetCellUnderCursor();
-		FVector2d CenterLocation = BuildManagerRef->GetCenterOfRectArea(CursorPoint, ObjectSize);
-		FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
-		// 나중에 회전을 적용할때 FRotator를 넣어주면 될 것 같다.
-		GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator(0, 0, 0));
-
+		FVector2d CenterLocation = BuildManagerRef->GetCenterOfRectArea(CursorPoint, ObjectSize, RotateYaw);
+		FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, ObjectData.ZOffSet);
+		//FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
+		FRotator SpawnRotator = GetActorRotation();
+		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator);
+		NewActor->SetActorRotation(NewActor->GetActorRotation() + FRotator(0.0f, RotateYaw, 0.0f));
 		// 영역 차지 로직
 		TArray<FIntPoint> IntPointArray;
 		CalCellsInRectArea(IntPointArray);
@@ -155,6 +158,18 @@ void AGS_PlacerBase::SetObjectSelectedState(bool InState)
 		//Boarder와 HPBar 숨기기..
 		// 위 기능은 만들지 않을것이니.. 추후에 선택해서 위치를 다시 잡는 기능을 구현할 때 이용하면 될듯.
 	}
+}
+
+void AGS_PlacerBase::RotatePlacer()
+{
+	Direction = (EPlacerDirectionType)(((int)Direction + 1) % (UGS_EnumUtils::GetEnumCount<EPlacerDirectionType>() - 1));
+
+	RotateYaw += 90;
+	RotateYaw = RotateYaw % 360;
+	SetActorRotation(GetActorRotation() + FRotator(0.0f, 90.0f, 0.0f));
+	
+	bUpdatePlaceIndicators = true;
+	DrawPlacementIndicators();
 }
 
 UStaticMeshComponent* AGS_PlacerBase::CreateIndicatorMesh()
@@ -221,10 +236,10 @@ void AGS_PlacerBase::DrawPlacementIndicators()
 void AGS_PlacerBase::CalCellsInRectArea(TArray<FIntPoint>& InIntPointArray)
 {
 	float BaseBuildLevel = BuildManagerRef->GetCellLocation(BuildManagerRef->GetCellUnderCursor()).Z;
-	FVector2d Center = BuildManagerRef->GetCenterOfRectArea(BuildManagerRef->GetCellUnderCursor(), ObjectSize);
-
+	FVector2d Center = BuildManagerRef->GetCenterOfRectArea(BuildManagerRef->GetCellUnderCursor(), ObjectSize, RotateYaw);
+	
 	StaticMeshCompo->SetWorldLocation(FVector(Center.X, Center.Y, BaseBuildLevel));
-	BuildManagerRef->GetCellsInRectArea(InIntPointArray, BuildManagerRef->GetCellUnderCursor(), ObjectSize);
+	BuildManagerRef->GetCellsInRectArea(InIntPointArray, BuildManagerRef->GetCellUnderCursor(), ObjectSize, RotateYaw);
 }
 
 EDEditorCellType AGS_PlacerBase::GetTargetCellType()

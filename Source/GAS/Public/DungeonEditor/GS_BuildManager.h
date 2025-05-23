@@ -56,8 +56,8 @@ public:
 	FVector GetLocationUnderCursorCamera() { return LocationUnderCursorCamera; }
 	
 	FVector GetCellLocation(FIntPoint InCellUnderCurosr);
-	FVector2d GetCenterOfRectArea(FIntPoint InAreaCenterCell, FIntPoint AreaSize);
-	void GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FIntPoint InCenterAreaCell, FIntPoint InAreaSize);
+	FVector2d GetCenterOfRectArea(FIntPoint InAreaCenterCell, FIntPoint AreaSize, float RotateDegree = 0.0f);
+	void GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FIntPoint InCenterAreaCell, FIntPoint InAreaSize, float RotateDegree = 0.0f);
 
 	// 나중에 배치한 애들의 타입을 넣어주어야 할 때 이용하면 괜찮을 것 같다.
 	void SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType, bool InIsRoom = false);
@@ -72,6 +72,9 @@ public:
 	void PressedLMB();
 	void ReleasedLMB();
 	void SelectPlaceableObject();
+	void PressedRMB();
+	void ReleasedRMB();
+	void RotateProp();
 	
 protected:
 	virtual void BeginPlay() override;

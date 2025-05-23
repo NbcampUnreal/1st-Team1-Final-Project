@@ -13,10 +13,6 @@ UGS_DraggableRuneWidget::UGS_DraggableRuneWidget(const FObjectInitializer& Objec
 {
 	RuneID = 0;
 	bIsPlaced = false;
-	if (IsValid(SelectionIndicator))
-	{
-
-	}
 }
 
 void UGS_DraggableRuneWidget::NativeConstruct()
@@ -47,6 +43,14 @@ FReply UGS_DraggableRuneWidget::NativeOnMouseButtonDown(const FGeometry& InGeome
 
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
+		if (IsValid(SelectionIndicator))
+		{
+			if (SelectionIndicator->GetVisibility() == ESlateVisibility::Visible)
+			{
+				return FReply::Handled();;
+			}
+		}
+
 		if (ParentBoardWidget)
 		{
 			ParentBoardWidget->StartRuneSelection(RuneID);
@@ -71,7 +75,7 @@ void UGS_DraggableRuneWidget::NativeOnMouseEnter(const FGeometry& InGeometry, co
 
 	if (!bIsPlaced)
 	{
-		SetRuneVisualState(true, false);
+		SetRuneVisualState(true, bIsPlaced);
 	}
 }
 
@@ -81,7 +85,7 @@ void UGS_DraggableRuneWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEve
 
 	if (!bIsPlaced)
 	{
-		SetRuneVisualState(false, false);
+		SetRuneVisualState(false, bIsPlaced);
 	}
 }
 
@@ -107,7 +111,7 @@ void UGS_DraggableRuneWidget::SetRuneTexture(UTexture2D* Texture)
 
 void UGS_DraggableRuneWidget::SetRuneVisualState(bool bHovered, bool bDisabled)
 {
-	if (!IsValid(RuneImage))
+	if (!IsValid(RuneState))
 	{
 		return;
 	}
@@ -116,17 +120,25 @@ void UGS_DraggableRuneWidget::SetRuneVisualState(bool bHovered, bool bDisabled)
 	if (bDisabled)
 	{
 		NewColor = FLinearColor(0.5f, 0.5f, 0.5f, 0.7f);
+		if (IsValid(SelectionIndicator))
+		{
+			SelectionIndicator->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 	else if (bHovered)
 	{
-		NewColor = FLinearColor(1.2f, 1.2f, 1.0f, 1.0f);
+		NewColor = FLinearColor(1.2f, 1.2f, 1.0f, 0.7f);
 	}
 	else
 	{
-		NewColor = FLinearColor::White;
+		NewColor = FLinearColor(0.0f, 0.0f, 0.0f, 0.0f);
+		if (IsValid(SelectionIndicator))
+		{
+			SelectionIndicator->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 
-	RuneImage->SetBrushTintColor(NewColor);
+	RuneState->SetColorAndOpacity(NewColor);
 }
 
 void UGS_DraggableRuneWidget::SetPlaced(bool bPlaced)
