@@ -227,7 +227,7 @@
 								<Action Name="" ID="{D3E40DAC-E979-4EF4-8D48-3F16EDC86F3E}" ShortID="745598978">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_AxeSwing_Hit" ID="{BF022B96-0D0E-4BA6-9AA8-E0B934FF2A41}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_Swing_Hit" ID="{199C4062-58AF-4B39-B5CE-2F7029BABD29}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -293,7 +293,7 @@
 								<Action Name="" ID="{59A44036-0045-42D0-A5C6-016AD2610615}" ShortID="234166397">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_Saw" ID="{91C078AB-FEA4-4EE1-A0C5-C1F2C62FF51C}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_CrystalSaw" ID="{6F302D28-2733-4779-A4AA-A97068514725}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -305,7 +305,7 @@
 								<Action Name="" ID="{9A5EADA5-6F38-4DE9-B836-BF942CA83ADC}" ShortID="96101203">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_Saw_Hit" ID="{86E51F01-81CC-49A4-BD8B-40EDC288492F}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_CrystalSaw_Hit" ID="{7E0EF1DB-5A85-4BD9-B830-47BB74676879}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -338,7 +338,7 @@
 								<Action Name="" ID="{3D1ADF06-DF28-42A6-A305-9D0749263153}" ShortID="258217654">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_SpikeTrap" ID="{E06DA69C-FFED-49FC-9D34-7D81B986EAF5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_CrystalSpikeTrap" ID="{C3DFCFBC-AD76-47D7-8F26-4ED602CC8A43}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -349,7 +349,7 @@
 								<Action Name="" ID="{59F7A33F-8634-4313-875F-EA9AE94ED1A1}" ShortID="310572861">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_SpikeTrap_Hit" ID="{F473346D-577A-43CC-A9FE-CF39A1BC99D7}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_CrystalSpikeTrap" ID="{C3DFCFBC-AD76-47D7-8F26-4ED602CC8A43}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
