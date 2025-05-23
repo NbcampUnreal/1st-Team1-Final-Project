@@ -21,22 +21,13 @@ void UGS_RuneGridCellWidget::InitCell(const FGridCellData& InCellData, UGS_Arcan
 {
 	ParentBoardWidget = InParentBoard;
 	SetCellData(InCellData);
-	RuneImage->SetVisibility(ESlateVisibility::Hidden);
 	PreviewImage->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UGS_RuneGridCellWidget::SetCellData(const FGridCellData& InCellData)
 {
 	CellData = InCellData;
-
-	if (CellData.State == EGridCellState::Occupied && CellData.PlacedRuneID > 0)
-	{
-		UTexture2D* RuneTexture = CellData.RuneTextureFrag;
-		if (RuneTexture)
-		{
-			SetRuneTexture(RuneTexture);
-		}
-	}
+	SetRuneTexture(CellData.RuneTextureFrag);
 
 	if (CellData.bIsSpecialCell)
 	{
@@ -47,6 +38,11 @@ void UGS_RuneGridCellWidget::SetCellData(const FGridCellData& InCellData)
 FIntPoint UGS_RuneGridCellWidget::GetCellPos() const
 {
 	return CellData.Pos;
+}
+
+uint8 UGS_RuneGridCellWidget::GetPlacedRuneID() const
+{
+	return CellData.PlacedRuneID;
 }
 
 void UGS_RuneGridCellWidget::SetPreviewVisualState(EGridCellVisualState NewState)
@@ -85,6 +81,10 @@ void UGS_RuneGridCellWidget::SetRuneTexture(UTexture2D* Texture)
 		{
 			RuneImage->SetBrushFromTexture(Texture);
 			RuneImage->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			RuneImage->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 }
