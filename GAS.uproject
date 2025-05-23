@@ -25,6 +25,10 @@
 			]
 		},
 		{
+			"Name": "Wwise",
+			"Enabled": true
+		},
+		{
 			"Name": "OnlineSubsystemSteam",
 			"Enabled": true
 		},

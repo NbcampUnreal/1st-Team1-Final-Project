@@ -38,6 +38,7 @@ void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputC
 		if (IA_RightClick)
 		{
 			EnhancedInput->BindAction(IA_RightClick, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnRightClick);
+			EnhancedInput->BindAction(IA_RightClick, ETriggerEvent::Completed, this, &UGS_SkillInputHandlerComp::OnRightClickRelease);
 		}
 		if (IA_ModifierCtrl)
 		{
@@ -47,6 +48,7 @@ void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputC
 		if (IA_LeftClick)
 		{
 			EnhancedInput->BindAction(IA_LeftClick, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnLeftClick);
+			EnhancedInput->BindAction(IA_LeftClick, ETriggerEvent::Completed, this, &UGS_SkillInputHandlerComp::OnRightClickRelease);
 		}
 	}
 }
@@ -104,5 +106,13 @@ void UGS_SkillInputHandlerComp::OnCtrlModifierEnded()
 {
 	bCtrlHeld = false;
 	UE_LOG(LogTemp, Warning, TEXT("Ctrl Click End"));
+}
+
+void UGS_SkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
+{
+}
+
+void UGS_SkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
+{
 }
 
