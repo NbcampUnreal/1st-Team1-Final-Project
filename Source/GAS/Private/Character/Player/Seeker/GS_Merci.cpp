@@ -6,6 +6,12 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
+#include "Character/Component/Seeker/GS_MerciSkillInputHandlerComp.h"
+#include "AkGameplayTypes.h"
+#include "AkComponent.h"
+#include "AkAudioEvent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Templates/Function.h"
 //#include "Weapon/Equipable/"
 
 // Sets default values
@@ -21,6 +27,21 @@ AGS_Merci::AGS_Merci()
 	Quiver->SetupAttachment(GetMesh(), TEXT("QuiverSocket"));
 	Quiver->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Quiver->SetSimulatePhysics(false);
+
+	ShotSoundComp = CreateDefaultSubobject<UAkComponent>(TEXT("Shot Sound"));
+	ShotSoundComp->SetupAttachment(GetMesh());
+	ShotSoundComp->bAutoActivate = false;
+
+	ReleaseSoundComp = CreateDefaultSubobject<UAkComponent>(TEXT("Release Sound"));
+	ReleaseSoundComp->SetupAttachment(GetMesh());
+	ReleaseSoundComp->bAutoActivate = false;
+
+	PullSoundComp = CreateDefaultSubobject<UAkComponent>(TEXT("Pull Sound"));
+	PullSoundComp->SetupAttachment(GetMesh());
+	PullSoundComp->bAutoActivate = false;
+
+	CharacterType = ECharacterType::Merci;
+	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_MerciSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 }
 
 void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
@@ -32,7 +53,6 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 			float Duration = Mesh->GetAnimInstance()->Montage_Play(DrawMontage, 2.0f);
 			if (Duration > 0.0f)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Draw"));
 				FOnMontageEnded EndDelegate;
 				EndDelegate.BindUObject(this, &AGS_Merci::OnDrawMontageEnded);
 				Mesh->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, DrawMontage);
@@ -50,6 +70,7 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 		SetDrawState(true); // 상태 전환
 
 		// 사운드 재생
+		/*PlayBowPullSound(PullSoundComp);*/
 
 		StartZoom(); // 줌인
 	}
@@ -61,13 +82,24 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 
 void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Frie"));
 	SetAimState(false);
 	SetDrawState(false);
 
 	// 사운드 재생
 
+	if (ReleaseSoundComp)
+	{
+		ReleaseSoundComp->PostAssociatedAkEvent(0, FOnAkPostEventCallback());
+		UE_LOG(LogTemp, Warning, TEXT("ReleaseSound"));
+	}
+
 	FireArrow(ArrowClass);
+
+	if (ShotSoundComp)
+	{
+		ShotSoundComp->PostAssociatedAkEvent(0, FOnAkPostEventCallback());
+		UE_LOG(LogTemp, Warning, TEXT("ShotSound"));
+	}
 
 	StopZoom();
 
@@ -93,12 +125,6 @@ void AGS_Merci::FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
 	SpawnParams.Instigator = this;
 
 	GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);
-
-	// 4. 사운드 재생
-	if (ArrowShotSound_C)
-	{
-
-	}
 }
 
 // Called when the game starts or when spawned
@@ -114,10 +140,6 @@ void AGS_Merci::BeginPlay()
 
 		ZoomTimeline.AddInterpFloat(ZoomCurve, TimelineCallback);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ZoomCurve null"));
-	}
 }
 
 void AGS_Merci::UpdateZoom(float Alpha)
@@ -128,7 +150,6 @@ void AGS_Merci::UpdateZoom(float Alpha)
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Update Zoom"));
 	float TargetArmLength = FMath::Lerp(400.0f, 180.0f, Alpha);
 	float SocketOffsetY = FMath::Lerp(0.f, 20.f, Alpha);
 	float SocketOffsetZ = FMath::Lerp(0.f, -40.0f, Alpha);
@@ -138,18 +159,42 @@ void AGS_Merci::UpdateZoom(float Alpha)
 	SpringArmComp->SocketOffset = OffSet;
 }
 
+//void AGS_Merci::PlayBowPullSound(UAkComponent* AkComp)
+//{
+//	if (!PullSoundComp || !BowPullEvent)
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("AkComponent or Event is null"));
+//		return;
+//	}
+//
+//	FOnAkPostEventCallback Callback;
+//	Callback.BindLambda([](EAkCallbackType CallbackType, AkCallbackInfo* CallbackInfo)
+//		{
+//			if (CallbackType == EAkCallbackType::EndOfEvent)
+//			{
+//				UE_LOG(LogTemp, Log, TEXT("Bow Pull Sound finished playing."));
+//				// 여기에 완료 후 로직 추가
+//			}
+//		});
+//
+//	PullSoundComp->PostAkEvent(
+//		BowPullEvent,
+//		0,                   // Callback Mask
+//		Callback,            // Callback Delegate
+//		nullptr              // Cookie
+//	);
+//}
+
 void AGS_Merci::OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (!bInterrupted)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OnDrawMontageEnded bInterrupted = false"));
 		SetWidgetVisibility(true); // 크로스 헤어 보이기
 		SetAimState(true);
 		SetDrawState(false);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OnDrawMontageEnded bInterrupted = true"));
 		SetWidgetVisibility(false); // 실패 시 숨기기
 		SetDrawState(false);
 	}
@@ -160,19 +205,16 @@ void AGS_Merci::SetWidgetVisibility(bool bVisible)
 	if (WidgetCrosshair)
 	{
 		WidgetCrosshair->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
-		UE_LOG(LogTemp, Warning, TEXT("Set Widget Visibility"));
 	}
 }
 
 void AGS_Merci::StartZoom()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Start Zoom"));
 	ZoomTimeline.Play(); // 줌인
 }
 
 void AGS_Merci::StopZoom()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Stop Zoom"));
 	ZoomTimeline.Reverse(); // 줌아웃
 }
 
