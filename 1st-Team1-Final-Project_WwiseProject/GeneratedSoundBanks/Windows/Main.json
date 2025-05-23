@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{18B9886B-FDDD-1CBD-43E3-0FCA3A59A9AB}",
+    "Hash": "{4B123204-C468-1822-B4F6-643A982F4512}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -29,7 +29,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_04c.wav",
-      "CachePath": "E5/{E5EBF217-3BCB-8977-CBCE-300F5C9B9DB5}.wem"
+      "CachePath": "56/{569B47FA-F4EA-C503-6E0F-4725431389E7}.wem"
      },
      {
       "Id": "15081757",
@@ -37,7 +37,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
-      "CachePath": "4E/{4E24841B-A9F8-F1F9-48EC-FAE0971AC6D6}.wem"
+      "CachePath": "AD/{ADA6F4C1-AB75-7724-99C9-E9333418D799}.wem"
      },
      {
       "Id": "45190972",
@@ -77,7 +77,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
-      "CachePath": "29/{29E8D46B-B201-04B9-0075-AA8D8679A4C9}.wem"
+      "CachePath": "04/{04B26063-F9EB-C782-3DC1-790616CFFE03}.wem"
      },
      {
       "Id": "112081368",
@@ -213,7 +213,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_FG2_FX_combat_one_shot_hit_whoosh_punch_4.wav",
-      "CachePath": "A0/{A08F1FD4-9590-CDEA-F5C8-2B73F2AD367F}.wem"
+      "CachePath": "61/{617FE605-8996-7E09-32BF-4A11BCE6D93D}.wem"
      },
      {
       "Id": "290212776",
@@ -296,14 +296,6 @@
       "CachePath": "9A/{9A513CC8-FF0F-3BA5-9FD4-F3E8CBE9A384}.wem"
      },
      {
-      "Id": "418165151",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_GB_fx_foley_one_shot_rockcrsh_brick_wall_breaking_02_impact_smash_destroy_hit_scatter_shards.wav",
-      "CachePath": "6D/{6D370922-EB05-2991-8653-B9BD94376D15}.wem"
-     },
-     {
       "Id": "434604945",
       "Language": "SFX",
       "Streaming": "false",
@@ -325,7 +317,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "CrystalTrapSFX.wav",
-      "CachePath": "1E/{1E17E403-068D-0C1D-6C42-E9A9DD520146}.wem"
+      "CachePath": "10/{10AADF17-9AA3-E379-76EC-DB59324F7C73}.wem"
      },
      {
       "Id": "451846292",
@@ -389,7 +381,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_SPG_fx_breakable_glass_smash_crash_shatter_04.wav",
-      "CachePath": "35/{351E463A-AE6D-AA4E-3551-ACFF6844A0C9}.wem"
+      "CachePath": "94/{947B0571-385E-A001-7294-B5CCC60E8490}.wem"
      },
      {
       "Id": "518697165",
@@ -421,7 +413,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Ambient_Game_Attack_Simple_Heavy_Swing_1_Deep_Hammer_Air_Woosh.wav",
-      "CachePath": "FA/{FAE6D089-5CF2-A941-5DFA-C089E25A3F9C}.wem"
+      "CachePath": "06/{06481DB1-8D08-E10B-B20A-651CA9CF0B73}.wem"
      },
      {
       "Id": "548015621",
@@ -437,7 +429,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_04b.wav",
-      "CachePath": "19/{192DFCB2-7FD2-50D4-B438-2D6DAB6E5299}.wem"
+      "CachePath": "44/{445591A1-400F-11CC-CE7C-B48B50E81AE2}.wem"
      },
      {
       "Id": "576560667",
@@ -597,7 +589,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
-      "CachePath": "54/{547D0C36-3ACF-7DCF-EA8B-7B599C30FF6F}.wem"
+      "CachePath": "5F/{5F7FEB5F-1DC7-BD86-7AF3-74F014943AFB}.wem"
      },
      {
       "Id": "763229215",
@@ -685,7 +677,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "GlassBreakWine_SFXB.2343.wav",
-      "CachePath": "97/{97A9BB5E-6731-E604-EA2E-409B458F15CD}.wem"
+      "CachePath": "F2/{F22E99BC-892E-46EC-D1C3-7DA86EA5F9F8}.wem"
      },
      {
       "Id": "919997465",
@@ -1005,7 +997,7 @@
       "Name": "EV_ArrowImpact_Stone",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Stone",
       "GUID": "{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "1000",
       "DurationType": "OneShot",
       "DurationMin": "0.54591566",
       "DurationMax": "0.7596884",
@@ -1479,8 +1471,8 @@
       "GUID": "{597B061A-CE0A-4A56-8154-41280E86C596}",
       "MaxAttenuation": "1000",
       "DurationType": "OneShot",
-      "DurationMin": "0.89423656",
-      "DurationMax": "0.94741064",
+      "DurationMin": "0.87675357",
+      "DurationMax": "0.9288881",
       "MediaRefs": [
        {
         "Id": "542254204"
@@ -1726,6 +1718,7 @@
       "Name": "Props_Spike",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Spike",
       "GUID": "{87EFA3D2-5892-417F-A875-D06CCD556912}",
+      "MaxAttenuation": "600",
       "DurationType": "OneShot",
       "DurationMin": "0.57722557",
       "DurationMax": "0.61154914",
@@ -1738,9 +1731,6 @@
        },
        {
         "Id": "151148536"
-       },
-       {
-        "Id": "418165151"
        }
       ]
      },
@@ -1749,6 +1739,7 @@
       "Name": "Props_Spike_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Spike_Hit",
       "GUID": "{36F0066E-709B-487B-AB1C-AAC04B8F753C}",
+      "MaxAttenuation": "600",
       "DurationType": "OneShot",
       "DurationMin": "0.57722557",
       "DurationMax": "0.61154914",
@@ -1761,9 +1752,6 @@
        },
        {
         "Id": "151148536"
-       },
-       {
-        "Id": "418165151"
        }
       ]
      },
@@ -1934,6 +1922,6 @@
     ]
    }
   ],
-  "FileHash": "{3C16A85E-0DD2-B835-5C7C-A73642A96DD3}"
+  "FileHash": "{0B2CD80F-8940-3DF4-2C84-2D4C09C9EECA}"
  }
 }
