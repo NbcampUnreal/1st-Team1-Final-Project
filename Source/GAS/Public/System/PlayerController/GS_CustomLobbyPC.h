@@ -24,7 +24,9 @@ protected:
 	virtual void BeginPlay() override;
 	//virtual void SetupInputComponent() override; // 키보드 기능. 나중에 esc 넣을때 주석 해제
 	virtual void OnRep_PlayerState() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	UFUNCTION(Server, Reliable)
+	void Server_NotifyClientLoaded();
+	bool bHasNotifiedInGameLoad = false;
 
 	UPROPERTY()
 	AGS_PlayerState* CachedPlayerState;
