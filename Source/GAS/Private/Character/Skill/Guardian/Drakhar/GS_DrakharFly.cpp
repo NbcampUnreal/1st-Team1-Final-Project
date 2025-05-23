@@ -5,14 +5,15 @@
 
 UGS_DrakharFly::UGS_DrakharFly()
 {
-	Cooltime = 5.f;
 	bIsFlying = false;
-	
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> FlyMontage(TEXT("/Game/Player/Guardian/Drakhar/Animations/Blueprint/AM_DraconicFury1.AM_DraconicFury1"));
-	if (FlyMontage.Succeeded())
-	{
-		SkillAnimMontages.Add(FlyMontage.Object);
-	}
+	// Cooltime = 5.f;
+	// bIsFlying = false;
+	//
+	// static ConstructorHelpers::FObjectFinder<UAnimMontage> FlyMontage(TEXT("/Game/Player/Guardian/Drakhar/Animations/Blueprint/AM_DraconicFury1.AM_DraconicFury1"));
+	// if (FlyMontage.Succeeded())
+	// {
+	// 	SkillAnimMontages.Add(FlyMontage.Object);
+	// }
 }
 
 void UGS_DrakharFly::ActiveSkill()
