@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "GS_Seeker.h"
 #include "Character/Interface/GS_AttackInterface.h"
+#include "AkGameplayTypes.h"
 #include "GS_Merci.generated.h"
 
 class AGS_SeekerMerciArrow;
+class UAkComponent;
 
 UCLASS()
 class GAS_API AGS_Merci : public AGS_Seeker, public IGS_AttackInterface
@@ -57,6 +59,21 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Audio")
 	class UAkAudioEvent* ArrowShotSound_C;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* ShotSoundComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* PullSoundComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* ReleaseSoundComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	UAkAudioEvent* BowPullEvent;
+
+	/*UFUNCTION()
+	void PlayBowPullSound(UAkComponent* AkComp);*/
 
 private:
 	bool bWidgetVisibility = false;
