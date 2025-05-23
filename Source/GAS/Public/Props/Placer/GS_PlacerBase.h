@@ -40,6 +40,8 @@ public:
 	void ActiveObjectPlacer();
 
 	void SetObjectSelectedState(bool InState);
+
+	void RotatePlacer();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -59,11 +61,16 @@ private:
 	INT CurPlaceMeshIndex;
 	bool bUpdatePlaceIndicators;
 	bool bCanBuild;
+	EPlacerDirectionType Direction;
 
 	void SetupObjectPlacer();
 	void DrawPlacementIndicators();
 
 	void CalCellsInRectArea(TArray<FIntPoint>& InIntPointArray);
-	
+
+	EDEditorCellType GetTargetCellType();
+	EDEditorCellType GetRoomCellInfo(int InIdx);
+
+	int RotateYaw;
 	bool bObjectSelected;
 };

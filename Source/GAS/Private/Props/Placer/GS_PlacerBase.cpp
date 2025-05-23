@@ -1,7 +1,9 @@
 #include "Props/Placer/GS_PlacerBase.h"
 
+#include "Character/Player/Monster/GS_IronFang.h"
 #include "DungeonEditor/GS_DEController.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
+#include "RuneSystem/GS_EnumUtils.h"
 
 AGS_PlacerBase::AGS_PlacerBase()
 {
@@ -53,6 +55,7 @@ AGS_PlacerBase::AGS_PlacerBase()
 	}
 
 	bUpdatePlaceIndicators = false;
+	Direction = EPlacerDirectionType::Forward;
 }
 
 void AGS_PlacerBase::BeginPlay()
@@ -116,18 +119,26 @@ void AGS_PlacerBase::BuildObject()
 		bUpdatePlaceIndicators = true;
 
 		FIntPoint CursorPoint = BuildManagerRef->GetCellUnderCursor();
-		FVector2d CenterLocation = BuildManagerRef->GetCenterOfRectArea(CursorPoint, ObjectSize);
-		FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
-		// 나중에 회전을 적용할때 FRotator를 넣어주면 될 것 같다.
-		GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator(0, 0, 0));
-
+		FVector2d CenterLocation = BuildManagerRef->GetCenterOfRectArea(CursorPoint, ObjectSize, RotateYaw);
+		FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, ObjectData.ZOffSet);
+		//FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
+		FRotator SpawnRotator = GetActorRotation();
+		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator);
+		NewActor->SetActorRotation(NewActor->GetActorRotation() + FRotator(0.0f, RotateYaw, 0.0f));
 		// 영역 차지 로직
 		TArray<FIntPoint> IntPointArray;
 		CalCellsInRectArea(IntPointArray);
 
+		EDEditorCellType TargetType = GetTargetCellType();
+		bool IsRoom = false;
 		for (int i = 0; i < IntPointArray.Num(); i++)
 		{
-			BuildManagerRef->SetOccupancyData(IntPointArray[i], true);
+			if (ObjectData.ObjectType == EObjectType::Room)
+			{
+				TargetType = GetRoomCellInfo(i);
+				IsRoom = true;
+			}
+			BuildManagerRef->SetOccupancyData(IntPointArray[i], TargetType, IsRoom);
 		}
 	}
 }
@@ -147,6 +158,18 @@ void AGS_PlacerBase::SetObjectSelectedState(bool InState)
 		//Boarder와 HPBar 숨기기..
 		// 위 기능은 만들지 않을것이니.. 추후에 선택해서 위치를 다시 잡는 기능을 구현할 때 이용하면 될듯.
 	}
+}
+
+void AGS_PlacerBase::RotatePlacer()
+{
+	Direction = (EPlacerDirectionType)(((int)Direction + 1) % (UGS_EnumUtils::GetEnumCount<EPlacerDirectionType>() - 1));
+
+	RotateYaw += 90;
+	RotateYaw = RotateYaw % 360;
+	SetActorRotation(GetActorRotation() + FRotator(0.0f, 90.0f, 0.0f));
+	
+	bUpdatePlaceIndicators = true;
+	DrawPlacementIndicators();
 }
 
 UStaticMeshComponent* AGS_PlacerBase::CreateIndicatorMesh()
@@ -188,13 +211,14 @@ void AGS_PlacerBase::DrawPlacementIndicators()
 
 			TArray<FIntPoint> IntPointArray;
 		 	CalCellsInRectArea(IntPointArray);
-		 	
+
+		 	EDEditorCellType TargetType = GetTargetCellType();
 		 	for (int i = 0; i < IntPointArray.Num(); i++)
 		 	{
 		 		FVector CellLocation = BuildManagerRef->GetCellLocation(IntPointArray[i]);
 		 		PlaceIndicators[i]->SetWorldLocation(CellLocation);
-
-		 		if (!BuildManagerRef->CheckOccupancyData(IntPointArray[i]))
+		 		
+		 		if (!BuildManagerRef->CheckOccupancyData(IntPointArray[i], TargetType))
 		 			//&& FMath::Abs(CellLocation.Z - BaseBuildLevel) < MaxHeightDifferenceforConstruction))
 		 		{
 		 			PlaceIndicators[i]->SetMaterial(0, PlaceAcceptedMaterial);
@@ -212,8 +236,53 @@ void AGS_PlacerBase::DrawPlacementIndicators()
 void AGS_PlacerBase::CalCellsInRectArea(TArray<FIntPoint>& InIntPointArray)
 {
 	float BaseBuildLevel = BuildManagerRef->GetCellLocation(BuildManagerRef->GetCellUnderCursor()).Z;
-	FVector2d Center = BuildManagerRef->GetCenterOfRectArea(BuildManagerRef->GetCellUnderCursor(), ObjectSize);
-
+	FVector2d Center = BuildManagerRef->GetCenterOfRectArea(BuildManagerRef->GetCellUnderCursor(), ObjectSize, RotateYaw);
+	
 	StaticMeshCompo->SetWorldLocation(FVector(Center.X, Center.Y, BaseBuildLevel));
-	BuildManagerRef->GetCellsInRectArea(InIntPointArray, BuildManagerRef->GetCellUnderCursor(), ObjectSize);
+	BuildManagerRef->GetCellsInRectArea(InIntPointArray, BuildManagerRef->GetCellUnderCursor(), ObjectSize, RotateYaw);
+}
+
+EDEditorCellType AGS_PlacerBase::GetTargetCellType()
+{
+	EObjectType ObjectType = ObjectData.ObjectType;
+	if (ObjectType == EObjectType::Room)
+	{
+		return EDEditorCellType::None;
+	}
+	else if (ObjectType == EObjectType::Monster)
+	{
+		return EDEditorCellType::FloorPlace;
+	}
+	else if (ObjectType == EObjectType::Trap)
+	{
+		ETrapPlacement TrapType = ObjectData.TrapType;
+		if (TrapType == ETrapPlacement::Floor)
+			return EDEditorCellType::FloorPlace;
+		else if (TrapType == ETrapPlacement::Ceiling)
+			return EDEditorCellType::CeilingPlace;
+		else if (TrapType == ETrapPlacement::Wall)
+			return EDEditorCellType::WallPlace;
+	}
+	else if (ObjectType == EObjectType::DoorAndWall)
+	{
+		// 나중에 벽과 문을 구분지어주어야 함.
+		return EDEditorCellType::Door;
+	}
+	else
+	{
+		return EDEditorCellType::None;
+	}
+	return EDEditorCellType::None;
+}
+
+EDEditorCellType AGS_PlacerBase::GetRoomCellInfo(int InIdx)
+{
+	FIntPoint FindIdx;
+	FindIdx.X = InIdx / ObjectSize.Y;
+	FindIdx.Y = InIdx % ObjectSize.Y;
+	if (ObjectData.RoomCellInfo.Find(FindIdx))
+	{
+		return ObjectData.RoomCellInfo[FindIdx];
+	}
+	return EDEditorCellType::HorizontalPlaceable;
 }

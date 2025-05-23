@@ -13,6 +13,7 @@
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
 
+
 AGS_RTSController::AGS_RTSController()
 {
 	bShowMouseCursor = true;
@@ -125,6 +126,11 @@ void AGS_RTSController::OnLeftMousePressed()
 		{
 			if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
 			{
+				if (!IsSelectable(Monster))
+				{
+					return;
+				}
+				
 				ClearUnitSelection();
 				
 				ECharacterType MonsterType = Monster->GetCharacterType();
@@ -203,8 +209,12 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	{
 		return;
 	}
-	
-	Server_RTSMove(UnitSelection, GroundHit.Location);
+
+	// 명령 가능한 유닛들만 
+	TArray<AGS_Monster*> Commandables;
+	GatherCommandableUnits(Commandables);
+
+	Server_RTSMove(Commandables, GroundHit.Location);
 }
 
 FVector2D AGS_RTSController::GetKeyboardDirection() const
@@ -319,6 +329,7 @@ void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 	}
 	
 	UnitSelection.AddUnique(Unit);
+	OnSelectionChanged.Broadcast(UnitSelection);
 	Unit->SetSelected(true);
 }
 
@@ -330,6 +341,7 @@ void AGS_RTSController::RemoveUnitFromSelection(AGS_Monster* Unit)
 	}
 	
 	UnitSelection.Remove(Unit);
+	OnSelectionChanged.Broadcast(UnitSelection);
 	Unit->SetSelected(false);
 }
 
@@ -344,6 +356,7 @@ void AGS_RTSController::ClearUnitSelection()
 	}
 		
 	UnitSelection.Empty();
+	OnSelectionChanged.Broadcast(UnitSelection);
 }
 
 
@@ -415,7 +428,11 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 
 void AGS_RTSController::MoveAIViaMinimap(const FVector& WorldLocation)
 {
-	Server_RTSMove(UnitSelection, WorldLocation);
+	// 명령 가능한 유닛들만 
+	TArray<AGS_Monster*> Commandables;
+	GatherCommandableUnits(Commandables);
+	
+	Server_RTSMove(Commandables, WorldLocation);
 }
 
 void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)
@@ -448,4 +465,20 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 			}
 		}
 	}
+}
+
+void AGS_RTSController::GatherCommandableUnits(TArray<AGS_Monster*>& Out) const
+{
+	for (AGS_Monster* Unit : UnitSelection)
+	{
+		if (IsValid(Unit) && Unit->IsCommandable())
+		{
+			Out.Add(Unit);
+		}
+	}
+}
+
+bool AGS_RTSController::IsSelectable(AGS_Monster* Monster) const
+{
+	return IsValid(Monster) && Monster->IsSelectable();
 }

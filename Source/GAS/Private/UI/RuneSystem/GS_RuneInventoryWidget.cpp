@@ -3,6 +3,7 @@
 
 #include "UI/RuneSystem/GS_RuneInventoryWidget.h"
 #include "UI/RuneSystem/GS_DraggableRuneWidget.h"
+#include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
 #include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "Components/ScrollBox.h"
 
@@ -26,9 +27,10 @@ void UGS_RuneInventoryWidget::NativeConstruct()
 	}
 }
 
-void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager)
+void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager, UGS_ArcaneBoardWidget* InBoardWidget)
 {
 	BoardManager = InBoardManager;
+	BoardWidget = InBoardWidget;
 
 	if (!IsValid(BoardManager) || !IsValid(RuneScrollBox))
 	{
@@ -46,16 +48,34 @@ void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager)
 			UGS_DraggableRuneWidget* RuneWidget = CreateWidget<UGS_DraggableRuneWidget>(this, RuneWidgetClass);
 			if (RuneWidget)
 			{
-				RuneWidget->SetRuneID(RuneID);
-
 				UTexture2D* RuneTexture = BoardManager->GetRuneTexture(RuneID);
 				if (RuneTexture)
 				{
-					RuneWidget->SetRuneTexture(RuneTexture);
+					RuneWidget->InitRuneWidget(RuneID, RuneTexture, InBoardWidget);
+				}
+
+				for (const FPlacedRuneInfo& Rune : BoardManager->PlacedRunes)
+				{
+					if (Rune.RuneID == RuneID)
+					{
+						RuneWidget->SetPlaced(true);
+					}
 				}
 
 				RuneScrollBox->AddChild(RuneWidget);
+				OwnsRuneList.Add(RuneID, RuneWidget);
 			}
 		}
 	}
+}
+
+bool UGS_RuneInventoryWidget::UpdatePlacedStateOfRune(uint8 RuneID, bool bIsPlaced)
+{
+	if (OwnsRuneList.Contains(RuneID))
+	{
+		OwnsRuneList[RuneID]->SetPlaced(bIsPlaced);
+		return true;
+	}
+
+	return false;
 }

@@ -7,6 +7,7 @@
 #include "GS_AIController.generated.h"
 
 struct FAIStimulus;
+class AGS_Character;
 /**
  * 
  */
@@ -22,9 +23,16 @@ public:
 	static const FName TargetActorKey;
 	static const FName RTSTargetKey;
 	static const FName bUseRTSKey;
+	static const FName TargetLockedKey;
 
 	UPROPERTY(VisibleAnywhere, Category = "AI Perception")
 	class UAISenseConfig_Sight* SightConfig;
+	
+	void LockTarget(AGS_Character* TargetCharacter);
+	void UnlockTarget();
+
+	void EnterConfuseState();
+	void ExitConfuseState();
 
 protected:
 	virtual void BeginPlay() override;
@@ -40,4 +48,7 @@ private:
 
 	UPROPERTY()
 	UBlackboardData* BBAsset;
+
+	UPROPERTY()
+	TWeakObjectPtr<AActor> PrevTargetActor;
 };

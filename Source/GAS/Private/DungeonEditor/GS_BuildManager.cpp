@@ -178,22 +178,27 @@ FVector AGS_BuildManager::GetCellLocation(FIntPoint InCellUnderCurosr)
 	return CellCenterLocation;
 }
 
-FVector2d AGS_BuildManager::GetCenterOfRectArea(FIntPoint InAreaCenterCell, FIntPoint AreaSize)
+FVector2d AGS_BuildManager::GetCenterOfRectArea(FIntPoint InAreaCenterCell, FIntPoint AreaSize, float RotateDegree)
 {
 	FVector2d AreaCenter = 	GetCellCenter(InAreaCenterCell);
+
+	FVector2D HalfCellOffset(0.f, 0.f);
 	if (AreaSize.X % 2 == 0)
 	{
-		AreaCenter.X -= CellSize * 0.5f;
+		HalfCellOffset.X -= CellSize * 0.5f;
 	}
 	if (AreaSize.Y % 2 == 0)
 	{
-		AreaCenter.Y -= CellSize * 0.5f;
+		HalfCellOffset.Y -= CellSize * 0.5f;
 	}
 
+	HalfCellOffset = HalfCellOffset.GetRotated(RotateDegree);
+	AreaCenter += HalfCellOffset;
+	
 	return AreaCenter;
 }
 
-void AGS_BuildManager::GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FIntPoint InCenterAreaCell, FIntPoint InAreaSize)
+void AGS_BuildManager::GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FIntPoint InCenterAreaCell, FIntPoint InAreaSize, float RotateDegree)
 {
 	FIntPoint StartCell = FIntPoint(InCenterAreaCell.X - FMath::FloorToInt((InAreaSize.X * 0.5f)), InCenterAreaCell.Y - FMath::FloorToInt((InAreaSize.Y * 0.5f)));
 
@@ -203,42 +208,74 @@ void AGS_BuildManager::GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FI
 		for (int j = 0; j <InAreaSize.Y; ++j)
 		{
 			int CurrentCellY = StartCell.Y + j;
-			InIntPointArray.Add(FIntPoint(CurrentCellX, CurrentCellY));
+			FVector2D NewRotatePoint = FVector2D(CurrentCellX - InCenterAreaCell.X, CurrentCellY - InCenterAreaCell.Y).GetRotated(RotateDegree) + FVector2D(InCenterAreaCell.X, InCenterAreaCell.Y);
+			NewRotatePoint.X = FMath::RoundToInt(NewRotatePoint.X);
+			NewRotatePoint.Y = FMath::RoundToInt(NewRotatePoint.Y);
+			int NewX = FMath::Abs(NewRotatePoint.X) * FMath::Sign(NewRotatePoint.X);
+			int NewY = FMath::Abs(NewRotatePoint.Y) * FMath::Sign(NewRotatePoint.Y);
+			InIntPointArray.Add(FIntPoint(NewX, NewY));
 		}
 	}
 }
 
-void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, bool InbOccipied)
+void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType, bool InIsRoom)
 {
-	if (InbOccipied)
+	FDEOccupancyData& CellInfo = OccupancyData.FindOrAdd(InCellPoint);
+
+	if ((InIsRoom && InTargetType == EDEditorCellType::HorizontalPlaceable) ||
+		InTargetType == EDEditorCellType::CeilingPlace)
 	{
-		OccupancyData.FindOrAdd(InCellPoint) = 1;
+		CellInfo.CeilingOccupancyData = InTargetType;
 	}
-	else
-	{
-		if (OccupancyData.Find(InCellPoint))
-		{
-			if (OccupancyData[InCellPoint] < 2)
-			{
-				OccupancyData.Remove(InCellPoint);
-			}
-			else
-			{
-				OccupancyData[InCellPoint]--;
-			}
-		}
-	}
+
+	CellInfo.FloorOccupancyData = InTargetType;
 }
 
-bool AGS_BuildManager::CheckOccupancyData(FIntPoint InCellPoint)
+bool AGS_BuildManager::CheckOccupancyData(FIntPoint InCellPoint,EDEditorCellType InTargetType)
 {
-	if (OccupancyData.Find(InCellPoint))
+	EDEditorCellType FindOccupancyType;
+	ConvertFindOccupancyData(InTargetType, FindOccupancyType);
+
+	if (auto* CellData = OccupancyData.Find(InCellPoint))
 	{
-		return true;
+		const EDEditorCellType Current = 
+			(InTargetType == EDEditorCellType::CeilingPlace)
+				? CellData->CeilingOccupancyData
+				: CellData->FloorOccupancyData;
+
+		return Current != FindOccupancyType;
 	}
-	else
+
+	return InTargetType != EDEditorCellType::None;
+}
+
+void AGS_BuildManager::ConvertFindOccupancyData(EDEditorCellType InTargetType, EDEditorCellType& InOutFindType)
+{
+	switch (InTargetType)
 	{
-		return false;
+	case EDEditorCellType::None:
+		InOutFindType = EDEditorCellType::None;
+		break;
+		
+	case EDEditorCellType::WallPlace:
+		InOutFindType = EDEditorCellType::VerticalPlaceable;
+		break;
+
+	case EDEditorCellType::FloorPlace:
+		InOutFindType = EDEditorCellType::HorizontalPlaceable;
+		break;
+		
+	case EDEditorCellType::CeilingPlace:
+		InOutFindType = EDEditorCellType::HorizontalPlaceable;
+		break;
+		
+	case EDEditorCellType::Wall:
+	case EDEditorCellType::Door:
+		InOutFindType = EDEditorCellType::WallAndDoorPlaceable;
+		break;
+
+	default:
+		break;
 	}
 }
 
@@ -361,6 +398,40 @@ void AGS_BuildManager::SelectPlaceableObject()
 				SelectedPlacableObject->SetObjectSelectedState(false);
 				SelectedPlacableObject = nullptr;
 			}
+		}
+	}
+}
+
+void AGS_BuildManager::PressedRMB()
+{
+	if (bInteractStarted)
+	{
+		bInteractStarted = false;
+	}
+
+	if (bBuildToolEnabled && bIsPlacementSelected)
+	{
+		if (ActivePlacer)
+		{
+			ActivePlacer->Destroy();
+			ActivePlacer = nullptr;
+		}
+		bBuildToolEnabled = false;
+		bIsPlacementSelected = false;
+	}
+}
+
+void AGS_BuildManager::ReleasedRMB()
+{
+}
+
+void AGS_BuildManager::RotateProp()
+{
+	if (bBuildToolEnabled && bIsPlacementSelected)
+	{
+		if (ActivePlacer)
+		{
+			ActivePlacer->RotatePlacer();
 		}
 	}
 }

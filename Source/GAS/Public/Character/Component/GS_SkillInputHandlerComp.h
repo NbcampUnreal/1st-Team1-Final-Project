@@ -28,25 +28,37 @@ protected:
 	virtual void OnRightClick(const struct FInputActionInstance& Instance);
 
 	UFUNCTION()
-	virtual void OnCtrlLeftClick(const struct FInputActionInstance& Instance);
+	virtual void OnLeftClick(const struct FInputActionInstance& Instance);
 
 	UFUNCTION()
-	virtual void OnCtrlRightClick(const struct FInputActionInstance& Instance);
+	void OnCtrlModifierStarted();
+
+	UFUNCTION()
+	void OnCtrlModifierEnded();
+
+	UFUNCTION()
+	virtual void OnRightClickRelease(const struct FInputActionInstance& Instance);
+
+	UFUNCTION()
+	virtual void OnLeftClickRelease(const struct FInputActionInstance& Instance);
 
 	TObjectPtr<AGS_Character> OwnerCharacter;
+
+	bool bCtrlHeld = false;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> IA_RightClick;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_CtrlLeftClick;
+	TObjectPtr<UInputAction> IA_LeftClick;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
-	TObjectPtr<UInputAction> IA_CtrlRightClick;
+	TObjectPtr<UInputAction> IA_ModifierCtrl;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> SkillMappingContext;
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	int32 MappingPriority = 1;

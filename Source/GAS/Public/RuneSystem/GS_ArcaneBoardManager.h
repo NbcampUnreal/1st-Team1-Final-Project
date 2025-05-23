@@ -90,7 +90,7 @@ public:
 	bool PreviewRunePlacement(uint8 RuneID, const FIntPoint& Pos, TArray<FIntPoint>& OutAffectedCells);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void GetGridDimensions(int32& OutWidth, int32& OutHeight);
+	void GetGridDimensions(int32& OutRows, int32& OutColumns);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	bool GetCellData(const FIntPoint& Pos, FGridCellData& OutCellData);
@@ -121,9 +121,7 @@ private:
 
 	void InitGridState();
 
-	void UpdateCellState(const FIntPoint& Pos, EGridCellState NewState);
-
-	void UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID, UTexture2D* RuneTextureFrag);
+	void UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID=0, UTexture2D* RuneTextureFrag=nullptr);
 
 	//특수 셀과 연결된 룬 ID들의 배열
 	UPROPERTY()

@@ -11,15 +11,11 @@ UENUM(BlueprintType)
 enum class EGridCellVisualState : uint8
 {
     Normal      UMETA(DisplayName = "Normal"),
-    Hover       UMETA(DisplayName = "Hover"),
     Valid       UMETA(DisplayName = "Valid"),
-    Invalid     UMETA(DisplayName = "Invalid"),
-    Special     UMETA(DisplayName = "Special"),
-    Occupied    UMETA(DisplayName = "Occupied")
+    Invalid     UMETA(DisplayName = "Invalid")
 };
 
 class UImage;
-class UButton;
 class UGS_ArcaneBoardWidget;
 
 /**
@@ -36,26 +32,35 @@ public:
     virtual void NativeConstruct() override;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void InitCell(const FGridCellData& InCellData, UGS_ArcaneBoardWidget* InParentBoard);
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void SetCellData(const FGridCellData& InCellData);
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     FIntPoint GetCellPos() const;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void SetVisualState(EGridCellVisualState NewState);
+    uint8 GetPlacedRuneID() const;
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void SetPreviewVisualState(EGridCellVisualState NewState);
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void SetRuneTexture(UTexture2D* Texture);
-
-    UFUNCTION(BlueprintImplementableEvent, Category = "ArcaneBoard")
-    void OnVisualStateChanged(EGridCellVisualState NewState);
 
 protected:
     UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
     FGridCellData CellData;
 
     UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-    UButton* DropZone;
+    UImage* RuneImage;
+
+    UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+    UImage* CellBG;
+
+    UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+    UImage* PreviewImage;
 
     UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
     EGridCellVisualState VisualState;

@@ -8,6 +8,7 @@
 
 class UTextBlock;
 class UScrollBox;
+class UGS_ArcaneBoardWidget;
 class UGS_DraggableRuneWidget;
 class UGS_ArcaneBoardManager;
 /**
@@ -24,7 +25,9 @@ public:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void InitInven(UGS_ArcaneBoardManager* InBoardManager);
+	void InitInven(UGS_ArcaneBoardManager* InBoardManager, UGS_ArcaneBoardWidget* InBoardWidget);
+
+	bool UpdatePlacedStateOfRune(uint8 RuneID, bool bIsPlaced);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -33,8 +36,13 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UScrollBox* RuneScrollBox;
 
+	TMap<uint8, UGS_DraggableRuneWidget*> OwnsRuneList;
+
 	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<UGS_DraggableRuneWidget> RuneWidgetClass;
+
+	UPROPERTY()
+	UGS_ArcaneBoardWidget* BoardWidget;
 
 	UPROPERTY()
 	UGS_ArcaneBoardManager* BoardManager;

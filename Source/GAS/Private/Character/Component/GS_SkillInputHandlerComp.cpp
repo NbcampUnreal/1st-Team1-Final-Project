@@ -38,14 +38,17 @@ void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputC
 		if (IA_RightClick)
 		{
 			EnhancedInput->BindAction(IA_RightClick, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnRightClick);
+			EnhancedInput->BindAction(IA_RightClick, ETriggerEvent::Completed, this, &UGS_SkillInputHandlerComp::OnRightClickRelease);
 		}
-		if (IA_CtrlLeftClick)
+		if (IA_ModifierCtrl)
 		{
-			EnhancedInput->BindAction(IA_CtrlLeftClick, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnCtrlLeftClick);
+			EnhancedInput->BindAction(IA_ModifierCtrl, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnCtrlModifierStarted);
+			EnhancedInput->BindAction(IA_ModifierCtrl, ETriggerEvent::Completed, this, &UGS_SkillInputHandlerComp::OnCtrlModifierEnded);
 		}
-		if (IA_CtrlRightClick)
+		if (IA_LeftClick)
 		{
-			EnhancedInput->BindAction(IA_CtrlRightClick, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnCtrlRightClick);
+			EnhancedInput->BindAction(IA_LeftClick, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnLeftClick);
+			EnhancedInput->BindAction(IA_LeftClick, ETriggerEvent::Completed, this, &UGS_SkillInputHandlerComp::OnRightClickRelease);
 		}
 	}
 }
@@ -61,28 +64,55 @@ void UGS_SkillInputHandlerComp::BeginPlay()
 
 void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Right Click"));
 	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
 	{
 		return;
+	}
+
+	if (bCtrlHeld)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Ctrl+Right Click"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Right Click"));
 	}
 }
 
-void UGS_SkillInputHandlerComp::OnCtrlLeftClick(const FInputActionInstance& Instance)
+void UGS_SkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Ctrl+Left Click"));
 	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
 	{
 		return;
+	}
+
+	if (bCtrlHeld)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Ctrl+Left Click"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Left Click"));
 	}
 }
 
-void UGS_SkillInputHandlerComp::OnCtrlRightClick(const FInputActionInstance& Instance)
+void UGS_SkillInputHandlerComp::OnCtrlModifierStarted()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Ctrl+Right Click"));
-	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
-	{
-		return;
-	}
+	bCtrlHeld = true;
+	UE_LOG(LogTemp, Warning, TEXT("Ctrl Click Start"));
+}
+
+void UGS_SkillInputHandlerComp::OnCtrlModifierEnded()
+{
+	bCtrlHeld = false;
+	UE_LOG(LogTemp, Warning, TEXT("Ctrl Click End"));
+}
+
+void UGS_SkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
+{
+}
+
+void UGS_SkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
+{
 }
 

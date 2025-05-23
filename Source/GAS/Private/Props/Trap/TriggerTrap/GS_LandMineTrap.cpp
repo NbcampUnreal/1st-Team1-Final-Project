@@ -1,4 +1,4 @@
-﻿#include "Props/Trap/TriggerTrap/GS_LandMineTrap.h"
+#include "Props/Trap/TriggerTrap/GS_LandMineTrap.h"
 #include "Character/Player/GS_Player.h"
 
 AGS_LandMineTrap::AGS_LandMineTrap()
@@ -24,11 +24,14 @@ AGS_LandMineTrap::AGS_LandMineTrap()
 
 void AGS_LandMineTrap::Explode()
 {
-	DestroyTrapEffect();
-	TArray<AActor*> OverlappingActors;
-	DamageSphereComp->GetOverlappingActors(OverlappingActors, AGS_Player::StaticClass());
-	HandleTrapAreaDamage(OverlappingActors);
-	RadialForceComp->FireImpulse();
+	if (HasAuthority())
+	{
+		DestroyTrapEffect();
+		TArray<AActor*> OverlappingActors;
+		DamageSphereComp->GetOverlappingActors(OverlappingActors, AGS_Player::StaticClass());
+		HandleTrapAreaDamage(OverlappingActors);
+		RadialForceComp->FireImpulse();
+	}
 }
 
 void AGS_LandMineTrap::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors)

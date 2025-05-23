@@ -64,6 +64,14 @@ void AGS_DEPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 					,this
 					, &AGS_DEPawn::Zoom);
 			}
+
+			if (PlayerController->PropRotationAction)
+			{
+				EnhancedInput->BindAction(PlayerController->PropRotationAction
+					, ETriggerEvent::Started
+					,this
+					, &AGS_DEPawn::PropRotation);
+			}
 			
 			if (PlayerController->ClickLMBAction)
 			{
@@ -76,6 +84,19 @@ void AGS_DEPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 					, ETriggerEvent::Completed
 					,this
 					, &AGS_DEPawn::ReleasedLMB);
+			}
+			
+			if (PlayerController->ClickRMBAction)
+			{
+				EnhancedInput->BindAction(PlayerController->ClickRMBAction
+					, ETriggerEvent::Triggered
+					,this
+					, &AGS_DEPawn::ClickRMB);
+
+				EnhancedInput->BindAction(PlayerController->ClickRMBAction
+					, ETriggerEvent::Completed
+					,this
+					, &AGS_DEPawn::ReleasedRMB);
 			}
 		}
 	}
@@ -113,6 +134,21 @@ void AGS_DEPawn::Zoom(const FInputActionValue& Value)
 	}
 }
 
+void AGS_DEPawn::PropRotation(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+
+	if (AGS_DEController* DEController = Cast<AGS_DEController>(Controller))
+	{
+		const bool IsActiveRotation = Value.Get<bool>();
+
+		if (IsActiveRotation)
+		{
+			DEController->GetBuildManager()->RotateProp();
+		}
+	}
+}
+
 void AGS_DEPawn::ClickLMB(const FInputActionValue& Value)
 {
 	if (!Controller) return;
@@ -139,6 +175,36 @@ void AGS_DEPawn::ReleasedLMB(const FInputActionValue& Value)
 		if (!IsClickLBT)
 		{
 			DEController->GetBuildManager()->ReleasedLMB();
+		}
+	}
+}
+
+void AGS_DEPawn::ClickRMB(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+
+	if (AGS_DEController* DEController = Cast<AGS_DEController>(Controller))
+	{
+		const bool IsClickRBT = Value.Get<bool>();
+
+		if (IsClickRBT)
+		{
+			DEController->GetBuildManager()->PressedRMB();
+		}
+	}
+}
+
+void AGS_DEPawn::ReleasedRMB(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+
+	if (AGS_DEController* DEController = Cast<AGS_DEController>(Controller))
+	{
+		const bool IsClickRBT = Value.Get<bool>();
+
+		if (!IsClickRBT)
+		{
+			DEController->GetBuildManager()->ReleasedRMB();
 		}
 	}
 }

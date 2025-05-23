@@ -1,9 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "GS_SkillBase.generated.h"
 
 class AGS_Character;
@@ -24,6 +21,7 @@ public:
 
 	// 스킬 작동
 	virtual void ActiveSkill(); // 서버 권한에서만 호출
+	virtual void DeactiveSkill();
 	virtual void ExecuteSkillEffect();
 	virtual void OnSkillCommand();
 	virtual bool CanActive() const;
@@ -39,7 +37,7 @@ protected:
 
 	// 스킬 공격 애니메이션
 	UPROPERTY(EditDefaultsOnly)
-	UAnimMontage* SkillAnimMontage;
+	TArray<UAnimMontage*> SkillAnimMontages;
 
 	// 스킬 소유자
 	AGS_Character* OwnerCharacter;

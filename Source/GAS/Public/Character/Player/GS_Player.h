@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/GS_Character.h"
+#include "Components/TimelineComponent.h"
 #include "GS_Player.generated.h"
 
 class USpringArmComponent;
@@ -34,6 +35,7 @@ public:
 	AGS_Player();
 
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	//component;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Components")
@@ -41,6 +43,39 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Components")
 	TObjectPtr<UCameraComponent> CameraComp;
+
+	// [시야방해]
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Components", meta = (AllowPrivateAccess = "true"))
+	class UPostProcessComponent* PostProcessComponent;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* BlurMID;
+
+	UPROPERTY(EditAnywhere, Category = "Vision")
+	UMaterialInterface* PostProcessMat;
+
+	UFUNCTION(Client, Reliable)
+	void Client_StartVisionObscured();
+
+	void StartVisionObscured();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StopVisionObscured();
+
+	void StopVisionObscured();
+
+	FTimeline ObscureTimeline;
+
+	UFUNCTION()
+	void HandleTimelineProgress(float Value);
+
+	UFUNCTION()
+	void OnTimelineFinished();
+
+	UPROPERTY()
+	UCurveFloat* ObscureCurve; // 외부에서 세팅할 수 있음
+
+	bool bIsObscuring = false;
 
 	//variable
 	UPROPERTY()

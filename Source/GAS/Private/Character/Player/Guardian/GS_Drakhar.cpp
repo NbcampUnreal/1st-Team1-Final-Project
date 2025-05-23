@@ -6,8 +6,6 @@
 #include "Character/Component/GS_StatComp.h"
 #include "Weapon/Projectile/Guardian/GS_DrakharProjectile.h"
 
-#include "Components/CapsuleComponent.h"
-#include "Components/DecalComponent.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -15,7 +13,7 @@
 
 AGS_Drakhar::AGS_Drakhar()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	
 	//combo attack variables
 	CurrentComboAttackIndex = 0;
@@ -23,26 +21,17 @@ AGS_Drakhar::AGS_Drakhar()
 
 	bIsComboAttacking = false;
 	bCanDoNextComboAttack = false;
+	ClientNextComboAttack = false;
 
 	//dash skill variables
 	DashPower = 1000.f;
-	bIsDashing = false;
 	DashInterpAlpha = 0.f;
 	DashDuration = 1.33f;
 
 	//earthquake skill variables
-	bIsEarthquaking = false;
 	EarthquakePower = 3000.f;
 	EarthquakeRadius = 500.f;
-
-	//draconic fury variables
-	bIsFlying = false;
-	FlyingPersistenceTime = 5.f;
-	DraconicAttackPersistenceTime = 3.f; //몽타주 끝나는 시간
-
-	/*DraconicFuryArray.Push(FVector(0.f, 0.f, 50.f));
-	DraconicFuryArray.Push(FVector(0.f, 0.f, 50.f));
-	DraconicFuryArray.Push(FVector(0.f, 0.f, 50.f));*/
+	
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -55,44 +44,6 @@ void AGS_Drakhar::BeginPlay()
 	}
 }
 
-void AGS_Drakhar::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-		
-	if (HasAuthority())
-	{
-		if (bIsDashing)
-		{
-			DashAttackCheck();
-
-			DashInterpAlpha += DeltaTime / DashDuration;
-
-			if (DashInterpAlpha >= 1.f)
-			{
-				SetActorLocation(DashEndLocation);
-				bIsDashing = false;
-				EndDash();
-			}
-			else
-			{
-				const FVector NewLocation = FMath::Lerp(DashStartLocation, DashEndLocation, DashInterpAlpha);
-				SetActorLocation(NewLocation);
-				DashStartLocation = NewLocation;
-			}
-		}
-	}
-	if (!HasAuthority() && IsLocallyControlled())
-	{
-		if (bIsFlying)
-		{
-			if (TargetActor)
-			{
-				
-			}			
-		}
-	}
-}
-
 void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -100,70 +51,43 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	DOREPLIFETIME(ThisClass, bIsComboAttacking);
 	DOREPLIFETIME(ThisClass, bCanDoNextComboAttack);
 	DOREPLIFETIME(ThisClass, CurrentComboAttackIndex);
-
-	DOREPLIFETIME(ThisClass, bIsDashing);
-
-	DOREPLIFETIME(ThisClass, bIsEarthquaking);
-
-	DOREPLIFETIME(ThisClass, bIsFlying);
-	DOREPLIFETIME(ThisClass, bCanDraconicFuryAttack);
-}
-
-void AGS_Drakhar::ComboAttack()
-{
-	if (IsLocallyControlled())
-	{
-		//play montage immediately
-		if (!ClientComboAttacking)
-		{
-			GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);			
-		}
-		//server RPC for check variables
-		ServerRPCComboAttack();
-	}
-}
-
-//WingRush
-void AGS_Drakhar::Skill1()
-{
-	Super::Skill1();
-
-	if (IsLocallyControlled())
-	{
-		//TODO
-		//GetSkillComp()->Activate();
-		ServerRPCDashCharacter();
-	}
-}
-
-//Earthquake
-void AGS_Drakhar::Skill2()
-{
-	Super::Skill2();
-
-	if (IsLocallyControlled())
-	{
-		ServerRPCEarthquake();
-	}
-}
-
-//DraconicFury
-void AGS_Drakhar::UltimateSkill()
-{
-	Super::UltimateSkill();
-
-	if (IsLocallyControlled())
-	{
-		
-	}
 }
 
 void AGS_Drakhar::Ctrl()
 {
 	if (IsLocallyControlled())
 	{
-		//server RPC
-		ServerRPCDraconicFuryFly();
+		GetSkillComp()->TryActivateSkill(ESkillSlot::Ready);
+	}
+}
+
+void AGS_Drakhar::CtrlStop()
+{
+	if (IsLocallyControlled())
+	{		
+		GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+	}
+}
+
+void AGS_Drakhar::LeftMouse()
+{
+	Super::LeftMouse();
+
+	if (IsLocallyControlled())
+	{
+		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
+		{
+			GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+		}
+		//normal combo attack
+		else
+		{
+			if (!ClientComboAttacking)
+			{
+				GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
+			}				
+			ServerRPCComboAttack();
+		}
 	}
 }
 
@@ -171,24 +95,48 @@ void AGS_Drakhar::RightMouse()
 {
 	if (IsLocallyControlled())
 	{
-		ServerRPCDraconicFuryAttack();
+		//ultimate skill
+		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
+		{	
+			GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+		}
+		//dash skill
+		else
+		{
+			GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+		}
 	}
 }
 
 void AGS_Drakhar::ServerRPCComboAttack_Implementation()
 {
+	UE_LOG(LogTemp, Warning, TEXT("server rpc attack"));
+
+	//다음 공격 되는 것이 확정인 경우
+	if (bCanDoNextComboAttack)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("can combo attack ????? %d"), bIsComboAttacking);				
+	}
+
 	//prevent attack stacking
 	if (bIsComboAttacking)
 	{
+		//이미 공격하고 있는 중에 클릭을 입력받으면 CanDoNext를 true로
 		bCanDoNextComboAttack = true;
 		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
 		return;
 	}
-
+	
+	//이미 공격하고 있는 중이 아니라면,
+	//몽타주 재생시켜주고
 	MulticastRPCPlayComboAttackMontage();
+	
+	//공격 몽타주 못하게 막기
 	bIsComboAttacking = true;
 	bCanDoNextComboAttack = false;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+
+	//UE_LOG(LogTemp, Warning, TEXT("what??"));
 }
 
 void AGS_Drakhar::MulticastRPCPlayComboAttackMontage_Implementation()
@@ -217,18 +165,28 @@ void AGS_Drakhar::ServerRPCComboAttackCheck_Implementation()
 
 void AGS_Drakhar::ServerRPCComboAttackEnd_Implementation()
 {
+	//만약 다음 공격을 할 수 있는 상황이라면,
 	if (bCanDoNextComboAttack)
 	{
+		//인덱스 증가
 		CurrentComboAttackIndex++;
 		CurrentComboAttackIndex %= MaxComboAttackIndex;
-		UE_LOG(LogTemp, Warning, TEXT("combo attack input"));
+		//UE_LOG(LogTemp, Warning, TEXT("[can next] combo attack index %d"), CurrentComboAttackIndex);
+
+		//ENetRole LocalRole = GetLocalRole();
+		//UE_LOG(LogTemp, Warning, TEXT("combo attack input %s"), *UEnum::GetValueAsString(LocalRole));
 	}
+	//아니라면
 	else
 	{
+		//초기화
 		CurrentComboAttackIndex = 0;
-		//not call
-		UE_LOG(LogTemp, Warning, TEXT("combo attack end %d"), CurrentComboAttackIndex);
+		//UE_LOG(LogTemp, Warning, TEXT("[can't next] combo attack index %d"), CurrentComboAttackIndex);
 	}
+
+	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("attack server end")), true, true, FLinearColor::Blue, 5.f);
+
+	//다음 몽타주 실행할 수 있게
 	bIsComboAttacking = false;
 	bCanDoNextComboAttack = false;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
@@ -237,37 +195,67 @@ void AGS_Drakhar::ServerRPCComboAttackEnd_Implementation()
 void AGS_Drakhar::OnRep_IsComboAttacking()
 {
 	ClientComboAttacking = bIsComboAttacking;
-	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("client combo attacking index %d"), ClientComboAttackIndex), true, true, FLinearColor::Green, 5.f);
+
+	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%d"), ClientComboAttacking), true, true, FLinearColor::Black, 5.f);
 }
 
 void AGS_Drakhar::OnRep_CurrentComboAttackIndex()
 {
 	ClientComboAttackIndex = CurrentComboAttackIndex;
 
-	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("client combo attacking index %d"), ClientComboAttackIndex), true, true, FLinearColor::Green, 5.f);
+	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("client combo attacking index %d"), ClientComboAttackIndex), true, true, FLinearColor::Green, 5.f);
+}
+
+void AGS_Drakhar::OnRep_CanDoNextComboAttack()
+{
+	ClientNextComboAttack = bCanDoNextComboAttack;
 }
 
 void AGS_Drakhar::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (!bInterrupted)
+}
+
+void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
+{
+	DashInterpAlpha += DeltaTime / DashDuration;
+
+	DashAttackCheck();
+	if (DashInterpAlpha >= 1.f)
 	{
-		ClientComboAttacking = false;
+		SetActorLocation(DashEndLocation);
+	}
+	else
+	{
+		const FVector NewLocation = FMath::Lerp(DashStartLocation, DashEndLocation, DashInterpAlpha);
+		SetActorLocation(NewLocation);
+		DashStartLocation = NewLocation;
 	}
 }
 
-void AGS_Drakhar::ServerRPCDashCharacter_Implementation()
+
+void AGS_Drakhar::ServerRPCEndDash_Implementation()
 {
-	if (bIsDashing)
+	if (DamagedCharacters.IsEmpty())
 	{
 		return;
 	}
+	
+	for (auto const& DamagedCharacter : DamagedCharacters)
+	{
+		float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
+		FDamageEvent DamageEvent;
+		DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
+	}
 
-	bIsDashing = true;
+	DamagedCharacters.Empty();
+}
+
+void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
+{
 	DashInterpAlpha = 0.f;
 	DashStartLocation = GetActorLocation();
 	DashEndLocation = DashStartLocation + GetActorForwardVector() * DashPower;
 }
-
 void AGS_Drakhar::DashAttackCheck()
 {
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -299,53 +287,6 @@ void AGS_Drakhar::DashAttackCheck()
 			}
 		}		
 	}
-}
-
-void AGS_Drakhar::EndDash()
-{
-	bIsDashing = false;
-	if (DamagedCharacters.IsEmpty())
-	{
-		return;
-	}
-
-	for (auto const& DamagedCharacter : DamagedCharacters)
-	{
-		float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
-		FDamageEvent DamageEvent;
-		DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
-	}
-
-	DamagedCharacters.Empty();
-
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-}
-
-void AGS_Drakhar::OnRep_IsDashing()
-{
-	if (bIsDashing)
-	{
-		GuardianAnim->PlayDashMontage();				
-	}
-	else
-	{
-		GuardianAnim->StopDashMontage();	
-	}
-}
-
-void AGS_Drakhar::ServerRPCEarthquake_Implementation()
-{
-	if (bIsEarthquaking)
-	{
-		return;
-	}
-
-	bIsEarthquaking = true;
-}
-
-void AGS_Drakhar::ServerRPCEarthquakeEnd_Implementation()
-{
-	bIsEarthquaking = false;
 }
 
 void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
@@ -391,91 +332,19 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 	}
 }
 
-void AGS_Drakhar::OnRep_IsEarthquaking()
+void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 {
-	if (bIsEarthquaking)
-	{
-		GuardianAnim->PlayEarthquakeMontage();
-	}
-	else
-	{
-		GuardianAnim->StopEarthquakeMontage();
-	}
-}
-
-void AGS_Drakhar::ServerRPCDraconicFuryFly_Implementation()
-{
-	if (bIsFlying)
-	{
-		return;
-	}
-	bIsFlying = true;
-
-	GetWorld()->GetTimerManager().SetTimer(FlyingTimerHandle, this, &AGS_Drakhar::EndFlying, FlyingPersistenceTime, false);
-
-	//show target point
-	
-}
-
-void AGS_Drakhar::ServerRPCDraconicFuryAttack_Implementation()
-{
-	if (!bIsFlying)
-	{
-		return;
-	}
-
-	bCanDraconicFuryAttack = true;
-	bIsFlying = false;
-	
-	GetWorld()->GetTimerManager().SetTimer(DraconicAttackTimer, this, &AGS_Drakhar::EndDraconicAttack, DraconicAttackPersistenceTime, false);
-	
-	//get random meteor transform
 	GetRandomDraconicFuryTarget();
 
+	int32 Index = FMath::RandRange(0, DraconicFuryTargetArray.Num() - 1);
+
+	UE_LOG(LogTemp, Warning, TEXT("Spawn"));
+
 	//spawn meteor
-	for (int i = 0; i < DraconicFuryTargetArray.Num(); ++i)
+	AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[Index].GetLocation(), DraconicFuryTargetArray[Index].Rotator());
+	if (DrakharProjectile)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("%d x y z : (%f %f %f)"), i, DrakharProjectile->GetLocation().X, DrakharProjectile->GetLocation().Y, DrakharProjectile.GetLocation().Z);
-		
-		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[i].GetLocation(), DraconicFuryTargetArray[i].Rotator());
-		if (DrakharProjectile)
-		{
-			DrakharProjectile->SetOwner(this);
-		}
-	}
-}
-
-void AGS_Drakhar::EndFlying()
-{
-	bIsFlying = false;
-	GetWorld()->GetTimerManager().ClearTimer(FlyingTimerHandle);
-}
-
-void AGS_Drakhar::EndDraconicAttack()
-{
-	bCanDraconicFuryAttack = false;
-	GetWorld()->GetTimerManager().ClearTimer(DraconicAttackTimer);
-}
-
-void AGS_Drakhar::OnRep_IsFlying()
-{
-	if (bIsFlying)
-	{
-		GuardianAnim->PlayDraconicFuryMontage(0);				
-	}
-	else
-	{
-		//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("client flying %d"), bIsFlying), true, true, FLinearColor::Green, 5.f);
-		GuardianAnim->StopDraconicFuryMontage(0);		
-	}
-}
-
-void AGS_Drakhar::OnRep_CanDraconicFuryAttack()
-{
-	if (bCanDraconicFuryAttack)
-	{
-		//GuardianAnim->StopDraconicFuryMontage(0);
-		GuardianAnim->PlayDraconicFuryMontage(1);		
+		DrakharProjectile->SetOwner(this);
 	}
 }
 

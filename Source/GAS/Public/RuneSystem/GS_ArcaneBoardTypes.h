@@ -18,8 +18,7 @@ UENUM(BlueprintType)
 enum class EGridCellState : uint8
 {
 	Empty		UMETA(DisplayName = "Empty"),
-	Occupied	UMETA(DisplayName = "Occupied"),
-	Locked		UMETA(DisplayName = "Locked")
+	Occupied	UMETA(DisplayName = "Occupied")
 };
 
 UENUM(BlueprintType)

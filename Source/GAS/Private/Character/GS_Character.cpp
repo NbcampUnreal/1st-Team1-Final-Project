@@ -95,3 +95,19 @@ FGenericTeamId AGS_Character::GetGenericTeamId() const
 {
 	return TeamId;
 }
+
+void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)
+{
+	if (!HasAuthority())
+	{
+		PlayAnimMontage(SkillMontage);
+	}
+}
+
+void AGS_Character::MulicastRPCStopCurrentSkillMontage_Implementation(UAnimMontage* CurrentSkillMontage)
+{
+	if (!HasAuthority())
+	{
+		StopAnimMontage(CurrentSkillMontage);
+	}
+}

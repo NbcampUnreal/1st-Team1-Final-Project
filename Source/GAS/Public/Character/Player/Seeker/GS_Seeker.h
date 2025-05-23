@@ -8,6 +8,24 @@
 
 class UGS_SkillInputHandlerComp;
 
+USTRUCT(BlueprintType) // Current Action
+struct FSeekerState
+{
+	GENERATED_BODY()
+
+	FSeekerState()
+	{
+		IsAim = false;
+		IsDraw = false;
+		IsEquip = false;
+	}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsAim;
+	bool IsDraw;
+	bool IsEquip;
+};
+
 UCLASS()
 class GAS_API AGS_Seeker : public AGS_Player
 {
@@ -17,6 +35,28 @@ public:
 	// Sets default values for this character's properties
 	AGS_Seeker();
 
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(BlueprintCallable)
+	void SetAimState(bool IsAim);
+
+	UFUNCTION(BlueprintPure, Category = "State")
+	bool GetAimState();
+
+	UFUNCTION(BlueprintCallable)
+	void SetDrawState(bool IsDraw);
+
+	UFUNCTION(BlueprintPure, Category = "State")
+	bool GetDrawState();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
+	UChildActorComponent* Weapon;
+	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -24,10 +64,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+private :
+	UPROPERTY(VisibleAnywhere, Category="State")
+	FSeekerState SeekerState;
 };
