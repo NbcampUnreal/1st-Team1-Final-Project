@@ -24,6 +24,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
 	AGS_TrigTrapBase* OwningTrap;
 
+
 	UFUNCTION(BlueprintCallable, Category = "Trap")
 	void Init(AGS_TrigTrapBase* InTrap);
 
@@ -34,8 +35,4 @@ public:
 		bool bFromSweep, const FHitResult& SweepResult);
 
 	void StickWithVisualOnly(const FHitResult& Hit);
-
-	
-
-
 };
