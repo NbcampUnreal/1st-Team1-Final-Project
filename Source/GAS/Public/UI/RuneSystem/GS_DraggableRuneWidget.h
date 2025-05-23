@@ -50,6 +50,9 @@ protected:
 	UImage* RuneImage;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UImage* RuneState;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UImage* SelectionIndicator;
 
 	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")

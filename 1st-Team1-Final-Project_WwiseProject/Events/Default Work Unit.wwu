@@ -412,6 +412,25 @@
 						</Event>
 					</ChildrenList>
 				</Folder>
+				<Folder Name="Player" ID="{5B530A9A-1B94-4771-9758-F7BC6453FCEA}" ShortID="925469267">
+					<ChildrenList>
+						<Folder Name="Seeker" ID="{3314A1AD-97AB-422D-9636-D2331FA99B43}" ShortID="269797649">
+							<ChildrenList>
+								<Event Name="Voice_Merci_Hit" ID="{5098E2B9-90BA-4412-987D-8FC0FAE125C3}">
+									<ChildrenList>
+										<Action Name="" ID="{BADA14D0-BB29-443B-9643-9945B1A66F89}" ShortID="873297469">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="Voice_Merci_Hit" ID="{3F4C103D-A1CF-4B0D-BE2B-37458590A7B5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+							</ChildrenList>
+						</Folder>
+					</ChildrenList>
+				</Folder>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>

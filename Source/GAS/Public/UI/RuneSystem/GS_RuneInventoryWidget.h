@@ -27,12 +27,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void InitInven(UGS_ArcaneBoardManager* InBoardManager, UGS_ArcaneBoardWidget* InBoardWidget);
 
+	bool UpdatePlacedStateOfRune(uint8 RuneID, bool bIsPlaced);
+
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UTextBlock* RuneCntText;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UScrollBox* RuneScrollBox;
+
+	TMap<uint8, UGS_DraggableRuneWidget*> OwnsRuneList;
 
 	UPROPERTY(BlueprintReadWrite)
 	TSubclassOf<UGS_DraggableRuneWidget> RuneWidgetClass;

@@ -44,6 +44,15 @@ enum class ERoomType : uint8
 	None	UMETA(DisplayName = "None")
 };
 
+UENUM(BlueprintType)
+enum class EPlacerDirectionType : uint8
+{
+	Forward		UMETA(DisplayName = "Forward"),
+	Right		UMETA(DisplayName = "Right"),
+	Backward	UMETA(DisplayName = "Backward"),
+	Left		UMETA(DisplayName = "Left")
+};
+
 USTRUCT(Atomic, BlueprintType)
 struct FDEOccupancyData
 {

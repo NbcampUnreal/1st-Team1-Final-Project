@@ -16,6 +16,7 @@ UGS_ArcaneBoardWidget::UGS_ArcaneBoardWidget(const FObjectInitializer& ObjectIni
 	SelectedRuneID = 0;
 	bIsInSelectionMode = false;
 	SelectionVisualWidget = nullptr;
+	DragVisualOffset = 50;
 }
 
 void UGS_ArcaneBoardWidget::NativeConstruct()
@@ -68,7 +69,7 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 	}
 
 	FVector2D MousePos = ScreenToViewport(InMouseEvent.GetScreenSpacePosition());
-	SelectionVisualWidget->SetPositionInViewport(MousePos-FVector2D(50.f, 50.f), false);
+	SelectionVisualWidget->SetPositionInViewport(MousePos- DragVisualOffset, false);
 
 	UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
 
@@ -232,7 +233,7 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 				MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 				if (MousePos != FVector2D::ZeroVector)
 				{
-					SelectionVisualWidget->SetPositionInViewport(MousePos, false);
+					SelectionVisualWidget->SetPositionInViewport(MousePos- DragVisualOffset, false);
 				}
 			}
 		}
@@ -272,6 +273,7 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 				{
 					UE_LOG(LogTemp, Display, TEXT("룬 배치 성공: ID=%d, Pos=(%d,%d)"), SelectedRuneID, CellPos.X, CellPos.Y);
 					UpdateGridVisuals();
+					RuneInven->UpdatePlacedStateOfRune(SelectedRuneID, true);
 				}
 				else
 				{
@@ -355,12 +357,6 @@ void UGS_ArcaneBoardWidget::UpdateGridVisuals()
 		}
 	}
 }
-
-void UGS_ArcaneBoardWidget::UpdateInvenState()
-{
-	
-}
-
 FVector2D UGS_ArcaneBoardWidget::ScreenToViewport(const FVector2D& ScreenPos) const
 {
 	if (APlayerController* PC = GetOwningPlayer())

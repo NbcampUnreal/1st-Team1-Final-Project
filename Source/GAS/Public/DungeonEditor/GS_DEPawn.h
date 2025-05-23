@@ -39,7 +39,13 @@ public:
 	UFUNCTION()
 	void Zoom(const FInputActionValue& Value);
 	UFUNCTION()
+	void PropRotation(const FInputActionValue& Value);
+	UFUNCTION()
 	void ClickLMB(const FInputActionValue& Value);
 	UFUNCTION()
 	void ReleasedLMB(const FInputActionValue& Value);
+	UFUNCTION()
+	void ClickRMB(const FInputActionValue& Value);
+	UFUNCTION()
+	void ReleasedRMB(const FInputActionValue& Value);
 };

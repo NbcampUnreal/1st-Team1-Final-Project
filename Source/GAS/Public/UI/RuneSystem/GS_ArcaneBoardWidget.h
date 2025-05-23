@@ -101,8 +101,9 @@ protected:
 	UGS_DragVisualWidget* SelectionVisualWidget;
 
 private:
+	float DragVisualOffset;
+
 	void UpdateGridVisuals();
-	void UpdateInvenState();
 
 	FVector2D ScreenToViewport(const FVector2D& ScreenPos) const;
 	FVector2D ViewportToScreen(const FVector2D& ViewportPos) const;
