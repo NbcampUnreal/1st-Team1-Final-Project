@@ -22,3 +22,5 @@ Saved/
 # Visual Studio cache
 .vs/
 *.ipch
+
+.cursor/rules/.mdc
