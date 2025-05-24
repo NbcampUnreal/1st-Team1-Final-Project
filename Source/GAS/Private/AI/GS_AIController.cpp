@@ -2,15 +2,16 @@
 
 
 #include "AI/GS_AIController.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
 const FName AGS_AIController::HomePosKey(TEXT("HomePos"));
+const FName AGS_AIController::MoveLocationKey(TEXT("MoveLocation"));
 const FName AGS_AIController::TargetActorKey(TEXT("Target"));
-const FName AGS_AIController::RTSTargetKey(TEXT("RTSTarget"));
-const FName AGS_AIController::bUseRTSKey(TEXT("bUseRTS"));
+const FName AGS_AIController::CommandKey(TEXT("Command"));
 const FName AGS_AIController::TargetLockedKey(TEXT("bTargetLocked"));
 
 AGS_AIController::AGS_AIController()

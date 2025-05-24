@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "RTSCommand.h"
 #include "GS_RTSController.generated.h"
 
 struct FInputActionInstance;
@@ -21,16 +22,6 @@ struct FUnitGroup
 	
 	UPROPERTY()
 	TArray<AGS_Monster*> Units;
-};
-
-// 명령 모드 
-UENUM(BlueprintType)
-enum class ERTSCommand : uint8
-{
-	None    UMETA(DisplayName="None"),
-	Move    UMETA(DisplayName="Move"), 
-	Attack  UMETA(DisplayName="Attack"), 
-	Skill   UMETA(DisplayName="Skill") 
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, const TArray<AGS_Monster*>&, NewSelection);

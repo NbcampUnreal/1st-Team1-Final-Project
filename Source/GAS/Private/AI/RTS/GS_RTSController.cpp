@@ -12,6 +12,7 @@
 #include "Blueprint/UserWidget.h"
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Perception/AIPerceptionComponent.h"
 
 
 AGS_RTSController::AGS_RTSController()
@@ -146,7 +147,6 @@ void AGS_RTSController::AttackSelectedUnits()
 {
 	CurrentCommand = ERTSCommand::Attack;
 	OnRTSCommandChanged.Broadcast(CurrentCommand);
-	UE_LOG(LogTemp, Log, TEXT("Attack Command"));
 }
 
 void AGS_RTSController::OnCommandStop(const FInputActionValue& Value)
@@ -156,6 +156,7 @@ void AGS_RTSController::OnCommandStop(const FInputActionValue& Value)
 
 void AGS_RTSController::StopSelectedUnits()
 {
+	CurrentCommand = ERTSCommand::Stop;
 	TArray<AGS_Monster*> Commandables;
 	GatherCommandableUnits(Commandables);
 
@@ -214,12 +215,10 @@ void AGS_RTSController::OnLeftMousePressed()
 			if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
 			{
 				Server_RTSAttack(Units, Monster);
-				UE_LOG(LogTemp, Log, TEXT("Attack Command1"));
 			}
 			else
 			{
 				Server_RTSAttackMove(Units, Hit.Location);
-				UE_LOG(LogTemp, Log, TEXT("Attack Command2"));
 			}
 		}
 		break;
@@ -261,7 +260,6 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	{
 		CurrentCommand = ERTSCommand::None;
 		OnRTSCommandChanged.Broadcast(CurrentCommand);
-		UE_LOG(LogTemp, Log, TEXT("Reset"));
 		return;
 	}
 	
@@ -554,8 +552,10 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 		{
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
-				BlackboardComp->SetValueAsBool(AGS_AIController::bUseRTSKey, true);
-				BlackboardComp->SetValueAsVector(AGS_AIController::RTSTargetKey, Dest);
+				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Move));
+				BlackboardComp->SetValueAsVector (AGS_AIController::MoveLocationKey, Dest);
+				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
 
 				// 이동 사운드 재생
 				if (Unit->MoveSoundEvent)
@@ -569,7 +569,21 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 
 void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Monster*>& Units, const FVector& Dest)
 {
-	
+	for (AGS_Monster* Unit : Units)
+	{
+		if (!IsValid(Unit)) continue;
+		
+		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Attack));
+				BlackboardComp->SetValueAsVector (AGS_AIController::MoveLocationKey, Dest);
+				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
+			}
+		}
+	}
 }
 
 void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster*>& Units, AGS_Character* TargetActor)
@@ -580,7 +594,13 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
-			AIController->LockTarget(TargetActor);
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Attack));
+				BlackboardComp->SetValueAsObject(AGS_AIController::TargetActorKey, TargetActor);
+				BlackboardComp->ClearValue(AGS_AIController::MoveLocationKey);
+			}
 		}
 	}
 }
@@ -594,10 +614,13 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
 			AIController->StopMovement();
-
+			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
-				BlackboardComp->ClearValue(AGS_AIController::RTSTargetKey);
+				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Stop));
+				BlackboardComp->ClearValue(AGS_AIController::MoveLocationKey);
+				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
 			}
 		}
 	}
