@@ -22,3 +22,7 @@ Saved/
 # Visual Studio cache
 .vs/
 *.ipch
+
+# Cursor
+.cursor/
+*.mdc

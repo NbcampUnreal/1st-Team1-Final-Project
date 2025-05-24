@@ -168,3 +168,15 @@ void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CharacterWalkSpeed;
 	}
 }
+
+// heal system
+void UGS_StatComp::ServerRPCHeal_Implementation(float InHealAmount)
+{
+    if (!IsValid(GetOwner()) || !GetOwner()->HasAuthority())
+    {
+        return;
+    }
+
+    float NewHealth = FMath::Min(CurrentHealth + InHealAmount, MaxHealth);
+    SetCurrentHealth(NewHealth);
+}
