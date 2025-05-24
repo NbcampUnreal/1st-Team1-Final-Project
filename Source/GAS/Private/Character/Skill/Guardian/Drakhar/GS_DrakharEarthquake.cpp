@@ -3,17 +3,11 @@
 
 #include "Character/Skill/Guardian/Drakhar/GS_DrakharEarthquake.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Character/Skill/GS_SkillComp.h"
 
 UGS_DrakharEarthquake::UGS_DrakharEarthquake()
 {
-	Cooltime = 15.f;
-	bIsEarthquaking = false;
-	
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> EarthquakeMontage(TEXT("/Game/Player/Guardian/Drakhar/Animations/Blueprint/AM_Earthquake.AM_Earthquake"));
-	if (EarthquakeMontage.Succeeded())
-	{
-		SkillAnimMontages.Add(EarthquakeMontage.Object);
-	}
+	CurrentSkillType = ESkillSlot::Aiming;
 }
 
 void UGS_DrakharEarthquake::ActiveSkill()

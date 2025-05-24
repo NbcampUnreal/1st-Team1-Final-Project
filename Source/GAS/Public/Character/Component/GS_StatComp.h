@@ -6,8 +6,9 @@
 
 class AGS_Character;
 class UAkAudioEvent;
+class UGS_StatComp;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentHPChangedDelegate, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentHPChangedDelegate, UGS_StatComp*);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class GAS_API UGS_StatComp : public UActorComponent

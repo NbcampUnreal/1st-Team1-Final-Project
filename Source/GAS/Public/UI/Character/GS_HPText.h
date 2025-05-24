@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,6 +6,7 @@
 
 class UGS_StatComp;
 class UTextBlock;
+class UProgressBar;
 
 UCLASS()
 class GAS_API UGS_HPText : public UUserWidget
@@ -26,12 +25,15 @@ public:
 	void SetOwningActor(AActor* InOwningActor) { OwningActor = InOwningActor; }
 
 	UFUNCTION()
-	void OnCurrentHPChanged(float InCurrentHP);
+	void OnCurrentHPChanged(UGS_StatComp* InStatComp);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UTextBlock> CurrentHPText;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<UProgressBar> HPBar;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<AActor>OwningActor;
 };
