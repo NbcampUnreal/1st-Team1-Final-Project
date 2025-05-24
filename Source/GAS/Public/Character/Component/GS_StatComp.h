@@ -40,8 +40,12 @@ public:
 	float CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
 
 	//getter
+	UFUNCTION(BlueprintCallable, Category = "Stats")
 	FORCEINLINE float GetMaxHealth()const { return MaxHealth; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Stats")
 	FORCEINLINE float GetCurrentHealth()const { return CurrentHealth; }
+	
 	FORCEINLINE float GetAttackPower()const { return AttackPower; }
 	FORCEINLINE float GetDefense()const { return Defense; }
 	FORCEINLINE float GetAgility()const { return Agility; }
@@ -63,7 +67,12 @@ public:
 	UFUNCTION()
 	void OnRep_CurrentHealth();
 
+	// heal system
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ServerRPCHeal(float InHealAmount);
+
 protected:
+	float CharacterWalkSpeed;
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
@@ -86,6 +95,4 @@ private:
 
 	UFUNCTION()
 	void OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-	
-	float CharacterWalkSpeed;
 };

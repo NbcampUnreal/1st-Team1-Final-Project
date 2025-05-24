@@ -23,4 +23,6 @@ Saved/
 .vs/
 *.ipch
 
+# Cursor
 .cursor/rules/.mdc
+.cursor/
