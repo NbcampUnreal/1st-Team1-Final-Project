@@ -164,7 +164,28 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");
 
 	// 2. 회전 방향 얻기(컨트롤러의 에임 방향)
-	FRotator SpawnRotation = GetController()->GetDesiredRotation();
+	// 화면 중앙에서 World Direction을 얻기 위한 설정
+	FVector ViewLoc;
+	FRotator ViewRot;
+	Controller->GetPlayerViewPoint(ViewLoc, ViewRot); // 카메라 기준 시점
+
+	FVector TraceStart = ViewLoc;
+	FVector TraceEnd = TraceStart + ViewRot.Vector() * 10000.f;
+
+	// 히트된 위치로 방향 계산
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	FVector TargetLocation = TraceEnd;
+
+	if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params))
+	{
+		TargetLocation = Hit.ImpactPoint;
+	}
+	// SpawnLocation → TargetLocation 방향 계산
+	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
+	FRotator SpawnRotation = LaunchDirection.Rotation();
 
 	// 3. 액터 스폰
 	FActorSpawnParameters SpawnParams;
