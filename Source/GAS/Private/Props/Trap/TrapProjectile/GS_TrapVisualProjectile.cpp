@@ -21,6 +21,13 @@ AGS_TrapVisualProjectile::AGS_TrapVisualProjectile()
 }
 
 
+void AGS_TrapVisualProjectile::BeginPlay()
+{
+	Super::BeginPlay();
+	SetLifeSpan(5.0f);
+}
+
+
 void AGS_TrapVisualProjectile::SetProjectileMesh(UStaticMesh* Mesh)
 {
 	if (ProjectileMesh && Mesh)
