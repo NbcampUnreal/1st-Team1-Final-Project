@@ -38,6 +38,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Player Pawn Classes")
 	TSubclassOf<APawn> RTSPawnClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "HUD Classes")
+	TSubclassOf<AHUD> SeekerHUDClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HUD Classes")
+	TSubclassOf<AHUD> RTSHUDClass;
+
 	//void HandleControllerChangeTriggerEvent();
 	
 };
