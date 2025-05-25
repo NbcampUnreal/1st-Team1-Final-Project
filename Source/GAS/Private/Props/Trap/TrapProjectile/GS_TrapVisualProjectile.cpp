@@ -11,7 +11,8 @@ AGS_TrapVisualProjectile::AGS_TrapVisualProjectile()
 
 	ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ProjectileMesh->SetSimulatePhysics(false);
-
+	
+	//박히는 화살 에셋 여기서 교체
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ArrowMeshObj(TEXT("/Game/Props/Trap/WallTrap/ArrowTrap/Mesh/SM_Arrow_old.SM_Arrow_old"));
 	if (ArrowMeshObj.Succeeded())
 	{

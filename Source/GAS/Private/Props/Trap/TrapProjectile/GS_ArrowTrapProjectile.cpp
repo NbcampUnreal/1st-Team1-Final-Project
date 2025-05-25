@@ -7,11 +7,6 @@
 
 AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
 {
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> ArrowMeshObj(TEXT("/Game/Props/Trap/WallTrap/ArrowTrap/Mesh/SM_CrystalArrow.SM_CrystalArrow"));
-	if (ArrowMeshObj.Succeeded())
-	{
-		ProjectileMesh->SetSkeletalMesh(ArrowMeshObj.Object);
-	}
 }
 
 
@@ -75,7 +70,6 @@ void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
 		AGS_TrapVisualProjectile* VisualArrow = GetWorld()->SpawnActor<AGS_TrapVisualProjectile>(VisualArrowClass, SpawnLocation, AdjustedRotation, Params);
 		if (VisualArrow)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("VisaulArrow GetName : %s"), *VisualArrow->GetName());
 			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
 
 		}
