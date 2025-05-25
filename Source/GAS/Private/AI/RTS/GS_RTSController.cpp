@@ -28,7 +28,7 @@ AGS_RTSController::AGS_RTSController()
 void AGS_RTSController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	SetInputMode(FInputModeGameAndUI());
 	if (!HasAuthority() && IsLocalController())
 	{
 		if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
