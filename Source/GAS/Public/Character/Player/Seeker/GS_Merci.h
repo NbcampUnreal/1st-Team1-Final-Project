@@ -52,10 +52,13 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
 
-	void FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+	UFUNCTION(Server, Reliable)
+	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
 
 	UFUNCTION(Server, Reliable)
-	void Server_NotifyDrawMontageEnded(bool bInterrupted);
+	void Server_NotifyDrawMontageEnded();
+
+	void OnDrawMontageEnded();
 
 protected:
 	// Called when the game starts or when spawned
@@ -92,7 +95,7 @@ private:
 	bool bWidgetVisibility = false;
 	USkeletalMeshComponent* Mesh;
 
-	void OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	
 
 	void PlayDrawMontage(UAnimMontage* DrawMontage);
 

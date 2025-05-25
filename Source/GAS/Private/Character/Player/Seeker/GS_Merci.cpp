@@ -92,7 +92,7 @@ void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowCl
 		UE_LOG(LogTemp, Warning, TEXT("ReleaseSound"));
 	}
 
-	FireArrow(ArrowClass);
+	Server_FireArrow(ArrowClass);
 
 	if (ShotSoundComp)
 	{
@@ -123,9 +123,9 @@ void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
 		float Duration = Mesh->GetAnimInstance()->Montage_Play(DrawMontage);
 		if (Duration > 0.0f)
 		{
-			FOnMontageEnded EndDelegate;
-			EndDelegate.BindUObject(this, &AGS_Merci::OnDrawMontageEnded);
-			Mesh->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, DrawMontage);
+			//FOnMontageEnded EndDelegate;
+			//EndDelegate.BindUObject(this, &AGS_Merci::OnDrawMontageEnded);
+			//Mesh->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, DrawMontage);
 			UE_LOG(LogTemp, Warning, TEXT("Montage_Play called, duration: %f"), Duration);
 		}
 		else
@@ -153,7 +153,7 @@ void AGS_Merci::Multicast_PlayDrawMontage_Implementation(UAnimMontage* Montage)
 	PlayDrawMontage(Montage);
 }
 
-void AGS_Merci::FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
+void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
 {
 	if (!ArrowClass || !Weapon)
 	{
@@ -246,36 +246,39 @@ void AGS_Merci::UpdateZoom(float Alpha)
 //	);
 //}
 
-void AGS_Merci::OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void AGS_Merci::OnDrawMontageEnded()
 {
-	if (!bInterrupted)
-	{
-		Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
-	}
-	else
-	{
-		Client_SetWidgetVisibility(false); // 실패 시 숨기기
-	}
+	Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
+	//if (!bInterrupted)
+	//{
+	//	Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
+	//}
+	//else
+	//{
+	//	Client_SetWidgetVisibility(false); // 실패 시 숨기기
+	//}
 
 	// 서버로 전달
 	if (HasAuthority() == false)
 	{
-		Server_NotifyDrawMontageEnded(bInterrupted);
+		Server_NotifyDrawMontageEnded();
 	}
 }
 
-void AGS_Merci::Server_NotifyDrawMontageEnded_Implementation(bool bInterrupted)
+void AGS_Merci::Server_NotifyDrawMontageEnded_Implementation()
 {
-	if (!bInterrupted)
-	{
-		// 서버에서 처리할 로직
-		SetAimState(true);
-		SetDrawState(false);
-	}
-	else
-	{
-		SetDrawState(false);
-	}
+	SetAimState(true);
+	SetDrawState(false);
+	//if (!bInterrupted)
+	//{
+	//	// 서버에서 처리할 로직
+	//	SetAimState(true);
+	//	SetDrawState(false);
+	//}
+	//else
+	//{
+	//	SetDrawState(false);
+	//}
 }
 
 void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
@@ -284,6 +287,7 @@ void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
 
 	if (WidgetCrosshair)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("WidgetVisibility"));
 		WidgetCrosshair->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	}
 }
