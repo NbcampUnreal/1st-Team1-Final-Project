@@ -32,7 +32,7 @@ void UGS_MerciMovingSkill::ActiveSkill()
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	MerciCharacter->SetDrawState(false);
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *SkillAnimMontages[0]->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("ActiveSkill : %s"), *SkillAnimMontages[0]->GetName());
 	MerciCharacter->LeftClickPressedAttack(SkillAnimMontages[0]);
 }
 
