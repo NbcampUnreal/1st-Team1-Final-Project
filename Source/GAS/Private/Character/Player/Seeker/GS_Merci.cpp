@@ -72,7 +72,7 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 		// 사운드 재생
 		/*PlayBowPullSound(PullSoundComp);*/
 
-		StartZoom(); // 줌인
+		Client_StartZoom(); // 줌인
 	}
 	else
 	{
@@ -101,9 +101,9 @@ void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowCl
 		UE_LOG(LogTemp, Warning, TEXT("ShotSound"));
 	}
 
-	StopZoom();
+	Client_StopZoom();
 
-	SetWidgetVisibility(false);
+	Client_SetWidgetVisibility(false);
 }
 
 void AGS_Merci::FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
@@ -189,18 +189,18 @@ void AGS_Merci::OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	if (!bInterrupted)
 	{
-		SetWidgetVisibility(true); // 크로스 헤어 보이기
+		Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
 		SetAimState(true);
 		SetDrawState(false);
 	}
 	else
 	{
-		SetWidgetVisibility(false); // 실패 시 숨기기
+		Client_SetWidgetVisibility(false); // 실패 시 숨기기
 		SetDrawState(false);
 	}
 }
 
-void AGS_Merci::SetWidgetVisibility(bool bVisible)
+void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
 {
 	if (WidgetCrosshair)
 	{
@@ -208,14 +208,22 @@ void AGS_Merci::SetWidgetVisibility(bool bVisible)
 	}
 }
 
-void AGS_Merci::StartZoom()
+void AGS_Merci::Client_StartZoom_Implementation()
 {
 	ZoomTimeline.Play(); // 줌인
 }
 
-void AGS_Merci::StopZoom()
+void AGS_Merci::Client_StopZoom_Implementation()
 {
 	ZoomTimeline.Reverse(); // 줌아웃
+}
+
+void AGS_Merci::Client_PlaySound_Implementation(UAkComponent* SoundComp)
+{
+	if (SoundComp)
+	{
+		SoundComp->PostAssociatedAkEvent(0, FOnAkPostEventCallback());
+	}
 }
 
 // Called every frame

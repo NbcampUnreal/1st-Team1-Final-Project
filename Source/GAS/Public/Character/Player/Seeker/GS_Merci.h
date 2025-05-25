@@ -80,8 +80,16 @@ private:
 	USkeletalMeshComponent* Mesh;
 
 	void OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-	void SetWidgetVisibility(bool bVisible);
 
-	void StartZoom();
-	void StopZoom();
+	UFUNCTION(Client, Reliable)
+	void Client_SetWidgetVisibility(bool bVisible);
+
+	UFUNCTION(Client, Reliable)
+	void Client_StartZoom();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StopZoom();
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlaySound(UAkComponent* SoundComp);
 };
