@@ -162,7 +162,7 @@ bool UGS_ArcaneBoardManager::RemoveRune(uint8 RuneID)
 	FIntPoint RunePos = PlacedRunes[RuneIndex].Pos;
 	for (const FIntPoint& Offset : RuneShape)
 	{
-		FIntPoint CellPos(RunePos.X + Offset.X, RunePos.X + Offset.X);
+		FIntPoint CellPos(RunePos.X + Offset.X, RunePos.Y + Offset.Y);
 		UpdateCellState(CellPos, EGridCellState::Empty);
 	}
 
@@ -175,7 +175,7 @@ bool UGS_ArcaneBoardManager::RemoveRune(uint8 RuneID)
 	//스탯창 UI 업데이트 이벤트 호출
 	OnStatsChanged.Broadcast(CurrStatEffects);
 
-	return false;
+	return true;
 }
 
 FCharacterStats UGS_ArcaneBoardManager::CalculateStatEffects()
@@ -424,16 +424,6 @@ void UGS_ArcaneBoardManager::InitGridState()
 			}
 			CurrGridState.Add(Cell.Pos, NewCell);
 		}
-	}
-}
-
-void UGS_ArcaneBoardManager::UpdateCellState(const FIntPoint& Pos, EGridCellState NewState)
-{
-	if (CurrGridState.Contains(Pos))
-	{
-		CurrGridState[Pos].State = NewState;
-		CurrGridState[Pos].PlacedRuneID = 0;
-		CurrGridState[Pos].RuneTextureFrag = nullptr;
 	}
 }
 

@@ -5,13 +5,7 @@
 
 UGS_DrakharDraconicFury::UGS_DrakharDraconicFury()
 {
-	Cooltime = 45.f;
-
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DraconicFuryMontage(TEXT("/Game/Player/Guardian/Drakhar/Animations/Blueprint/AM_DraconicFury2.AM_DraconicFury2"));
-	if (DraconicFuryMontage.Succeeded())
-	{
-		SkillAnimMontages.Add(DraconicFuryMontage.Object);
-	}
+	CurrentSkillType = ESkillSlot::Ultimate;
 }
 
 void UGS_DrakharDraconicFury::ActiveSkill()
@@ -27,5 +21,6 @@ void UGS_DrakharDraconicFury::ActiveSkill()
 void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 {
 	StartCoolDown();
+	//OwnerCharacter->GetSkillComp()->StartTimer(ESkillSlot::Ultimate);
 	OwnerCharacter->MulticastRPCPlaySkillMontage((SkillAnimMontages[0]));
 }

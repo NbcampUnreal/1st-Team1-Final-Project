@@ -20,8 +20,10 @@ public:
     void InitializeDefaults();
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void CopyProperties(APlayerState* OtherPlayerState) override;
+    virtual void SeamlessTravelTo(APlayerState* NewPlayerState) override;
 
-    // ø™«“
+    // Ïó≠Ìï†
     UPROPERTY(ReplicatedUsing = OnRep_PlayerRole, BlueprintReadOnly, Category = "Lobby")
     EPlayerRole CurrentPlayerRole;
     UFUNCTION()
@@ -52,7 +54,7 @@ public:
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_SetReadyStatus(bool bNewReadyStatus);
 
-    // µ®∏Æ∞Õ
+    // Îç∏Î¶¨Í≤É
     UPROPERTY(BlueprintAssignable, Category = "Lobby|Events")
     FOnRoleChangedSignature OnRoleChangedDelegate;
     UPROPERTY(BlueprintAssignable, Category = "Lobby|Events")

@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WwiseDocument Type="WorkUnit" ID="{FDFB093B-59E2-4879-BF96-CF460645B40F}" SchemaVersion="123">
 	<GameParameters>
-		<WorkUnit Name="Default Work Unit" ID="{FDFB093B-59E2-4879-BF96-CF460645B40F}" PersistMode="Standalone"/>
+		<WorkUnit Name="Default Work Unit" ID="{FDFB093B-59E2-4879-BF96-CF460645B40F}" PersistMode="Standalone">
+			<ChildrenList>
+				<GameParameter Name="LowHPSound" ID="{499A8A01-58CD-471A-A182-6ECADC86A50E}">
+					<PropertyList>
+						<Property Name="InitialValue" Type="Real64" Value="100"/>
+						<Property Name="RTPCRamping" Type="int16" Value="1"/>
+					</PropertyList>
+				</GameParameter>
+			</ChildrenList>
+		</WorkUnit>
 	</GameParameters>
 </WwiseDocument>

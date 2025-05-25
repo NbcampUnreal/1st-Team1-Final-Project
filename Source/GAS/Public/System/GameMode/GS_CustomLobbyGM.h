@@ -22,9 +22,9 @@ protected:
 	TMap<TObjectPtr<APlayerState>, bool> PlayerReadyStates;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
-	FName NextLevelName = "LoadingLevel";
+	FName NextLevelName = "InGameTestLevel"; // 테스트 후에 다시 LoadingLevel로 바꿔놔야함!!!!!!!!!!!!!!!!!!!
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
-	int32 MinPlayersToStart = 2;
+	int32 MinPlayersToStart = 1;
 
 };

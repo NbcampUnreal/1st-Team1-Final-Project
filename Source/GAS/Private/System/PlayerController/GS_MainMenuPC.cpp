@@ -17,7 +17,7 @@ void AGS_MainMenuPC::HandleCustomGameRequest()
 	if (GI)
 	{
 		UE_LOG(LogTemp, Log, TEXT("AGS_MainMenuPC: Player %s is requesting a custom game session via GameInstance."), *GetNameSafe(this));
-		GI->FindSession(this);
+		GI->GSFindSession(this);
 	}
 	else
 	{
@@ -39,6 +39,20 @@ void AGS_MainMenuPC::BeginPlay()
 	Super::BeginPlay();
 
 	ShowMainMenuUI();
+
+	if (IsLocalController()) // MainLevel 앞에 TitleLevel 추가할 거면 이거도 옮겨야 됨!!!!
+	{
+		UGS_GameInstance* GI = GetGameInstance<UGS_GameInstance>();
+		if (GI)
+		{
+			FString ConnectString = GI->GetAndClearPendingConnectString();
+			if (!ConnectString.IsEmpty())
+			{
+				UE_LOG(LogTemp, Log, TEXT("AGS_MainMenuPC: Traveling to server from command line: %s"), *ConnectString);
+				ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
+			}
+		}
+	}
 }
 
 void AGS_MainMenuPC::SetupInputComponent()

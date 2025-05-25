@@ -58,6 +58,9 @@ public:
 	void EndRuneSelection(bool bPlaceRune = false);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	bool StartRuneReposition(uint8 RuneID);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	UGS_RuneGridCellWidget* GetCellAtPos(const FVector2D& ViewportPos);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -104,7 +107,4 @@ private:
 	float DragVisualOffset;
 
 	void UpdateGridVisuals();
-
-	FVector2D ScreenToViewport(const FVector2D& ScreenPos) const;
-	FVector2D ViewportToScreen(const FVector2D& ViewportPos) const;
 };

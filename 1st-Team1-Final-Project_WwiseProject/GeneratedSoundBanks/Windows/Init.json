@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{D6CC510E-47D7-5443-9066-06580160DD80}",
+    "Hash": "{E6774B27-2E2E-3FDE-686B-14337CEDAB4B}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -40,6 +40,14 @@
       "Name": "Master Audio Bus",
       "ObjectPath": "\\Master-Mixer Hierarchy\\Default Work Unit\\Master Audio Bus",
       "GUID": "{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}"
+     }
+    ],
+    "GameParameters": [
+     {
+      "Id": "181543522",
+      "Name": "LowHPSound",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
+      "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
      }
     ],
     "StateGroups": [
@@ -118,6 +126,6 @@
     ]
    }
   ],
-  "FileHash": "{F2C1E2CA-4575-2AC9-BC58-5CFB65AF47FE}"
+  "FileHash": "{5B97B7E2-33D6-1A81-9EB8-23B2BE4381C2}"
  }
 }

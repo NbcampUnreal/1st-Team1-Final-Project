@@ -68,8 +68,15 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 		return Reply;
 	}
 
-	FVector2D MousePos = ScreenToViewport(InMouseEvent.GetScreenSpacePosition());
-	SelectionVisualWidget->SetPositionInViewport(MousePos- DragVisualOffset, false);
+	// 스크린 좌표를 뷰포트 좌표로 변환
+	FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
+		MousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
+	}
+
+	SelectionVisualWidget->SetPositionInViewport(MousePos - DragVisualOffset, false);
 
 	UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
 
@@ -88,21 +95,32 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 FReply UGS_ArcaneBoardWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	FReply Reply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-	if (!bIsInSelectionMode)
-	{
-		return Reply;
-	}
-
+	
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		FVector2D MousePos = ScreenToViewport(InMouseEvent.GetScreenSpacePosition());
+		// 스크린 좌표를 뷰포트 좌표로 변환
+		FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
+		if (APlayerController* PC = GetOwningPlayer())
+		{
+			FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
+			MousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
+		}
+
 		UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
 
 		if (CellUnderMouse)
 		{
 			//배치 로직
-			EndRuneSelection(true);
-			return FReply::Handled();
+			if(bIsInSelectionMode)
+			{
+				EndRuneSelection(true);
+				return FReply::Handled();
+			}
+			else
+			{
+				StartRuneReposition(CellUnderMouse->GetPlacedRuneID());
+				return FReply::Handled();
+			}
 		}
 	}
 	else if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
@@ -138,15 +156,6 @@ void UGS_ArcaneBoardWidget::GenerateGridLayout()
 			CellWidget->InitCell(CellData, this);
 			GridPanel->AddChildToUniformGrid(CellWidget, CellData.Pos.X, CellData.Pos.Y);
 			GridCells.Add(CellData.Pos, CellWidget);
-
-			if (CellData.State == EGridCellState::Occupied && CellData.PlacedRuneID > 0)
-			{
-				UTexture2D* RuneTexture = CellData.RuneTextureFrag;
-				if (RuneTexture)
-				{
-					CellWidget->SetRuneTexture(RuneTexture);
-				}
-			}
 		}
 	}
 }
@@ -182,7 +191,7 @@ void UGS_ArcaneBoardWidget::UpdateGridPreview(uint8 RuneID, const FIntPoint& Gri
 			UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
 			if (IsValid(CellWidget))
 			{
-				EGridCellVisualState PreviewState = bCanPlace ? 
+				EGridCellVisualState PreviewState = bCanPlace ?
 					EGridCellVisualState::Valid : EGridCellVisualState::Invalid;
 
 				CellWidget->SetPreviewVisualState(PreviewState);
@@ -233,7 +242,7 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 				MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 				if (MousePos != FVector2D::ZeroVector)
 				{
-					SelectionVisualWidget->SetPositionInViewport(MousePos- DragVisualOffset, false);
+					SelectionVisualWidget->SetPositionInViewport(MousePos - DragVisualOffset, false);
 				}
 			}
 		}
@@ -242,7 +251,7 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 
 void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 {
-	if(!bPlaceRune)
+	if (!bPlaceRune)
 	{
 		if (IsValid(SelectionVisualWidget))
 		{
@@ -294,9 +303,29 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 	SelectedRuneID = 0;
 }
 
+bool UGS_ArcaneBoardWidget::StartRuneReposition(uint8 RuneID)
+{
+	if (!BoardManager->RemoveRune(RuneID))
+	{
+		return false;
+	}
+
+	UpdateGridVisuals();
+	RuneInven->UpdatePlacedStateOfRune(RuneID, false);
+	StartRuneSelection(RuneID);
+
+	return true;
+}
+
 UGS_RuneGridCellWidget* UGS_ArcaneBoardWidget::GetCellAtPos(const FVector2D& ViewportPos)
 {
-	FVector2D ScreenPos = ViewportToScreen(ViewportPos);
+	// 뷰포트 좌표를 스크린 좌표로 변환
+	FVector2D ScreenPos = ViewportPos;
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
+		ScreenPos = ScreenGeometry.LocalToAbsolute(ViewportPos);
+	}
 
 	for (auto& CellPair : GridCells)
 	{
@@ -318,7 +347,7 @@ void UGS_ArcaneBoardWidget::ClearPreview()
 {
 	for (const FIntPoint& CellPos : PreviewCells)
 	{
-		if(GridCells.Contains(CellPos))
+		if (GridCells.Contains(CellPos))
 		{
 			UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
 			if (IsValid(CellWidget))
@@ -343,36 +372,14 @@ void UGS_ArcaneBoardWidget::UpdateGridVisuals()
 		return;
 	}
 
-	for (const FIntPoint& CellPos : PreviewCells)
+	for (auto Cell : GridCells)
 	{
-		if (GridCells.Contains(CellPos))
-		{
-			UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
-			FGridCellData UpdatedCellData;
+		UGS_RuneGridCellWidget* CellWidget = Cell.Value;
+		FGridCellData UpdatedCellData;
 
-			if (BoardManager->GetCellData(CellPos, UpdatedCellData))
-			{
-				CellWidget->SetCellData(UpdatedCellData);
-			}
+		if (BoardManager->GetCellData(Cell.Key, UpdatedCellData))
+		{
+			CellWidget->SetCellData(UpdatedCellData);
 		}
 	}
-}
-FVector2D UGS_ArcaneBoardWidget::ScreenToViewport(const FVector2D& ScreenPos) const
-{
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
-		return ScreenGeometry.AbsoluteToLocal(ScreenPos);
-	}
-	return ScreenPos;
-}
-
-FVector2D UGS_ArcaneBoardWidget::ViewportToScreen(const FVector2D& ViewportPos) const
-{
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
-		return ScreenGeometry.LocalToAbsolute(ViewportPos);
-	}
-	return ViewportPos;
 }

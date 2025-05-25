@@ -39,4 +39,19 @@ private:
 	void OnRep_CurrentTime();
 
 	FTimerHandle GameTimeHandle;
+
+
+public:
+	UPROPERTY(ReplicatedUsing = OnRep_Loaded)
+	int32 NumClientsLoaded = 0;
+	UPROPERTY(Replicated)                 
+	int32 NumClientsExpected = 0;
+
+	DECLARE_MULTICAST_DELEGATE(FAllClientsLoaded);
+	FAllClientsLoaded OnAllClientsLoaded;
+
+	UFUNCTION()
+	void OnRep_Loaded();
+	void AddLoadedClient();
+
 };

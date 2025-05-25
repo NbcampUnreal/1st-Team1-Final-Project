@@ -227,7 +227,7 @@
 								<Action Name="" ID="{D3E40DAC-E979-4EF4-8D48-3F16EDC86F3E}" ShortID="745598978">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_AxeSwing_Hit" ID="{BF022B96-0D0E-4BA6-9AA8-E0B934FF2A41}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_Swing_Hit" ID="{199C4062-58AF-4B39-B5CE-2F7029BABD29}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -293,7 +293,7 @@
 								<Action Name="" ID="{59A44036-0045-42D0-A5C6-016AD2610615}" ShortID="234166397">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_Saw" ID="{91C078AB-FEA4-4EE1-A0C5-C1F2C62FF51C}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_CrystalSaw" ID="{6F302D28-2733-4779-A4AA-A97068514725}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -305,18 +305,18 @@
 								<Action Name="" ID="{9A5EADA5-6F38-4DE9-B836-BF942CA83ADC}" ShortID="96101203">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_Saw_Hit" ID="{86E51F01-81CC-49A4-BD8B-40EDC288492F}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_CrystalSaw_Hit" ID="{7E0EF1DB-5A85-4BD9-B830-47BB74676879}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
 							</ChildrenList>
 						</Event>
-						<Event Name="Props_StoneWall" ID="{9C89005A-CF4E-46F0-9A26-2606EC93E64B}">
+						<Event Name="Props_CrystalWallTrap" ID="{9C89005A-CF4E-46F0-9A26-2606EC93E64B}">
 							<ChildrenList>
 								<Action Name="" ID="{99C1554E-6C82-410F-8563-2BCF2A7714A2}" ShortID="302038271">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_StoneTrap" ID="{74EAE0B7-683C-4013-8639-C4EED1D2E519}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_CrystalWallTrap" ID="{718BD15B-1AFD-469E-94CE-28FFE8661F93}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -327,7 +327,7 @@
 								<Action Name="" ID="{DC419BB4-3FDC-483A-B993-EDCDFCF2EC08}" ShortID="49632125">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_StoneTrap_Hit" ID="{6232E52C-7117-4E48-96CB-99065188C99E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_SpikeTrap_Hit" ID="{9C483B99-6DBB-4BB3-98E8-CEAAB68C4397}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -338,18 +338,18 @@
 								<Action Name="" ID="{3D1ADF06-DF28-42A6-A305-9D0749263153}" ShortID="258217654">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_SpikeTrap" ID="{E06DA69C-FFED-49FC-9D34-7D81B986EAF5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_CrystalSpikeTrap" ID="{C3DFCFBC-AD76-47D7-8F26-4ED602CC8A43}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
 							</ChildrenList>
 						</Event>
-						<Event Name="Props_Spike_Hit" ID="{36F0066E-709B-487B-AB1C-AAC04B8F753C}">
+						<Event Name="Props_CrystalSpike_Hit" ID="{36F0066E-709B-487B-AB1C-AAC04B8F753C}">
 							<ChildrenList>
 								<Action Name="" ID="{59F7A33F-8634-4313-875F-EA9AE94ED1A1}" ShortID="310572861">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_SpikeTrap_Hit" ID="{F473346D-577A-43CC-A9FE-CF39A1BC99D7}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_CrystalSpikeTrap" ID="{C3DFCFBC-AD76-47D7-8F26-4ED602CC8A43}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -410,6 +410,17 @@
 								</Action>
 							</ChildrenList>
 						</Event>
+						<Event Name="Props_CrystalWallTrap_Hit" ID="{B21DE69E-40F0-4E26-A3A1-FD3ACBE3F2B1}">
+							<ChildrenList>
+								<Action Name="" ID="{DF3E5BE0-9604-464E-8B5B-2BC6D70E906C}" ShortID="1041416101">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_CrystalWallTrap_Hit" ID="{6786AD38-A246-4D4F-991C-6B947DAD639B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
 					</ChildrenList>
 				</Folder>
 				<Folder Name="Player" ID="{5B530A9A-1B94-4771-9758-F7BC6453FCEA}" ShortID="925469267">
@@ -427,10 +438,22 @@
 										</Action>
 									</ChildrenList>
 								</Event>
+								<Event Name="Voice_Merci_Sick" ID="{7573A416-C37E-4A3F-8DDC-F3B908D97302}">
+									<ChildrenList>
+										<Action Name="" ID="{C7D3518C-22B4-49F7-BAB6-5A69E97759D0}" ShortID="1068866103">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_Sick" ID="{18CE2D14-C053-4977-847A-B7147EB374A5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
 						</Folder>
 					</ChildrenList>
 				</Folder>
+				<Event Name="EV_Merci_Sick" ID="{2D264FD9-C0B5-44E6-9384-57FEEE4D3C06}"/>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>
