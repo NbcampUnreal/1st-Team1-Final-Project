@@ -42,6 +42,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
 
+	UFUNCTION(Server, Reliable)
+	void Server_LeftClickPressedAttack(UAnimMontage* DrawMontage);
+
+	UFUNCTION(Server, Reliable)
+	void Server_LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+
 	void FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
 
 protected:
@@ -80,6 +86,11 @@ private:
 	USkeletalMeshComponent* Mesh;
 
 	void OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	void PlayDrawMontage(UAnimMontage* DrawMontage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDrawMontage(UAnimMontage* Montage);
 
 	UFUNCTION(Client, Reliable)
 	void Client_SetWidgetVisibility(bool bVisible);

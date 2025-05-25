@@ -46,27 +46,17 @@ AGS_Merci::AGS_Merci()
 
 void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 {
+	if (!HasAuthority())
+	{
+		// 서버에 요청
+		Server_LeftClickPressedAttack(DrawMontage);
+		return;
+	}
+
 	if (!GetDrawState())
 	{
-		if (Mesh && DrawMontage)
-		{
-			float Duration = Mesh->GetAnimInstance()->Montage_Play(DrawMontage, 2.0f);
-			if (Duration > 0.0f)
-			{
-				FOnMontageEnded EndDelegate;
-				EndDelegate.BindUObject(this, &AGS_Merci::OnDrawMontageEnded);
-				Mesh->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, DrawMontage);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Duration<=0.0f"));
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Mesh null or DrawMontage null"));
-		}
-
+		Multicast_PlayDrawMontage(DrawMontage);
+		//PlayDrawMontage(DrawMontage);
 		SetDrawState(true); // 상태 전환
 
 		// 사운드 재생
@@ -82,6 +72,13 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 
 void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
 {
+
+	if (!HasAuthority())
+	{
+		Server_LeftClickReleaseAttack(ArrowClass);
+		return;
+	}
+
 	SetAimState(false);
 	SetDrawState(false);
 
@@ -104,6 +101,49 @@ void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowCl
 	Client_StopZoom();
 
 	Client_SetWidgetVisibility(false);
+}
+
+void AGS_Merci::Server_LeftClickPressedAttack_Implementation(UAnimMontage* DrawMontage)
+{
+	LeftClickPressedAttack(DrawMontage);
+}
+
+void AGS_Merci::Server_LeftClickReleaseAttack_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
+{
+	LeftClickReleaseAttack(ArrowClass);
+}
+
+void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
+{
+	UE_LOG(LogTemp, Warning, TEXT("DrawMontage valid: %s"), *GetNameSafe(DrawMontage));
+	if (Mesh && DrawMontage)
+	{
+		float Duration = Mesh->GetAnimInstance()->Montage_Play(DrawMontage, 2.0f);
+		if (Duration > 0.0f)
+		{
+			FOnMontageEnded EndDelegate;
+			EndDelegate.BindUObject(this, &AGS_Merci::OnDrawMontageEnded);
+			Mesh->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, DrawMontage);
+			UE_LOG(LogTemp, Warning, TEXT("Montage_Play called, duration: %f"), Duration);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Duration<=0.0f"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Mesh null or DrawMontage null"));
+	}
+}
+
+void AGS_Merci::Multicast_PlayDrawMontage_Implementation(UAnimMontage* Montage)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage called on %s"), *GetName());
+	UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage called on %s, Montage: %s"),
+		*GetName(),
+		*GetNameSafe(Montage));
+	PlayDrawMontage(Montage);
 }
 
 void AGS_Merci::FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
@@ -132,7 +172,7 @@ void AGS_Merci::BeginPlay()
 {
 	Super::BeginPlay();
 	Mesh = this->GetMesh();
-
+	UE_LOG(LogTemp, Warning, TEXT("AnimInstance: %s"), *GetNameSafe(GetMesh()->GetAnimInstance()));
 	if (ZoomCurve)
 	{
 		FOnTimelineFloat TimelineCallback;
