@@ -30,6 +30,10 @@ public:
 	virtual void LeftClickPressed_Implementation() override;
 	virtual void LeftClickRelease_Implementation() override;
 
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> WidgetCrosshairClass;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
 	UUserWidget* WidgetCrosshair;
 
@@ -49,6 +53,9 @@ public:
 	void Server_LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
 
 	void FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+
+	UFUNCTION(Server, Reliable)
+	void Server_NotifyDrawMontageEnded(bool bInterrupted);
 
 protected:
 	// Called when the game starts or when spawned
@@ -88,6 +95,9 @@ private:
 	void OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	void PlayDrawMontage(UAnimMontage* DrawMontage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StopDrawMontage();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayDrawMontage(UAnimMontage* Montage);

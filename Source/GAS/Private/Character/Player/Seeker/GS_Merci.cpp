@@ -60,6 +60,7 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 		SetDrawState(true); // 상태 전환
 
 		// 사운드 재생
+		// 사운드 재생
 		/*PlayBowPullSound(PullSoundComp);*/
 
 		Client_StartZoom(); // 줌인
@@ -72,7 +73,6 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 
 void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
 {
-
 	if (!HasAuthority())
 	{
 		Server_LeftClickReleaseAttack(ArrowClass);
@@ -81,6 +81,8 @@ void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowCl
 
 	SetAimState(false);
 	SetDrawState(false);
+
+	Multicast_StopDrawMontage();
 
 	// 사운드 재생
 
@@ -118,7 +120,7 @@ void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
 	UE_LOG(LogTemp, Warning, TEXT("DrawMontage valid: %s"), *GetNameSafe(DrawMontage));
 	if (Mesh && DrawMontage)
 	{
-		float Duration = Mesh->GetAnimInstance()->Montage_Play(DrawMontage, 2.0f);
+		float Duration = Mesh->GetAnimInstance()->Montage_Play(DrawMontage);
 		if (Duration > 0.0f)
 		{
 			FOnMontageEnded EndDelegate;
@@ -135,6 +137,11 @@ void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Mesh null or DrawMontage null"));
 	}
+}
+
+void AGS_Merci::Multicast_StopDrawMontage_Implementation()
+{
+	Mesh->GetAnimInstance()->Montage_Stop(0.2f); // BlendOut 0.2초
 }
 
 void AGS_Merci::Multicast_PlayDrawMontage_Implementation(UAnimMontage* Montage)
@@ -171,6 +178,20 @@ void AGS_Merci::FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
 void AGS_Merci::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (IsLocallyControlled()) // 꼭 필요!
+	{
+		if (WidgetCrosshairClass)
+		{
+			WidgetCrosshair = CreateWidget<UUserWidget>(GetWorld(), WidgetCrosshairClass);
+			if (WidgetCrosshair)
+			{
+				WidgetCrosshair->AddToViewport();
+				WidgetCrosshair->SetVisibility(ESlateVisibility::Hidden);
+			}
+		}
+	}
+
 	Mesh = this->GetMesh();
 	UE_LOG(LogTemp, Warning, TEXT("AnimInstance: %s"), *GetNameSafe(GetMesh()->GetAnimInstance()));
 	if (ZoomCurve)
@@ -230,18 +251,37 @@ void AGS_Merci::OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	if (!bInterrupted)
 	{
 		Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
+	}
+	else
+	{
+		Client_SetWidgetVisibility(false); // 실패 시 숨기기
+	}
+
+	// 서버로 전달
+	if (HasAuthority() == false)
+	{
+		Server_NotifyDrawMontageEnded(bInterrupted);
+	}
+}
+
+void AGS_Merci::Server_NotifyDrawMontageEnded_Implementation(bool bInterrupted)
+{
+	if (!bInterrupted)
+	{
+		// 서버에서 처리할 로직
 		SetAimState(true);
 		SetDrawState(false);
 	}
 	else
 	{
-		Client_SetWidgetVisibility(false); // 실패 시 숨기기
 		SetDrawState(false);
 	}
 }
 
 void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
 {
+	if (!IsLocallyControlled()) return;
+
 	if (WidgetCrosshair)
 	{
 		WidgetCrosshair->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
