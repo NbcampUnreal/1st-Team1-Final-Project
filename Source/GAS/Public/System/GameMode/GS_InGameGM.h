@@ -13,12 +13,9 @@ class GAS_API AGS_InGameGM : public AGameMode
 	
 public:
 	AGS_InGameGM();
+	virtual TSubclassOf<APlayerController> GetPlayerControllerClassToSpawnForSeamlessTravel(APlayerController* PreviousPC) override;
 	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
-	virtual void PostSeamlessTravel() override;
-	virtual void BeginPlay() override;
-
-	void SpawnAllPlayersSafely();
-	bool bSpawnDelegateBound = false;
+	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player Controller Classes")
 	TSubclassOf<APlayerController> SeekerControllerClass;
