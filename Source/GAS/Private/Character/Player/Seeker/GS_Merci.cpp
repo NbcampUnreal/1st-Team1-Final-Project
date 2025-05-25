@@ -55,6 +55,7 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 
 	if (!GetDrawState())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("GetDrawState=false pass: %s"), GetDrawState()?TEXT("true") : TEXT("false"));
 		Multicast_PlayDrawMontage(DrawMontage);
 		//PlayDrawMontage(DrawMontage);
 		SetDrawState(true); // 상태 전환
@@ -192,6 +193,10 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
 
+	if (ArrowClass == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ArrowClass is null!!!!!!!!!"));
+	}
 	GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);
 }
 
