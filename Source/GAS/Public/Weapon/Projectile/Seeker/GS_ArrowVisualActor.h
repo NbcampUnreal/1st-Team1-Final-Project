@@ -22,9 +22,15 @@ public:
 
 	UFUNCTION()
 	void OnRep_SkeletalMesh();
+
+	float LifeTime = 5.0f; // 5초 후 소멸
+	float ElapsedTime = 0.0f;
 	
 
 	void SetArrowMesh(USkeletalMesh* Mesh);
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+protected:
+	virtual void Tick(float DeltaTime) override;
 };

@@ -160,7 +160,59 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	{
 		return;
 	}
+	//FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");
 
+	//APlayerController* PC = Cast<APlayerController>(Controller);
+	//if (!PC) return;
+
+	//int32 ViewportX, ViewportY;
+	//PC->GetViewportSize(ViewportX, ViewportY);
+
+	//// 화면 중심 픽셀 좌표
+	//FVector2D ScreenCenter(ViewportX / 2.0f, ViewportY / 2.0f);
+
+	//FVector WorldOrigin;
+	//FVector WorldDirection;
+
+	//if (PC->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldOrigin, WorldDirection))
+	//{
+	//	// 월드 방향을 기준으로 트레이스
+	//	FVector TraceStart = WorldOrigin;
+	//	FVector TraceEnd = TraceStart + WorldDirection * 10000.f;
+
+	//	FHitResult Hit;
+	//	FCollisionQueryParams Params;
+	//	Params.AddIgnoredActor(this);
+
+	//	FVector TargetLocation = TraceEnd;
+	//	if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params))
+	//	{
+	//		TargetLocation = Hit.ImpactPoint;
+	//	}
+
+	//	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
+	//	FRotator BaseRotation = LaunchDirection.Rotation();
+
+	//	// 여러 발 처리
+	//	int32 HalfCount = NumArrows / 2;
+	//	for (int32 i = 0; i < NumArrows; ++i)
+	//	{
+	//		float OffsetAngle = (i - HalfCount) * SpreadAngleDeg;
+	//		if (NumArrows % 2 == 0)
+	//		{
+	//			OffsetAngle += SpreadAngleDeg / 2.0f;
+	//		}
+
+	//		FRotator ArrowRotation = BaseRotation;
+	//		ArrowRotation.Yaw += OffsetAngle;
+
+	//		FActorSpawnParameters SpawnParams;
+	//		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	//		SpawnParams.Instigator = this;
+
+	//		GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRotation, SpawnParams);
+	//	}
+	//}
 	// 1. 소켓 위치 얻기
 	FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");
 
@@ -213,7 +265,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRotation, SpawnParams);
 	}
 
-	// 3. 액터 스폰
+	/* 3. 액터 스폰*/
 	/*FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
@@ -223,6 +275,8 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		UE_LOG(LogTemp, Warning, TEXT("ArrowClass is null!!!!!!!!!"));
 	}
 	GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);*/
+
+
 }
 
 // Called when the game starts or when spawned
