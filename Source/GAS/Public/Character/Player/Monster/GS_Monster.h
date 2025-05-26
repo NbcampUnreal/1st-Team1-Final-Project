@@ -51,7 +51,8 @@ public:
 	FORCEINLINE bool IsCommandable() const { return !bCommandLocked; }
 	FORCEINLINE bool IsSelectable() const { return !bSelectionLocked; }
 	
-	void SetSelected(bool bIsSelected);
+	//void SetSelected(bool bIsSelected);
+	void SetSelected(bool bIsSelected, bool bPlaySound = true);
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	virtual void Attack();

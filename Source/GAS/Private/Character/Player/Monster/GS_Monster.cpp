@@ -21,9 +21,6 @@ AGS_Monster::AGS_Monster()
 
 	AkComponent = CreateDefaultSubobject<UAkComponent>("AkComponent");
 	AkComponent->SetupAttachment(RootComponent);
-
-	GetStatComp()->SetCurrentHealth(2000.f);
-	GetStatComp()->SetAttackPower(20.f);
 	
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	if (MovementComponent)
@@ -58,14 +55,28 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AGS_Monster, bSelectionLocked);
 }
 
-void AGS_Monster::SetSelected(bool bIsSelected)
+//void AGS_Monster::SetSelected(bool bIsSelected)
+//{
+//	if (SelectionDecal)
+//	{
+//		SelectionDecal->SetVisibility(bIsSelected);
+//	}
+//
+//	if (bIsSelected && ClickSoundEvent)
+//	{
+//		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
+//	}
+//}
+
+void AGS_Monster::SetSelected(bool bIsSelected, bool bPlaySound)
 {
 	if (SelectionDecal)
 	{
 		SelectionDecal->SetVisibility(bIsSelected);
 	}
 
-	if (bIsSelected && ClickSoundEvent)
+	// 선택되었고, 소리 재생이 허용된 경우에만 소리 재생
+	if (bIsSelected && bPlaySound && ClickSoundEvent)
 	{
 		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
 	}

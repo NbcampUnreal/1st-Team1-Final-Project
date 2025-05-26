@@ -38,7 +38,7 @@ void AGS_Character::BeginPlay()
 		FString EnumToName = CharacterEnum->GetNameStringByValue((int64)CharacterType);
 		StatComp->InitStat(FName(EnumToName));
 	}
-
+	
 	if (HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
 	{
 		HPTextWidgetComp->SetVisibility(true);
@@ -64,7 +64,7 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f"), *GetName(), ActualDamage);
 
-	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage);
+	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage, false);
 
 	return ActualDamage;
 }
@@ -72,6 +72,10 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AGS_Character::WatchOtherPlayer()
+{
 }
 
 void AGS_Character::SetHPTextWidget(UGS_HPText* InHPTextWidget)
@@ -111,6 +115,12 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 FGenericTeamId AGS_Character::GetGenericTeamId() const
 {
 	return TeamId;
+}
+
+void AGS_Character::MulticastRPCCharacterDeath_Implementation()
+{
+	 GetMesh()->SetSimulatePhysics(true);
+	 GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 }
 
 void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)

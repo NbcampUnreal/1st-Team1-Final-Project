@@ -7,11 +7,9 @@
 
 AGS_ArrowVisualActor::AGS_ArrowVisualActor()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	SetReplicateMovement(true);
-
-
 
 	ArrowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArrowMesh"));
 	ArrowMesh->SetIsReplicated(true);
@@ -23,7 +21,7 @@ AGS_ArrowVisualActor::AGS_ArrowVisualActor()
 
 void AGS_ArrowVisualActor::OnRep_SkeletalMesh()
 {
-		ArrowMesh->SetSkeletalMesh(CurrentMesh);
+	ArrowMesh->SetSkeletalMesh(CurrentMesh);
 }
 
 void AGS_ArrowVisualActor::SetArrowMesh(USkeletalMesh* Mesh)
@@ -32,11 +30,6 @@ void AGS_ArrowVisualActor::SetArrowMesh(USkeletalMesh* Mesh)
 	{
 		ArrowMesh->SetSkeletalMesh(Mesh);
 		CurrentMesh = Mesh;
-		UE_LOG(LogTemp, Warning, TEXT("Arrow Mesh Set!!!!!!!!!!"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Arrow Mesh null or Mesh null"));
 	}
 }
 
@@ -45,5 +38,16 @@ void AGS_ArrowVisualActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AGS_ArrowVisualActor, CurrentMesh);
+}
+
+void AGS_ArrowVisualActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	ElapsedTime += DeltaTime;
+	if (ElapsedTime >= LifeTime)
+	{
+		Destroy(); // 또는 Object Pool로 반환
+	}
 }
 

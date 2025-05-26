@@ -85,7 +85,7 @@ void AGS_Drakhar::LeftMouse()
 			if (!ClientComboAttacking)
 			{
 				GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
-			}				
+			}
 			ServerRPCComboAttack();
 		}
 	}
@@ -187,9 +187,11 @@ void AGS_Drakhar::ServerRPCComboAttackEnd_Implementation()
 	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("attack server end")), true, true, FLinearColor::Blue, 5.f);
 
 	//다음 몽타주 실행할 수 있게
-	bIsComboAttacking = false;
-	bCanDoNextComboAttack = false;
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	ResetComboAttackVariables();
+	
+	// bIsComboAttacking = false;
+	// bCanDoNextComboAttack = false;
+	// GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
 void AGS_Drakhar::OnRep_IsComboAttacking()
@@ -213,6 +215,13 @@ void AGS_Drakhar::OnRep_CanDoNextComboAttack()
 
 void AGS_Drakhar::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
+}
+
+void AGS_Drakhar::ResetComboAttackVariables()
+{
+	bIsComboAttacking = false;
+	bCanDoNextComboAttack = false;
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
 void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)

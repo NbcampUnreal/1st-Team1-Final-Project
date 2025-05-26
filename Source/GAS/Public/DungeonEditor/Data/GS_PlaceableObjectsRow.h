@@ -36,7 +36,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Description;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ZOffSet = 0.0f;
+	FVector OffSet = FVector::ZeroVector;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ConstructionCost = 0.0f;
 };

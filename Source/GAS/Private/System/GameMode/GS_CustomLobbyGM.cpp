@@ -113,11 +113,6 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //가디언 1명 아니면 시작
         UWorld* World = GetWorld();
         if (World)
         {
-            if (auto* GI = GetGameInstance<UGS_GameInstance>())
-            {
-                GI->ExpectedPlayers = PlayerReadyStates.Num();
-                UE_LOG(LogTemp, Warning, TEXT("LobbyGM: GI->ExpectedPlayers = %d"), GI->ExpectedPlayers);
-            }
             UE_LOG(LogTemp, Warning, TEXT("LobbyGM: ServerTravel Start ***"));
             bUseSeamlessTravel = true;
             World->ServerTravel(NextLevelName.ToString() + "?listen", true);
