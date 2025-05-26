@@ -34,6 +34,7 @@ void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& In
 
 	if (!bCtrlHeld)
 	{
+		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 	}
 	else
 	{
@@ -61,7 +62,7 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 	Super::OnRightClickRelease(Instance);
 	if (!bCtrlHeld)
 	{
-
+		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
 	}
 	else
 	{
