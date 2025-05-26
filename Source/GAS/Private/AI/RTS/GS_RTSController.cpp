@@ -33,6 +33,12 @@ AGS_RTSController::AGS_RTSController()
 void AGS_RTSController::BeginPlay()
 {
 	Super::BeginPlay();
+	FInputModeGameOnly InputModeData;
+	SetInputMode(InputModeData);
+	if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
+	{
+		ViewportClient->SetMouseCaptureMode(EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown);
+	}
 	if (!HasAuthority() && IsLocalController())
 	{
 		if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
@@ -192,7 +198,7 @@ void AGS_RTSController::OnLeftMousePressed()
 	UE_LOG(LogTemp, Log, TEXT("--- OnLeftMousePressed: Command=%d"), static_cast<int32>(CurrentCommand));
 	
 	FHitResult Hit;
-	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
+	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2), true, Hit);
 	UE_LOG(LogTemp, Log, TEXT("  bHit=%d, Hit.Actor=%s"), bHit, *GetNameSafe(Hit.GetActor()));
 	
 	TArray<AGS_Monster*> Units;
@@ -263,7 +269,7 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	}
 	
 	FHitResult GroundHit;
-	if (!GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, GroundHit))
+	if (!GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2), true, GroundHit))
 	{
 		return;
 	}
