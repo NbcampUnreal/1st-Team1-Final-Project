@@ -10,6 +10,12 @@ AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
 {
 }
 
+void AGS_ArrowTrapProjectile::BeginPlay()
+{
+	Super::BeginPlay();
+	SetLifeSpan(4.0f);
+}
+
 
 void AGS_ArrowTrapProjectile::Init(AGS_TrigTrapBase* InTrap)
 {
@@ -35,6 +41,7 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 	if (Player && OwningTrap)
 	{
 		OwningTrap->HandleTrapDamage(OtherActor);
+		Destroy();
 	}
 	if(!OtherActor->IsA<APawn>())
 	{
@@ -63,16 +70,18 @@ void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
-	TSubclassOf<AGS_TrapVisualProjectile> VisualArrowClass = AGS_TrapVisualProjectile::StaticClass();
 
-	if (VisualArrowClass)
+	AGS_TrapVisualProjectile* VisualArrow = GetWorld()->SpawnActor<AGS_TrapVisualProjectile>(AGS_TrapVisualProjectile::StaticClass(), SpawnLocation, AdjustedRotation, Params);
+	
+	if (!VisualArrow)
 	{
-		AGS_TrapVisualProjectile* VisualArrow = GetWorld()->SpawnActor<AGS_TrapVisualProjectile>(VisualArrowClass, SpawnLocation, AdjustedRotation, Params);
-		if (VisualArrow)
-		{
-			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
+		return;
+	}
+	
+	if (VisualArrow)
+	{
+		VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
 
-		}
 	}
 
 	// 본 화살 제거
