@@ -12,17 +12,22 @@
 #include "Blueprint/UserWidget.h"
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Perception/AIPerceptionComponent.h"
 
 
 AGS_RTSController::AGS_RTSController()
 {
 	bShowMouseCursor = true;
 
+	CurrentCommand = ERTSCommand::None;
 	KeyboardDir = FVector2D::ZeroVector;
 	MouseEdgeDir = FVector2D::ZeroVector;
+	CameraActor = nullptr;
 	CameraSpeed = 2000.f;
 	EdgeScreenRatio = 0.02f;
 	UnitGroups.SetNum(9);
+	bCtrlDown = false;
+	bShiftDown = false;
 }
 
 void AGS_RTSController::BeginPlay()
@@ -63,6 +68,12 @@ void AGS_RTSController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Triggered, this, &AGS_RTSController::CameraMove);
 		EnhancedInputComponent->BindAction(CameraMoveAction, ETriggerEvent::Completed, this, &AGS_RTSController::CameraMoveEnd);
+
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandMove);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandAttack);
+		EnhancedInputComponent->BindAction(StopAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandStop);
+		EnhancedInputComponent->BindAction(SkillAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandSkill);
+		
 		EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnLeftMousePressed);
 		EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Completed, this, &AGS_RTSController::OnLeftMouseReleased);
 		EnhancedInputComponent->BindAction(RightClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnRightMousePressed);
@@ -115,61 +126,118 @@ void AGS_RTSController::CameraMoveEnd()
 	KeyboardDir = FVector2D::ZeroVector;
 }
 
+
+void AGS_RTSController::OnCommandMove(const FInputActionValue& Value)
+{
+	MoveSelectedUnits();
+}
+
+void AGS_RTSController::MoveSelectedUnits()
+{
+	CurrentCommand = ERTSCommand::Move;
+	OnRTSCommandChanged.Broadcast(CurrentCommand);
+}
+
+void AGS_RTSController::OnCommandAttack(const FInputActionValue& Value)
+{
+	AttackSelectedUnits();
+}
+
+void AGS_RTSController::AttackSelectedUnits()
+{
+	CurrentCommand = ERTSCommand::Attack;
+	OnRTSCommandChanged.Broadcast(CurrentCommand);
+}
+
+void AGS_RTSController::OnCommandStop(const FInputActionValue& Value)
+{
+	StopSelectedUnits();
+}
+
+void AGS_RTSController::StopSelectedUnits()
+{
+	CurrentCommand = ERTSCommand::Stop;
+	TArray<AGS_Monster*> Commandables;
+	GatherCommandableUnits(Commandables);
+
+	Server_RTSStop(Commandables);
+}
+
+void AGS_RTSController::OnCommandSkill(const FInputActionValue& Value)
+{
+	SkillSelectedUnits();
+}
+
+void AGS_RTSController::SkillSelectedUnits()
+{
+	CurrentCommand = ERTSCommand::Skill;
+	OnRTSCommandChanged.Broadcast(CurrentCommand);
+}
+
+
 void AGS_RTSController::OnLeftMousePressed()
 {
-	// Ctrl+클릭 → 같은 타입 전부 선택
+	// Ctrl+클릭 → 같은 유닛 타입 전체 선택
 	if (bCtrlDown && !bShiftDown)
 	{
-		FHitResult Hit;		
-		bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, Hit);
-		if (bHit && Hit.GetActor())
-		{
-			if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
-			{
-				if (!IsSelectable(Monster))
-				{
-					return;
-				}
-				
-				ClearUnitSelection();
-				
-				ECharacterType MonsterType = Monster->GetCharacterType();
-				
-				// 월드에 있는 모든 몬스터를 순회 
-				for (TActorIterator<AGS_Monster> It(GetWorld()); It; ++It)
-				{
-					AGS_Monster* M = *It;
-					if (M->GetCharacterType() != MonsterType)
-					{
-						continue;
-					}
-
-					AddUnitToSelection(M);
-				}
-			}
-		}
+		SelectOnCtrlClick();
 		return;
 	}
 	
 	// Shift+클릭 → 현재 선택만 변경 
 	if (bShiftDown)
 	{
-		DoShiftClickToggle();
+		ToggleOnShiftClick();
 		return;
 	}
+	UE_LOG(LogTemp, Log, TEXT("--- OnLeftMousePressed: Command=%d"), static_cast<int32>(CurrentCommand));
 	
-	if (AGS_RTSHUD* HUD = Cast<AGS_RTSHUD>(GetHUD()))
-	{
-		HUD->StartSelection();
-	}
+	FHitResult Hit;
+	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
+	UE_LOG(LogTemp, Log, TEXT("  bHit=%d, Hit.Actor=%s"), bHit, *GetNameSafe(Hit.GetActor()));
+	
+	TArray<AGS_Monster*> Units;
+	GatherCommandableUnits(Units);
+	UnlockTargets(Units);
 
-	// 클릭 시 빈 공간이면 기존 선택 해제
-	FHitResult GroundHit;
-	bool bGroundHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, GroundHit);
-	if (!bGroundHit)
+	// 명령 모드에 따라 
+	switch (CurrentCommand)
 	{
-		ClearUnitSelection();
+	case ERTSCommand::Move:
+		if (bHit)
+		{
+			Server_RTSMove(Units, Hit.Location);
+		}
+		break;
+	case ERTSCommand::Attack:
+		if (bHit)
+		{
+			if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
+			{
+				Server_RTSAttack(Units, Monster);
+			}
+			else
+			{
+				Server_RTSAttackMove(Units, Hit.Location);
+			}
+		}
+		break;
+	case ERTSCommand::Skill:
+		if (bHit)
+		{
+			Server_RTSSkill(Units, Hit.Location);
+		}
+		break;
+	default:
+		if (AGS_RTSHUD* HUD = Cast<AGS_RTSHUD>(GetHUD()))
+		{
+			HUD->StartSelection();
+		}
+		break;
 	}
+	
+	CurrentCommand = ERTSCommand::None;
+	OnRTSCommandChanged.Broadcast(CurrentCommand);
 }
 
 void AGS_RTSController::OnLeftMouseReleased()
@@ -182,28 +250,19 @@ void AGS_RTSController::OnLeftMouseReleased()
 	if (AGS_RTSHUD* HUD = Cast<AGS_RTSHUD>(GetHUD()))
 	{
 		HUD->StopSelection();
-		return;
 	}
-
-	// 단순 클릭 처리
-	FHitResult Hit;
-	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, Hit);
-	if (bHit && Hit.GetActor())
-	{
-		if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
-		{
-			ClearUnitSelection();
-			AddUnitToSelection(Monster);
-			return;
-		}
-	}
-
-	// 빈 공간 클릭
-	ClearUnitSelection();
 }
 
 void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 {
+	// 커맨드 모드 중이면 취소
+	if (CurrentCommand != ERTSCommand::None)
+	{
+		CurrentCommand = ERTSCommand::None;
+		OnRTSCommandChanged.Broadcast(CurrentCommand);
+		return;
+	}
+	
 	FHitResult GroundHit;
 	if (!GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, GroundHit))
 	{
@@ -211,11 +270,12 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	}
 
 	// 명령 가능한 유닛들만 
-	TArray<AGS_Monster*> Commandables;
-	GatherCommandableUnits(Commandables);
-
-	Server_RTSMove(Commandables, GroundHit.Location);
+	TArray<AGS_Monster*> Units;
+	GatherCommandableUnits(Units);
+	UnlockTargets(Units);
+	Server_RTSMove(Units, GroundHit.Location);
 }
+
 
 FVector2D AGS_RTSController::GetKeyboardDirection() const
 {
@@ -300,7 +360,40 @@ void AGS_RTSController::InitCameraActor()
 	}
 }
 
-void AGS_RTSController::DoShiftClickToggle()
+
+void AGS_RTSController::SelectOnCtrlClick()
+{
+	FHitResult Hit;		
+	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, Hit);
+	if (bHit && Hit.GetActor())
+	{
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
+		{
+			if (!IsSelectable(Monster))
+			{
+				return;
+			}
+				
+			ClearUnitSelection();
+				
+			ECharacterType MonsterType = Monster->GetCharacterType();
+				
+			// 월드에 있는 모든 몬스터를 순회 
+			for (TActorIterator<AGS_Monster> It(GetWorld()); It; ++It)
+			{
+				AGS_Monster* M = *It;
+				if (M->GetCharacterType() != MonsterType)
+				{
+					continue;
+				}
+
+				AddUnitToSelection(M);
+			}
+		}
+	}
+}
+
+void AGS_RTSController::ToggleOnShiftClick()
 {
 	FHitResult ShiftHit;
 	if (!GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, ShiftHit))
@@ -320,6 +413,7 @@ void AGS_RTSController::DoShiftClickToggle()
 		}
 	}
 }
+
 
 void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 {
@@ -381,6 +475,7 @@ void AGS_RTSController::OnShiftReleased(const FInputActionInstance& InputInstanc
 }
 
 
+// 유닛 그룹 저장 + 불러오기 
 void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, int32 GroupIdx)
 {
 	if (bCtrlDown) // Ctrl+숫자 → 부대 저장
@@ -406,6 +501,7 @@ void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, in
 	}
 }
 
+// 카메라 위치 저장 + 불러오기 
 void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, int32 CameraIndex)
 {
 	if (bShiftDown) // 저장
@@ -426,6 +522,7 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 	}
 }
 
+
 void AGS_RTSController::MoveAIViaMinimap(const FVector& WorldLocation)
 {
 	// 명령 가능한 유닛들만 
@@ -444,6 +541,7 @@ void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)
 	}
 }
 
+
 void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>& Units, const FVector& Dest)
 {
 	for (AGS_Monster* Unit : Units)
@@ -454,8 +552,10 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 		{
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
-				BlackboardComp->SetValueAsBool(AGS_AIController::bUseRTSKey, true);
-				BlackboardComp->SetValueAsVector(AGS_AIController::RTSTargetKey, Dest);
+				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Move));
+				BlackboardComp->SetValueAsVector (AGS_AIController::MoveLocationKey, Dest);
+				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
 
 				// 이동 사운드 재생
 				if (Unit->MoveSoundEvent)
@@ -466,6 +566,70 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 		}
 	}
 }
+
+void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Monster*>& Units, const FVector& Dest)
+{
+	for (AGS_Monster* Unit : Units)
+	{
+		if (!IsValid(Unit)) continue;
+		
+		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Attack));
+				BlackboardComp->SetValueAsVector (AGS_AIController::MoveLocationKey, Dest);
+				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
+			}
+		}
+	}
+}
+
+void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster*>& Units, AGS_Character* TargetActor)
+{
+	for (AGS_Monster* Unit : Units)
+	{
+		if (!IsValid(Unit)) continue;
+		
+		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Attack));
+				BlackboardComp->SetValueAsObject(AGS_AIController::TargetActorKey, TargetActor);
+				BlackboardComp->ClearValue(AGS_AIController::MoveLocationKey);
+			}
+		}
+	}
+}
+
+void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>& Units)
+{
+	for (AGS_Monster* Unit : Units)
+	{
+		if (!IsValid(Unit)) continue;
+		
+		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			AIController->StopMovement();
+			
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Stop));
+				BlackboardComp->ClearValue(AGS_AIController::MoveLocationKey);
+				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
+			}
+		}
+	}
+}
+
+void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc)
+{
+}
+
 
 void AGS_RTSController::GatherCommandableUnits(TArray<AGS_Monster*>& Out) const
 {
@@ -481,4 +645,18 @@ void AGS_RTSController::GatherCommandableUnits(TArray<AGS_Monster*>& Out) const
 bool AGS_RTSController::IsSelectable(AGS_Monster* Monster) const
 {
 	return IsValid(Monster) && Monster->IsSelectable();
+}
+
+void AGS_RTSController::UnlockTargets(const TArray<AGS_Monster*>& Units)
+{
+	for (AGS_Monster* Unit : Units)
+	{
+		if (!IsValid(Unit)) 
+			continue;
+
+		if (AGS_AIController* AI = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			AI->UnlockTarget();
+		}
+	}
 }

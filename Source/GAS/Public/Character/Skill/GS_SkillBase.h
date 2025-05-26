@@ -1,18 +1,29 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GS_SkillComp.h"
 #include "GS_SkillBase.generated.h"
 
 class AGS_Character;
-/**
- * 
- */
+
 UCLASS()
 class GAS_API UGS_SkillBase : public UObject
 {
 	GENERATED_BODY()
 
 public:
+	ESkillSlot CurrentSkillType;
+	
+	float Cooltime=30.0f;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TArray<UAnimMontage*> SkillAnimMontages;
+
+	UPROPERTY(EditDefaultsOnly)
+	UTexture2D* SkillImage;
+
+	UTexture2D* GetSkillImage();
+	
 	// 쿨타임 관리
 	float GetCoolTime();
 
@@ -31,14 +42,15 @@ protected:
 	bool bIsActive = false;
 	// 쿨타임 관리
 	FTimerHandle CooldownHandle;
-	float Cooltime=30.0f;
+	FTimerHandle LogTimerHandle;
+
+	float LeftCoolTime;
+	
 	bool bIsCoolingDown;
 	void StartCoolDown();
-
-	// 스킬 공격 애니메이션
-	UPROPERTY(EditDefaultsOnly)
-	TArray<UAnimMontage*> SkillAnimMontages;
-
+	void LogRemainingTime();
+	void SetCoolTime(float InCoolTime);
+	
 	// 스킬 소유자
 	AGS_Character* OwnerCharacter;
 };

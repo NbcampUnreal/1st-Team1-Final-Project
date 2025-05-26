@@ -4,12 +4,29 @@
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/GS_Character.h"
 #include "Character/Skill/GS_SkillBase.h"
+#include "Character/Skill/GS_SkillSet.h"
 #include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
 #include "Character/Skill/Seeker/Chan/GS_ChanMovingSkill.h"
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
 #include "Character/Skill/GS_SkillSet.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "UI/Character/GS_SkillWidget.h"
 #include "Net/UnrealNetwork.h"
 
+void UGS_SkillComp::OnRep_Skill1()
+{
+	Skill1CoolTimeChanged.Broadcast(Skill1LeftCoolTime);
+}
+
+void UGS_SkillComp::OnRep_Skill2()
+{
+	Skill2CoolTimeChanged.Broadcast(Skill2LeftCoolTime);
+}
+
+void UGS_SkillComp::OnRep_Skill3()
+{
+	Skill3CoolTimeChanged.Broadcast(Skill3LeftCoolTime);
+}
 
 // Sets default values for this component's properties
 UGS_SkillComp::UGS_SkillComp()
@@ -85,15 +102,15 @@ void UGS_SkillComp::TrySkillCommand(ESkillSlot Slot)
 	}
 }
 
-void UGS_SkillComp::SetSkill(ESkillSlot Slot, TSubclassOf<UGS_SkillBase> SkillClass)
+void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 {
-	if (!SkillClass)
+	if (!Info.SkillClass)
 	{
 		UE_LOG(LogTemp, Error, TEXT(">>> SetSkill: Invalid SkillClass"));
 		return;
 	}
 
-	UGS_SkillBase* Skill = NewObject<UGS_SkillBase>(this, SkillClass);
+	UGS_SkillBase* Skill = NewObject<UGS_SkillBase>(this, Info.SkillClass);
 	if (!Skill)
 	{
 		UE_LOG(LogTemp, Error, TEXT(">>> SetSkill: Failed to create skill object"));
@@ -101,6 +118,9 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, TSubclassOf<UGS_SkillBase> SkillCl
 	}
 
 	Skill->InitSkill(Cast<AGS_Character>(GetOwner()));
+	Skill->Cooltime = Info.Cooltime;
+	Skill->SkillAnimMontages = Info.Montages;
+	Skill->SkillImage = Info.Image;
 	SkillMap.Add(Slot, Skill);
 }
 
@@ -142,6 +162,45 @@ bool UGS_SkillComp::IsSkillActive(ESkillSlot Slot) const
 	return false;
 }
 
+void UGS_SkillComp::InitializeSkillWidget(UGS_SkillWidget* InSkillWidget)
+{
+	if (IsValid(InSkillWidget))
+	{
+		//client
+		ESkillSlot Slot = InSkillWidget->GetSkillSlot();
+
+		//ServerRPCInitSkills();
+		InitSkills();
+		
+		if (SkillMap.Contains(Slot))
+		{
+			InSkillWidget->Initialize(SkillMap[Slot]);
+			
+			if (Slot == ESkillSlot::Moving)
+			{
+				Skill1CoolTimeChanged.AddUObject(InSkillWidget, &UGS_SkillWidget::OnSkillCoolTimeChanged);
+			}
+			if (Slot == ESkillSlot::Aiming)
+			{
+				Skill2CoolTimeChanged.AddUObject(InSkillWidget, &UGS_SkillWidget::OnSkillCoolTimeChanged);
+			}
+			if (Slot == ESkillSlot::Ultimate)
+			{
+				Skill3CoolTimeChanged.AddUObject(InSkillWidget, &UGS_SkillWidget::OnSkillCoolTimeChanged);
+			}
+		}
+	}
+}
+
+UGS_SkillBase* UGS_SkillComp::GetSkillFromSkillMap(ESkillSlot Slot)
+{
+	if (SkillMap.Contains(Slot))
+	{
+		return SkillMap[Slot];
+	}
+	return nullptr;
+}
+
 // Called when the game starts
 void UGS_SkillComp::BeginPlay()
 {
@@ -150,6 +209,7 @@ void UGS_SkillComp::BeginPlay()
 
 	if (GetOwner()->HasAuthority())
 	{
+		//ServerRPCInitSkills();
 		InitSkills();
 	}
 }
@@ -208,5 +268,8 @@ void UGS_SkillComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UGS_SkillComp, ReplicatedSkillStates);
 	DOREPLIFETIME(UGS_SkillComp, bCanUseSkill);
-}
 
+	DOREPLIFETIME(ThisClass, Skill1LeftCoolTime);
+	DOREPLIFETIME(ThisClass, Skill2LeftCoolTime);
+	DOREPLIFETIME(ThisClass, Skill3LeftCoolTime);
+}

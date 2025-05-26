@@ -9,10 +9,11 @@
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "UI/Character/GS_HPWidget.h"
 
 AGS_Character::AGS_Character()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	StatComp = CreateDefaultSubobject<UGS_StatComp>(TEXT("StatComp"));
 	SkillComp = CreateDefaultSubobject<UGS_SkillComp>(TEXT("SkillComp"));
@@ -22,6 +23,7 @@ AGS_Character::AGS_Character()
 	HPTextWidgetComp->SetupAttachment(RootComponent);
 	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HPTextWidgetComp->SetVisibility(false);
 }
 
 void AGS_Character::BeginPlay()
@@ -35,6 +37,11 @@ void AGS_Character::BeginPlay()
 	{
 		FString EnumToName = CharacterEnum->GetNameStringByValue((int64)CharacterType);
 		StatComp->InitStat(FName(EnumToName));
+	}
+
+	if (HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
+	{
+		HPTextWidgetComp->SetVisibility(true);
 	}
 }
 
@@ -74,6 +81,16 @@ void AGS_Character::SetHPTextWidget(UGS_HPText* InHPTextWidget)
 	{
 		HPTextWidget->InitializeHPTextWidget(GetStatComp());
 		StatComp->OnCurrentHPChanged.AddUObject(HPTextWidget, &UGS_HPText::OnCurrentHPChanged);
+	}
+}
+
+void AGS_Character::SetHPBarWidget(UGS_HPWidget* InHPBarWidget)
+{
+	UGS_HPWidget* HPBarWidget = Cast<UGS_HPWidget>(InHPBarWidget);
+	if (IsValid(HPBarWidget))
+	{
+		HPBarWidget->InitializeHPWidget(GetStatComp());
+		StatComp->OnCurrentHPChanged.AddUObject(HPBarWidget, &UGS_HPWidget::OnCurrentHPBarChanged);
 	}
 }
 

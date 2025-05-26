@@ -10,6 +10,7 @@ class UGS_SkillComp;
 class UGS_DebuffComp;
 class UGS_HPTextWidgetComp;
 class UGS_HPText;
+class UGS_HPWidget;
 
 UENUM(BlueprintType)
 enum class ECharacterType : uint8
@@ -66,7 +67,7 @@ public:
 
 	//HP widget
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
-
+	void SetHPBarWidget(UGS_HPWidget* InHPBarWidget);
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	//play skill montage

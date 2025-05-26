@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{DA713E31-F4E5-AB8B-002F-58EA1E4480CD}",
+    "Hash": "{620C7A5B-6966-7288-68C9-57E9B898384C}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -22,6 +22,22 @@
       "Location": "Memory",
       "ShortName": "ArrowImpactWood_BW.54281.wav",
       "CachePath": "E7/{E75C8D0E-0A44-9599-0179-8FADEEB33D76}.wem"
+     },
+     {
+      "Id": "7846130",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_04c.wav",
+      "CachePath": "56/{569B47FA-F4EA-C503-6E0F-4725431389E7}.wem"
+     },
+     {
+      "Id": "15081757",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
+      "CachePath": "AD/{ADA6F4C1-AB75-7724-99C9-E9333418D799}.wem"
      },
      {
       "Id": "45190972",
@@ -56,6 +72,22 @@
       "CachePath": "08/{0801B149-5EAE-81E6-B35F-AEFA8B3A8891}.wem"
      },
      {
+      "Id": "107540085",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
+      "CachePath": "0C/{0CE5A0AB-80B7-5A43-2297-FC39512D1C36}.wem"
+     },
+     {
+      "Id": "108068136",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
+      "CachePath": "04/{04B26063-F9EB-C782-3DC1-790616CFFE03}.wem"
+     },
+     {
       "Id": "112081368",
       "Language": "SFX",
       "Streaming": "false",
@@ -72,12 +104,36 @@
       "CachePath": "4D/{4D5CACE9-FBC6-8F58-6453-5C3BC9B32A8B}.wem"
      },
      {
+      "Id": "141938875",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_impact_gore_hit_liquid_crunching_04.wav",
+      "CachePath": "CA/{CA3252CA-CE0D-C2A0-31FA-D78C83C3A875}.wem"
+     },
+     {
+      "Id": "147470122",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_Grunt_2_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "1C/{1C2B7ADD-90EC-CA41-A2DD-B38C597669A7}.wem"
+     },
+     {
       "Id": "149736104",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootSteps_Lava (4).wav",
       "CachePath": "A7/{A7763ECF-E602-CB21-7F7F-96E9079E8E03}.wem"
+     },
+     {
+      "Id": "151148536",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_04b.wav",
+      "CachePath": "16/{1669A074-2DA5-9667-7CC4-F9667EB6A9C1}.wem"
      },
      {
       "Id": "157399992",
@@ -173,7 +229,15 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "CatMeow_S08AN.44.wav",
-      "CachePath": "9F/{9FA1D211-B6AC-520A-7F6E-0DD9D9A9F8C3}.wem"
+      "CachePath": "99/{994A27EE-3785-4FCF-9195-DFB7728912B3}.wem"
+     },
+     {
+      "Id": "289001169",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_FG2_FX_combat_one_shot_hit_whoosh_punch_4.wav",
+      "CachePath": "61/{617FE605-8996-7E09-32BF-4A11BCE6D93D}.wem"
      },
      {
       "Id": "290212776",
@@ -189,7 +253,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarl_S011HO.324.wav",
-      "CachePath": "23/{239EF9A2-308D-3A3F-0B53-E02A1B966B69}.wem"
+      "CachePath": "C6/{C6D9BC2F-BEFE-D623-CE73-710BB48447F4}.wem"
      },
      {
       "Id": "313983704",
@@ -200,28 +264,12 @@
       "CachePath": "BC/{BC693F83-11C1-F5DA-8473-9D2EF5636125}.wem"
      },
      {
-      "Id": "318472292",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "SFX_Saw.wav",
-      "CachePath": "3A/{3A350892-0AA0-1D88-2880-65128FDBEE62}.wem"
-     },
-     {
       "Id": "321658963",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_Out.wav",
       "CachePath": "CA/{CABC276B-B97B-E16F-326E-6FCE9A1E8902}.wem"
-     },
-     {
-      "Id": "324020983",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "SFX_AxeSwing_Hit.wav",
-      "CachePath": "BE/{BEAC21E8-2467-FFCB-E459-19332BFE3CA1}.wem"
      },
      {
       "Id": "326406373",
@@ -264,6 +312,14 @@
       "CachePath": "EC/{EC658BD6-2331-30DB-B09E-43B888A45B5D}.wem"
      },
      {
+      "Id": "399735935",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "DS_VEDMT_fx_heartbeat_one_shot_stuck.wav",
+      "CachePath": "D1/{D18C278B-25FB-C3CF-FDD3-6D7C0537BCC2}.wem"
+     },
+     {
       "Id": "401627905",
       "Language": "SFX",
       "Streaming": "false",
@@ -272,12 +328,12 @@
       "CachePath": "9A/{9A513CC8-FF0F-3BA5-9FD4-F3E8CBE9A384}.wem"
      },
      {
-      "Id": "430856920",
+      "Id": "418165151",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
-      "ShortName": "SFX_Axe_Swing.wav",
-      "CachePath": "AB/{AB49C123-70BE-130E-D873-B25018D39E87}.wem"
+      "ShortName": "ESM_GB_fx_foley_one_shot_rockcrsh_brick_wall_breaking_02_impact_smash_destroy_hit_scatter_shards.wav",
+      "CachePath": "66/{66CC7DBC-9D8A-9406-0146-D67410BE06DE}.wem"
      },
      {
       "Id": "434604945",
@@ -294,6 +350,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_You_Shit_1_Female_Adult_Mature_DJ_Woman.wav",
       "CachePath": "6C/{6C2CE5F4-5233-8F40-795C-3A87120B6BB6}.wem"
+     },
+     {
+      "Id": "446662238",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "CrystalTrapSFX.wav",
+      "CachePath": "10/{10AADF17-9AA3-E379-76EC-DB59324F7C73}.wem"
      },
      {
       "Id": "451846292",
@@ -336,12 +400,36 @@
       "CachePath": "D5/{D5FBD559-460A-3B3D-9297-73DB1210EB08}.wem"
      },
      {
+      "Id": "482396296",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_impact_gore_hit_liquid_crunching_04.wav",
+      "CachePath": "32/{32C8FF9E-23D0-E7BE-E33B-B00E9AD68CCE}.wem"
+     },
+     {
+      "Id": "484226950",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_Coughing_6_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "76/{76BC9DAA-1AB1-5015-31D3-8A3EC41BB32C}.wem"
+     },
+     {
       "Id": "485972195",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Bloated_Zombie_Short_Attack_Dry_Mutant_Dead_Undead_Monster_Fat.wav",
       "CachePath": "D1/{D1D649E4-FE04-9E71-695C-B5F693978566}.wem"
+     },
+     {
+      "Id": "492757837",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_SPG_fx_breakable_glass_smash_crash_shatter_04.wav",
+      "CachePath": "94/{947B0571-385E-A001-7294-B5CCC60E8490}.wem"
      },
      {
       "Id": "518697165",
@@ -357,7 +445,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Groan_1_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "73/{7342D226-9C70-D12E-9BBA-DE7C8FA2AC3D}.wem"
+      "CachePath": "ED/{EDC3325F-5DD6-5FFC-4712-4BC9159CE9BC}.wem"
      },
      {
       "Id": "537148971",
@@ -368,12 +456,28 @@
       "CachePath": "71/{71ED084E-15F1-56C7-8948-167F1ED51B3C}.wem"
      },
      {
+      "Id": "542254204",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Ambient_Game_Attack_Simple_Heavy_Swing_1_Deep_Hammer_Air_Woosh.wav",
+      "CachePath": "BB/{BBB6F33F-EB7C-9B61-1883-19ECCAD744B7}.wem"
+     },
+     {
       "Id": "548015621",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Undead_Vocal_Jump_2_Long_Raaa_2.wav",
-      "CachePath": "D1/{D12799A4-C7A9-48B0-D6CC-4DB1C7E06303}.wem"
+      "CachePath": "59/{59709879-66E3-83CB-2E4C-29C8B7290F4D}.wem"
+     },
+     {
+      "Id": "552526360",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_04b.wav",
+      "CachePath": "44/{445591A1-400F-11CC-CE7C-B48B50E81AE2}.wem"
      },
      {
       "Id": "576560667",
@@ -408,14 +512,6 @@
       "CachePath": "E0/{E0FAD87A-96A5-3AD3-53F5-0C73CBF0230B}.wem"
      },
      {
-      "Id": "602204976",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "SFX_StoneTrap_Hit.wav",
-      "CachePath": "B3/{B37D4729-24C4-142C-9B17-D4F31D6BA141}.wem"
-     },
-     {
       "Id": "610202587",
       "Language": "SFX",
       "Streaming": "false",
@@ -440,14 +536,6 @@
       "CachePath": "96/{96300078-EC08-B39A-D34F-1F977C3540F7}.wem"
      },
      {
-      "Id": "655511879",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "SFX_SpikeTrap_Hit.wav",
-      "CachePath": "55/{555E4D62-0A1D-2AE1-C8BB-90268D05BFD5}.wem"
-     },
-     {
       "Id": "660206576",
       "Language": "SFX",
       "Streaming": "false",
@@ -464,28 +552,12 @@
       "CachePath": "2E/{2E7C8DA0-46DA-C19E-83EB-0BA2577CA5A9}.wem"
      },
      {
-      "Id": "689440783",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_Character_Sharon_Ouch_1_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "88/{88190B7F-1A4D-6993-D983-5E463D56AF45}.wem"
-     },
-     {
       "Id": "689500474",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowImpactBody_BW.54264.wav",
       "CachePath": "F0/{F0FA6C86-B765-797F-D8C2-EDDAD1E730CA}.wem"
-     },
-     {
-      "Id": "694306221",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "SFX_SpikeTrap.wav",
-      "CachePath": "05/{05CB506B-F9D5-53BB-16FA-5E2A7051E323}.wem"
      },
      {
       "Id": "696638021",
@@ -533,7 +605,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Jump_2_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "19/{19196768-8DC9-F810-8E57-78F83838B509}.wem"
+      "CachePath": "A8/{A81E49E6-6097-DA25-4B64-A19E74ECEEDC}.wem"
      },
      {
       "Id": "756368802",
@@ -541,7 +613,15 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Undead_Vocal_You_Cannot_Outrun_Death.wav",
-      "CachePath": "50/{509A1685-50BC-14E2-69DD-49FFB15DCB51}.wem"
+      "CachePath": "C2/{C241C0FA-30E4-5B31-FD91-053A1501A82A}.wem"
+     },
+     {
+      "Id": "761274105",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
+      "CachePath": "5F/{5F7FEB5F-1DC7-BD86-7AF3-74F014943AFB}.wem"
      },
      {
       "Id": "763229215",
@@ -550,14 +630,6 @@
       "Location": "Memory",
       "ShortName": "SFX_Lava_Hit1.wav",
       "CachePath": "75/{75ACA214-A2A4-1D99-50D1-AB1499E837FA}.wem"
-     },
-     {
-      "Id": "769452809",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "SFX_Saw_Hit.wav",
-      "CachePath": "A0/{A001BF43-841B-640B-1EA8-1CFB00C0A0D5}.wem"
      },
      {
       "Id": "790427616",
@@ -592,12 +664,28 @@
       "CachePath": "F0/{F00849BB-91D3-0573-A268-7AF8B52292AD}.wem"
      },
      {
+      "Id": "810310470",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "GlassBreakWine_SFXB.2343.wav",
+      "CachePath": "C0/{C04690AE-CB4D-DBFC-FC1E-2402361EE307}.wem"
+     },
+     {
       "Id": "810864320",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Undead_Vocal_Hurt_Throaty_Rah.wav",
       "CachePath": "C3/{C3009557-9511-2FED-8F64-0D839347DE05}.wem"
+     },
+     {
+      "Id": "829138029",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_Breathing_3_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "88/{8826DE9D-BCAE-39D4-157A-09CCE1AA9C32}.wem"
      },
      {
       "Id": "848033451",
@@ -632,12 +720,28 @@
       "CachePath": "5B/{5B595419-272B-3B4D-B8B2-B9CF3017021E}.wem"
      },
      {
+      "Id": "900809544",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "GlassBreakWine_SFXB.2343.wav",
+      "CachePath": "F2/{F22E99BC-892E-46EC-D1C3-7DA86EA5F9F8}.wem"
+     },
+     {
       "Id": "919997465",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_inflammation_light_02_burn_fire_flame.wav",
       "CachePath": "33/{335EF1C3-0385-1EB3-AF6C-8D1199FD097D}.wem"
+     },
+     {
+      "Id": "928428161",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
+      "CachePath": "83/{83D8DDBF-F4F8-DF3E-EAEA-6881FF30BC86}.wem"
      },
      {
       "Id": "941890073",
@@ -661,7 +765,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Grunt_1_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "AE/{AE1C04A0-466F-C53B-0033-0433E487CCC2}.wem"
+      "CachePath": "1A/{1AFF7EE8-1AB3-B38B-661E-026A089B4698}.wem"
      },
      {
       "Id": "958130278",
@@ -694,14 +798,6 @@
       "Location": "Memory",
       "ShortName": "LighterIgniteFlame_BW.9029.wav",
       "CachePath": "50/{50E90512-7895-A028-9CA9-75CDD5C2A5BE}.wem"
-     },
-     {
-      "Id": "1016849281",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_Character_Sharon_Ouch_2_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "00/{005C0459-2BCB-E528-7F4E-FC021BAC8C86}.wem"
      },
      {
       "Id": "1021834988",
@@ -787,10 +883,10 @@
        "LibId": "8912899"
       },
       {
-       "Id": "281650181",
+       "Id": "266675917",
        "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Props\\SFX_SpikeTrap_Hit\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
-       "GUID": "{5D5C8854-CDA1-418F-AFDA-09A2E666C3F0}",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Merci\\SFX_Sick\\Heartbeat\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "GUID": "{916168E5-E202-42D9-B331-43F94CE1206D}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
       },
@@ -799,14 +895,6 @@
        "Name": "Time Stretch (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_UI\\[Effect Slot [2]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{02C0AFA9-0983-4966-95AD-85EB4FE85DFD}",
-       "LibName": "Wwise Time Stretch",
-       "LibId": "8519683"
-      },
-      {
-       "Id": "356455906",
-       "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Props\\SFX_AxeSwing_Hit\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
-       "GUID": "{79068F1E-BDD8-4FD5-8310-CF3249AD5587}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
       },
@@ -1429,13 +1517,13 @@
       "Name": "Props_Axe",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe",
       "GUID": "{597B061A-CE0A-4A56-8154-41280E86C596}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "1000",
       "DurationType": "OneShot",
-      "DurationMin": "0.70765114",
-      "DurationMax": "0.7497302",
+      "DurationMin": "0.89423656",
+      "DurationMax": "0.94741064",
       "MediaRefs": [
        {
-        "Id": "430856920"
+        "Id": "542254204"
        }
       ],
       "PluginRefs": {
@@ -1451,22 +1539,17 @@
       "Name": "Props_Axe_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe_Hit",
       "GUID": "{E6A16F60-3008-4709-B717-1D97F028AB1C}",
-      "MaxAttenuation": "1000",
       "DurationType": "OneShot",
-      "DurationMin": "0.67240876",
-      "DurationMax": "0.7547534",
+      "DurationMin": "0.6745022",
+      "DurationMax": "0.6745022",
       "MediaRefs": [
        {
-        "Id": "324020983"
+        "Id": "289001169"
+       },
+       {
+        "Id": "482396296"
        }
-      ],
-      "PluginRefs": {
-       "Custom": [
-        {
-         "Id": "356455906"
-        }
-       ]
-      }
+      ]
      },
      {
       "Id": "737601643",
@@ -1475,9 +1558,12 @@
       "GUID": "{DCFFA37D-831E-4187-999F-FD2DB425816C}",
       "MaxAttenuation": "1000",
       "DurationType": "OneShot",
-      "DurationMin": "0.7761227",
-      "DurationMax": "0.79403806",
+      "DurationMin": "1.1340458",
+      "DurationMax": "1.1406152",
       "MediaRefs": [
+       {
+        "Id": "7846130"
+       },
        {
         "Id": "213946712"
        },
@@ -1486,6 +1572,9 @@
        },
        {
         "Id": "454704061"
+       },
+       {
+        "Id": "928428161"
        }
       ]
      },
@@ -1501,6 +1590,52 @@
       "MediaRefs": [
        {
         "Id": "321658963"
+       }
+      ]
+     },
+     {
+      "Id": "2640261390",
+      "Name": "Props_CrystalSpike_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalSpike_Hit",
+      "GUID": "{36F0066E-709B-487B-AB1C-AAC04B8F753C}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.57722557",
+      "DurationMax": "0.61154914",
+      "MediaRefs": [
+       {
+        "Id": "15081757"
+       },
+       {
+        "Id": "108068136"
+       },
+       {
+        "Id": "141938875"
+       },
+       {
+        "Id": "151148536"
+       },
+       {
+        "Id": "418165151"
+       }
+      ]
+     },
+     {
+      "Id": "446941167",
+      "Name": "Props_CrystalWallTrap",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap",
+      "GUID": "{9C89005A-CF4E-46F0-9A26-2606EC93E64B}",
+      "DurationType": "OneShot",
+      "DurationMin": "1.8",
+      "DurationMax": "1.9070336",
+      "MediaRefs": [
+       {
+        "Id": "107540085"
+       },
+       {
+        "Id": "313983704"
+       },
+       {
+        "Id": "810310470"
        }
       ]
      },
@@ -1638,11 +1773,11 @@
       "Name": "Props_Saw",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Saw",
       "GUID": "{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}",
-      "MaxAttenuation": "700",
+      "MaxAttenuation": "600",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
-        "Id": "318472292"
+        "Id": "446662238"
        }
       ]
      },
@@ -1651,10 +1786,24 @@
       "Name": "Props_Saw_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Saw_Hit",
       "GUID": "{DFBB5823-D275-437F-99C5-623B934A4616}",
-      "DurationType": "Infinite",
+      "DurationType": "OneShot",
+      "DurationMin": "1.5328146",
+      "DurationMax": "1.6239605",
       "MediaRefs": [
        {
-        "Id": "769452809"
+        "Id": "482396296"
+       },
+       {
+        "Id": "492757837"
+       },
+       {
+        "Id": "552526360"
+       },
+       {
+        "Id": "761274105"
+       },
+       {
+        "Id": "900809544"
        }
       ]
      },
@@ -1663,65 +1812,38 @@
       "Name": "Props_Spike",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Spike",
       "GUID": "{87EFA3D2-5892-417F-A875-D06CCD556912}",
-      "MaxAttenuation": "1200",
       "DurationType": "OneShot",
-      "DurationMin": "0.5833485",
-      "DurationMax": "0.61803627",
+      "DurationMin": "0.57722557",
+      "DurationMax": "0.61154914",
       "MediaRefs": [
        {
-        "Id": "694306221"
+        "Id": "15081757"
+       },
+       {
+        "Id": "108068136"
+       },
+       {
+        "Id": "141938875"
+       },
+       {
+        "Id": "151148536"
+       },
+       {
+        "Id": "418165151"
        }
       ]
-     },
-     {
-      "Id": "1341033136",
-      "Name": "Props_Spike_Hit",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Spike_Hit",
-      "GUID": "{36F0066E-709B-487B-AB1C-AAC04B8F753C}",
-      "MaxAttenuation": "1500",
-      "DurationType": "OneShot",
-      "DurationMin": "0.48125064",
-      "DurationMax": "0.5401856",
-      "MediaRefs": [
-       {
-        "Id": "655511879"
-       }
-      ],
-      "PluginRefs": {
-       "Custom": [
-        {
-         "Id": "281650181"
-        }
-       ]
-      }
      },
      {
       "Id": "1046362180",
       "Name": "Props_StoneTrap_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneTrap_Hit",
       "GUID": "{624349E1-2251-4E0E-8E91-39536798294E}",
-      "MaxAttenuation": "1200",
       "DurationType": "OneShot",
-      "DurationMin": "0.9988623",
-      "DurationMax": "1.089267",
+      "DurationMin": "0.4353176",
+      "DurationMax": "0.48862755",
       "MediaRefs": [
        {
-        "Id": "602204976"
-       }
-      ]
-     },
-     {
-      "Id": "3944187859",
-      "Name": "Props_StoneWall",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneWall",
-      "GUID": "{9C89005A-CF4E-46F0-9A26-2606EC93E64B}",
-      "MaxAttenuation": "1500",
-      "DurationType": "OneShot",
-      "DurationMin": "1.6358533",
-      "DurationMax": "1.7331263",
-      "MediaRefs": [
-       {
-        "Id": "313983704"
+        "Id": "141938875"
        }
       ]
      },
@@ -1756,25 +1878,25 @@
       "MaxAttenuation": "600",
       "DurationType": "OneShot",
       "DurationMin": "0.36159804",
-      "DurationMax": "0.7565742",
+      "DurationMax": "0.89162403",
       "MediaRefs": [
+       {
+        "Id": "147470122"
+       },
        {
         "Id": "444842476"
        },
        {
-        "Id": "527820047"
+        "Id": "484226950"
        },
        {
-        "Id": "689440783"
+        "Id": "527820047"
        },
        {
         "Id": "755959048"
        },
        {
         "Id": "957899954"
-       },
-       {
-        "Id": "1016849281"
        }
       ],
       "PluginRefs": {
@@ -1784,6 +1906,37 @@
         }
        ]
       }
+     },
+     {
+      "Id": "108894333",
+      "Name": "Voice_Merci_Sick",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Sick",
+      "GUID": "{7573A416-C37E-4A3F-8DDC-F3B908D97302}",
+      "MaxAttenuation": "600",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "399735935"
+       },
+       {
+        "Id": "829138029"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "266675917"
+        }
+       ]
+      }
+     }
+    ],
+    "GameParameters": [
+     {
+      "Id": "181543522",
+      "Name": "LowHPSound",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
+      "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
      }
     ],
     "StateGroups": [
@@ -1862,6 +2015,6 @@
     ]
    }
   ],
-  "FileHash": "{5D619A75-7AE2-F9FB-76BC-783AF7A0A9CE}"
+  "FileHash": "{6258EA1D-5E81-B928-7FE6-5F4E4286C854}"
  }
 }

@@ -30,6 +30,10 @@ public:
 	virtual void LeftClickPressed_Implementation() override;
 	virtual void LeftClickRelease_Implementation() override;
 
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> WidgetCrosshairClass;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
 	UUserWidget* WidgetCrosshair;
 
@@ -42,7 +46,19 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
 
-	void FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+	UFUNCTION(Server, Reliable)
+	void Server_LeftClickPressedAttack(UAnimMontage* DrawMontage);
+
+	UFUNCTION(Server, Reliable)
+	void Server_LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+
+	UFUNCTION(Server, Reliable)
+	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+
+	UFUNCTION(Server, Reliable)
+	void Server_NotifyDrawMontageEnded();
+
+	void OnDrawMontageEnded();
 
 protected:
 	// Called when the game starts or when spawned
@@ -79,9 +95,25 @@ private:
 	bool bWidgetVisibility = false;
 	USkeletalMeshComponent* Mesh;
 
-	void OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-	void SetWidgetVisibility(bool bVisible);
+	
 
-	void StartZoom();
-	void StopZoom();
+	void PlayDrawMontage(UAnimMontage* DrawMontage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StopDrawMontage();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDrawMontage(UAnimMontage* Montage);
+
+	UFUNCTION(Client, Reliable)
+	void Client_SetWidgetVisibility(bool bVisible);
+
+	UFUNCTION(Client, Reliable)
+	void Client_StartZoom();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StopZoom();
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlaySound(UAkComponent* SoundComp);
 };

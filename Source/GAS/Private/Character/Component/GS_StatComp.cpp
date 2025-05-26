@@ -51,7 +51,11 @@ void UGS_StatComp::InitStat(FName RowName)
 		AttackSpeed = FoundRow->ATS;
 
 		CurrentHealth = MaxHealth;
-	}	
+	}
+
+	//set move speed
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed *= Agility;
 }
 
 void UGS_StatComp::UpdateStat()
@@ -81,7 +85,7 @@ void UGS_StatComp::SetCurrentHealth(float InHealth)
 	{
 		MulticastRPCPlayTakeDamageMontage();
 	}	
-
+	
 	//update health
 	CurrentHealth = InHealth;
 
@@ -91,7 +95,7 @@ void UGS_StatComp::SetCurrentHealth(float InHealth)
 		CurrentHealth = 0.f;
 
 	}
-	OnCurrentHPChanged.Broadcast(CurrentHealth);
+	OnCurrentHPChanged.Broadcast(this);
 }
 
 void UGS_StatComp::SetMaxHealth(float InMaxHealth)
@@ -152,7 +156,7 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 
 void UGS_StatComp::OnRep_CurrentHealth()
 {
-	OnCurrentHPChanged.Broadcast(CurrentHealth);
+	OnCurrentHPChanged.Broadcast(this);
 }
 
 void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -167,4 +171,16 @@ void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		//can move
 		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CharacterWalkSpeed;
 	}
+}
+
+// heal system
+void UGS_StatComp::ServerRPCHeal_Implementation(float InHealAmount)
+{
+    if (!IsValid(GetOwner()) || !GetOwner()->HasAuthority())
+    {
+        return;
+    }
+
+    float NewHealth = FMath::Min(CurrentHealth + InHealAmount, MaxHealth);
+    SetCurrentHealth(NewHealth);
 }
