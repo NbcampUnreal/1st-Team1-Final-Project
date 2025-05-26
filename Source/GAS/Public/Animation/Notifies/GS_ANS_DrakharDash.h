@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "GS_ANS_DrkharDash.generated.h"
+#include "GS_ANS_DrakharDash.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GAS_API UGS_ANS_DrkharDash : public UAnimNotifyState
+class GAS_API UGS_ANS_DrakharDash : public UAnimNotifyState
 {
 	GENERATED_BODY()
 

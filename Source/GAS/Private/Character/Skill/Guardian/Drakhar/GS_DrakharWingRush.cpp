@@ -2,6 +2,7 @@
 
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatComp.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -19,6 +20,12 @@ void UGS_DrakharWingRush::ActiveSkill()
 {
 	Super::ActiveSkill();
 
+	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter);
+	if (IsValid(Drakhar))
+	{
+		Drakhar->ResetComboAttackVariables();
+	}
+	
 	ExecuteSkillEffect();
 	
 	DashStartLocation = OwnerCharacter->GetActorLocation();

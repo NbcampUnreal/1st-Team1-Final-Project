@@ -67,6 +67,8 @@ public:
 	UFUNCTION()
 	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+	void ResetComboAttackVariables();
+	
 	//[Dash Skill]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCDoDash(float DeltaTime);
