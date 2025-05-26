@@ -19,6 +19,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 	void SetCharacterMovement(UCharacterMovementComponent* CharacterMovement);
 
+	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 protected:

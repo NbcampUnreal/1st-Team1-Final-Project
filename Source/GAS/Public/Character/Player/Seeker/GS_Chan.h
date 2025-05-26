@@ -4,10 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GS_Seeker.h"
+#include "Character/Interface/GS_AttackInterface.h"
 #include "GS_Chan.generated.h"
 
+class AGS_WeaponShield;
+class AGS_WeaponAxe;
+
 UCLASS()
-class GAS_API AGS_Chan : public AGS_Seeker
+class GAS_API AGS_Chan : public AGS_Seeker, public IGS_AttackInterface
 {
 	GENERATED_BODY()
 
@@ -21,7 +25,79 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// Attack Interface
+	virtual void LeftClickPressed_Implementation() override;
+	virtual void LeftClickRelease_Implementation() override;
+
+	// Combo Attack
+	void ComboInputOpen();
+	void ComboInputClose();
+	void EndMontage();
+	
+	UPROPERTY(EditAnywhere, Category="Animation")
+	UAnimMontage* ComboAnimMontage;
+
+	int32 CurrentComboIndex;
+	bool CanAcceptComboInput = true;
+	bool bNextCombo = false;
+
+	UFUNCTION(Server, Reliable)
+	void ServerAttackMontage();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlayComboSection();
+	
+
+	// Weapon
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<class AGS_WeaponShield> WeaponShieldClass;
+
+	UPROPERTY(Replicated)
+	AGS_WeaponShield* WeaponShield;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName WeaponShieldName = "Shield";
+	
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<class AGS_WeaponAxe> WeaponAxeClass;
+
+	UPROPERTY(Replicated)
+	AGS_WeaponAxe* WeaponAxe;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName WeaponAxeName = "Axe";
+
+	template <typename T>
+	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 };
+
+template <typename T>
+void AGS_Chan::SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon)
+{
+	if (!WeaponClass)
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	T* SpawnWeapon = World->SpawnActor<T>(WeaponClass);
+	if (!SpawnWeapon)
+	{
+		return;
+	}
+
+	SpawnWeapon->AttachToComponent(GetMesh(),
+		FAttachmentTransformRules::SnapToTargetIncludingScale,
+		SocketName);
+
+	SpawnWeapon->SetOwningCharacter(this);
+	OutWeapon = SpawnWeapon;
+}
