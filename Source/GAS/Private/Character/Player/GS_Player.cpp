@@ -6,6 +6,7 @@
 #include "Components/PostProcessComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Kismet/GameplayStatics.h"
+//#include "AkAudioDevice.h"
 
 AGS_Player::AGS_Player()
 {
@@ -38,6 +39,10 @@ AGS_Player::AGS_Player()
 	}
 
 	TeamId = FGenericTeamId(1);
+
+	// AkComponent 생성
+	AkComponent = CreateDefaultSubobject<UAkComponent>(TEXT("AkComponent"));
+	AkComponent->SetupAttachment(GetRootComponent());
 }
 
 void AGS_Player::BeginPlay()
@@ -58,6 +63,9 @@ void AGS_Player::BeginPlay()
 
 	BlurMID = UMaterialInstanceDynamic::Create(PostProcessMat, this);
 	PostProcessComponent->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, BlurMID));
+
+	// 리스너 설정
+	SetupAudioListener();
 }
 
 void AGS_Player::Tick(float DeltaSeconds)
@@ -146,5 +154,29 @@ void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 FCharacterWantsToMove AGS_Player::GetWantsToMove()
 {
 	return WantsToMove;
+}
+
+void AGS_Player::SetupAudioListener()
+{
+	if (!AkComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AkComponent is null in SetupAudioListener"));
+		return;
+	}
+
+	// 자신의 리스너만 사용하도록 설정
+	TArray<UAkComponent*> Listeners;
+	Listeners.Add(AkComponent);
+	AkComponent->SetListeners(Listeners);
+	
+	// if (Listeners.Num() > 0)
+	// {
+	// 	AkComponent->SetListeners(Listeners);
+	// 	UE_LOG(LogTemp, Log, TEXT("Audio listener setup completed for %s"), *GetName());
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("Failed to setup audio listener for %s"), *GetName());
+	// }
 }
 
