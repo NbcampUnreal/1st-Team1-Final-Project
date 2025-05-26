@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{93D8C51A-10DA-38A6-4EC9-6A13AA9EB4FF}",
+    "Hash": "{2BA8CB49-A4C8-19E7-3E75-8A5187A7C71C}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -461,7 +461,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Ambient_Game_Attack_Simple_Heavy_Swing_1_Deep_Hammer_Air_Woosh.wav",
-      "CachePath": "BB/{BBB6F33F-EB7C-9B61-1883-19ECCAD744B7}.wem"
+      "CachePath": "CC/{CC2B8653-8F41-9151-8A79-E17DCC305942}.wem"
      },
      {
       "Id": "548015621",
@@ -1517,10 +1517,8 @@
       "Name": "Props_Axe",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe",
       "GUID": "{597B061A-CE0A-4A56-8154-41280E86C596}",
-      "MaxAttenuation": "1000",
-      "DurationType": "OneShot",
-      "DurationMin": "0.89423656",
-      "DurationMax": "0.94741064",
+      "MaxAttenuation": "100",
+      "DurationType": "Infinite",
       "MediaRefs": [
        {
         "Id": "542254204"
@@ -1700,7 +1698,7 @@
       "Name": "Props_MineExplode",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_MineExplode",
       "GUID": "{59F8482E-4399-4E6E-B401-0432CFED7550}",
-      "MaxAttenuation": "2000",
+      "MaxAttenuation": "1500",
       "DurationType": "OneShot",
       "DurationMin": "2.3256478",
       "DurationMax": "2.463938",
@@ -1843,7 +1841,7 @@
       "Name": "Props_StoneTrap_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneTrap_Hit",
       "GUID": "{624349E1-2251-4E0E-8E91-39536798294E}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "100",
       "DurationType": "OneShot",
       "DurationMin": "0.4353176",
       "DurationMax": "0.48862755",
@@ -2021,6 +2019,6 @@
     ]
    }
   ],
-  "FileHash": "{05F1558F-95F7-131F-1D24-7730E0887447}"
+  "FileHash": "{7C84C1D9-1EBA-97BC-8CB3-0783500FD12B}"
  }
 }
