@@ -68,14 +68,17 @@ void AGS_TrapBase::OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	if (!HasAuthority())
 	{
 		//클라이언트
-		Server_HandleTrapDamage(Player);
 		Server_DamageBoxEffect(Player);
+		Server_CustomTrapEffect(Player);
+		Server_HandleTrapDamage(Player);
 	}
 	else
 	{
 		//서버
 		DamageBoxEffect(Player);
+		CustomTrapEffect(Player);
 		HandleTrapDamage(Player);
+		
 	}
 }
 
@@ -109,7 +112,8 @@ void AGS_TrapBase::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors)
 void AGS_TrapBase::Server_DamageBoxEffect_Implementation(AActor* OtherActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Server_DamageBoxEffect_Implementation called"));
-	Multicast_DamageBoxEffect(OtherActor);
+	//Multicast_DamageBoxEffect(OtherActor);
+	DamageBoxEffect(OtherActor);
 }
 
 
@@ -122,4 +126,15 @@ void AGS_TrapBase::Multicast_DamageBoxEffect_Implementation(AActor* TargetActor)
 void AGS_TrapBase::DamageBoxEffect_Implementation(AActor* OtherActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("DamageBoxEffect Applied"));
+}
+
+
+void AGS_TrapBase::Server_CustomTrapEffect_Implementation(AActor* TargetActor)
+{
+	CustomTrapEffect(TargetActor);
+}
+
+void AGS_TrapBase::CustomTrapEffect_Implementation(AActor* TargetActor)
+{
+
 }
