@@ -93,12 +93,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	UAkComponent* AkComponent;
 
+	// 오디오 관련 함수들
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void SetupLocalAudioListener();
+    
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	bool IsLocalPlayer() const;
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FCharacterWantsToMove GetWantsToMove();
-
-	// 리스너 설정 함수
-	void SetupAudioListener();
 };

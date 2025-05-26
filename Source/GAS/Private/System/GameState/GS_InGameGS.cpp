@@ -25,8 +25,6 @@ void AGS_InGameGS::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(AGS_InGameGS, CurrentTime);
-	DOREPLIFETIME_CONDITION(AGS_InGameGS, NumClientsLoaded, COND_None);
-	DOREPLIFETIME_CONDITION(AGS_InGameGS, NumClientsExpected, COND_None);
 }
 
 void AGS_InGameGS::UpdateGameTime()
@@ -53,25 +51,3 @@ void AGS_InGameGS::OnRep_CurrentTime()
 	OnTimerUpdated.Broadcast(GetFormattedTime());
 }
 
-void AGS_InGameGS::OnRep_Loaded()
-{
-	if (!HasAuthority())
-	{
-		UE_LOG(LogTemp, Log, TEXT("Client: OnRep_Loaded - NumClientsLoaded = %d / %d"), NumClientsLoaded, NumClientsExpected);
-	}
-}
-
-void AGS_InGameGS::AddLoadedClient()
-{
-	if (HasAuthority())
-	{
-		++NumClientsLoaded;
-		UE_LOG(LogTemp, Log, TEXT("InGameGS: AddLoadedClient -> %d / %d"), NumClientsLoaded, NumClientsExpected);
-
-		if (NumClientsExpected > 0 && NumClientsLoaded >= NumClientsExpected)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("InGameGS: *** ALL CLIENTS LOADED (%d) *** Broadcasting..."), NumClientsLoaded);
-			OnAllClientsLoaded.Broadcast();
-		}
-	}
-}

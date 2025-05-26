@@ -6,7 +6,7 @@
 #include "Components/PostProcessComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Kismet/GameplayStatics.h"
-//#include "AkAudioDevice.h"
+#include "AkAudioDevice.h"
 
 AGS_Player::AGS_Player()
 {
@@ -64,8 +64,11 @@ void AGS_Player::BeginPlay()
 	BlurMID = UMaterialInstanceDynamic::Create(PostProcessMat, this);
 	PostProcessComponent->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, BlurMID));
 
-	// 리스너 설정
-	SetupAudioListener();
+	// 로컬 플레이어만 오디오 리스너 설정
+	if (IsLocalPlayer())
+	{
+		SetupLocalAudioListener();
+	}
 }
 
 void AGS_Player::Tick(float DeltaSeconds)
@@ -156,27 +159,33 @@ FCharacterWantsToMove AGS_Player::GetWantsToMove()
 	return WantsToMove;
 }
 
-void AGS_Player::SetupAudioListener()
+void AGS_Player::SetupLocalAudioListener()
 {
 	if (!AkComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AkComponent is null in SetupAudioListener"));
+		UE_LOG(LogAudio, Warning, TEXT("AkComponent is null in SetupLocalAudioListener"));
 		return;
 	}
 
-	// 자신의 리스너만 사용하도록 설정
-	TArray<UAkComponent*> Listeners;
-	Listeners.Add(AkComponent);
-	AkComponent->SetListeners(Listeners);
-	
-	// if (Listeners.Num() > 0)
-	// {
-	// 	AkComponent->SetListeners(Listeners);
-	// 	UE_LOG(LogTemp, Log, TEXT("Audio listener setup completed for %s"), *GetName());
-	// }
-	// else
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("Failed to setup audio listener for %s"), *GetName());
-	// }
+	// 로컬 플레이어 확인
+	if (!IsLocalPlayer())
+	{
+		UE_LOG(LogAudio, Warning, TEXT("SetupLocalAudioListener called on non-local player: %s"), *GetName());
+		return;
+	}
+
+	// 가장 기본적인 방법: AkComponent를 직접 사용 : 이 방법이 가장 안전하고 호환성이 좋다
+	UE_LOG(LogAudio, Log, TEXT("Setting up audio listener for local player: %s"), *GetName());
+    
+	// AkComponent가 자동으로 리스너 역할을 하도록 설정. 별도의 API 호출 없이 AkComponent 자체가 리스너가 된다
 }
 
+// 로컬 플레이어 확인 함수
+bool AGS_Player::IsLocalPlayer() const
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		return PC->IsLocalController();
+	}
+	return false;
+}

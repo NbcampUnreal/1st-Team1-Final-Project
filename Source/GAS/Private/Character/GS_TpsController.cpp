@@ -73,6 +73,8 @@ void AGS_TpsController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetInputMode(FInputModeGameOnly());
+
 	if (!HasAuthority() && IsLocalController())
 	{
 		check(InputMappingContext);
@@ -80,7 +82,31 @@ void AGS_TpsController::BeginPlay()
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 		check(Subsystem);
 		Subsystem->AddMappingContext(InputMappingContext, 0);
+
+		// 오디오 리스너 설정 (약간의 지연을 두고 실행)
+        FTimerHandle TimerHandle;
+        GetWorld()->GetTimerManager().SetTimer(
+			TimerHandle, 
+			this, 
+			&AGS_TpsController::SetupPlayerAudioListener, 
+			0.1f, 
+			false
+			);
 	}
+}
+
+void AGS_TpsController::SetupPlayerAudioListener()
+{
+    if (!IsLocalController())
+    {
+        return;
+    }
+
+    if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
+    {
+        ControlledPlayer->SetupLocalAudioListener();
+        UE_LOG(LogAudio, Log, TEXT("Audio listener setup initiated from controller for: %s"), *ControlledPlayer->GetName());
+    }
 }
 
 void AGS_TpsController::SetupInputComponent()

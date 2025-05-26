@@ -111,6 +111,7 @@ public:
 
 	// 유닛 선택
 	void AddUnitToSelection(AGS_Monster* Unit);
+	void AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& Units); // 다중 선택
 	void RemoveUnitFromSelection(AGS_Monster* Unit);
 	void ClearUnitSelection();
 

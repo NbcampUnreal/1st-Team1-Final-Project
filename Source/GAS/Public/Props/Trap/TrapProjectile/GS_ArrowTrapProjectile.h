@@ -35,4 +35,8 @@ public:
 		bool bFromSweep, const FHitResult& SweepResult);
 
 	void StickWithVisualOnly(const FHitResult& Hit);
+
+
+protected:
+	virtual void BeginPlay() override;
 };
