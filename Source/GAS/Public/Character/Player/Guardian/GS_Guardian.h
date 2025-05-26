@@ -29,6 +29,10 @@ public:
 	UFUNCTION()
 	void MeleeAttackCheck();
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCDrawDebugLine();
+	
+
 	UPROPERTY()
 	TObjectPtr<UGS_DrakharAnimInstance> GuardianAnim;
 

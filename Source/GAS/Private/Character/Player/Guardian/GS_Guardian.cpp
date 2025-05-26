@@ -82,3 +82,9 @@ void AGS_Guardian::MeleeAttackCheck()
 	}
 	DrawDebugCapsule(GetWorld(), Start, MeleeAttackRange * 0.5f, MeleeAttackRadius, FRotationMatrix::MakeFromZ(Forward).ToQuat(), FColor::Red, false, 5.f);
 }
+
+void AGS_Guardian::MulticastRPCDrawDebugLine_Implementation()
+{
+	
+	
+}

@@ -33,7 +33,7 @@ void UGS_UnitSelection::HandleSelectionChanged(const TArray<AGS_Monster*>& NewSe
 		AGS_Monster* Monster = NewSelection[0];
 		PortraitImage->SetBrushFromTexture(Monster->GetPortrait());
 		NameText->SetText(Monster->GetMonsterName());
-		HPText->SetText(FText::AsNumber(Monster->GetStatComp()->GetCurrentHealth()));
+		HPText->SetText(FText::FromString(FString::Printf(TEXT("%d"),FMath::RoundToInt(Monster->GetStatComp()->GetCurrentHealth()))));
 		DescText->SetText(Monster->GetDescription());
 		TypeText->SetText(Monster->GetTypeName());
 	}

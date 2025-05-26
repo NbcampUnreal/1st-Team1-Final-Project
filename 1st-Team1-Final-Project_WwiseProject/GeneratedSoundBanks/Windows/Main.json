@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{620C7A5B-6966-7288-68C9-57E9B898384C}",
+    "Hash": "{93D8C51A-10DA-38A6-4EC9-6A13AA9EB4FF}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -413,7 +413,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Coughing_6_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "76/{76BC9DAA-1AB1-5015-31D3-8A3EC41BB32C}.wem"
+      "CachePath": "50/{5080E208-0C18-0E0F-E93C-F359B2AB1CDB}.wem"
      },
      {
       "Id": "485972195",
@@ -669,7 +669,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "GlassBreakWine_SFXB.2343.wav",
-      "CachePath": "C0/{C04690AE-CB4D-DBFC-FC1E-2402361EE307}.wem"
+      "CachePath": "E0/{E0C6C6AB-BDDA-A6A4-898D-65F5EB10B965}.wem"
      },
      {
       "Id": "810864320",
@@ -685,7 +685,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Breathing_3_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "88/{8826DE9D-BCAE-39D4-157A-09CCE1AA9C32}.wem"
+      "CachePath": "94/{9430C832-A863-9D75-0F48-765805421492}.wem"
      },
      {
       "Id": "848033451",
@@ -1539,6 +1539,7 @@
       "Name": "Props_Axe_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe_Hit",
       "GUID": "{E6A16F60-3008-4709-B717-1D97F028AB1C}",
+      "MaxAttenuation": "600",
       "DurationType": "OneShot",
       "DurationMin": "0.6745022",
       "DurationMax": "0.6745022",
@@ -1598,6 +1599,7 @@
       "Name": "Props_CrystalSpike_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalSpike_Hit",
       "GUID": "{36F0066E-709B-487B-AB1C-AAC04B8F753C}",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "0.57722557",
       "DurationMax": "0.61154914",
@@ -1624,6 +1626,7 @@
       "Name": "Props_CrystalWallTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap",
       "GUID": "{9C89005A-CF4E-46F0-9A26-2606EC93E64B}",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "1.8",
       "DurationMax": "1.9070336",
@@ -1786,6 +1789,7 @@
       "Name": "Props_Saw_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Saw_Hit",
       "GUID": "{DFBB5823-D275-437F-99C5-623B934A4616}",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "1.5328146",
       "DurationMax": "1.6239605",
@@ -1812,6 +1816,7 @@
       "Name": "Props_Spike",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Spike",
       "GUID": "{87EFA3D2-5892-417F-A875-D06CCD556912}",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "0.57722557",
       "DurationMax": "0.61154914",
@@ -1838,6 +1843,7 @@
       "Name": "Props_StoneTrap_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneTrap_Hit",
       "GUID": "{624349E1-2251-4E0E-8E91-39536798294E}",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "0.4353176",
       "DurationMax": "0.48862755",
@@ -2015,6 +2021,6 @@
     ]
    }
   ],
-  "FileHash": "{26057B96-7C8F-6EBD-66FF-32F191BC9001}"
+  "FileHash": "{9227B490-0A01-598F-670F-4EB02D72455F}"
  }
 }

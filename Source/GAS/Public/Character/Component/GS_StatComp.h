@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GS_StatRow.h"
 #include "GS_StatComp.generated.h"
 
 class AGS_Character;
@@ -26,7 +27,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat")
 	TObjectPtr<UDataTable> StatDataTable;
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TArray<UAnimMontage*> TakeDamageMontages;
 
@@ -35,7 +36,7 @@ public:
 	
 	void InitStat(FName RowName);
 
-	void UpdateStat();
+	void UpdateStat(const FGS_StatRow& RuneStats);
 
 	float CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
 
@@ -52,7 +53,7 @@ public:
 	FORCEINLINE float GetAttackSpeed()const { return AttackSpeed; }
 
 	//setter
-	void SetCurrentHealth(float InHealth);
+	void SetCurrentHealth(float InHealth, bool bIsHealing);
 	void SetMaxHealth(float InMaxHealth);
 	void SetAttackPower(float InAttackPower);
 	void SetDefense(float InDefense);

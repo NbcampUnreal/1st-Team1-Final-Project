@@ -1,5 +1,6 @@
 #include "Character/Component/GS_StatComp.h"
 
+#include "AIController.h"
 #include "AkGameplayStatics.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatRow.h"
@@ -58,7 +59,7 @@ void UGS_StatComp::InitStat(FName RowName)
 	OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed *= Agility;
 }
 
-void UGS_StatComp::UpdateStat()
+void UGS_StatComp::UpdateStat(const FGS_StatRow& RuneStats)
 {
 	//update stats by rune system
 }
@@ -73,43 +74,57 @@ float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character
 	return Damage;
 }
 
-void UGS_StatComp::SetCurrentHealth(float InHealth)
+void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 {
 	if (!IsValid(GetOwner()) || !GetOwner()->HasAuthority())
 	{
 		return;
 	}
-	
-	//play take damage montage
-	// if (!TakeDamageMontages.IsEmpty())
-	// {
-	// 	MulticastRPCPlayTakeDamageMontage();
-	// }	
-
 	//update health
 	CurrentHealth = InHealth;
-
-	//dead
-	if (CurrentHealth <= KINDA_SMALL_NUMBER)
+	OnCurrentHPChanged.Broadcast(this);
+	
+	//healing
+	if (bIsHealing)
 	{
-		CurrentHealth = 0.f;
 		
-		AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-		if (IsValid(OwnerCharacter))
+	}
+	//damaged
+	else
+	{
+		//[TODO] play take damage montage
+		if (!TakeDamageMontages.IsEmpty())
 		{
-			OwnerCharacter->MulticastRPCCharacterDeath();
-
-			//player -> 다른 플레이어 관전
-			
-			//monster -> 사라지기 (임시)
-			if (OwnerCharacter->ActorHasTag("Monster"))
-			{
-				OwnerCharacter->SetLifeSpan(4.f);
-			}
+			MulticastRPCPlayTakeDamageMontage();
 		}
 
+		//dead
+		if (CurrentHealth <= KINDA_SMALL_NUMBER)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("death"));
+			CurrentHealth = 0.f;
+	
+			AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+			if (IsValid(OwnerCharacter))
+			{
+				OwnerCharacter->MulticastRPCCharacterDeath();
+
+				//player -> 다른 플레이어 관전
+		
+				//monster -> 사라지기 (임시)
+				if (OwnerCharacter->ActorHasTag("Monster"))
+				{
+					if (UCharacterMovementComponent* MoveComp = OwnerCharacter->GetCharacterMovement())
+					{
+						MoveComp->DisableMovement();
+					}
+					OwnerCharacter->DetachFromControllerPendingDestroy();
+					
+					OwnerCharacter->SetLifeSpan(4.f);
+				}
+			}
+		}
 	}
-	OnCurrentHPChanged.Broadcast(this);
 }
 
 void UGS_StatComp::SetMaxHealth(float InMaxHealth)
@@ -150,13 +165,13 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 	UAnimMontage* AnimMontage = TakeDamageMontages[idx];
 
 	if (IsValid(OwnerCharacter))
-	{
+	{	
 		OwnerCharacter->PlayAnimMontage(AnimMontage);
 		if(OwnerCharacter->HasAuthority())
 		{
 			//stop character during damage animation
 			CharacterWalkSpeed = OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
-			OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = 0.f;
+			//OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = 0.f;
 		}
 		
 		if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
@@ -183,7 +198,7 @@ void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	if (OwnerCharacter->HasAuthority())
 	{
 		//can move
-		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CharacterWalkSpeed;
+		//OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CharacterWalkSpeed;
 	}
 }
 
@@ -196,5 +211,5 @@ void UGS_StatComp::ServerRPCHeal_Implementation(float InHealAmount)
     }
 
     float NewHealth = FMath::Min(CurrentHealth + InHealAmount, MaxHealth);
-    SetCurrentHealth(NewHealth);
+    SetCurrentHealth(NewHealth, true);
 }
