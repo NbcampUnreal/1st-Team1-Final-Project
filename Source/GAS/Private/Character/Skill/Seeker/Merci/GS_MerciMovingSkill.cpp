@@ -7,10 +7,15 @@
 
 UGS_MerciMovingSkill::UGS_MerciMovingSkill()
 {
-	static ConstructorHelpers::FClassFinder<AGS_SeekerMerciArrow> ArrowBP(TEXT("Game/Weapons/Blueprints/BP_SeekerMerciArrowSmoke"));
+	static ConstructorHelpers::FClassFinder<AGS_SeekerMerciArrow> ArrowBP(TEXT("/Game/Weapons/Blueprints/BP_SeekerMerciArrowSmoke"));
 	if (ArrowBP.Succeeded())
 	{
 		ArrowClass = ArrowBP.Class;
+		UE_LOG(LogTemp, Warning, TEXT("ArrowClass loaded: %s"), *ArrowClass->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("ArrowClass load failed!"));
 	}
 }
 
@@ -20,6 +25,8 @@ void UGS_MerciMovingSkill::ActiveSkill()
 	Super::ActiveSkill();
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	MerciCharacter->SetDrawState(false);
+	UE_LOG(LogTemp, Warning, TEXT("ActiveSkill : %s"), *SkillAnimMontages[0]->GetName());
 	MerciCharacter->LeftClickPressedAttack(SkillAnimMontages[0]);
 }
 

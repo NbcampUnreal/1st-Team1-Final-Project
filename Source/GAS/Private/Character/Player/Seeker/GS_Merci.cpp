@@ -46,33 +46,25 @@ AGS_Merci::AGS_Merci()
 
 void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 {
+	if (!HasAuthority())
+	{
+		// 서버에 요청
+		Server_LeftClickPressedAttack(DrawMontage);
+		return;
+	}
+
 	if (!GetDrawState())
 	{
-		if (Mesh && DrawMontage)
-		{
-			float Duration = Mesh->GetAnimInstance()->Montage_Play(DrawMontage, 2.0f);
-			if (Duration > 0.0f)
-			{
-				FOnMontageEnded EndDelegate;
-				EndDelegate.BindUObject(this, &AGS_Merci::OnDrawMontageEnded);
-				Mesh->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, DrawMontage);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Duration<=0.0f"));
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Mesh null or DrawMontage null"));
-		}
-
+		UE_LOG(LogTemp, Warning, TEXT("GetDrawState=false pass: %s"), GetDrawState()?TEXT("true") : TEXT("false"));
+		Multicast_PlayDrawMontage(DrawMontage);
+		//PlayDrawMontage(DrawMontage);
 		SetDrawState(true); // 상태 전환
 
 		// 사운드 재생
+		// 사운드 재생
 		/*PlayBowPullSound(PullSoundComp);*/
 
-		StartZoom(); // 줌인
+		Client_StartZoom(); // 줌인
 	}
 	else
 	{
@@ -80,10 +72,18 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 	}
 }
 
-void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
+void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
+	if (!HasAuthority())
+	{
+		Server_LeftClickReleaseAttack(ArrowClass);
+		return;
+	}
+
 	SetAimState(false);
 	SetDrawState(false);
+
+	Multicast_StopDrawMontage();
 
 	// 사운드 재생
 
@@ -93,7 +93,7 @@ void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowCl
 		UE_LOG(LogTemp, Warning, TEXT("ReleaseSound"));
 	}
 
-	FireArrow(ArrowClass);
+	Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 
 	if (ShotSoundComp)
 	{
@@ -101,12 +101,60 @@ void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowCl
 		UE_LOG(LogTemp, Warning, TEXT("ShotSound"));
 	}
 
-	StopZoom();
+	Client_StopZoom();
 
-	SetWidgetVisibility(false);
+	Client_SetWidgetVisibility(false);
 }
 
-void AGS_Merci::FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
+void AGS_Merci::Server_LeftClickPressedAttack_Implementation(UAnimMontage* DrawMontage)
+{
+	LeftClickPressedAttack(DrawMontage);
+}
+
+void AGS_Merci::Server_LeftClickReleaseAttack_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
+{
+	LeftClickReleaseAttack(ArrowClass);
+}
+
+void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
+{
+	UE_LOG(LogTemp, Warning, TEXT("DrawMontage valid: %s"), *GetNameSafe(DrawMontage));
+	if (Mesh && DrawMontage)
+	{
+		float Duration = Mesh->GetAnimInstance()->Montage_Play(DrawMontage);
+		if (Duration > 0.0f)
+		{
+			//FOnMontageEnded EndDelegate;
+			//EndDelegate.BindUObject(this, &AGS_Merci::OnDrawMontageEnded);
+			//Mesh->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, DrawMontage);
+			UE_LOG(LogTemp, Warning, TEXT("Montage_Play called, duration: %f"), Duration);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Duration<=0.0f"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Mesh null or DrawMontage null"));
+	}
+}
+
+void AGS_Merci::Multicast_StopDrawMontage_Implementation()
+{
+	Mesh->GetAnimInstance()->Montage_Stop(0.2f); // BlendOut 0.2초
+}
+
+void AGS_Merci::Multicast_PlayDrawMontage_Implementation(UAnimMontage* Montage)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage called on %s"), *GetName());
+	UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage called on %s, Montage: %s"),
+		*GetName(),
+		*GetNameSafe(Montage));
+	PlayDrawMontage(Montage);
+}
+
+void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
 	if (!ArrowClass || !Weapon)
 	{
@@ -117,22 +165,86 @@ void AGS_Merci::FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
 	FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");
 
 	// 2. 회전 방향 얻기(컨트롤러의 에임 방향)
-	FRotator SpawnRotation = GetController()->GetDesiredRotation();
+	// 화면 중앙에서 World Direction을 얻기 위한 설정
+	FVector ViewLoc;
+	FRotator ViewRot;
+	Controller->GetPlayerViewPoint(ViewLoc, ViewRot); // 카메라 기준 시점
+
+	FVector TraceStart = ViewLoc;
+	FVector TraceEnd = TraceStart + ViewRot.Vector() * 10000.f;
+
+	// 히트된 위치로 방향 계산
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	FVector TargetLocation = TraceEnd;
+
+	if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params))
+	{
+		TargetLocation = Hit.ImpactPoint;
+	}
+	// SpawnLocation → TargetLocation 방향 계산
+	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
+	FRotator BaseRotation = LaunchDirection.Rotation();
+
+	// 화살 수가 홀수이면 가운데 화살이 정중앙
+	int32 HalfCount = NumArrows / 2;
+	for (int32 i = 0; i < NumArrows; ++i)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NumArrow 1 fire"));
+		// 중심 기준 각도 차이 계산
+		float OffsetAngle = (i - HalfCount) * SpreadAngleDeg;
+
+		// 짝수일 경우 중심에서 양옆으로 대칭 유지
+		if (NumArrows % 2 == 0)
+		{
+			OffsetAngle += SpreadAngleDeg / 2.0f;
+		}
+
+		// Yaw 회전만 적용 (좌우 회전)
+		FRotator ArrowRotation = BaseRotation;
+		ArrowRotation.Yaw += OffsetAngle;
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;
+
+		GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRotation, SpawnParams);
+	}
 
 	// 3. 액터 스폰
-	FActorSpawnParameters SpawnParams;
+	/*FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
 
-	GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);
+	if (ArrowClass == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ArrowClass is null!!!!!!!!!"));
+	}
+	GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);*/
 }
 
 // Called when the game starts or when spawned
 void AGS_Merci::BeginPlay()
 {
 	Super::BeginPlay();
-	Mesh = this->GetMesh();
 
+	if (IsLocallyControlled()) // 꼭 필요!
+	{
+		if (WidgetCrosshairClass)
+		{
+			WidgetCrosshair = CreateWidget<UUserWidget>(GetWorld(), WidgetCrosshairClass);
+			if (WidgetCrosshair)
+			{
+				WidgetCrosshair->AddToViewport();
+				WidgetCrosshair->SetVisibility(ESlateVisibility::Hidden);
+			}
+		}
+	}
+
+	Mesh = this->GetMesh();
+	UE_LOG(LogTemp, Warning, TEXT("AnimInstance: %s"), *GetNameSafe(GetMesh()->GetAnimInstance()));
 	if (ZoomCurve)
 	{
 		FOnTimelineFloat TimelineCallback;
@@ -185,37 +297,68 @@ void AGS_Merci::UpdateZoom(float Alpha)
 //	);
 //}
 
-void AGS_Merci::OnDrawMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void AGS_Merci::OnDrawMontageEnded()
 {
-	if (!bInterrupted)
+	Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
+	//if (!bInterrupted)
+	//{
+	//	Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
+	//}
+	//else
+	//{
+	//	Client_SetWidgetVisibility(false); // 실패 시 숨기기
+	//}
+
+	// 서버로 전달
+	if (HasAuthority() == false)
 	{
-		SetWidgetVisibility(true); // 크로스 헤어 보이기
-		SetAimState(true);
-		SetDrawState(false);
-	}
-	else
-	{
-		SetWidgetVisibility(false); // 실패 시 숨기기
-		SetDrawState(false);
+		Server_NotifyDrawMontageEnded();
 	}
 }
 
-void AGS_Merci::SetWidgetVisibility(bool bVisible)
+void AGS_Merci::Server_NotifyDrawMontageEnded_Implementation()
 {
+	SetAimState(true);
+	SetDrawState(false);
+	//if (!bInterrupted)
+	//{
+	//	// 서버에서 처리할 로직
+	//	SetAimState(true);
+	//	SetDrawState(false);
+	//}
+	//else
+	//{
+	//	SetDrawState(false);
+	//}
+}
+
+void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
+{
+	if (!IsLocallyControlled()) return;
+
 	if (WidgetCrosshair)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("WidgetVisibility"));
 		WidgetCrosshair->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	}
 }
 
-void AGS_Merci::StartZoom()
+void AGS_Merci::Client_StartZoom_Implementation()
 {
 	ZoomTimeline.Play(); // 줌인
 }
 
-void AGS_Merci::StopZoom()
+void AGS_Merci::Client_StopZoom_Implementation()
 {
 	ZoomTimeline.Reverse(); // 줌아웃
+}
+
+void AGS_Merci::Client_PlaySound_Implementation(UAkComponent* SoundComp)
+{
+	if (SoundComp)
+	{
+		SoundComp->PostAssociatedAkEvent(0, FOnAkPostEventCallback());
+	}
 }
 
 // Called every frame

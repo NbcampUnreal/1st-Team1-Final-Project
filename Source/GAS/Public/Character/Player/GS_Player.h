@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Character/GS_Character.h"
 #include "Components/TimelineComponent.h"
+#include "AkComponent.h"
 #include "GS_Player.generated.h"
 
 class USpringArmComponent;
@@ -88,9 +89,16 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Movement")
 	FCharacterWantsToMove WantsToMove;
 
+	// 오디오 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* AkComponent;
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FCharacterWantsToMove GetWantsToMove();
+
+	// 리스너 설정 함수
+	void SetupAudioListener();
 };
