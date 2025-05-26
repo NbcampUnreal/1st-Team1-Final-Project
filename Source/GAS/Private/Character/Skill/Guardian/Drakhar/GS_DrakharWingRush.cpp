@@ -19,7 +19,7 @@ UGS_DrakharWingRush::UGS_DrakharWingRush()
 void UGS_DrakharWingRush::ActiveSkill()
 {
 	Super::ActiveSkill();
-
+	
 	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter);
 	if (IsValid(Drakhar))
 	{
