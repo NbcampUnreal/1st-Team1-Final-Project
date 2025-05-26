@@ -81,11 +81,11 @@ void UGS_StatComp::SetCurrentHealth(float InHealth)
 	}
 	
 	//play take damage montage
-	if (!TakeDamageMontages.IsEmpty())
-	{
-		MulticastRPCPlayTakeDamageMontage();
-	}	
-	
+	// if (!TakeDamageMontages.IsEmpty())
+	// {
+	// 	MulticastRPCPlayTakeDamageMontage();
+	// }	
+
 	//update health
 	CurrentHealth = InHealth;
 
