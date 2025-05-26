@@ -33,7 +33,6 @@ AGS_RTSController::AGS_RTSController()
 void AGS_RTSController::BeginPlay()
 {
 	Super::BeginPlay();
-	SetInputMode(FInputModeGameAndUI());
 	if (!HasAuthority() && IsLocalController())
 	{
 		if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
@@ -377,6 +376,7 @@ void AGS_RTSController::SelectOnCtrlClick()
 			ClearUnitSelection();
 				
 			ECharacterType MonsterType = Monster->GetCharacterType();
+			TArray<AGS_Monster*> SameTypeUnits;
 				
 			// 월드에 있는 모든 몬스터를 순회 
 			for (TActorIterator<AGS_Monster> It(GetWorld()); It; ++It)
@@ -384,10 +384,13 @@ void AGS_RTSController::SelectOnCtrlClick()
 				AGS_Monster* M = *It;
 				if (M->GetCharacterType() != MonsterType)
 				{
-					continue;
+					//continue;
+					SameTypeUnits.Add(M);
 				}
 
-				AddUnitToSelection(M);
+				//AddUnitToSelection(M);
+				// 한 번에 선택하여 첫 번째 유닛만 소리 재생
+				AddMultipleUnitsToSelection(SameTypeUnits);
 			}
 		}
 	}
@@ -421,10 +424,40 @@ void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 	{
 		return;
 	}
+
+	// 첫 번째로 추가되는 유닛만 소리 재생
+	bool bShouldPlaySound = UnitSelection.IsEmpty();
 	
 	UnitSelection.AddUnique(Unit);
 	OnSelectionChanged.Broadcast(UnitSelection);
-	Unit->SetSelected(true);
+	//Unit->SetSelected(true);
+	Unit->SetSelected(true, bShouldPlaySound);
+}
+
+// 여러 유닛을 한번에 선택할 때 사용할 새로운 함수 추가
+void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& Units)
+{
+	if (Units.IsEmpty())
+	{
+		return;
+	}
+	
+	bool bShouldPlaySound = UnitSelection.IsEmpty();
+	
+	for (int32 i = 0; i < Units.Num(); ++i)
+	{
+		AGS_Monster* Unit = Units[i];
+		if (!Unit)
+		{
+			continue;
+		}
+		
+		UnitSelection.AddUnique(Unit);
+		// 첫 번째 유닛만 소리 재생
+		Unit->SetSelected(true, bShouldPlaySound && i == 0);
+	}
+	
+	OnSelectionChanged.Broadcast(UnitSelection);
 }
 
 void AGS_RTSController::RemoveUnitFromSelection(AGS_Monster* Unit)
@@ -491,12 +524,15 @@ void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, in
 		}
 		
 		ClearUnitSelection();
-		
-		UnitSelection = UnitGroups[GroupIdx].Units;
-		for (AGS_Monster* U : UnitSelection)
-		{
-			U->SetSelected(true);
-		}
+		//UnitSelection = UnitGroups[GroupIdx].Units;
+		//for (AGS_Monster* U : UnitSelection)
+		//{
+		//	U->SetSelected(true);
+		//}
+
+		// 부대 호출 시에도 첫 번째 유닛만 소리 재생
+		AddMultipleUnitsToSelection(UnitGroups[GroupIdx].Units);
+
 		UE_LOG(LogTemp, Log, TEXT("Loaded group %d (%d units)"), GroupIdx+1, UnitSelection.Num());
 	}
 }
@@ -544,8 +580,9 @@ void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)
 
 void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>& Units, const FVector& Dest)
 {
-	for (AGS_Monster* Unit : Units)
+	for (int32 i = 0; i < Units.Num(); ++i)
 	{
+		AGS_Monster* Unit = Units[i];
 		if (!IsValid(Unit)) continue;
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
@@ -557,8 +594,8 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 				BlackboardComp->SetValueAsVector (AGS_AIController::MoveLocationKey, Dest);
 				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
 
-				// 이동 사운드 재생
-				if (Unit->MoveSoundEvent)
+				// 첫 번째 유닛만 이동 소리 재생
+				if (i == 0 && Unit->MoveSoundEvent)
 				{
 					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
 				}
@@ -569,8 +606,9 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 
 void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Monster*>& Units, const FVector& Dest)
 {
-	for (AGS_Monster* Unit : Units)
+	for (int32 i = 0; i < Units.Num(); ++i)
 	{
+		AGS_Monster* Unit = Units[i];
 		if (!IsValid(Unit)) continue;
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
@@ -581,6 +619,12 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Attack));
 				BlackboardComp->SetValueAsVector (AGS_AIController::MoveLocationKey, Dest);
 				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
+
+				// 첫 번째 유닛만 공격 소리 재생
+				if (i == 0 && Unit->MoveSoundEvent)
+				{
+					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
+				}
 			}
 		}
 	}
@@ -588,8 +632,9 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 
 void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster*>& Units, AGS_Character* TargetActor)
 {
-	for (AGS_Monster* Unit : Units)
+	for (int32 i = 0; i < Units.Num(); ++i)
 	{
+		AGS_Monster* Unit = Units[i];
 		if (!IsValid(Unit)) continue;
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
@@ -600,6 +645,12 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Attack));
 				BlackboardComp->SetValueAsObject(AGS_AIController::TargetActorKey, TargetActor);
 				BlackboardComp->ClearValue(AGS_AIController::MoveLocationKey);
+
+				// 첫 번째 유닛만 공격 소리 재생
+				if (i == 0 && Unit->MoveSoundEvent)
+				{
+					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
+				}
 			}
 		}
 	}
@@ -607,8 +658,9 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 
 void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>& Units)
 {
-	for (AGS_Monster* Unit : Units)
+	for (int32 i = 0; i < Units.Num(); ++i)
 	{
+		AGS_Monster* Unit = Units[i];
 		if (!IsValid(Unit)) continue;
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
@@ -621,6 +673,12 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Stop));
 				BlackboardComp->ClearValue(AGS_AIController::MoveLocationKey);
 				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
+
+				// 첫 번째 유닛만 정지 소리 재생
+				if (i == 0 && Unit->MoveSoundEvent)
+				{
+					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
+				}
 			}
 		}
 	}
@@ -628,6 +686,28 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 
 void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc)
 {
+	for (int32 i = 0; i < Units.Num(); ++i)
+	{
+		AGS_Monster* Unit = Units[i];
+		if (!IsValid(Unit)) continue;
+		
+		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Skill));
+				BlackboardComp->SetValueAsVector(AGS_AIController::MoveLocationKey, TargetLoc);
+				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
+
+				// 첫 번째 유닛만 스킬 소리 재생
+				if (i == 0 && Unit->MoveSoundEvent)
+				{
+					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
+				}
+			}
+		}
+	}
 }
 
 

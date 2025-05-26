@@ -39,6 +39,9 @@ public:
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* LCtrlAction;*/
 
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+    void SetupPlayerAudioListener();
+
 	void Move(const FInputActionValue& InputValue);
 	void Look(const FInputActionValue& InputValue);
 	void WalkToggle(const FInputActionValue& InputValue);
