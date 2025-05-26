@@ -65,6 +65,13 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPCMeleeAttack(AGS_Character* InDamagedCharacter);
 
+	//character death play ragdoll
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCCharacterDeath();
+
+	UFUNCTION()
+	void WatchOtherPlayer();
+	
 	//HP widget
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
 	void SetHPBarWidget(UGS_HPWidget* InHPBarWidget);
@@ -76,6 +83,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulicastRPCStopCurrentSkillMontage(UAnimMontage* CurrentSkillMontage);
+
 	
 protected:
 	//component

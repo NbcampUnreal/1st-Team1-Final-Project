@@ -93,6 +93,20 @@ void UGS_StatComp::SetCurrentHealth(float InHealth)
 	if (CurrentHealth <= KINDA_SMALL_NUMBER)
 	{
 		CurrentHealth = 0.f;
+		
+		AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+		if (IsValid(OwnerCharacter))
+		{
+			OwnerCharacter->MulticastRPCCharacterDeath();
+
+			//player -> 다른 플레이어 관전
+			
+			//monster -> 사라지기 (임시)
+			if (OwnerCharacter->ActorHasTag("Monster"))
+			{
+				OwnerCharacter->SetLifeSpan(4.f);
+			}
+		}
 
 	}
 	OnCurrentHPChanged.Broadcast(this);
