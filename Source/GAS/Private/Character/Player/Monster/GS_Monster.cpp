@@ -21,9 +21,6 @@ AGS_Monster::AGS_Monster()
 
 	AkComponent = CreateDefaultSubobject<UAkComponent>("AkComponent");
 	AkComponent->SetupAttachment(RootComponent);
-
-	GetStatComp()->SetCurrentHealth(2000.f);
-	GetStatComp()->SetAttackPower(20.f);
 	
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	if (MovementComponent)

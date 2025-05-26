@@ -26,7 +26,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat")
 	TObjectPtr<UDataTable> StatDataTable;
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TArray<UAnimMontage*> TakeDamageMontages;
 
@@ -52,7 +52,7 @@ public:
 	FORCEINLINE float GetAttackSpeed()const { return AttackSpeed; }
 
 	//setter
-	void SetCurrentHealth(float InHealth);
+	void SetCurrentHealth(float InHealth, bool bIsHealing);
 	void SetMaxHealth(float InMaxHealth);
 	void SetAttackPower(float InAttackPower);
 	void SetDefense(float InDefense);

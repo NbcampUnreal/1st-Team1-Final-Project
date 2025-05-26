@@ -85,7 +85,7 @@ void AGS_Drakhar::LeftMouse()
 			if (!ClientComboAttacking)
 			{
 				GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
-			}				
+			}
 			ServerRPCComboAttack();
 		}
 	}
