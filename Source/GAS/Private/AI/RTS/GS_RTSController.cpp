@@ -12,7 +12,6 @@
 #include "Blueprint/UserWidget.h"
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
-#include "Perception/AIPerceptionComponent.h"
 
 
 AGS_RTSController::AGS_RTSController()
@@ -212,9 +211,9 @@ void AGS_RTSController::OnLeftMousePressed()
 	case ERTSCommand::Attack:
 		if (bHit)
 		{
-			if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
+			if (AGS_Character* Target = Cast<AGS_Character>(Hit.GetActor()))
 			{
-				Server_RTSAttack(Units, Monster);
+				Server_RTSAttack(Units, Target);
 			}
 			else
 			{
@@ -550,6 +549,8 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
+			AIController->UnlockTarget();
+			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
@@ -575,6 +576,8 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
+			AIController->UnlockTarget();
+			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
@@ -594,6 +597,8 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
+			AIController->LockTarget(TargetActor);
+			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
@@ -613,6 +618,7 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
+			AIController->UnlockTarget();
 			AIController->StopMovement();
 			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
