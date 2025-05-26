@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{0430B3D6-97D9-EFB2-C10E-DE8A0777AECC}",
+    "Hash": "{93D8C51A-10DA-38A6-4EC9-6A13AA9EB4FF}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -1539,6 +1539,7 @@
       "Name": "Props_Axe_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe_Hit",
       "GUID": "{E6A16F60-3008-4709-B717-1D97F028AB1C}",
+      "MaxAttenuation": "600",
       "DurationType": "OneShot",
       "DurationMin": "0.6745022",
       "DurationMax": "0.6745022",
@@ -2020,6 +2021,6 @@
     ]
    }
   ],
-  "FileHash": "{AB23F462-0D5C-1AFF-C5ED-1B943873F810}"
+  "FileHash": "{05F1558F-95F7-131F-1D24-7730E0887447}"
  }
 }
