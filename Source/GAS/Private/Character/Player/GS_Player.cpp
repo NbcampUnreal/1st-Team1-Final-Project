@@ -163,19 +163,19 @@ void AGS_Player::SetupLocalAudioListener()
 {
 	if (!AkComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AkComponent is null in SetupLocalAudioListener"));
+		UE_LOG(LogAudio, Warning, TEXT("AkComponent is null in SetupLocalAudioListener"));
 		return;
 	}
 
 	// 로컬 플레이어 확인
 	if (!IsLocalPlayer())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("SetupLocalAudioListener called on non-local player: %s"), *GetName());
+		UE_LOG(LogAudio, Warning, TEXT("SetupLocalAudioListener called on non-local player: %s"), *GetName());
 		return;
 	}
 
 	// 가장 기본적인 방법: AkComponent를 직접 사용 : 이 방법이 가장 안전하고 호환성이 좋다
-	UE_LOG(LogTemp, Log, TEXT("Setting up audio listener for local player: %s"), *GetName());
+	UE_LOG(LogAudio, Log, TEXT("Setting up audio listener for local player: %s"), *GetName());
     
 	// AkComponent가 자동으로 리스너 역할을 하도록 설정. 별도의 API 호출 없이 AkComponent 자체가 리스너가 된다
 }

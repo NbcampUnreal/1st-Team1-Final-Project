@@ -105,7 +105,7 @@ void AGS_TpsController::SetupPlayerAudioListener()
     if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
     {
         ControlledPlayer->SetupLocalAudioListener();
-        UE_LOG(LogTemp, Log, TEXT("Audio listener setup initiated from controller for: %s"), *ControlledPlayer->GetName());
+        UE_LOG(LogAudio, Log, TEXT("Audio listener setup initiated from controller for: %s"), *ControlledPlayer->GetName());
     }
 }
 
