@@ -2,7 +2,6 @@
 
 
 #include "Character/Player/Seeker/GS_Merci.h"
-//#include "Weapon/Equipable/"
 
 // Sets default values
 AGS_Merci::AGS_Merci()
