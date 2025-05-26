@@ -38,7 +38,7 @@ void AGS_Character::BeginPlay()
 		FString EnumToName = CharacterEnum->GetNameStringByValue((int64)CharacterType);
 		StatComp->InitStat(FName(EnumToName));
 	}
-
+	
 	if (HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
 	{
 		HPTextWidgetComp->SetVisibility(true);
@@ -64,7 +64,7 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f"), *GetName(), ActualDamage);
 
-	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage);
+	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage, false);
 
 	return ActualDamage;
 }
@@ -119,8 +119,8 @@ FGenericTeamId AGS_Character::GetGenericTeamId() const
 
 void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 {
-	GetMesh()->SetSimulatePhysics(true);
-	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	 GetMesh()->SetSimulatePhysics(true);
+	 GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 }
 
 void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)
