@@ -44,16 +44,16 @@ public:
 	void LeftClickPressedAttack(UAnimMontage* DrawMontage);
 
 	UFUNCTION(BlueprintCallable)
-	void LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+	void LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
 	UFUNCTION(Server, Reliable)
 	void Server_LeftClickPressedAttack(UAnimMontage* DrawMontage);
 
 	UFUNCTION(Server, Reliable)
-	void Server_LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+	void Server_LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
 	UFUNCTION(Server, Reliable)
-	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass);
+	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyDrawMontageEnded();

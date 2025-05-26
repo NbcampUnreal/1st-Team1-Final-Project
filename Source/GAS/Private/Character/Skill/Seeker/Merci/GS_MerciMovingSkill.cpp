@@ -17,17 +17,6 @@ UGS_MerciMovingSkill::UGS_MerciMovingSkill()
 	{
 		UE_LOG(LogTemp, Error, TEXT("ArrowClass load failed!"));
 	}
-
-	//static ConstructorHelpers::FObjectFinder<UAnimMontage> Montage(TEXT("/Game/Player/Seeker/Merci/Animation/AnimSequence/WithBow/StandingDrawArrow/AM_MerciDraw"));
-	//if (Montage.Succeeded())
-	//{
-	//	SkillAnimMontages.Add(Montage.Object);
-	//	UE_LOG(LogTemp, Warning, TEXT("Succeeded"));
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Montage not Succeeded"));
-	//}
 }
 
 void UGS_MerciMovingSkill::ActiveSkill()
