@@ -74,6 +74,10 @@ void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void AGS_Character::WatchOtherPlayer()
+{
+}
+
 void AGS_Character::SetHPTextWidget(UGS_HPText* InHPTextWidget)
 {
 	UGS_HPText* HPTextWidget = Cast<UGS_HPText>(InHPTextWidget);
@@ -111,6 +115,12 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 FGenericTeamId AGS_Character::GetGenericTeamId() const
 {
 	return TeamId;
+}
+
+void AGS_Character::MulticastRPCCharacterDeath_Implementation()
+{
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 }
 
 void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)

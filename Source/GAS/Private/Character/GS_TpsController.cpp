@@ -72,7 +72,7 @@ void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
 void AGS_TpsController::BeginPlay()
 {
 	Super::BeginPlay();
-
+	SetInputMode(FInputModeGameOnly());
 	if (!HasAuthority() && IsLocalController())
 	{
 		check(InputMappingContext);

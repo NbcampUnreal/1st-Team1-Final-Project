@@ -23,11 +23,6 @@ AGS_CustomLobbyPC::AGS_CustomLobbyPC()
 void AGS_CustomLobbyPC::BeginPlay()
 {
 	Super::BeginPlay();
-	if (IsLocalController())
-	{
-		UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: BeginPlay → Server_NotifyClientLoaded()"));
-		Server_NotifyClientLoaded();
-	}
 }
 
 void AGS_CustomLobbyPC::OnRep_PlayerState()
@@ -58,29 +53,6 @@ void AGS_CustomLobbyPC::OnRep_PlayerState()
 	{
 		UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC::OnRep_PlayerState - PlayerState changed after initial setup for PC: %s. Re-evaluating bindings/UI."), *GetNameSafe(this));
 		TryBindToPlayerStateDelegates();
-	}
-
-	if (IsLocalController() && !bHasNotifiedInGameLoad && PlayerState)
-	{
-		if (auto* InGameGS = GetWorld()->GetGameState<AGS_InGameGS>())
-		{
-			UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: OnRep_PlayerState is calling Server_NotifyClientLoaded() for InGame level."));
-			Server_NotifyClientLoaded();
-			bHasNotifiedInGameLoad = true;
-		}
-	}
-}
-
-void AGS_CustomLobbyPC::Server_NotifyClientLoaded_Implementation()
-{
-	if (auto* GS = GetWorld()->GetGameState<AGS_InGameGS>())//InGameGS 인스턴스가 생성됐을 InGameLevel에서만 호출됨
-	{
-		UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: Server received ClientLoaded from %s"), *PlayerState->GetPlayerName());
-		GS->AddLoadedClient();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyPC: Server_NotifyClientLoaded called, but AGS_InGameGS is NULL! World: %s"), *GetNameSafe(GetWorld()));
 	}
 }
 

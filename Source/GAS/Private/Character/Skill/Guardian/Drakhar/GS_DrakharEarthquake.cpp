@@ -16,6 +16,11 @@ void UGS_DrakharEarthquake::ActiveSkill()
 	{
 		return;
 	}
+	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter);
+	if (IsValid(Drakhar))
+	{
+		Drakhar->ResetComboAttackVariables();
+	}
 	ExecuteSkillEffect();
 }
 

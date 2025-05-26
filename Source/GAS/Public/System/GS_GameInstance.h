@@ -104,8 +104,4 @@ protected:
     FDelegateHandle OnSessionUserInviteAcceptedDelegateHandle;
     virtual void OnSessionUserInviteAccepted_Impl(const bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
 
-
-    //서버 이동
-public:
-    int32 ExpectedPlayers = 0;
 };
