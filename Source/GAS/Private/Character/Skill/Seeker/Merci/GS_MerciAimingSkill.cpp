@@ -33,5 +33,5 @@ void UGS_MerciAimingSkill::ActiveSkill()
 void UGS_MerciAimingSkill::OnSkillCommand()
 {
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-	MerciCharacter->LeftClickReleaseAttack(ArrowClass, 25.0f, 4);
+	MerciCharacter->LeftClickReleaseAttack(ArrowClass, 15.0f, 4);
 }
