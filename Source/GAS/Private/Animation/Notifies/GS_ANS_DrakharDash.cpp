@@ -1,8 +1,8 @@
-﻿#include "Animation/Notifies/GS_ANS_DrkharDash.h"
+﻿#include "Animation/Notifies/GS_ANS_DrakharDash.h"
 
 #include "Character/Player/Guardian/GS_Drakhar.h"
 
-void UGS_ANS_DrkharDash::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
+void UGS_ANS_DrakharDash::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 	if (AActor* Owner = MeshComp->GetOwner())
@@ -15,7 +15,7 @@ void UGS_ANS_DrkharDash::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequ
 	}
 }
 
-void UGS_ANS_DrkharDash::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference)
+void UGS_ANS_DrakharDash::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float FrameDeltaTime, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyTick(MeshComp, Animation, FrameDeltaTime, EventReference);
 
@@ -29,7 +29,7 @@ void UGS_ANS_DrkharDash::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSeque
 	}
 }
 
-void UGS_ANS_DrkharDash::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
+void UGS_ANS_DrakharDash::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
 	

@@ -120,11 +120,16 @@ void AGS_PlacerBase::BuildObject()
 
 		FIntPoint CursorPoint = BuildManagerRef->GetCellUnderCursor();
 		FVector2d CenterLocation = BuildManagerRef->GetCenterOfRectArea(CursorPoint, ObjectSize, RotateYaw);
-		FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, ObjectData.ZOffSet);
+		FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, ObjectData.OffSet.Z);
+		FVector2D SpawnOffset = FVector2D(ObjectData.OffSet.X, ObjectData.OffSet.Y);
 		//FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
 		FRotator SpawnRotator = GetActorRotation();
 		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator);
 		NewActor->SetActorRotation(NewActor->GetActorRotation() + FRotator(0.0f, RotateYaw, 0.0f));
+		SpawnOffset = SpawnOffset.GetRotated(RotateYaw);
+		SpawnLocation = NewActor->GetActorLocation();
+		NewActor->SetActorLocation(FVector(SpawnLocation.X + SpawnOffset.X, SpawnLocation.Y + SpawnOffset.Y, SpawnLocation.Z));
+		
 		// 영역 차지 로직
 		TArray<FIntPoint> IntPointArray;
 		CalCellsInRectArea(IntPointArray);
