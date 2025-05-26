@@ -14,7 +14,24 @@ void AGS_SeekerMerciArrow::BeginPlay()
 	if (HasAuthority())
 	{
 		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AGS_SeekerMerciArrow::OnBeginOverlap);
+		// 화살 스폰 직후
+		this->SetActorEnableCollision(false);
+
+		// N초 뒤에 다시 Collision 활성화
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+			{
+				this->SetActorEnableCollision(true);
+			}, 0.05f, false);
+
+		AActor* IgnoredActor = GetInstigator(); // 또는 GetInstigator();
+		if (IgnoredActor)
+		{
+			CollisionComponent->IgnoreActorWhenMoving(IgnoredActor, true);
+		}
 	}
+
+	
 }
 
 void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
