@@ -32,6 +32,11 @@ bool AGS_Seeker::GetDrawState()
 	return SeekerState.IsDraw;
 }
 
+/*EGait AGS_Seeker::GetGait()
+{
+	return Gait;
+}*/
+
 // Called when the game starts or when spawned
 void AGS_Seeker::BeginPlay()
 {
@@ -51,7 +56,7 @@ void AGS_Seeker::Tick(float DeltaTime)
 
 // Called to bind functionality to input
 void AGS_Seeker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
+{	
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	if (SkillInputHandlerComponent)

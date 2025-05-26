@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/GS_Player.h"
+#include "Animation/Character/E_SeekerAnim.h"
 #include "GS_Seeker.generated.h"
 
 class UGS_SkillInputHandlerComp;
@@ -53,6 +54,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool GetDrawState();
 
+	/*UFUNCTION(BlueprintCallable)
+	EGait GetGait();*/
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	UChildActorComponent* Weapon;
 	
@@ -64,7 +68,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
 
-
+	/*
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	EGait Gait;*/
 
 private :
 	UPROPERTY(VisibleAnywhere, Category="State")

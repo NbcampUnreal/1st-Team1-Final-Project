@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GS_StatRow.h"
 #include "GS_StatComp.generated.h"
 
 class AGS_Character;
@@ -35,7 +36,7 @@ public:
 	
 	void InitStat(FName RowName);
 
-	void UpdateStat();
+	void UpdateStat(const FGS_StatRow& RuneStats);
 
 	float CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
 

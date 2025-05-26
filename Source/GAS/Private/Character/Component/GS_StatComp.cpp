@@ -1,5 +1,6 @@
 #include "Character/Component/GS_StatComp.h"
 
+#include "AIController.h"
 #include "AkGameplayStatics.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatRow.h"
@@ -58,7 +59,7 @@ void UGS_StatComp::InitStat(FName RowName)
 	OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed *= Agility;
 }
 
-void UGS_StatComp::UpdateStat()
+void UGS_StatComp::UpdateStat(const FGS_StatRow& RuneStats)
 {
 	//update stats by rune system
 }
@@ -113,6 +114,12 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 				//monster -> 사라지기 (임시)
 				if (OwnerCharacter->ActorHasTag("Monster"))
 				{
+					if (UCharacterMovementComponent* MoveComp = OwnerCharacter->GetCharacterMovement())
+					{
+						MoveComp->DisableMovement();
+					}
+					OwnerCharacter->DetachFromControllerPendingDestroy();
+					
 					OwnerCharacter->SetLifeSpan(4.f);
 				}
 			}
@@ -158,7 +165,7 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 	UAnimMontage* AnimMontage = TakeDamageMontages[idx];
 
 	if (IsValid(OwnerCharacter))
-	{
+	{	
 		OwnerCharacter->PlayAnimMontage(AnimMontage);
 		if(OwnerCharacter->HasAuthority())
 		{
