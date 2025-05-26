@@ -35,8 +35,33 @@
 						<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
 						<Property Name="Lowpass" Type="int16">
 							<ValueList>
-								<Value>30</Value>
+								<Value>5</Value>
 							</ValueList>
+						</Property>
+						<Property Name="Pitch" Type="int32">
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{28846270-5A35-41EF-AE73-6CE89B32E18B}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Max" Type="Real64" Value="10"/>
+											<Property Name="Min" Type="Real64" Value="-10"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
+						<Property Name="Volume" Type="Real64">
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{36973207-0F4C-4AA2-ACDC-71C8EE0A1E4A}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Min" Type="Real64" Value="-3"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
 						</Property>
 					</PropertyList>
 					<ReferenceList>
@@ -44,7 +69,7 @@
 							<Custom>
 								<Attenuation Name="Attenuation (Custom)" ID="{E98A9B7D-3AF3-4F57-BFBF-2C8BE459C0AD}" ShortID="562164368">
 									<PropertyList>
-										<Property Name="RadiusMax" Type="Real64" Value="800"/>
+										<Property Name="RadiusMax" Type="Real64" Value="450"/>
 									</PropertyList>
 									<CurveUsageInfoList>
 										<VolumeDryUsage>
@@ -58,10 +83,14 @@
 															<XPos>0</XPos>
 															<YPos>0</YPos>
 															<Flags>5</Flags>
-															<SegmentShape>Log3</SegmentShape>
 														</Point>
 														<Point>
-															<XPos>800</XPos>
+															<XPos>303.61445</XPos>
+															<YPos>-1.13111</YPos>
+															<Flags>0</Flags>
+														</Point>
+														<Point>
+															<XPos>450</XPos>
 															<YPos>-200</YPos>
 															<Flags>37</Flags>
 														</Point>
@@ -1624,7 +1653,7 @@
 						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
-								<Value>15</Value>
+								<Value>20</Value>
 							</ValueList>
 						</Property>
 						<Property Name="Lowpass" Type="int16">
@@ -1646,7 +1675,7 @@
 						</Property>
 						<Property Name="Volume" Type="Real64">
 							<ValueList>
-								<Value>-7</Value>
+								<Value>-8</Value>
 							</ValueList>
 							<ModifierList>
 								<ModifierInfo>
@@ -1665,7 +1694,7 @@
 							<Custom>
 								<Attenuation Name="Attenuation (Custom)" ID="{90A98EA5-9F9B-43C5-91FA-213CA094DE26}" ShortID="184574814">
 									<PropertyList>
-										<Property Name="RadiusMax" Type="Real64" Value="1200"/>
+										<Property Name="RadiusMax" Type="Real64" Value="900"/>
 									</PropertyList>
 									<CurveUsageInfoList>
 										<VolumeDryUsage>
@@ -1681,12 +1710,12 @@
 															<Flags>5</Flags>
 														</Point>
 														<Point>
-															<XPos>797.71754</XPos>
-															<YPos>-1.23687</YPos>
+															<XPos>757.7695</XPos>
+															<YPos>-2.50692</YPos>
 															<Flags>0</Flags>
 														</Point>
 														<Point>
-															<XPos>1200</XPos>
+															<XPos>900</XPos>
 															<YPos>-200</YPos>
 															<Flags>37</Flags>
 														</Point>
@@ -2352,7 +2381,7 @@
 								</Property>
 								<Property Name="Volume" Type="Real64">
 									<ValueList>
-										<Value>-5</Value>
+										<Value>-3.5</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
@@ -2387,13 +2416,8 @@
 																	<Flags>5</Flags>
 																</Point>
 																<Point>
-																	<XPos>246.50499</XPos>
-																	<YPos>-1.13013</YPos>
-																	<Flags>0</Flags>
-																</Point>
-																<Point>
-																	<XPos>651.96838</XPos>
-																	<YPos>-4.09025</YPos>
+																	<XPos>613.41416</XPos>
+																	<YPos>-1.87241</YPos>
 																	<Flags>0</Flags>
 																</Point>
 																<Point>
@@ -3127,6 +3151,9 @@
 								<Reference Name="Attenuation">
 									<Custom>
 										<Attenuation Name="Attenuation (Custom)" ID="{EB96848F-6423-4C43-92BF-BC10412CDC79}" ShortID="637856468">
+											<PropertyList>
+												<Property Name="RadiusMax" Type="Real64" Value="800"/>
+											</PropertyList>
 											<CurveUsageInfoList>
 												<VolumeDryUsage>
 													<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
@@ -3141,12 +3168,12 @@
 																	<Flags>5</Flags>
 																</Point>
 																<Point>
-																	<XPos>89.8735736363636</XPos>
-																	<YPos>-1.79693</YPos>
+																	<XPos>433.044817777778</XPos>
+																	<YPos>-1.81696</YPos>
 																	<Flags>0</Flags>
 																</Point>
 																<Point>
-																	<XPos>100</XPos>
+																	<XPos>800</XPos>
 																	<YPos>-200</YPos>
 																	<Flags>37</Flags>
 																</Point>
@@ -5224,8 +5251,8 @@
 																	<Flags>5</Flags>
 																</Point>
 																<Point>
-																	<XPos>606.62252</XPos>
-																	<YPos>-1.83476</YPos>
+																	<XPos>741.56228</XPos>
+																	<YPos>-1.21452</YPos>
 																	<Flags>0</Flags>
 																</Point>
 																<Point>
@@ -5804,7 +5831,7 @@
 								</Property>
 								<Property Name="Volume" Type="Real64">
 									<ValueList>
-										<Value>-5</Value>
+										<Value>-6</Value>
 									</ValueList>
 								</Property>
 							</PropertyList>
@@ -5829,8 +5856,8 @@
 																	<Flags>5</Flags>
 																</Point>
 																<Point>
-																	<XPos>593.37752</XPos>
-																	<YPos>-2.54912</YPos>
+																	<XPos>737.95583</XPos>
+																	<YPos>-1.81735</YPos>
 																	<Flags>0</Flags>
 																</Point>
 																<Point>
@@ -6710,6 +6737,11 @@
 						<BlendContainer Name="SFX_CrystalWallTrap" ID="{718BD15B-1AFD-469E-94CE-28FFE8661F93}" ShortID="719553769">
 							<PropertyList>
 								<Property Name="3DSpatialization" Type="int16" Value="2"/>
+								<Property Name="Volume" Type="Real64">
+									<ValueList>
+										<Value>-5</Value>
+									</ValueList>
+								</Property>
 							</PropertyList>
 							<ReferenceList>
 								<Reference Name="Attenuation">
@@ -6732,8 +6764,8 @@
 																	<Flags>5</Flags>
 																</Point>
 																<Point>
-																	<XPos>598.67552</XPos>
-																	<YPos>-2.51466</YPos>
+																	<XPos>743.25383</XPos>
+																	<YPos>-1.15021</YPos>
 																	<Flags>0</Flags>
 																</Point>
 																<Point>
@@ -7199,7 +7231,7 @@
 								<Property Name="3DSpatialization" Type="int16" Value="2"/>
 								<Property Name="Volume" Type="Real64">
 									<ValueList>
-										<Value>-3</Value>
+										<Value>-5</Value>
 									</ValueList>
 								</Property>
 							</PropertyList>
@@ -7224,8 +7256,8 @@
 																	<Flags>5</Flags>
 																</Point>
 																<Point>
-																	<XPos>698.65573</XPos>
-																	<YPos>-1.78089</YPos>
+																	<XPos>730.78424</XPos>
+																	<YPos>-1.22032</YPos>
 																	<Flags>0</Flags>
 																</Point>
 																<Point>
@@ -7715,7 +7747,7 @@
 										</Property>
 										<Property Name="Volume" Type="Real64">
 											<ValueList>
-												<Value>-7</Value>
+												<Value>-5</Value>
 											</ValueList>
 											<ModifierList>
 												<ModifierInfo>
@@ -7898,6 +7930,9 @@
 								<Reference Name="Attenuation">
 									<Custom>
 										<Attenuation Name="Attenuation (Custom)" ID="{CDDDD870-E238-484B-B93B-02ECC37D2033}" ShortID="780884162">
+											<PropertyList>
+												<Property Name="RadiusMax" Type="Real64" Value="800"/>
+											</PropertyList>
 											<CurveUsageInfoList>
 												<VolumeDryUsage>
 													<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
@@ -7912,7 +7947,12 @@
 																	<Flags>5</Flags>
 																</Point>
 																<Point>
-																	<XPos>100</XPos>
+																	<XPos>735.74297</XPos>
+																	<YPos>-1.73737</YPos>
+																	<Flags>0</Flags>
+																</Point>
+																<Point>
+																	<XPos>800</XPos>
 																	<YPos>-200</YPos>
 																	<Flags>37</Flags>
 																</Point>
