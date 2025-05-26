@@ -10,6 +10,12 @@ AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
 {
 }
 
+void AGS_ArrowTrapProjectile::BeginPlay()
+{
+	Super::BeginPlay();
+	SetLifeSpan(4.0f);
+}
+
 
 void AGS_ArrowTrapProjectile::Init(AGS_TrigTrapBase* InTrap)
 {
