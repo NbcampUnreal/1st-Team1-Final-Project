@@ -18,6 +18,21 @@ AGS_SeekerMerciArrowNormal::AGS_SeekerMerciArrowNormal()
 void AGS_SeekerMerciArrowNormal::BeginPlay()
 {
 	Super::BeginPlay();
+	// 화살 스폰 직후
+	this->SetActorEnableCollision(false);
+
+	// N초 뒤에 다시 Collision 활성화
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		{
+			this->SetActorEnableCollision(true);
+		}, 0.05f, false);
+
+	AActor* IgnoredActor = GetInstigator(); // 또는 GetInstigator();
+	if (IgnoredActor)
+	{
+		CollisionComponent->IgnoreActorWhenMoving(IgnoredActor, true);
+	}
 }
 
 void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
@@ -27,6 +42,16 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 {
 	Super::OnBeginOverlap(OverlappedComp, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 	
+	/*if (OtherActor == GetInstigator()
+		|| Cast<AGS_SeekerMerciArrow>(OtherActor)
+		|| Cast<AGS_Seeker>(OtherActor))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Other Actor is Player of Arrow"));
+		return;
+	}*/
+
+	UE_LOG(LogTemp, Warning, TEXT("Arrow Overlap : %s | OverlappedComp : %s"), *OtherActor->GetName(), *OverlappedComp->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("Instigator : %s"), *GetInstigator()->GetName());
 	// 맞은 대상 구분
 	ETargetType TargetType = DetermineTargetType(OtherActor);
 	

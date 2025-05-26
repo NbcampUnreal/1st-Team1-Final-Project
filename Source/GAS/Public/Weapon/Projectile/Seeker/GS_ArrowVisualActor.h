@@ -17,5 +17,14 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* ArrowMesh;
 
+	UPROPERTY(ReplicatedUsing = OnRep_SkeletalMesh)
+	USkeletalMesh* CurrentMesh;
+
+	UFUNCTION()
+	void OnRep_SkeletalMesh();
+	
+
 	void SetArrowMesh(USkeletalMesh* Mesh);
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

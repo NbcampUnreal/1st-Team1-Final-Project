@@ -72,7 +72,7 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 	}
 }
 
-void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
+void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
 	if (!HasAuthority())
 	{
@@ -93,7 +93,7 @@ void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowCl
 		UE_LOG(LogTemp, Warning, TEXT("ReleaseSound"));
 	}
 
-	Server_FireArrow(ArrowClass);
+	Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 
 	if (ShotSoundComp)
 	{
@@ -111,7 +111,7 @@ void AGS_Merci::Server_LeftClickPressedAttack_Implementation(UAnimMontage* DrawM
 	LeftClickPressedAttack(DrawMontage);
 }
 
-void AGS_Merci::Server_LeftClickReleaseAttack_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
+void AGS_Merci::Server_LeftClickReleaseAttack_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
 	LeftClickReleaseAttack(ArrowClass);
 }
@@ -154,7 +154,7 @@ void AGS_Merci::Multicast_PlayDrawMontage_Implementation(UAnimMontage* Montage)
 	PlayDrawMontage(Montage);
 }
 
-void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass)
+void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
 	if (!ArrowClass || !Weapon)
 	{
@@ -186,10 +186,35 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	}
 	// SpawnLocation → TargetLocation 방향 계산
 	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
-	FRotator SpawnRotation = LaunchDirection.Rotation();
+	FRotator BaseRotation = LaunchDirection.Rotation();
+
+	// 화살 수가 홀수이면 가운데 화살이 정중앙
+	int32 HalfCount = NumArrows / 2;
+	for (int32 i = 0; i < NumArrows; ++i)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NumArrow 1 fire"));
+		// 중심 기준 각도 차이 계산
+		float OffsetAngle = (i - HalfCount) * SpreadAngleDeg;
+
+		// 짝수일 경우 중심에서 양옆으로 대칭 유지
+		if (NumArrows % 2 == 0)
+		{
+			OffsetAngle += SpreadAngleDeg / 2.0f;
+		}
+
+		// Yaw 회전만 적용 (좌우 회전)
+		FRotator ArrowRotation = BaseRotation;
+		ArrowRotation.Yaw += OffsetAngle;
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;
+
+		GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRotation, SpawnParams);
+	}
 
 	// 3. 액터 스폰
-	FActorSpawnParameters SpawnParams;
+	/*FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = this;
 
@@ -197,7 +222,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ArrowClass is null!!!!!!!!!"));
 	}
-	GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);
+	GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);*/
 }
 
 // Called when the game starts or when spawned
