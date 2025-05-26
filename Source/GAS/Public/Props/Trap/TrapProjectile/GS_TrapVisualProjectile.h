@@ -16,4 +16,7 @@ public:
 	UStaticMeshComponent* ProjectileMesh;
 
 	void SetProjectileMesh(UStaticMesh* Mesh);
+
+protected:
+	virtual void BeginPlay() override;
 };

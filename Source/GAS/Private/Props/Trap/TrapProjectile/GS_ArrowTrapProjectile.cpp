@@ -1,17 +1,13 @@
 #include "Props/Trap/TrapProjectile/GS_ArrowTrapProjectile.h"
 #include "Components/SphereComponent.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/GS_Character.h"
 #include "Props/Trap/TrapProjectile/GS_TrapVisualProjectile.h"
 #include "Net/UnrealNetwork.h"
 
 
 AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
 {
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> ArrowMeshObj(TEXT("/Game/Props/Trap/WallTrap/ArrowTrap/Mesh/SM_CrystalArrow.SM_CrystalArrow"));
-	if (ArrowMeshObj.Succeeded())
-	{
-		ProjectileMesh->SetSkeletalMesh(ArrowMeshObj.Object);
-	}
 }
 
 
@@ -30,11 +26,7 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!HasAuthority())
-	{
-		return;
-	}
-	if (!OtherActor || OtherActor == this)
+	if (!HasAuthority() || !OtherActor || OtherActor == this)
 	{
 		return;
 	}
@@ -44,7 +36,10 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 	{
 		OwningTrap->HandleTrapDamage(OtherActor);
 	}
-	StickWithVisualOnly(SweepResult);
+	if(!OtherActor->IsA<APawn>())
+	{
+		StickWithVisualOnly(SweepResult);
+	}
 }
 
 void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
@@ -63,7 +58,7 @@ void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
 
 	// 메시가 +Y 방향을 앞이라고 가정 시 Y축 기준 -90도 회전
 	FRotator AdjustedRotation = SpawnRotation + FRotator(0.f, -90.f, 0.f);
-	SpawnLocation -= ArrowDirection * 20.f; // 약간 파고들게
+	SpawnLocation -= ArrowDirection * 5.f; // 약간 파고들게
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -75,7 +70,6 @@ void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
 		AGS_TrapVisualProjectile* VisualArrow = GetWorld()->SpawnActor<AGS_TrapVisualProjectile>(VisualArrowClass, SpawnLocation, AdjustedRotation, Params);
 		if (VisualArrow)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("VisaulArrow GetName : %s"), *VisualArrow->GetName());
 			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
 
 		}

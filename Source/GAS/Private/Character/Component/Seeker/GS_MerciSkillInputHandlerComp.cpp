@@ -37,7 +37,7 @@ void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& In
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+		
 	}
 }
 
@@ -52,7 +52,7 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 	}
 	else
 	{
-
+		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 	}
 }
 
@@ -65,7 +65,7 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Moving);
+		
 	}
 }
 
@@ -79,6 +79,6 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 	}
 	else
 	{
-
+		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Moving);
 	}
 }

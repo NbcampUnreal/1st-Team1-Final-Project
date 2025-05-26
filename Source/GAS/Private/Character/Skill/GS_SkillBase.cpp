@@ -59,6 +59,13 @@ bool UGS_SkillBase::IsActive() const
 void UGS_SkillBase::StartCoolDown()
 {
 	//server
+
+	if (Cooltime <= 0.f)
+	{
+		bIsCoolingDown = false;
+		return;
+	}
+
 	bIsCoolingDown = true;
 	
 	OwnerCharacter->GetWorldTimerManager().SetTimer(CooldownHandle, [this]()
