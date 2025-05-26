@@ -1,6 +1,7 @@
 #include "Props/Trap/TrapProjectile/GS_ArrowTrapProjectile.h"
 #include "Components/SphereComponent.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/GS_Character.h"
 #include "Props/Trap/TrapProjectile/GS_TrapVisualProjectile.h"
 #include "Net/UnrealNetwork.h"
 
@@ -25,11 +26,7 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!HasAuthority())
-	{
-		return;
-	}
-	if (!OtherActor || OtherActor == this)
+	if (!HasAuthority() || !OtherActor || OtherActor == this)
 	{
 		return;
 	}
@@ -39,7 +36,10 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 	{
 		OwningTrap->HandleTrapDamage(OtherActor);
 	}
-	StickWithVisualOnly(SweepResult);
+	if(!OtherActor->IsA<APawn>())
+	{
+		StickWithVisualOnly(SweepResult);
+	}
 }
 
 void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
