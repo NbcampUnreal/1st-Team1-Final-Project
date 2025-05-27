@@ -1,81 +1,21 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Weapon/Equipable/GS_WeaponSword.h"
-#include "Character/GS_Character.h"
-#include "Character/Component/GS_StatComp.h"
-#include "Components/BoxComponent.h"
-#include "Engine/DamageEvents.h"
 
 AGS_WeaponSword::AGS_WeaponSword()
 {
-	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>("Mesh");
-	RootComponent = Mesh;
+	// 검 메시 생성
+	SwordMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SwordMesh"));
+	RootComponent = SwordMesh;
 
-	HitBox = CreateDefaultSubobject<UBoxComponent>("HitBox");
-	HitBox->SetupAttachment(Mesh);
-	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	HitBox->OnComponentBeginOverlap.AddDynamic(this, &AGS_WeaponSword::OnHit);
+	// 히트박스를 검 메시에 붙임
+	HitBox->SetupAttachment(SwordMesh);
 
-	OwnerChar = nullptr;
-	bReplicates = true;
-}
-
-
-void AGS_WeaponSword::BeginPlay()
-{
-	Super::BeginPlay();
-
-	OwnerChar = Cast<AGS_Character>(GetOwner());
-}
-
-
-void AGS_WeaponSword::EnableHit()
-{
-	if (HasAuthority())
+	// 검 메시 에셋 로드
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshAsset(
+		TEXT("/Game/Weapons/Sword_01/SKM_Sword_01.SKM_Sword_01"));
+	if (MeshAsset.Succeeded())
 	{
-		HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		SwordMesh->SetSkeletalMesh(MeshAsset.Object);
 	}
-	else
-	{
-		Server_SetHitCollision(true);
-	}
-}
-
-void AGS_WeaponSword::DisableHit()
-{
-	if (HasAuthority())
-	{
-		HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	else
-	{
-		Server_SetHitCollision(false);
-	}
-}
-
-void AGS_WeaponSword::Server_SetHitCollision_Implementation(bool bEnable)
-{
-	HitBox->SetCollisionEnabled(bEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
-}
-
-void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (!OtherActor || OtherActor == this || OtherActor == OwnerChar)
-	{
-		return;
-	}
-
-	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
-	if (!DamagedCharacter)
-	{
-		return;
-	}
-	
-	float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(OwnerChar, DamagedCharacter);
-	FDamageEvent DamageEvent;
-	DamagedCharacter->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar);
-
-	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
