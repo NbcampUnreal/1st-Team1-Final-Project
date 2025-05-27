@@ -3,22 +3,48 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Weapon/Equipable/GS_WeaponMeleeBase.h"
+#include "Weapon/Equipable/GS_WeaponEquipable.h"
 #include "GS_WeaponSword.generated.h"
 
 /**
- * 검 클래스
+ * 
  */
 UCLASS()
-class GAS_API AGS_WeaponSword : public AGS_WeaponMeleeBase
+class GAS_API AGS_WeaponSword : public AGS_WeaponEquipable
 {
 	GENERATED_BODY()
 
 public:
 	AGS_WeaponSword();
 
+	UFUNCTION()
+	void EnableHit();
+	
+	UFUNCTION()
+	void DisableHit();
+
+	UFUNCTION(Server, Unreliable)
+	void Server_SetHitCollision(bool bEnable);
+	
+	UFUNCTION()
+	void OnHit(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
+	
 protected:
-	// 검 메시
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
-	USkeletalMeshComponent* SwordMesh;
+	virtual void BeginPlay() override;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Attack")
+	USkeletalMeshComponent* Mesh;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Attack")
+	class UBoxComponent* HitBox;
+
+	UPROPERTY()
+	class AGS_Character* OwnerChar;
 };

@@ -53,15 +53,6 @@ void AGS_Chan::LeftClickPressed_Implementation()
 	{
 		if (CurrentComboIndex == 0)
 		{
-			// 도끼 휘두르는 소리와 공격 목소리 재생
-			if (AxeSwingSound)
-			{
-				PlaySound(AxeSwingSound);
-			}
-			if (AttackVoiceSound)
-			{
-				PlaySound(AttackVoiceSound);
-			}
 			ServerAttackMontage();
 		}
 		else
