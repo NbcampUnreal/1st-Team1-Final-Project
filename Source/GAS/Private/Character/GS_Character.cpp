@@ -122,6 +122,11 @@ FGenericTeamId AGS_Character::GetGenericTeamId() const
 	return TeamId;
 }
 
+bool AGS_Character::IsEnemy(const AGS_Character* Other) const
+{
+	return Other && GetGenericTeamId()!= Other->GetGenericTeamId();
+}
+
 void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 {
 	 GetMesh()->SetSimulatePhysics(true);

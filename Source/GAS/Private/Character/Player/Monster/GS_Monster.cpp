@@ -14,6 +14,9 @@ AGS_Monster::AGS_Monster()
 	AIControllerClass = AGS_AIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+	Weapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponComp"));
+	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
+
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>("SelectionDecal");
 	SelectionDecal->SetupAttachment(RootComponent);
 	SelectionDecal->SetVisibility(false);
@@ -73,19 +76,6 @@ void AGS_Monster::Multicast_OnDeath_Implementation()
 {
 	OnMonsterDead.Broadcast(this);
 }
-
-//void AGS_Monster::SetSelected(bool bIsSelected)
-//{
-//	if (SelectionDecal)
-//	{
-//		SelectionDecal->SetVisibility(bIsSelected);
-//	}
-//
-//	if (bIsSelected && ClickSoundEvent)
-//	{
-//		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
-//	}
-//}
 
 void AGS_Monster::SetSelected(bool bIsSelected, bool bPlaySound)
 {

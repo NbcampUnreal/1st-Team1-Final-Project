@@ -54,13 +54,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	ECharacterType CharacterType;
 
-	ECharacterType GetCharacterType() const { return CharacterType; }
-
 	//getter
 	FORCEINLINE UGS_StatComp* GetStatComp() const { return StatComp; }
 	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }
 	FORCEINLINE UGS_DebuffComp* GetDebuffComp() const { return DebuffComp; }
-
+	FORCEINLINE ECharacterType GetCharacterType() const { return CharacterType; }
+	
 	//serverRPC
 	UFUNCTION(Server, Reliable)
 	void ServerRPCMeleeAttack(AGS_Character* InDamagedCharacter);
@@ -79,6 +78,9 @@ public:
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
 	void SetHPBarWidget(UGS_HPWidget* InHPBarWidget);
 	virtual FGenericTeamId GetGenericTeamId() const override;
+	
+	UFUNCTION(BlueprintPure, Category = "Team")
+	bool IsEnemy(const AGS_Character* Other) const;
 
 	//play skill montage
 	UFUNCTION(NetMulticast,Reliable)

@@ -1,12 +1,8 @@
 #include "Character/Player/GS_Player.h"
-
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Kismet/GameplayStatics.h"
-#include "AkAudioDevice.h"
 
 AGS_Player::AGS_Player()
 {

@@ -7,6 +7,7 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "AkGameplayStatics.h"
 #include "MonsterDataAsset.h"
+#include "Weapon/GS_Weapon.h"
 #include "GS_Monster.generated.h"
 
 class UGS_MonsterAnimInstance;
@@ -51,16 +52,26 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
 	bool bSelectionLocked = false;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<AGS_Weapon> DefaultWeaponClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
+	UChildActorComponent* Weapon;
+
 	UPROPERTY(BlueprintAssignable, Category="Dead")
 	FOnMonsterDead OnMonsterDead;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();
 
+	FORCEINLINE AGS_Weapon* GetCurrentWeapon() const
+	{
+		return Cast<AGS_Weapon>(Weapon ? Weapon->GetChildActor() : nullptr);
+	}
+
 	FORCEINLINE bool IsCommandable() const { return !bCommandLocked; }
 	FORCEINLINE bool IsSelectable() const { return !bSelectionLocked; }
 	
-	//void SetSelected(bool bIsSelected);
 	void SetSelected(bool bIsSelected, bool bPlaySound = true);
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
