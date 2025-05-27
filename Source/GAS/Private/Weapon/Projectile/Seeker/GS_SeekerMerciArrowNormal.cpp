@@ -83,7 +83,7 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 		break;
 	}
 
-	if (TargetType == ETargetType::Etc)
+	if (TargetType == ETargetType::Structure)
 	{
 		StickWithVisualOnly(SweepResult); // 화살 박힘
 	}

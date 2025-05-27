@@ -7,6 +7,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/Skill/Seeker/GS_FieldSkillActor.h"
 
 void AGS_SeekerMerciArrow::BeginPlay()
 {
@@ -107,9 +108,13 @@ ETargetType AGS_SeekerMerciArrow::DetermineTargetType(AActor* OtherActor) const
 	{
 		return ETargetType::Seeker;
 	}
+	else if (Cast<AGS_SeekerMerciArrow>(OtherActor) || Cast<AGS_FieldSkillActor>(OtherActor))
+	{
+		return ETargetType::Skill;
+	}
 	else
 	{
-		return ETargetType::Etc;
+		return ETargetType::Structure;
 	}
 }
 
@@ -117,7 +122,9 @@ void AGS_SeekerMerciArrow::HandleTargetTypeGeneric(ETargetType TargetType, const
 {
 	switch (TargetType)
 	{
-	case ETargetType::Etc:
+	case ETargetType::Skill:
+		break;
+	case ETargetType::Structure:
 		StickWithVisualOnly(SweepResult);
 		break;
 	case ETargetType::Seeker:
