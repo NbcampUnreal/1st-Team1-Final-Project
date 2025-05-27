@@ -197,5 +197,8 @@ private:
 	void GatherCommandableUnits(TArray<AGS_Monster*>& Out) const;
 	bool IsSelectable(AGS_Monster* Monster) const;
 	void UnlockTargets(const TArray<AGS_Monster*>& Units);
+
+	UFUNCTION()
+	void OnSelectedUnitDead(AGS_Monster* Monster);
 };
 

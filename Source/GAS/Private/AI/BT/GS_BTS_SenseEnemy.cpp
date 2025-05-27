@@ -24,6 +24,10 @@ void UGS_BTS_SenseEnemy::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	}
 
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
+	if (Blackboard->GetValueAsBool(AGS_AIController::TargetLockedKey))
+	{
+		return;
+	}
 
 	TArray<AActor*> Targets;
 	AIController->PerceptionComponent->GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), Targets);

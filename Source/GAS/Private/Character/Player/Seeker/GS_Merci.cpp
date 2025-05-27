@@ -70,12 +70,18 @@ void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowCl
 	SetDrawState(false);
 	Multicast_StopDrawMontage();
 	
-	// 활 놓는 사운드 재생ww
-	PlaySound(BowReleaseSound);
-	Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
+	if (bIsFullyDrawn)
+	{
+		// 활 놓는 사운드 재생
+		PlaySound(BowReleaseSound);
 
-	// 화살 발사 사운드 재생
-    PlaySound(ArrowShotSound);  // 부모 클래스의 PlaySound 함수 사용
+		Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
+
+		bIsFullyDrawn = false;  // 상태 초기화
+
+		// 화살 발사 사운드 재생
+		PlaySound(ArrowShotSound);  // 부모 클래스의 PlaySound 함수 사용
+	}
 
 	Client_StopZoom();
 	Client_SetWidgetVisibility(false);
@@ -328,15 +334,8 @@ void AGS_Merci::UpdateZoom(float Alpha)
 
 void AGS_Merci::OnDrawMontageEnded()
 {
+	bIsFullyDrawn = true;  // 활 완전히 당김 상태 설정
 	Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
-	//if (!bInterrupted)
-	//{
-	//	Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
-	//}
-	//else
-	//{
-	//	Client_SetWidgetVisibility(false); // 실패 시 숨기기
-	//}
 
 	// 서버로 전달
 	if (HasAuthority() == false)

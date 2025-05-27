@@ -4,6 +4,7 @@
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
+#include "Components/CapsuleComponent.h"
 #include "Weapon/Projectile/Guardian/GS_DrakharProjectile.h"
 
 #include "Engine/DamageEvents.h"
@@ -24,14 +25,16 @@ AGS_Drakhar::AGS_Drakhar()
 	ClientNextComboAttack = false;
 
 	//dash skill variables
-	DashPower = 1000.f;
+	DashPower = 1500.f;
 	DashInterpAlpha = 0.f;
-	DashDuration = 1.33f;
+	DashDuration = 1.f;
 
 	//earthquake skill variables
 	EarthquakePower = 3000.f;
 	EarthquakeRadius = 500.f;
-	
+
+	//Guardian State Setting
+	GuardianState = EGuardianState::None;
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -75,18 +78,27 @@ void AGS_Drakhar::LeftMouse()
 
 	if (IsLocallyControlled())
 	{
-		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
+		if (GuardianState != EGuardianState::Skill)
 		{
-			GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+			if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
+			{
+				GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+				ServerRPCStartSkill();
+			}
+			//normal combo attack
+			else
+			{
+				if (!ClientComboAttacking)
+				{
+					GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
+				}
+				ServerRPCComboAttack();
+			}
 		}
-		//normal combo attack
 		else
 		{
-			if (!ClientComboAttacking)
-			{
-				GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
-			}
-			ServerRPCComboAttack();
+			//?
+			//ServerRPCStopSkill();
 		}
 	}
 }
@@ -96,14 +108,23 @@ void AGS_Drakhar::RightMouse()
 	if (IsLocallyControlled())
 	{
 		//ultimate skill
-		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
-		{	
-			GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+		if (GuardianState != EGuardianState::Skill)
+		{
+			if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
+			{	
+				GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+				ServerRPCStartSkill();
+			}
+			//dash skill
+			else
+			{
+				GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+				ServerRPCStartSkill();
+			}
 		}
-		//dash skill
 		else
 		{
-			GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+			//ServerRPCStopSkill();
 		}
 	}
 }
@@ -135,8 +156,6 @@ void AGS_Drakhar::ServerRPCComboAttack_Implementation()
 	bIsComboAttacking = true;
 	bCanDoNextComboAttack = false;
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-
-	//UE_LOG(LogTemp, Warning, TEXT("what??"));
 }
 
 void AGS_Drakhar::MulticastRPCPlayComboAttackMontage_Implementation()
@@ -171,41 +190,28 @@ void AGS_Drakhar::ServerRPCComboAttackEnd_Implementation()
 		//인덱스 증가
 		CurrentComboAttackIndex++;
 		CurrentComboAttackIndex %= MaxComboAttackIndex;
-		//UE_LOG(LogTemp, Warning, TEXT("[can next] combo attack index %d"), CurrentComboAttackIndex);
-
-		//ENetRole LocalRole = GetLocalRole();
-		//UE_LOG(LogTemp, Warning, TEXT("combo attack input %s"), *UEnum::GetValueAsString(LocalRole));
 	}
 	//아니라면
 	else
 	{
 		//초기화
 		CurrentComboAttackIndex = 0;
-		//UE_LOG(LogTemp, Warning, TEXT("[can't next] combo attack index %d"), CurrentComboAttackIndex);
 	}
 
 	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("attack server end")), true, true, FLinearColor::Blue, 5.f);
 
 	//다음 몽타주 실행할 수 있게
 	ResetComboAttackVariables();
-	
-	// bIsComboAttacking = false;
-	// bCanDoNextComboAttack = false;
-	// GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
 void AGS_Drakhar::OnRep_IsComboAttacking()
 {
 	ClientComboAttacking = bIsComboAttacking;
-
-	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%d"), ClientComboAttacking), true, true, FLinearColor::Black, 5.f);
 }
 
 void AGS_Drakhar::OnRep_CurrentComboAttackIndex()
 {
 	ClientComboAttackIndex = CurrentComboAttackIndex;
-
-	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("client combo attacking index %d"), ClientComboAttackIndex), true, true, FLinearColor::Green, 5.f);
 }
 
 void AGS_Drakhar::OnRep_CanDoNextComboAttack()
@@ -226,9 +232,12 @@ void AGS_Drakhar::ResetComboAttackVariables()
 
 void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 {
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+
 	DashInterpAlpha += DeltaTime / DashDuration;
 
 	DashAttackCheck();
+	
 	if (DashInterpAlpha >= 1.f)
 	{
 		SetActorLocation(DashEndLocation);
@@ -236,11 +245,10 @@ void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 	else
 	{
 		const FVector NewLocation = FMath::Lerp(DashStartLocation, DashEndLocation, DashInterpAlpha);
-		SetActorLocation(NewLocation);
+		SetActorLocation(NewLocation, true);
 		DashStartLocation = NewLocation;
 	}
 }
-
 
 void AGS_Drakhar::ServerRPCEndDash_Implementation()
 {
@@ -257,6 +265,8 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	}
 
 	DamagedCharacters.Empty();
+	GuardianState = EGuardianState::None;
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 }
 
 void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
@@ -265,17 +275,19 @@ void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
 	DashStartLocation = GetActorLocation();
 	DashEndLocation = DashStartLocation + GetActorForwardVector() * DashPower;
 }
+
 void AGS_Drakhar::DashAttackCheck()
 {
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	TArray<FHitResult> OutHitResults;	
 	const FVector Start = GetActorLocation();
 	const FVector End = Start + GetActorForwardVector() * 100.f;
 	FCollisionQueryParams Params(NAME_None, false, this);
 
-	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Camera, FCollisionShape::MakeCapsule(100.f, 200.f), Params);
-
+	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity,
+		ECC_Camera, FCollisionShape::MakeCapsule(100.f, 200.f), Params);
+	
 	if (bIsHitDetected)
 	{
 		for (auto const& OutHitResult : OutHitResults)
@@ -284,15 +296,6 @@ void AGS_Drakhar::DashAttackCheck()
 			if (IsValid(DamagedCharacter))
 			{
 				DamagedCharacters.Add(DamagedCharacter);
-
-				DrawDebugPoint(
-					GetWorld(),
-					OutHitResult.ImpactPoint,
-					15.f,
-					FColor::Yellow,
-					false,
-					1.f
-				);
 			}
 		}		
 	}
@@ -317,15 +320,6 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			if (IsValid(DamagedCharacter))
 			{
 				EarthquakeDamagedCharacters.Add(DamagedCharacter);
-
-				DrawDebugPoint(
-					GetWorld(),
-					OutHitResult.ImpactPoint,
-					15.f,
-					FColor::Yellow,
-					false,
-					1.f
-				);
 			}
 		}
 		for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)

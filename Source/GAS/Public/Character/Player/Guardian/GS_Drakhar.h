@@ -41,7 +41,7 @@ public:
 	virtual void LeftMouse() override;
 	
 	virtual void RightMouse() override;
-
+	
 	//[combo attack]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCComboAttack();
@@ -89,7 +89,7 @@ public:
 	//[DraconicFury Skill]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCSpawnDraconicFury();
-
+	
 private:
 	//[combo attack]
 	int32 MaxComboAttackIndex;
@@ -100,7 +100,6 @@ private:
 	//[dash skill]
 	UPROPERTY()
 	TSet<AGS_Character*> DamagedCharacters;
-
 	FVector DashStartLocation;
 	FVector DashEndLocation;
 	float DashPower;

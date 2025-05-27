@@ -60,6 +60,8 @@ public:
 
 	void OnDrawMontageEnded();
 
+	bool GetIsFullyDrawn() { return bIsFullyDrawn; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -111,4 +113,6 @@ private:
 
 	UFUNCTION(Client, Reliable)
 	void Client_PlaySound(UAkComponent* SoundComp);
+
+	bool bIsFullyDrawn = false;
 };
