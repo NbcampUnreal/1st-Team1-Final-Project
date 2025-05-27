@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GS_EnumUtils.h"
+#include "Character/Component/GS_StatRow.h"
 #include "GS_ArcaneBoardTypes.generated.h"
 
 UENUM(BlueprintType)
@@ -27,27 +28,6 @@ enum class EPreviewState : uint8
 	None		UMETA(DisplayName = "None"),
 	Valid		UMETA(DisplayName = "Valid"),
 	Invalid		UMETA(DisplayName = "Invalid")
-};
-
-USTRUCT(Atomic, BlueprintType)
-struct FCharacterStats
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float MaxHP = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float ATK = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float DEF = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float AGL = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float ATS = 0.0f;
 };
 
 USTRUCT(Atomic, BlueprintType)

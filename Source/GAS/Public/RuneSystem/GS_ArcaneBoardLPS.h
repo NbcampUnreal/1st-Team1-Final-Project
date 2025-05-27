@@ -8,6 +8,7 @@
 #include "GS_ArcaneBoardLPS.generated.h"
 
 class UGS_ArcaneBoardManager;
+class UGS_ArcaneBoardWidget;
 
 /**
  * 룬 시스템을 관리하는 로컬 플레이어 서브 시스템
@@ -25,7 +26,7 @@ public:
     UGS_ArcaneBoardManager* BoardManager;
 
     UPROPERTY()
-    FCharacterStats RuneSystemStats;
+    FGS_StatRow RuneSystemStats;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void ShowArcaneBoardUI();
@@ -43,7 +44,7 @@ public:
     void ApplyBoardChanges();
 
     UFUNCTION()
-    void OnBoardStatsChanged(const FCharacterStats& NewStats);
+    void OnBoardStatsChanged(const FGS_StatRow& NewStats);
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void SaveBoardConfig();
@@ -56,10 +57,10 @@ public:
 
 private:
     UPROPERTY()
-    UUserWidget* CurrentBoardWidget;
+    UGS_ArcaneBoardWidget* CurrentBoardWidget;
 
     UPROPERTY()
-    TSubclassOf<UUserWidget> ArcaneBoardWidgetClass;
+    TSubclassOf<UGS_ArcaneBoardWidget> ArcaneBoardWidgetClass;
 
     void RequestServerStatsUpdate();
 };

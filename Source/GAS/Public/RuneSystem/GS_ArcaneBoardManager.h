@@ -9,7 +9,7 @@
 #include "GS_ArcaneBoardManager.generated.h"
 
 // 스탯 변경 델리게이트 선언
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatsChangedDelegate, const FCharacterStats&, NewStats);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatsChangedDelegate, const FGS_StatRow&, NewStats);
 
 /**
  * 룬 시스템의 실질적인 로직을 처리하는 매니저
@@ -30,10 +30,10 @@ public:
 	TArray<FPlacedRuneInfo> PlacedRunes;
 
 	UPROPERTY()
-	FCharacterStats AppliedStatEffects;
+	FGS_StatRow AppliedStatEffects;
 
 	UPROPERTY()
-	FCharacterStats CurrStatEffects;
+	FGS_StatRow CurrStatEffects;
 
 	UPROPERTY()
 	UDataTable* RuneTable;
@@ -62,7 +62,7 @@ public:
 	bool RemoveRune(uint8 RuneID);
 
 	UFUNCTION(BlueprintCallable)
-	FCharacterStats CalculateStatEffects();
+	FGS_StatRow CalculateStatEffects();
 
 	UFUNCTION(BlueprintCallable)
 	void ApplyChanges();
@@ -71,7 +71,7 @@ public:
 	void ResetAllRune();
 
 	UFUNCTION(BlueprintCallable)
-	void LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes, const FCharacterStats& Stats);
+	void LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes, const FGS_StatRow& Stats);
 
 	UFUNCTION(BlueprintCallable)
 	bool GetRuneData(uint8 RuneID, FRuneTableRow& OutData);
