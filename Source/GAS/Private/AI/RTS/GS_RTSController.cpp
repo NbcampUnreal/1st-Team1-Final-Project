@@ -202,7 +202,7 @@ void AGS_RTSController::OnLeftMousePressed()
 	
 	TArray<AGS_Monster*> Units;
 	GatherCommandableUnits(Units);
-	UnlockTargets(Units);
+	//UnlockTargets(Units);
 
 	// 명령 모드에 따라 
 	switch (CurrentCommand)
@@ -276,7 +276,7 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	// 명령 가능한 유닛들만 
 	TArray<AGS_Monster*> Units;
 	GatherCommandableUnits(Units);
-	UnlockTargets(Units);
+	//UnlockTargets(Units);
 	Server_RTSMove(Units, GroundHit.Location);
 }
 
@@ -592,7 +592,7 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
-			AIController->UnlockTarget();
+			//AIController->UnlockTarget();
 			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
@@ -620,7 +620,7 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
-			AIController->UnlockTarget();
+			//AIController->UnlockTarget();
 			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
@@ -648,7 +648,7 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
-			AIController->LockTarget(TargetActor);
+			//AIController->LockTarget(TargetActor);
 			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
@@ -676,15 +676,12 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
-			AIController->UnlockTarget();
 			AIController->StopMovement();
 			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
-				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Stop));
-				BlackboardComp->ClearValue(AGS_AIController::MoveLocationKey);
-				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::None));
 
 				// 첫 번째 유닛만 정지 소리 재생
 				if (i == 0 && Unit->MoveSoundEvent)
@@ -709,8 +706,6 @@ void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Skill));
-				BlackboardComp->SetValueAsVector(AGS_AIController::MoveLocationKey, TargetLoc);
-				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
 
 				// 첫 번째 유닛만 스킬 소리 재생
 				if (i == 0 && Unit->MoveSoundEvent)
