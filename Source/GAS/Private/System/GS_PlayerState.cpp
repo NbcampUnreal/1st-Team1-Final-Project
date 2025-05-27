@@ -9,6 +9,7 @@ AGS_PlayerState::AGS_PlayerState()
     : CurrentPlayerRole(EPlayerRole::PR_None)
     , CurrentSeekerJob(ESeekerJob::SJ_Job1)
     , CurrentGuardianJob(EGuardianJob::GJ_Job1)
+    , CurrentGameResult(EGameResult::GR_InProgress)
     , bIsReady(false)
 	, CurrentHealth(200.f)
 	, bIsAlive(true)
@@ -23,6 +24,7 @@ void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AGS_PlayerState, CurrentPlayerRole);
 	DOREPLIFETIME(AGS_PlayerState, CurrentSeekerJob);
 	DOREPLIFETIME(AGS_PlayerState, CurrentGuardianJob);
+    DOREPLIFETIME(AGS_PlayerState, CurrentGameResult);
     DOREPLIFETIME(AGS_PlayerState, bIsReady);
     DOREPLIFETIME(AGS_PlayerState, bIsAlive);
 }
@@ -46,6 +48,7 @@ void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
         NewPS->CurrentPlayerRole = CurrentPlayerRole;
         NewPS->CurrentSeekerJob = CurrentSeekerJob;
         NewPS->CurrentGuardianJob = CurrentGuardianJob;
+        NewPS->CurrentGameResult = CurrentGameResult;
         NewPS->CurrentHealth = CurrentHealth;
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
@@ -63,6 +66,7 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
         NewPS->CurrentPlayerRole = CurrentPlayerRole;
         NewPS->CurrentSeekerJob = CurrentSeekerJob;
         NewPS->CurrentGuardianJob = CurrentGuardianJob;
+        NewPS->CurrentGameResult = CurrentGameResult;
         NewPS->CurrentHealth = CurrentHealth;
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;

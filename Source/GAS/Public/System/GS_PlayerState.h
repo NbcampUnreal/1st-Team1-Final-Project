@@ -8,7 +8,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoleChangedSignature, EPlayerRole, NewRole);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnJobChangedSignature, EPlayerRole, CurrentRole);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReadyStatusChangedSignature, bool, bNewReadyStatus);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerAliveStatusChangedSignature, AGS_PlayerState*, PlayerState, bool, bIsAlive);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerAliveStatusChangedSignature, AGS_PlayerState*, bool);
 
 class UGS_StatComp;
 
@@ -64,25 +64,28 @@ public:
     FOnJobChangedSignature OnJobChangedDelegate;
     UPROPERTY(BlueprintAssignable, Category = "Lobby|Events")
     FOnReadyStatusChangedSignature OnReadyStatusChangedDelegate;
-    UPROPERTY(BlueprintAssignable, Category = "InGame|State")
+
     FOnPlayerAliveStatusChangedSignature OnPlayerAliveStatusChangedDelegate;
 
     //상태
     float CurrentHealth;
     UPROPERTY(ReplicatedUsing = OnRep_IsAlive)
     bool bIsAlive = true;
-    UFUNCTION()
-    void OnRep_IsAlive();
-
-    void SetIsAlive(bool bNewIsAlive);
-
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Game Result")
+    EGameResult CurrentGameResult;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     TObjectPtr<UGS_StatComp> BoundStatComp;
+
+    UFUNCTION()
+    void OnRep_IsAlive();
+    void SetIsAlive(bool bNewIsAlive);
     void SetupStatCompBinding(UGS_StatComp* InStatComp);
+
 protected:
+    FTimerHandle BindStatCompTimerHandle;
+
     UFUNCTION()
     void HandleCurrentHPChanged(UGS_StatComp* StatComp);
-    FTimerHandle BindStatCompTimerHandle;
     void TryBindToStatComp();
 
 };

@@ -2,9 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "System/GS_PlayerRole.h"
 #include "GS_InGameGM.generated.h"
 
-
+class AGS_PlayerState;
 
 UCLASS()
 class GAS_API AGS_InGameGM : public AGameMode
@@ -16,6 +17,10 @@ public:
 	virtual TSubclassOf<APlayerController> GetPlayerControllerClassToSpawnForSeamlessTravel(APlayerController* PreviousPC) override;
 	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
+
+	virtual void StartPlay() override;
+
+	virtual void Logout(AController* Exiting) override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player Controller Classes")
 	TSubclassOf<APlayerController> SeekerControllerClass;
@@ -41,6 +46,19 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "HUD Classes")
 	TSubclassOf<AHUD> RTSHUDClass;
 
-	//void HandleControllerChangeTriggerEvent();
+public:
+	void HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, bool bIsAlive);
+
+	void CheckAllPlayersDead();
+
+	void BindToPlayerState(APlayerController* PlayerController);
+
+	void OnTimerEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void EndGame(EGameResult Result);
+
+private:
+	void SetGameResultOnAllPlayers(EGameResult Result);
 	
 };
