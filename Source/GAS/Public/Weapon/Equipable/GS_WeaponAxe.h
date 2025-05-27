@@ -3,29 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GS_WeaponEquipable.h"
+#include "Weapon/Equipable/GS_WeaponMeleeBase.h"
 #include "GS_WeaponAxe.generated.h"
 
+/**
+ * 도끼 클래스
+ */
 UCLASS()
-class GAS_API AGS_WeaponAxe : public AGS_WeaponEquipable
+class GAS_API AGS_WeaponAxe : public AGS_WeaponMeleeBase
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	AGS_WeaponAxe();
 
-	virtual void Tick(float DeltaTime) override;
-
-	UPROPERTY(VisibleAnywhere, Category = "Mesh")
-	USkeletalMeshComponent* AxeMeshComponent;
-
-	// 히트 사운드
-	//UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	//UAkAudioEvent* HitSound;
-
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
+	// 도끼 메시
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
+	USkeletalMeshComponent* AxeMesh;
 };
