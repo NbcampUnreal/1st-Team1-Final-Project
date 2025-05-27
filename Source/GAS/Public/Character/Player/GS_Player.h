@@ -93,6 +93,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	UAkComponent* AkComponent;
 
+	// 사운드 재생 함수들
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlaySound(UAkAudioEvent* SoundEvent);
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPostEventCallback& Callback);
+
 	// 오디오 관련 함수들
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void SetupLocalAudioListener();

@@ -9,8 +9,8 @@ UGS_ArcaneBoardManager::UGS_ArcaneBoardManager()
 	//기본 초기화
 	CurrClass = ECharacterClass::Ares;
 	PlacedRunes.Empty();
-	AppliedStatEffects = FCharacterStats();
-	CurrStatEffects = FCharacterStats();
+	AppliedStatEffects = FGS_StatRow();
+	CurrStatEffects = FGS_StatRow();
 	CurrGridLayout = nullptr;
 
 	//데이터 테이블은 ArcaneBoardLPS에서 설정
@@ -79,10 +79,8 @@ bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
 
 	bHasUnsavedChanges = false;
 
-	CurrStatEffects = FCharacterStats();
-	AppliedStatEffects = FCharacterStats();
-
-	//후에 저장된 룬 배치 로드해야 함
+	AppliedStatEffects = CalculateStatEffects();
+	CurrStatEffects = AppliedStatEffects;
 
 	return true;
 }
@@ -178,37 +176,39 @@ bool UGS_ArcaneBoardManager::RemoveRune(uint8 RuneID)
 	return true;
 }
 
-FCharacterStats UGS_ArcaneBoardManager::CalculateStatEffects()
+FGS_StatRow UGS_ArcaneBoardManager::CalculateStatEffects()
 {
-	FCharacterStats Result;
+	FGS_StatRow Result;
 
 	for (const FPlacedRuneInfo& Rune : PlacedRunes)
 	{
 		FRuneTableRow RuneData;
 		if (GetRuneData(Rune.RuneID, RuneData))
 		{
-			if (RuneData.FStatEffect.StatName == FName("MaxHP"))
+			if (RuneData.StatEffect.StatName == FName("HP"))
 			{
-				Result.MaxHP += RuneData.FStatEffect.Value;
+				Result.HP += RuneData.StatEffect.Value;
 			}
-			else if (RuneData.FStatEffect.StatName == FName("ATK"))
+			else if (RuneData.StatEffect.StatName == FName("ATK"))
 			{
-				Result.ATK += RuneData.FStatEffect.Value;
+				Result.ATK += RuneData.StatEffect.Value;
 			}
-			else if (RuneData.FStatEffect.StatName == FName("DEF"))
+			else if (RuneData.StatEffect.StatName == FName("DEF"))
 			{
-				Result.DEF += RuneData.FStatEffect.Value;
+				Result.DEF += RuneData.StatEffect.Value;
 			}
-			else if (RuneData.FStatEffect.StatName == FName("AGL"))
+			else if (RuneData.StatEffect.StatName == FName("AGL"))
 			{
-				Result.AGL += RuneData.FStatEffect.Value;
+				Result.AGL += RuneData.StatEffect.Value;
 			}
-			else if (RuneData.FStatEffect.StatName == FName("ATS"))
+			else if (RuneData.StatEffect.StatName == FName("ATS"))
 			{
-				Result.ATS += RuneData.FStatEffect.Value;
+				Result.ATS += RuneData.StatEffect.Value;
 			}
 		}
 	}
+
+	// 특수 셀 연결로직
 
 	return Result;
 }
@@ -221,7 +221,7 @@ void UGS_ArcaneBoardManager::ResetAllRune()
 {
 }
 
-void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes, const FCharacterStats& Stats)
+void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes, const FGS_StatRow& Stats)
 {
 }
 

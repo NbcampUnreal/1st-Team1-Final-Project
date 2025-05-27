@@ -14,6 +14,11 @@ void UGS_CharacterAnimInstance::SetCharacterMovement(UCharacterMovementComponent
 	OwnerCharacterMovement = CharacterMovement;
 }
 
+void UGS_CharacterAnimInstance::NativeInitializeAnimation()
+{
+	Super::NativeInitializeAnimation();
+}
+
 void UGS_CharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);

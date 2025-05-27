@@ -6,6 +6,7 @@
 #include "Components/UniformGridPanel.h"
 #include "UI/RuneSystem/GS_RuneGridCellWidget.h"
 #include "UI/RuneSystem/GS_RuneInventoryWidget.h"
+#include "UI/RuneSystem/GS_StatPanelWidget.h"
 #include "UI/RuneSystem/GS_DragVisualWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 
@@ -54,9 +55,34 @@ void UGS_ArcaneBoardWidget::NativeConstruct()
 		BoardManager->InitializeForTesting();
 	}
 
-	GenerateGridLayout();
+	BindManagerEvents();
 
+	GenerateGridLayout();
 	InitInventory();
+	InitStatPanel();
+}
+
+void UGS_ArcaneBoardWidget::NativeDestruct()
+{
+	UnbindManagerEvents();
+
+	Super::NativeDestruct();
+}
+
+void UGS_ArcaneBoardWidget::BindManagerEvents()
+{
+	if (IsValid(BoardManager))
+	{
+		BoardManager->OnStatsChanged.AddDynamic(this, &UGS_ArcaneBoardWidget::OnStatsChanged);
+	}
+}
+
+void UGS_ArcaneBoardWidget::UnbindManagerEvents()
+{
+	if (IsValid(BoardManager))
+	{
+		BoardManager->OnStatsChanged.RemoveDynamic(this, &UGS_ArcaneBoardWidget::OnStatsChanged);
+	}
 }
 
 FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -110,15 +136,17 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseButtonDown(const FGeometry& InGeometr
 
 		if (CellUnderMouse)
 		{
+			uint8 RuneID = CellUnderMouse->GetPlacedRuneID();
+
 			//배치 로직
 			if(bIsInSelectionMode)
 			{
 				EndRuneSelection(true);
 				return FReply::Handled();
 			}
-			else
+			else if(RuneID > 0)
 			{
-				StartRuneReposition(CellUnderMouse->GetPlacedRuneID());
+				StartRuneReposition(RuneID);
 				return FReply::Handled();
 			}
 		}
@@ -168,8 +196,25 @@ void UGS_ArcaneBoardWidget::InitInventory()
 	}
 }
 
-void UGS_ArcaneBoardWidget::UpdateStatsDisplay(const FCharacterStats& Stats)
+void UGS_ArcaneBoardWidget::InitStatPanel()
 {
+	if (IsValid(StatPanel) && IsValid(BoardManager))
+	{
+		StatPanel->InitStatList(BoardManager);
+
+		OnStatsChanged(BoardManager->CurrStatEffects);
+	}
+}
+
+void UGS_ArcaneBoardWidget::OnStatsChanged(const FGS_StatRow& NewStats)
+{
+	if (IsValid(StatPanel))
+	{
+		StatPanel->UpdateStats(NewStats);
+
+		UE_LOG(LogTemp, Warning, TEXT("스탯 UI 업데이트 완료 - HP+%.1f, ATK+%.1f, DEF+%.1f, AGL+%.1f, ATS+%.1f"),
+			NewStats.HP, NewStats.ATK, NewStats.DEF, NewStats.AGL, NewStats.ATS);
+	}
 }
 
 void UGS_ArcaneBoardWidget::UpdateGridPreview(uint8 RuneID, const FIntPoint& GridPos)

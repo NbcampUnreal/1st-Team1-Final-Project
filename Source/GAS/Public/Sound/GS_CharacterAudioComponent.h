@@ -22,14 +22,14 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|Character")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Character")
 	class UAkAudioEvent* SkillEvent;
 
 	int32 SkillEventID;
 
-	UFUNCTION(BlueprintCallable, Category = "Audio|Character")
+	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
 	void PlaySkill();
-	UFUNCTION(BlueprintCallable, Category = "Audio|Character")
+	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
 	void StopSkill();
 
 		

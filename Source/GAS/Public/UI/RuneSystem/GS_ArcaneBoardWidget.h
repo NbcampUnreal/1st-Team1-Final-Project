@@ -26,6 +26,7 @@ public:
 	UGS_ArcaneBoardWidget(const FObjectInitializer& ObjectInitializer);
 
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 	//마우스 이벤트
 	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -39,7 +40,10 @@ public:
 	void InitInventory();
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void UpdateStatsDisplay(const FCharacterStats& Stats);
+	void InitStatPanel();
+
+	UFUNCTION()
+	void OnStatsChanged(const FGS_StatRow& NewStats);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void UpdateGridPreview(uint8 RuneID, const FIntPoint& GridPos);
@@ -107,4 +111,7 @@ private:
 	float DragVisualOffset;
 
 	void UpdateGridVisuals();
+
+	void BindManagerEvents();
+	void UnbindManagerEvents();
 };
