@@ -4,6 +4,7 @@
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
+#include "Components/CapsuleComponent.h"
 #include "Weapon/Projectile/Guardian/GS_DrakharProjectile.h"
 
 #include "Engine/DamageEvents.h"
@@ -24,9 +25,9 @@ AGS_Drakhar::AGS_Drakhar()
 	ClientNextComboAttack = false;
 
 	//dash skill variables
-	DashPower = 1000.f;
+	DashPower = 1500.f;
 	DashInterpAlpha = 0.f;
-	DashDuration = 1.33f;
+	DashDuration = 1.f;
 
 	//earthquake skill variables
 	EarthquakePower = 3000.f;
@@ -97,7 +98,7 @@ void AGS_Drakhar::LeftMouse()
 		else
 		{
 			//?
-			ServerRPCStopSkill();
+			//ServerRPCStopSkill();
 		}
 	}
 }
@@ -123,7 +124,7 @@ void AGS_Drakhar::RightMouse()
 		}
 		else
 		{
-			ServerRPCStopSkill();
+			//ServerRPCStopSkill();
 		}
 	}
 }
@@ -231,9 +232,12 @@ void AGS_Drakhar::ResetComboAttackVariables()
 
 void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 {
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+
 	DashInterpAlpha += DeltaTime / DashDuration;
 
 	DashAttackCheck();
+	
 	if (DashInterpAlpha >= 1.f)
 	{
 		SetActorLocation(DashEndLocation);
@@ -241,7 +245,7 @@ void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 	else
 	{
 		const FVector NewLocation = FMath::Lerp(DashStartLocation, DashEndLocation, DashInterpAlpha);
-		SetActorLocation(NewLocation);
+		SetActorLocation(NewLocation, true);
 		DashStartLocation = NewLocation;
 	}
 }
@@ -262,6 +266,7 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 
 	DamagedCharacters.Empty();
 	GuardianState = EGuardianState::None;
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 }
 
 void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
@@ -273,15 +278,16 @@ void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
 
 void AGS_Drakhar::DashAttackCheck()
 {
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	TArray<FHitResult> OutHitResults;	
 	const FVector Start = GetActorLocation();
 	const FVector End = Start + GetActorForwardVector() * 100.f;
 	FCollisionQueryParams Params(NAME_None, false, this);
 
-	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Camera, FCollisionShape::MakeCapsule(100.f, 200.f), Params);
-
+	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity,
+		ECC_Camera, FCollisionShape::MakeCapsule(100.f, 200.f), Params);
+	
 	if (bIsHitDetected)
 	{
 		for (auto const& OutHitResult : OutHitResults)

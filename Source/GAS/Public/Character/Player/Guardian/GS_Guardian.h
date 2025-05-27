@@ -13,6 +13,7 @@ enum class EGuardianState : uint8
 	Ready,
 	Skill,
 	ComboAttack,
+	invincible
 };
 
 UCLASS()

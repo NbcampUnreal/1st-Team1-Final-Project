@@ -12,8 +12,6 @@
 UGS_DrakharWingRush::UGS_DrakharWingRush()
 {
 	CurrentSkillType = ESkillSlot::Moving;
-	DashRemainTime = 1.2f; //not yet
-	DashPower = 1000.f;
 }
 
 void UGS_DrakharWingRush::ActiveSkill()
@@ -23,13 +21,13 @@ void UGS_DrakharWingRush::ActiveSkill()
 	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter);
 	if (IsValid(Drakhar))
 	{
-		Drakhar->ResetComboAttackVariables();
+			Drakhar->ResetComboAttackVariables();
 	}
 	
 	ExecuteSkillEffect();
 	
-	DashStartLocation = OwnerCharacter->GetActorLocation();
-	DashEndLocation = DashStartLocation + OwnerCharacter->GetActorForwardVector() * DashPower;
+	// DashStartLocation = OwnerCharacter->GetActorLocation();
+	// DashEndLocation = DashStartLocation + OwnerCharacter->GetActorForwardVector() * DashPower;
 }
 
 void UGS_DrakharWingRush::ExecuteSkillEffect()

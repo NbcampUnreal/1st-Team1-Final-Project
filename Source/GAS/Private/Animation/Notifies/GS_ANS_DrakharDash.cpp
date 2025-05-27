@@ -9,7 +9,6 @@ void UGS_ANS_DrakharDash::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeq
 	{
 		if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner))
 		{
-			Drakhar->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			Drakhar->ServerRPCCalculateDashLocation();
 		}
 	}
