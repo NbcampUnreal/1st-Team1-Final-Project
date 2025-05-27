@@ -7,6 +7,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/Skill/Seeker/GS_FieldSkillActor.h"
 
 void AGS_SeekerMerciArrow::BeginPlay()
 {
@@ -14,7 +15,24 @@ void AGS_SeekerMerciArrow::BeginPlay()
 	if (HasAuthority())
 	{
 		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AGS_SeekerMerciArrow::OnBeginOverlap);
+		// 화살 스폰 직후
+		this->SetActorEnableCollision(false);
+
+		// N초 뒤에 다시 Collision 활성화
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+			{
+				this->SetActorEnableCollision(true);
+			}, 0.05f, false);
+
+		AActor* IgnoredActor = GetInstigator(); // 또는 GetInstigator();
+		if (IgnoredActor)
+		{
+			CollisionComponent->IgnoreActorWhenMoving(IgnoredActor, true);
+		}
 	}
+
+	
 }
 
 void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
@@ -90,9 +108,13 @@ ETargetType AGS_SeekerMerciArrow::DetermineTargetType(AActor* OtherActor) const
 	{
 		return ETargetType::Seeker;
 	}
+	else if (Cast<AGS_SeekerMerciArrow>(OtherActor) || Cast<AGS_FieldSkillActor>(OtherActor))
+	{
+		return ETargetType::Skill;
+	}
 	else
 	{
-		return ETargetType::Etc;
+		return ETargetType::Structure;
 	}
 }
 
@@ -100,7 +122,9 @@ void AGS_SeekerMerciArrow::HandleTargetTypeGeneric(ETargetType TargetType, const
 {
 	switch (TargetType)
 	{
-	case ETargetType::Etc:
+	case ETargetType::Skill:
+		break;
+	case ETargetType::Structure:
 		StickWithVisualOnly(SweepResult);
 		break;
 	case ETargetType::Seeker:
