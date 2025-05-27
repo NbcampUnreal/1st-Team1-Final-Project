@@ -20,6 +20,10 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Mesh")
 	USkeletalMeshComponent* ShieldMeshComponent;
 
+	// 히트 사운드
+	//UPROPERTY(EditDefaultsOnly, Category = "Sound")
+    //UAkAudioEvent* BlockSound;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void PostInitializeComponents() override;

@@ -189,3 +189,25 @@ bool AGS_Player::IsLocalPlayer() const
 	}
 	return false;
 }
+
+void AGS_Player::PlaySound(UAkAudioEvent* SoundEvent)
+{
+	if (!AkComponent || !SoundEvent)
+	{
+		UE_LOG(LogAudio, Warning, TEXT("AkComponent or SoundEvent is null in PlaySound"));
+		return;
+	}
+
+	AkComponent->PostAkEvent(SoundEvent);
+}
+
+void AGS_Player::PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPostEventCallback& Callback)
+{
+	if (!AkComponent || !SoundEvent)
+	{
+		UE_LOG(LogAudio, Warning, TEXT("AkComponent or SoundEvent is null in PlaySoundWithCallback"));
+		return;
+	}
+
+	AkComponent->PostAkEvent(SoundEvent, 0, Callback);
+}

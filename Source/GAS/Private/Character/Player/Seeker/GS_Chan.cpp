@@ -60,7 +60,6 @@ void AGS_Chan::LeftClickPressed_Implementation()
 			bNextCombo = true;
 			CanAcceptComboInput = false;
 		}
-		
 	}
 }
 
@@ -109,6 +108,16 @@ void AGS_Chan::MulticastPlayComboSection_Implementation()
 		AnimInstance->Montage_Play(ComboAnimMontage);
 		AnimInstance->IsPlayingComboMontage = true;
 		AnimInstance->Montage_JumpToSection(SectionName, ComboAnimMontage);
+
+		// 콤보 공격 사운드와 공격 목소리 재생
+		if (AxeSwingSound)
+		{
+			PlaySound(AxeSwingSound);
+		}
+		if (AttackVoiceSound)
+		{
+			PlaySound(AttackVoiceSound);
+		}
 	}
 	CanAcceptComboInput = false;
 	bNextCombo = false;

@@ -487,7 +487,7 @@
 										<Action Name="" ID="{B5C4219E-E896-4CF4-80AC-89C30A4701FF}" ShortID="668745111">
 											<ReferenceList>
 												<Reference Name="Target">
-													<ObjectRef Name="Voice_Chan_Hit" ID="{89809553-D4E8-46B1-9043-2928ED76CE30}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+													<ObjectRef Name="SFX_Chan_Hit" ID="{90838E57-C7FE-4B16-B1D5-1CDC25F6BF4D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>

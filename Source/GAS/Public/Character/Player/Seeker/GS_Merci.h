@@ -73,23 +73,18 @@ protected:
 	UFUNCTION()
 	void UpdateZoom(float Alpha);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Audio")
-	class UAkAudioEvent* ArrowShotSound_C;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
-	UAkComponent* ShotSoundComp;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
-	UAkComponent* PullSoundComp;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
-	UAkComponent* ReleaseSoundComp;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* BowPullEvent;
+    class UAkAudioEvent* ArrowShotSound_C;
 
-	/*UFUNCTION()
-	void PlayBowPullSound(UAkComponent* AkComp);*/
+	// 활 관련 사운드
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
+	UAkAudioEvent* BowPullSound; // 활 당길 때(클릭)
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
+	UAkAudioEvent* BowReleaseSound; // 활 놓을 때(릴리즈)
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
+	UAkAudioEvent* ArrowShotSound; // 활 놓을 때(릴리즈)
 
 private:
 	bool bWidgetVisibility = false;

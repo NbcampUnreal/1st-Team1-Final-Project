@@ -27,19 +27,7 @@ AGS_Merci::AGS_Merci()
 	Quiver->SetupAttachment(GetMesh(), TEXT("QuiverSocket"));
 	Quiver->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Quiver->SetSimulatePhysics(false);
-
-	ShotSoundComp = CreateDefaultSubobject<UAkComponent>(TEXT("Shot Sound"));
-	ShotSoundComp->SetupAttachment(GetMesh());
-	ShotSoundComp->bAutoActivate = false;
-
-	ReleaseSoundComp = CreateDefaultSubobject<UAkComponent>(TEXT("Release Sound"));
-	ReleaseSoundComp->SetupAttachment(GetMesh());
-	ReleaseSoundComp->bAutoActivate = false;
-
-	PullSoundComp = CreateDefaultSubobject<UAkComponent>(TEXT("Pull Sound"));
-	PullSoundComp->SetupAttachment(GetMesh());
-	PullSoundComp->bAutoActivate = false;
-
+	
 	CharacterType = ECharacterType::Merci;
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_MerciSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 }
@@ -59,11 +47,9 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 		Multicast_PlayDrawMontage(DrawMontage);
 		//PlayDrawMontage(DrawMontage);
 		SetDrawState(true); // 상태 전환
-
-		// 사운드 재생
-		// 사운드 재생
-		/*PlayBowPullSound(PullSoundComp);*/
-
+		
+		// 활 당기는 사운드 재생
+		PlaySound(BowPullSound);
 		Client_StartZoom(); // 줌인
 	}
 	else
@@ -82,27 +68,16 @@ void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowCl
 
 	SetAimState(false);
 	SetDrawState(false);
-
 	Multicast_StopDrawMontage();
-
-	// 사운드 재생
-
-	if (ReleaseSoundComp)
-	{
-		ReleaseSoundComp->PostAssociatedAkEvent(0, FOnAkPostEventCallback());
-		UE_LOG(LogTemp, Warning, TEXT("ReleaseSound"));
-	}
-
+	
+	// 활 놓는 사운드 재생
+	PlaySound(BowReleaseSound);
 	Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 
-	if (ShotSoundComp)
-	{
-		ShotSoundComp->PostAssociatedAkEvent(0, FOnAkPostEventCallback());
-		UE_LOG(LogTemp, Warning, TEXT("ShotSound"));
-	}
+	// 화살 발사 사운드 재생
+    PlaySound(ArrowShotSound);  // 부모 클래스의 PlaySound 함수 사용
 
 	Client_StopZoom();
-
 	Client_SetWidgetVisibility(false);
 }
 

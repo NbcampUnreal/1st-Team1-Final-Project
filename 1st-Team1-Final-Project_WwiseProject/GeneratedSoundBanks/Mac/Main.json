@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{11E7AA7D-8FA8-B583-A98B-9264E06F6FE1}",
+    "Hash": "{E8BFA0BE-866E-E21D-E67D-5917889FAB38}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -101,7 +101,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Jump_4_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "A8/{A863697C-C193-CCA8-D110-19E4DF8A89A3}.wem"
+      "CachePath": "CF/{CF893FFF-1F00-BC29-3226-B3FE95C0B970}.wem"
      },
      {
       "Id": "120977185",
@@ -157,7 +157,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Groaning_Sequence_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "01/{01986860-6829-ABF3-D995-A88513BAEBFB}.wem"
+      "CachePath": "87/{87A20826-00EF-F4F9-2444-BE0B31ED900A}.wem"
      },
      {
       "Id": "177130386",
@@ -245,7 +245,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Empire_Game_Footsteps_Single_Metal_Armor_Movement_Knight_Walking_Marching_Foely.wav",
-      "CachePath": "F4/{F4F15AAC-50B9-DA62-29E4-1C208EF87BF9}.wem"
+      "CachePath": "57/{57BEFD3C-FD4D-C2AD-9D7B-FDF61CE2EBA1}.wem"
      },
      {
       "Id": "282287949",
@@ -533,7 +533,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Groan_11_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "D5/{D554E2F2-9270-956F-1FA7-A66E24EFCC3F}.wem"
+      "CachePath": "CB/{CB3371A0-66F8-C18D-C0B5-B45534D19E1B}.wem"
      },
      {
       "Id": "595941273",
@@ -581,7 +581,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_DGF_fx_foley_footstep_concrete_warrior_walk_heavy_armor_slow_01.wav",
-      "CachePath": "16/{16F8902E-D809-25B9-EEDF-8D73C0FE4547}.wem"
+      "CachePath": "D4/{D4329BBE-B163-DDCA-7AEE-F6BB97E99CA3}.wem"
      },
      {
       "Id": "647807090",
@@ -589,7 +589,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_quick.wav",
-      "CachePath": "3B/{3B7D27EF-8498-B167-A582-69D5B0B2A176}.wem"
+      "CachePath": "A2/{A2CA8514-543B-3BFD-B770-7FD8088F2B03}.wem"
      },
      {
       "Id": "660206576",
@@ -757,7 +757,15 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Coughing_1_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "BD/{BDEEA374-A5D6-61BD-87DA-54159FB64CB6}.wem"
+      "CachePath": "EF/{EF411331-C6CC-8D7A-6976-08E989567375}.wem"
+     },
+     {
+      "Id": "844797285",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fantasy_Game_Action_Collect_Ore_C_Pick_Axe_Impact_Material_Crafting_Accent_Medieval.wav",
+      "CachePath": "45/{45DE6146-1E32-A07F-FAB7-7B98AF947F17}.wem"
      },
      {
       "Id": "848033451",
@@ -805,7 +813,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_broadsword_impact_shield_metal.wav",
-      "CachePath": "01/{01A33752-3B95-E1FD-252D-C33283DB75EB}.wem"
+      "CachePath": "22/{22E12FE5-A3CB-9E54-038A-04490012574B}.wem"
      },
      {
       "Id": "919997465",
@@ -869,7 +877,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Grunt_4_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "B1/{B15437D0-4A0D-D494-413C-141012FE848F}.wem"
+      "CachePath": "08/{08C340F8-D70B-1F96-749C-AB6CC4446C7A}.wem"
      },
      {
       "Id": "995426383",
@@ -917,7 +925,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fantasy_Game_Action_Collect_Ore_C_Pick_Axe_Impact_Material_Crafting_Accent_Medieval.wav",
-      "CachePath": "EA/{EAF65B3F-C844-C8F1-17EE-3EE35E77BE2C}.wem"
+      "CachePath": "B3/{B30D5C21-F12E-6A4A-4B40-FE91E0CEB3D2}.wem"
      },
      {
       "Id": "1069660761",
@@ -993,14 +1001,6 @@
        "GUID": "{916168E5-E202-42D9-B331-43F94CE1206D}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
-      },
-      {
-       "Id": "279083052",
-       "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Chan\\Voice_Chan_Hit\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
-       "GUID": "{7BA02974-3ABB-4BA9-9F7C-940AB9151248}",
-       "LibName": "Wwise Pitch Shifter",
-       "LibId": "8912899"
       },
       {
        "Id": "296962076",
@@ -1237,7 +1237,7 @@
       "Name": "EV_Chan_Attack",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_Chan_Attack",
       "GUID": "{241C638E-B089-4989-827A-E6D31828D946}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "350",
       "DurationType": "OneShot",
       "DurationMin": "0.8429317",
       "DurationMax": "1.0250889",
@@ -2063,7 +2063,7 @@
       "Name": "Voice_Chan_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Hit",
       "GUID": "{0473682A-3932-4A2B-B275-C5D3FFFCEDCC}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.4965172",
       "DurationMax": "0.8445003",
@@ -2079,15 +2079,11 @@
        },
        {
         "Id": "732424984"
+       },
+       {
+        "Id": "844797285"
        }
-      ],
-      "PluginRefs": {
-       "Custom": [
-        {
-         "Id": "279083052"
-        }
-       ]
-      }
+      ]
      },
      {
       "Id": "524349233",
@@ -2257,6 +2253,6 @@
     ]
    }
   ],
-  "FileHash": "{4117385B-A531-C7EE-E24F-2356133AD5FA}"
+  "FileHash": "{831904E4-4CF8-02D9-CA68-248BF38E586A}"
  }
 }
