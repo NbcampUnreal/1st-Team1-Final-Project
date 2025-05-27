@@ -18,7 +18,6 @@ void UGS_MerciAimingSkill::ActiveSkill()
 {
 	if (!CanActiveInternally())
 	{
-		UE_LOG(LogTemp, Error, TEXT("Can't Active Skill!!!!!!!!"));
 		bPressedDuringCooldown = true;
 		return;
 	}
@@ -34,13 +33,16 @@ void UGS_MerciAimingSkill::OnSkillCommand()
 {
 	if (!CanActiveInternally() || bPressedDuringCooldown)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Can't Active Command!!!!!!!!"));
 		return;
 	}
-	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-	MerciCharacter->LeftClickReleaseAttack(ArrowClass, 15.0f, 4);
 
-	StartCoolDown();
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
+	MerciCharacter->LeftClickReleaseAttack(ArrowClass, 15.0f, 4);
+	if(IsFullyDrawn)
+	{
+		StartCoolDown();
+	}
 }
 
 bool UGS_MerciAimingSkill::CanActive() const

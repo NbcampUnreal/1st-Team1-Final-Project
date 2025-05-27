@@ -18,7 +18,6 @@ void UGS_MerciMovingSkill::ActiveSkill()
 {
 	if (!CanActiveInternally())
 	{
-		UE_LOG(LogTemp, Error, TEXT("Can't Active Skill!!!!!!!!"));
 		// 누른 시점에 쿨타임 중이었다면 무효 입력 플래그 설정
 		bPressedDuringCooldown = true;
 		return;
@@ -36,13 +35,16 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 {
 	if (!CanActiveInternally() || bPressedDuringCooldown)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Can't Active Command!!!!!!!!"));
 		return;
 	}
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-	MerciCharacter->LeftClickReleaseAttack(ArrowClass);
+	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
 
-	StartCoolDown();
+	MerciCharacter->LeftClickReleaseAttack(ArrowClass);
+	if (IsFullyDrawn)
+	{
+		StartCoolDown();
+	}
 }
 
 bool UGS_MerciMovingSkill::CanActive() const
