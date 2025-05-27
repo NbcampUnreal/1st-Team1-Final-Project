@@ -36,8 +36,8 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 		return;
 	}*/
 
-	UE_LOG(LogTemp, Warning, TEXT("Arrow Overlap : %s | OverlappedComp : %s"), *OtherActor->GetName(), *OverlappedComp->GetName());
-	UE_LOG(LogTemp, Warning, TEXT("Instigator : %s"), *GetInstigator()->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("Arrow Overlap : %s | OverlappedComp : %s"), *OtherActor->GetName(), *OverlappedComp->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("Instigator : %s"), *GetInstigator()->GetName());
 	// 맞은 대상 구분
 	ETargetType TargetType = DetermineTargetType(OtherActor);
 	
@@ -50,20 +50,20 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 	case EArrowType::Normal:
 		if (TargetType == ETargetType::Guardian)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Overlap - Normal - Guardian"));
+			//UE_LOG(LogTemp, Warning, TEXT("Overlap - Normal - Guardian"));
 			DamageToApply *= 0.5f;
 			// 화살이 박히지 않음 → 바로 Destroy
 			Destroy();
 		}
 		else if (TargetType == ETargetType::DungeonMonster)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Overlap - Normal - Dungeon Monster"));
+			//UE_LOG(LogTemp, Warning, TEXT("Overlap - Normal - Dungeon Monster"));
 			StickWithVisualOnly(SweepResult);
 		}
 		break;
 
 	case EArrowType::Axe:
-		UE_LOG(LogTemp, Warning, TEXT("Overlap - Axe - Guardian, DungeonMonster"));
+		//UE_LOG(LogTemp, Warning, TEXT("Overlap - Axe - Guardian, DungeonMonster"));
 		DamageTypeClass = UGS_IgnoreDefenceDamageType::StaticClass();
 		StickWithVisualOnly(SweepResult);
 		break;
@@ -71,13 +71,13 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 	case EArrowType::Child:
 		if (TargetType == ETargetType::Guardian)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Overlap - Child - Guardian"));
+			//UE_LOG(LogTemp, Warning, TEXT("Overlap - Child - Guardian"));
 			StickWithVisualOnly(SweepResult);
 		}
 		else if (TargetType == ETargetType::DungeonMonster)
 		{
 			// 일반 몬스터에게는 관통 → 시각 효과 없이 그냥 지나감
-			UE_LOG(LogTemp, Warning, TEXT("Overlap - Child - Dungeon Monster"));
+			//UE_LOG(LogTemp, Warning, TEXT("Overlap - Child - Dungeon Monster"));
 		}
 		
 		break;
