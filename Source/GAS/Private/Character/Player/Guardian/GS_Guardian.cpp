@@ -4,6 +4,7 @@
 
 #include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
+#include "Net/UnrealNetwork.h"
 
 AGS_Guardian::AGS_Guardian()
 {
@@ -16,7 +17,6 @@ AGS_Guardian::AGS_Guardian()
 void AGS_Guardian::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void AGS_Guardian::PostInitializeComponents()
@@ -28,17 +28,16 @@ void AGS_Guardian::PostInitializeComponents()
 void AGS_Guardian::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
+
+	DOREPLIFETIME(ThisClass, GuardianState);
 }
 
 void AGS_Guardian::LeftMouse()
 {
-	
 }
 
 void AGS_Guardian::Ctrl()
 {
-
 }
 
 void AGS_Guardian::CtrlStop()
@@ -47,7 +46,6 @@ void AGS_Guardian::CtrlStop()
 
 void AGS_Guardian::RightMouse()
 {
-
 }
 
 void AGS_Guardian::MeleeAttackCheck()
@@ -80,11 +78,28 @@ void AGS_Guardian::MeleeAttackCheck()
 			ServerRPCMeleeAttack(DamagedCharacter);
 		}
 	}
-	DrawDebugCapsule(GetWorld(), Start, MeleeAttackRange * 0.5f, MeleeAttackRadius, FRotationMatrix::MakeFromZ(Forward).ToQuat(), FColor::Red, false, 5.f);
 }
 
-void AGS_Guardian::MulticastRPCDrawDebugLine_Implementation()
+void AGS_Guardian::ServerRPCStopSkill_Implementation()
 {
-	
-	
+	GuardianState = EGuardianState::None;
 }
+
+void AGS_Guardian::ServerRPCStartSkill_Implementation()
+{
+	GuardianState = EGuardianState::Skill;
+}
+
+void AGS_Guardian::OnRep_GuardianState()
+{
+	ClientGuardianState = GuardianState;
+}
+
+// void AGS_Guardian::MulticastRPCDrawDebugLine_Implementation(const FVector& Start, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit)
+// {
+// 	FColor Color = bIsHit ? FColor::Green : FColor::Red;
+// 	DrawDebugCapsule(GetWorld(), Start, CapsuleRange * 0.5f, Radius, FRotationMatrix::MakeFromZ(Forward).ToQuat(),
+// 		Color, false, 5.f);
+//
+// 	//DrawDebugPoint(GetWorld(),OutHitResult.ImpactPoint, 15.f, FColor::Yellow, false, 1.f);
+// }

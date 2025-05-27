@@ -40,4 +40,7 @@ private:
 	//[draconic fury]
 	UFUNCTION()
 	void AnimNotify_DraconicFury();
+
+	UFUNCTION()
+	void AnimNotify_SkillStop();
 };
