@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/GS_Player.h"
-#include "Animation/Character/E_SeekerAnim.h"
 #include "GS_Seeker.generated.h"
 
 class UGS_SkillInputHandlerComp;
+class UPostProcessComponent;
+class UMaterialInterface;
+class UGS_StatComp;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -54,12 +56,20 @@ public:
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool GetDrawState();
 
-	/*UFUNCTION(BlueprintCallable)
-	EGait GetGait();*/
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	UChildActorComponent* Weapon;
 	
+	// ================
+	// LowHP 스크린 효과
+	// ================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Effects")
+	UPostProcessComponent* LowHealthPostProcessComp;
+
+	UPROPERTY(EditDefaultsOnly, Category="Effects")
+	UMaterialInterface* LowHealthEffectMaterial;
+	
+	UFUNCTION()
+	void HandleLowHealthEffect(UGS_StatComp* InStatComp);
 
 protected:
 	// Called when the game starts or when spawned
@@ -68,11 +78,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
 
-	/*
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
-	EGait Gait;*/
-
 private :
 	UPROPERTY(VisibleAnywhere, Category="State")
 	FSeekerState SeekerState;
+
+	// ================
+	// LowHP 스크린 효과
+	// ================
+	UPROPERTY(EditDefaultsOnly, Category="Effects", meta=(ClampMin="0.0", ClampMax="1.0"))
+	float LowHealthThresholdRatio = 0.3f;
+
+	bool bIsLowHealthEffectActive = false;
+
+	UPROPERTY(EditDefaultsOnly, Category="Effects")
+	class UMaterialParameterCollection* MPC_LowHPEffectAsset;
 };
