@@ -2,12 +2,17 @@
 #include "Net/UnrealNetwork.h"
 #include "System/GS_PlayerRole.h"
 #include "System/GameMode/GS_CustomLobbyGM.h"
+#include "Character/Player/GS_Player.h"
+#include "Character/Component/GS_StatComp.h"
 
 AGS_PlayerState::AGS_PlayerState()
     : CurrentPlayerRole(EPlayerRole::PR_None)
     , CurrentSeekerJob(ESeekerJob::SJ_Job1)
     , CurrentGuardianJob(EGuardianJob::GJ_Job1)
     , bIsReady(false)
+	, CurrentHealth(200.f)
+	, bIsAlive(true)
+	, BoundStatComp(nullptr)
 {
     bReplicates = true;
 }
@@ -19,6 +24,14 @@ void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME(AGS_PlayerState, CurrentSeekerJob);
 	DOREPLIFETIME(AGS_PlayerState, CurrentGuardianJob);
     DOREPLIFETIME(AGS_PlayerState, bIsReady);
+    DOREPLIFETIME(AGS_PlayerState, bIsAlive);
+}
+
+void AGS_PlayerState::BeginPlay()
+{
+    Super::BeginPlay();
+
+    TryBindToStatComp();
 }
 
 void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
@@ -29,9 +42,13 @@ void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
     // NewPlayerState == Newly-created PlayerState
     if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
     {
+        // 다음 맵으로 넘길 애들 추가 까먹지 말기!!!!!!!!
         NewPS->CurrentPlayerRole = CurrentPlayerRole;
         NewPS->CurrentSeekerJob = CurrentSeekerJob;
         NewPS->CurrentGuardianJob = CurrentGuardianJob;
+        NewPS->CurrentHealth = CurrentHealth;
+        NewPS->bIsAlive = bIsAlive;
+        NewPS->BoundStatComp = BoundStatComp;
     }
 }
 
@@ -42,9 +59,13 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
     // 여기서는 this == Old, NewPlayerState == New 와 동일.
     if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
     {
+        // 다음 맵으로 넘길 애들 추가 까먹지 말기!!!!!!!!
         NewPS->CurrentPlayerRole = CurrentPlayerRole;
         NewPS->CurrentSeekerJob = CurrentSeekerJob;
         NewPS->CurrentGuardianJob = CurrentGuardianJob;
+        NewPS->CurrentHealth = CurrentHealth;
+        NewPS->bIsAlive = bIsAlive;
+        NewPS->BoundStatComp = BoundStatComp;
     }
 }
 
@@ -74,6 +95,93 @@ void AGS_PlayerState::OnRep_PlayerRole()
     );
     OnRoleChangedDelegate.Broadcast(CurrentPlayerRole);
 	OnJobChangedDelegate.Broadcast(CurrentPlayerRole);
+}
+
+void AGS_PlayerState::TryBindToStatComp()
+{
+    APawn* MyPawn = GetPawn();
+
+    if (MyPawn)
+    {
+        UGS_StatComp* StatComp = MyPawn->FindComponentByClass<UGS_StatComp>();
+
+        if (StatComp)
+        {
+            SetupStatCompBinding(StatComp);
+            if (GetWorld() && GetWorld()->GetTimerManager().IsTimerActive(BindStatCompTimerHandle))
+            {
+                GetWorld()->GetTimerManager().ClearTimer(BindStatCompTimerHandle);
+            }
+            UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): StatComp binding successful!"), *GetName());
+            return;
+        }
+    }
+
+    if (!GetWorld()->GetTimerManager().IsTimerActive(BindStatCompTimerHandle))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s): Pawn or StatComp not ready. Starting timer..."), *GetName());
+        GetWorld()->GetTimerManager().SetTimer(BindStatCompTimerHandle, this, &AGS_PlayerState::TryBindToStatComp, 0.2f, true);
+    }
+}
+
+void AGS_PlayerState::SetupStatCompBinding(UGS_StatComp* InStatComp)
+{
+    if (InStatComp && InStatComp != BoundStatComp)
+    {
+        if (BoundStatComp)
+        {
+            BoundStatComp->OnCurrentHPChanged.RemoveAll(this);
+        }
+        InStatComp->OnCurrentHPChanged.AddUObject(this, &AGS_PlayerState::HandleCurrentHPChanged);
+        BoundStatComp = InStatComp;
+
+        HandleCurrentHPChanged(BoundStatComp);
+    }
+}
+
+void AGS_PlayerState::HandleCurrentHPChanged(UGS_StatComp* StatComp)
+{
+    if (StatComp)
+    {
+        CurrentHealth = StatComp->GetCurrentHealth();
+        //델리것 추가 필요?
+        UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s) HP updated to %f"), *GetName(), CurrentHealth);
+        if (HasAuthority())
+        {
+            if (CurrentHealth <= 0.f && bIsAlive)
+            {
+                bIsAlive = false;
+                OnRep_IsAlive();
+                UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) is now dead (bIsAlive = false) - Set on Server."), *GetName());
+            }
+        }
+    }
+}
+
+void AGS_PlayerState::OnRep_IsAlive()
+{
+    OnPlayerAliveStatusChangedDelegate.Broadcast(this, bIsAlive);
+    UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s) OnRep_IsAlive called. bIsAlive = %s"),
+        *GetName(),
+        bIsAlive ? TEXT("True") : TEXT("False"));
+}
+
+void AGS_PlayerState::SetIsAlive(bool bNewIsAlive)
+{
+    if (HasAuthority() && bIsAlive != bNewIsAlive)
+    {
+        bIsAlive = bNewIsAlive;
+
+        // 서버에서 델리게이트 브로드캐스트
+        OnPlayerAliveStatusChangedDelegate.Broadcast(this, bIsAlive);
+
+        // 서버에서도 OnRep_IsAlive를 호출하여 서버 측 로직을 동일하게 처리할 수 있음 (선택 사항)
+        // OnRep_IsAlive(); 
+
+        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) SetIsAlive called on Server. New State: %s"),
+            *GetName(),
+            bIsAlive ? TEXT("True") : TEXT("False"));
+    }
 }
 
 bool AGS_PlayerState::Server_SetPlayerRole_Validate(EPlayerRole NewRole) { return true; }
