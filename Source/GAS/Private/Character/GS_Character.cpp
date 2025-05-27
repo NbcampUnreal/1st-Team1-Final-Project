@@ -74,6 +74,11 @@ void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void AGS_Character::OnDeath()
+{
+	MulticastRPCCharacterDeath();
+}
+
 void AGS_Character::WatchOtherPlayer()
 {
 }

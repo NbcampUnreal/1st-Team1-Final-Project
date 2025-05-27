@@ -68,9 +68,12 @@ public:
 	//character death play ragdoll
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCCharacterDeath();
-
+	
 	UFUNCTION()
 	void WatchOtherPlayer();
+
+	UFUNCTION()
+	virtual void OnDeath();
 	
 	//HP widget
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);

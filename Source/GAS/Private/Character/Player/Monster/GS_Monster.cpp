@@ -3,7 +3,6 @@
 
 #include "Character/Player/Monster/GS_Monster.h"
 #include "AI/GS_AIController.h"
-#include "Character/Component/GS_StatComp.h"
 #include "Components/DecalComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AkComponent.h"
@@ -53,6 +52,26 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 	DOREPLIFETIME(AGS_Monster, bCommandLocked);
 	DOREPLIFETIME(AGS_Monster, bSelectionLocked);
+}
+
+void AGS_Monster::OnDeath()
+{
+	Super::OnDeath();
+	
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		MoveComp->DisableMovement();
+	}
+	
+	DetachFromControllerPendingDestroy();
+	SetLifeSpan(4.f);
+	
+	Multicast_OnDeath();
+}
+
+void AGS_Monster::Multicast_OnDeath_Implementation()
+{
+	OnMonsterDead.Broadcast(this);
 }
 
 //void AGS_Monster::SetSelected(bool bIsSelected)

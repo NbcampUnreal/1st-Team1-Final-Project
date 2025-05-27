@@ -432,6 +432,9 @@ void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 
 	// 첫 번째로 추가되는 유닛만 소리 재생
 	bool bShouldPlaySound = UnitSelection.IsEmpty();
+
+	// 죽음 델리게이트
+	Unit->OnMonsterDead.AddUniqueDynamic(this, &AGS_RTSController::OnSelectedUnitDead);
 	
 	UnitSelection.AddUnique(Unit);
 	OnSelectionChanged.Broadcast(UnitSelection);
@@ -456,6 +459,9 @@ void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& 
 		{
 			continue;
 		}
+
+		// 죽음 델리게이트
+		Unit->OnMonsterDead.AddUniqueDynamic(this, &AGS_RTSController::OnSelectedUnitDead);
 		
 		UnitSelection.AddUnique(Unit);
 		// 첫 번째 유닛만 소리 재생
@@ -471,6 +477,9 @@ void AGS_RTSController::RemoveUnitFromSelection(AGS_Monster* Unit)
 	{
 		return;
 	}
+
+	// 죽음 바인드 해제
+	Unit->OnMonsterDead.RemoveDynamic(this, &AGS_RTSController::OnSelectedUnitDead);
 	
 	UnitSelection.Remove(Unit);
 	OnSelectionChanged.Broadcast(UnitSelection);
@@ -483,10 +492,13 @@ void AGS_RTSController::ClearUnitSelection()
 	{
 		if (IsValid(Unit))
 		{
+			// 죽음 바인드 해제
+			Unit->OnMonsterDead.RemoveDynamic(this, &AGS_RTSController::OnSelectedUnitDead);
+			
 			Unit->SetSelected(false);
 		}
 	}
-		
+	
 	UnitSelection.Empty();
 	OnSelectionChanged.Broadcast(UnitSelection);
 }
@@ -746,4 +758,9 @@ void AGS_RTSController::UnlockTargets(const TArray<AGS_Monster*>& Units)
 			AI->UnlockTarget();
 		}
 	}
+}
+
+void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)
+{
+	RemoveUnitFromSelection(Monster);
 }

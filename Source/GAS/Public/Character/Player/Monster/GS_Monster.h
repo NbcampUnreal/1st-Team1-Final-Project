@@ -13,6 +13,9 @@ class UGS_MonsterAnimInstance;
 /**
  * 
  */
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMonsterDead, AGS_Monster*, DeadUnit);
+
 UCLASS()
 class GAS_API AGS_Monster : public AGS_Character
 {
@@ -48,6 +51,12 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
 	bool bSelectionLocked = false;
 
+	UPROPERTY(BlueprintAssignable, Category="Dead")
+	FOnMonsterDead OnMonsterDead;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnDeath();
+
 	FORCEINLINE bool IsCommandable() const { return !bCommandLocked; }
 	FORCEINLINE bool IsSelectable() const { return !bSelectionLocked; }
 	
@@ -76,6 +85,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual void OnDeath() override;
 	
 	UPROPERTY()
 	TObjectPtr<UGS_MonsterAnimInstance> MonsterAnim;

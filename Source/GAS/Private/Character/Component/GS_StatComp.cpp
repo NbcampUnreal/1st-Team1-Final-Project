@@ -107,21 +107,7 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 			AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
 			if (IsValid(OwnerCharacter))
 			{
-				OwnerCharacter->MulticastRPCCharacterDeath();
-
-				//player -> 다른 플레이어 관전
-		
-				//monster -> 사라지기 (임시)
-				if (OwnerCharacter->ActorHasTag("Monster"))
-				{
-					if (UCharacterMovementComponent* MoveComp = OwnerCharacter->GetCharacterMovement())
-					{
-						MoveComp->DisableMovement();
-					}
-					OwnerCharacter->DetachFromControllerPendingDestroy();
-					
-					OwnerCharacter->SetLifeSpan(4.f);
-				}
+				OwnerCharacter->OnDeath();
 			}
 		}
 	}
