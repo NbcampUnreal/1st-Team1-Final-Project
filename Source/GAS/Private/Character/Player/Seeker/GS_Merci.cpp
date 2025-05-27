@@ -12,6 +12,7 @@
 #include "AkAudioEvent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Templates/Function.h"
+#include "DrawDebugHelpers.h"
 //#include "Weapon/Equipable/"
 
 // Sets default values
@@ -117,7 +118,10 @@ void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
 
 void AGS_Merci::Multicast_StopDrawMontage_Implementation()
 {
-	Mesh->GetAnimInstance()->Montage_Stop(0.2f); // BlendOut 0.2초
+	if (Mesh && Mesh->GetAnimInstance())
+	{
+		Mesh->GetAnimInstance()->Montage_Stop(0.2f); // BlendOut 0.2초
+	}
 }
 
 void AGS_Merci::Multicast_PlayDrawMontage_Implementation(UAnimMontage* Montage)
@@ -135,72 +139,18 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	{
 		return;
 	}
-	//FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");
 
-	//APlayerController* PC = Cast<APlayerController>(Controller);
-	//if (!PC) return;
-
-	//int32 ViewportX, ViewportY;
-	//PC->GetViewportSize(ViewportX, ViewportY);
-
-	//// 화면 중심 픽셀 좌표
-	//FVector2D ScreenCenter(ViewportX / 2.0f, ViewportY / 2.0f);
-
-	//FVector WorldOrigin;
-	//FVector WorldDirection;
-
-	//if (PC->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldOrigin, WorldDirection))
-	//{
-	//	// 월드 방향을 기준으로 트레이스
-	//	FVector TraceStart = WorldOrigin;
-	//	FVector TraceEnd = TraceStart + WorldDirection * 10000.f;
-
-	//	FHitResult Hit;
-	//	FCollisionQueryParams Params;
-	//	Params.AddIgnoredActor(this);
-
-	//	FVector TargetLocation = TraceEnd;
-	//	if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params))
-	//	{
-	//		TargetLocation = Hit.ImpactPoint;
-	//	}
-
-	//	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
-	//	FRotator BaseRotation = LaunchDirection.Rotation();
-
-	//	// 여러 발 처리
-	//	int32 HalfCount = NumArrows / 2;
-	//	for (int32 i = 0; i < NumArrows; ++i)
-	//	{
-	//		float OffsetAngle = (i - HalfCount) * SpreadAngleDeg;
-	//		if (NumArrows % 2 == 0)
-	//		{
-	//			OffsetAngle += SpreadAngleDeg / 2.0f;
-	//		}
-
-	//		FRotator ArrowRotation = BaseRotation;
-	//		ArrowRotation.Yaw += OffsetAngle;
-
-	//		FActorSpawnParameters SpawnParams;
-	//		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	//		SpawnParams.Instigator = this;
-
-	//		GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRotation, SpawnParams);
-	//	}
-	//}
-	// 1. 소켓 위치 얻기
-	FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");
-
-	// 2. 회전 방향 얻기(컨트롤러의 에임 방향)
-	// 화면 중앙에서 World Direction을 얻기 위한 설정
+	// 1. 카메라 위치와 회전값(플레이어의 시점) 가져오기
 	FVector ViewLoc;
 	FRotator ViewRot;
 	Controller->GetPlayerViewPoint(ViewLoc, ViewRot); // 카메라 기준 시점
 
+	// 2. 카메라에서 정면으로 Ray를 쏨
 	FVector TraceStart = ViewLoc;
-	FVector TraceEnd = TraceStart + ViewRot.Vector() * 10000.f;
+	FVector TraceEnd = TraceStart + ViewRot.Vector() * 5000.0f;
+	//Multicast_DrawDebugLine(TraceStart, TraceEnd, FColor::Green);
 
-	// 히트된 위치로 방향 계산
+	// 3. Ray가 무언가에 부딪히면 그 위치를 목표로 설정, 아니면 끝 지점 사용
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
@@ -211,15 +161,16 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	{
 		TargetLocation = Hit.ImpactPoint;
 	}
-	// SpawnLocation → TargetLocation 방향 계산
+
+	// 4. 무기의 소켓 위치에서 목표 위치로 향하는 방향 계산
+	FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");
 	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
 	FRotator BaseRotation = LaunchDirection.Rotation();
 
-	// 화살 수가 홀수이면 가운데 화살이 정중앙
+	// 5. 여러 발 발사 처리 (SpreadAngleDeg를 기준으로 좌우로 퍼지게 만듦)
 	int32 HalfCount = NumArrows / 2;
 	for (int32 i = 0; i < NumArrows; ++i)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("NumArrow 1 fire"));
 		// 중심 기준 각도 차이 계산
 		float OffsetAngle = (i - HalfCount) * SpreadAngleDeg;
 
@@ -229,29 +180,21 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 			OffsetAngle += SpreadAngleDeg / 2.0f;
 		}
 
-		// Yaw 회전만 적용 (좌우 회전)
-		FRotator ArrowRotation = BaseRotation;
-		ArrowRotation.Yaw += OffsetAngle;
+		// Yaw(좌우)만 회전 적용하여 퍼지는 방향 구함
+		FRotator SpreadRot = FRotator(0.f, OffsetAngle, 0.f);
+		FVector SpreadDir = SpreadRot.RotateVector(LaunchDirection);
+		FRotator ArrowRot = SpreadDir.Rotation();
 
+		// 6. 화살 스폰
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		SpawnParams.Instigator = this;
 
-		GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRotation, SpawnParams);
+		GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRot, SpawnParams);
+
+		// 7. 화살 방향 시각화 (Spread 적용된 방향)
+		//Multicast_DrawDebugLine(SpawnLocation, SpawnLocation + SpreadDir * 1000.f, FColor::Red);
 	}
-
-	/* 3. 액터 스폰*/
-	/*FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
-
-	if (ArrowClass == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ArrowClass is null!!!!!!!!!"));
-	}
-	GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, SpawnRotation, SpawnParams);*/
-
-
 }
 
 // Called when the game starts or when spawned
@@ -325,6 +268,11 @@ void AGS_Merci::UpdateZoom(float Alpha)
 //		nullptr              // Cookie
 //	);
 //}
+
+void AGS_Merci::Multicast_DrawDebugLine_Implementation(FVector Start, FVector End, FColor Color)
+{
+	DrawDebugLine(GetWorld(), Start, End, Color, false, 5.0f, 0, 3.0f);
+}
 
 void AGS_Merci::OnDrawMontageEnded()
 {

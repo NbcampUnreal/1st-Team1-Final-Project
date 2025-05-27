@@ -58,6 +58,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyDrawMontageEnded();
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_DrawDebugLine(FVector Start, FVector End, FColor Color = FColor::Green);
+
 	void OnDrawMontageEnded();
 
 protected:

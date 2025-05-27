@@ -23,6 +23,7 @@ AGS_WeaponProjectile::AGS_WeaponProjectile()
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
 	ProjectileMovementComponent->bShouldBounce = true;
 	ProjectileMovementComponent->Bounciness = 0.3f; 
+
 	
 }
 
@@ -35,6 +36,10 @@ void AGS_WeaponProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActo
 void AGS_WeaponProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	if (ProjectileMovementComponent)
+	{
+		ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileMovementComponent->InitialSpeed;
+	}
 }
 
 void AGS_WeaponProjectile::Tick(float DeltaTime)
