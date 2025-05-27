@@ -20,5 +20,5 @@ public:
 	TMap<ECharacterClass, FRunePlacementData> SavedRunesByClass;
 
 	UPROPERTY()
-	FCharacterStats AppliedStatEffects;
+	FGS_StatRow AppliedStatEffects;
 };
