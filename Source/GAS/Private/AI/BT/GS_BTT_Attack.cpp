@@ -42,3 +42,18 @@ void UGS_BTT_Attack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemo
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
 }
+
+EBTNodeResult::Type UGS_BTT_Attack::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	AGS_Monster* Monster = Cast<AGS_Monster>(OwnerComp.GetAIOwner()->GetPawn());
+	if(Monster)
+	{
+		UAnimInstance* AnimInstance = Monster->GetMesh()->GetAnimInstance();
+		if (AnimInstance->Montage_IsPlaying(Monster->AttackMontage))
+		{
+			AnimInstance->Montage_Stop(0.0f, nullptr);
+		}
+	}
+	
+	return EBTNodeResult::Aborted;
+}

@@ -2,7 +2,7 @@
 
 
 #include "Animation/Notifies/GS_ANS_HitWeapon.h"
-#include "Character/Player/Monster/GS_IronFang.h"
+#include "Character/Player/Monster/GS_Monster.h"
 #include "Weapon/Equipable/GS_WeaponSword.h"
 
 void UGS_ANS_HitWeapon::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
@@ -12,10 +12,10 @@ void UGS_ANS_HitWeapon::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeque
 	{
 		return;
 	}
-
-	if (AGS_IronFang* IronFang = Cast<AGS_IronFang>(Owner))
+	
+	if (AGS_Monster* Character = Cast<AGS_Monster>(MeshComp->GetOwner()))
 	{
-		if (AGS_WeaponSword* Weapon = IronFang->GetCurrentWeapon())
+		if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Character->GetCurrentWeapon()))
 		{
 			Weapon->EnableHit();
 		}
@@ -30,9 +30,9 @@ void UGS_ANS_HitWeapon::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenc
 		return;
 	}
 
-	if (AGS_IronFang* IronFang = Cast<AGS_IronFang>(Owner))
+	if (AGS_Monster* Character = Cast<AGS_Monster>(MeshComp->GetOwner()))
 	{
-		if (AGS_WeaponSword* Weapon = IronFang->GetCurrentWeapon())
+		if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Character->GetCurrentWeapon()))
 		{
 			Weapon->DisableHit();
 		}

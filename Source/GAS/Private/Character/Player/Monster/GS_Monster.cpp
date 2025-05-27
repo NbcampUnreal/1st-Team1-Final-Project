@@ -3,7 +3,6 @@
 
 #include "Character/Player/Monster/GS_Monster.h"
 #include "AI/GS_AIController.h"
-#include "Character/Component/GS_StatComp.h"
 #include "Components/DecalComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AkComponent.h"
@@ -14,6 +13,9 @@ AGS_Monster::AGS_Monster()
 {
 	AIControllerClass = AGS_AIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	Weapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponComp"));
+	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
 
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>("SelectionDecal");
 	SelectionDecal->SetupAttachment(RootComponent);
@@ -55,18 +57,25 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AGS_Monster, bSelectionLocked);
 }
 
-//void AGS_Monster::SetSelected(bool bIsSelected)
-//{
-//	if (SelectionDecal)
-//	{
-//		SelectionDecal->SetVisibility(bIsSelected);
-//	}
-//
-//	if (bIsSelected && ClickSoundEvent)
-//	{
-//		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
-//	}
-//}
+void AGS_Monster::OnDeath()
+{
+	Super::OnDeath();
+	
+	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
+	{
+		MoveComp->DisableMovement();
+	}
+	
+	DetachFromControllerPendingDestroy();
+	SetLifeSpan(4.f);
+	
+	Multicast_OnDeath();
+}
+
+void AGS_Monster::Multicast_OnDeath_Implementation()
+{
+	OnMonsterDead.Broadcast(this);
+}
 
 void AGS_Monster::SetSelected(bool bIsSelected, bool bPlaySound)
 {

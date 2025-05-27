@@ -74,6 +74,11 @@ void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void AGS_Character::OnDeath()
+{
+	MulticastRPCCharacterDeath();
+}
+
 void AGS_Character::WatchOtherPlayer()
 {
 }
@@ -115,6 +120,11 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 FGenericTeamId AGS_Character::GetGenericTeamId() const
 {
 	return TeamId;
+}
+
+bool AGS_Character::IsEnemy(const AGS_Character* Other) const
+{
+	return Other && GetGenericTeamId()!= Other->GetGenericTeamId();
 }
 
 void AGS_Character::MulticastRPCCharacterDeath_Implementation()

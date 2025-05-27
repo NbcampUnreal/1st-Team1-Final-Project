@@ -17,16 +17,7 @@ class GAS_API AGS_ShadowFang : public AGS_Monster
 public:
 	AGS_ShadowFang();
 
-	UFUNCTION()
-	AGS_WeaponSword* GetCurrentWeapon() const { return CurrentWeapon; }
-
 protected:
 	virtual void BeginPlay() override;
 
-private:
-	UPROPERTY(EditAnywhere, Category="Weapon")
-	TSubclassOf<AGS_WeaponSword> WeaponClass;	
-
-	UPROPERTY()
-	AGS_WeaponSword* CurrentWeapon;
 };
