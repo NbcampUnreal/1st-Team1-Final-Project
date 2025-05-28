@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{E8BFA0BE-866E-E21D-E67D-5917889FAB38}",
+    "Hash": "{95668AD2-FB30-0250-4855-5001A8EA9367}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -493,7 +493,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Ambient_Game_Attack_Simple_Heavy_Swing_1_Deep_Hammer_Air_Woosh.wav",
-      "CachePath": "CC/{CC2B8653-8F41-9151-8A79-E17DCC305942}.wem"
+      "CachePath": "1C/{1C9A3B1A-2AF8-6BF1-E482-61BCD62C8821}.wem"
      },
      {
       "Id": "548015621",
@@ -765,7 +765,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fantasy_Game_Action_Collect_Ore_C_Pick_Axe_Impact_Material_Crafting_Accent_Medieval.wav",
-      "CachePath": "45/{45DE6146-1E32-A07F-FAB7-7B98AF947F17}.wem"
+      "CachePath": "04/{04E5B396-FEC4-0D7F-7DB6-BE3E770363AA}.wem"
      },
      {
       "Id": "848033451",
@@ -1108,7 +1108,7 @@
       "Name": "EV_Arrow_Shot",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Arrow_Shot",
       "GUID": "{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "1.6107165",
       "DurationMax": "1.6200471",
@@ -1123,7 +1123,7 @@
       "Name": "EV_ArrowBy",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowBy",
       "GUID": "{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}",
-      "MaxAttenuation": "300",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.75643444",
       "DurationMax": "0.75643444",
@@ -1201,10 +1201,10 @@
       "Name": "EV_Bow_Pull",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Bow_Pull",
       "GUID": "{70E298F1-D671-45D2-BDB8-C18312B3AFC5}",
-      "MaxAttenuation": "300",
+      "MaxAttenuation": "360",
       "DurationType": "OneShot",
-      "DurationMin": "0.5092074",
-      "DurationMax": "0.81546146",
+      "DurationMin": "0.74920744",
+      "DurationMax": "1.0554614",
       "MediaRefs": [
        {
         "Id": "460690503"
@@ -1222,7 +1222,7 @@
       "Name": "EV_Bow_Realse",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Bow_Realse",
       "GUID": "{77A06439-AF10-4A18-AA52-5B5A3A9E5468}",
-      "MaxAttenuation": "30",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.7148274",
       "DurationMax": "0.75733334",
@@ -1535,7 +1535,7 @@
       "Name": "FootSteps",
       "ObjectPath": "\\Events\\Default Work Unit\\FootSteps",
       "GUID": "{ACB43239-CB8C-41BC-9AC2-2E9257233BFE}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.14469069",
       "DurationMax": "1.0886393",
@@ -1683,7 +1683,7 @@
       "Name": "Props_Axe",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe",
       "GUID": "{597B061A-CE0A-4A56-8154-41280E86C596}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "777",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2113,7 +2113,7 @@
       "Name": "Voice_Merci_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Hit",
       "GUID": "{5098E2B9-90BA-4412-987D-8FC0FAE125C3}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.36159804",
       "DurationMax": "0.89162403",
@@ -2150,7 +2150,7 @@
       "Name": "Voice_Merci_Sick",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Sick",
       "GUID": "{7573A416-C37E-4A3F-8DDC-F3B908D97302}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "400",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2253,6 +2253,6 @@
     ]
    }
   ],
-  "FileHash": "{7390F11C-F558-5A51-027C-822C8A4FDF93}"
+  "FileHash": "{6D0932CE-9A20-7491-8A25-C9297393A229}"
  }
 }
