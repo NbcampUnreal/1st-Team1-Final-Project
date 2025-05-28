@@ -19,6 +19,11 @@ public:
 	UGS_MerciAimingSkill();
 	virtual void ActiveSkill() override;
 	virtual void OnSkillCommand() override;
+	virtual bool CanActive() const override;
+
+	virtual bool CanActiveInternally() const;
 
 	TSubclassOf<AGS_SeekerMerciArrow> ArrowClass;
+private:
+	bool bPressedDuringCooldown = false;
 };

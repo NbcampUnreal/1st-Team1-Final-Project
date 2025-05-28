@@ -26,32 +26,19 @@ void AGS_WeaponSword::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OwnerChar = Cast<AGS_Character>(GetOwner());
+	OwnerChar = Cast<AGS_Character>(GetAttachParentActor());
+	UE_LOG(LogTemp, Warning, TEXT("Weapon OwnerChar : %s"),*GetNameSafe(OwnerChar));
 }
 
 
 void AGS_WeaponSword::EnableHit()
 {
-	if (HasAuthority())
-	{
-		HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	}
-	else
-	{
-		Server_SetHitCollision(true);
-	}
+	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 void AGS_WeaponSword::DisableHit()
 {
-	if (HasAuthority())
-	{
-		HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	else
-	{
-		Server_SetHitCollision(false);
-	}
+	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGS_WeaponSword::Server_SetHitCollision_Implementation(bool bEnable)
@@ -62,20 +49,25 @@ void AGS_WeaponSword::Server_SetHitCollision_Implementation(bool bEnable)
 void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!OtherActor || OtherActor == this || OtherActor == OwnerChar)
+	if (!HasAuthority()) return;
+
+	AGS_Character* Damaged = Cast<AGS_Character>(OtherActor);
+	AGS_Character* Attacker = OwnerChar;
+
+	if (!Damaged || !Attacker)
 	{
 		return;
 	}
 
-	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
-	if (!DamagedCharacter)
+	UGS_StatComp* DamagedStat = Damaged->GetStatComp();
+	if (!DamagedStat) 
 	{
-		return;
+		return;	
 	}
-	
-	float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(OwnerChar, DamagedCharacter);
+
+	float Damage = DamagedStat->CalculateDamage(Attacker, Damaged);
 	FDamageEvent DamageEvent;
-	DamagedCharacter->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar);
+	Damaged->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar);
 
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

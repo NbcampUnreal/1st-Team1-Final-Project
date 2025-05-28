@@ -1,9 +1,9 @@
 #include "Character/Component/GS_StatComp.h"
 
-#include "AIController.h"
 #include "AkGameplayStatics.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatRow.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -107,21 +107,7 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 			AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
 			if (IsValid(OwnerCharacter))
 			{
-				OwnerCharacter->MulticastRPCCharacterDeath();
-
-				//player -> 다른 플레이어 관전
-		
-				//monster -> 사라지기 (임시)
-				if (OwnerCharacter->ActorHasTag("Monster"))
-				{
-					if (UCharacterMovementComponent* MoveComp = OwnerCharacter->GetCharacterMovement())
-					{
-						MoveComp->DisableMovement();
-					}
-					OwnerCharacter->DetachFromControllerPendingDestroy();
-					
-					OwnerCharacter->SetLifeSpan(4.f);
-				}
+				OwnerCharacter->OnDeath();
 			}
 		}
 	}
@@ -165,12 +151,15 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 	UAnimMontage* AnimMontage = TakeDamageMontages[idx];
 
 	if (IsValid(OwnerCharacter))
-	{	
-		OwnerCharacter->PlayAnimMontage(AnimMontage);
+	{
+		if (Cast<AGS_Guardian>(OwnerCharacter)->GuardianState != EGuardianState::Skill)
+		{
+			//OwnerCharacter->PlayAnimMontage(AnimMontage, 2.f);
+		}
 		if(OwnerCharacter->HasAuthority())
 		{
 			//stop character during damage animation
-			CharacterWalkSpeed = OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
+			//CharacterWalkSpeed = OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
 			//OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = 0.f;
 		}
 		

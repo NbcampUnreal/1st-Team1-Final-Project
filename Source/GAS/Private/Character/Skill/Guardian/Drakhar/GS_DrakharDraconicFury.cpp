@@ -26,6 +26,5 @@ void UGS_DrakharDraconicFury::ActiveSkill()
 void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 {
 	StartCoolDown();
-	//OwnerCharacter->GetSkillComp()->StartTimer(ESkillSlot::Ultimate);
 	OwnerCharacter->MulticastRPCPlaySkillMontage((SkillAnimMontages[0]));
 }

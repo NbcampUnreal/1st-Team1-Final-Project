@@ -12,7 +12,6 @@
 #include "Blueprint/UserWidget.h"
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
-#include "Perception/AIPerceptionComponent.h"
 
 
 AGS_RTSController::AGS_RTSController()
@@ -203,7 +202,7 @@ void AGS_RTSController::OnLeftMousePressed()
 	
 	TArray<AGS_Monster*> Units;
 	GatherCommandableUnits(Units);
-	UnlockTargets(Units);
+	//UnlockTargets(Units);
 
 	// 명령 모드에 따라 
 	switch (CurrentCommand)
@@ -217,9 +216,9 @@ void AGS_RTSController::OnLeftMousePressed()
 	case ERTSCommand::Attack:
 		if (bHit)
 		{
-			if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
+			if (AGS_Character* Target = Cast<AGS_Character>(Hit.GetActor()))
 			{
-				Server_RTSAttack(Units, Monster);
+				Server_RTSAttack(Units, Target);
 			}
 			else
 			{
@@ -277,7 +276,7 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	// 명령 가능한 유닛들만 
 	TArray<AGS_Monster*> Units;
 	GatherCommandableUnits(Units);
-	UnlockTargets(Units);
+	//UnlockTargets(Units);
 	Server_RTSMove(Units, GroundHit.Location);
 }
 
@@ -433,6 +432,9 @@ void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 
 	// 첫 번째로 추가되는 유닛만 소리 재생
 	bool bShouldPlaySound = UnitSelection.IsEmpty();
+
+	// 죽음 델리게이트
+	Unit->OnMonsterDead.AddUniqueDynamic(this, &AGS_RTSController::OnSelectedUnitDead);
 	
 	UnitSelection.AddUnique(Unit);
 	OnSelectionChanged.Broadcast(UnitSelection);
@@ -457,6 +459,9 @@ void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& 
 		{
 			continue;
 		}
+
+		// 죽음 델리게이트
+		Unit->OnMonsterDead.AddUniqueDynamic(this, &AGS_RTSController::OnSelectedUnitDead);
 		
 		UnitSelection.AddUnique(Unit);
 		// 첫 번째 유닛만 소리 재생
@@ -472,6 +477,9 @@ void AGS_RTSController::RemoveUnitFromSelection(AGS_Monster* Unit)
 	{
 		return;
 	}
+
+	// 죽음 바인드 해제
+	Unit->OnMonsterDead.RemoveDynamic(this, &AGS_RTSController::OnSelectedUnitDead);
 	
 	UnitSelection.Remove(Unit);
 	OnSelectionChanged.Broadcast(UnitSelection);
@@ -484,10 +492,13 @@ void AGS_RTSController::ClearUnitSelection()
 	{
 		if (IsValid(Unit))
 		{
+			// 죽음 바인드 해제
+			Unit->OnMonsterDead.RemoveDynamic(this, &AGS_RTSController::OnSelectedUnitDead);
+			
 			Unit->SetSelected(false);
 		}
 	}
-		
+	
 	UnitSelection.Empty();
 	OnSelectionChanged.Broadcast(UnitSelection);
 }
@@ -593,6 +604,8 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
+			//AIController->UnlockTarget();
+			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
@@ -619,6 +632,8 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
+			//AIController->UnlockTarget();
+			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
@@ -645,6 +660,8 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
+			//AIController->LockTarget(TargetActor);
+			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
@@ -676,9 +693,7 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
-				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Stop));
-				BlackboardComp->ClearValue(AGS_AIController::MoveLocationKey);
-				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::None));
 
 				// 첫 번째 유닛만 정지 소리 재생
 				if (i == 0 && Unit->MoveSoundEvent)
@@ -703,8 +718,6 @@ void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Skill));
-				BlackboardComp->SetValueAsVector(AGS_AIController::MoveLocationKey, TargetLoc);
-				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
 
 				// 첫 번째 유닛만 스킬 소리 재생
 				if (i == 0 && Unit->MoveSoundEvent)
@@ -745,4 +758,9 @@ void AGS_RTSController::UnlockTargets(const TArray<AGS_Monster*>& Units)
 			AI->UnlockTarget();
 		}
 	}
+}
+
+void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)
+{
+	RemoveUnitFromSelection(Monster);
 }

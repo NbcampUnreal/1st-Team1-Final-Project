@@ -18,16 +18,7 @@ class GAS_API AGS_IronFang : public AGS_Monster
 public:
 	AGS_IronFang();
 
-	UFUNCTION()
-	AGS_WeaponSword* GetCurrentWeapon() const { return CurrentWeapon; }
-
 protected:
 	virtual void BeginPlay() override;
 
-private:
-	UPROPERTY(EditAnywhere, Category="Weapon")
-	TSubclassOf<AGS_WeaponSword> WeaponClass;	
-
-	UPROPERTY()
-	AGS_WeaponSword* CurrentWeapon;
 };
