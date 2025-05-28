@@ -8,6 +8,9 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoleChangedSignature, EPlayerRole, NewRole);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnJobChangedSignature, EPlayerRole, CurrentRole);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReadyStatusChangedSignature, bool, bNewReadyStatus);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerAliveStatusChangedSignature, AGS_PlayerState*, bool);
+
+class UGS_StatComp;
 
 UCLASS()
 class GAS_API AGS_PlayerState : public APlayerState
@@ -18,9 +21,9 @@ public:
     AGS_PlayerState();
 
     void InitializeDefaults();
-
+    virtual void BeginPlay() override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void CopyProperties(APlayerState* OtherPlayerState) override;
+    virtual void CopyProperties(APlayerState* OtherPlayerState) override;
     virtual void SeamlessTravelTo(APlayerState* NewPlayerState) override;
 
     // 역할
@@ -61,4 +64,28 @@ public:
     FOnJobChangedSignature OnJobChangedDelegate;
     UPROPERTY(BlueprintAssignable, Category = "Lobby|Events")
     FOnReadyStatusChangedSignature OnReadyStatusChangedDelegate;
+
+    FOnPlayerAliveStatusChangedSignature OnPlayerAliveStatusChangedDelegate;
+
+    //상태
+    float CurrentHealth;
+    UPROPERTY(ReplicatedUsing = OnRep_IsAlive)
+    bool bIsAlive = true;
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Game Result")
+    EGameResult CurrentGameResult;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UGS_StatComp> BoundStatComp;
+
+    UFUNCTION()
+    void OnRep_IsAlive();
+    void SetIsAlive(bool bNewIsAlive);
+    void SetupStatCompBinding(UGS_StatComp* InStatComp);
+
+protected:
+    FTimerHandle BindStatCompTimerHandle;
+
+    UFUNCTION()
+    void HandleCurrentHPChanged(UGS_StatComp* StatComp);
+    void TryBindToStatComp();
+
 };

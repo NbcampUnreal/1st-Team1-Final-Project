@@ -119,6 +119,7 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 
 	Skill->InitSkill(Cast<AGS_Character>(GetOwner()));
 	Skill->Cooltime = Info.Cooltime;
+	Skill->Damage = Info.Damage;
 	Skill->SkillAnimMontages = Info.Montages;
 	Skill->SkillImage = Info.Image;
 	SkillMap.Add(Slot, Skill);

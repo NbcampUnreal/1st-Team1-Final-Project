@@ -3,7 +3,7 @@
 #include "Character/GS_Character.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
-#include "Character/Component/GS_StatComp.h"
+#include "Character/Skill/GS_SkillBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Weapon/Projectile/Guardian/GS_DrakharProjectile.h"
 
@@ -80,7 +80,7 @@ void AGS_Drakhar::LeftMouse()
 	{
 		if (GuardianState != EGuardianState::Skill)
 		{
-			if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
+			if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready)) //ctrl로 떠있을 때
 			{
 				GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 				ServerRPCStartSkill();
@@ -131,7 +131,7 @@ void AGS_Drakhar::RightMouse()
 
 void AGS_Drakhar::ServerRPCComboAttack_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("server rpc attack"));
+	//UE_LOG(LogTemp, Warning, TEXT("server rpc attack"));
 
 	//다음 공격 되는 것이 확정인 경우
 	if (bCanDoNextComboAttack)
@@ -259,9 +259,10 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	
 	for (auto const& DamagedCharacter : DamagedCharacters)
 	{
-		float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
+		//float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
+		float SkillDamage = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Moving)->Damage;
 		FDamageEvent DamageEvent;
-		DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
+		DamagedCharacter->TakeDamage(SkillDamage, DamageEvent, GetController(), this);
 	}
 
 	DamagedCharacters.Empty();
@@ -278,8 +279,6 @@ void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
 
 void AGS_Drakhar::DashAttackCheck()
 {
-	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 	TArray<FHitResult> OutHitResults;	
 	const FVector Start = GetActorLocation();
 	const FVector End = Start + GetActorForwardVector() * 100.f;
@@ -324,12 +323,11 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 		}
 		for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)
 		{
-			float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
-
-			//TODO
-			//Damage += SkillDamage;
+			//float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
+			float SkillDamage = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)->Damage;
+			
 			FDamageEvent DamageEvent;
-			DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
+			DamagedCharacter->TakeDamage(SkillDamage, DamageEvent, GetController(), this);
 			DamagedCharacter->LaunchCharacter(GetActorForwardVector() * EarthquakePower, false, false);
 		}
 	}

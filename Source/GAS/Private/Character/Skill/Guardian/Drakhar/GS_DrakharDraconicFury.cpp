@@ -9,22 +9,22 @@ UGS_DrakharDraconicFury::UGS_DrakharDraconicFury()
 	CurrentSkillType = ESkillSlot::Ultimate;
 }
 
-	void UGS_DrakharDraconicFury::ActiveSkill()
+void UGS_DrakharDraconicFury::ActiveSkill()
+{
+	if (!CanActive())
 	{
-		if (!CanActive())
-		{
-			return;
-		}
-		AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter);
-		if (IsValid(Drakhar))
-		{
-			Drakhar->ResetComboAttackVariables();
-		}
-		ExecuteSkillEffect();
+		return;
 	}
+	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter);
+	if (IsValid(Drakhar))
+	{
+		Drakhar->ResetComboAttackVariables();
+	}
+	ExecuteSkillEffect();
+}
 
-	void UGS_DrakharDraconicFury::ExecuteSkillEffect()
-	{
-		StartCoolDown();
-		OwnerCharacter->MulticastRPCPlaySkillMontage((SkillAnimMontages[0]));
-	}
+void UGS_DrakharDraconicFury::ExecuteSkillEffect()
+{
+	StartCoolDown();
+	OwnerCharacter->MulticastRPCPlaySkillMontage((SkillAnimMontages[0]));
+}

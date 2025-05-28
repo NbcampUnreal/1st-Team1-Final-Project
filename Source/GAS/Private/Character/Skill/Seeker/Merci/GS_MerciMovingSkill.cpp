@@ -7,11 +7,7 @@
 
 UGS_MerciMovingSkill::UGS_MerciMovingSkill()
 {
-	static ConstructorHelpers::FClassFinder<AGS_SeekerMerciArrow> ArrowBP(TEXT("/Game/Weapons/Blueprints/BP_SeekerMerciArrowSmoke"));
-	if (ArrowBP.Succeeded())
-	{
-		ArrowClass = ArrowBP.Class;
-	}
+	
 }
 
 void UGS_MerciMovingSkill::ActiveSkill()
@@ -28,7 +24,7 @@ void UGS_MerciMovingSkill::ActiveSkill()
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	MerciCharacter->SetDrawState(false);
-	MerciCharacter->LeftClickPressedAttack(SkillAnimMontages[0]);
+	MerciCharacter->DrawBow(SkillAnimMontages[0]);
 }
 
 void UGS_MerciMovingSkill::OnSkillCommand()
@@ -40,7 +36,11 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
 
-	MerciCharacter->LeftClickReleaseAttack(ArrowClass);
+	if (MerciCharacter->SmokeArrowClass)
+	{
+		MerciCharacter->ReleaseArrow(MerciCharacter->SmokeArrowClass);
+	}
+	
 	if (IsFullyDrawn)
 	{
 		StartCoolDown();

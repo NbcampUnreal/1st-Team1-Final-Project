@@ -7,6 +7,7 @@
 
 class UButton;
 class UTextBlock;
+class UCanvasPanel;
 
 UCLASS()
 class GAS_API UGS_CustomLobbyUI : public UUserWidget
@@ -29,6 +30,8 @@ public:
 	UTextBlock* PerkDungeonText;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ReadyText;
+	UPROPERTY(meta = (BindWidget))
+	UCanvasPanel* ModalCanvasPanel;
 
 	UFUNCTION()
 	void OnJobSelectionButtonClicked();
@@ -41,4 +44,6 @@ public:
 
 	void UpdateRoleSpecificText(EPlayerRole NewRole);
 	void UpdateReadyButtonText(bool bIsReady);
+
+	UCanvasPanel* GetModalCanvasPanel() const { return ModalCanvasPanel; }
 };

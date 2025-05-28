@@ -1,6 +1,7 @@
 #include "UI/Screen/GS_CustomLobbyUI.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/CanvasPanel.h"
 #include "Kismet/GameplayStatics.h"
 #include "System/PlayerController/GS_CustomLobbyPC.h"
 #include "System/GS_PlayerState.h"
