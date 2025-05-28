@@ -6,6 +6,7 @@
 #include "Character/GS_Character.h"
 #include "Character/Player/Seeker/GS_Merci.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
+#include "EnhancedInputComponent.h"
 
 
 UGS_MerciSkillInputHandlerComp::UGS_MerciSkillInputHandlerComp()
@@ -72,5 +73,19 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 	else
 	{
 		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Moving);
+	}
+}
+
+void UGS_MerciSkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
+{
+	float ScrollValue = Instance.GetValue().Get<float>();
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	if (ScrollValue > 0.f)
+	{
+		MerciCharacter->Server_ChangeArrowType(+1);
+	}
+	else if (ScrollValue < 0.f)
+	{
+		MerciCharacter->Server_ChangeArrowType(-1);
 	}
 }
