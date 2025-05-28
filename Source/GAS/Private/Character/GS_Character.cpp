@@ -1,15 +1,15 @@
 #include "Character/GS_Character.h"
-
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "UI/Character/GS_HPText.h"
-
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_HPWidget.h"
+#include "Weapon/GS_Weapon.h"
 
 AGS_Character::AGS_Character()
 {
@@ -43,6 +43,11 @@ void AGS_Character::BeginPlay()
 	{
 		HPTextWidgetComp->SetVisibility(true);
 	}
+
+	if (HasAuthority())
+	{
+		SpawnAndAttachWeapons();
+	}
 }
 
 void AGS_Character::Tick(float DeltaTime)
@@ -55,6 +60,13 @@ void AGS_Character::Tick(float DeltaTime)
 		FVector LocalPlayerCameraLocation = UGameplayStatics::GetPlayerCameraManager(this, 0)->GetCameraLocation();
 		HPTextWidgetComp->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(WidgetComponentLocation, LocalPlayerCameraLocation));
 	}
+}
+
+void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_Character, WeaponSlots);
 }
 
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -146,5 +158,29 @@ void AGS_Character::MulicastRPCStopCurrentSkillMontage_Implementation(UAnimMonta
 	if (!HasAuthority())
 	{
 		StopAnimMontage(CurrentSkillMontage);
+	}
+}
+
+void AGS_Character::SpawnAndAttachWeapons()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	
+	for (FWeaponSlot& Slot : WeaponSlots)
+	{
+		if (!Slot.WeaponClass) continue;
+
+		Slot.WeaponInstance = World->SpawnActor<AGS_Weapon>(Slot.WeaponClass);
+		if (!Slot.WeaponInstance) continue;
+
+		Slot.WeaponInstance->AttachToComponent(
+			GetMesh(),
+			FAttachmentTransformRules::SnapToTargetIncludingScale,
+			Slot.SocketName);
+
+		Slot.WeaponInstance->SetOwner(this);
 	}
 }

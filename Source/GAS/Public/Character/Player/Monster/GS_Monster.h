@@ -52,22 +52,11 @@ public:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
 	bool bSelectionLocked = false;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TSubclassOf<AGS_Weapon> DefaultWeaponClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
-	UChildActorComponent* Weapon;
-
 	UPROPERTY(BlueprintAssignable, Category="Dead")
 	FOnMonsterDead OnMonsterDead;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();
-
-	FORCEINLINE AGS_Weapon* GetCurrentWeapon() const
-	{
-		return Cast<AGS_Weapon>(Weapon ? Weapon->GetChildActor() : nullptr);
-	}
 
 	FORCEINLINE bool IsCommandable() const { return !bCommandLocked; }
 	FORCEINLINE bool IsSelectable() const { return !bSelectionLocked; }
