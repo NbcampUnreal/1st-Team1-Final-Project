@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -14,4 +14,6 @@ class GAS_API UGS_ChanUltimateSkill : public UGS_SeekerSkillBase
 {
 	GENERATED_BODY()
 	
+	virtual void ActiveSkill() override;
+	virtual void ExecuteSkillEffect() override;
 };

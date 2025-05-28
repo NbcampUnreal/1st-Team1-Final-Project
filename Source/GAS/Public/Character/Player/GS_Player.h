@@ -107,9 +107,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	bool IsLocalPlayer() const;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlaySkillMontage(UAnimMontage* Montage);
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+	virtual void PlaySkillMontage(UAnimMontage* Montage);
+
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FCharacterWantsToMove GetWantsToMove();
 };

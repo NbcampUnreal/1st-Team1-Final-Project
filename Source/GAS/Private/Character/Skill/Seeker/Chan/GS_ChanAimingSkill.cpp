@@ -13,7 +13,8 @@ void UGS_ChanAimingSkill::ActiveSkill()
 {
 	if (!CanActive()) return;
 	Super::ActiveSkill();
-
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 	StartHoldUp();
 }
 
@@ -23,6 +24,8 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 	{
 		return;
 	}
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 	OnShieldSlam();
 }
 
@@ -37,17 +40,6 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 	FCollisionShape Shape = FCollisionShape::MakeSphere(Radius);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
-
-	// 테스트용
-	DrawDebugSphere(
-		GetWorld(),
-		Start + Forward * Radius,
-		Radius,
-		16,
-		FColor::Red,
-		false,
-		1.f
-	);
 
 	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitResults, Start, Start + Forward * 100.f, FQuat::Identity, ECC_Pawn, Shape, Params))
 	{

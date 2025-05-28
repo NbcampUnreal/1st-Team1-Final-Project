@@ -38,8 +38,10 @@ public:
 	virtual void OnSkillCommand();
 	virtual bool CanActive() const;
 	virtual bool IsActive() const;
-
+	
 protected:
+	
+
 	bool bIsActive = false;
 	// 쿨타임 관리
 	FTimerHandle CooldownHandle;
