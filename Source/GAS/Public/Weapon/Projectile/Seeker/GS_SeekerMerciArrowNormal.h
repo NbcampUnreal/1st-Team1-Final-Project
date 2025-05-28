@@ -28,6 +28,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Arrow")
 	float BaseDamage = 10.0f;
 
+	void ChangeArrowType(EArrowType Type);
 	virtual void OnBeginOverlap(
 		UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
