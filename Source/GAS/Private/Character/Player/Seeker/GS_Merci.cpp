@@ -192,17 +192,45 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		SpawnParams.Instigator = this;
 
-		GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRot, SpawnParams);
+		AGS_SeekerMerciArrow* SpawnedArrow =GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRot, SpawnParams);
 
+		// 7. 화살 타입 설정
+		if (AGS_SeekerMerciArrowNormal* NormalArrow = Cast<AGS_SeekerMerciArrowNormal>(SpawnedArrow)) // 연기화살 제외
+		{
+			// 멀티샷일 경우
+			if (NumArrows > 1)
+			{
+				NormalArrow->ChangeArrowType(EArrowType::Normal);
+			}
+			else // 한 발일 경우
+			{
+				NormalArrow->ChangeArrowType(CurrentArrowType);
+			}
+		}
 		// 7. 화살 방향 시각화 (Spread 적용된 방향)
 		//Multicast_DrawDebugLine(SpawnLocation, SpawnLocation + SpreadDir * 1000.f, FColor::Red);
 	}
+}
+
+void AGS_Merci::Server_ChangeArrowType_Implementation(int32 Direction)
+{
+	int32 NumTypes = 3;
+
+	int32 CurrentIndex = static_cast<int32>(CurrentArrowType);
+
+	CurrentIndex = (CurrentIndex + Direction + NumTypes) % NumTypes;
+
+	CurrentArrowType = static_cast<EArrowType>(CurrentIndex);
+
+	UE_LOG(LogTemp, Log, TEXT("Arrow Changed to: %d"), CurrentIndex);
 }
 
 // Called when the game starts or when spawned
 void AGS_Merci::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CurrentArrowType = EArrowType::Normal;
 
 	if (IsLocallyControlled()) // 꼭 필요!
 	{

@@ -6,6 +6,7 @@
 #include "GS_Seeker.h"
 #include "Character/Interface/GS_AttackInterface.h"
 #include "AkGameplayTypes.h"
+#include "Weapon/Projectile/Seeker/GS_SeekerMerciArrowNormal.h"
 #include "GS_Merci.generated.h"
 
 class AGS_SeekerMerciArrow;
@@ -73,6 +74,9 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_DrawDebugLine(FVector Start, FVector End, FColor Color = FColor::Green);
 
+	UFUNCTION(Server, Reliable)
+	void Server_ChangeArrowType(int32 Direction);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -124,4 +128,6 @@ private:
 	void Client_PlaySound(UAkComponent* SoundComp);
 
 	bool bIsFullyDrawn = false;
+
+	EArrowType CurrentArrowType;
 };
