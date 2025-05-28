@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{6DDE30A8-9170-0BFC-C096-4DDD0070BB76}",
+    "Hash": "{795EA8A9-ACC6-336C-8E27-B560A3F610BE}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -405,7 +405,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_flame_extinguish_short_01_burn_fire_flame.wav",
-      "CachePath": "1A/{1AE56785-54D9-9793-74C0-18450B969302}.wem"
+      "CachePath": "30/{3094612E-A4BE-D582-E1E3-227A4455AFA2}.wem"
      },
      {
       "Id": "454704061",
@@ -821,7 +821,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_inflammation_light_02_burn_fire_flame.wav",
-      "CachePath": "33/{335EF1C3-0385-1EB3-AF6C-8D1199FD097D}.wem"
+      "CachePath": "21/{21817537-8D90-0CFC-C1E6-24112A4F18E4}.wem"
      },
      {
       "Id": "928428161",
@@ -1283,7 +1283,7 @@
       "Name": "EV_Fire_Burn",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Burn",
       "GUID": "{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "360",
       "DurationType": "OneShot",
       "DurationMin": "1.3835624",
       "DurationMax": "1.3835624",
@@ -1300,8 +1300,8 @@
       "GUID": "{1261AE45-6B7B-489A-93E1-50AC8218A43C}",
       "MaxAttenuation": "400",
       "DurationType": "OneShot",
-      "DurationMin": "2.2946355",
-      "DurationMax": "2.2946355",
+      "DurationMin": "1.4747763",
+      "DurationMax": "1.4747763",
       "MediaRefs": [
        {
         "Id": "454432692"
@@ -2254,6 +2254,6 @@
     ]
    }
   ],
-  "FileHash": "{E922F9D6-ED04-E84B-20FD-E43D5491B552}"
+  "FileHash": "{2C1D8523-DE08-0492-6334-DAA375A58388}"
  }
 }
