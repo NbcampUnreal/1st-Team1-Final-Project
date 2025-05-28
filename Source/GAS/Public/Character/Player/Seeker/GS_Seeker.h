@@ -3,11 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameFramework/Character.h"
 #include "Character/Player/GS_Player.h"
-#include "Animation/Character/E_SeekerAnim.h"
 #include "GS_Seeker.generated.h"
 
 class UGS_SkillInputHandlerComp;
+class UPostProcessComponent;
+class UMaterialInterface;
+class UGS_StatComp;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -54,25 +57,85 @@ public:
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool GetDrawState();
 
-	/*UFUNCTION(BlueprintCallable)
-	EGait GetGait();*/
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	UChildActorComponent* Weapon;
 	
+	// ================
+	// LowHP 스크린 효과
+	// ================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Effects")
+	UPostProcessComponent* LowHealthPostProcessComp;
+
+	UPROPERTY(EditDefaultsOnly, Category="Effects")
+	UMaterialInterface* LowHealthEffectMaterial;
+	
+	UFUNCTION()
+	void HandleLowHealthEffect(UGS_StatComp* InStatComp);
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	// EndPlay 함수 선언 추가
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
 
-	/*
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
-	EGait Gait;*/
+	// 동적 머티리얼 파라미터 사용
+	UPROPERTY()
+	UMaterialInstanceDynamic* LowHealthDynamicMaterial;
+
+	// 카메라 매니저 참조 추가
+	UPROPERTY()
+	APlayerCameraManager* LocalCameraManager;
+
+	// 카메라 매니저 관련 함수
+	void InitializeCameraManager();
+	void UpdatePostProcessEffect(float EffectStrength);
+
+	// ===================================
+	// LowHP 스크린 효과 (효과 보간 관련 변수)
+	// ===================================
+	UPROPERTY()
+	float TargetEffectStrength;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Effect")
+	float EffectInterpSpeed = 2.0f; // 효과 보간 속도
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Effect")
+	float EffectFadeInSpeed = 1.0f; // 효과 페이드 인 속도
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Effect")
+	float EffectFadeOutSpeed = 0.5f; // 효과 페이드 아웃 속도
+
+	// 리플리케이션 관련 변수
+	UPROPERTY(ReplicatedUsing = OnRep_IsLowHealthEffectActive)
+	bool bIsLowHealthEffectActive;
+	
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentEffectStrength)
+	float CurrentEffectStrength;
+	
+	UFUNCTION()
+	void OnRep_IsLowHealthEffectActive();
+	
+	UFUNCTION()
+	void OnRep_CurrentEffectStrength();
+
+	// 리플리케이션 설정
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	// 머티리얼 파라미터 이름 상수
+	static const FName HPRatioParamName;
+	static const FName EffectIntensityParamName;
 
 private :
 	UPROPERTY(VisibleAnywhere, Category="State")
 	FSeekerState SeekerState;
+
+	// ================
+	// LowHP 스크린 효과
+	// ================
+	UPROPERTY(EditDefaultsOnly, Category="Effects", meta=(ClampMin="0.0", ClampMax="1.0"))
+	float LowHealthThresholdRatio = 0.3f;
 };
