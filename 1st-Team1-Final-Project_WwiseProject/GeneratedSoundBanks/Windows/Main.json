@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{39578FE3-9C4A-943B-A875-B41253655567}",
+    "Hash": "{6DDE30A8-9170-0BFC-C096-4DDD0070BB76}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -661,7 +661,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "waves.wav",
-      "CachePath": "A9/{A97BE36E-CAE5-7C1D-4425-4D510D9A1EF3}.wem"
+      "CachePath": "EB/{EB328C0B-4338-6F79-4660-DBE2B4BB4639}.wem"
      },
      {
       "Id": "755959048",
@@ -1671,6 +1671,7 @@
       "Name": "Play_waves",
       "ObjectPath": "\\Events\\Default Work Unit\\Play_waves",
       "GUID": "{D4D99DFE-1AFF-4742-A8A6-B7C19192CD0A}",
+      "MaxAttenuation": "320",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2253,6 +2254,6 @@
     ]
    }
   ],
-  "FileHash": "{70223316-DE8D-A547-62DF-CD50310A5BFE}"
+  "FileHash": "{B543402C-4333-A55A-05C6-E4AD5EC07B0F}"
  }
 }
