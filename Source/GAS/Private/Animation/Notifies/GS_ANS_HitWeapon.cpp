@@ -17,7 +17,14 @@ void UGS_ANS_HitWeapon::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeque
 	{
 		if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Character->GetCurrentWeapon()))
 		{
-			Weapon->EnableHit();
+			if (Character->HasAuthority())
+			{
+				Weapon->EnableHit();
+			}
+			else
+			{
+				Weapon->Server_SetHitCollision(true);
+			}
 		}
 	}
 }
@@ -34,7 +41,14 @@ void UGS_ANS_HitWeapon::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenc
 	{
 		if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Character->GetCurrentWeapon()))
 		{
-			Weapon->DisableHit();
+			if (Character->HasAuthority())
+			{
+				Weapon->DisableHit();
+			}
+			else
+			{
+				Weapon->Server_SetHitCollision(false);
+			}
 		}
 	}
 }
