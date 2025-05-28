@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{E8BFA0BE-866E-E21D-E67D-5917889FAB38}",
+    "Hash": "{39578FE3-9C4A-943B-A875-B41253655567}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -493,7 +493,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Ambient_Game_Attack_Simple_Heavy_Swing_1_Deep_Hammer_Air_Woosh.wav",
-      "CachePath": "CC/{CC2B8653-8F41-9151-8A79-E17DCC305942}.wem"
+      "CachePath": "C4/{C495D3A3-EF3D-610A-CF20-C294479BCBA1}.wem"
      },
      {
       "Id": "548015621",
@@ -765,7 +765,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fantasy_Game_Action_Collect_Ore_C_Pick_Axe_Impact_Material_Crafting_Accent_Medieval.wav",
-      "CachePath": "45/{45DE6146-1E32-A07F-FAB7-7B98AF947F17}.wem"
+      "CachePath": "04/{04E5B396-FEC4-0D7F-7DB6-BE3E770363AA}.wem"
      },
      {
       "Id": "848033451",
@@ -1108,7 +1108,7 @@
       "Name": "EV_Arrow_Shot",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Arrow_Shot",
       "GUID": "{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "1.6107165",
       "DurationMax": "1.6200471",
@@ -1123,7 +1123,7 @@
       "Name": "EV_ArrowBy",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowBy",
       "GUID": "{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}",
-      "MaxAttenuation": "300",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.75643444",
       "DurationMax": "0.75643444",
@@ -1150,7 +1150,7 @@
       "Name": "EV_ArrowImpact_Body",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Body",
       "GUID": "{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.30958745",
       "DurationMax": "0.32799646",
@@ -1165,7 +1165,7 @@
       "Name": "EV_ArrowImpact_Stone",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Stone",
       "GUID": "{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}",
-      "MaxAttenuation": "900",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.54591566",
       "DurationMax": "0.7596884",
@@ -1201,10 +1201,10 @@
       "Name": "EV_Bow_Pull",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Bow_Pull",
       "GUID": "{70E298F1-D671-45D2-BDB8-C18312B3AFC5}",
-      "MaxAttenuation": "300",
+      "MaxAttenuation": "360",
       "DurationType": "OneShot",
-      "DurationMin": "0.5092074",
-      "DurationMax": "0.81546146",
+      "DurationMin": "0.74920744",
+      "DurationMax": "1.0554614",
       "MediaRefs": [
        {
         "Id": "460690503"
@@ -1222,7 +1222,7 @@
       "Name": "EV_Bow_Realse",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Bow_Realse",
       "GUID": "{77A06439-AF10-4A18-AA52-5B5A3A9E5468}",
-      "MaxAttenuation": "30",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.7148274",
       "DurationMax": "0.75733334",
@@ -1283,7 +1283,7 @@
       "Name": "EV_Fire_Burn",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Burn",
       "GUID": "{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}",
-      "MaxAttenuation": "300",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "1.3835624",
       "DurationMax": "1.3835624",
@@ -1298,7 +1298,7 @@
       "Name": "EV_Fire_Extinguish",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Extinguish",
       "GUID": "{1261AE45-6B7B-489A-93E1-50AC8218A43C}",
-      "MaxAttenuation": "300",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "2.2946355",
       "DurationMax": "2.2946355",
@@ -1535,7 +1535,7 @@
       "Name": "FootSteps",
       "ObjectPath": "\\Events\\Default Work Unit\\FootSteps",
       "GUID": "{ACB43239-CB8C-41BC-9AC2-2E9257233BFE}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.14469069",
       "DurationMax": "1.0886393",
@@ -1683,7 +1683,7 @@
       "Name": "Props_Axe",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe",
       "GUID": "{597B061A-CE0A-4A56-8154-41280E86C596}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "680",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1703,7 +1703,7 @@
       "Name": "Props_Axe_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe_Hit",
       "GUID": "{E6A16F60-3008-4709-B717-1D97F028AB1C}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.6745022",
       "DurationMax": "0.6745022",
@@ -1721,7 +1721,7 @@
       "Name": "Props_BearTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_BearTrap",
       "GUID": "{DCFFA37D-831E-4187-999F-FD2DB425816C}",
-      "MaxAttenuation": "1000",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "1.1340458",
       "DurationMax": "1.1406152",
@@ -1748,7 +1748,7 @@
       "Name": "Props_BearTrap_Out",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_BearTrap_Out",
       "GUID": "{A8F68B4C-166B-47F0-82AB-7DA87701254B}",
-      "MaxAttenuation": "1000",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.3267212",
       "DurationMax": "0.34614906",
@@ -1763,7 +1763,7 @@
       "Name": "Props_CrystalSpike_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalSpike_Hit",
       "GUID": "{36F0066E-709B-487B-AB1C-AAC04B8F753C}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.57722557",
       "DurationMax": "0.61154914",
@@ -1811,7 +1811,7 @@
       "Name": "Props_FlameTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_FlameTrap",
       "GUID": "{E933E0D7-C994-4F16-A665-499CBF190223}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "6.5923166",
       "DurationMax": "6.984317",
@@ -1832,7 +1832,7 @@
       "Name": "Props_Lava",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Lava",
       "GUID": "{6686274F-8432-44ED-A70C-2B145099B0E2}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "720",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1848,7 +1848,7 @@
       "Name": "Props_Lava_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Lava_Hit",
       "GUID": "{714D3788-7B53-452D-9C66-6FC35CD86958}",
-      "MaxAttenuation": "1000",
+      "MaxAttenuation": "400",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1864,7 +1864,7 @@
       "Name": "Props_MineExplode",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_MineExplode",
       "GUID": "{59F8482E-4399-4E6E-B401-0432CFED7550}",
-      "MaxAttenuation": "1500",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "2.3256478",
       "DurationMax": "2.463938",
@@ -1879,7 +1879,7 @@
       "Name": "Props_MineFuse",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_MineFuse",
       "GUID": "{A35527D0-C2F4-47A0-BDE7-2C8FA15D748C}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.47876656",
       "DurationMax": "0.47876656",
@@ -1894,7 +1894,7 @@
       "Name": "Props_MineTick",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_MineTick",
       "GUID": "{74D1A5FF-BF72-4F0B-9EF1-9D75B1CBC0BA}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.09575816",
       "DurationMax": "0.09575816",
@@ -1909,7 +1909,7 @@
       "Name": "Props_Portal",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Portal",
       "GUID": "{9141DA7A-2D2F-449C-88E2-C9754D09EDA8}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "400",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1925,7 +1925,7 @@
       "Name": "Props_Portal_Trigger",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Portal_Trigger",
       "GUID": "{3DFD4CDA-F232-4F79-B00F-324E80CF48AF}",
-      "MaxAttenuation": "700",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "5.0896153",
       "DurationMax": "5.0896153",
@@ -1940,7 +1940,7 @@
       "Name": "Props_Saw",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Saw",
       "GUID": "{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "480.00003",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1953,7 +1953,7 @@
       "Name": "Props_Saw_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Saw_Hit",
       "GUID": "{DFBB5823-D275-437F-99C5-623B934A4616}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "1.5328146",
       "DurationMax": "1.6239605",
@@ -1980,7 +1980,7 @@
       "Name": "Props_Spike",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Spike",
       "GUID": "{87EFA3D2-5892-417F-A875-D06CCD556912}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.57722557",
       "DurationMax": "0.61154914",
@@ -2007,7 +2007,7 @@
       "Name": "Props_StoneTrap_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneTrap_Hit",
       "GUID": "{624349E1-2251-4E0E-8E91-39536798294E}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.4353176",
       "DurationMax": "0.48862755",
@@ -2113,7 +2113,7 @@
       "Name": "Voice_Merci_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Hit",
       "GUID": "{5098E2B9-90BA-4412-987D-8FC0FAE125C3}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.36159804",
       "DurationMax": "0.89162403",
@@ -2150,7 +2150,7 @@
       "Name": "Voice_Merci_Sick",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Sick",
       "GUID": "{7573A416-C37E-4A3F-8DDC-F3B908D97302}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "400",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2253,6 +2253,6 @@
     ]
    }
   ],
-  "FileHash": "{7390F11C-F558-5A51-027C-822C8A4FDF93}"
+  "FileHash": "{70223316-DE8D-A547-62DF-CD50310A5BFE}"
  }
 }
