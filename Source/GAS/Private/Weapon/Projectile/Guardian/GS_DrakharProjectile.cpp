@@ -26,7 +26,7 @@ void AGS_DrakharProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherAct
 	if (IsValid(DamagedCharacter))
 	{
 		FDamageEvent DamageEvent;
-		DamagedCharacter->TakeDamage(100.f, DamageEvent, GetOwner()->GetInstigatorController(), this);
+		DamagedCharacter->TakeDamage(120.f, DamageEvent, GetOwner()->GetInstigatorController(), this);
 	}
 	Destroy();
 }
