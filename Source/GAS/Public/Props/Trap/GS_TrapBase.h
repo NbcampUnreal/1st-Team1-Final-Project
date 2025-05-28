@@ -45,7 +45,7 @@ public:
 	
 
 	//데미지 박스에 오버랩된 플레이어에게 데미지 주는 함수
-	void HandleTrapDamage(AActor* OtherActor);
+	virtual void HandleTrapDamage(AActor* OtherActor);
 	//범위 내의 여러 플레이어에게 한 번에 데미지 주는 함수
 	virtual void HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors);
 	
