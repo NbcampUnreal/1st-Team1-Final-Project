@@ -49,6 +49,9 @@ public:
 	void UpdateGridPreview(uint8 RuneID, const FIntPoint& GridPos);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void UpdateGridVisuals();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void ApplyChanges();
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -109,8 +112,6 @@ protected:
 
 private:
 	float DragVisualOffset;
-
-	void UpdateGridVisuals();
 
 	void BindManagerEvents();
 	void UnbindManagerEvents();

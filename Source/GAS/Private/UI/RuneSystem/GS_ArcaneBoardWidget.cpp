@@ -279,7 +279,17 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 			}
 
 			SelectionVisualWidget->Setup(RuneID, RuneTexture);
-			SelectionVisualWidget->AddToViewport(10000);
+			if (GridCells.Num() > 0)
+			{
+				FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
+				FVector2D BoardSize = this->GetCachedGeometry().GetLocalSize();
+
+				float ScaleFactor = BoardSize.Y / (ViewportSize.Y * 0.8f);
+
+				SelectionVisualWidget->SetRenderScale(FVector2D(ScaleFactor, ScaleFactor));
+			}
+
+			SelectionVisualWidget->AddToViewport(3);
 
 			if (GetWorld())
 			{
