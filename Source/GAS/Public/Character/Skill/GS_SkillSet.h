@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,6 +18,9 @@ struct GAS_API FSkillInfo
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Cooltime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float Damage;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<UAnimMontage*> Montages;

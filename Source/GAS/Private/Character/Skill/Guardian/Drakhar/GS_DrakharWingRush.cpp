@@ -23,11 +23,7 @@ void UGS_DrakharWingRush::ActiveSkill()
 	{
 			Drakhar->ResetComboAttackVariables();
 	}
-	
 	ExecuteSkillEffect();
-	
-	// DashStartLocation = OwnerCharacter->GetActorLocation();
-	// DashEndLocation = DashStartLocation + OwnerCharacter->GetActorForwardVector() * DashPower;
 }
 
 void UGS_DrakharWingRush::ExecuteSkillEffect()

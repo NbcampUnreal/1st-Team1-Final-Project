@@ -14,7 +14,8 @@ class GAS_API UGS_SkillBase : public UObject
 public:
 	ESkillSlot CurrentSkillType;
 	
-	float Cooltime=30.0f;
+	float Cooltime = 30.0f;
+	float Damage = 0.f;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TArray<UAnimMontage*> SkillAnimMontages;
