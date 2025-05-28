@@ -7,6 +7,9 @@
 #include "Components/PostProcessComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Engine/World.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -64,6 +67,9 @@ void AGS_Seeker::BeginPlay()
 	}
 }
 
+const FName AGS_Seeker::HPRatioParamName = TEXT("HPRatio");
+const FName AGS_Seeker::EffectIntensityParamName = TEXT("EffectIntensity");
+
 void AGS_Seeker::InitializeCameraManager()
 {
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -74,7 +80,12 @@ void AGS_Seeker::InitializeCameraManager()
 			LowHealthDynamicMaterial = UMaterialInstanceDynamic::Create(LowHealthEffectMaterial, this);
 			if (LowHealthDynamicMaterial)
 			{
-				// PostProcessComponent에 머티리얼 적용
+				float OutValue = 0.0f;
+				if (!LowHealthDynamicMaterial->GetScalarParameterValue(HPRatioParamName, OutValue))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("HPRatio 파라미터가 머티리얼에 존재하지 않습니다."));
+				}
+				
 				LowHealthPostProcessComp->Settings.WeightedBlendables.Array.Empty();
 				LowHealthPostProcessComp->Settings.AddBlendable(LowHealthDynamicMaterial, 1.0f);
 			}
@@ -100,21 +111,31 @@ void AGS_Seeker::HandleLowHealthEffect(UGS_StatComp* InStatComp)
 	float CurrentHealth = InStatComp->GetCurrentHealth();
 	float MaxHealth = InStatComp->GetMaxHealth();
 	float HealthRatio = CurrentHealth / FMath::Max(1.0f, MaxHealth);
-	HealthRatio = FMath::Clamp(HealthRatio, 0.0f, 1.0f);
 
 	bool bShouldBeLowHealth = HealthRatio <= LowHealthThresholdRatio && CurrentHealth > KINDA_SMALL_NUMBER;
 
 	if (bShouldBeLowHealth)
 	{
-		float EffectStrength = 1.0f - HealthRatio;
-		UpdatePostProcessEffect(EffectStrength);
-		LowHealthPostProcessComp->bEnabled = true;
-		bIsLowHealthEffectActive = true;
+		// 효과 활성화
+		if (!bIsLowHealthEffectActive)
+		{
+			CurrentEffectStrength = 0.0f;
+			bIsLowHealthEffectActive = true;
+			LowHealthPostProcessComp->bEnabled = true;
+		}
+		TargetEffectStrength = 1.0f - HealthRatio;
 	}
 	else
 	{
-		LowHealthPostProcessComp->bEnabled = false;
-		bIsLowHealthEffectActive = false;
+		// HP가 임계값 이상으로 회복되면 효과 즉시 OFF
+		if (bIsLowHealthEffectActive)
+		{
+			bIsLowHealthEffectActive = false;
+			TargetEffectStrength = 0.0f;
+			CurrentEffectStrength = 0.0f;
+			UpdatePostProcessEffect(0.0f);
+			LowHealthPostProcessComp->bEnabled = false;
+		}
 	}
 }
 
@@ -141,8 +162,25 @@ void AGS_Seeker::Tick(float DeltaTime)
 			float HealthRatio = OwnerStatComp->GetCurrentHealth() / FMath::Max(1.0f, OwnerStatComp->GetMaxHealth());
 			HealthRatio = FMath::Clamp(HealthRatio, 0.0f, 1.0f);
 			
-			float EffectStrength = 1.0f - HealthRatio;
-			UpdatePostProcessEffect(EffectStrength);
+			// 목표 효과 강도 계산
+			TargetEffectStrength = 1.0f - HealthRatio;
+			
+			// 부드러운 보간
+			CurrentEffectStrength = FMath::FInterpTo(
+				CurrentEffectStrength,
+				TargetEffectStrength,
+				DeltaTime,
+				EffectInterpSpeed
+			);
+			
+			UpdatePostProcessEffect(CurrentEffectStrength);
+
+			// 효과가 충분히 작아지면 PostProcess 비활성화
+			if (!bIsLowHealthEffectActive && CurrentEffectStrength < KINDA_SMALL_NUMBER)
+			{
+				LowHealthPostProcessComp->bEnabled = false;
+				UpdatePostProcessEffect(0.0f); // 혹시 모를 잔상 방지
+			}
 		}
 	}
 }
@@ -156,5 +194,26 @@ void AGS_Seeker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	{
 		SkillInputHandlerComponent->SetupEnhancedInput(PlayerInputComponent);
 	}
+}
+
+void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AGS_Seeker, bIsLowHealthEffectActive);
+	DOREPLIFETIME(AGS_Seeker, CurrentEffectStrength);
+}
+
+void AGS_Seeker::OnRep_IsLowHealthEffectActive()
+{
+	if (LowHealthPostProcessComp)
+	{
+		LowHealthPostProcessComp->bEnabled = bIsLowHealthEffectActive;
+	}
+}
+
+void AGS_Seeker::OnRep_CurrentEffectStrength()
+{
+	UpdatePostProcessEffect(CurrentEffectStrength);
 }
 
