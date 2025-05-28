@@ -93,6 +93,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	UAkComponent* AkComponent;
 
+	// 사운드 재생 함수들
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlaySound(UAkAudioEvent* SoundEvent);
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPostEventCallback& Callback);
+
 	// 오디오 관련 함수들
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void SetupLocalAudioListener();
@@ -100,9 +107,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	bool IsLocalPlayer() const;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlaySkillMontage(UAnimMontage* Montage);
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+	virtual void PlaySkillMontage(UAnimMontage* Montage);
+
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FCharacterWantsToMove GetWantsToMove();
 };

@@ -1,8 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "System/GameState/GS_InGameGS.h"
 #include "Net/UnrealNetwork.h"
+#include "System/GameMode/GS_InGameGM.h"
+#include "Kismet/GameplayStatics.h"
 
 AGS_InGameGS::AGS_InGameGS()
 {
@@ -33,7 +32,18 @@ void AGS_InGameGS::UpdateGameTime()
 
 	if (CurrentTime >= TotalGameTime)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Game Over Time: %f"), CurrentTime);
+		if (GameTimeHandle.IsValid() && GetWorldTimerManager().IsTimerActive(GameTimeHandle))
+		{
+			UE_LOG(LogTemp, Error, TEXT("AGS_InGameGS: Game Over Time: %f. Notifying GameMode."), CurrentTime);
+
+			GetWorldTimerManager().ClearTimer(GameTimeHandle);
+
+			AGS_InGameGM* GM = GetWorld()->GetAuthGameMode<AGS_InGameGM>();
+			if (GM)
+			{
+				GM->OnTimerEnd();
+			}
+		}
 	}
 }
 

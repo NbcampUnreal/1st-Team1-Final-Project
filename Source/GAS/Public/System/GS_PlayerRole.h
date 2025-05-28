@@ -26,3 +26,11 @@ enum class EGuardianJob : uint8
     GJ_Job1     UMETA(DisplayName = "Guardian Job 1"),
     GJ_Job2     UMETA(DisplayName = "Guardian Job 2")
 };
+
+UENUM(BlueprintType)
+enum class EGameResult : uint8
+{
+    GR_InProgress   UMETA(DisplayName = "In Progress"),
+    GR_SeekersWon   UMETA(DisplayName = "Seekers Won"),
+    GR_SeekersLost  UMETA(DisplayName = "Seekers Lost")
+};

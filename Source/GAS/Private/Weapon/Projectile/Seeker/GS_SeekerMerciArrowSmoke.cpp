@@ -15,7 +15,7 @@ void AGS_SeekerMerciArrowSmoke::OnBeginOverlap(UPrimitiveComponent* OverlappedCo
 		SpawnSmokeArea(SweepResult.ImpactPoint);
 		StickWithVisualOnly(SweepResult);
 	}
-	else if (TargetType == ETargetType::Etc)
+	else if (TargetType == ETargetType::Structure)
 	{
 		SpawnSmokeArea(SweepResult.ImpactPoint);
 	}

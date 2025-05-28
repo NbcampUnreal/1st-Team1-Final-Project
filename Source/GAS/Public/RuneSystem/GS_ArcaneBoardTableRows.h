@@ -30,7 +30,7 @@ struct FRuneTableRow : public FTableRowBase
 	TSoftObjectPtr<UTexture2D> RuneTexture;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FStatEffect FStatEffect;
+	FStatEffect StatEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsPlaced;

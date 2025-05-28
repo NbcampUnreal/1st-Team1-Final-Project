@@ -10,22 +10,7 @@
 
 UGS_MerciSkillInputHandlerComp::UGS_MerciSkillInputHandlerComp()
 {
-	static ConstructorHelpers::FClassFinder<AGS_SeekerMerciArrow> ArrowBP(TEXT("/Game/Weapons/Blueprints/BP_SeekerMerciArrowNormal"));
-	if (ArrowBP.Succeeded())
-	{
-		ArrowClass = ArrowBP.Class;
-		
-	}
-	else
-	{
-		
-	}
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> Montage(TEXT("/Game/Player/Seeker/Merci/Animation/AnimSequence/WithBow/StandingDrawArrow/AM_MerciDraw"));
-	if (Montage.Succeeded())
-	{
-		SkillAnimMontages = Montage.Object;
-	}
 }
 
 void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
@@ -49,7 +34,10 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 	if (!bCtrlHeld)
 	{
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-		MerciCharacter->LeftClickPressedAttack(SkillAnimMontages);
+		if(MerciCharacter->ComboSkillDrawMontage)
+		{
+			MerciCharacter->DrawBow(MerciCharacter->ComboSkillDrawMontage);
+		}
 	}
 	else
 	{
@@ -76,7 +64,10 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 	if (!bCtrlHeld)
 	{
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-		MerciCharacter->LeftClickReleaseAttack(ArrowClass);
+		if (MerciCharacter->NormalArrowClass)
+		{
+			MerciCharacter->ReleaseArrow(MerciCharacter->NormalArrowClass);
+		}
 	}
 	else
 	{

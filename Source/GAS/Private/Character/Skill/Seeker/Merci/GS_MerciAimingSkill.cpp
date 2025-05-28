@@ -7,31 +7,48 @@
 
 UGS_MerciAimingSkill::UGS_MerciAimingSkill()
 {
-	static ConstructorHelpers::FClassFinder<AGS_SeekerMerciArrow> ArrowBP(TEXT("/Game/Weapons/Blueprints/BP_SeekerMerciArrowNormal"));
-	if (ArrowBP.Succeeded())
-	{
-		ArrowClass = ArrowBP.Class;
-		UE_LOG(LogTemp, Warning, TEXT("ArrowClass loaded: %s"), *ArrowClass->GetName());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("ArrowClass load failed!"));
-	}
 }
 
 void UGS_MerciAimingSkill::ActiveSkill()
 {
-	if (!CanActive()) return;
-	Super::ActiveSkill();
-
+	if (!CanActiveInternally())
+	{
+		bPressedDuringCooldown = true;
+		return;
+	}
+	
+	// 유효 입력이므로 무효 입력 플래그 해제
+	bPressedDuringCooldown = false;
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	MerciCharacter->SetDrawState(false);
-	UE_LOG(LogTemp, Warning, TEXT("ActiveSkill : %s"), *SkillAnimMontages[0]->GetName());
-	MerciCharacter->LeftClickPressedAttack(SkillAnimMontages[0]);
+	MerciCharacter->DrawBow(SkillAnimMontages[0]);
 }
 
 void UGS_MerciAimingSkill::OnSkillCommand()
 {
+	if (!CanActiveInternally() || bPressedDuringCooldown)
+	{
+		return;
+	}
+
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-	MerciCharacter->LeftClickReleaseAttack(ArrowClass, 15.0f, 4);
+	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
+	if(MerciCharacter->NormalArrowClass)
+	{
+		MerciCharacter->ReleaseArrow(MerciCharacter->NormalArrowClass, 15.0f, 4);
+	}
+	if(IsFullyDrawn)
+	{
+		StartCoolDown();
+	}
+}
+
+bool UGS_MerciAimingSkill::CanActive() const
+{
+	return true;
+}
+
+bool UGS_MerciAimingSkill::CanActiveInternally() const
+{
+	return OwnerCharacter && !bIsCoolingDown;
 }

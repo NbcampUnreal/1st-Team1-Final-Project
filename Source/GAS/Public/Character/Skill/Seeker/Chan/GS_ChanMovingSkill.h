@@ -21,6 +21,5 @@ public:
 protected:
 	// 공격
 	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target) override;
-	virtual void ApplyEffectToGuardian(AGS_Guardian* Target) override;
-	
+	virtual void ApplyEffectToGuardian(AGS_Guardian* Target) override;	
 };

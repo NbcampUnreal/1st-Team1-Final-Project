@@ -66,6 +66,15 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName WeaponAxeName = "Axe";
 
+	// ===============
+	// 전용 공격 사운드
+	// ===============
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
+	UAkAudioEvent* AxeSwingSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Voice")
+	UAkAudioEvent* AttackVoiceSound;
+
 	template <typename T>
 	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);
 

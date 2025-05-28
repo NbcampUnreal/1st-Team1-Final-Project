@@ -443,7 +443,62 @@
 										<Action Name="" ID="{C7D3518C-22B4-49F7-BAB6-5A69E97759D0}" ShortID="1068866103">
 											<ReferenceList>
 												<Reference Name="Target">
-													<ObjectRef Name="SFX_Sick" ID="{18CE2D14-C053-4977-847A-B7147EB374A5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+													<ObjectRef Name="SFX_MerciSick" ID="{18CE2D14-C053-4977-847A-B7147EB374A5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Chan_Move" ID="{FA35E9E7-77DD-410B-83DE-BD9F2372CDE5}">
+									<ChildrenList>
+										<Action Name="" ID="{9B53B720-C3E3-4912-8C97-68DAAC55C38A}" ShortID="966989016">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="MoveSound" ID="{3543D7BE-CBA5-47D0-88AD-87E92946B8AF}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Chan_Attack" ID="{241C638E-B089-4989-827A-E6D31828D946}">
+									<ChildrenList>
+										<Action Name="" ID="{861E6B26-0B94-466A-A18A-E76BC8DBFD9E}" ShortID="1019286774">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="AttackSound" ID="{0FAC94E7-2F25-48B7-992D-1AEC462E1555}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="Voice_Chan_Attack" ID="{EBADCE3E-03AD-4CE6-8FD3-AA2B341B5AF0}">
+									<ChildrenList>
+										<Action Name="" ID="{85C7E0A9-F11E-4F19-AD54-72858033EC51}" ShortID="1025223510">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="AttackSound_Voice" ID="{C87D2CD4-68EF-4CC3-A952-E30BEB0BB41D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="Voice_Chan_Hit" ID="{0473682A-3932-4A2B-B275-C5D3FFFCEDCC}">
+									<ChildrenList>
+										<Action Name="" ID="{B5C4219E-E896-4CF4-80AC-89C30A4701FF}" ShortID="668745111">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_Chan_Hit" ID="{90838E57-C7FE-4B16-B1D5-1CDC25F6BF4D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="Voice_Chan_Sick" ID="{E1DDF8F5-475F-4246-811D-FF8BB1D8636C}">
+									<ChildrenList>
+										<Action Name="" ID="{20860976-0936-475C-AD36-523C3F674023}" ShortID="662819928">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_ChanSick" ID="{67DF5CEC-5E49-4F32-AB14-6164E018E873}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>

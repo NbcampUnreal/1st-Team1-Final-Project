@@ -41,24 +41,37 @@ public:
 	USkeletalMeshComponent* Quiver;
 
 	UFUNCTION(BlueprintCallable)
-	void LeftClickPressedAttack(UAnimMontage* DrawMontage);
+	void DrawBow(UAnimMontage* DrawMontage);
 
 	UFUNCTION(BlueprintCallable)
-	void LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
+	void ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
 	UFUNCTION(Server, Reliable)
-	void Server_LeftClickPressedAttack(UAnimMontage* DrawMontage);
+	void Server_DrawBow(UAnimMontage* DrawMontage);
 
 	UFUNCTION(Server, Reliable)
-	void Server_LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
+	void Server_ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
 	UFUNCTION(Server, Reliable)
 	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AGS_SeekerMerciArrow> NormalArrowClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AGS_SeekerMerciArrow> SmokeArrowClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* ComboSkillDrawMontage;
 
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyDrawMontageEnded();
 
 	void OnDrawMontageEnded();
+	
+	bool GetIsFullyDrawn() { return bIsFullyDrawn; }
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_DrawDebugLine(FVector Start, FVector End, FColor Color = FColor::Green);
 
 protected:
 	// Called when the game starts or when spawned
@@ -73,29 +86,22 @@ protected:
 	UFUNCTION()
 	void UpdateZoom(float Alpha);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Audio")
-	class UAkAudioEvent* ArrowShotSound_C;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
-	UAkComponent* ShotSoundComp;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
-	UAkComponent* PullSoundComp;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
-	UAkComponent* ReleaseSoundComp;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* BowPullEvent;
+    class UAkAudioEvent* ArrowShotSound_C;
 
-	/*UFUNCTION()
-	void PlayBowPullSound(UAkComponent* AkComp);*/
+	// 활 관련 사운드
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
+	UAkAudioEvent* BowPullSound; // 활 당길 때(클릭)
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
+	UAkAudioEvent* BowReleaseSound; // 활 놓을 때(릴리즈)
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
+	UAkAudioEvent* ArrowShotSound; // 활 놓을 때(릴리즈)
 
 private:
 	bool bWidgetVisibility = false;
 	USkeletalMeshComponent* Mesh;
-
-	
 
 	void PlayDrawMontage(UAnimMontage* DrawMontage);
 
@@ -116,4 +122,6 @@ private:
 
 	UFUNCTION(Client, Reliable)
 	void Client_PlaySound(UAkComponent* SoundComp);
+
+	bool bIsFullyDrawn = false;
 };

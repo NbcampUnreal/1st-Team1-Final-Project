@@ -21,12 +21,12 @@ public:
 
 	
 protected:
-	FTimerHandle DashTimer;
-	FVector DashStartLocation;
-	FVector DashEndLocation;
-	
-	float DashRemainTime;
-	float DashPower;
+	// FTimerHandle DashTimer;
+	// FVector DashStartLocation;
+	// FVector DashEndLocation;
+	//
+	// float DashRemainTime;
+	// float DashPower;
 
 	//float DashInterpAlpha;
 	//int32 Activeid;

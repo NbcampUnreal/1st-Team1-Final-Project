@@ -12,6 +12,8 @@ void UGS_ChanMovingSkill::ActiveSkill()
 {
 	if (!CanActive()) return;
 	Super::ActiveSkill();
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 	ExecuteSkillEffect();
 }
 
@@ -25,17 +27,6 @@ void UGS_ChanMovingSkill::ExecuteSkillEffect()
 	FCollisionShape Shape = FCollisionShape::MakeSphere(Radius);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
-
-	// 디버그: 캐릭터를 중심으로 원을 그림
-	DrawDebugSphere(
-		GetWorld(),
-		Center,
-		Radius,
-		16,
-		FColor::Red,
-		false,
-		1.f
-	);
 
 	// 캐릭터를 중심으로 한 지점에 고정된 SphereOverlap
 	if (GetWorld()->SweepMultiByChannel(HitResults, Center, Center, FQuat::Identity, ECC_Pawn, Shape, Params))

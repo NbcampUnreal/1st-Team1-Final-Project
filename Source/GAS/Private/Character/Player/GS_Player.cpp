@@ -1,12 +1,8 @@
 #include "Character/Player/GS_Player.h"
-
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Kismet/GameplayStatics.h"
-#include "AkAudioDevice.h"
 
 AGS_Player::AGS_Player()
 {
@@ -154,6 +150,15 @@ void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void AGS_Player::PlaySkillMontage(UAnimMontage* Montage)
+{
+	if (this->GetMesh() && Montage)
+	{
+		this->GetMesh()->GetAnimInstance()->Montage_Play(Montage);
+		UE_LOG(LogTemp, Warning, TEXT("Skill Montage Play!!!!!!!!!!!!!!"));
+	}
+}
+
 FCharacterWantsToMove AGS_Player::GetWantsToMove()
 {
 	return WantsToMove;
@@ -188,4 +193,31 @@ bool AGS_Player::IsLocalPlayer() const
 		return PC->IsLocalController();
 	}
 	return false;
+}
+
+void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage)
+{
+	PlaySkillMontage(Montage);
+}
+
+void AGS_Player::PlaySound(UAkAudioEvent* SoundEvent)
+{
+	if (!AkComponent || !SoundEvent)
+	{
+		UE_LOG(LogAudio, Warning, TEXT("AkComponent or SoundEvent is null in PlaySound"));
+		return;
+	}
+
+	AkComponent->PostAkEvent(SoundEvent);
+}
+
+void AGS_Player::PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPostEventCallback& Callback)
+{
+	if (!AkComponent || !SoundEvent)
+	{
+		UE_LOG(LogAudio, Warning, TEXT("AkComponent or SoundEvent is null in PlaySoundWithCallback"));
+		return;
+	}
+
+	AkComponent->PostAkEvent(SoundEvent, 0, Callback);
 }

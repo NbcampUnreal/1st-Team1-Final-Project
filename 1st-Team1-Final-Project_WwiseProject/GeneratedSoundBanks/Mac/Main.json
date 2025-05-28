@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{2BA8CB49-A4C8-19E7-3E75-8A5187A7C71C}",
+    "Hash": "{E8BFA0BE-866E-E21D-E67D-5917889FAB38}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -96,6 +96,14 @@
       "CachePath": "65/{65019945-3BB6-6A43-0831-6B8CC7FF5E38}.wem"
      },
      {
+      "Id": "116836280",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Jump_4_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "CF/{CF893FFF-1F00-BC29-3226-B3FE95C0B970}.wem"
+     },
+     {
       "Id": "120977185",
       "Language": "SFX",
       "Streaming": "false",
@@ -142,6 +150,14 @@
       "Location": "Memory",
       "ShortName": "SFX_GrenadeTick.wav",
       "CachePath": "78/{783A3204-F3A4-EE0B-047A-830C3280BA2A}.wem"
+     },
+     {
+      "Id": "177115164",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Groaning_Sequence_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "87/{87A20826-00EF-F4F9-2444-BE0B31ED900A}.wem"
      },
      {
       "Id": "177130386",
@@ -224,6 +240,14 @@
       "CachePath": "18/{187CAB32-5A2A-EEE7-E7FF-CAF853A2F032}.wem"
      },
      {
+      "Id": "278485591",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Empire_Game_Footsteps_Single_Metal_Armor_Movement_Knight_Walking_Marching_Foely.wav",
+      "CachePath": "57/{57BEFD3C-FD4D-C2AD-9D7B-FDF61CE2EBA1}.wem"
+     },
+     {
       "Id": "282287949",
       "Language": "SFX",
       "Streaming": "false",
@@ -286,6 +310,14 @@
       "Location": "Memory",
       "ShortName": "TorchFlicker.wav",
       "CachePath": "55/{559E03B1-4932-EBDC-CFF5-88FD3CA8B894}.wem"
+     },
+     {
+      "Id": "369405294",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "DD/{DD70A6D1-2A33-A992-390C-CD75E3CAB902}.wem"
      },
      {
       "Id": "373316616",
@@ -496,6 +528,14 @@
       "CachePath": "C1/{C1E7FFF6-4ED9-0743-C0CF-0A9CB01DD0C3}.wem"
      },
      {
+      "Id": "579496560",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Groan_11_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "CB/{CB3371A0-66F8-C18D-C0B5-B45534D19E1B}.wem"
+     },
+     {
       "Id": "595941273",
       "Language": "SFX",
       "Streaming": "false",
@@ -536,6 +576,22 @@
       "CachePath": "96/{96300078-EC08-B39A-D34F-1F977C3540F7}.wem"
      },
      {
+      "Id": "640069506",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_DGF_fx_foley_footstep_concrete_warrior_walk_heavy_armor_slow_01.wav",
+      "CachePath": "D4/{D4329BBE-B163-DDCA-7AEE-F6BB97E99CA3}.wem"
+     },
+     {
+      "Id": "647807090",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_quick.wav",
+      "CachePath": "A2/{A2CA8514-543B-3BFD-B770-7FD8088F2B03}.wem"
+     },
+     {
       "Id": "660206576",
       "Language": "SFX",
       "Streaming": "false",
@@ -574,6 +630,14 @@
       "Location": "Memory",
       "ShortName": "ArrowBy_BW.54273.wav",
       "CachePath": "A7/{A793D2E2-DCF5-5582-7F08-A334538F83FA}.wem"
+     },
+     {
+      "Id": "732424984",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Grunt_13_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "98/{98AEAE2B-466C-3662-1E52-6D03F49F099E}.wem"
      },
      {
       "Id": "733375653",
@@ -688,6 +752,22 @@
       "CachePath": "94/{9430C832-A863-9D75-0F48-765805421492}.wem"
      },
      {
+      "Id": "829321492",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Coughing_1_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "EF/{EF411331-C6CC-8D7A-6976-08E989567375}.wem"
+     },
+     {
+      "Id": "844797285",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fantasy_Game_Action_Collect_Ore_C_Pick_Axe_Impact_Material_Crafting_Accent_Medieval.wav",
+      "CachePath": "45/{45DE6146-1E32-A07F-FAB7-7B98AF947F17}.wem"
+     },
+     {
       "Id": "848033451",
       "Language": "SFX",
       "Streaming": "false",
@@ -726,6 +806,14 @@
       "Location": "Memory",
       "ShortName": "GlassBreakWine_SFXB.2343.wav",
       "CachePath": "F2/{F22E99BC-892E-46EC-D1C3-7DA86EA5F9F8}.wem"
+     },
+     {
+      "Id": "914961834",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_broadsword_impact_shield_metal.wav",
+      "CachePath": "22/{22E12FE5-A3CB-9E54-038A-04490012574B}.wem"
      },
      {
       "Id": "919997465",
@@ -784,6 +872,14 @@
       "CachePath": "EA/{EA7E8CD3-7DE7-F01C-7693-5637D7851CC2}.wem"
      },
      {
+      "Id": "992284103",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Grunt_4_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "08/{08C340F8-D70B-1F96-749C-AB6CC4446C7A}.wem"
+     },
+     {
       "Id": "995426383",
       "Language": "SFX",
       "Streaming": "false",
@@ -822,6 +918,14 @@
       "Location": "Memory",
       "ShortName": "Footstep_Grass (4).wav",
       "CachePath": "72/{72800A1A-7261-FD60-8F95-A01A6B9E5295}.wem"
+     },
+     {
+      "Id": "1054283662",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fantasy_Game_Action_Collect_Ore_C_Pick_Axe_Impact_Material_Crafting_Accent_Medieval.wav",
+      "CachePath": "B3/{B30D5C21-F12E-6A4A-4B40-FE91E0CEB3D2}.wem"
      },
      {
       "Id": "1069660761",
@@ -875,6 +979,14 @@
        "LibId": "8519683"
       },
       {
+       "Id": "246667213",
+       "Name": "Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Chan\\SFX_ChanSick\\Heartbeat\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "GUID": "{39B077D1-ACA4-4897-967D-D3F9D0521EDB}",
+       "LibName": "Wwise Time Stretch",
+       "LibId": "8519683"
+      },
+      {
        "Id": "251314527",
        "Name": "Pitch Shifter (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Merci\\Voice_Merci_Hit\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
@@ -885,7 +997,7 @@
       {
        "Id": "266675917",
        "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Merci\\SFX_Sick\\Heartbeat\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Merci\\SFX_MerciSick\\Heartbeat\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{916168E5-E202-42D9-B331-43F94CE1206D}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
@@ -956,6 +1068,14 @@
       }
      ],
      "ShareSets": [
+      {
+       "Id": "1724990773",
+       "Name": "New_Time_Stretch",
+       "ObjectPath": "\\Effects\\Default Work Unit\\New_Time_Stretch",
+       "GUID": "{7BC846C7-52C7-4F99-BE4C-668A26D5387A}",
+       "LibName": "Wwise Time Stretch",
+       "LibId": "8519683"
+      },
       {
        "Id": "2652646462",
        "Name": "Dialog_Leveler_Soft",
@@ -1045,7 +1165,7 @@
       "Name": "EV_ArrowImpact_Stone",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Stone",
       "GUID": "{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "900",
       "DurationType": "OneShot",
       "DurationMin": "0.54591566",
       "DurationMax": "0.7596884",
@@ -1109,6 +1229,52 @@
       "MediaRefs": [
        {
         "Id": "797000384"
+       }
+      ]
+     },
+     {
+      "Id": "2754704106",
+      "Name": "EV_Chan_Attack",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_Chan_Attack",
+      "GUID": "{241C638E-B089-4989-827A-E6D31828D946}",
+      "MaxAttenuation": "350",
+      "DurationType": "OneShot",
+      "DurationMin": "0.8429317",
+      "DurationMax": "1.0250889",
+      "MediaRefs": [
+       {
+        "Id": "647807090"
+       },
+       {
+        "Id": "914961834"
+       }
+      ],
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "1724990773"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "680941589",
+      "Name": "EV_Chan_Move",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_Chan_Move",
+      "GUID": "{FA35E9E7-77DD-410B-83DE-BD9F2372CDE5}",
+      "MaxAttenuation": "400",
+      "DurationType": "OneShot",
+      "DurationMin": "0.5410953",
+      "DurationMax": "0.59006864",
+      "MediaRefs": [
+       {
+        "Id": "278485591"
+       },
+       {
+        "Id": "640069506"
+       },
+       {
+        "Id": "1054283662"
        }
       ]
      },
@@ -1517,7 +1683,7 @@
       "Name": "Props_Axe",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe",
       "GUID": "{597B061A-CE0A-4A56-8154-41280E86C596}",
-      "MaxAttenuation": "100",
+      "MaxAttenuation": "800",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1841,7 +2007,7 @@
       "Name": "Props_StoneTrap_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneTrap_Hit",
       "GUID": "{624349E1-2251-4E0E-8E91-39536798294E}",
-      "MaxAttenuation": "100",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "0.4353176",
       "DurationMax": "0.48862755",
@@ -1856,7 +2022,7 @@
       "Name": "Props_Torch",
       "ObjectPath": "\\Events\\Default Work Unit\\Props_Torch",
       "GUID": "{0FE8AE3D-0C62-4903-9226-37A060EB1543}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "450",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1873,6 +2039,74 @@
       "DurationType": "OneShot",
       "DurationMin": "0",
       "DurationMax": "0"
+     },
+     {
+      "Id": "197987059",
+      "Name": "Voice_Chan_Attack",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Attack",
+      "GUID": "{EBADCE3E-03AD-4CE6-8FD3-AA2B341B5AF0}",
+      "MaxAttenuation": "400",
+      "DurationType": "OneShot",
+      "DurationMin": "0.4243262",
+      "DurationMax": "0.50989586",
+      "MediaRefs": [
+       {
+        "Id": "369405294"
+       },
+       {
+        "Id": "992284103"
+       }
+      ]
+     },
+     {
+      "Id": "3237405698",
+      "Name": "Voice_Chan_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Hit",
+      "GUID": "{0473682A-3932-4A2B-B275-C5D3FFFCEDCC}",
+      "MaxAttenuation": "400",
+      "DurationType": "OneShot",
+      "DurationMin": "0.4965172",
+      "DurationMax": "0.8445003",
+      "MediaRefs": [
+       {
+        "Id": "116836280"
+       },
+       {
+        "Id": "177115164"
+       },
+       {
+        "Id": "579496560"
+       },
+       {
+        "Id": "732424984"
+       },
+       {
+        "Id": "844797285"
+       }
+      ]
+     },
+     {
+      "Id": "524349233",
+      "Name": "Voice_Chan_Sick",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Sick",
+      "GUID": "{E1DDF8F5-475F-4246-811D-FF8BB1D8636C}",
+      "MaxAttenuation": "600",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "399735935"
+       },
+       {
+        "Id": "829321492"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "246667213"
+        }
+       ]
+      }
      },
      {
       "Id": "2915263918",
@@ -2019,6 +2253,6 @@
     ]
    }
   ],
-  "FileHash": "{7C84C1D9-1EBA-97BC-8CB3-0783500FD12B}"
+  "FileHash": "{831904E4-4CF8-02D9-CA68-248BF38E586A}"
  }
 }

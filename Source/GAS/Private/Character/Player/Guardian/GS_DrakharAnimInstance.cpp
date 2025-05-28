@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
 
@@ -52,4 +49,9 @@ void UGS_DrakharAnimInstance::AnimNotify_EarthquakeCheck()
 void UGS_DrakharAnimInstance::AnimNotify_DraconicFury()
 {
 	Drakhar->ServerRPCSpawnDraconicFury();
+}
+
+void UGS_DrakharAnimInstance::AnimNotify_SkillStop()
+{
+	Drakhar->ServerRPCStopSkill();
 }

@@ -20,6 +20,10 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Mesh")
 	USkeletalMeshComponent* AxeMeshComponent;
 
+	// 히트 사운드
+	//UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	//UAkAudioEvent* HitSound;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
