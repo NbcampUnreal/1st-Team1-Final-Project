@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Character/Player/GS_Player.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "NiagaraComponent.h"
 #include "GS_Seeker.generated.h"
 
 class UGS_SkillInputHandlerComp;
@@ -66,11 +68,23 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Effects")
 	UPostProcessComponent* LowHealthPostProcessComp;
 
-	UPROPERTY(EditDefaultsOnly, Category="Effects")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	UMaterialInterface* LowHealthEffectMaterial;
 	
 	UFUNCTION()
 	void HandleLowHealthEffect(UGS_StatComp* InStatComp);
+
+	// ================
+	// 함정 VFX 컴포넌트
+	// ================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="VFX")
+	UNiagaraComponent* FeetLavaVFX_L;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="VFX")
+	UNiagaraComponent* FeetLavaVFX_R;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="VFX")
+	UNiagaraComponent* BodyLavaVFX;
 
 protected:
 	// Called when the game starts or when spawned

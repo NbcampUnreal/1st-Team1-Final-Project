@@ -10,6 +10,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
+#include "NiagaraComponent.h"
 
 
 // Sets default values
@@ -23,6 +24,23 @@ AGS_Seeker::AGS_Seeker()
 	LowHealthPostProcessComp->SetupAttachment(CameraComp);
 	LowHealthPostProcessComp->bEnabled = false;
 	LowHealthPostProcessComp->Priority = 10; // 다른 PP보다 높게 설정하여 우선 적용
+
+	// Fire Effect 생성 및 설정
+	FeetLavaVFX_L = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_L"));
+	FeetLavaVFX_L->SetupAttachment(GetMesh(), FName("foot_l_Socket"));
+	FeetLavaVFX_L->bAutoActivate = false;
+	FeetLavaVFX_L->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+
+	FeetLavaVFX_R = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_R"));
+	FeetLavaVFX_R->SetupAttachment(GetMesh(), FName("foot_r_Socket"));
+	FeetLavaVFX_R->bAutoActivate = false;
+	FeetLavaVFX_R->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+
+	BodyLavaVFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BodyLavaVFX"));
+	BodyLavaVFX->SetupAttachment(GetMesh(), FName("spine_03"));
+	BodyLavaVFX->bAutoActivate = false;
+	BodyLavaVFX->SetRelativeLocation(FVector(-60.f, 0.f, 0.f));
+	BodyLavaVFX->SetRelativeRotation(FRotator(-90.f, 0.f, 0.f));
 }
 
 void AGS_Seeker::SetAimState(bool IsAim)
