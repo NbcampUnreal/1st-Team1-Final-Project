@@ -4,6 +4,11 @@
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
 #include "Character/Player/GS_Player.h"
 
+UGS_ChanUltimateSkill::UGS_ChanUltimateSkill()
+{
+	CurrentSkillType = ESkillSlot::Ultimate;
+}
+
 void UGS_ChanUltimateSkill::ActiveSkill()
 {
 	if (!CanActive()) return;

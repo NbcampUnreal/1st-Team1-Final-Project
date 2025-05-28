@@ -6,6 +6,7 @@
 #include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
 #include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "Components/ScrollBox.h"
+#include "Components/TextBlock.h"
 
 UGS_RuneInventoryWidget::UGS_RuneInventoryWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -67,6 +68,9 @@ void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager, 
 			}
 		}
 	}
+
+	int32 TotalRuneCnt = OwnsRuneList.Num();
+	RuneCntText->SetText(FText::AsNumber(TotalRuneCnt));
 }
 
 bool UGS_RuneInventoryWidget::UpdatePlacedStateOfRune(uint8 RuneID, bool bIsPlaced)

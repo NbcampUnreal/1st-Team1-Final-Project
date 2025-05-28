@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "GS_TrapData.h"
+#include "Character/GS_Character.h"
 #include "GS_TrapBase.generated.h"
 
 class UBoxComponent;
@@ -35,10 +36,14 @@ public:
 	UDataTable* TrapDataTable;
 
 	FTrapData TrapData;
-
+	
 	
 	void LoadTrapData();
+
+
+	bool IsBlockedInDirection(const FVector& Start, const FVector& Direction, float Distance, AGS_Character* CharacterToIgnore);
 	
+
 	//데미지 박스에 오버랩된 플레이어에게 데미지 주는 함수
 	void HandleTrapDamage(AActor* OtherActor);
 	//범위 내의 여러 플레이어에게 한 번에 데미지 주는 함수
@@ -76,6 +81,13 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void CustomTrapEffect(AActor* TargetActor);
 	void CustomTrapEffect_Implementation(AActor* TargetActor);
+
+
+	UFUNCTION(BlueprintCallable, Category="Trap")
+	void PushCharacterInBox(UBoxComponent* CollisionBox, float PushPower = 600.0f);
+
+
+	
 protected:
 
 	virtual void BeginPlay() override;

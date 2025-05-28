@@ -14,6 +14,8 @@ class GAS_API UGS_ChanUltimateSkill : public UGS_SeekerSkillBase
 {
 	GENERATED_BODY()
 	
+public:
+	UGS_ChanUltimateSkill();
 	virtual void ActiveSkill() override;
 	virtual void ExecuteSkillEffect() override;
 };

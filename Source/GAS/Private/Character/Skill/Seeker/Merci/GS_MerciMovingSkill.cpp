@@ -7,7 +7,7 @@
 
 UGS_MerciMovingSkill::UGS_MerciMovingSkill()
 {
-	
+	CurrentSkillType = ESkillSlot::Moving;
 }
 
 void UGS_MerciMovingSkill::ActiveSkill()

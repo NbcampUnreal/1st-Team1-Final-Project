@@ -4,6 +4,7 @@
 #include "Character/Component/Seeker/GS_ChanSkillInputHandlerComp.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/GS_Character.h"
+#include "Character/Player/Seeker/GS_Chan.h"
 
 void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
@@ -29,7 +30,11 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 {
 	if (!bCtrlHeld)
 	{
-
+		AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
+		if (ChanCharacter)
+		{
+			ChanCharacter->LeftClickPressed_Implementation();
+		}
 	}
 	else
 	{
