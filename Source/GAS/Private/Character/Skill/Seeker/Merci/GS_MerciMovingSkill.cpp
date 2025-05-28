@@ -24,7 +24,7 @@ void UGS_MerciMovingSkill::ActiveSkill()
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	MerciCharacter->SetDrawState(false);
-	MerciCharacter->LeftClickPressedAttack(SkillAnimMontages[0]);
+	MerciCharacter->DrawBow(SkillAnimMontages[0]);
 }
 
 void UGS_MerciMovingSkill::OnSkillCommand()
@@ -38,7 +38,7 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 
 	if (MerciCharacter->SmokeArrowClass)
 	{
-		MerciCharacter->LeftClickReleaseAttack(MerciCharacter->SmokeArrowClass);
+		MerciCharacter->ReleaseArrow(MerciCharacter->SmokeArrowClass);
 	}
 	
 	if (IsFullyDrawn)

@@ -21,7 +21,7 @@ void UGS_MerciAimingSkill::ActiveSkill()
 	bPressedDuringCooldown = false;
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	MerciCharacter->SetDrawState(false);
-	MerciCharacter->LeftClickPressedAttack(SkillAnimMontages[0]);
+	MerciCharacter->DrawBow(SkillAnimMontages[0]);
 }
 
 void UGS_MerciAimingSkill::OnSkillCommand()
@@ -35,7 +35,7 @@ void UGS_MerciAimingSkill::OnSkillCommand()
 	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
 	if(MerciCharacter->NormalArrowClass)
 	{
-		MerciCharacter->LeftClickReleaseAttack(MerciCharacter->NormalArrowClass, 15.0f, 4);
+		MerciCharacter->ReleaseArrow(MerciCharacter->NormalArrowClass, 15.0f, 4);
 	}
 	if(IsFullyDrawn)
 	{

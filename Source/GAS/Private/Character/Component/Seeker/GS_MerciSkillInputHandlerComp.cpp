@@ -36,7 +36,7 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 		if(MerciCharacter->ComboSkillDrawMontage)
 		{
-			MerciCharacter->LeftClickPressedAttack(MerciCharacter->ComboSkillDrawMontage);
+			MerciCharacter->DrawBow(MerciCharacter->ComboSkillDrawMontage);
 		}
 	}
 	else
@@ -66,7 +66,7 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 		if (MerciCharacter->NormalArrowClass)
 		{
-			MerciCharacter->LeftClickReleaseAttack(MerciCharacter->NormalArrowClass);
+			MerciCharacter->ReleaseArrow(MerciCharacter->NormalArrowClass);
 		}
 	}
 	else

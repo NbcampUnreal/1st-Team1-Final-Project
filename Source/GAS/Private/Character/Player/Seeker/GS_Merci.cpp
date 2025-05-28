@@ -33,12 +33,12 @@ AGS_Merci::AGS_Merci()
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_MerciSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 }
 
-void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
+void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 {
 	if (!HasAuthority())
 	{
 		// 서버에 요청
-		Server_LeftClickPressedAttack(DrawMontage);
+		Server_DrawBow(DrawMontage);
 		return;
 	}
 
@@ -59,11 +59,11 @@ void AGS_Merci::LeftClickPressedAttack(UAnimMontage* DrawMontage)
 	}
 }
 
-void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
+void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
 	if (!HasAuthority())
 	{
-		Server_LeftClickReleaseAttack(ArrowClass);
+		Server_ReleaseArrow(ArrowClass);
 		return;
 	}
 
@@ -88,14 +88,14 @@ void AGS_Merci::LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowCl
 	Client_SetWidgetVisibility(false);
 }
 
-void AGS_Merci::Server_LeftClickPressedAttack_Implementation(UAnimMontage* DrawMontage)
+void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)
 {
-	LeftClickPressedAttack(DrawMontage);
+	DrawBow(DrawMontage);
 }
 
-void AGS_Merci::Server_LeftClickReleaseAttack_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
+void AGS_Merci::Server_ReleaseArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
-	LeftClickReleaseAttack(ArrowClass);
+	ReleaseArrow(ArrowClass);
 }
 
 void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)

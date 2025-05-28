@@ -41,16 +41,16 @@ public:
 	USkeletalMeshComponent* Quiver;
 
 	UFUNCTION(BlueprintCallable)
-	void LeftClickPressedAttack(UAnimMontage* DrawMontage);
+	void DrawBow(UAnimMontage* DrawMontage);
 
 	UFUNCTION(BlueprintCallable)
-	void LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
+	void ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
 	UFUNCTION(Server, Reliable)
-	void Server_LeftClickPressedAttack(UAnimMontage* DrawMontage);
+	void Server_DrawBow(UAnimMontage* DrawMontage);
 
 	UFUNCTION(Server, Reliable)
-	void Server_LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
+	void Server_ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
 	UFUNCTION(Server, Reliable)
 	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
