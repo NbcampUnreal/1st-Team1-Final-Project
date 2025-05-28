@@ -7,6 +7,7 @@
 
 UGS_MerciAimingSkill::UGS_MerciAimingSkill()
 {
+	CurrentSkillType = ESkillSlot::Aiming;
 }
 
 void UGS_MerciAimingSkill::ActiveSkill()
