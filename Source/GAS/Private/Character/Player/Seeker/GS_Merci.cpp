@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Templates/Function.h"
 #include "DrawDebugHelpers.h"
+#include "Net/UnrealNetwork.h"
 //#include "Weapon/Equipable/"
 
 // Sets default values
@@ -98,6 +99,14 @@ void AGS_Merci::Server_ReleaseArrow_Implementation(TSubclassOf<AGS_SeekerMerciAr
 	ReleaseArrow(ArrowClass);
 }
 
+void AGS_Merci::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_Merci, CurrentAxeArrows);
+	DOREPLIFETIME(AGS_Merci, CurrentChildArrows);
+}
+
 void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
 {
 	if (Mesh && DrawMontage)
@@ -140,6 +149,33 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	if (!ArrowClass || !Weapon)
 	{
 		return;
+	}
+
+	// 현재 화살 수량 체크
+	if (CurrentArrowType == EArrowType::Axe && CurrentAxeArrows <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Axe Empty"));
+		return;
+	}
+	if (CurrentArrowType == EArrowType::Child && CurrentChildArrows <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Child Empty"));
+		return;
+	}
+
+	// 수량 감소
+	if (NumArrows == 1)
+	{
+		if (CurrentArrowType == EArrowType::Axe)
+		{
+			--CurrentAxeArrows;
+			UE_LOG(LogTemp, Log, TEXT("Axe Shot: %d"), CurrentAxeArrows);
+		}
+		else if (CurrentArrowType == EArrowType::Child)
+		{
+			--CurrentChildArrows;
+			UE_LOG(LogTemp, Log, TEXT("Child Shot: %d"), CurrentChildArrows);
+		}
 	}
 
 	// 1. 카메라 위치와 회전값(플레이어의 시점) 가져오기
@@ -232,6 +268,16 @@ void AGS_Merci::BeginPlay()
 
 	CurrentArrowType = EArrowType::Normal;
 
+	if (HasAuthority())
+	{
+		CurrentAxeArrows = MaxAxeArrows;
+		CurrentChildArrows = MaxChildArrows;
+
+		// 일정 주기로 화살 재충전 타이머 시작
+		GetWorld()->GetTimerManager().SetTimer(AxeArrowRegenTimer, this, &AGS_Merci::RegenAxeArrow, RegenInterval, true);
+		GetWorld()->GetTimerManager().SetTimer(ChildArrowRegenTimer, this, &AGS_Merci::RegenChildArrow, RegenInterval, true);
+	}
+
 	if (IsLocallyControlled()) // 꼭 필요!
 	{
 		if (WidgetCrosshairClass)
@@ -273,32 +319,6 @@ void AGS_Merci::UpdateZoom(float Alpha)
 	SpringArmComp->SocketOffset = OffSet;
 }
 
-//void AGS_Merci::PlayBowPullSound(UAkComponent* AkComp)
-//{
-//	if (!PullSoundComp || !BowPullEvent)
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("AkComponent or Event is null"));
-//		return;
-//	}
-//
-//	FOnAkPostEventCallback Callback;
-//	Callback.BindLambda([](EAkCallbackType CallbackType, AkCallbackInfo* CallbackInfo)
-//		{
-//			if (CallbackType == EAkCallbackType::EndOfEvent)
-//			{
-//				UE_LOG(LogTemp, Log, TEXT("Bow Pull Sound finished playing."));
-//				// 여기에 완료 후 로직 추가
-//			}
-//		});
-//
-//	PullSoundComp->PostAkEvent(
-//		BowPullEvent,
-//		0,                   // Callback Mask
-//		Callback,            // Callback Delegate
-//		nullptr              // Cookie
-//	);
-//}
-
 void AGS_Merci::Multicast_DrawDebugLine_Implementation(FVector Start, FVector End, FColor Color)
 {
 	DrawDebugLine(GetWorld(), Start, End, Color, false, 5.0f, 0, 3.0f);
@@ -320,16 +340,6 @@ void AGS_Merci::Server_NotifyDrawMontageEnded_Implementation()
 {
 	SetAimState(true);
 	SetDrawState(false);
-	//if (!bInterrupted)
-	//{
-	//	// 서버에서 처리할 로직
-	//	SetAimState(true);
-	//	SetDrawState(false);
-	//}
-	//else
-	//{
-	//	SetDrawState(false);
-	//}
 }
 
 void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
@@ -385,3 +395,30 @@ void AGS_Merci::LeftClickRelease_Implementation()
 	IGS_AttackInterface::LeftClickRelease_Implementation();
 }
 
+void AGS_Merci::RegenAxeArrow()
+{
+	if (!HasAuthority()) 
+	{
+		return;
+	}
+
+	if (CurrentAxeArrows < MaxAxeArrows)
+	{
+		++CurrentAxeArrows;
+		UE_LOG(LogTemp, Log, TEXT("Axe regen: %d"), CurrentAxeArrows);
+	}
+}
+
+void AGS_Merci::RegenChildArrow()
+{
+	if (!HasAuthority()) 
+	{
+		return;
+	}
+
+	if (CurrentChildArrows < MaxChildArrows)
+	{
+		++CurrentChildArrows;
+		UE_LOG(LogTemp, Log, TEXT("Child regen: %d"), CurrentChildArrows);
+	}
+}

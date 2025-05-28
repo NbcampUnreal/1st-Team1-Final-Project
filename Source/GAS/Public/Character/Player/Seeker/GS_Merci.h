@@ -103,6 +103,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
 	UAkAudioEvent* ArrowShotSound; // 활 놓을 때(릴리즈)
 
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+
+	// [화살 관리]
+	
 private:
 	bool bWidgetVisibility = false;
 	USkeletalMeshComponent* Mesh;
@@ -130,4 +134,25 @@ private:
 	bool bIsFullyDrawn = false;
 
 	EArrowType CurrentArrowType;
+
+	// [화살 관리]
+	int32 MaxAxeArrows = 5;
+
+	int32 MaxChildArrows = 3;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Arrow")
+	int32 CurrentAxeArrows;
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Arrow")
+	int32 CurrentChildArrows;
+
+	FTimerHandle AxeArrowRegenTimer;
+	FTimerHandle ChildArrowRegenTimer;
+
+	float RegenInterval = 5.0f; // 5초마다 충전
+
+	UFUNCTION()
+	void RegenAxeArrow();
+
+	UFUNCTION()
+	void RegenChildArrow();
 };
