@@ -55,15 +55,23 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AGS_SeekerMerciArrow> NormalArrowClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AGS_SeekerMerciArrow> SmokeArrowClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* ComboSkillDrawMontage;
+
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyDrawMontageEnded();
 
+	void OnDrawMontageEnded();
+	
+	bool GetIsFullyDrawn() { return bIsFullyDrawn; }
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_DrawDebugLine(FVector Start, FVector End, FColor Color = FColor::Green);
-
-	void OnDrawMontageEnded();
-
-	bool GetIsFullyDrawn() { return bIsFullyDrawn; }
 
 protected:
 	// Called when the game starts or when spawned
@@ -94,8 +102,6 @@ protected:
 private:
 	bool bWidgetVisibility = false;
 	USkeletalMeshComponent* Mesh;
-
-	
 
 	void PlayDrawMontage(UAnimMontage* DrawMontage);
 

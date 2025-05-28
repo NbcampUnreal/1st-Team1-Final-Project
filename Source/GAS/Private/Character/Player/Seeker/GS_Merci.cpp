@@ -100,15 +100,11 @@ void AGS_Merci::Server_LeftClickReleaseAttack_Implementation(TSubclassOf<AGS_See
 
 void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
 {
-	UE_LOG(LogTemp, Warning, TEXT("DrawMontage valid: %s"), *GetNameSafe(DrawMontage));
 	if (Mesh && DrawMontage)
 	{
 		float Duration = Mesh->GetAnimInstance()->Montage_Play(DrawMontage);
 		if (Duration > 0.0f)
 		{
-			//FOnMontageEnded EndDelegate;
-			//EndDelegate.BindUObject(this, &AGS_Merci::OnDrawMontageEnded);
-			//Mesh->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, DrawMontage);
 			UE_LOG(LogTemp, Warning, TEXT("Montage_Play called, duration: %f"), Duration);
 		}
 		else
