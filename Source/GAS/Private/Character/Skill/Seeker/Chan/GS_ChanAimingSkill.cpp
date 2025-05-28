@@ -9,6 +9,11 @@
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Skill/GS_SkillComp.h"
 
+UGS_ChanAimingSkill::UGS_ChanAimingSkill()
+{
+	CurrentSkillType = ESkillSlot::Aiming;
+}
+
 void UGS_ChanAimingSkill::ActiveSkill()
 {
 	if (!CanActive()) return;

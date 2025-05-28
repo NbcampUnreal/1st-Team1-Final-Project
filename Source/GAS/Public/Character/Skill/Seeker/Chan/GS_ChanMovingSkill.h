@@ -15,6 +15,8 @@ class GAS_API UGS_ChanMovingSkill : public UGS_SeekerSkillBase
 	GENERATED_BODY()
 
 public:
+	UGS_ChanMovingSkill();
+
 	virtual void ActiveSkill() override;
 	virtual void ExecuteSkillEffect() override;
 

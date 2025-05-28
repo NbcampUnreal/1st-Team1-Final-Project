@@ -8,6 +8,11 @@
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Debuff/EDebuffType.h"
 
+UGS_ChanMovingSkill::UGS_ChanMovingSkill()
+{
+	CurrentSkillType = ESkillSlot::Moving;
+}
+
 void UGS_ChanMovingSkill::ActiveSkill()
 {
 	if (!CanActive()) return;
