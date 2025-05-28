@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
 
