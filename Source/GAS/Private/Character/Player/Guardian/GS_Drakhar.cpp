@@ -34,7 +34,7 @@ AGS_Drakhar::AGS_Drakhar()
 	EarthquakeRadius = 500.f;
 
 	//Guardian State Setting
-	GuardianState = EGuardianState::None;
+	ClientGuardianState = EGuardianState::None;
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -45,6 +45,7 @@ void AGS_Drakhar::BeginPlay()
 	{
 		GuardianAnim->OnMontageEnded.AddDynamic(this, &AGS_Drakhar::OnMontageEnded);
 	}
+	GuardianState = EGuardianState::CtrlSkillEnd;
 }
 
 void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -60,7 +61,11 @@ void AGS_Drakhar::Ctrl()
 {
 	if (IsLocallyControlled())
 	{
-		GetSkillComp()->TryActivateSkill(ESkillSlot::Ready);
+		if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
+		{
+			GetSkillComp()->TryActivateSkill(ESkillSlot::Ready);
+			ServerRPCStartCtrl();
+		}
 	}
 }
 
@@ -69,6 +74,7 @@ void AGS_Drakhar::CtrlStop()
 	if (IsLocallyControlled())
 	{		
 		GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+		ServerRPCStopCtrl();
 	}
 }
 
@@ -78,27 +84,21 @@ void AGS_Drakhar::LeftMouse()
 
 	if (IsLocallyControlled())
 	{
-		if (GuardianState != EGuardianState::Skill)
+		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
 		{
-			if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready)) //ctrl로 떠있을 때
-			{
-				GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
-				ServerRPCStartSkill();
-			}
-			//normal combo attack
-			else
-			{
-				if (!ClientComboAttacking)
-				{
-					GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
-				}
-				ServerRPCComboAttack();
-			}
+			//earthquake
+			GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 		}
-		else
+
+		//not flying
+		else if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
 		{
-			//?
-			//ServerRPCStopSkill();
+			if (!ClientComboAttacking)
+			{
+				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("melee attack")), true, true, FLinearColor::Blue, 5.f);
+				GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
+			}
+			ServerRPCComboAttack();
 		}
 	}
 }
@@ -108,31 +108,21 @@ void AGS_Drakhar::RightMouse()
 	if (IsLocallyControlled())
 	{
 		//ultimate skill
-		if (GuardianState != EGuardianState::Skill)
-		{
-			if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
-			{	
-				GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
-				ServerRPCStartSkill();
-			}
-			//dash skill
-			else
-			{
-				GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
-				ServerRPCStartSkill();
-			}
+		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
+		{	
+			GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
 		}
-		else
+		//dash skill
+		else if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
 		{
-			//ServerRPCStopSkill();
+			GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 		}
+		
 	}
 }
 
 void AGS_Drakhar::ServerRPCComboAttack_Implementation()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("server rpc attack"));
-
 	//다음 공격 되는 것이 확정인 경우
 	if (bCanDoNextComboAttack)
 	{
@@ -259,7 +249,6 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	
 	for (auto const& DamagedCharacter : DamagedCharacters)
 	{
-		//float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
 		float SkillDamage = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Moving)->Damage;
 		FDamageEvent DamageEvent;
 		DamagedCharacter->TakeDamage(SkillDamage, DamageEvent, GetController(), this);
@@ -323,7 +312,6 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 		}
 		for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)
 		{
-			//float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
 			float SkillDamage = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)->Damage;
 			
 			FDamageEvent DamageEvent;
