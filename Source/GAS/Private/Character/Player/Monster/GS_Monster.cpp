@@ -14,9 +14,6 @@
 #include "EngineUtils.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 
-// 정적 멤버 변수 초기화 - 멀티플레이 문제로 제거
-// TArray<AGS_Monster*> AGS_Monster::ActiveCombatMonsters;
-// AkPlayingID AGS_Monster::CurrentCombatMusicID = AK_INVALID_PLAYING_ID;
 
 AGS_Monster::AGS_Monster()
 {
@@ -46,7 +43,7 @@ AGS_Monster::AGS_Monster()
 	CombatTrigger->SetupAttachment(RootComponent);
 	CombatTrigger->SetSphereRadius(1200.0f);
 
-	// *** SoundTrigger 프리셋 사용 ***
+	// SoundTrigger 프리셋 사용
 	CombatTrigger->SetCollisionProfileName(TEXT("SoundTrigger"));
 
 	CombatTrigger->OnComponentBeginOverlap.AddDynamic(this, &AGS_Monster::OnCombatTriggerBeginOverlap);

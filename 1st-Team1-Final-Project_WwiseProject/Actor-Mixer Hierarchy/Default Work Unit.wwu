@@ -11252,7 +11252,7 @@
 								<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.2"/>
 								<Property Name="Highpass" Type="int16">
 									<ValueList>
-										<Value>20</Value>
+										<Value>25</Value>
 									</ValueList>
 								</Property>
 								<Property Name="Lowpass" Type="int16">
@@ -11284,6 +11284,12 @@
 							</ReferenceList>
 							<ChildrenList>
 								<AudioFileSource Name="MA_BLO_Bass_Guitar_Drone_One_Shot_Heather_E" ID="{787B202C-C516-4AFF-AE98-2A6F34C66FEC}">
+									<PropertyList>
+										<Property Name="FadeInDuration" Type="Real64" Value="1.02166601527821"/>
+										<Property Name="FadeOutDuration" Type="Real64" Value="1.36222135370428"/>
+										<Property Name="FadeOutShape" Type="int16" Value="1"/>
+										<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+									</PropertyList>
 									<Language>SFX</Language>
 									<AudioFile>MA_BLO_Bass_Guitar_Drone_One_Shot_Heather_E.wav</AudioFile>
 									<MediaIDList>
@@ -11291,46 +11297,6 @@
 									</MediaIDList>
 								</AudioFileSource>
 							</ChildrenList>
-							<ObjectLists>
-								<ObjectList Name="RTPC">
-									<Reference>
-										<Local>
-											<RTPC Name="" ID="{34F6C017-02F9-4725-813A-E4658B6061EF}" ShortID="179488303">
-												<PropertyList>
-													<Property Name="PropertyName" Type="string" Value="MakeUpGain"/>
-												</PropertyList>
-												<ReferenceList>
-													<Reference Name="ControlInput">
-														<ObjectRef Name="CombatMusicVolume" ID="{C6BECC82-7359-4290-9D26-7D0B86908195}" WorkUnitID="{FDFB093B-59E2-4879-BF96-CF460645B40F}"/>
-													</Reference>
-													<Reference Name="Curve">
-														<Custom>
-															<Curve Name="" ID="{BAC2C97C-EEB3-498C-9D69-093C0D9F8196}">
-																<PropertyList>
-																	<Property Name="Flags" Type="int32" Value="3"/>
-																</PropertyList>
-																<PointList>
-																	<Point>
-																		<XPos>0</XPos>
-																		<YPos>-96</YPos>
-																		<Flags>5</Flags>
-																		<SegmentShape>Exp1</SegmentShape>
-																	</Point>
-																	<Point>
-																		<XPos>100</XPos>
-																		<YPos>0</YPos>
-																		<Flags>37</Flags>
-																	</Point>
-																</PointList>
-															</Curve>
-														</Custom>
-													</Reference>
-												</ReferenceList>
-											</RTPC>
-										</Local>
-									</Reference>
-								</ObjectList>
-							</ObjectLists>
 							<ActiveSourceList>
 								<ActiveSource Name="MA_BLO_Bass_Guitar_Drone_One_Shot_Heather_E" ID="{787B202C-C516-4AFF-AE98-2A6F34C66FEC}" Platform="Linked"/>
 							</ActiveSourceList>

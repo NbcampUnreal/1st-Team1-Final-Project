@@ -15,11 +15,11 @@ Event	ID	Name			Wwise Object Path	Notes
 	831579122	EV_Mon_SmallClaw			\Default Work Unit\Monster\EV_Mon_SmallClaw	
 	942444514	Props_Torch			\Default Work Unit\Props_Torch	횃불 소리
 	1046362180	Props_StoneTrap_Hit			\Default Work Unit\Props\Props_StoneTrap_Hit	
-	1068539467	EV_Combat			\Default Work Unit\StateSound\EV_Combat	
 	1082319155	EV_Mon_SmallClaw_UI			\Default Work Unit\Monster\EV_Mon_SmallClaw_UI	
 	1129758503	EV_Mon_IronFang_UI			\Default Work Unit\Monster\EV_Mon_IronFang_UI	
 	1613532296	EV_GameState			\Default Work Unit\EV_GameState	
 	1721776362	Props_BearTrap_Out			\Default Work Unit\Props\Props_BearTrap_Out	
+	1751144939	EV_CombatStop			\Default Work Unit\StateSound\EV_CombatStop	
 	1852963041	EV_Bow_Pull			\Default Work Unit\EV_Bow_Pull	
 	2021162518	Props_Lava			\Default Work Unit\Props\Props_Lava	
 	2240580818	Props_MineTick			\Default Work Unit\Props\Props_MineTick	
@@ -41,6 +41,7 @@ Event	ID	Name			Wwise Object Path	Notes
 	3369981961	EV_Fire_Burn			\Default Work Unit\EV_Fire_Burn	
 	3432958693	EV_ArrowBy			\Default Work Unit\EV_ArrowBy	
 	3834184178	EV_ArrowImpact_Stone			\Default Work Unit\EV_ArrowImpact_Stone	
+	3860373373	EV_CombatPlay			\Default Work Unit\StateSound\EV_CombatPlay	
 	3970649718	Props_MineFuse			\Default Work Unit\Props\Props_MineFuse	
 	4061399480	Props_FlameTrap			\Default Work Unit\Props\Props_FlameTrap	
 	4137582580	EV_Bow_Realse			\Default Work Unit\EV_Bow_Realse	
@@ -66,7 +67,6 @@ State	ID	Name	State Group			Notes
 
 Game Parameter	ID	Name			Wwise Object Path	Notes
 	181543522	LowHPSound			\Default Work Unit\LowHPSound	
-	971873412	CombatMusicVolume			\Default Work Unit\CombatMusicVolume	
 
 Effect plug-ins	ID	Name	Type				Notes
 	5204649	Time Stretch (Custom)	Wwise Time Stretch			
@@ -91,7 +91,7 @@ Effect plug-ins	ID	Name	Type				Notes
 	3157398371	Few_Odd_Harm_Notches	Wwise Flanger			
 
 In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
-	3677691	Amb_DungeonSound	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A5\{A584F5E2-CE8C-F801-8784-1AA6F9B2B26D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Ambient\Amb_DungeonSound		7926000
+	3677691	Amb_DungeonSound	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\C5\{C5B0A087-2ED9-95F4-B1C7-56C79513FED4}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Ambient\Amb_DungeonSound		7926000
 	5171484	SFX_ArrowImpact_Wood	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E7\{E75C8D0E-0A44-9599-0179-8FADEEB33D76}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Wood		164512
 	7846130	ESM_MG3_fx_foley_smash_rocks_pickaxe_04c	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\56\{569B47FA-F4EA-C503-6E0F-4725431389E7}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_BearTrap\SFX_BearTrap_Blend\ESM_MG3_fx_foley_smash_rocks_pickaxe_04c		110668
 	15081757	SFX_CrystalSpikeTrap0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\AD\{ADA6F4C1-AB75-7724-99C9-E9333418D799}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_CrystalSpikeTrap\SFX_CrystalSpikeTrap0		131892
@@ -119,7 +119,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	245240366	SFX_Lava1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\42\{427C606B-003F-B8A9-D86C-33C51F7C4425}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Lava\SFX_Lava1		2037828
 	246210322	FlameMovementHeavy	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\4A\{4A5F7EC4-9B70-DF47-BB41-4EAC7BA92D4D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_FlameShot\FlameMovementHeavy		1341084
 	255360718	FootstepsConcrete2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A5\{A5CE27AF-12AC-80AA-5CFE-039A21E1E6C4}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Stone\FootstepsConcrete2		69940
-	258551038	CombatMusic	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\49\{49C39D61-7B14-3CE8-147C-8B2007A7B447}.wem		\Actor-Mixer Hierarchy\Default Work Unit\StateSound\CombatMusic		4405584
+	258551038	CombatMusic	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\7A\{7A7D12EC-1AC0-6297-B181-3BBA52F8B7BB}.wem		\Actor-Mixer Hierarchy\Default Work Unit\StateSound\CombatMusic		4405584
 	269881452	MonsterSnarlGrowl2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\18\{187CAB32-5A2A-EEE7-E7FF-CAF853A2F032}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_Monster\SFX_Mon_IronFang_UI\MonsterSnarlGrowl2		367712
 	278485591	Knight_Walking_Marching_Foely	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\57\{57BEFD3C-FD4D-C2AD-9D7B-FDF61CE2EBA1}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Chan\MoveSound\Knight_Walking_Marching_Foely		101028
 	282287949	SmallClawSound2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\99\{994A27EE-3785-4FCF-9195-DFB7728912B3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_Monster\SFX_Mon_SmallClaw_UI\SmallClawSound2		131360
