@@ -509,6 +509,36 @@
 					</ChildrenList>
 				</Folder>
 				<Event Name="EV_Merci_Sick" ID="{2D264FD9-C0B5-44E6-9384-57FEEE4D3C06}"/>
+				<Folder Name="AmbientSound" ID="{3FF0CB0B-7ED7-4094-9D61-F16A684F73E8}" ShortID="1044342719">
+					<ChildrenList>
+						<Event Name="Amb_Dungeon" ID="{512023F1-7483-4146-89A7-57F6CFD88495}">
+							<ChildrenList>
+								<Action Name="" ID="{ECD8483E-5AA8-484F-99AE-A411A0C3C6FA}" ShortID="958545447">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Amb_DungeonSound" ID="{2AD44FDF-140B-4BC0-AF2A-0D1166270A21}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
+				<Folder Name="StateSound" ID="{672C6E2B-2D90-4068-A13C-346D1A36720A}" ShortID="253688740">
+					<ChildrenList>
+						<Event Name="EV_Combat" ID="{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}">
+							<ChildrenList>
+								<Action Name="" ID="{FCC7F9FC-2D22-431C-AB7F-07EF81BD65EA}" ShortID="306751028">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="CombatMusic" ID="{8337F92F-C852-4576-AE80-24337AECED65}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>

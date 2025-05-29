@@ -10,11 +10,29 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{E6774B27-2E2E-3FDE-686B-14337CEDAB4B}",
+    "Hash": "{72DEC203-65B0-255D-DE4D-C8AB32002BF9}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
     "Plugins": {
+     "ShareSets": [
+      {
+       "Id": "48620415",
+       "Name": "Have_U_Ever_Been_Outside",
+       "ObjectPath": "\\Effects\\Factory Effects\\RoomVerb\\Exteriors\\Have_U_Ever_Been_Outside",
+       "GUID": "{FE29AE8D-FD86-4652-A95D-68D32F5760EC}",
+       "LibName": "Wwise RoomVerb",
+       "LibId": "7733251"
+      },
+      {
+       "Id": "3442768367",
+       "Name": "Hall_Large_Dark",
+       "ObjectPath": "\\Effects\\Factory Effects\\RoomVerb\\Halls\\Hall_Large_Dark",
+       "GUID": "{0F6A7D6D-131C-4650-9561-FC05F5C7A37B}",
+       "LibName": "Wwise RoomVerb",
+       "LibId": "7733251"
+      }
+     ],
      "AudioDevices": [
       {
        "Id": "2317455096",
@@ -42,12 +60,46 @@
       "GUID": "{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}"
      }
     ],
+    "AuxBusses": [
+     {
+      "Id": "1617989505",
+      "Name": "Aux_HallReverb",
+      "ObjectPath": "\\Master-Mixer Hierarchy\\Default Work Unit\\Master Audio Bus\\Aux_HallReverb",
+      "GUID": "{23E2DC9E-EC48-446C-BDF6-FCEFCDF2BE61}",
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "3442768367"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "3063516785",
+      "Name": "Aux_ExteriorsReverb",
+      "ObjectPath": "\\Master-Mixer Hierarchy\\Default Work Unit\\Master Audio Bus\\Aux_ExteriorsReverb",
+      "GUID": "{B5240562-FC69-4E8B-A39B-64BAB46F241E}",
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "48620415"
+        }
+       ]
+      }
+     }
+    ],
     "GameParameters": [
      {
       "Id": "181543522",
       "Name": "LowHPSound",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
       "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
+     },
+     {
+      "Id": "971873412",
+      "Name": "CombatMusicVolume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\CombatMusicVolume",
+      "GUID": "{C6BECC82-7359-4290-9D26-7D0B86908195}"
      }
     ],
     "StateGroups": [
@@ -126,6 +178,6 @@
     ]
    }
   ],
-  "FileHash": "{5B97B7E2-33D6-1A81-9EB8-23B2BE4381C2}"
+  "FileHash": "{16FF841B-D000-E87A-8851-B61D1428FF67}"
  }
 }
