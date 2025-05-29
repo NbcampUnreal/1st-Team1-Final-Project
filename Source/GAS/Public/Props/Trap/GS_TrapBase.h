@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "GS_TrapData.h"
 #include "Character/GS_Character.h"
+#include "Character/Component/GS_DebuffComp.h"
 #include "GS_TrapBase.generated.h"
 
 class UBoxComponent;
