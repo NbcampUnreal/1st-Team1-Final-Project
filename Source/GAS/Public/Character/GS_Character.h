@@ -11,6 +11,7 @@ class UGS_DebuffComp;
 class UGS_HPTextWidgetComp;
 class UGS_HPText;
 class UGS_HPWidget;
+class AGS_Weapon;
 
 UENUM(BlueprintType)
 enum class ECharacterType : uint8
@@ -27,6 +28,21 @@ enum class ECharacterType : uint8
 	StoneClaw
 };
 
+USTRUCT(BlueprintType)
+struct FWeaponSlot
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
+	TSubclassOf<AGS_Weapon> WeaponClass = nullptr;
+	
+	UPROPERTY()
+	AGS_Weapon* WeaponInstance = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
+	FName SocketName = NAME_None;
+};
+
 
 UCLASS()
 class GAS_API AGS_Character : public ACharacter, public IGenericTeamAgentInterface
@@ -37,8 +53,8 @@ public:
 	AGS_Character();
 
 	virtual void BeginPlay() override;
-	
 	virtual void Tick(float DeltaTime) override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	
@@ -89,6 +105,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulicastRPCStopCurrentSkillMontage(UAnimMontage* CurrentSkillMontage);
 
+	UFUNCTION(BlueprintCallable)
+	AGS_Weapon* GetWeaponByIndex(int32 Index) const;
 	
 protected:
 	//component
@@ -101,7 +119,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_StatComp> StatComp;
 
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TArray<FWeaponSlot> WeaponSlots;
+
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
 	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
+
+	void SpawnAndAttachWeapons();
 };
+

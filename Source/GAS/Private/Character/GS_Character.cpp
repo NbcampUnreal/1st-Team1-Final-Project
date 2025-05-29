@@ -1,15 +1,15 @@
 #include "Character/GS_Character.h"
-
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "UI/Character/GS_HPText.h"
-
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_HPWidget.h"
+#include "Weapon/GS_Weapon.h"
 
 AGS_Character::AGS_Character()
 {
@@ -43,6 +43,11 @@ void AGS_Character::BeginPlay()
 	{
 		HPTextWidgetComp->SetVisibility(true);
 	}
+
+	if (HasAuthority())
+	{
+		SpawnAndAttachWeapons();
+	}
 }
 
 void AGS_Character::Tick(float DeltaTime)
@@ -57,12 +62,19 @@ void AGS_Character::Tick(float DeltaTime)
 	}
 }
 
+void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_Character, WeaponSlots);
+}
+
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	float CurrentHealth = StatComp->GetCurrentHealth();
 
-	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f"), *GetName(), ActualDamage);
+	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f by %s"), *GetName(), ActualDamage, *DamageCauser->GetName());
 
 	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage, false);
 
@@ -127,6 +139,11 @@ bool AGS_Character::IsEnemy(const AGS_Character* Other) const
 	return Other && GetGenericTeamId()!= Other->GetGenericTeamId();
 }
 
+AGS_Weapon* AGS_Character::GetWeaponByIndex(int32 Index) const
+{
+	return WeaponSlots.IsValidIndex(Index) ? WeaponSlots[Index].WeaponInstance : nullptr;
+}
+
 void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 {
 	 GetMesh()->SetSimulatePhysics(true);
@@ -146,5 +163,29 @@ void AGS_Character::MulicastRPCStopCurrentSkillMontage_Implementation(UAnimMonta
 	if (!HasAuthority())
 	{
 		StopAnimMontage(CurrentSkillMontage);
+	}
+}
+
+void AGS_Character::SpawnAndAttachWeapons()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	
+	for (FWeaponSlot& Slot : WeaponSlots)
+	{
+		if (!Slot.WeaponClass) continue;
+
+		FActorSpawnParameters Params;
+		Params.Owner = this;
+		Slot.WeaponInstance = World->SpawnActor<AGS_Weapon>(Slot.WeaponClass, Params);
+		if (!Slot.WeaponInstance) continue;
+
+		Slot.WeaponInstance->AttachToComponent(
+			GetMesh(),
+			FAttachmentTransformRules::SnapToTargetIncludingScale,
+			Slot.SocketName);
 	}
 }

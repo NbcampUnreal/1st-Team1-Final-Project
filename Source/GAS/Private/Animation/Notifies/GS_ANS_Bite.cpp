@@ -11,7 +11,10 @@ void UGS_ANS_Bite::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 	{
 		if (AGS_SmallClaw* Claw = Cast<AGS_SmallClaw>(Owner))
 		{
-			Claw->Server_SetBiteCollision(true);
+			if (Claw->HasAuthority())
+			{
+				Claw->SetBiteCollision(true);
+			}
 		}
 	}
 }
@@ -22,7 +25,10 @@ void UGS_ANS_Bite::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	{
 		if (AGS_SmallClaw* Claw = Cast<AGS_SmallClaw>(Owner))
 		{
-			Claw->Server_SetBiteCollision(false);
+			if (Claw->HasAuthority())
+			{
+				Claw->SetBiteCollision(false);
+			}
 		}
 	}
 }
