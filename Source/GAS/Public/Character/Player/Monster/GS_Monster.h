@@ -66,14 +66,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAkAudioEvent* CombatMusicEvent;
 
-	UPROPERTY(EditAnywhere, Category = "Combat|Audio", meta = (ClampMin = "0.1", ClampMax = "5.0"))
-	float FadeInDuration = 1.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Combat|Audio", meta = (ClampMin = "0.1", ClampMax = "5.0"))
-	float FadeOutDuration = 1.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Combat|Audio")
-	UAkRtpc* CombatMusicVolumeRTPC;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAkAudioEvent* CombatMusicStopEvent;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();
@@ -122,8 +116,5 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UAkComponent* AkComponent;
-	
-	// 타이머 핸들
-	FTimerHandle CombatMusicFadeTimerHandle;
 };
 

@@ -14,9 +14,6 @@ class UPostProcessComponent;
 class UMaterialInterface;
 class UGS_StatComp;
 
-// Wwise 타입 정의 (int32로 대체)
-// typedef uint32 AkPlayingID;
-
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
 {
@@ -41,13 +38,10 @@ class GAS_API AGS_Seeker : public AGS_Player
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AGS_Seeker();
 
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -102,6 +96,9 @@ private:
 	UPROPERTY()
 	FTimerHandle CombatMusicFadeTimerHandle;
 
+	UPROPERTY()
+	UAkAudioEvent* ActiveCombatMusicStopEvent; // 현재 재생 중인 전투 음악에 대한 Stop Event
+
 public:
 	// 몬스터가 전투 음악 시작/중지를 요청할 때 호출
 	UFUNCTION(BlueprintCallable)
@@ -116,7 +113,6 @@ private:
 	void UpdateCombatMusicState();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	// EndPlay 함수 선언 추가
@@ -152,7 +148,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effect")
 	float EffectFadeOutSpeed = 0.5f; // 효과 페이드 아웃 속도
 
-	// 리플리케이션 관련 변수
 	UPROPERTY(ReplicatedUsing = OnRep_IsLowHealthEffectActive)
 	bool bIsLowHealthEffectActive;
 	

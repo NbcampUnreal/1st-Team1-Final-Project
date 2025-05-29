@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{17C4073E-7EC9-DEA0-5061-3F63B40B5F90}",
+    "Hash": "{9FA8BEF3-817A-2E0D-DF32-776A3AC157AC}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -21,7 +21,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am.wav",
-      "CachePath": "A5/{A584F5E2-CE8C-F801-8784-1AA6F9B2B26D}.wem"
+      "CachePath": "C5/{C5B0A087-2ED9-95F4-B1C7-56C79513FED4}.wem"
      },
      {
       "Id": "5171484",
@@ -245,7 +245,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Heather_E.wav",
-      "CachePath": "49/{49C39D61-7B14-3CE8-147C-8B2007A7B447}.wem"
+      "CachePath": "7A/{7A7D12EC-1AC0-6297-B181-3BBA52F8B7BB}.wem"
      },
      {
       "Id": "269881452",
@@ -1322,9 +1322,9 @@
       ]
      },
      {
-      "Id": "1068539467",
-      "Name": "EV_Combat",
-      "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_Combat",
+      "Id": "3860373373",
+      "Name": "EV_CombatPlay",
+      "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_CombatPlay",
       "GUID": "{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}",
       "MaxAttenuation": "480.00003",
       "DurationType": "OneShot",
@@ -1335,6 +1335,16 @@
         "Id": "258551038"
        }
       ]
+     },
+     {
+      "Id": "1751144939",
+      "Name": "EV_CombatStop",
+      "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_CombatStop",
+      "GUID": "{231EBD3B-55A9-4877-9F9A-87156CC7C9A5}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "3369981961",
@@ -2234,12 +2244,6 @@
       "Name": "LowHPSound",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
       "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
-     },
-     {
-      "Id": "971873412",
-      "Name": "CombatMusicVolume",
-      "ObjectPath": "\\Game Parameters\\Default Work Unit\\CombatMusicVolume",
-      "GUID": "{C6BECC82-7359-4290-9D26-7D0B86908195}"
      }
     ],
     "StateGroups": [
@@ -2318,6 +2322,6 @@
     ]
    }
   ],
-  "FileHash": "{0571D30E-16D9-A6F4-DF77-797CA84B47FB}"
+  "FileHash": "{73F2F166-1C06-EC40-EDC9-8FF56CA8C8F9}"
  }
 }

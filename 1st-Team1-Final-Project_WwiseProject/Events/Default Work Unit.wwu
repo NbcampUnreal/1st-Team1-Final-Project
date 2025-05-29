@@ -526,9 +526,29 @@
 				</Folder>
 				<Folder Name="StateSound" ID="{672C6E2B-2D90-4068-A13C-346D1A36720A}" ShortID="253688740">
 					<ChildrenList>
-						<Event Name="EV_Combat" ID="{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}">
+						<Event Name="EV_CombatPlay" ID="{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}">
 							<ChildrenList>
 								<Action Name="" ID="{FCC7F9FC-2D22-431C-AB7F-07EF81BD65EA}" ShortID="306751028">
+									<PropertyList>
+										<Property Name="FadeInCurve" Type="int16" Value="7"/>
+										<Property Name="FadeTime" Type="Real64" Value="2.5"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="CombatMusic" ID="{8337F92F-C852-4576-AE80-24337AECED65}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_CombatStop" ID="{231EBD3B-55A9-4877-9F9A-87156CC7C9A5}">
+							<ChildrenList>
+								<Action Name="" ID="{7DA1B27F-902A-481F-9A93-50991A7F58CB}" ShortID="611338682">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="7"/>
+										<Property Name="FadeTime" Type="Real64" Value="2"/>
+									</PropertyList>
 									<ReferenceList>
 										<Reference Name="Target">
 											<ObjectRef Name="CombatMusic" ID="{8337F92F-C852-4576-AE80-24337AECED65}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>

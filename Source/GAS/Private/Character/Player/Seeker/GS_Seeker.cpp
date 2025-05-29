@@ -18,17 +18,17 @@
 // Sets default values
 AGS_Seeker::AGS_Seeker()
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	// 전투 음악 관련 초기화
 	CurrentCombatMusicID = 0;
+	ActiveCombatMusicStopEvent = nullptr;
 
 	// Post Process Component 생성 및 설정
 	LowHealthPostProcessComp = CreateDefaultSubobject<UPostProcessComponent>(TEXT("LowHealthPostProcessComp"));
 	LowHealthPostProcessComp->SetupAttachment(CameraComp);
 	LowHealthPostProcessComp->bEnabled = false;
-	LowHealthPostProcessComp->Priority = 10; // 다른 PP보다 높게 설정하여 우선 적용
+	LowHealthPostProcessComp->Priority = 10;
 
 	// Fire Effect 생성 및 설정
 	FeetLavaVFX_L = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_L"));
@@ -73,7 +73,6 @@ bool AGS_Seeker::GetDrawState()
 	return Gait;
 }*/
 
-// Called when the game starts or when spawned
 void AGS_Seeker::BeginPlay()
 {
 	Super::BeginPlay();
@@ -173,7 +172,6 @@ void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-// Called every frame
 void AGS_Seeker::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -240,9 +238,9 @@ void AGS_Seeker::OnRep_CurrentEffectStrength()
 	UpdatePostProcessEffect(CurrentEffectStrength);
 }
 
-// ================
-// 전투 음악 관리 함수들
-// ================
+// =================
+// 전투 음악 관리 함수
+// =================
 void AGS_Seeker::AddCombatMonster(AGS_Monster* Monster)
 {
 	if (!Monster)
@@ -299,28 +297,7 @@ void AGS_Seeker::StartCombatMusic()
 		{
 			// 전투 음악 재생
 			CurrentCombatMusicID = UAkGameplayStatics::PostEvent(CombatMusicEvent, this, 0, FOnAkPostEventCallback());
-			
-			// 페이드 인 처리 (RTPC가 있는 경우)
-			if (UAkRtpc* VolumeRTPC = NearbyMonsters[0]->CombatMusicVolumeRTPC)
-			{
-				// 0에서 100으로 페이드 인
-				UAkGameplayStatics::SetRTPCValue(VolumeRTPC, 0.0f, 0, this);
-				
-				// 페이드 인
-				FTimerHandle FadeInHandle;
-				GetWorld()->GetTimerManager().SetTimer(
-					FadeInHandle,
-					[this, VolumeRTPC]()
-					{
-						if (VolumeRTPC && IsValid(this))
-						{
-							UAkGameplayStatics::SetRTPCValue(VolumeRTPC, 100.0f, 1000, this);
-						}
-					},
-					0.1f,
-					false
-				);
-			}
+			ActiveCombatMusicStopEvent = NearbyMonsters[0]->CombatMusicStopEvent;
 		}
 	}
 }
@@ -338,33 +315,20 @@ void AGS_Seeker::StopCombatMusic()
 		return;
 	}
 	
-	// RTPC 페이드 아웃 처리
-	if (NearbyMonsters.Num() > 0 && NearbyMonsters[0] && NearbyMonsters[0]->CombatMusicVolumeRTPC)
+	// 저장된 Stop Event를 사용하여 Fade Out과 함께 음악 중지
+	if (ActiveCombatMusicStopEvent)
 	{
-		UAkGameplayStatics::SetRTPCValue(NearbyMonsters[0]->CombatMusicVolumeRTPC, 0.0f, 1000, this);
-		
-		// 페이드 아웃 완료 후 음악 중지
-		GetWorld()->GetTimerManager().SetTimer(
-			CombatMusicFadeTimerHandle,
-			[this]()
-			{
-				// 여러 방법으로 중지 시도
-				UAkGameplayStatics::StopAll();
-				UAkGameplayStatics::StopActor(this);
-				
-				CurrentCombatMusicID = 0;
-			},
-			1.2f, // 페이드 아웃보다 약간 길게
-			false
-		);
+		UAkGameplayStatics::PostEvent(ActiveCombatMusicStopEvent, this, 0, FOnAkPostEventCallback());
 	}
 	else
 	{
-		// RTPC가 없는 경우 바로 중지
-		UAkGameplayStatics::StopAll();
+		// Stop Event가 없는 경우, 중지하고 경고 로그
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic - ActiveCombatMusicStopEvent is null. Stopping music immediately."));
 		UAkGameplayStatics::StopActor(this);
-		CurrentCombatMusicID = 0;
 	}
+
+	CurrentCombatMusicID = 0;
+	ActiveCombatMusicStopEvent = nullptr;
 }
 
 void AGS_Seeker::UpdateCombatMusicState()
