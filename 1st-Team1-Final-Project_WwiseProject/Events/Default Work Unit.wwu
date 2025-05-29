@@ -509,6 +509,21 @@
 					</ChildrenList>
 				</Folder>
 				<Event Name="EV_Merci_Sick" ID="{2D264FD9-C0B5-44E6-9384-57FEEE4D3C06}"/>
+				<Folder Name="AmbientSound" ID="{3FF0CB0B-7ED7-4094-9D61-F16A684F73E8}" ShortID="1044342719">
+					<ChildrenList>
+						<Event Name="Amb_Dungeon" ID="{512023F1-7483-4146-89A7-57F6CFD88495}">
+							<ChildrenList>
+								<Action Name="" ID="{ECD8483E-5AA8-484F-99AE-A411A0C3C6FA}" ShortID="958545447">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Amb_DungeonSound" ID="{2AD44FDF-140B-4BC0-AF2A-0D1166270A21}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>

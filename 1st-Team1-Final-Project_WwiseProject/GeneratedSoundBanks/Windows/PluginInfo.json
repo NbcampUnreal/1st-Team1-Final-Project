@@ -11,6 +11,13 @@
     "StaticLib": "AkCompressorFX"
    },
    {
+    "LibName": "Wwise RoomVerb",
+    "LibId": "7733251",
+    "Type": "Effect",
+    "DLL": "AkRoomVerb",
+    "StaticLib": "AkRoomVerbFX"
+   },
+   {
     "LibName": "Wwise Flanger",
     "LibId": "8192003",
     "Type": "Effect",
@@ -42,6 +49,6 @@
     "Type": "AudioDevice"
    }
   ],
-  "FileHash": "{611BD8F6-D8DE-F152-409F-EE11899A86BC}"
+  "FileHash": "{FFC02D5E-020E-D8C1-1BF2-DA344E52A206}"
  }
 }
