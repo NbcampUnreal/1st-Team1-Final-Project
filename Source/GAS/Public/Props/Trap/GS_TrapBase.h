@@ -38,21 +38,6 @@ public:
 	FTrapData TrapData;
 	
 	
-	void LoadTrapData();
-
-
-	bool IsBlockedInDirection(const FVector& Start, const FVector& Direction, float Distance, AGS_Character* CharacterToIgnore);
-	
-
-	//데미지 박스에 오버랩된 플레이어에게 데미지 주는 함수
-	virtual void HandleTrapDamage(AActor* OtherActor);
-	//범위 내의 여러 플레이어에게 한 번에 데미지 주는 함수
-	virtual void HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors);
-	
-	UFUNCTION(Server, Reliable)
-	void Server_HandleTrapDamage(AActor* TargetActor);
-	void Server_HandleTrapDamage_Implementation(AActor* TargetActor);
-
 
 	//Damage Box에 오버랩 되었을 때
 	UFUNCTION()
@@ -87,8 +72,34 @@ public:
 	void PushCharacterInBox(UBoxComponent* CollisionBox, float PushPower = 600.0f);
 
 
+	//Damage 관련 함수
+	UFUNCTION(Server, Reliable)
+	void Server_HandleTrapDamage(AActor* TargetActor);
+	void Server_HandleTrapDamage_Implementation(AActor* TargetActor);
+
+	UFUNCTION()
+	void ApplyDotDamage(AActor* DamagedActor);
+
+	//데미지 박스에 오버랩된 플레이어에게 데미지 주는 함수
+	virtual void HandleTrapDamage(AActor* OtherActor);
+	//범위 내의 여러 플레이어에게 한 번에 데미지 주는 함수
+	virtual void HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors);
 	
+
+
+
+
+
+	void LoadTrapData();
+
+
+	bool IsBlockedInDirection(const FVector& Start, const FVector& Direction, float Distance, AGS_Character* CharacterToIgnore);
+
+	
+
+
 protected:
+	TMap<AActor*, FTimerHandle> ActiveDoTTimers;
 
 	virtual void BeginPlay() override;
 	

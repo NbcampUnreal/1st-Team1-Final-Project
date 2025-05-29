@@ -90,15 +90,27 @@ void AGS_TrapBase::Server_HandleTrapDamage_Implementation(AActor* OtherActor)
 
 void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Player damaged"));
+	UE_LOG(LogTemp, Warning, TEXT("Player is damaged"));
 	if (!OtherActor) return;
 	AGS_Seeker* DamagedSeeker = Cast<AGS_Seeker>(OtherActor);
 	if (!DamagedSeeker) return;
 	if (TrapData.Effect.Damage <= 0.f) return;
-
+	UE_LOG(LogTemp, Warning, TEXT("Passed lv 1"));
  	//기본 데미지 부여
 	FDamageEvent DamageEvent;
-	DamagedSeeker->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
+
+	
+	if (TrapData.Effect.bDoT)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TrapData.Effect.bDoT True"));
+		ApplyDotDamage(OtherActor);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TrapData.Effect.bDoT false"));
+		DamagedSeeker->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
+	}
+
 
 	//디버프 추가
 
@@ -107,6 +119,43 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 void AGS_TrapBase::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors)
 {
 }
+
+
+void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
+{
+	if (!DamagedActor || !HasAuthority() || !TrapData.Effect.bDoT) return;
+
+	if (ActiveDoTTimers.Contains(DamagedActor))
+	{
+		//이미 해당 엑터의 타이머가 작동 중이라면 타이머 초기화(처음부터 다시 시작)
+		GetWorld()->GetTimerManager().ClearTimer(ActiveDoTTimers[DamagedActor]);
+	}
+
+	int32 CurrentTick = 0;
+	FTimerHandle TimerHandle;
+	FTimerDelegate Delegate;
+	//타이머가 끝나면 실행되는 람다
+	Delegate.BindLambda([=, this]() mutable
+		{
+			if (!DamagedActor || !TrapData.Effect.bDoT) return;
+
+			FDamageEvent DamageEvent;
+			DamagedActor->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
+			UE_LOG(LogTemp, Warning, TEXT("CurrentTick : %d"), CurrentTick);
+			CurrentTick++;
+
+			if (CurrentTick >= TrapData.Effect.DamageCount)
+			{
+				//current tick이 damage count보다 같거나 크다면 타이머 초기화 후 ActiveDoTTimers 맵에서 제거
+				GetWorld()->GetTimerManager().ClearTimer(ActiveDoTTimers[DamagedActor]);
+				ActiveDoTTimers.Remove(DamagedActor);
+			}
+		});
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, Delegate, TrapData.Effect.DamageInterval, true);
+	ActiveDoTTimers.Add(DamagedActor, TimerHandle);
+}
+
 
 
 void AGS_TrapBase::Server_DamageBoxEffect_Implementation(AActor* OtherActor)
