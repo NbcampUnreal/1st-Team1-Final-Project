@@ -8,6 +8,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Character/Player/Seeker/GS_Chan.h"
 
 UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 {
@@ -87,7 +88,7 @@ void UGS_ChanAimingSkill::OnShieldSlam()
 	UE_LOG(LogTemp, Warning, TEXT("Slam!!!!!!!"));
 	CurrentStamina -= SlamStaminaCost;
 	// UI 업데이트
-
+	UpdateProgressBar(CurrentStamina);
 	ExecuteSkillEffect();
 
 	if (CurrentStamina <= 0.f)
@@ -99,7 +100,10 @@ void UGS_ChanAimingSkill::OnShieldSlam()
 void UGS_ChanAimingSkill::TickDrainStamina()
 {
 	CurrentStamina -= StaminaDrainRate;
+
 	// UI 업데이트
+	UpdateProgressBar(CurrentStamina);
+
 	UE_LOG(LogTemp, Warning, TEXT("Stamina : %f"), CurrentStamina);
 	if (CurrentStamina <= 0.f)
 	{
@@ -115,8 +119,10 @@ void UGS_ChanAimingSkill::StartHoldUp()
 		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
 	}
 	CurrentStamina = MaxStamina;
-
 	// UI 표시
+	ShowProgressBar(true);
+	UpdateProgressBar(CurrentStamina);
+
 	UE_LOG(LogTemp, Warning, TEXT("Start Hold Up!!!!!!!"));
 	OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 1.0f, true);
 }
@@ -129,6 +135,7 @@ void UGS_ChanAimingSkill::EndHoldUp()
 		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
 	}
 	// UI 숨기기
+	ShowProgressBar(false);
 	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 	UE_LOG(LogTemp, Warning, TEXT("End Hold Up!!!!!!"));
 }
@@ -156,4 +163,16 @@ void UGS_ChanAimingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 	{
 		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Stun, OwnerCharacter);
 	}
+}
+
+void UGS_ChanAimingSkill::UpdateProgressBar(float InStamina)
+{
+	AGS_Chan* OwnerChan = Cast<AGS_Chan>(OwnerCharacter);
+	OwnerChan->Client_UpdateChanAimingSkillBar(InStamina / MaxStamina);
+}
+
+void UGS_ChanAimingSkill::ShowProgressBar(bool bShow)
+{
+	AGS_Chan* OwnerChan = Cast<AGS_Chan>(OwnerCharacter);
+	OwnerChan->Client_ChanAimingSkillBar(bShow);
 }
