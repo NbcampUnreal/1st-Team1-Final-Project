@@ -42,6 +42,9 @@ protected:
 	UFUNCTION()
 	virtual void OnLeftClickRelease(const struct FInputActionInstance& Instance);
 
+	UFUNCTION()
+	virtual void OnScroll(const struct FInputActionInstance& Instance);
+
 	TObjectPtr<AGS_Character> OwnerCharacter;
 
 	bool bCtrlHeld = false;
@@ -59,6 +62,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> SkillMappingContext;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_Scroll;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	int32 MappingPriority = 1;

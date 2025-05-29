@@ -26,8 +26,7 @@ void AGS_WeaponSword::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OwnerChar = Cast<AGS_Character>(GetAttachParentActor());
-	UE_LOG(LogTemp, Warning, TEXT("Weapon OwnerChar : %s"),*GetNameSafe(OwnerChar));
+	OwnerChar = Cast<AGS_Character>(GetOwner());
 }
 
 
@@ -41,20 +40,18 @@ void AGS_WeaponSword::DisableHit()
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-void AGS_WeaponSword::Server_SetHitCollision_Implementation(bool bEnable)
-{
-	HitBox->SetCollisionEnabled(bEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
-}
-
 void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!HasAuthority()) return;
-
+	if (!HasAuthority())
+	{
+		return;
+	}
+ 
 	AGS_Character* Damaged = Cast<AGS_Character>(OtherActor);
 	AGS_Character* Attacker = OwnerChar;
 
-	if (!Damaged || !Attacker)
+	if (!Damaged || !Attacker || !Damaged->IsEnemy(Attacker))
 	{
 		return;
 	}

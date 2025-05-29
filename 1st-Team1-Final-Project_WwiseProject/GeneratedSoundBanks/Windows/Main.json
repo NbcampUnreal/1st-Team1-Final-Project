@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{39578FE3-9C4A-943B-A875-B41253655567}",
+    "Hash": "{795EA8A9-ACC6-336C-8E27-B560A3F610BE}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -405,7 +405,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_flame_extinguish_short_01_burn_fire_flame.wav",
-      "CachePath": "1A/{1AE56785-54D9-9793-74C0-18450B969302}.wem"
+      "CachePath": "30/{3094612E-A4BE-D582-E1E3-227A4455AFA2}.wem"
      },
      {
       "Id": "454704061",
@@ -661,7 +661,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "waves.wav",
-      "CachePath": "A9/{A97BE36E-CAE5-7C1D-4425-4D510D9A1EF3}.wem"
+      "CachePath": "EB/{EB328C0B-4338-6F79-4660-DBE2B4BB4639}.wem"
      },
      {
       "Id": "755959048",
@@ -821,7 +821,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_inflammation_light_02_burn_fire_flame.wav",
-      "CachePath": "33/{335EF1C3-0385-1EB3-AF6C-8D1199FD097D}.wem"
+      "CachePath": "21/{21817537-8D90-0CFC-C1E6-24112A4F18E4}.wem"
      },
      {
       "Id": "928428161",
@@ -1283,7 +1283,7 @@
       "Name": "EV_Fire_Burn",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Burn",
       "GUID": "{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "360",
       "DurationType": "OneShot",
       "DurationMin": "1.3835624",
       "DurationMax": "1.3835624",
@@ -1300,8 +1300,8 @@
       "GUID": "{1261AE45-6B7B-489A-93E1-50AC8218A43C}",
       "MaxAttenuation": "400",
       "DurationType": "OneShot",
-      "DurationMin": "2.2946355",
-      "DurationMax": "2.2946355",
+      "DurationMin": "1.4747763",
+      "DurationMax": "1.4747763",
       "MediaRefs": [
        {
         "Id": "454432692"
@@ -1671,6 +1671,7 @@
       "Name": "Play_waves",
       "ObjectPath": "\\Events\\Default Work Unit\\Play_waves",
       "GUID": "{D4D99DFE-1AFF-4742-A8A6-B7C19192CD0A}",
+      "MaxAttenuation": "320",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2253,6 +2254,6 @@
     ]
    }
   ],
-  "FileHash": "{70223316-DE8D-A547-62DF-CD50310A5BFE}"
+  "FileHash": "{AF567D93-28D5-8426-4C4C-CEB37F56012C}"
  }
 }
