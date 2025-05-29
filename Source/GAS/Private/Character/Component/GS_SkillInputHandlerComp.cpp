@@ -50,6 +50,10 @@ void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputC
 			EnhancedInput->BindAction(IA_LeftClick, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnLeftClick);
 			EnhancedInput->BindAction(IA_LeftClick, ETriggerEvent::Completed, this, &UGS_SkillInputHandlerComp::OnLeftClickRelease);
 		}
+		if (IA_Scroll)
+		{
+			EnhancedInput->BindAction(IA_Scroll, ETriggerEvent::Triggered, this, &UGS_SkillInputHandlerComp::OnScroll);
+		}
 	}
 }
 
@@ -116,5 +120,10 @@ void UGS_SkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& 
 void UGS_SkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Left Click Release"));
+}
+
+void UGS_SkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Scroll Mouse"));
 }
 

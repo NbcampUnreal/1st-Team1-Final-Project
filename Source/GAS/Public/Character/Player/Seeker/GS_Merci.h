@@ -6,6 +6,7 @@
 #include "GS_Seeker.h"
 #include "Character/Interface/GS_AttackInterface.h"
 #include "AkGameplayTypes.h"
+#include "Weapon/Projectile/Seeker/GS_SeekerMerciArrowNormal.h"
 #include "GS_Merci.generated.h"
 
 class AGS_SeekerMerciArrow;
@@ -73,6 +74,9 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_DrawDebugLine(FVector Start, FVector End, FColor Color = FColor::Green);
 
+	UFUNCTION(Server, Reliable)
+	void Server_ChangeArrowType(int32 Direction);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -99,6 +103,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
 	UAkAudioEvent* ArrowShotSound; // 활 놓을 때(릴리즈)
 
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+
+	// [화살 관리]
+	
 private:
 	bool bWidgetVisibility = false;
 	USkeletalMeshComponent* Mesh;
@@ -124,4 +132,27 @@ private:
 	void Client_PlaySound(UAkComponent* SoundComp);
 
 	bool bIsFullyDrawn = false;
+
+	EArrowType CurrentArrowType;
+
+	// [화살 관리]
+	int32 MaxAxeArrows = 5;
+
+	int32 MaxChildArrows = 3;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Arrow")
+	int32 CurrentAxeArrows;
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Arrow")
+	int32 CurrentChildArrows;
+
+	FTimerHandle AxeArrowRegenTimer;
+	FTimerHandle ChildArrowRegenTimer;
+
+	float RegenInterval = 5.0f; // 5초마다 충전
+
+	UFUNCTION()
+	void RegenAxeArrow();
+
+	UFUNCTION()
+	void RegenChildArrow();
 };

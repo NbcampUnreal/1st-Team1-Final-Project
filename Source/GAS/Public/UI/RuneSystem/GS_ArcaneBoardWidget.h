@@ -76,7 +76,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	uint8 GetSelectedRuneID() const;
 
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void OnCloseButtonClicked();
+
 protected:
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UButton* CloseButton;
+
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	UUniformGridPanel* GridPanel;
 

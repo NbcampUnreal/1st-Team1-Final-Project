@@ -29,12 +29,7 @@ void AGS_SmallClaw::BeginPlay()
 	}
 } 
 
-void AGS_SmallClaw::Attack()
-{
-	Super::Attack();
-}
-
-void AGS_SmallClaw::Server_SetBiteCollision_Implementation(bool bEnable)
+void AGS_SmallClaw::SetBiteCollision(bool bEnable)
 {
 	if (BiteCollision)
 	{
@@ -44,7 +39,13 @@ void AGS_SmallClaw::Server_SetBiteCollision_Implementation(bool bEnable)
 
 void AGS_SmallClaw::OnAttackBiteboxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                            UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+	
 	if (!OtherActor || OtherActor == this)
 	{
 		return;
@@ -52,6 +53,11 @@ void AGS_SmallClaw::OnAttackBiteboxOverlap(UPrimitiveComponent* OverlappedCompon
 
 	if (AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor))
 	{
+		if (!DamagedCharacter->IsEnemy(Cast<AGS_Character>(this)))
+		{
+			return; 
+		}
+		
 		float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
 		FDamageEvent DamageEvent;
 		OtherActor->TakeDamage(Damage, DamageEvent, GetController(), this);

@@ -39,6 +39,13 @@ struct FTrapEffect
     //dot damage
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bDoT = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="bDoT"))
+    int32 DamageCount = 3;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="bDoT"))
+    float DamageInterval = 1.0f;
+
 };
 
 USTRUCT(BlueprintType)

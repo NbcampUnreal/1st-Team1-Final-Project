@@ -19,11 +19,9 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Category = "Attack")
 	class UBoxComponent* BiteCollision;
-	
-	virtual void Attack() override;
-	
-	UFUNCTION(Server, Reliable)
-	void Server_SetBiteCollision(bool bEnable);
+
+	UFUNCTION()
+	void SetBiteCollision(bool bEnable);
 
 	UFUNCTION()
 	void OnAttackBiteboxOverlap(

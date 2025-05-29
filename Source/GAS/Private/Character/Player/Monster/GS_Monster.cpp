@@ -23,9 +23,6 @@ AGS_Monster::AGS_Monster()
 	AIControllerClass = AGS_AIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-	Weapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponComp"));
-	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
-
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>("SelectionDecal");
 	SelectionDecal->SetupAttachment(RootComponent);
 	SelectionDecal->SetVisibility(false);
