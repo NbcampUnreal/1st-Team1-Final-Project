@@ -74,7 +74,7 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	float CurrentHealth = StatComp->GetCurrentHealth();
 
-	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f"), *GetName(), ActualDamage);
+	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f by %s"), *GetName(), ActualDamage, *DamageCauser->GetName());
 
 	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage, false);
 
@@ -139,6 +139,11 @@ bool AGS_Character::IsEnemy(const AGS_Character* Other) const
 	return Other && GetGenericTeamId()!= Other->GetGenericTeamId();
 }
 
+AGS_Weapon* AGS_Character::GetWeaponByIndex(int32 Index) const
+{
+	return WeaponSlots.IsValidIndex(Index) ? WeaponSlots[Index].WeaponInstance : nullptr;
+}
+
 void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 {
 	 GetMesh()->SetSimulatePhysics(true);
@@ -173,14 +178,14 @@ void AGS_Character::SpawnAndAttachWeapons()
 	{
 		if (!Slot.WeaponClass) continue;
 
-		Slot.WeaponInstance = World->SpawnActor<AGS_Weapon>(Slot.WeaponClass);
+		FActorSpawnParameters Params;
+		Params.Owner = this;
+		Slot.WeaponInstance = World->SpawnActor<AGS_Weapon>(Slot.WeaponClass, Params);
 		if (!Slot.WeaponInstance) continue;
 
 		Slot.WeaponInstance->AttachToComponent(
 			GetMesh(),
 			FAttachmentTransformRules::SnapToTargetIncludingScale,
 			Slot.SocketName);
-
-		Slot.WeaponInstance->SetOwner(this);
 	}
 }

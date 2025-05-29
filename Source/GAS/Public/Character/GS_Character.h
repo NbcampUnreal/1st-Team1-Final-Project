@@ -104,6 +104,9 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulicastRPCStopCurrentSkillMontage(UAnimMontage* CurrentSkillMontage);
+
+	UFUNCTION(BlueprintCallable)
+	AGS_Weapon* GetWeaponByIndex(int32 Index) const;
 	
 protected:
 	//component

@@ -13,17 +13,13 @@ void UGS_ANS_HitWeapon::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeque
 		return;
 	}
 	
-	if (AGS_Monster* Character = Cast<AGS_Monster>(MeshComp->GetOwner()))
+	if (AGS_Monster* Monster = Cast<AGS_Monster>(MeshComp->GetOwner()))
 	{
-		if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Character->GetCurrentWeapon()))
+		if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Monster->GetWeaponByIndex(0)))
 		{
-			if (Character->HasAuthority())
+			if (Monster->HasAuthority())
 			{
 				Weapon->EnableHit();
-			}
-			else
-			{
-				Weapon->Server_SetHitCollision(true);
 			}
 		}
 	}
@@ -36,18 +32,14 @@ void UGS_ANS_HitWeapon::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenc
 	{
 		return;
 	}
-
-	if (AGS_Monster* Character = Cast<AGS_Monster>(MeshComp->GetOwner()))
+	
+	if (AGS_Monster* Monster = Cast<AGS_Monster>(MeshComp->GetOwner()))
 	{
-		if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Character->GetCurrentWeapon()))
+		if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Monster->GetWeaponByIndex(0)))
 		{
-			if (Character->HasAuthority())
+			if (Monster->HasAuthority())
 			{
 				Weapon->DisableHit();
-			}
-			else
-			{
-				Weapon->Server_SetHitCollision(false);
 			}
 		}
 	}
