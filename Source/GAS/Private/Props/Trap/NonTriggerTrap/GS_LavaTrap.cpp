@@ -1,22 +1,45 @@
 #include "Props/Trap/NonTriggerTrap/GS_LavaTrap.h"
-#include "Character/Player/Seeker/GS_Seeker.h"
 #include "Engine/DamageEvents.h"
 
 AGS_LavaTrap::AGS_LavaTrap()
 {
 }
 
-void AGS_LavaTrap::HandleTrapDamage(AActor* OtherActor)
+
+void AGS_LavaTrap::StartLavaLoop(AGS_Seeker* Seeker)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Player damaged"));
-	if (!OtherActor) return;
-	AGS_Seeker* DamagedSeeker = Cast<AGS_Seeker>(OtherActor);
-	if (!DamagedSeeker) return;
-	if (TrapData.Effect.Damage <= 0.f) return;
+	if (!Seeker || !HasAuthority())
+	{
+		return;
+	}
 
-	//기본 데미지 부여
-	FDamageEvent DamageEvent;
-	DamagedSeeker->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
+	HandleTrapDamage(Seeker);
 
-	//디버프 추가
+	FTimerHandle TimerHandle;
+	FTimerDelegate TimerDel;
+
+	TimerDel.BindLambda([this, Seeker]()
+		{
+			CheckLavaLoop(Seeker);
+		});
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 1.0f, false);
+	ActiveLavaTimers.Add(Seeker, TimerHandle);
+}
+
+void AGS_LavaTrap::CheckLavaLoop(AGS_Seeker* Seeker)
+{
+	if (!Seeker || !HasAuthority())
+	{
+		ActiveLavaTimers.Remove(Seeker);
+		return;
+	}
+
+	ActiveLavaTimers.Remove(Seeker);
+	
+	if (DamageBoxComp->IsOverlappingActor(Seeker))
+	{
+		StartLavaLoop(Seeker);
+	}
+
 }

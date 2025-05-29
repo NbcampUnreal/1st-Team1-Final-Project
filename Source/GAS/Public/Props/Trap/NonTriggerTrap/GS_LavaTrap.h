@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Props/Trap/NonTriggerTrap/GS_NonTrigTrapBase.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include "GS_LavaTrap.generated.h"
 
 
@@ -13,8 +14,16 @@ class GAS_API AGS_LavaTrap : public AGS_NonTrigTrapBase
 	
 
 public:
+
 	AGS_LavaTrap();
 
+	
+	FTimerHandle LavaTickTimer;
+	TMap<AActor*, FTimerHandle> ActiveLavaTimers;
+	
+	
+	UFUNCTION(BlueprintCallable, Category = "Trap")
+	void StartLavaLoop(AGS_Seeker* Seeker);
 
-	virtual void HandleTrapDamage(AActor* OtherActor) override;
+	void CheckLavaLoop(AGS_Seeker* Seeker);
 };
