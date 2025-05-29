@@ -13,6 +13,8 @@ const FName AGS_AIController::MoveLocationKey(TEXT("MoveLocation"));
 const FName AGS_AIController::TargetActorKey(TEXT("Target"));
 const FName AGS_AIController::CommandKey(TEXT("Command"));
 const FName AGS_AIController::TargetLockedKey(TEXT("bTargetLocked"));
+const FName AGS_AIController::CanAttackKey(TEXT("bCanAttack"));
+const FName AGS_AIController::LastAttackTimeKey(TEXT("LastAttackTime"));
 
 AGS_AIController::AGS_AIController()
 {
