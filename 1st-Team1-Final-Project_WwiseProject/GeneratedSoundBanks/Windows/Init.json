@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{8E12A259-8DCB-6607-000A-E59A326D701A}",
+    "Hash": "{72DEC203-65B0-255D-DE4D-C8AB32002BF9}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -94,6 +94,12 @@
       "Name": "LowHPSound",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
       "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
+     },
+     {
+      "Id": "971873412",
+      "Name": "CombatMusicVolume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\CombatMusicVolume",
+      "GUID": "{C6BECC82-7359-4290-9D26-7D0B86908195}"
      }
     ],
     "StateGroups": [
@@ -172,6 +178,6 @@
     ]
    }
   ],
-  "FileHash": "{5A282CD5-0A95-97C7-7C1F-D098FA008334}"
+  "FileHash": "{16FF841B-D000-E87A-8851-B61D1428FF67}"
  }
 }

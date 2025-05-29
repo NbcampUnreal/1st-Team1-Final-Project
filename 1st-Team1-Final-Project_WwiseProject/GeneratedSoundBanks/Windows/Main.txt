@@ -15,6 +15,7 @@ Event	ID	Name			Wwise Object Path	Notes
 	831579122	EV_Mon_SmallClaw			\Default Work Unit\Monster\EV_Mon_SmallClaw	
 	942444514	Props_Torch			\Default Work Unit\Props_Torch	횃불 소리
 	1046362180	Props_StoneTrap_Hit			\Default Work Unit\Props\Props_StoneTrap_Hit	
+	1068539467	EV_Combat			\Default Work Unit\StateSound\EV_Combat	
 	1082319155	EV_Mon_SmallClaw_UI			\Default Work Unit\Monster\EV_Mon_SmallClaw_UI	
 	1129758503	EV_Mon_IronFang_UI			\Default Work Unit\Monster\EV_Mon_IronFang_UI	
 	1613532296	EV_GameState			\Default Work Unit\EV_GameState	
@@ -65,6 +66,7 @@ State	ID	Name	State Group			Notes
 
 Game Parameter	ID	Name			Wwise Object Path	Notes
 	181543522	LowHPSound			\Default Work Unit\LowHPSound	
+	971873412	CombatMusicVolume			\Default Work Unit\CombatMusicVolume	
 
 Effect plug-ins	ID	Name	Type				Notes
 	5204649	Time Stretch (Custom)	Wwise Time Stretch			
@@ -117,6 +119,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	245240366	SFX_Lava1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\42\{427C606B-003F-B8A9-D86C-33C51F7C4425}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Lava\SFX_Lava1		2037828
 	246210322	FlameMovementHeavy	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\4A\{4A5F7EC4-9B70-DF47-BB41-4EAC7BA92D4D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_FlameShot\FlameMovementHeavy		1341084
 	255360718	FootstepsConcrete2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A5\{A5CE27AF-12AC-80AA-5CFE-039A21E1E6C4}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Stone\FootstepsConcrete2		69940
+	258551038	CombatMusic	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\49\{49C39D61-7B14-3CE8-147C-8B2007A7B447}.wem		\Actor-Mixer Hierarchy\Default Work Unit\StateSound\CombatMusic		4405584
 	269881452	MonsterSnarlGrowl2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\18\{187CAB32-5A2A-EEE7-E7FF-CAF853A2F032}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_Monster\SFX_Mon_IronFang_UI\MonsterSnarlGrowl2		367712
 	278485591	Knight_Walking_Marching_Foely	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\57\{57BEFD3C-FD4D-C2AD-9D7B-FDF61CE2EBA1}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Chan\MoveSound\Knight_Walking_Marching_Foely		101028
 	282287949	SmallClawSound2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\99\{994A27EE-3785-4FCF-9195-DFB7728912B3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_Monster\SFX_Mon_SmallClaw_UI\SmallClawSound2		131360

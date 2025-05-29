@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "AkAudioEvent.h"
 #include "GS_CharacterAudioSystem.generated.h"
 
 /**
@@ -15,7 +16,17 @@ class GAS_API UGS_CharacterAudioSystem : public UObject
 	GENERATED_BODY()
 	
 public:
-	// ¼Ò¸® Àç»ı ÀÎÅÍÆäÀÌ½º
+	UGS_CharacterAudioSystem();
+
+	// ì „íˆ¬ ìŒì•… ê´€ë ¨ í•¨ìˆ˜
+	void PlayCombatMusic(AActor* Context);
+	void StopCombatMusic(AActor* Context);
+
+	// ì „íˆ¬ ìŒì•… ì´ë²¤íŠ¸
+	UPROPERTY(EditDefaultsOnly, Category = "Combat Audio")
+	UAkAudioEvent* CombatMusicEvent;
+
+	// ì „íˆ¬ ìŒì•… ê´€ë ¨ í•¨ìˆ˜
 	UFUNCTION(BlueprintCallable, Category = "Audio|Character")
 	void PlayFootstepSound();
 
@@ -24,6 +35,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|Character")
 	class UAkAudioEvent* TestEvent;
-
 
 };

@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{298271DF-1276-05F7-A8ED-CCE1C5B1BEDC}",
+    "Hash": "{17C4073E-7EC9-DEA0-5061-3F63B40B5F90}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -238,6 +238,14 @@
       "Location": "Memory",
       "ShortName": "FootstepsConcrete2.wav",
       "CachePath": "A5/{A5CE27AF-12AC-80AA-5CFE-039A21E1E6C4}.wem"
+     },
+     {
+      "Id": "258551038",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Heather_E.wav",
+      "CachePath": "49/{49C39D61-7B14-3CE8-147C-8B2007A7B447}.wem"
      },
      {
       "Id": "269881452",
@@ -1314,6 +1322,21 @@
       ]
      },
      {
+      "Id": "1068539467",
+      "Name": "EV_Combat",
+      "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_Combat",
+      "GUID": "{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}",
+      "MaxAttenuation": "480.00003",
+      "DurationType": "OneShot",
+      "DurationMin": "21.000597",
+      "DurationMax": "21.000597",
+      "MediaRefs": [
+       {
+        "Id": "258551038"
+       }
+      ]
+     },
+     {
       "Id": "3369981961",
       "Name": "EV_Fire_Burn",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Burn",
@@ -2211,6 +2234,12 @@
       "Name": "LowHPSound",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
       "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
+     },
+     {
+      "Id": "971873412",
+      "Name": "CombatMusicVolume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\CombatMusicVolume",
+      "GUID": "{C6BECC82-7359-4290-9D26-7D0B86908195}"
      }
     ],
     "StateGroups": [
@@ -2289,6 +2318,6 @@
     ]
    }
   ],
-  "FileHash": "{30AF8FBE-0CEA-FE43-CBCE-E1BFFC885450}"
+  "FileHash": "{0571D30E-16D9-A6F4-DF77-797CA84B47FB}"
  }
 }

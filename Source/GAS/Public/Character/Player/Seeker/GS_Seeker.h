@@ -14,6 +14,9 @@ class UPostProcessComponent;
 class UMaterialInterface;
 class UGS_StatComp;
 
+// Wwise 타입 정의 (int32로 대체)
+// typedef uint32 AkPlayingID;
+
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
 {
@@ -85,6 +88,32 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="VFX")
 	UNiagaraComponent* BodyLavaVFX;
+
+	// ================
+	// 전투 음악 관리
+	// ================
+private:
+	UPROPERTY()
+	TArray<class AGS_Monster*> NearbyMonsters;
+	
+	UPROPERTY()
+	int32 CurrentCombatMusicID;
+	
+	UPROPERTY()
+	FTimerHandle CombatMusicFadeTimerHandle;
+
+public:
+	// 몬스터가 전투 음악 시작/중지를 요청할 때 호출
+	UFUNCTION(BlueprintCallable)
+	void AddCombatMonster(class AGS_Monster* Monster);
+	
+	UFUNCTION(BlueprintCallable)
+	void RemoveCombatMonster(class AGS_Monster* Monster);
+
+private:
+	void StartCombatMusic();
+	void StopCombatMusic();
+	void UpdateCombatMusicState();
 
 protected:
 	// Called when the game starts or when spawned
