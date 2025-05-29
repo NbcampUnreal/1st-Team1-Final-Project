@@ -14,6 +14,7 @@
 #include "Templates/Function.h"
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
+#include "UI/Character/GS_ArrowTypeWidget.h"
 //#include "Weapon/Equipable/"
 
 // Sets default values
@@ -105,6 +106,7 @@ void AGS_Merci::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 
 	DOREPLIFETIME(AGS_Merci, CurrentAxeArrows);
 	DOREPLIFETIME(AGS_Merci, CurrentChildArrows);
+	DOREPLIFETIME(AGS_Merci, CurrentArrowType);
 }
 
 void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
@@ -393,6 +395,48 @@ void AGS_Merci::LeftClickPressed_Implementation()
 void AGS_Merci::LeftClickRelease_Implementation()
 {
 	IGS_AttackInterface::LeftClickRelease_Implementation();
+}
+
+void AGS_Merci::OnRep_CurrentArrowType()
+{
+	if(ArrowTypeWidget)
+	{
+		ArrowTypeWidget->UpdateArrowImage(CurrentArrowType);
+		if (CurrentArrowType == EArrowType::Normal)
+		{
+			ArrowTypeWidget->UpdateArrowCount(9999);
+		}
+		else if (CurrentArrowType == EArrowType::Axe)
+		{
+			ArrowTypeWidget->UpdateArrowCount(CurrentAxeArrows);
+		}
+		else if (CurrentArrowType == EArrowType::Child)
+		{
+			ArrowTypeWidget->UpdateArrowCount(CurrentChildArrows);
+		}
+	}
+}
+
+void AGS_Merci::OnRep_CurrentAxeArrows()
+{
+	if (ArrowTypeWidget)
+	{
+		if(CurrentArrowType==EArrowType::Axe)
+		{
+			ArrowTypeWidget->UpdateArrowCount(CurrentAxeArrows);
+		}
+	}
+}
+
+void AGS_Merci::OnRep_CurrentChildArrows()
+{
+	if (ArrowTypeWidget)
+	{
+		if (CurrentArrowType == EArrowType::Child)
+		{
+			ArrowTypeWidget->UpdateArrowCount(CurrentChildArrows);
+		}
+	}
 }
 
 void AGS_Merci::RegenAxeArrow()
