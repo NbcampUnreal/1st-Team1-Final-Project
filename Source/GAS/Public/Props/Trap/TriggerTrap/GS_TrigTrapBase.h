@@ -21,9 +21,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Replicated, Category="Trap")
 	bool bIsTriggered = false;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
-	//float CooldownTime = 3.0f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
 	UBoxComponent* TriggerBoxComp;
 
