@@ -113,6 +113,26 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 
 
 	//디버프 추가
+	if (UGS_DebuffComp* DebuffComp = DamagedSeeker->FindComponentByClass<UGS_DebuffComp>())
+	{
+
+		const FTrapEffect& Effect = TrapData.Effect;
+
+		//Stun
+		if (Effect.bStun)
+		{
+			DebuffComp->ApplyDebuff(EDebuffType::Stun, nullptr);
+		}
+
+		////Obscure
+		//if (Effect.bObscure)
+		//{
+		//	DebuffComp->ApplyDebuff(EDebuffType::Obscure, nullptr);
+		//}
+
+
+	}
+
 
 }
 
@@ -161,7 +181,6 @@ void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
 void AGS_TrapBase::Server_DamageBoxEffect_Implementation(AActor* OtherActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Server_DamageBoxEffect_Implementation called"));
-	//Multicast_DamageBoxEffect(OtherActor);
 	DamageBoxEffect(OtherActor);
 }
 
