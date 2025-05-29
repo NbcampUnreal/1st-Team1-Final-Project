@@ -71,7 +71,7 @@ public:
 	void ResetAllRune();
 
 	UFUNCTION(BlueprintCallable)
-	void LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes, const FGS_StatRow& Stats);
+	void LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes);
 
 	UFUNCTION(BlueprintCallable)
 	bool GetRuneData(uint8 RuneID, FRuneTableRow& OutData);
@@ -104,9 +104,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	bool GetFragmentedRuneTexture(uint8 RuneID, TMap<FIntPoint, UTexture2D*>& OutShape);
 
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void InitializeForTesting();
-
 private:
 
 	TMap<uint8, FRuneTableRow> RuneDataCache;
@@ -120,6 +117,8 @@ private:
 	TMap<FIntPoint, FGridCellData> CurrGridState;
 
 	void InitGridState();
+
+	void ApplyRuneToGrid(uint8 RuneID, const FIntPoint& Position, EGridCellState NewState, bool bApplyTexture = true);
 
 	void UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID=0, UTexture2D* RuneTextureFrag=nullptr);
 

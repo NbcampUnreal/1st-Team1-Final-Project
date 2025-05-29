@@ -15,6 +15,8 @@ class GAS_API UGS_ChanAimingSkill : public UGS_SeekerSkillBase
 	GENERATED_BODY()
 	
 public:
+	UGS_ChanAimingSkill();
+
 	virtual void ActiveSkill() override;
 	virtual void OnSkillCommand() override;
 	virtual void ExecuteSkillEffect() override;

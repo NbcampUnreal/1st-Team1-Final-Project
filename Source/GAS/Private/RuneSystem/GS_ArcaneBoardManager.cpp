@@ -29,6 +29,8 @@ UGS_ArcaneBoardManager::UGS_ArcaneBoardManager()
 	{
 		GridLayoutTable = GridLayoutTableFinder.Object;
 	}
+
+	InitDataCache();
 }
 
 bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
@@ -113,15 +115,7 @@ bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
 		UE_LOG(LogTemp, Warning, TEXT("%d"), rune.RuneID);
 	}
 
-	TArray<FIntPoint> RuneShapePos;
-	RuneShape.GenerateKeyArray(RuneShapePos);
-
-	//셀 상태 업데이트
-	for (const FIntPoint& Offset : RuneShapePos)
-	{
-		FIntPoint CellPos(Pos.X + Offset.X, Pos.Y + Offset.Y);
-		UpdateCellState(CellPos, EGridCellState::Occupied, RuneID, RuneShape[Offset]);
-	}
+	ApplyRuneToGrid(RuneID, Pos, EGridCellState::Occupied, true);
 
 	bHasUnsavedChanges = true;
 
@@ -151,18 +145,8 @@ bool UGS_ArcaneBoardManager::RemoveRune(uint8 RuneID)
 		return false;
 	}
 
-	TArray<FIntPoint> RuneShape;
-	if (!GetRuneShape(RuneID, RuneShape))
-	{
-		return false;
-	}
-
 	FIntPoint RunePos = PlacedRunes[RuneIndex].Pos;
-	for (const FIntPoint& Offset : RuneShape)
-	{
-		FIntPoint CellPos(RunePos.X + Offset.X, RunePos.Y + Offset.Y);
-		UpdateCellState(CellPos, EGridCellState::Empty);
-	}
+	ApplyRuneToGrid(RuneID, RunePos, EGridCellState::Empty, false);
 
 	PlacedRunes.RemoveAt(RuneIndex);
 
@@ -221,7 +205,7 @@ void UGS_ArcaneBoardManager::ResetAllRune()
 {
 }
 
-void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes, const FGS_StatRow& Stats)
+void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes)
 {
 }
 
@@ -400,11 +384,6 @@ bool UGS_ArcaneBoardManager::GetFragmentedRuneTexture(uint8 RuneID, TMap<FIntPoi
 	return false;
 }
 
-void UGS_ArcaneBoardManager::InitializeForTesting()
-{
-	InitDataCache();
-}
-
 void UGS_ArcaneBoardManager::InitGridState()
 {
 	CurrGridState.Empty();
@@ -424,6 +403,31 @@ void UGS_ArcaneBoardManager::InitGridState()
 			}
 			CurrGridState.Add(Cell.Pos, NewCell);
 		}
+	}
+}
+
+void UGS_ArcaneBoardManager::ApplyRuneToGrid(uint8 RuneID, const FIntPoint& Position, EGridCellState NewState, bool bApplyTexture)
+{
+	TMap<FIntPoint, UTexture2D*> RuneShape;
+	if (!GetFragmentedRuneTexture(RuneID, RuneShape))
+	{
+		return;
+	}
+
+	for (const auto& ShapePair : RuneShape)
+	{
+		FIntPoint CellPos(Position.X + ShapePair.Key.X, Position.Y + ShapePair.Key.Y);
+
+		UTexture2D* TextureToApply = nullptr;
+		uint8 RuneIDToApply = 0;
+
+		if (NewState == EGridCellState::Occupied && bApplyTexture)
+		{
+			TextureToApply = ShapePair.Value;
+			RuneIDToApply = RuneID;
+		}
+
+		UpdateCellState(CellPos, NewState, RuneIDToApply, TextureToApply);
 	}
 }
 

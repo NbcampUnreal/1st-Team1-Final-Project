@@ -138,3 +138,59 @@ void AGS_TrapBase::CustomTrapEffect_Implementation(AActor* TargetActor)
 {
 
 }
+
+
+//플레이어가 안에 있는 경우 밀쳐내는 함수
+void AGS_TrapBase::PushCharacterInBox(UBoxComponent* CollisionBox, float PushPower)
+{
+	if (!CollisionBox) return;
+
+	TArray<AActor*> OverlappingActors;
+	CollisionBox->GetOverlappingActors(OverlappingActors, ACharacter::StaticClass());
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		AGS_Character* Character = Cast<AGS_Character>(Actor);
+		if (Character)
+		{
+			FVector LocalCharacterLocation = GetActorTransform().InverseTransformPosition(Character->GetActorLocation());
+			FVector PushDirection = (LocalCharacterLocation.Y >= 0.0f)
+				? GetActorRightVector()
+				: -GetActorRightVector();
+
+			if (IsBlockedInDirection(Character->GetActorLocation(), PushDirection, 100.0f, Character))
+			{
+				PushDirection *= -1.0f;
+			}
+
+			PushDirection.Z = 0.0f;
+			PushDirection = PushDirection.GetSafeNormal();
+
+			FVector LaunchVelocity = PushDirection * PushPower + FVector(0, 0, 200.0f);
+
+			Character->LaunchCharacter(LaunchVelocity, true, true);
+		}
+	}
+
+}
+
+
+bool AGS_TrapBase::IsBlockedInDirection(const FVector& Start, const FVector& Direction, float Distance,  AGS_Character* CharacterToIgnore)
+{
+	FHitResult HitResult;
+	FVector End = Start + Direction * Distance;
+	
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	if (CharacterToIgnore)
+	{
+		Params.AddIgnoredActor(CharacterToIgnore);
+	}
+
+	#if WITH_EDITOR
+		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 2.0f);
+	#endif
+
+	return GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, Params);
+}

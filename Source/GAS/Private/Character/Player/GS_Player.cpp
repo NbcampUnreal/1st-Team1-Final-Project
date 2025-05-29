@@ -150,6 +150,15 @@ void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
+void AGS_Player::PlaySkillMontage(UAnimMontage* Montage)
+{
+	if (this->GetMesh() && Montage)
+	{
+		this->GetMesh()->GetAnimInstance()->Montage_Play(Montage);
+		UE_LOG(LogTemp, Warning, TEXT("Skill Montage Play!!!!!!!!!!!!!!"));
+	}
+}
+
 FCharacterWantsToMove AGS_Player::GetWantsToMove()
 {
 	return WantsToMove;
@@ -184,6 +193,11 @@ bool AGS_Player::IsLocalPlayer() const
 		return PC->IsLocalController();
 	}
 	return false;
+}
+
+void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage)
+{
+	PlaySkillMontage(Montage);
 }
 
 void AGS_Player::PlaySound(UAkAudioEvent* SoundEvent)

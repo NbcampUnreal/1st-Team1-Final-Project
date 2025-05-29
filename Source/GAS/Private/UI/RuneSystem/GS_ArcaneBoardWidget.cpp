@@ -3,7 +3,9 @@
 #include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
 #include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "RuneSystem/GS_GridLayoutDataAsset.h"
+#include "RuneSystem/GS_ArcaneBoardLPS.h"
 #include "Components/UniformGridPanel.h"
+#include "Components/Button.h"
 #include "UI/RuneSystem/GS_RuneGridCellWidget.h"
 #include "UI/RuneSystem/GS_RuneInventoryWidget.h"
 #include "UI/RuneSystem/GS_StatPanelWidget.h"
@@ -52,7 +54,12 @@ void UGS_ArcaneBoardWidget::NativeConstruct()
 	if (!IsValid(BoardManager))
 	{
 		BoardManager = NewObject<UGS_ArcaneBoardManager>(this);
-		BoardManager->InitializeForTesting();
+		BoardManager->InitDataCache();
+	}
+
+	if (CloseButton)
+	{
+		CloseButton->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnCloseButtonClicked);
 	}
 
 	BindManagerEvents();
@@ -279,7 +286,17 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 			}
 
 			SelectionVisualWidget->Setup(RuneID, RuneTexture);
-			SelectionVisualWidget->AddToViewport(10000);
+			if (GridCells.Num() > 0)
+			{
+				FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
+				FVector2D BoardSize = this->GetCachedGeometry().GetLocalSize();
+
+				float ScaleFactor = BoardSize.Y / (ViewportSize.Y * 0.8f);
+
+				SelectionVisualWidget->SetRenderScale(FVector2D(ScaleFactor, ScaleFactor));
+			}
+
+			SelectionVisualWidget->AddToViewport(3);
 
 			if (GetWorld())
 			{
@@ -408,6 +425,25 @@ void UGS_ArcaneBoardWidget::ClearPreview()
 uint8 UGS_ArcaneBoardWidget::GetSelectedRuneID() const
 {
 	return SelectedRuneID;
+}
+
+void UGS_ArcaneBoardWidget::OnCloseButtonClicked()
+{
+	/*if (HasUnsavedChanges())
+	{
+
+	}
+	else
+	{
+		if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+		{
+			LPS->TryCloseArcaneBoardUI();
+		}
+	}*/
+	if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+	{
+		LPS->TryCloseArcaneBoardUI();
+	}
 }
 
 void UGS_ArcaneBoardWidget::UpdateGridVisuals()

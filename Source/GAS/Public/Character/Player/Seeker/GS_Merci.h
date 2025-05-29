@@ -6,6 +6,7 @@
 #include "GS_Seeker.h"
 #include "Character/Interface/GS_AttackInterface.h"
 #include "AkGameplayTypes.h"
+#include "Weapon/Projectile/Seeker/GS_SeekerMerciArrowNormal.h"
 #include "GS_Merci.generated.h"
 
 class AGS_SeekerMerciArrow;
@@ -41,29 +42,40 @@ public:
 	USkeletalMeshComponent* Quiver;
 
 	UFUNCTION(BlueprintCallable)
-	void LeftClickPressedAttack(UAnimMontage* DrawMontage);
+	void DrawBow(UAnimMontage* DrawMontage);
 
 	UFUNCTION(BlueprintCallable)
-	void LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
+	void ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
 	UFUNCTION(Server, Reliable)
-	void Server_LeftClickPressedAttack(UAnimMontage* DrawMontage);
+	void Server_DrawBow(UAnimMontage* DrawMontage);
 
 	UFUNCTION(Server, Reliable)
-	void Server_LeftClickReleaseAttack(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
+	void Server_ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
 	UFUNCTION(Server, Reliable)
 	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AGS_SeekerMerciArrow> NormalArrowClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<AGS_SeekerMerciArrow> SmokeArrowClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UAnimMontage* ComboSkillDrawMontage;
+
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyDrawMontageEnded();
 
+	void OnDrawMontageEnded();
+	
+	bool GetIsFullyDrawn() { return bIsFullyDrawn; }
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_DrawDebugLine(FVector Start, FVector End, FColor Color = FColor::Green);
 
-	void OnDrawMontageEnded();
-
-	bool GetIsFullyDrawn() { return bIsFullyDrawn; }
+	UFUNCTION(Server, Reliable)
+	void Server_ChangeArrowType(int32 Direction);
 
 protected:
 	// Called when the game starts or when spawned
@@ -91,11 +103,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
 	UAkAudioEvent* ArrowShotSound; // 활 놓을 때(릴리즈)
 
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+
+	// [화살 관리]
+	
 private:
 	bool bWidgetVisibility = false;
 	USkeletalMeshComponent* Mesh;
-
-	
 
 	void PlayDrawMontage(UAnimMontage* DrawMontage);
 
@@ -118,4 +132,27 @@ private:
 	void Client_PlaySound(UAkComponent* SoundComp);
 
 	bool bIsFullyDrawn = false;
+
+	EArrowType CurrentArrowType;
+
+	// [화살 관리]
+	int32 MaxAxeArrows = 5;
+
+	int32 MaxChildArrows = 3;
+
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Arrow")
+	int32 CurrentAxeArrows;
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Arrow")
+	int32 CurrentChildArrows;
+
+	FTimerHandle AxeArrowRegenTimer;
+	FTimerHandle ChildArrowRegenTimer;
+
+	float RegenInterval = 5.0f; // 5초마다 충전
+
+	UFUNCTION()
+	void RegenAxeArrow();
+
+	UFUNCTION()
+	void RegenChildArrow();
 };

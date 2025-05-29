@@ -19,8 +19,7 @@ class GAS_API UGS_ArcaneBoardLPS : public ULocalPlayerSubsystem
 	GENERATED_BODY()
 	
 public:
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
+    void Initialize(FSubsystemCollectionBase& Collection) override;
 
     UPROPERTY()
     UGS_ArcaneBoardManager* BoardManager;
@@ -29,13 +28,19 @@ public:
     FGS_StatRow RuneSystemStats;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void ShowArcaneBoardUI();
+    void ShowArcaneBoardUI(UWidget* ParentWidget = nullptr);
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void HideArcaneBoardUI();
+    UGS_ArcaneBoardWidget* CreateArcaneBoardWidget();
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void DestroyArcaneBoardWidget();
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     bool TryCloseArcaneBoardUI();
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    ECharacterClass GetCurrPlayerClass() const;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void UpdateStatsUI();
@@ -57,7 +62,7 @@ public:
 
 private:
     UPROPERTY()
-    UGS_ArcaneBoardWidget* CurrentBoardWidget;
+    UGS_ArcaneBoardWidget* CurrBoardWidget;
 
     UPROPERTY()
     TSubclassOf<UGS_ArcaneBoardWidget> ArcaneBoardWidgetClass;

@@ -21,23 +21,18 @@ void AGS_SeekerMerciArrowNormal::BeginPlay()
 	
 }
 
+void AGS_SeekerMerciArrowNormal::ChangeArrowType(EArrowType Type)
+{
+	ArrowType = Type;
+}
+
 void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 	UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
 	Super::OnBeginOverlap(OverlappedComp, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
-	
-	/*if (OtherActor == GetInstigator()
-		|| Cast<AGS_SeekerMerciArrow>(OtherActor)
-		|| Cast<AGS_Seeker>(OtherActor))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Other Actor is Player of Arrow"));
-		return;
-	}*/
 
-	//UE_LOG(LogTemp, Warning, TEXT("Arrow Overlap : %s | OverlappedComp : %s"), *OtherActor->GetName(), *OverlappedComp->GetName());
-	//UE_LOG(LogTemp, Warning, TEXT("Instigator : %s"), *GetInstigator()->GetName());
 	// 맞은 대상 구분
 	ETargetType TargetType = DetermineTargetType(OtherActor);
 	
