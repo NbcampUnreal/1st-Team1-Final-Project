@@ -181,7 +181,6 @@ void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
 void AGS_TrapBase::Server_DamageBoxEffect_Implementation(AActor* OtherActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Server_DamageBoxEffect_Implementation called"));
-	//Multicast_DamageBoxEffect(OtherActor);
 	DamageBoxEffect(OtherActor);
 }
 
