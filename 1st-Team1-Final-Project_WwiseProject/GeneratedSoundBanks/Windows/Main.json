@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{9DF53CEF-C431-119B-F2D0-19C3A606A578}",
+    "Hash": "{E1C36D2F-973A-BF85-00F2-EF176C950E67}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -38,6 +38,14 @@
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_04c.wav",
       "CachePath": "C4/{C4338F14-5260-1320-4AD7-71D2BB135B84}.wem"
+     },
+     {
+      "Id": "8446681",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_Crying_2_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "B5/{B5FFB231-E59A-101B-13A0-3C64558C07CC}.wem"
      },
      {
       "Id": "15081757",
@@ -222,6 +230,14 @@
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.268.wav",
       "CachePath": "39/{3904409D-71D1-AB20-F48A-8D01663764A7}.wem"
+     },
+     {
+      "Id": "234128836",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Dying_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "F2/{F21EC345-00E4-7F67-B514-9702AC869DAE}.wem"
      },
      {
       "Id": "245240366",
@@ -2126,6 +2142,20 @@
       ]
      },
      {
+      "Id": "2834051383",
+      "Name": "Voice_Chan_Die",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Die",
+      "GUID": "{B5D9F3B7-56D1-4E7E-B266-A42C91017124}",
+      "DurationType": "OneShot",
+      "DurationMin": "3.464923",
+      "DurationMax": "3.464923",
+      "MediaRefs": [
+       {
+        "Id": "234128836"
+       }
+      ]
+     },
+     {
       "Id": "3237405698",
       "Name": "Voice_Chan_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Hit",
@@ -2174,6 +2204,20 @@
         }
        ]
       }
+     },
+     {
+      "Id": "2779071563",
+      "Name": "Voice_Merci_Die",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Die",
+      "GUID": "{169823F8-E7B9-4D5E-AE2E-003C93280F66}",
+      "DurationType": "OneShot",
+      "DurationMin": "1.4364586",
+      "DurationMax": "1.4364586",
+      "MediaRefs": [
+       {
+        "Id": "8446681"
+       }
+      ]
      },
      {
       "Id": "2915263918",
@@ -2320,6 +2364,6 @@
     ]
    }
   ],
-  "FileHash": "{C1843165-96CA-8763-A533-1BB3A99FAE00}"
+  "FileHash": "{8D43AB01-87AD-7B66-32DC-42F6ECC96DD5}"
  }
 }

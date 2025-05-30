@@ -31,6 +31,8 @@ Event	ID	Name			Wwise Object Path	Notes
 	2662114774	Props_Axe_Hit			\Default Work Unit\Props\Props_Axe_Hit	
 	2754704106	EV_Chan_Attack			\Default Work Unit\Player\Seeker\EV_Chan_Attack	
 	2756369268	Amb_Dungeon			\Default Work Unit\AmbientSound\Amb_Dungeon	
+	2779071563	Voice_Merci_Die			\Default Work Unit\Player\Seeker\Voice_Merci_Die	
+	2834051383	Voice_Chan_Die			\Default Work Unit\Player\Seeker\Voice_Chan_Die	
 	2897876713	EV_Arrow_Shot			\Default Work Unit\EV_Arrow_Shot	
 	2915263918	Voice_Merci_Hit			\Default Work Unit\Player\Seeker\Voice_Merci_Hit	
 	2999099924	EV_ArrowImpact_Wood			\Default Work Unit\EV_ArrowImpact_Wood	
@@ -94,6 +96,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	3677691	Amb_DungeonSound	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F1\{F1E035C6-61E2-C3A3-4C4D-A89F9536D196}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Ambient\Amb_DungeonSound		7926000
 	5171484	SFX_ArrowImpact_Wood	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F9\{F9FCC43A-5747-5C17-1EE4-2403694EE12D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Wood		151152
 	7846130	ESM_MG3_fx_foley_smash_rocks_pickaxe_04c	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\C4\{C4338F14-5260-1320-4AD7-71D2BB135B84}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_BearTrap\SFX_BearTrap_Blend\ESM_MG3_fx_foley_smash_rocks_pickaxe_04c		101684
+	8446681	Voice_MerciDie	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B5\{B5FFB231-E59A-101B-13A0-3C64558C07CC}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Merci\Voice_MerciDie		134324
 	15081757	SFX_CrystalSpikeTrap0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\69\{69283A98-7A63-273F-A660-E7C5A5D74086}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_CrystalSpikeTrap\SFX_CrystalSpikeTrap0		121180
 	45190972	SmallClawSound1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\63\{633CEBE1-2B3B-4680-28E5-1CFE99F164DE}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_Monster\SFX_Mon_SmallClaw_UI\SmallClawSound1		108704
 	46724587	FootSteps_Lava (1)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\D4\{D468E696-B651-282D-0B5D-16825AE1B90F}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Lava\FootSteps_Lava (1)		168668
@@ -117,6 +120,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	222843135	FootSteps_Lava (3)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\8E\{8EBB5EF5-C1EA-65FF-5278-9FEBECBFC81B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Lava\FootSteps_Lava (3)		129292
 	223150580	SFX_SmallClaw_Idle1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\2A\{2A5119AE-25F2-360D-62BD-BAE2113B4F4F}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_Monster\SFX_Mon_ShadowFang_UI\SFX_SmallClaw_Idle1		163264
 	223413545	MonsterSnarlGrowl1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\39\{3904409D-71D1-AB20-F48A-8D01663764A7}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\SFX_Mon_SmallClaw\MonsterSnarlGrowl1		112988
+	234128836	Voice_ChanDie	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F2\{F21EC345-00E4-7F67-B514-9702AC869DAE}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Chan\Voice_ChanDie		314656
 	245240366	SFX_Lava1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CC\{CCC44E05-8543-52D6-124F-F6CD377C4DA1}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Lava\SFX_Lava1		2037828
 	246210322	FlameMovementHeavy	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\77\{77AF4E19-1068-61F3-43F7-6D636534580F}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_FlameShot\FlameMovementHeavy		1232128
 	255360718	FootstepsConcrete2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E4\{E4362B59-0A9A-4535-8495-A5FD31975BB3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Stone\FootstepsConcrete2		64264
