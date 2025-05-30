@@ -5,13 +5,9 @@
 #include "Character/GS_Character.h"
 #include "Character/Skill/GS_SkillBase.h"
 #include "Character/Skill/GS_SkillSet.h"
-#include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
-#include "Character/Skill/Seeker/Chan/GS_ChanMovingSkill.h"
-#include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
-#include "Character/Skill/GS_SkillSet.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_SkillWidget.h"
 #include "Net/UnrealNetwork.h"
+
 
 void UGS_SkillComp::OnRep_Skill1()
 {
@@ -176,7 +172,7 @@ void UGS_SkillComp::InitializeSkillWidget(UGS_SkillWidget* InSkillWidget)
 		if (SkillMap.Contains(Slot))
 		{
 			InSkillWidget->Initialize(SkillMap[Slot]);
-			
+
 			if (Slot == ESkillSlot::Moving)
 			{
 				Skill1CoolTimeChanged.AddUObject(InSkillWidget, &UGS_SkillWidget::OnSkillCoolTimeChanged);

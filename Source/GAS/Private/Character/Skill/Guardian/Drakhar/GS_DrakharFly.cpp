@@ -7,6 +7,8 @@
 UGS_DrakharFly::UGS_DrakharFly()
 {
 	bIsFlying = false;
+
+	CurrentSkillType = ESkillSlot::Ready;
 }
 
 void UGS_DrakharFly::ActiveSkill()
@@ -31,7 +33,6 @@ void UGS_DrakharFly::ActiveSkill()
 	{
 		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ready, true);
 	}
-	
 	ExecuteSkillEffect();
 }
 
@@ -47,6 +48,7 @@ void UGS_DrakharFly::DeactiveSkill()
 	}
 	
 	ExecuteSkillEffect();
+	//StartCoolDown();
 }
 
 void UGS_DrakharFly::ExecuteSkillEffect()

@@ -10,10 +10,8 @@ UENUM(BlueprintType)
 enum class EGuardianState : uint8
 {
 	None,
-	Ready,
-	Skill,
-	ComboAttack,
-	invincible
+	CtrlUp,
+	CtrlSkillEnd,
 };
 
 UCLASS()
@@ -45,16 +43,16 @@ public:
 
 	//[skill check]
 	UFUNCTION(Server, Reliable)
-	void ServerRPCStartSkill();
+	void ServerRPCStartCtrl();
 
 	UFUNCTION(Server, Reliable)
-	void ServerRPCStopSkill();
+	void ServerRPCStopCtrl();
 	
 	UFUNCTION()
 	void OnRep_GuardianState();
 	
-	// UFUNCTION(NetMulticast, Unreliable)
-	// void MulticastRPCDrawDebugLine(const FVector& Start, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit);
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCDrawDebugLine(const FVector& Start, const FVector& End, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit);
 protected:
 	UPROPERTY()
 	EGuardianState ClientGuardianState;

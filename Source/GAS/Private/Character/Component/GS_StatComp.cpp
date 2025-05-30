@@ -152,7 +152,7 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 
 	if (IsValid(OwnerCharacter))
 	{
-		if (Cast<AGS_Guardian>(OwnerCharacter)->GuardianState != EGuardianState::Skill)
+		if (Cast<AGS_Guardian>(OwnerCharacter)->GuardianState != EGuardianState::None)
 		{
 			//OwnerCharacter->PlayAnimMontage(AnimMontage, 2.f);
 		}
