@@ -23,6 +23,7 @@ void AGS_ArrowTrapProjectile::Init(AGS_TrigTrapBase* InTrap)
 	if (HasAuthority())
 	{
 		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AGS_ArrowTrapProjectile::OnBeginOverlap);
+		CollisionComponent->SetCollisionObjectType(ECC_GameTraceChannel3);
 	}
 }
 
@@ -38,8 +39,12 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 	}
 
 	AGS_Player* Player = Cast<AGS_Player>(OtherActor);
-	if (Player && OwningTrap)
+
+	UE_LOG(LogTemp, Warning, TEXT("OtherComp: %s, Type: %d"), *OtherComp->GetName(), OtherComp->GetCollisionObjectType());
+
+	if (Player && OtherComp == Player->GetMesh() && OwningTrap)
 	{
+		//수정
 		OwningTrap->HandleTrapDamage(OtherActor);
 		StickWithVisualOnly(SweepResult);
 		Destroy();
@@ -60,13 +65,13 @@ void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
 	// 화살이 박힌 위치
 	FVector SpawnLocation = Hit.ImpactPoint;
 
-	// 방향 = 화살이 실제 날아온 방향
 	FVector ArrowDirection = GetVelocity().GetSafeNormal();
 	FRotator SpawnRotation = FRotationMatrix::MakeFromX(ArrowDirection).Rotator();
 
-	// 메시가 +Y 방향을 앞이라고 가정 시 Y축 기준 -90도 회전
 	FRotator AdjustedRotation = SpawnRotation + FRotator(0.f, -90.f, 0.f);
-	SpawnLocation -= ArrowDirection * 5.f; // 약간 파고들게
+
+	// 약간 박히게 밀어넣기
+	SpawnLocation = Hit.ImpactPoint - ArrowDirection * 1.f;
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -81,7 +86,7 @@ void AGS_ArrowTrapProjectile::StickWithVisualOnly(const FHitResult& Hit)
 	
 	if (VisualArrow)
 	{
-		VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
+		VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform, Hit.BoneName);
 
 	}
 
