@@ -13,6 +13,12 @@ void AGS_LavaTrap::StartLavaLoop(AGS_Seeker* Seeker)
 		return;
 	}
 
+	if (ActiveLavaTimers.Contains(Seeker))
+	{
+		return;
+	}
+
+
 	HandleTrapDamage(Seeker);
 
 	FTimerHandle TimerHandle;

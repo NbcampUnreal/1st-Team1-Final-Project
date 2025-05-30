@@ -10,6 +10,7 @@
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_HPWidget.h"
 #include "System/GS_PlayerState.h"
+#include "Components/CapsuleComponent.h"
 #include "Weapon/GS_Weapon.h"
 
 AGS_Character::AGS_Character()
@@ -25,6 +26,10 @@ AGS_Character::AGS_Character()
 	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HPTextWidgetComp->SetVisibility(false);
+
+	//함정 - 화살발사기의 화살 채널 설정
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Overlap);
 }
 
 void AGS_Character::BeginPlay()
