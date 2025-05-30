@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{9FA8BEF3-817A-2E0D-DF32-776A3AC157AC}",
+    "Hash": "{9DF53CEF-C431-119B-F2D0-19C3A606A578}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -21,7 +21,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am.wav",
-      "CachePath": "C5/{C5B0A087-2ED9-95F4-B1C7-56C79513FED4}.wem"
+      "CachePath": "F1/{F1E035C6-61E2-C3A3-4C4D-A89F9536D196}.wem"
      },
      {
       "Id": "5171484",
@@ -29,7 +29,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowImpactWood_BW.54281.wav",
-      "CachePath": "E7/{E75C8D0E-0A44-9599-0179-8FADEEB33D76}.wem"
+      "CachePath": "F9/{F9FCC43A-5747-5C17-1EE4-2403694EE12D}.wem"
      },
      {
       "Id": "7846130",
@@ -37,7 +37,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_04c.wav",
-      "CachePath": "56/{569B47FA-F4EA-C503-6E0F-4725431389E7}.wem"
+      "CachePath": "C4/{C4338F14-5260-1320-4AD7-71D2BB135B84}.wem"
      },
      {
       "Id": "15081757",
@@ -45,7 +45,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
-      "CachePath": "AD/{ADA6F4C1-AB75-7724-99C9-E9333418D799}.wem"
+      "CachePath": "69/{69283A98-7A63-273F-A660-E7C5A5D74086}.wem"
      },
      {
       "Id": "45190972",
@@ -53,7 +53,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Dragon_Vocal_Fight_Painful_Growl_Monster_Creature_Voice.wav",
-      "CachePath": "EA/{EA68F9E2-703A-9634-A72C-0A51AE4EF1FF}.wem"
+      "CachePath": "63/{633CEBE1-2B3B-4680-28E5-1CFE99F164DE}.wem"
      },
      {
       "Id": "46724587",
@@ -61,7 +61,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootSteps_Lava (1).wav",
-      "CachePath": "1C/{1CD67C2A-6001-8EB3-6708-3CBD931C56EB}.wem"
+      "CachePath": "D4/{D468E696-B651-282D-0B5D-16825AE1B90F}.wem"
      },
      {
       "Id": "65595387",
@@ -69,7 +69,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Lava_Hit0.wav",
-      "CachePath": "84/{845FE753-80F0-6825-CB07-84F31B1EBEA8}.wem"
+      "CachePath": "2B/{2BF6526B-0EB6-B99D-1A11-32A26653FF1C}.wem"
      },
      {
       "Id": "81623842",
@@ -77,7 +77,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Wind_Loop_Distant_Air_Steady_1.wav",
-      "CachePath": "08/{0801B149-5EAE-81E6-B35F-AEFA8B3A8891}.wem"
+      "CachePath": "1A/{1AF3F7D1-9AF5-5ADB-1786-1A4FBB05DE98}.wem"
      },
      {
       "Id": "107540085",
@@ -85,7 +85,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
-      "CachePath": "0C/{0CE5A0AB-80B7-5A43-2297-FC39512D1C36}.wem"
+      "CachePath": "86/{86BCC787-7896-A5DC-34C9-11CB3C5F7B34}.wem"
      },
      {
       "Id": "108068136",
@@ -93,7 +93,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
-      "CachePath": "04/{04B26063-F9EB-C782-3DC1-790616CFFE03}.wem"
+      "CachePath": "B1/{B1E68324-48AE-99E6-139E-FB8406ACAEF4}.wem"
      },
      {
       "Id": "112081368",
@@ -101,7 +101,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsDirt2.wav",
-      "CachePath": "65/{65019945-3BB6-6A43-0831-6B8CC7FF5E38}.wem"
+      "CachePath": "C7/{C732EA7A-9736-F45C-4D0B-C55C65DB5D11}.wem"
      },
      {
       "Id": "116836280",
@@ -109,7 +109,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Jump_4_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "CF/{CF893FFF-1F00-BC29-3226-B3FE95C0B970}.wem"
+      "CachePath": "4A/{4A407617-B43F-5B87-A827-F98465A68FC9}.wem"
      },
      {
       "Id": "120977185",
@@ -117,7 +117,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeFuse.wav",
-      "CachePath": "4D/{4D5CACE9-FBC6-8F58-6453-5C3BC9B32A8B}.wem"
+      "CachePath": "88/{88435514-F2F0-912A-25E3-079873B98238}.wem"
      },
      {
       "Id": "141938875",
@@ -125,7 +125,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_CH_fx_impact_gore_hit_liquid_crunching_04.wav",
-      "CachePath": "CA/{CA3252CA-CE0D-C2A0-31FA-D78C83C3A875}.wem"
+      "CachePath": "46/{4631D6E4-F035-4FFC-6EA5-333E7C3FDF12}.wem"
      },
      {
       "Id": "147470122",
@@ -133,7 +133,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Grunt_2_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "1C/{1C2B7ADD-90EC-CA41-A2DD-B38C597669A7}.wem"
+      "CachePath": "C5/{C5D74CA2-392C-BBFE-D5FC-5338FCCCE046}.wem"
      },
      {
       "Id": "149736104",
@@ -141,7 +141,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootSteps_Lava (4).wav",
-      "CachePath": "A7/{A7763ECF-E602-CB21-7F7F-96E9079E8E03}.wem"
+      "CachePath": "8F/{8F23005F-52A2-B1C3-CAA4-6D41D8E3C465}.wem"
      },
      {
       "Id": "151148536",
@@ -149,7 +149,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_04b.wav",
-      "CachePath": "16/{1669A074-2DA5-9667-7CC4-F9667EB6A9C1}.wem"
+      "CachePath": "3E/{3EAD4D0E-1342-4EE7-B379-B24E88DAC1C5}.wem"
      },
      {
       "Id": "157399992",
@@ -157,7 +157,15 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeTick.wav",
-      "CachePath": "78/{783A3204-F3A4-EE0B-047A-830C3280BA2A}.wem"
+      "CachePath": "3C/{3CC037AE-4F16-5DA5-A599-EAD0A0BD74D1}.wem"
+     },
+     {
+      "Id": "172591083",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "GasCombat_Demo.wav",
+      "CachePath": "25/{257D320C-FE85-DF02-6220-A68EB09AB4FF}.wem"
      },
      {
       "Id": "177115164",
@@ -165,7 +173,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Groaning_Sequence_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "87/{87A20826-00EF-F4F9-2444-BE0B31ED900A}.wem"
+      "CachePath": "08/{08DD0456-B4C3-B9DA-2EDC-214C385E1BAE}.wem"
      },
      {
       "Id": "177130386",
@@ -173,7 +181,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am.wav",
-      "CachePath": "C4/{C4AB8AED-E27C-80B7-9E61-568BCEA89233}.wem"
+      "CachePath": "C8/{C8BFC395-3714-C951-0990-0FC8F24C80FE}.wem"
      },
      {
       "Id": "199617062",
@@ -181,7 +189,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (1).wav",
-      "CachePath": "D8/{D8198CFD-2383-6DA8-9D53-C82E9BE174F6}.wem"
+      "CachePath": "D4/{D4997C74-C868-E958-1836-37F645D77735}.wem"
      },
      {
       "Id": "213946712",
@@ -189,7 +197,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_In1.wav",
-      "CachePath": "66/{66974F7A-164D-7E0A-D574-C9F4FB0DB0A6}.wem"
+      "CachePath": "D5/{D570C748-BD7E-8229-9BEE-F42962377B5B}.wem"
      },
      {
       "Id": "222843135",
@@ -197,7 +205,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootSteps_Lava (3).wav",
-      "CachePath": "6B/{6BFC1F58-54BB-B2F0-4B65-E642B954B5FD}.wem"
+      "CachePath": "8E/{8EBB5EF5-C1EA-65FF-5278-9FEBECBFC81B}.wem"
      },
      {
       "Id": "223150580",
@@ -205,7 +213,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy.wav",
-      "CachePath": "1F/{1F15E0D9-61EF-E966-A2B3-C1AC144AC6BC}.wem"
+      "CachePath": "2A/{2A5119AE-25F2-360D-62BD-BAE2113B4F4F}.wem"
      },
      {
       "Id": "223413545",
@@ -213,7 +221,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.268.wav",
-      "CachePath": "66/{6646DB2A-9B9D-7EF1-6740-41D5559C99DD}.wem"
+      "CachePath": "39/{3904409D-71D1-AB20-F48A-8D01663764A7}.wem"
      },
      {
       "Id": "245240366",
@@ -221,7 +229,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Lava1.wav",
-      "CachePath": "42/{427C606B-003F-B8A9-D86C-33C51F7C4425}.wem"
+      "CachePath": "CC/{CCC44E05-8543-52D6-124F-F6CD377C4DA1}.wem"
      },
      {
       "Id": "246210322",
@@ -229,7 +237,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FlameMovementHeavy_SFXB.651.wav",
-      "CachePath": "4A/{4A5F7EC4-9B70-DF47-BB41-4EAC7BA92D4D}.wem"
+      "CachePath": "77/{77AF4E19-1068-61F3-43F7-6D636534580F}.wem"
      },
      {
       "Id": "255360718",
@@ -237,15 +245,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsConcrete2.wav",
-      "CachePath": "A5/{A5CE27AF-12AC-80AA-5CFE-039A21E1E6C4}.wem"
-     },
-     {
-      "Id": "258551038",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Heather_E.wav",
-      "CachePath": "7A/{7A7D12EC-1AC0-6297-B181-3BBA52F8B7BB}.wem"
+      "CachePath": "E4/{E4362B59-0A9A-4535-8495-A5FD31975BB3}.wem"
      },
      {
       "Id": "269881452",
@@ -253,7 +253,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.269.wav",
-      "CachePath": "18/{187CAB32-5A2A-EEE7-E7FF-CAF853A2F032}.wem"
+      "CachePath": "17/{17D3A7BD-8C71-C4DB-CBDD-897DDFEC52EF}.wem"
      },
      {
       "Id": "278485591",
@@ -261,7 +261,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Empire_Game_Footsteps_Single_Metal_Armor_Movement_Knight_Walking_Marching_Foely.wav",
-      "CachePath": "57/{57BEFD3C-FD4D-C2AD-9D7B-FDF61CE2EBA1}.wem"
+      "CachePath": "67/{670293BD-A2CD-9AF0-1D51-5D3E3FD89C9B}.wem"
      },
      {
       "Id": "282287949",
@@ -269,7 +269,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "CatMeow_S08AN.44.wav",
-      "CachePath": "99/{994A27EE-3785-4FCF-9195-DFB7728912B3}.wem"
+      "CachePath": "21/{21C67689-04D5-F3F7-308B-096E8B07158C}.wem"
      },
      {
       "Id": "289001169",
@@ -277,7 +277,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_FG2_FX_combat_one_shot_hit_whoosh_punch_4.wav",
-      "CachePath": "61/{617FE605-8996-7E09-32BF-4A11BCE6D93D}.wem"
+      "CachePath": "9F/{9FC642A9-62A6-AB86-D1BF-599D1D64B2AD}.wem"
      },
      {
       "Id": "290212776",
@@ -285,7 +285,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepMetal1.wav",
-      "CachePath": "75/{758138DC-BF20-3EAF-9803-773285868A26}.wem"
+      "CachePath": "75/{75146B4D-D3B8-FE8C-826A-F925D569090E}.wem"
      },
      {
       "Id": "307021949",
@@ -293,7 +293,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarl_S011HO.324.wav",
-      "CachePath": "C6/{C6D9BC2F-BEFE-D623-CE73-710BB48447F4}.wem"
+      "CachePath": "BE/{BE15E685-367D-01F5-C87C-EB0DC9D41931}.wem"
      },
      {
       "Id": "313983704",
@@ -301,7 +301,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_StoneTrap1.wav",
-      "CachePath": "BC/{BC693F83-11C1-F5DA-8473-9D2EF5636125}.wem"
+      "CachePath": "EE/{EE5D2F66-F2B7-7821-9E4F-6419C54205C5}.wem"
      },
      {
       "Id": "321658963",
@@ -309,7 +309,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_Out.wav",
-      "CachePath": "CA/{CABC276B-B97B-E16F-326E-6FCE9A1E8902}.wem"
+      "CachePath": "7E/{7E0BDE7F-8A22-DB6D-27B4-972FAD8FCCC6}.wem"
      },
      {
       "Id": "326406373",
@@ -317,7 +317,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (5).wav",
-      "CachePath": "BC/{BC18A9E6-8F90-CE54-6711-E48D3BC8E7E3}.wem"
+      "CachePath": "37/{37192E86-5D8B-4035-3025-E78DC8C1B07E}.wem"
      },
      {
       "Id": "369007659",
@@ -325,7 +325,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "TorchFlicker.wav",
-      "CachePath": "55/{559E03B1-4932-EBDC-CFF5-88FD3CA8B894}.wem"
+      "CachePath": "E9/{E93E11AF-4684-5D00-A49D-01E8163638B9}.wem"
      },
      {
       "Id": "369405294",
@@ -333,7 +333,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "DD/{DD70A6D1-2A33-A992-390C-CD75E3CAB902}.wem"
+      "CachePath": "22/{229A5453-4A62-EF27-EAA1-F84C2AEC156F}.wem"
      },
      {
       "Id": "373316616",
@@ -341,7 +341,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Arrow_Realse.wav",
-      "CachePath": "1B/{1BD5F843-7767-DF2E-45D6-3A67563F9E82}.wem"
+      "CachePath": "74/{74880479-9A9D-3F13-1BC5-D4E2BF33BD9B}.wem"
      },
      {
       "Id": "377837800",
@@ -349,7 +349,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (3).wav",
-      "CachePath": "0D/{0D02EE03-BBCD-6A58-0CFD-E5FC05CAFA57}.wem"
+      "CachePath": "00/{00230D6F-B6B2-51BA-E447-CEE35C030F2D}.wem"
      },
      {
       "Id": "384388068",
@@ -357,7 +357,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Dirt4.wav",
-      "CachePath": "EC/{EC658BD6-2331-30DB-B09E-43B888A45B5D}.wem"
+      "CachePath": "9C/{9C30925B-3E67-B34B-4961-816EA4E0FCE2}.wem"
      },
      {
       "Id": "399735935",
@@ -365,7 +365,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "DS_VEDMT_fx_heartbeat_one_shot_stuck.wav",
-      "CachePath": "D1/{D18C278B-25FB-C3CF-FDD3-6D7C0537BCC2}.wem"
+      "CachePath": "72/{72ECFA9B-8A1A-E6D7-D4FB-8A10A43EFD18}.wem"
      },
      {
       "Id": "401627905",
@@ -373,7 +373,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepMetal2.wav",
-      "CachePath": "9A/{9A513CC8-FF0F-3BA5-9FD4-F3E8CBE9A384}.wem"
+      "CachePath": "35/{3516BDE1-BB27-E85B-7BDA-66F412F8B807}.wem"
      },
      {
       "Id": "418165151",
@@ -381,7 +381,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_rockcrsh_brick_wall_breaking_02_impact_smash_destroy_hit_scatter_shards.wav",
-      "CachePath": "66/{66CC7DBC-9D8A-9406-0146-D67410BE06DE}.wem"
+      "CachePath": "7C/{7CB34677-1A68-5A6E-64C4-CEDE224AB2CB}.wem"
      },
      {
       "Id": "434604945",
@@ -389,7 +389,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_In0.wav",
-      "CachePath": "15/{15C54224-9E2A-14C5-57AE-8FE3B524A2F8}.wem"
+      "CachePath": "8B/{8B729338-3276-28E8-2FE5-3B0A7DCE0D62}.wem"
      },
      {
       "Id": "444842476",
@@ -397,7 +397,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_You_Shit_1_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "6C/{6C2CE5F4-5233-8F40-795C-3A87120B6BB6}.wem"
+      "CachePath": "BD/{BD0AF678-283E-9198-B671-BF8E4DC7BEC7}.wem"
      },
      {
       "Id": "446662238",
@@ -405,7 +405,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "CrystalTrapSFX.wav",
-      "CachePath": "10/{10AADF17-9AA3-E379-76EC-DB59324F7C73}.wem"
+      "CachePath": "07/{07808BB0-BE47-0C88-902A-56176633AFA0}.wem"
      },
      {
       "Id": "451846292",
@@ -413,7 +413,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "CatMeowPurr_SFXB.207.wav",
-      "CachePath": "62/{6287811C-FD38-0519-7582-B55F9545D5D5}.wem"
+      "CachePath": "7B/{7B190F78-8DB3-6C4C-CFC6-4394A0FBC172}.wem"
      },
      {
       "Id": "454432692",
@@ -421,7 +421,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_flame_extinguish_short_01_burn_fire_flame.wav",
-      "CachePath": "C9/{C9C724FD-B207-6554-9290-9D72C26785E5}.wem"
+      "CachePath": "43/{434549BE-EB06-71AC-59CD-B70B80EEDA22}.wem"
      },
      {
       "Id": "454704061",
@@ -429,7 +429,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_Hit.wav",
-      "CachePath": "D6/{D6097544-A114-11ED-7819-676E97EC36FF}.wem"
+      "CachePath": "23/{232D6D9B-9268-76DD-D046-4AA2F28796A5}.wem"
      },
      {
       "Id": "457873650",
@@ -437,7 +437,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_inflammation_light_02_burn_fire_flame.wav",
-      "CachePath": "CB/{CBF1F095-B4AE-0527-A1B3-9B95BB070A3A}.wem"
+      "CachePath": "CF/{CF033A5A-9518-C199-7D3C-067465945448}.wem"
      },
      {
       "Id": "460690503",
@@ -445,7 +445,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "BowPullString_BW.54384.wav",
-      "CachePath": "D5/{D5FBD559-460A-3B3D-9297-73DB1210EB08}.wem"
+      "CachePath": "4D/{4D3DE185-41C6-22A1-0252-ED8CD668A097}.wem"
      },
      {
       "Id": "482396296",
@@ -453,7 +453,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_CH_fx_impact_gore_hit_liquid_crunching_04.wav",
-      "CachePath": "32/{32C8FF9E-23D0-E7BE-E33B-B00E9AD68CCE}.wem"
+      "CachePath": "E5/{E5AB914C-B81E-DC27-6AF2-7410630CAADB}.wem"
      },
      {
       "Id": "484226950",
@@ -461,7 +461,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Coughing_6_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "50/{5080E208-0C18-0E0F-E93C-F359B2AB1CDB}.wem"
+      "CachePath": "84/{849837E6-C4EE-37F8-9A81-9408617CA207}.wem"
      },
      {
       "Id": "485972195",
@@ -469,7 +469,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Bloated_Zombie_Short_Attack_Dry_Mutant_Dead_Undead_Monster_Fat.wav",
-      "CachePath": "D1/{D1D649E4-FE04-9E71-695C-B5F693978566}.wem"
+      "CachePath": "04/{04FD5821-75C5-B33A-257F-810B1C35DB93}.wem"
      },
      {
       "Id": "492757837",
@@ -477,7 +477,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_SPG_fx_breakable_glass_smash_crash_shatter_04.wav",
-      "CachePath": "94/{947B0571-385E-A001-7294-B5CCC60E8490}.wem"
+      "CachePath": "97/{97FF4AD0-66F2-F626-D04C-AF09016675E3}.wem"
      },
      {
       "Id": "518697165",
@@ -485,7 +485,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Dirt3.wav",
-      "CachePath": "6E/{6E6E02EA-5019-68F8-642F-516169F4C419}.wem"
+      "CachePath": "03/{03F7A63B-0B42-C67B-9025-81840E7CAC95}.wem"
      },
      {
       "Id": "527820047",
@@ -493,7 +493,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Groan_1_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "ED/{EDC3325F-5DD6-5FFC-4712-4BC9159CE9BC}.wem"
+      "CachePath": "95/{955AE41D-CC3E-59A6-98A9-3872DEC979B3}.wem"
      },
      {
       "Id": "537148971",
@@ -501,7 +501,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootSteps_Lava (2).wav",
-      "CachePath": "71/{71ED084E-15F1-56C7-8948-167F1ED51B3C}.wem"
+      "CachePath": "91/{912767DB-5F82-1A47-0CF4-E5DCA29DF84B}.wem"
      },
      {
       "Id": "542254204",
@@ -509,7 +509,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Ambient_Game_Attack_Simple_Heavy_Swing_1_Deep_Hammer_Air_Woosh.wav",
-      "CachePath": "C4/{C495D3A3-EF3D-610A-CF20-C294479BCBA1}.wem"
+      "CachePath": "B2/{B2764BA7-71CC-388C-70F7-95AD9B91C1BA}.wem"
      },
      {
       "Id": "548015621",
@@ -517,7 +517,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Undead_Vocal_Jump_2_Long_Raaa_2.wav",
-      "CachePath": "59/{59709879-66E3-83CB-2E4C-29C8B7290F4D}.wem"
+      "CachePath": "BF/{BF7697DB-A607-C870-6035-236FAE6A8196}.wem"
      },
      {
       "Id": "552526360",
@@ -525,7 +525,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_04b.wav",
-      "CachePath": "44/{445591A1-400F-11CC-CE7C-B48B50E81AE2}.wem"
+      "CachePath": "54/{54C013B5-8402-F0E9-3E76-AC20EBE06D42}.wem"
      },
      {
       "Id": "576560667",
@@ -533,7 +533,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.267.wav",
-      "CachePath": "1E/{1E7C6C48-01A7-F608-4FF7-A1CF4C81B3B0}.wem"
+      "CachePath": "FE/{FE0A6440-808D-CF7E-4E22-B83C5116A20C}.wem"
      },
      {
       "Id": "578835809",
@@ -541,7 +541,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_10.wav",
-      "CachePath": "C1/{C1E7FFF6-4ED9-0743-C0CF-0A9CB01DD0C3}.wem"
+      "CachePath": "03/{03D2F2F1-E116-7D97-1701-748D658EDA78}.wem"
      },
      {
       "Id": "579496560",
@@ -549,7 +549,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Groan_11_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "CB/{CB3371A0-66F8-C18D-C0B5-B45534D19E1B}.wem"
+      "CachePath": "62/{62B0B2BE-46A4-E6EA-AABA-1C3934FDF197}.wem"
      },
      {
       "Id": "595941273",
@@ -557,7 +557,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MA_POR_FX_Texture_One_Shot_Agitate.wav",
-      "CachePath": "EC/{EC0DC842-5DBA-FBF4-7D82-825014658598}.wem"
+      "CachePath": "D9/{D916BA6B-7DBC-2E15-BC16-8012A9D27838}.wem"
      },
      {
       "Id": "600873638",
@@ -565,7 +565,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_04.wav",
-      "CachePath": "E0/{E0FAD87A-96A5-3AD3-53F5-0C73CBF0230B}.wem"
+      "CachePath": "A9/{A995FC7A-1FF1-B21C-C0E6-E6F20D4C7319}.wem"
      },
      {
       "Id": "610202587",
@@ -573,7 +573,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_GrenadeExplosion.wav",
-      "CachePath": "B2/{B29D1EE3-D558-F9A8-3B17-0D4ED773C676}.wem"
+      "CachePath": "67/{67F18F66-B608-9A90-176C-832EB7FD0E8C}.wem"
      },
      {
       "Id": "613319137",
@@ -581,7 +581,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "BowPullString_BW.54383.wav",
-      "CachePath": "1B/{1B0F98C4-D217-ABB5-FEEF-5EB7D1EF9383}.wem"
+      "CachePath": "08/{08598617-FF12-A9C2-5D2D-35A7CFFD5E2F}.wem"
      },
      {
       "Id": "624593524",
@@ -589,7 +589,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj.wav",
-      "CachePath": "96/{96300078-EC08-B39A-D34F-1F977C3540F7}.wem"
+      "CachePath": "A9/{A959604A-6956-7167-0B32-0258C4DE17AB}.wem"
      },
      {
       "Id": "640069506",
@@ -597,7 +597,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_DGF_fx_foley_footstep_concrete_warrior_walk_heavy_armor_slow_01.wav",
-      "CachePath": "D4/{D4329BBE-B163-DDCA-7AEE-F6BB97E99CA3}.wem"
+      "CachePath": "3B/{3B729B72-1636-CD25-481D-E176C24B0D4B}.wem"
      },
      {
       "Id": "647807090",
@@ -605,7 +605,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_quick.wav",
-      "CachePath": "A2/{A2CA8514-543B-3BFD-B770-7FD8088F2B03}.wem"
+      "CachePath": "9A/{9A57C428-817A-7D2F-E772-21EC644DA6BB}.wem"
      },
      {
       "Id": "660206576",
@@ -613,7 +613,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsDirt1.wav",
-      "CachePath": "B7/{B7A60FA2-8632-2B7F-20A9-AB463C96761A}.wem"
+      "CachePath": "63/{63659564-69FE-255F-0AE4-D8433FFF1F78}.wem"
      },
      {
       "Id": "674316476",
@@ -621,7 +621,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Attack_Dry.wav",
-      "CachePath": "2E/{2E7C8DA0-46DA-C19E-83EB-0BA2577CA5A9}.wem"
+      "CachePath": "ED/{EDE91C50-8F83-8A5F-9FF1-79263F44D9F0}.wem"
      },
      {
       "Id": "689500474",
@@ -629,7 +629,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowImpactBody_BW.54264.wav",
-      "CachePath": "F0/{F0FA6C86-B765-797F-D8C2-EDDAD1E730CA}.wem"
+      "CachePath": "2F/{2F48D1A4-DA9C-10C9-EC73-0E5AA1A41B36}.wem"
      },
      {
       "Id": "696638021",
@@ -637,7 +637,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Undead_Vocal_I_Hunger_.wav",
-      "CachePath": "C7/{C7695DD0-EC33-9F41-46AF-7E7E515A1AD0}.wem"
+      "CachePath": "B2/{B2E7A119-4959-00D4-16AF-70D19B99744B}.wem"
      },
      {
       "Id": "710539305",
@@ -645,7 +645,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowBy_BW.54273.wav",
-      "CachePath": "A7/{A793D2E2-DCF5-5582-7F08-A334538F83FA}.wem"
+      "CachePath": "8E/{8E0CD796-7256-E655-71DD-DE424054F802}.wem"
      },
      {
       "Id": "732424984",
@@ -653,7 +653,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Grunt_13_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "98/{98AEAE2B-466C-3662-1E52-6D03F49F099E}.wem"
+      "CachePath": "40/{4050587D-0680-5A83-2694-A4424CF96CAD}.wem"
      },
      {
       "Id": "733375653",
@@ -661,7 +661,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "BowPullString_BW.54386.wav",
-      "CachePath": "FA/{FA1F08A4-553C-7493-FDB6-7321F0463487}.wem"
+      "CachePath": "8E/{8EF503AA-1052-CFE7-517F-492C0B0B8CEF}.wem"
      },
      {
       "Id": "749540455",
@@ -669,7 +669,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
-      "CachePath": "67/{677810CE-F942-768F-1C3C-ECC714B4B876}.wem"
+      "CachePath": "56/{56A58808-72BC-8108-94A0-DC72DBB3DFB3}.wem"
      },
      {
       "Id": "750724736",
@@ -677,7 +677,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "waves.wav",
-      "CachePath": "2F/{2FB65713-1AAB-FF5A-6467-895D398190F4}.wem"
+      "CachePath": "49/{49C18DBC-AF3F-807D-9B0B-61EC467CB250}.wem"
      },
      {
       "Id": "755959048",
@@ -685,7 +685,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Jump_2_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "A8/{A81E49E6-6097-DA25-4B64-A19E74ECEEDC}.wem"
+      "CachePath": "CC/{CC42840E-C922-5480-879E-44DAFEC6E843}.wem"
      },
      {
       "Id": "756368802",
@@ -693,7 +693,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Undead_Vocal_You_Cannot_Outrun_Death.wav",
-      "CachePath": "C2/{C241C0FA-30E4-5B31-FD91-053A1501A82A}.wem"
+      "CachePath": "D1/{D19935A4-6F96-858D-F6D8-B52915163A21}.wem"
      },
      {
       "Id": "761274105",
@@ -701,7 +701,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
-      "CachePath": "5F/{5F7FEB5F-1DC7-BD86-7AF3-74F014943AFB}.wem"
+      "CachePath": "BF/{BF7D185E-D5C5-B172-7330-642937A5B5C8}.wem"
      },
      {
       "Id": "763229215",
@@ -709,7 +709,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Lava_Hit1.wav",
-      "CachePath": "75/{75ACA214-A2A4-1D99-50D1-AB1499E837FA}.wem"
+      "CachePath": "FD/{FDB583FA-E91D-2649-E075-CAA822D48C97}.wem"
      },
      {
       "Id": "790427616",
@@ -717,7 +717,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Dirt5.wav",
-      "CachePath": "5F/{5FCB1406-F0D3-E367-DD3D-7C90A7DF287B}.wem"
+      "CachePath": "75/{75504C83-31F2-823D-29B6-F44E6B71CAF2}.wem"
      },
      {
       "Id": "795056826",
@@ -725,7 +725,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Portal.wav",
-      "CachePath": "0C/{0CFCD810-E6F8-70B4-80DE-32460AD3969D}.wem"
+      "CachePath": "0E/{0E5D2A8A-2EC6-BF05-7C77-8F6519850EB7}.wem"
      },
      {
       "Id": "797000384",
@@ -733,7 +733,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "BowSnap_BW.54387.wav",
-      "CachePath": "65/{656DBBB6-6758-73FE-11F9-8ED71DFC9348}.wem"
+      "CachePath": "CE/{CE3C29A7-F253-129E-015E-D6A12C1CCE9F}.wem"
      },
      {
       "Id": "809366429",
@@ -741,7 +741,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepMetal.wav",
-      "CachePath": "F0/{F00849BB-91D3-0573-A268-7AF8B52292AD}.wem"
+      "CachePath": "CC/{CCF2A5AA-E6FB-203E-53D8-2742C7DF2248}.wem"
      },
      {
       "Id": "810310470",
@@ -749,7 +749,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "GlassBreakWine_SFXB.2343.wav",
-      "CachePath": "E0/{E0C6C6AB-BDDA-A6A4-898D-65F5EB10B965}.wem"
+      "CachePath": "8C/{8CDF2A63-5E8E-3ECD-3241-7CB78E8C5008}.wem"
      },
      {
       "Id": "810864320",
@@ -757,7 +757,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Undead_Vocal_Hurt_Throaty_Rah.wav",
-      "CachePath": "C3/{C3009557-9511-2FED-8F64-0D839347DE05}.wem"
+      "CachePath": "BD/{BD3AE8AA-6BA5-8124-4732-95AD7BCF0892}.wem"
      },
      {
       "Id": "829138029",
@@ -765,7 +765,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Breathing_3_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "94/{9430C832-A863-9D75-0F48-765805421492}.wem"
+      "CachePath": "B6/{B61D6875-C1DD-D875-DD2E-4985D0B3B6E3}.wem"
      },
      {
       "Id": "829321492",
@@ -773,7 +773,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Coughing_1_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "EF/{EF411331-C6CC-8D7A-6976-08E989567375}.wem"
+      "CachePath": "BA/{BA48F7C2-D46B-FF4C-E6A0-C9E691A87A03}.wem"
      },
      {
       "Id": "844797285",
@@ -781,7 +781,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fantasy_Game_Action_Collect_Ore_C_Pick_Axe_Impact_Material_Crafting_Accent_Medieval.wav",
-      "CachePath": "04/{04E5B396-FEC4-0D7F-7DB6-BE3E770363AA}.wem"
+      "CachePath": "5D/{5DB1CAC3-C2CB-7995-9E3A-81AD78AC25F2}.wem"
      },
      {
       "Id": "848033451",
@@ -789,7 +789,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_01.wav",
-      "CachePath": "AA/{AA0EA770-6250-7262-D44F-148E619702A0}.wem"
+      "CachePath": "13/{13270088-D655-A080-CFD0-5D89A97ED1B4}.wem"
      },
      {
       "Id": "849513322",
@@ -797,7 +797,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
-      "CachePath": "0D/{0DDEECBF-3D01-3B6A-4A0F-7550CFB11666}.wem"
+      "CachePath": "F5/{F50EEC36-D2B8-BE0F-93F4-E88B4BE7668D}.wem"
      },
      {
       "Id": "866318197",
@@ -805,7 +805,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsConcrete1.wav",
-      "CachePath": "2A/{2A32EEA4-4A01-5437-B624-1983B1D272A6}.wem"
+      "CachePath": "FC/{FCDF9688-9D8E-BC19-28B7-8D15B75E8C0A}.wem"
      },
      {
       "Id": "872852181",
@@ -813,7 +813,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Orc_Pain_Vocal_Hurt_Growl_Male_Voice_Creature_Monster_Fantasy.wav",
-      "CachePath": "5B/{5B595419-272B-3B4D-B8B2-B9CF3017021E}.wem"
+      "CachePath": "EF/{EFA67403-CE32-AA6C-5694-7C7C83F1D546}.wem"
      },
      {
       "Id": "900809544",
@@ -821,7 +821,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "GlassBreakWine_SFXB.2343.wav",
-      "CachePath": "F2/{F22E99BC-892E-46EC-D1C3-7DA86EA5F9F8}.wem"
+      "CachePath": "14/{14529B88-16D7-0FC8-910A-0AF86C998AC1}.wem"
      },
      {
       "Id": "914961834",
@@ -829,7 +829,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_broadsword_impact_shield_metal.wav",
-      "CachePath": "22/{22E12FE5-A3CB-9E54-038A-04490012574B}.wem"
+      "CachePath": "1F/{1F528885-2A8F-FD16-0FBB-0FE88AC7C0E6}.wem"
      },
      {
       "Id": "919997465",
@@ -837,7 +837,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_inflammation_light_02_burn_fire_flame.wav",
-      "CachePath": "B5/{B5039A65-7E09-4A40-DA1D-A25509582E47}.wem"
+      "CachePath": "34/{34EA4E69-7856-C03D-D375-986BCC847C8A}.wem"
      },
      {
       "Id": "928428161",
@@ -845,7 +845,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
-      "CachePath": "83/{83D8DDBF-F4F8-DF3E-EAEA-6881FF30BC86}.wem"
+      "CachePath": "AA/{AAA47AAD-DC56-2C23-1A77-C23CA52F9E69}.wem"
      },
      {
       "Id": "941890073",
@@ -853,7 +853,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_Lava0.wav",
-      "CachePath": "2D/{2D647CE2-A0BF-8541-BC1F-E57D5C522F8C}.wem"
+      "CachePath": "FD/{FDC1077B-6413-0BB9-0D6D-C32EDAC78ABF}.wem"
      },
      {
       "Id": "956247085",
@@ -861,7 +861,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootSteps_Lava (5).wav",
-      "CachePath": "E6/{E6F3A076-3CE6-D0D8-C7A4-243B47BF9E63}.wem"
+      "CachePath": "B6/{B63E98A3-98BD-23F9-0079-B0126D5B0619}.wem"
      },
      {
       "Id": "957899954",
@@ -869,7 +869,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Grunt_1_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "1A/{1AFF7EE8-1AB3-B38B-661E-026A089B4698}.wem"
+      "CachePath": "B2/{B29E4255-2B91-EB89-F17F-CC39B3164681}.wem"
      },
      {
       "Id": "958130278",
@@ -877,7 +877,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.267.wav",
-      "CachePath": "6F/{6F283E1B-2A67-A3B8-BDE8-E452EFFD5BB0}.wem"
+      "CachePath": "0A/{0AE591B5-A6DB-DD9A-FC4E-EB0608ABC463}.wem"
      },
      {
       "Id": "969253722",
@@ -885,7 +885,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsConcrete.wav",
-      "CachePath": "EA/{EA7E8CD3-7DE7-F01C-7693-5637D7851CC2}.wem"
+      "CachePath": "CA/{CAAFAB44-DA9A-54E9-E276-6B019EE9A9E3}.wem"
      },
      {
       "Id": "992284103",
@@ -893,7 +893,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Grunt_4_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "08/{08C340F8-D70B-1F96-749C-AB6CC4446C7A}.wem"
+      "CachePath": "3E/{3EDE4200-BC9D-C236-1B10-7BD0E0BD4236}.wem"
      },
      {
       "Id": "995426383",
@@ -901,7 +901,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsDirt.wav",
-      "CachePath": "13/{13A5521D-59F7-9A3E-377F-D279FBC8696A}.wem"
+      "CachePath": "2E/{2E27881F-A54F-C4E0-0AEC-EA8AE04C3AE2}.wem"
      },
      {
       "Id": "997628724",
@@ -909,7 +909,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "LighterIgniteFlame_BW.9029.wav",
-      "CachePath": "50/{50E90512-7895-A028-9CA9-75CDD5C2A5BE}.wem"
+      "CachePath": "F3/{F3C57AEE-16EF-BD32-FCC5-306214E504A9}.wem"
      },
      {
       "Id": "1021834988",
@@ -917,7 +917,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_SGAL3_Cinematic_FX_scifi_loop_tonal_portal_drone_steady_smooth_tone.wav",
-      "CachePath": "24/{24BD38E9-4E2B-4DDE-F84B-FE24029ED557}.wem"
+      "CachePath": "49/{4938C769-A360-7665-92A3-5C6EED6F5C64}.wem"
      },
      {
       "Id": "1030029664",
@@ -925,7 +925,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.269.wav",
-      "CachePath": "D1/{D138EC47-9D77-318B-6516-A42C75C620F3}.wem"
+      "CachePath": "83/{8399496E-3CBA-4A3D-2416-D4AD6B384461}.wem"
      },
      {
       "Id": "1038282182",
@@ -933,7 +933,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (4).wav",
-      "CachePath": "72/{72800A1A-7261-FD60-8F95-A01A6B9E5295}.wem"
+      "CachePath": "FD/{FD535CEA-A554-2814-1899-60A335860B6D}.wem"
      },
      {
       "Id": "1054283662",
@@ -941,7 +941,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fantasy_Game_Action_Collect_Ore_C_Pick_Axe_Impact_Material_Crafting_Accent_Medieval.wav",
-      "CachePath": "B3/{B30D5C21-F12E-6A4A-4B40-FE91E0CEB3D2}.wem"
+      "CachePath": "BB/{BBA79A5D-B032-3F8C-26C0-D6B550B3F42B}.wem"
      },
      {
       "Id": "1069660761",
@@ -949,7 +949,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "Footstep_Grass (2).wav",
-      "CachePath": "55/{55D5DF1A-EA9F-51EF-B2F4-2AFAC4BC2C54}.wem"
+      "CachePath": "9B/{9B9B5F63-CDC2-D1D4-472A-4C3C2821144E}.wem"
      },
      {
       "Id": "1072008213",
@@ -957,7 +957,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
-      "CachePath": "74/{74D99463-5CA4-82C3-222D-D553919F9B49}.wem"
+      "CachePath": "E0/{E01D6A67-8199-72E6-1273-CAE1BA24D718}.wem"
      }
     ],
     "Plugins": {
@@ -1327,12 +1327,10 @@
       "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_CombatPlay",
       "GUID": "{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}",
       "MaxAttenuation": "480.00003",
-      "DurationType": "OneShot",
-      "DurationMin": "21.000597",
-      "DurationMax": "21.000597",
+      "DurationType": "Infinite",
       "MediaRefs": [
        {
-        "Id": "258551038"
+        "Id": "172591083"
        }
       ]
      },
@@ -2322,6 +2320,6 @@
     ]
    }
   ],
-  "FileHash": "{73F2F166-1C06-EC40-EDC9-8FF56CA8C8F9}"
+  "FileHash": "{3C1F4E95-77E0-CF98-9E55-0F53BA036BC7}"
  }
 }

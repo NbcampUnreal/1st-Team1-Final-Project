@@ -12,6 +12,7 @@ class UGS_HPTextWidgetComp;
 class UGS_HPText;
 class UGS_HPWidget;
 class AGS_Weapon;
+class UAkAudioEvent;
 
 UENUM(BlueprintType)
 enum class ECharacterType : uint8
@@ -63,6 +64,10 @@ public:
 	/** 팀 ID (0: 중립, 1: 플레이어, 2: 몬스터) */
 	UPROPERTY(EditAnywhere, Category="Team")
 	FGenericTeamId TeamId;
+
+	// 죽음 사운드
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
+	UAkAudioEvent* DeathSoundEvent;
 
 	//variable
 	float MaxSpeed;

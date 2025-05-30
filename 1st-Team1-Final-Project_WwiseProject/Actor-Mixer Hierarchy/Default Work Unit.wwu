@@ -8883,18 +8883,13 @@
 											<PropertyList>
 												<Property Name="Highpass" Type="int16">
 													<ValueList>
-														<Value>12</Value>
+														<Value>13</Value>
 													</ValueList>
 												</Property>
 												<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
 												<Property Name="Lowpass" Type="int16">
 													<ValueList>
 														<Value>15</Value>
-													</ValueList>
-												</Property>
-												<Property Name="MakeUpGain" Type="Real64">
-													<ValueList>
-														<Value>2</Value>
 													</ValueList>
 												</Property>
 												<Property Name="OverrideEffect" Type="bool" Value="True"/>
@@ -8912,12 +8907,15 @@
 													</ModifierList>
 												</Property>
 												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-2</Value>
+													</ValueList>
 													<ModifierList>
 														<ModifierInfo>
 															<Modifier Name="" ID="{96DC4763-1723-4C28-BEF5-803DAF1FC373}">
 																<PropertyList>
 																	<Property Name="Enabled" Type="bool" Value="True"/>
-																	<Property Name="Min" Type="Real64" Value="-2"/>
+																	<Property Name="Min" Type="Real64" Value="-3"/>
 																</PropertyList>
 															</Modifier>
 														</ModifierInfo>
@@ -8962,8 +8960,7 @@
 																		<Custom>
 																			<Effect Name="Time Stretch (Custom)" ID="{916168E5-E202-42D9-B331-43F94CE1206D}" ShortID="266675917" PluginName="Wwise Time Stretch" CompanyID="0" PluginID="130" PluginType="3">
 																				<PropertyList>
-																					<Property Name="PitchShift" Type="Real32" Value="10"/>
-																					<Property Name="TimeStretch" Type="Real32" Value="95"/>
+																					<Property Name="TimeStretch" Type="Real32" Value="70"/>
 																				</PropertyList>
 																			</Effect>
 																		</Custom>
@@ -10240,18 +10237,13 @@
 											<PropertyList>
 												<Property Name="Highpass" Type="int16">
 													<ValueList>
-														<Value>12</Value>
+														<Value>13</Value>
 													</ValueList>
 												</Property>
 												<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
 												<Property Name="Lowpass" Type="int16">
 													<ValueList>
 														<Value>15</Value>
-													</ValueList>
-												</Property>
-												<Property Name="MakeUpGain" Type="Real64">
-													<ValueList>
-														<Value>2</Value>
 													</ValueList>
 												</Property>
 												<Property Name="OverrideEffect" Type="bool" Value="True"/>
@@ -10269,6 +10261,9 @@
 													</ModifierList>
 												</Property>
 												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-2</Value>
+													</ValueList>
 													<ModifierList>
 														<ModifierInfo>
 															<Modifier Name="" ID="{480BC152-7CC6-4428-90F6-2A02FB1D9A7A}">
@@ -10319,8 +10314,7 @@
 																		<Custom>
 																			<Effect Name="Time Stretch (Custom)" ID="{39B077D1-ACA4-4897-967D-D3F9D0521EDB}" ShortID="246667213" PluginName="Wwise Time Stretch" CompanyID="0" PluginID="130" PluginType="3">
 																				<PropertyList>
-																					<Property Name="PitchShift" Type="Real32" Value="10"/>
-																					<Property Name="TimeStretch" Type="Real32" Value="95"/>
+																					<Property Name="TimeStretch" Type="Real32" Value="70"/>
 																				</PropertyList>
 																			</Effect>
 																		</Custom>
@@ -11252,17 +11246,18 @@
 								<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.2"/>
 								<Property Name="Highpass" Type="int16">
 									<ValueList>
-										<Value>25</Value>
+										<Value>5</Value>
 									</ValueList>
 								</Property>
+								<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
 								<Property Name="Lowpass" Type="int16">
 									<ValueList>
-										<Value>10</Value>
+										<Value>5</Value>
 									</ValueList>
 								</Property>
-								<Property Name="Pitch" Type="int32">
+								<Property Name="MakeUpGain" Type="Real64">
 									<ValueList>
-										<Value>300</Value>
+										<Value>-1</Value>
 									</ValueList>
 								</Property>
 								<Property Name="Volume" Type="Real64">
@@ -11296,9 +11291,16 @@
 										<MediaID ID="258551038"/>
 									</MediaIDList>
 								</AudioFileSource>
+								<AudioFileSource Name="GasCombat_Demo" ID="{70FB0445-56FC-436B-AF5E-6E1F807078CD}">
+									<Language>SFX</Language>
+									<AudioFile>GasCombat_Demo.wav</AudioFile>
+									<MediaIDList>
+										<MediaID ID="172591083"/>
+									</MediaIDList>
+								</AudioFileSource>
 							</ChildrenList>
 							<ActiveSourceList>
-								<ActiveSource Name="MA_BLO_Bass_Guitar_Drone_One_Shot_Heather_E" ID="{787B202C-C516-4AFF-AE98-2A6F34C66FEC}" Platform="Linked"/>
+								<ActiveSource Name="GasCombat_Demo" ID="{70FB0445-56FC-436B-AF5E-6E1F807078CD}" Platform="Linked"/>
 							</ActiveSourceList>
 						</Sound>
 					</ChildrenList>
