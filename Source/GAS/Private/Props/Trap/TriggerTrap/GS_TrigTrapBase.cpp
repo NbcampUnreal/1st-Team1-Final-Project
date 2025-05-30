@@ -1,5 +1,6 @@
 #include "Props/Trap/TriggerTrap/GS_TrigTrapBase.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include <Net/UnrealNetwork.h>
 AGS_TrigTrapBase::AGS_TrigTrapBase()
 {
@@ -30,8 +31,8 @@ void AGS_TrigTrapBase::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp
 	//change it to Player Character later
 	if (OtherActor && OtherActor != this && !bIsTriggered)
 	{
-		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
-		if (Player)
+		AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
+		if (Seeker)
 		{
 			if (!HasAuthority())
 			{
@@ -83,8 +84,8 @@ void AGS_TrigTrapBase::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, 
 	//change it to Player Character later
 	if (OtherActor && OtherActor != this && !bIsTriggered)
 	{
-		AGS_Player* Player = Cast<AGS_Player>(OtherActor);
-		if (Player)
+		AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
+		if (Seeker)
 		{
 			if (!HasAuthority())
 			{

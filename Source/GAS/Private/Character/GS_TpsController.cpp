@@ -8,6 +8,7 @@
 #include "Character/GS_Character.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Interface/GS_AttackInterface.h"
+#include "Net/UnrealNetwork.h"
 
 AGS_TpsController::AGS_TpsController()
 {
@@ -16,6 +17,7 @@ AGS_TpsController::AGS_TpsController()
 	LookAction = nullptr;
 	WalkToggleAction = nullptr;
 	LClickAction = nullptr;
+	bCanMove = true;
 }
 
 void AGS_TpsController::Move(const FInputActionValue& InputValue)
@@ -25,10 +27,13 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.0f);
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
+	if(GetCanMove())
 	{
-		ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.X);
-		ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.Y);
+		if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
+		{
+			ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.X);
+			ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.Y);
+		}
 	}
 }
 
@@ -126,4 +131,11 @@ void AGS_TpsController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Started, this, &AGS_TpsController::LClickPressed);
 		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Completed, this, &AGS_TpsController::LClickRelease);
 	}
+}
+
+void AGS_TpsController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_TpsController, bCanMove);
 }

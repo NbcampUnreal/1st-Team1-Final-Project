@@ -8,14 +8,17 @@
 #include "AkComponent.h"
 #include "Animation/Character/GS_MonsterAnimInstance.h"
 #include "Net/UnrealNetwork.h"
+#include "Components/SphereComponent.h"
+#include "Sound/GS_AudioManager.h"
+#include "Sound/GS_CharacterAudioSystem.h"
+#include "EngineUtils.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+
 
 AGS_Monster::AGS_Monster()
 {
 	AIControllerClass = AGS_AIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
-	Weapon = CreateDefaultSubobject<UChildActorComponent>(TEXT("WeaponComp"));
-	Weapon->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
 
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>("SelectionDecal");
 	SelectionDecal->SetupAttachment(RootComponent);
@@ -35,6 +38,16 @@ AGS_Monster::AGS_Monster()
 	TeamId = FGenericTeamId(2);
 
 	Tags.Add("Monster");
+
+	CombatTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("CombatTrigger"));
+	CombatTrigger->SetupAttachment(RootComponent);
+	CombatTrigger->SetSphereRadius(1200.0f);
+
+	// SoundTrigger 프리셋 사용
+	CombatTrigger->SetCollisionProfileName(TEXT("SoundTrigger"));
+
+	CombatTrigger->OnComponentBeginOverlap.AddDynamic(this, &AGS_Monster::OnCombatTriggerBeginOverlap);
+	CombatTrigger->OnComponentEndOverlap.AddDynamic(this, &AGS_Monster::OnCombatTriggerEndOverlap);
 }
 
 void AGS_Monster::BeginPlay()
@@ -64,6 +77,22 @@ void AGS_Monster::OnDeath()
 	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
 	{
 		MoveComp->DisableMovement();
+	}
+	
+	// 주변의 모든 Seeker에게 이 몬스터 제거 알림
+	if (GetWorld())
+	{
+		for (TActorIterator<APawn> It(GetWorld()); It; ++It)
+		{
+			APawn* Pawn = *It;
+			if (Pawn && Pawn->IsA(AGS_Seeker::StaticClass()))
+			{
+				if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(Pawn))
+				{
+					Seeker->RemoveCombatMonster(this);
+				}
+			}
+		}
 	}
 	
 	DetachFromControllerPendingDestroy();
@@ -102,4 +131,26 @@ void AGS_Monster::Attack()
 void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 {
 	MonsterAnim->Montage_Play(AttackMontage);
+}
+
+void AGS_Monster::OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor->IsA(AGS_Seeker::StaticClass()))
+	{
+		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor))
+		{
+			Seeker->AddCombatMonster(this);
+		}
+	}
+}
+
+void AGS_Monster::OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && OtherActor->IsA(AGS_Seeker::StaticClass()))
+	{
+		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor))
+		{
+			Seeker->RemoveCombatMonster(this);
+		}
+	}
 }

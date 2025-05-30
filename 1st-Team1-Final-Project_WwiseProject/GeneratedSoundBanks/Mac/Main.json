@@ -10,11 +10,19 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{795EA8A9-ACC6-336C-8E27-B560A3F610BE}",
+    "Hash": "{9FA8BEF3-817A-2E0D-DF32-776A3AC157AC}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
     "Media": [
+     {
+      "Id": "3677691",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am.wav",
+      "CachePath": "C5/{C5B0A087-2ED9-95F4-B1C7-56C79513FED4}.wem"
+     },
      {
       "Id": "5171484",
       "Language": "SFX",
@@ -232,6 +240,14 @@
       "CachePath": "A5/{A5CE27AF-12AC-80AA-5CFE-039A21E1E6C4}.wem"
      },
      {
+      "Id": "258551038",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Heather_E.wav",
+      "CachePath": "7A/{7A7D12EC-1AC0-6297-B181-3BBA52F8B7BB}.wem"
+     },
+     {
       "Id": "269881452",
       "Language": "SFX",
       "Streaming": "false",
@@ -405,7 +421,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_flame_extinguish_short_01_burn_fire_flame.wav",
-      "CachePath": "30/{3094612E-A4BE-D582-E1E3-227A4455AFA2}.wem"
+      "CachePath": "C9/{C9C724FD-B207-6554-9290-9D72C26785E5}.wem"
      },
      {
       "Id": "454704061",
@@ -661,7 +677,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "waves.wav",
-      "CachePath": "EB/{EB328C0B-4338-6F79-4660-DBE2B4BB4639}.wem"
+      "CachePath": "2F/{2FB65713-1AAB-FF5A-6467-895D398190F4}.wem"
      },
      {
       "Id": "755959048",
@@ -821,7 +837,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_inflammation_light_02_burn_fire_flame.wav",
-      "CachePath": "21/{21817537-8D90-0CFC-C1E6-24112A4F18E4}.wem"
+      "CachePath": "B5/{B5039A65-7E09-4A40-DA1D-A25509582E47}.wem"
      },
      {
       "Id": "928428161",
@@ -1077,6 +1093,14 @@
        "LibId": "8519683"
       },
       {
+       "Id": "1990128658",
+       "Name": "Room_Medium",
+       "ObjectPath": "\\Effects\\Factory Effects\\RoomVerb\\Rooms\\Room_Medium",
+       "GUID": "{F5C06EC1-E4A4-4332-A7D3-A89E2986B74F}",
+       "LibName": "Wwise RoomVerb",
+       "LibId": "7733251"
+      },
+      {
        "Id": "2652646462",
        "Name": "Dialog_Leveler_Soft",
        "ObjectPath": "\\Effects\\Factory Effects\\Compressor\\Dialog_Leveler_Soft",
@@ -1104,6 +1128,25 @@
     },
     "Events": [
      {
+      "Id": "2756369268",
+      "Name": "Amb_Dungeon",
+      "ObjectPath": "\\Events\\Default Work Unit\\AmbientSound\\Amb_Dungeon",
+      "GUID": "{512023F1-7483-4146-89A7-57F6CFD88495}",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "3677691"
+       }
+      ],
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "1990128658"
+        }
+       ]
+      }
+     },
+     {
       "Id": "2897876713",
       "Name": "EV_Arrow_Shot",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Arrow_Shot",
@@ -1123,7 +1166,7 @@
       "Name": "EV_ArrowBy",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowBy",
       "GUID": "{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "360",
       "DurationType": "OneShot",
       "DurationMin": "0.75643444",
       "DurationMax": "0.75643444",
@@ -1277,6 +1320,31 @@
         "Id": "1054283662"
        }
       ]
+     },
+     {
+      "Id": "3860373373",
+      "Name": "EV_CombatPlay",
+      "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_CombatPlay",
+      "GUID": "{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}",
+      "MaxAttenuation": "480.00003",
+      "DurationType": "OneShot",
+      "DurationMin": "21.000597",
+      "DurationMax": "21.000597",
+      "MediaRefs": [
+       {
+        "Id": "258551038"
+       }
+      ]
+     },
+     {
+      "Id": "1751144939",
+      "Name": "EV_CombatStop",
+      "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_CombatStop",
+      "GUID": "{231EBD3B-55A9-4877-9F9A-87156CC7C9A5}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "3369981961",
@@ -2254,6 +2322,6 @@
     ]
    }
   ],
-  "FileHash": "{2C1D8523-DE08-0492-6334-DAA375A58388}"
+  "FileHash": "{73F2F166-1C06-EC40-EDC9-8FF56CA8C8F9}"
  }
 }

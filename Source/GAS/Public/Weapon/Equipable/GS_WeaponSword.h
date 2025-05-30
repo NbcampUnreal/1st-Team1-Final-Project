@@ -22,9 +22,6 @@ public:
 	
 	UFUNCTION()
 	void DisableHit();
-
-	UFUNCTION(Server, Unreliable)
-	void Server_SetHitCollision(bool bEnable);
 	
 	UFUNCTION()
 	void OnHit(
