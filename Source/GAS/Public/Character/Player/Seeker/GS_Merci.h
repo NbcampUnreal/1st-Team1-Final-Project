@@ -12,6 +12,7 @@
 class AGS_SeekerMerciArrow;
 class UAkComponent;
 class UGS_ArrowTypeWidget;
+class UNiagaraSystem;
 
 UCLASS()
 class GAS_API AGS_Merci : public AGS_Seeker, public IGS_AttackInterface
@@ -32,6 +33,9 @@ public:
 	virtual void LeftClickPressed_Implementation() override;
 	virtual void LeftClickRelease_Implementation() override;
 
+	// 화살 발사 VFX
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayArrowShotVFX(FVector Location, FRotator Rotation, int32 NumArrows);
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;
@@ -83,6 +87,21 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// 화살 발사 VFX 에셋
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
+	UNiagaraSystem* ArrowShotVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
+	UNiagaraSystem* MultiShotVFX;
+
+	// VFX 위치 오프셋
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack", meta = (AllowPrivateAccess = "true"))
+	FVector ArrowShotVFXOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack", meta = (AllowPrivateAccess = "true"))
+	FVector MultiShotVFXOffset = FVector::ZeroVector;
+
 
 	// 타임라인 관련
 	FTimeline ZoomTimeline;

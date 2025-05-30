@@ -504,6 +504,28 @@
 										</Action>
 									</ChildrenList>
 								</Event>
+								<Event Name="Voice_Chan_Die" ID="{B5D9F3B7-56D1-4E7E-B266-A42C91017124}">
+									<ChildrenList>
+										<Action Name="" ID="{E269B9C9-CA97-4975-B8A4-32DD259E3C1B}" ShortID="382865893">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="Voice_ChanDie" ID="{EC78CBB8-F891-4A88-BBC3-B80BDF8A8F73}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="Voice_Merci_Die" ID="{169823F8-E7B9-4D5E-AE2E-003C93280F66}">
+									<ChildrenList>
+										<Action Name="" ID="{501A5121-47D9-4DCC-9B50-D438A91F75F4}" ShortID="560872034">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="Voice_MerciDie" ID="{9B0DBA9E-7F7F-4974-91FE-1DF25CE1859E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
 						</Folder>
 					</ChildrenList>

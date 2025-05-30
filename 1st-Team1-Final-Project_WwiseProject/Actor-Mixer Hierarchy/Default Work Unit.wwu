@@ -8883,18 +8883,13 @@
 											<PropertyList>
 												<Property Name="Highpass" Type="int16">
 													<ValueList>
-														<Value>12</Value>
+														<Value>13</Value>
 													</ValueList>
 												</Property>
 												<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
 												<Property Name="Lowpass" Type="int16">
 													<ValueList>
 														<Value>15</Value>
-													</ValueList>
-												</Property>
-												<Property Name="MakeUpGain" Type="Real64">
-													<ValueList>
-														<Value>2</Value>
 													</ValueList>
 												</Property>
 												<Property Name="OverrideEffect" Type="bool" Value="True"/>
@@ -8912,12 +8907,15 @@
 													</ModifierList>
 												</Property>
 												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-2</Value>
+													</ValueList>
 													<ModifierList>
 														<ModifierInfo>
 															<Modifier Name="" ID="{96DC4763-1723-4C28-BEF5-803DAF1FC373}">
 																<PropertyList>
 																	<Property Name="Enabled" Type="bool" Value="True"/>
-																	<Property Name="Min" Type="Real64" Value="-2"/>
+																	<Property Name="Min" Type="Real64" Value="-3"/>
 																</PropertyList>
 															</Modifier>
 														</ModifierInfo>
@@ -8962,8 +8960,7 @@
 																		<Custom>
 																			<Effect Name="Time Stretch (Custom)" ID="{916168E5-E202-42D9-B331-43F94CE1206D}" ShortID="266675917" PluginName="Wwise Time Stretch" CompanyID="0" PluginID="130" PluginType="3">
 																				<PropertyList>
-																					<Property Name="PitchShift" Type="Real32" Value="10"/>
-																					<Property Name="TimeStretch" Type="Real32" Value="95"/>
+																					<Property Name="TimeStretch" Type="Real32" Value="70"/>
 																				</PropertyList>
 																			</Effect>
 																		</Custom>
@@ -9030,6 +9027,75 @@
 										</ObjectList>
 									</ObjectLists>
 								</BlendContainer>
+								<Sound Name="Voice_MerciDie" ID="{9B0DBA9E-7F7F-4974-91FE-1DF25CE1859E}" ShortID="854020006">
+									<PropertyList>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Pitch" Type="int32">
+											<ValueList>
+												<Value>100</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{E9AABDF6-79AF-429C-8AF2-FFDE5F90A968}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-1"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="ESM_Character_Yury_Dying_2_Male_Human_Voice_Over_Vocal_English_Russian" ID="{7C5CE035-828F-42E7-9AB3-3014B2586D2E}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.497644602362789"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.525291524716278"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimEnd" Type="Real64" Value="3.56645288823256"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Character_Yury_Dying_2_Male_Human_Voice_Over_Vocal_English_Russian.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="234128836"/>
+											</MediaIDList>
+										</AudioFileSource>
+										<AudioFileSource Name="ESM_Character_Sharon_Crying_2_Female_Adult_Mature_DJ_Woman" ID="{BCBC8D81-149F-4477-A9B4-43EF2EF89ACA}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.117792184507884"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.461745363270904"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Character_Sharon_Crying_2_Female_Adult_Mature_DJ_Woman.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="8446681"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="ESM_Character_Sharon_Crying_2_Female_Adult_Mature_DJ_Woman" ID="{BCBC8D81-149F-4477-A9B4-43EF2EF89ACA}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
 							</ChildrenList>
 						</Folder>
 						<Folder Name="Chan" ID="{51207146-34BA-4509-A4DE-E3C35A48426C}" ShortID="451123922">
@@ -10240,18 +10306,13 @@
 											<PropertyList>
 												<Property Name="Highpass" Type="int16">
 													<ValueList>
-														<Value>12</Value>
+														<Value>13</Value>
 													</ValueList>
 												</Property>
 												<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
 												<Property Name="Lowpass" Type="int16">
 													<ValueList>
 														<Value>15</Value>
-													</ValueList>
-												</Property>
-												<Property Name="MakeUpGain" Type="Real64">
-													<ValueList>
-														<Value>2</Value>
 													</ValueList>
 												</Property>
 												<Property Name="OverrideEffect" Type="bool" Value="True"/>
@@ -10269,6 +10330,9 @@
 													</ModifierList>
 												</Property>
 												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-2</Value>
+													</ValueList>
 													<ModifierList>
 														<ModifierInfo>
 															<Modifier Name="" ID="{480BC152-7CC6-4428-90F6-2A02FB1D9A7A}">
@@ -10319,8 +10383,7 @@
 																		<Custom>
 																			<Effect Name="Time Stretch (Custom)" ID="{39B077D1-ACA4-4897-967D-D3F9D0521EDB}" ShortID="246667213" PluginName="Wwise Time Stretch" CompanyID="0" PluginID="130" PluginType="3">
 																				<PropertyList>
-																					<Property Name="PitchShift" Type="Real32" Value="10"/>
-																					<Property Name="TimeStretch" Type="Real32" Value="95"/>
+																					<Property Name="TimeStretch" Type="Real32" Value="70"/>
 																				</PropertyList>
 																			</Effect>
 																		</Custom>
@@ -11163,6 +11226,56 @@
 										</RandomSequenceContainer>
 									</ChildrenList>
 								</BlendContainer>
+								<Sound Name="Voice_ChanDie" ID="{EC78CBB8-F891-4A88-BBC3-B80BDF8A8F73}" ShortID="358055663">
+									<PropertyList>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Pitch" Type="int32">
+											<ValueList>
+												<Value>50</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-1</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="ESM_Character_Yury_Dying_2_Male_Human_Voice_Over_Vocal_English_Russian" ID="{C95FB0E0-0B5E-4E85-975F-41A1388D60EF}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.497644602362789"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.525291524716278"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimEnd" Type="Real64" Value="3.56645288823256"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Character_Yury_Dying_2_Male_Human_Voice_Over_Vocal_English_Russian.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="234128836"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="ESM_Character_Yury_Dying_2_Male_Human_Voice_Over_Vocal_English_Russian" ID="{C95FB0E0-0B5E-4E85-975F-41A1388D60EF}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
 							</ChildrenList>
 						</Folder>
 					</ChildrenList>
@@ -11252,17 +11365,18 @@
 								<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.2"/>
 								<Property Name="Highpass" Type="int16">
 									<ValueList>
-										<Value>25</Value>
+										<Value>5</Value>
 									</ValueList>
 								</Property>
+								<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
 								<Property Name="Lowpass" Type="int16">
 									<ValueList>
-										<Value>10</Value>
+										<Value>5</Value>
 									</ValueList>
 								</Property>
-								<Property Name="Pitch" Type="int32">
+								<Property Name="MakeUpGain" Type="Real64">
 									<ValueList>
-										<Value>300</Value>
+										<Value>-1</Value>
 									</ValueList>
 								</Property>
 								<Property Name="Volume" Type="Real64">
@@ -11296,9 +11410,16 @@
 										<MediaID ID="258551038"/>
 									</MediaIDList>
 								</AudioFileSource>
+								<AudioFileSource Name="GasCombat_Demo" ID="{70FB0445-56FC-436B-AF5E-6E1F807078CD}">
+									<Language>SFX</Language>
+									<AudioFile>GasCombat_Demo.wav</AudioFile>
+									<MediaIDList>
+										<MediaID ID="172591083"/>
+									</MediaIDList>
+								</AudioFileSource>
 							</ChildrenList>
 							<ActiveSourceList>
-								<ActiveSource Name="MA_BLO_Bass_Guitar_Drone_One_Shot_Heather_E" ID="{787B202C-C516-4AFF-AE98-2A6F34C66FEC}" Platform="Linked"/>
+								<ActiveSource Name="GasCombat_Demo" ID="{70FB0445-56FC-436B-AF5E-6E1F807078CD}" Platform="Linked"/>
 							</ActiveSourceList>
 						</Sound>
 					</ChildrenList>
