@@ -38,13 +38,10 @@ class GAS_API AGS_Seeker : public AGS_Player
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AGS_Seeker();
 
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -86,8 +83,36 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="VFX")
 	UNiagaraComponent* BodyLavaVFX;
 
+	// ================
+	// 전투 음악 관리
+	// ================
+private:
+	UPROPERTY()
+	TArray<class AGS_Monster*> NearbyMonsters;
+	
+	UPROPERTY()
+	int32 CurrentCombatMusicID;
+	
+	UPROPERTY()
+	FTimerHandle CombatMusicFadeTimerHandle;
+
+	UPROPERTY()
+	UAkAudioEvent* ActiveCombatMusicStopEvent; // 현재 재생 중인 전투 음악에 대한 Stop Event
+
+public:
+	// 몬스터가 전투 음악 시작/중지를 요청할 때 호출
+	UFUNCTION(BlueprintCallable)
+	void AddCombatMonster(class AGS_Monster* Monster);
+	
+	UFUNCTION(BlueprintCallable)
+	void RemoveCombatMonster(class AGS_Monster* Monster);
+
+private:
+	void StartCombatMusic();
+	void StopCombatMusic();
+	void UpdateCombatMusicState();
+
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	// EndPlay 함수 선언 추가
@@ -123,7 +148,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effect")
 	float EffectFadeOutSpeed = 0.5f; // 효과 페이드 아웃 속도
 
-	// 리플리케이션 관련 변수
 	UPROPERTY(ReplicatedUsing = OnRep_IsLowHealthEffectActive)
 	bool bIsLowHealthEffectActive;
 	

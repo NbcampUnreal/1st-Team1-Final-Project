@@ -11,14 +11,6 @@
 UGS_DraggableRuneWidget::UGS_DraggableRuneWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	RuneID = 0;
-	bIsPlaced = false;
-}
-
-void UGS_DraggableRuneWidget::NativeConstruct()
-{
-	Super::NativeConstruct();
-
 	//임시
 	if (!IsValid(DragVisualWidgetClass))
 	{
@@ -30,6 +22,14 @@ void UGS_DraggableRuneWidget::NativeConstruct()
 			DragVisualWidgetClass = LoadedClass;
 		}
 	}
+
+	RuneID = 0;
+	bIsPlaced = false;
+}
+
+void UGS_DraggableRuneWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
 }
 
 FReply UGS_DraggableRuneWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)

@@ -11,19 +11,24 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 #include "NiagaraComponent.h"
+#include "AkGameplayStatics.h"
+#include "Character/Player/Monster/GS_Monster.h"
 
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	// 전투 음악 관련 초기화
+	CurrentCombatMusicID = 0;
+	ActiveCombatMusicStopEvent = nullptr;
 
 	// Post Process Component 생성 및 설정
 	LowHealthPostProcessComp = CreateDefaultSubobject<UPostProcessComponent>(TEXT("LowHealthPostProcessComp"));
 	LowHealthPostProcessComp->SetupAttachment(CameraComp);
 	LowHealthPostProcessComp->bEnabled = false;
-	LowHealthPostProcessComp->Priority = 10; // 다른 PP보다 높게 설정하여 우선 적용
+	LowHealthPostProcessComp->Priority = 10;
 
 	// Fire Effect 생성 및 설정
 	FeetLavaVFX_L = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_L"));
@@ -68,7 +73,6 @@ bool AGS_Seeker::GetDrawState()
 	return Gait;
 }*/
 
-// Called when the game starts or when spawned
 void AGS_Seeker::BeginPlay()
 {
 	Super::BeginPlay();
@@ -168,7 +172,6 @@ void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-// Called every frame
 void AGS_Seeker::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -233,5 +236,113 @@ void AGS_Seeker::OnRep_IsLowHealthEffectActive()
 void AGS_Seeker::OnRep_CurrentEffectStrength()
 {
 	UpdatePostProcessEffect(CurrentEffectStrength);
+}
+
+// =================
+// 전투 음악 관리 함수
+// =================
+void AGS_Seeker::AddCombatMonster(AGS_Monster* Monster)
+{
+	if (!Monster)
+	{
+		return;
+	}
+	
+	if (!NearbyMonsters.Contains(Monster))
+	{
+		NearbyMonsters.Add(Monster);
+		
+		// 첫 번째 몬스터가 추가되면 음악 시작
+		if (NearbyMonsters.Num() == 1)
+		{
+			StartCombatMusic();
+		}
+	}
+}
+
+void AGS_Seeker::RemoveCombatMonster(AGS_Monster* Monster)
+{
+	if (!Monster)
+	{
+		return;
+	}
+	
+	NearbyMonsters.Remove(Monster);
+	
+	// 모든 몬스터가 제거되면 음악 중지
+	if (NearbyMonsters.Num() == 0)
+	{
+		StopCombatMusic();
+	}
+}
+
+void AGS_Seeker::StartCombatMusic()
+{
+	// 로컬 클라이언트에서만 실행
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+	
+	// 이미 재생 중이면 중복 재생 방지
+	if (CurrentCombatMusicID != 0)
+	{
+		return;
+	}
+	
+	// 몬스터에서 음악 이벤트 가져오기
+	if (NearbyMonsters.Num() > 0 && NearbyMonsters[0])
+	{
+		if (UAkAudioEvent* CombatMusicEvent = NearbyMonsters[0]->CombatMusicEvent)
+		{
+			// 전투 음악 재생
+			CurrentCombatMusicID = UAkGameplayStatics::PostEvent(CombatMusicEvent, this, 0, FOnAkPostEventCallback());
+			ActiveCombatMusicStopEvent = NearbyMonsters[0]->CombatMusicStopEvent;
+		}
+	}
+}
+
+void AGS_Seeker::StopCombatMusic()
+{
+	// 로컬 클라이언트에서만 실행
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+	
+	if (CurrentCombatMusicID == 0)
+	{
+		return;
+	}
+	
+	// 저장된 Stop Event를 사용하여 Fade Out과 함께 음악 중지
+	if (ActiveCombatMusicStopEvent)
+	{
+		UAkGameplayStatics::PostEvent(ActiveCombatMusicStopEvent, this, 0, FOnAkPostEventCallback());
+	}
+	else
+	{
+		// Stop Event가 없는 경우, 중지하고 경고 로그
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic - ActiveCombatMusicStopEvent is null. Stopping music immediately."));
+		UAkGameplayStatics::StopActor(this);
+	}
+
+	CurrentCombatMusicID = 0;
+	ActiveCombatMusicStopEvent = nullptr;
+}
+
+void AGS_Seeker::UpdateCombatMusicState()
+{
+	// 유효하지 않은 몬스터들 제거
+	NearbyMonsters.RemoveAll([](AGS_Monster* Monster)
+	{
+		return !IsValid(Monster);
+	});
+	
+	// 몬스터가 없으면 음악 중지
+	if (NearbyMonsters.Num() == 0 && CurrentCombatMusicID != 0)
+	{
+		StopCombatMusic();
+	}
 }
 

@@ -8,6 +8,8 @@
 #include "AkGameplayStatics.h"
 #include "MonsterDataAsset.h"
 #include "Weapon/GS_Weapon.h"
+#include "Components/SphereComponent.h"
+#include "Character/Player/GS_Player.h"
 #include "GS_Monster.generated.h"
 
 class UGS_MonsterAnimInstance;
@@ -55,6 +57,18 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Dead")
 	FOnMonsterDead OnMonsterDead;
 
+	// =============
+	// 전투 음악 관련
+	// =============
+	UPROPERTY(VisibleAnywhere, Category = "Combat")
+	class USphereComponent* CombatTrigger;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAkAudioEvent* CombatMusicEvent;
+
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	UAkAudioEvent* CombatMusicStopEvent;
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();
 
@@ -88,6 +102,12 @@ protected:
 
 	virtual void OnDeath() override;
 	
+	UFUNCTION()
+	void OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	UPROPERTY()
 	TObjectPtr<UGS_MonsterAnimInstance> MonsterAnim;
 	
@@ -96,6 +116,5 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UAkComponent* AkComponent;
-	
 };
 

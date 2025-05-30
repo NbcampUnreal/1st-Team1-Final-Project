@@ -6,7 +6,8 @@
 #include "System/GS_PlayerRole.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
-#include "Components/CanvasPanelSlot.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Kismet/GameplayStatics.h"
 #include "Interfaces/OnlinePresenceInterface.h"
 #include "Interfaces/OnlineIdentityInterface.h"
@@ -273,7 +274,7 @@ void AGS_CustomLobbyPC::RequestOpenPerkOrDungeonPopup()
 	AGS_PlayerState* PS = GetCachedPlayerState();
 	if (!PS) return;
 
-	if (CurrentModalWidget && CurrentModalWidget->IsInViewport())
+	if (CurrentModalWidget && CurrentModalWidget->GetParent())
 	{
 		CurrentModalWidget->RemoveFromParent();
 		CurrentModalWidget = nullptr;
@@ -293,12 +294,22 @@ void AGS_CustomLobbyPC::RequestOpenPerkOrDungeonPopup()
 		LogMessage = TEXT("Guardian Dungeon UI Opened");
 	}
 
+	UGS_CustomLobbyUI* LobbyUI = Cast<UGS_CustomLobbyUI>(CustomLobbyWidgetInstance);
+	if (!LobbyUI) return;
+	UOverlay* ModalOverlay = LobbyUI->GetModalOverlay();
+	if (!ModalOverlay) return;
+
 	if (WidgetToOpen)
 	{
 		CurrentModalWidget = CreateWidget<UUserWidget>(this, WidgetToOpen);
 		if (CurrentModalWidget)
 		{
-			CurrentModalWidget->AddToViewport();
+			UOverlaySlot* OS = ModalOverlay->AddChildToOverlay(CurrentModalWidget);
+			if (OS)
+			{
+				OS->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+				OS->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+			}
 			UE_LOG(LogTemp, Log, TEXT("%s"), *LogMessage);
 		}
 	}

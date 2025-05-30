@@ -11,6 +11,7 @@
 
 class AGS_SeekerMerciArrow;
 class UAkComponent;
+class UGS_ArrowTypeWidget;
 
 UCLASS()
 class GAS_API AGS_Merci : public AGS_Seeker, public IGS_AttackInterface
@@ -77,6 +78,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_ChangeArrowType(int32 Direction);
 
+	void SetArrowTypeWidget(UGS_ArrowTypeWidget* Widget) { ArrowTypeWidget = Widget; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -108,6 +111,8 @@ protected:
 	// [화살 관리]
 	
 private:
+	UGS_ArrowTypeWidget* ArrowTypeWidget;
+
 	bool bWidgetVisibility = false;
 	USkeletalMeshComponent* Mesh;
 
@@ -133,17 +138,27 @@ private:
 
 	bool bIsFullyDrawn = false;
 
-	EArrowType CurrentArrowType;
 
 	// [화살 관리]
 	int32 MaxAxeArrows = 5;
-
 	int32 MaxChildArrows = 3;
 
-	UPROPERTY(Replicated, VisibleAnywhere, Category = "Arrow")
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentArrowType)
+	EArrowType CurrentArrowType;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentAxeArrows)
 	int32 CurrentAxeArrows;
-	UPROPERTY(Replicated, VisibleAnywhere, Category = "Arrow")
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentChildArrows)
 	int32 CurrentChildArrows;
+
+	UFUNCTION()
+	void OnRep_CurrentArrowType();
+
+	UFUNCTION()
+	void OnRep_CurrentAxeArrows();
+
+	UFUNCTION()
+	void OnRep_CurrentChildArrows();
 
 	FTimerHandle AxeArrowRegenTimer;
 	FTimerHandle ChildArrowRegenTimer;

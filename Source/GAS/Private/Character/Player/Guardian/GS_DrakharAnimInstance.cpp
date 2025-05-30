@@ -51,7 +51,7 @@ void UGS_DrakharAnimInstance::AnimNotify_DraconicFury()
 	Drakhar->ServerRPCSpawnDraconicFury();
 }
 
-void UGS_DrakharAnimInstance::AnimNotify_SkillStop()
+void UGS_DrakharAnimInstance::AnimNotify_CtrlSkillEnd()
 {
-	Drakhar->ServerRPCStopSkill();
+	Drakhar->ServerRPCStopCtrl();
 }
