@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/GS_Character.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Character/GS_TpsController.h"
 
 void UGS_DebuffStun::OnApply()
 {
@@ -17,8 +18,16 @@ void UGS_DebuffStun::OnApply()
 	if (TargetCharacter)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Apply Stun Debuff for %s"), *TargetCharacter->GetName());
-		// 움직임도 멈춤
-		TargetCharacter->GetCharacterMovement()->DisableMovement();
+		// 움직임도 멈춤(가디언)
+		if(AGS_TpsController* Controller = Cast<AGS_TpsController>(TargetCharacter->GetController()))
+		{
+			Controller->SetCanMove(false);
+		}
+		else
+		{
+			MaxSpeed = TargetCharacter->GetCharacterMovement()->MaxWalkSpeed;
+			TargetCharacter->GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+		}
 		// 스킬 못쓰고
 		// 스킬을 끊지는 않음
 		if (UGS_SkillComp* SkillComp = TargetCharacter->GetSkillComp())
@@ -41,8 +50,15 @@ void UGS_DebuffStun::OnExpire()
 
 	if (TargetCharacter)
 	{
-		// 움직임
-		TargetCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+		// 움직임(가디언
+		if(AGS_TpsController* Controller = Cast<AGS_TpsController>(TargetCharacter->GetController()))
+		{
+			Controller->SetCanMove(true);
+		}
+		else
+		{
+			TargetCharacter->GetCharacterMovement()->MaxWalkSpeed = MaxSpeed;
+		}
 
 		// 스킬 사용 가능
 		if (UGS_SkillComp* SkillComp = TargetCharacter->GetSkillComp())

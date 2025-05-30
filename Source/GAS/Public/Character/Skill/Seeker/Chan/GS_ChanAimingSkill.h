@@ -47,4 +47,7 @@ private:
 	float StaminaDrainRate=1.0f; // 초당 소비량
 	float SlamStaminaCost=5.0f;
 	FTimerHandle StaminaDrainHandle;
+
+	void UpdateProgressBar(float InStamina);
+	void ShowProgressBar(bool bShow);
 };

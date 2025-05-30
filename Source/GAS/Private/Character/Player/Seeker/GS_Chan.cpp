@@ -6,6 +6,7 @@
 #include "Weapon/Equipable/GS_WeaponAxe.h"
 #include "Weapon/Equipable/GS_WeaponShield.h"
 #include "Net/UnrealNetwork.h"
+#include "UI/Character/GS_ChanAimingSkillBar.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 
 
@@ -18,6 +19,8 @@ AGS_Chan::AGS_Chan()
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_ChanSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 	bReplicates = true;
 }
+
+
 
 // Called when the game starts or when spawned
 void AGS_Chan::BeginPlay()
@@ -97,6 +100,24 @@ void AGS_Chan::EndMontage()
 		}
 	}
 }
+
+void AGS_Chan::Client_UpdateChanAimingSkillBar_Implementation(float Stamina)
+{
+	if(ChanAimingSkillBarWidget)
+	{
+		ChanAimingSkillBarWidget->SetAimingProgress(Stamina);
+	}
+}
+
+void AGS_Chan::Client_ChanAimingSkillBar_Implementation(bool bShow)
+{
+	if (ChanAimingSkillBarWidget)
+	{
+		ChanAimingSkillBarWidget->ShowSkillBar(bShow);
+	}
+
+}
+
 
 void AGS_Chan::MulticastPlayComboSection_Implementation()
 {

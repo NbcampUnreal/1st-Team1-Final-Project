@@ -76,7 +76,7 @@ UGS_ArcaneBoardWidget* UGS_ArcaneBoardLPS::CreateArcaneBoardWidget()
             {
                 UE_LOG(LogTemp, Log, TEXT("아케인 보드 위젯 생성 완료"));
 
-                // 데이터 로드
+                CurrBoardWidget->SetBoardManager(BoardManager);
                 LoadBoardConfig();
 
                 return CurrBoardWidget;
@@ -151,10 +151,110 @@ void UGS_ArcaneBoardLPS::OnBoardStatsChanged(const FGS_StatRow& NewStats)
 
 void UGS_ArcaneBoardLPS::SaveBoardConfig()
 {
+    if (!IsValid(BoardManager))
+    {
+        return;
+    }
+
+    const FString SaveSlotName = TEXT("ArcaneBoardSave");
+    const int32 UserIdx = 0;
+
+    UGS_ArcaneBoardSaveGame* SaveGameInstance = nullptr;
+
+    if (UGameplayStatics::DoesSaveGameExist(SaveSlotName, UserIdx))
+    {
+        SaveGameInstance = Cast<UGS_ArcaneBoardSaveGame>(
+            UGameplayStatics::LoadGameFromSlot(SaveSlotName, UserIdx));
+    }
+
+    if (!SaveGameInstance)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("SaveBoardConfig: 기존 세이브 파일 로드 실패, 새로 생성합니다."));
+
+        SaveGameInstance = Cast<UGS_ArcaneBoardSaveGame>(
+            UGameplayStatics::CreateSaveGameObject(UGS_ArcaneBoardSaveGame::StaticClass()));
+    }
+
+    if (!SaveGameInstance)
+    {
+        UE_LOG(LogTemp, Error, TEXT("SaveBoardConfig: 세이브 게임 객체 생성 실패"));
+        return;
+    }
+
+    ECharacterClass CurrentClass = BoardManager->CurrClass;
+    FRunePlacementData PlacementData;
+    PlacementData.PlacedRunes = BoardManager->PlacedRunes;
+
+    SaveGameInstance->SavedRunesByClass.Add(CurrentClass, PlacementData);
+
+    bool bSaveSuccess = UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveSlotName, UserIdx);
+
+    if (bSaveSuccess)
+    {
+        UE_LOG(LogTemp, Log, TEXT("SaveBoardConfig: 세이브 성공 - 직업: %s, 룬 개수: %d"),
+            *UGS_EnumUtils::GetEnumAsString(CurrentClass),
+            PlacementData.PlacedRunes.Num());
+
+        BoardManager->bHasUnsavedChanges = false;
+    }
 }
 
 void UGS_ArcaneBoardLPS::LoadBoardConfig()
 {
+    if (!IsValid(BoardManager))
+    {
+        return;
+    }
+
+    const FString SaveSlotName = TEXT("ArcaneBoardSave");
+    const int32 UserIndex = 0;
+
+    if (!UGameplayStatics::DoesSaveGameExist(SaveSlotName, UserIndex))
+    {
+        UE_LOG(LogTemp, Log, TEXT("LoadBoardConfig: 세이브 파일이 존재하지 않습니다."));
+        return;
+    }
+
+    UGS_ArcaneBoardSaveGame* LoadedSaveGame = Cast<UGS_ArcaneBoardSaveGame>(
+        UGameplayStatics::LoadGameFromSlot(SaveSlotName, UserIndex));
+
+    if (!LoadedSaveGame)
+    {
+        UE_LOG(LogTemp, Error, TEXT("LoadBoardConfig: 세이브 파일 로드 실패"));
+        return;
+    }
+
+    ECharacterClass CurrentClass = BoardManager->CurrClass;
+
+    if (!LoadedSaveGame->SavedRunesByClass.Contains(CurrentClass))
+    {
+        UE_LOG(LogTemp, Log, TEXT("LoadBoardConfig: 현재 직업(%s)에 대한 세이브 데이터가 없습니다."),
+            *UGS_EnumUtils::GetEnumAsString(CurrentClass));
+        return;
+    }
+
+    const FRunePlacementData& SavedPlacementData = LoadedSaveGame->SavedRunesByClass[CurrentClass];
+
+    // 데이터 유효성 검증
+    if (SavedPlacementData.PlacedRunes.Num() == 0)
+    {
+        UE_LOG(LogTemp, Log, TEXT("LoadBoardConfig: 저장된 룬 배치 데이터가 비어있습니다."));
+        return;
+    }
+
+    BoardManager->LoadSavedData(CurrentClass, SavedPlacementData.PlacedRunes);
+
+    if (CurrBoardWidget)
+    {
+        CurrBoardWidget->UpdateGridVisuals();
+        CurrBoardWidget->InitInventory();
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("LoadBoardConfig: 로드 성공 - 직업: %s, 룬 개수: %d"),
+        *UGS_EnumUtils::GetEnumAsString(CurrentClass),
+        SavedPlacementData.PlacedRunes.Num());
+
+    BoardManager->bHasUnsavedChanges = false;
 }
 
 void UGS_ArcaneBoardLPS::UpdateCharacterStats()

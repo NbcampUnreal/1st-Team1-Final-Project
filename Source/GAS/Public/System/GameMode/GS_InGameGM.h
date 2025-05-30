@@ -22,6 +22,10 @@ public:
 
 	virtual void Logout(AController* Exiting) override;
 
+protected:
+	void StartMatchCheck();
+
+public:
 	UPROPERTY(EditDefaultsOnly, Category = "Player Controller Classes")
 	TSubclassOf<APlayerController> SeekerControllerClass;
 
@@ -60,5 +64,9 @@ public:
 
 private:
 	void SetGameResultOnAllPlayers(EGameResult Result);
-	
+
+	FTimerHandle MatchStartTimerHandle;
+
+	bool bMatchHasStarted;
+	bool bGameEnded;
 };

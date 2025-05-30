@@ -47,9 +47,16 @@ public:
 	void WalkToggle(const FInputActionValue& InputValue);
 	void LClickPressed(const FInputActionValue& InputValue);
 	void LClickRelease(const FInputActionValue& InputValue);
-	
+
+	void SetCanMove(bool bInCanMove) { bCanMove = bInCanMove; }
+	bool GetCanMove() { return bCanMove; }
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+private:
+
+	UPROPERTY(Replicated)
+	bool bCanMove;
 };
