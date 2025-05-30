@@ -80,12 +80,10 @@ public:
     void OnRep_IsAlive();
     void SetIsAlive(bool bNewIsAlive);
     void SetupStatCompBinding(UGS_StatComp* InStatComp);
+    void OnPawnStatInitialized();
 
 protected:
-    FTimerHandle BindStatCompTimerHandle;
-
     UFUNCTION()
     void HandleCurrentHPChanged(UGS_StatComp* StatComp);
-    void TryBindToStatComp();
 
 };

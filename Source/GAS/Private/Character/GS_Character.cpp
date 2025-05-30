@@ -9,6 +9,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_HPWidget.h"
+#include "System/GS_PlayerState.h"
+#include "Components/CapsuleComponent.h"
 #include "Weapon/GS_Weapon.h"
 #include "AkGameplayStatics.h"
 
@@ -25,6 +27,10 @@ AGS_Character::AGS_Character()
 	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HPTextWidgetComp->SetVisibility(false);
+
+	//함정 - 화살발사기의 화살 채널 설정
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Overlap);
 }
 
 void AGS_Character::BeginPlay()
@@ -33,11 +39,37 @@ void AGS_Character::BeginPlay()
 
 	//Set Default Stats to Character
 	const UEnum* CharacterEnum = FindObject<UEnum>(ANY_PACKAGE, TEXT("ECharacterType"), true);
+	bool bStatInitialized = false;
 
 	if (CharacterEnum)
 	{
 		FString EnumToName = CharacterEnum->GetNameStringByValue((int64)CharacterType);
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Character::BeginPlay - CharacterType Value: %d, EnumToName: '%s' for Actor: %s"),
+			(int64)CharacterType,
+			*EnumToName,
+			*GetName());
 		StatComp->InitStat(FName(EnumToName));
+		bStatInitialized = true;
+	}
+	if (bStatInitialized)
+	{
+		AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+		if (PS)
+		{
+			if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+			{
+				UE_LOG(LogTemp, Log, TEXT("AGS_Character (%s): Notifying PlayerState to initialize StatComp binding."), *GetName());
+				PS->OnPawnStatInitialized();
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AGS_Character (%s): PlayerState is NULL when trying to notify OnPawnStatInitialized."), *GetName());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGS_Character (%s): Stat initialization failed or MaxHealth is 0. Not notifying PlayerState."), *GetName());
 	}
 	
 	if (HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))

@@ -23,17 +23,31 @@ struct FTrapEffect
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float Damage = 0.f;
 
+    //stun
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bStun = false;
+    //Obscure
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //bool bObscure = false;
+
+    ////Confuse
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //bool bConfuse = false;
+    ////Mute
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //bool bMute = false;
+
     //slow
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool bSlow = false;
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //bool bSlow = false;
 
-    //knockback
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool bKnockback = false;
+    ////knockback
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //bool bKnockback = false;
 
-    //push
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool bPush = false;
+    ////push
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //bool bPush = false;
 
 
     //dot damage
@@ -62,6 +76,4 @@ struct FTrapData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTrapEffect Effect;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	//TSoftObjectPtr<UStaticMesh> TrapMesh;
 };

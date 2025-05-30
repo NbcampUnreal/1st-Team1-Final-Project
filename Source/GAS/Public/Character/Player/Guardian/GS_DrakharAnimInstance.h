@@ -41,6 +41,7 @@ private:
 	UFUNCTION()
 	void AnimNotify_DraconicFury();
 
+	//[skill check]
 	UFUNCTION()
-	void AnimNotify_SkillStop();
+	void AnimNotify_CtrlSkillEnd();
 };

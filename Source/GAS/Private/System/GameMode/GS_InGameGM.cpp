@@ -59,6 +59,9 @@ void AGS_InGameGM::StartPlay()
 {
     Super::StartPlay();
 
+    bMatchHasStarted = false;
+    bGameEnded = false;
+
     FTimerHandle TempHandle;
     GetWorldTimerManager().SetTimer(TempHandle, [this]() {
         if (GameState)
@@ -77,6 +80,7 @@ void AGS_InGameGM::StartPlay()
                     HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
                 }
             }
+            GetWorldTimerManager().SetTimer(MatchStartTimerHandle, this, &AGS_InGameGM::StartMatchCheck, 2.0f, false);
         }
     }, 0.2f, false);
 }
@@ -113,6 +117,13 @@ void AGS_InGameGM::BindToPlayerState(APlayerController* PlayerController)
     }
 }
 
+void AGS_InGameGM::StartMatchCheck()
+{
+    UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Match checks started. bMatchHasStarted = true"));
+    bMatchHasStarted = true;
+    CheckAllPlayersDead(); //이거 지워도 상관 없음
+}
+
 void AGS_InGameGM::OnTimerEnd()
 {
     UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: OnTimerEnd called (likely by GameState). Seekers Lose."));
@@ -121,6 +132,12 @@ void AGS_InGameGM::OnTimerEnd()
 
 void AGS_InGameGM::EndGame(EGameResult Result)
 {
+    if (bGameEnded)
+    {
+        return;
+    }
+    bGameEnded = true;
+
     FString NextLevelName;
 
     if (Result == EGameResult::GR_SeekersLost)
@@ -194,7 +211,14 @@ void AGS_InGameGM::CheckAllPlayersDead()
     if (PlayerCount > 0 && bAllPlayersDead)
     {
         UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: All relevant players are dead!"));
-        // TODO: 여기에 모든 플레이어 사망 시 처리 로직 추가
+        if (bMatchHasStarted)
+        {
+            EndGame(EGameResult::GR_SeekersLost);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: All dead check triggered, but match not started yet. Ignoring EndGame."));
+        }
     }
     else
     {

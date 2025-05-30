@@ -9,6 +9,7 @@
 
 class AGS_WeaponShield;
 class AGS_WeaponAxe;
+class UGS_ChanAimingSkillBar;
 
 UCLASS()
 class GAS_API AGS_Chan : public AGS_Seeker, public IGS_AttackInterface
@@ -33,6 +34,8 @@ public:
 	void ComboInputOpen();
 	void ComboInputClose();
 	void EndMontage();
+
+	
 	
 	UPROPERTY(EditAnywhere, Category="Animation")
 	UAnimMontage* ComboAnimMontage;
@@ -78,9 +81,21 @@ public:
 	template <typename T>
 	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);
 
+	// [Widget]
+	void SetChanAimingSkillBarWidget(UGS_ChanAimingSkillBar* Widget) { ChanAimingSkillBarWidget = Widget; }
+
+	UFUNCTION(Client, Reliable)
+	void Client_UpdateChanAimingSkillBar(float Stamina);
+
+	UFUNCTION(Client, Reliable)
+	void Client_ChanAimingSkillBar(bool bShow);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+private:
+	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;
 };
 
 template <typename T>

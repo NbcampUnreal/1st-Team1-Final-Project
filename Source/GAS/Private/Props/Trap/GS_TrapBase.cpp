@@ -95,24 +95,41 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 	AGS_Seeker* DamagedSeeker = Cast<AGS_Seeker>(OtherActor);
 	if (!DamagedSeeker) return;
 	if (TrapData.Effect.Damage <= 0.f) return;
-	UE_LOG(LogTemp, Warning, TEXT("Passed lv 1"));
  	//기본 데미지 부여
 	FDamageEvent DamageEvent;
 
 	
 	if (TrapData.Effect.bDoT)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TrapData.Effect.bDoT True"));
 		ApplyDotDamage(OtherActor);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TrapData.Effect.bDoT false"));
 		DamagedSeeker->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
 	}
 
 
 	//디버프 추가
+	if (UGS_DebuffComp* DebuffComp = DamagedSeeker->FindComponentByClass<UGS_DebuffComp>())
+	{
+
+		const FTrapEffect& Effect = TrapData.Effect;
+
+		//Stun
+		if (Effect.bStun)
+		{
+			DebuffComp->ApplyDebuff(EDebuffType::Stun, nullptr);
+		}
+
+		////Obscure
+		//if (Effect.bObscure)
+		//{
+		//	DebuffComp->ApplyDebuff(EDebuffType::Obscure, nullptr);
+		//}
+
+
+	}
+
 
 }
 
@@ -161,7 +178,6 @@ void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
 void AGS_TrapBase::Server_DamageBoxEffect_Implementation(AActor* OtherActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Server_DamageBoxEffect_Implementation called"));
-	//Multicast_DamageBoxEffect(OtherActor);
 	DamageBoxEffect(OtherActor);
 }
 
