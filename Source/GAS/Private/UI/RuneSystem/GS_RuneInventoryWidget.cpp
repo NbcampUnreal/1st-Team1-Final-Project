@@ -11,10 +11,6 @@
 UGS_RuneInventoryWidget::UGS_RuneInventoryWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-}
-
-void UGS_RuneInventoryWidget::NativeConstruct()
-{
 	//임시
 	if (!IsValid(RuneWidgetClass))
 	{
@@ -26,6 +22,11 @@ void UGS_RuneInventoryWidget::NativeConstruct()
 			RuneWidgetClass = LoadedClass;
 		}
 	}
+}
+
+void UGS_RuneInventoryWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
 }
 
 void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager, UGS_ArcaneBoardWidget* InBoardWidget)
@@ -46,25 +47,28 @@ void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager, 
 		FRuneTableRow RuneData;
 		if (BoardManager->GetRuneData(RuneID, RuneData))
 		{
-			UGS_DraggableRuneWidget* RuneWidget = CreateWidget<UGS_DraggableRuneWidget>(this, RuneWidgetClass);
-			if (RuneWidget)
+			if(RuneWidgetClass)
 			{
-				UTexture2D* RuneTexture = BoardManager->GetRuneTexture(RuneID);
-				if (RuneTexture)
+				UGS_DraggableRuneWidget* RuneWidget = CreateWidget<UGS_DraggableRuneWidget>(this, RuneWidgetClass);
+				if (RuneWidget)
 				{
-					RuneWidget->InitRuneWidget(RuneID, RuneTexture, InBoardWidget);
-				}
-
-				for (const FPlacedRuneInfo& Rune : BoardManager->PlacedRunes)
-				{
-					if (Rune.RuneID == RuneID)
+					UTexture2D* RuneTexture = BoardManager->GetRuneTexture(RuneID);
+					if (RuneTexture)
 					{
-						RuneWidget->SetPlaced(true);
+						RuneWidget->InitRuneWidget(RuneID, RuneTexture, InBoardWidget);
 					}
-				}
 
-				RuneScrollBox->AddChild(RuneWidget);
-				OwnsRuneList.Add(RuneID, RuneWidget);
+					for (const FPlacedRuneInfo& Rune : BoardManager->PlacedRunes)
+					{
+						if (Rune.RuneID == RuneID)
+						{
+							RuneWidget->SetPlaced(true);
+						}
+					}
+
+					RuneScrollBox->AddChild(RuneWidget);
+					OwnsRuneList.Add(RuneID, RuneWidget);
+				}
 			}
 		}
 	}

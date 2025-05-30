@@ -15,14 +15,7 @@ UGS_StatPanelWidget::UGS_StatPanelWidget(const FObjectInitializer& ObjectInitial
 	{
 		StatDataTable = StatDataTableAsset.Object;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("스탯 데이터 로드 안됨"));
-	}
-}
 
-void UGS_StatPanelWidget::NativeConstruct()
-{
 	if (!IsValid(StatWidgetClass))
 	{
 		FSoftClassPath StatWidgetClassPath(TEXT("/Game/UI/RuneSystem/WBP_StatData.WBP_StatData_C"));
@@ -33,6 +26,11 @@ void UGS_StatPanelWidget::NativeConstruct()
 			StatWidgetClass = LoadedClass;
 		}
 	}
+}
+
+void UGS_StatPanelWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
 }
 
 void UGS_StatPanelWidget::InitStatList(UGS_ArcaneBoardManager* InBoardManager)
