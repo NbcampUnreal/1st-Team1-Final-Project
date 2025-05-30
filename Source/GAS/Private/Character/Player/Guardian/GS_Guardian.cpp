@@ -3,6 +3,8 @@
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 
 #include "Animation/AnimInstance.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Character/Skill/GS_SkillComp.h"
 #include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -95,6 +97,23 @@ void AGS_Guardian::ServerRPCStopCtrl_Implementation()
 void AGS_Guardian::OnRep_GuardianState()
 {
 	ClientGuardianState = GuardianState;
+}
+
+void AGS_Guardian::QuitGuardianSkill()
+{
+	UE_LOG(LogTemp, Warning, TEXT("quit skill"));
+
+	//reset skill state
+	GuardianState = EGuardianState::CtrlSkillEnd;
+
+	//fly end
+	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+	
+	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
+	if (IsValid(Drakhar))
+	{
+		Drakhar->ResetComboAttackVariables();
+	}
 }
 
 void AGS_Guardian::MulticastRPCDrawDebugLine_Implementation(const FVector& Start, const FVector& End, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit)
