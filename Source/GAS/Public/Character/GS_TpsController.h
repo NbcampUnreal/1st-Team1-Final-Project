@@ -39,6 +39,12 @@ public:
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* LCtrlAction;*/
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* PageUpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* PageDownAction;
+	
 	UFUNCTION(BlueprintCallable, Category = "Audio")
     void SetupPlayerAudioListener();
 
@@ -47,7 +53,9 @@ public:
 	void WalkToggle(const FInputActionValue& InputValue);
 	void LClickPressed(const FInputActionValue& InputValue);
 	void LClickRelease(const FInputActionValue& InputValue);
-
+	void PageUp(const FInputActionValue& InputValue);
+	void PageDown(const FInputActionValue& InputValue);
+	
 	void SetCanMove(bool bInCanMove) { bCanMove = bInCanMove; }
 	bool GetCanMove() { return bCanMove; }
 

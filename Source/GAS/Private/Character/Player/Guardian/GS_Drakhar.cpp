@@ -293,7 +293,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 {
 	TSet<AGS_Character*> EarthquakeDamagedCharacters;
 	TArray<FHitResult> OutHitResults;
-	const FVector Start = GetActorLocation();
+	const FVector Start = GetActorLocation() + 200.f;
 	const FVector End = Start + GetActorForwardVector() * 100.f;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	Params.AddIgnoredActor(this);
@@ -319,6 +319,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			DamagedCharacter->LaunchCharacter(GetActorForwardVector() * EarthquakePower, false, false);
 		}
 	}
+	MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
 }
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()

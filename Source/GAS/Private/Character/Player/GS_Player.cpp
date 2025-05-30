@@ -1,8 +1,12 @@
 #include "Character/Player/GS_Player.h"
 #include "Camera/CameraComponent.h"
+#include "Character/GS_TpsController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/PostProcessComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/GameStateBase.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "System/GS_PlayerState.h"
 
 AGS_Player::AGS_Player()
 {
@@ -145,6 +149,21 @@ void AGS_Player::OnTimelineFinished()
 	bIsObscuring = false;
 }
 
+void AGS_Player::OnDeath()
+{
+	Super::OnDeath();
+	
+	GetCharacterMovement()->DisableMovement();
+
+	AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(GetPlayerState());
+	if (GS_PS)
+	{
+		GS_PS->bIsAlive = false;
+	}
+
+	SpectateNextPlayer();
+}
+
 void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -194,6 +213,41 @@ bool AGS_Player::IsLocalPlayer() const
 	}
 	return false;
 }
+
+void AGS_Player::SpectateNextPlayer()
+{
+	for (const auto& PS : GetWorld()->GetGameState()->PlayerArray)
+	{
+		AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
+		if (IsValid(GS_PS))
+		{
+			if (GS_PS->bIsAlive) //[TODO] GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker 
+			{
+				AGS_TpsController* AlivePlayerController = Cast<AGS_TpsController>(GS_PS->GetPlayerController());
+				
+				if (IsValid(AlivePlayerController))
+				{
+					APlayerController* DeadPlayerPC = Cast<APlayerController>(GetController());
+					if (DeadPlayerPC)
+					{
+						//UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!!!!!!!!!!!!!%s"), *DeadPlayerPC->GetName());
+						//UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!!!!!!!!!!!!!%s"), *AlivePlayerController->GetName());
+
+						DeadPlayerPC->SetViewTargetWithBlend(AlivePlayerController);
+					}
+				}
+			}
+		}
+		//Game Over?
+		//all players dead
+	}
+}
+
+void AGS_Player::ServerRPCSpectateNextPlayer_Implementation()
+{
+	SpectateNextPlayer();
+}
+
 
 void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage)
 {

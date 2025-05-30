@@ -14,7 +14,6 @@
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
 
-
 // Sets default values
 AGS_Seeker::AGS_Seeker()
 {
