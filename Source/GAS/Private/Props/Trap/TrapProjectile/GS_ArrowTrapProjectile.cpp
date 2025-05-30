@@ -40,7 +40,7 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 
 	AGS_Player* Player = Cast<AGS_Player>(OtherActor);
 
-	UE_LOG(LogTemp, Warning, TEXT("OtherComp: %s, Type: %d"), *OtherComp->GetName(), OtherComp->GetCollisionObjectType());
+	//UE_LOG(LogTemp, Warning, TEXT("OtherComp: %s, Type: %d"), *OtherComp->GetName(), OtherComp->GetCollisionObjectType());
 
 	if (Player && OtherComp == Player->GetMesh() && OwningTrap)
 	{
