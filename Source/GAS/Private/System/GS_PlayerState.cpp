@@ -32,8 +32,6 @@ void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 void AGS_PlayerState::BeginPlay()
 {
     Super::BeginPlay();
-
-    TryBindToStatComp();
 }
 
 void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
@@ -101,30 +99,34 @@ void AGS_PlayerState::OnRep_PlayerRole()
 	OnJobChangedDelegate.Broadcast(CurrentPlayerRole);
 }
 
-void AGS_PlayerState::TryBindToStatComp()
+void AGS_PlayerState::OnPawnStatInitialized()
 {
     APawn* MyPawn = GetPawn();
 
     if (MyPawn)
     {
+        UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): OnPawnStatInitialized - Found Pawn: %s (Class: %s)"),
+            *GetName(), *MyPawn->GetName(), *MyPawn->GetClass()->GetName());
+
         UGS_StatComp* StatComp = MyPawn->FindComponentByClass<UGS_StatComp>();
 
         if (StatComp)
         {
+            UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): OnPawnStatInitialized - Found StatComp: %s on Pawn %s"),
+                *GetName(), *StatComp->GetName(), *MyPawn->GetName());
+
             SetupStatCompBinding(StatComp);
-            if (GetWorld() && GetWorld()->GetTimerManager().IsTimerActive(BindStatCompTimerHandle))
-            {
-                GetWorld()->GetTimerManager().ClearTimer(BindStatCompTimerHandle);
-            }
-            UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): StatComp binding successful!"), *GetName());
-            return;
+            UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): StatComp binding successful! from OnPawnStatInitialized"), *GetName()); // 성공 로그
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s): OnPawnStatInitialized - StatComp NOT FOUND on Pawn: %s. This should not happen if Character called this."),
+                *GetName(), *MyPawn->GetName());
         }
     }
-
-    if (!GetWorld()->GetTimerManager().IsTimerActive(BindStatCompTimerHandle))
+    else
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s): Pawn or StatComp not ready. Starting timer..."), *GetName());
-        GetWorld()->GetTimerManager().SetTimer(BindStatCompTimerHandle, this, &AGS_PlayerState::TryBindToStatComp, 0.2f, true);
+        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s): OnPawnStatInitialized - MyPawn is NULL. This should not happen."), *GetName());
     }
 }
 
@@ -147,16 +149,18 @@ void AGS_PlayerState::HandleCurrentHPChanged(UGS_StatComp* StatComp)
 {
     if (StatComp)
     {
-        CurrentHealth = StatComp->GetCurrentHealth();
-        //델리것 추가 필요?
-        UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s) HP updated to %f"), *GetName(), CurrentHealth);
+        float HealthFromStatComp = StatComp->GetCurrentHealth();
+        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) in HandleCurrentHPChanged: Value from StatComp->GetCurrentHealth() is: %f"),
+            *GetName(), HealthFromStatComp);
+
+        CurrentHealth = HealthFromStatComp;
+        UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s) HP updated to %f (this is PlayerState.CurrentHealth)"), *GetName(), CurrentHealth);
+
         if (HasAuthority())
         {
             if (CurrentHealth <= 0.f && bIsAlive)
             {
-                bIsAlive = false;
-                OnRep_IsAlive();
-                UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) is now dead (bIsAlive = false) - Set on Server."), *GetName());
+                SetIsAlive(false);
             }
         }
     }
