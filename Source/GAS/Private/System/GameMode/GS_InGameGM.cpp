@@ -62,6 +62,11 @@ void AGS_InGameGM::StartPlay()
     bMatchHasStarted = false;
     bGameEnded = false;
 
+    FString BoseLevelName = TEXT("BoseLevel");
+    FString ResultLevelName = TEXT("ResultLevel");
+    UGameplayStatics::LoadStreamLevel(this, FName(*BoseLevelName), false, false, FLatentActionInfo());
+    UGameplayStatics::LoadStreamLevel(this, FName(*ResultLevelName), false, false, FLatentActionInfo());
+
     FTimerHandle TempHandle;
     GetWorldTimerManager().SetTimer(TempHandle, [this]() {
         if (GameState)
