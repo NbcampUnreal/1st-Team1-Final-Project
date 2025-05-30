@@ -87,6 +87,11 @@ bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
 	return true;
 }
 
+ECharacterClass UGS_ArcaneBoardManager::GetCurrClass()
+{
+	return CurrClass;
+}
+
 bool UGS_ArcaneBoardManager::CanPlaceRuneAt(uint8 RuneID, const FIntPoint& Pos)
 {
 	TArray<FIntPoint> AffectedCells;

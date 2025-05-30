@@ -113,20 +113,7 @@ bool UGS_ArcaneBoardLPS::TryCloseArcaneBoardUI()
 
 ECharacterClass UGS_ArcaneBoardLPS::GetCurrPlayerClass() const
 {
-    /*if (APlayerController* PC = GetLocalPlayer()->GetPlayerController(GetWorld()))
-    {
-        if (AGS_Character* PlayerCharacter = Cast<AGS_Character>(PC->GetPawn()))
-        {
-            ECharacterClass CharacterClass = PlayerCharacter->GetCharacterClass();
-
-            UE_LOG(LogTemp, Log, TEXT("현재 플레이어 직업: %s"),
-                *UGS_EnumUtils::GetEnumAsString(CharacterClass));
-
-            return CharacterClass;
-        }
-    }*/
-
-    return ECharacterClass::Ares;
+    return BoardManager->GetCurrClass();
 }
 
 void UGS_ArcaneBoardLPS::UpdateStatsUI()
