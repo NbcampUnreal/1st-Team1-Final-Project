@@ -41,6 +41,7 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 	if (Player && OwningTrap)
 	{
 		OwningTrap->HandleTrapDamage(OtherActor);
+		StickWithVisualOnly(SweepResult);
 		Destroy();
 	}
 	if(!OtherActor->IsA<APawn>())
