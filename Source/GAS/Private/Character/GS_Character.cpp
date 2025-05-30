@@ -12,6 +12,7 @@
 #include "System/GS_PlayerState.h"
 #include "Components/CapsuleComponent.h"
 #include "Weapon/GS_Weapon.h"
+#include "AkGameplayStatics.h"
 
 AGS_Character::AGS_Character()
 {
@@ -120,6 +121,12 @@ void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void AGS_Character::OnDeath()
 {
+	// 죽음 사운드 재생
+	if (DeathSoundEvent)
+	{
+		UAkGameplayStatics::PostEvent(DeathSoundEvent, this, 0, FOnAkPostEventCallback());
+	}
+
 	MulticastRPCCharacterDeath();
 }
 

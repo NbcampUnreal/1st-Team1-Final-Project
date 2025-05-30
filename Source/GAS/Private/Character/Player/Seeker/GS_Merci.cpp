@@ -7,6 +7,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
 #include "Character/Component/Seeker/GS_MerciSkillInputHandlerComp.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "AkGameplayTypes.h"
 #include "AkComponent.h"
 #include "AkAudioEvent.h"
@@ -48,11 +50,11 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("GetDrawState=false pass: %s"), GetDrawState()?TEXT("true") : TEXT("false"));
 		Multicast_PlayDrawMontage(DrawMontage);
-		//PlayDrawMontage(DrawMontage);
 		SetDrawState(true); // 상태 전환
 		
 		// 활 당기는 사운드 재생
 		PlaySound(BowPullSound);
+		
 		Client_StartZoom(); // 줌인
 	}
 	else
@@ -207,6 +209,9 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
 	FRotator BaseRotation = LaunchDirection.Rotation();
 
+	FVector VFXLocation = SpawnLocation;
+	FRotator VFXRotation = BaseRotation;
+
 	// 5. 여러 발 발사 처리 (SpreadAngleDeg를 기준으로 좌우로 퍼지게 만듦)
 	int32 HalfCount = NumArrows / 2;
 	for (int32 i = 0; i < NumArrows; ++i)
@@ -245,9 +250,10 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 				NormalArrow->ChangeArrowType(CurrentArrowType);
 			}
 		}
-		// 7. 화살 방향 시각화 (Spread 적용된 방향)
-		//Multicast_DrawDebugLine(SpawnLocation, SpawnLocation + SpreadDir * 1000.f, FColor::Red);
 	}
+	
+	// 8. 화살 발사 VFX 호출 (멀티캐스트로 모든 클라이언트에서 재생)
+	Multicast_PlayArrowShotVFX(VFXLocation, VFXRotation, NumArrows);
 }
 
 void AGS_Merci::Server_ChangeArrowType_Implementation(int32 Direction)
@@ -464,5 +470,32 @@ void AGS_Merci::RegenChildArrow()
 	{
 		++CurrentChildArrows;
 		UE_LOG(LogTemp, Log, TEXT("Child regen: %d"), CurrentChildArrows);
+	}
+}
+
+void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRotator Rotation, int32 NumArrows)
+{
+	if (!GetWorld()) return;
+	
+	// 화살 수에 따라 다른 VFX 선택
+	UNiagaraSystem* VFXToPlay = (NumArrows > 1) ? MultiShotVFX : ArrowShotVFX;
+	
+	if (VFXToPlay)
+	{
+		FVector PositionOffset = (NumArrows > 1) ? MultiShotVFXOffset : ArrowShotVFXOffset;
+		
+		// 로컬 오프셋을 월드 스페이스로 변환하여 적용
+		FVector WorldOffset = Rotation.RotateVector(PositionOffset);
+		FVector FinalLocation = Location + WorldOffset;
+		
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			VFXToPlay,
+			FinalLocation,
+			Rotation,
+			FVector::OneVector,
+			true,
+			true
+		);
 	}
 }
