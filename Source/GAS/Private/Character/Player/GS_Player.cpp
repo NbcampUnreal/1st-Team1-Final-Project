@@ -152,6 +152,15 @@ void AGS_Player::OnTimelineFinished()
 void AGS_Player::OnDeath()
 {
 	Super::OnDeath();
+
+	// 죽음 사운드 재생
+	if (DeathSoundEvent)
+	{
+		PlaySound(DeathSoundEvent);
+	}
+
+	// 추가적인 플레이어 죽음 처리 로직을 여기에 구현할 수 있다
+	// 예: 카메라 연출, UI 변경, 리스폰 타이머 등
 	
 	GetCharacterMovement()->DisableMovement();
 
@@ -274,18 +283,4 @@ void AGS_Player::PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPos
 	}
 
 	AkComponent->PostAkEvent(SoundEvent, 0, Callback);
-}
-
-void AGS_Player::OnDeath()
-{
-	Super::OnDeath();
-
-	// 죽음 사운드 재생
-	if (DeathSoundEvent)
-	{
-		PlaySound(DeathSoundEvent);
-	}
-
-	// 추가적인 플레이어 죽음 처리 로직을 여기에 구현할 수 있다
-	// 예: 카메라 연출, UI 변경, 리스폰 타이머 등
 }

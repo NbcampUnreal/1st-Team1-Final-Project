@@ -123,8 +123,6 @@ protected:
 	
 	virtual void PlaySkillMontage(UAnimMontage* Montage);
 
-	virtual void OnDeath() override;
-
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FCharacterWantsToMove GetWantsToMove();
 };
