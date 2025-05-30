@@ -24,6 +24,7 @@ void UGS_DebuffConfuse::OnApply()
 		if (AGS_Monster* Monster = Cast<AGS_Monster>(TargetCharacter))
 		{
 			Monster->bSelectionLocked = true;
+			Monster->bCommandLocked = true;
 		}
 	}
 }
@@ -43,6 +44,7 @@ void UGS_DebuffConfuse::OnExpire()
 		if (AGS_Monster* Monster = Cast<AGS_Monster>(TargetCharacter))
 		{
 			Monster->bSelectionLocked = false;
+			Monster->bCommandLocked = false;
 		}
 	}
 }
