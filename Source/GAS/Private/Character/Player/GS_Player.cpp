@@ -169,7 +169,6 @@ void AGS_Player::OnDeath()
 	{
 		GS_PS->bIsAlive = false;
 	}
-
 	SpectateNextPlayer();
 }
 
@@ -239,10 +238,9 @@ void AGS_Player::SpectateNextPlayer()
 					APlayerController* DeadPlayerPC = Cast<APlayerController>(GetController());
 					if (DeadPlayerPC)
 					{
-						//UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!!!!!!!!!!!!!%s"), *DeadPlayerPC->GetName());
-						//UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!!!!!!!!!!!!!%s"), *AlivePlayerController->GetName());
-
+						DeadPlayerPC->UnPossess();
 						DeadPlayerPC->SetViewTargetWithBlend(AlivePlayerController);
+						SetLifeSpan(2.f);
 					}
 				}
 			}

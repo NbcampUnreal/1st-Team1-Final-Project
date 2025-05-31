@@ -87,7 +87,6 @@ void AGS_TpsController::PageUp(const FInputActionValue& InputValue)
 				if (!GS_PS->bIsAlive)
 				{
 					UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Next Player")), true, true, FLinearColor::Blue, 5.f);
-					//ControlledPlayer->SpectateNextPlayer();
 					ControlledPlayer->ServerRPCSpectateNextPlayer();
 				}
 			}
@@ -97,13 +96,7 @@ void AGS_TpsController::PageUp(const FInputActionValue& InputValue)
 
 void AGS_TpsController::PageDown(const FInputActionValue& InputValue)
 {
-	// if (IsLocalController())
-	// {
-	// 	if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
-	// 	{
-	// 		ControlledPlayer->SpectateNextPlayer();
-	// 	}
-	// }
+
 }
 
 void AGS_TpsController::BeginPlay()
