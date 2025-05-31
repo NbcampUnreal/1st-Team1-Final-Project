@@ -2,6 +2,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/PostProcessComponent.h"
+#include "Character/Component/GS_StatComp.h"
+#include "GameFramework/Controller.h"
+#include "System/GS_PlayerState.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
 AGS_Player::AGS_Player()
@@ -74,6 +77,41 @@ void AGS_Player::Tick(float DeltaSeconds)
 	if (ObscureTimeline.IsPlaying())
 	{
 		ObscureTimeline.TickTimeline(DeltaSeconds);
+	}
+}
+
+void AGS_Player::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+
+	if (PS && StatComp)
+	{
+		float HealthToRestoreFromPS = PS->CurrentHealth;
+		bool bShouldBeAliveFromPS = PS->bIsAlive;
+
+		float ClampedHealthForStatComp = FMath::Clamp(HealthToRestoreFromPS, 0.f, StatComp->GetMaxHealth());
+
+		if (!bShouldBeAliveFromPS)
+		{
+			ClampedHealthForStatComp = 0.f;
+		}
+		else if (ClampedHealthForStatComp <= 0.f && StatComp->GetMaxHealth() > KINDA_SMALL_NUMBER)
+		{
+			ClampedHealthForStatComp = FMath::Min(1.f, StatComp->GetMaxHealth());
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Player (%s) PossessedBy: Restoring state from PlayerState. PS.Health: %f, PS.bIsAlive: %s. Setting StatComp Health to: %f"),
+			*GetName(), PS->CurrentHealth, PS->bIsAlive ? TEXT("True") : TEXT("False"), ClampedHealthForStatComp);
+
+		StatComp->SetCurrentHealth(ClampedHealthForStatComp, false);
+		PS->OnPawnStatInitialized();
+	}
+	else
+	{
+		if (!PS) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: PlayerState is NULL!"), *GetName());
+		if (!StatComp) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: StatComp is NULL!"), *GetName());
 	}
 }
 
