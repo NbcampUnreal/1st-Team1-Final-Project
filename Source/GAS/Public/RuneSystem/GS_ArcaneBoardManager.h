@@ -22,7 +22,7 @@ class GAS_API UGS_ArcaneBoardManager : public UObject
 public:
 	UGS_ArcaneBoardManager();
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	ECharacterClass CurrClass;
 
 	//현재 그리드에 배치된 룬들의 정보를 담은 배열
@@ -51,6 +51,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool SetCurrClass(ECharacterClass NewClass);
+
+	UFUNCTION(BlueprintCallable)
+	ECharacterClass GetCurrClass();
 
 	UFUNCTION(BlueprintCallable)
 	bool CanPlaceRuneAt(uint8 RuneID, const FIntPoint& Pos);

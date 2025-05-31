@@ -8,7 +8,9 @@
 #include "Character/GS_Character.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Interface/GS_AttackInterface.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "System/GS_PlayerState.h"
 
 AGS_TpsController::AGS_TpsController()
 {
@@ -74,6 +76,29 @@ void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
 	}
 }
 
+void AGS_TpsController::PageUp(const FInputActionValue& InputValue)
+{
+	if (IsLocalController())
+	{
+		if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
+		{
+			if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(ControlledPlayer->GetPlayerState()))
+			{
+				if (!GS_PS->bIsAlive)
+				{
+					UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Next Player")), true, true, FLinearColor::Blue, 5.f);
+					ControlledPlayer->ServerRPCSpectateNextPlayer();
+				}
+			}
+		}
+	}
+}
+
+void AGS_TpsController::PageDown(const FInputActionValue& InputValue)
+{
+
+}
+
 void AGS_TpsController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -130,6 +155,14 @@ void AGS_TpsController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Started, this, &AGS_TpsController::LClickPressed);
 		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Completed, this, &AGS_TpsController::LClickRelease);
+	}
+	if (PageUpAction)
+	{
+		EnhancedInputComponent->BindAction(PageUpAction, ETriggerEvent::Started, this, &AGS_TpsController::PageUp);
+	}
+	if (PageDownAction)
+	{
+		EnhancedInputComponent->BindAction(PageDownAction, ETriggerEvent::Started, this, &AGS_TpsController::PageDown);
 	}
 }
 

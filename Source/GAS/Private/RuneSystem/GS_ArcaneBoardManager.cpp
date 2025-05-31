@@ -87,6 +87,11 @@ bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
 	return true;
 }
 
+ECharacterClass UGS_ArcaneBoardManager::GetCurrClass()
+{
+	return CurrClass;
+}
+
 bool UGS_ArcaneBoardManager::CanPlaceRuneAt(uint8 RuneID, const FIntPoint& Pos)
 {
 	TArray<FIntPoint> AffectedCells;
@@ -199,6 +204,11 @@ FGS_StatRow UGS_ArcaneBoardManager::CalculateStatEffects()
 
 void UGS_ArcaneBoardManager::ApplyChanges()
 {
+	AppliedStatEffects = CurrStatEffects;
+
+	bHasUnsavedChanges = false;
+
+	OnStatsChanged.Broadcast(AppliedStatEffects);
 }
 
 void UGS_ArcaneBoardManager::ResetAllRune()
@@ -207,6 +217,21 @@ void UGS_ArcaneBoardManager::ResetAllRune()
 
 void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes)
 {
+	PlacedRunes.Empty();
+	InitGridState();
+
+	for (const FPlacedRuneInfo& RuneInfo : Runes)
+	{
+		PlacedRunes.Add(RuneInfo);
+		ApplyRuneToGrid(RuneInfo.RuneID, RuneInfo.Pos, EGridCellState::Occupied, true);
+	}
+
+	AppliedStatEffects = CalculateStatEffects();
+	CurrStatEffects = AppliedStatEffects;
+
+	OnStatsChanged.Broadcast(CurrStatEffects);
+
+	bHasUnsavedChanges = false;
 }
 
 bool UGS_ArcaneBoardManager::GetRuneData(uint8 RuneID, FRuneTableRow& OutData)

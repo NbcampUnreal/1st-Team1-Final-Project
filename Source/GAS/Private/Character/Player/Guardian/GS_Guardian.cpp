@@ -3,6 +3,8 @@
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 
 #include "Animation/AnimInstance.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Character/Skill/GS_SkillComp.h"
 #include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -78,16 +80,18 @@ void AGS_Guardian::MeleeAttackCheck()
 			ServerRPCMeleeAttack(DamagedCharacter);
 		}
 	}
+
+	MulticastRPCDrawDebugLine(Start, End, MeleeAttackRange, MeleeAttackRadius, Forward, bIsHitDetected);
 }
 
-void AGS_Guardian::ServerRPCStopSkill_Implementation()
+void AGS_Guardian::ServerRPCStartCtrl_Implementation()
 {
-	GuardianState = EGuardianState::None;
+	GuardianState = EGuardianState::CtrlUp;
 }
 
-void AGS_Guardian::ServerRPCStartSkill_Implementation()
+void AGS_Guardian::ServerRPCStopCtrl_Implementation()
 {
-	GuardianState = EGuardianState::Skill;
+	GuardianState = EGuardianState::CtrlSkillEnd;
 }
 
 void AGS_Guardian::OnRep_GuardianState()
@@ -95,11 +99,27 @@ void AGS_Guardian::OnRep_GuardianState()
 	ClientGuardianState = GuardianState;
 }
 
-// void AGS_Guardian::MulticastRPCDrawDebugLine_Implementation(const FVector& Start, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit)
-// {
-// 	FColor Color = bIsHit ? FColor::Green : FColor::Red;
-// 	DrawDebugCapsule(GetWorld(), Start, CapsuleRange * 0.5f, Radius, FRotationMatrix::MakeFromZ(Forward).ToQuat(),
-// 		Color, false, 5.f);
-//
-// 	//DrawDebugPoint(GetWorld(),OutHitResult.ImpactPoint, 15.f, FColor::Yellow, false, 1.f);
-// }
+void AGS_Guardian::QuitGuardianSkill()
+{
+	UE_LOG(LogTemp, Warning, TEXT("quit skill"));
+
+	//reset skill state
+	GuardianState = EGuardianState::CtrlSkillEnd;
+
+	//fly end
+	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+	
+	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
+	if (IsValid(Drakhar))
+	{
+		Drakhar->ResetComboAttackVariables();
+	}
+}
+
+void AGS_Guardian::MulticastRPCDrawDebugLine_Implementation(const FVector& Start, const FVector& End, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit)
+{
+	FColor Color = bIsHit ? FColor::Green : FColor::Red;
+	const FVector Origin = Start + (End - Start) * 0.5f;
+	DrawDebugCapsule(GetWorld(), Origin, CapsuleRange * 0.5f, Radius, FRotationMatrix::MakeFromZ(Forward).ToQuat(),
+		Color, false, 5.f);
+}

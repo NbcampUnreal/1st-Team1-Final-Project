@@ -11,7 +11,6 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkill1CoolTimeChangedDelegate, float);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkill2CoolTimeChangedDelegate, float);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkill3CoolTimeChangedDelegate, float);
 
-
 UENUM(BlueprintType)
 enum class ESkillSlot : uint8
 {
@@ -43,7 +42,7 @@ public:
 	FOnSkill1CoolTimeChangedDelegate Skill1CoolTimeChanged;
 	FOnSkill2CoolTimeChangedDelegate Skill2CoolTimeChanged;
 	FOnSkill3CoolTimeChangedDelegate Skill3CoolTimeChanged;
-
+	
 	UPROPERTY(ReplicatedUsing=OnRep_Skill1)
 	float Skill1LeftCoolTime = 0.0f;
 	

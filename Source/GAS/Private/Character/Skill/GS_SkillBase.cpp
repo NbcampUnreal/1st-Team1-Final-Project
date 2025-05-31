@@ -1,5 +1,6 @@
 #include "Character/Skill/GS_SkillBase.h"
 #include "Character/GS_Character.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -55,7 +56,7 @@ bool UGS_SkillBase::IsActive() const
 
 void UGS_SkillBase::StartCoolDown()
 {
-	//server
+	//server logic
 
 	if (Cooltime <= 0.f)
 	{
@@ -74,15 +75,24 @@ void UGS_SkillBase::StartCoolDown()
 		}, Cooltime, false);
 
 	GetWorld()->GetTimerManager().SetTimer(LogTimerHandle, this, &UGS_SkillBase::LogRemainingTime, 0.07f, true);
+
+	// //guardian state setting
+	// AGS_Guardian* Guardian = Cast<AGS_Guardian>(OwnerCharacter);
+	// if (IsValid(Guardian))
+	// {
+	// 	Guardian->GuardianState = EGuardianState::SKillCoolDown;
+	// }
 }
 
 void UGS_SkillBase::LogRemainingTime()
 {
-	//server
+	//server logic
+	
 	LeftCoolTime = GetWorld()->GetTimerManager().GetTimerRemaining(CooldownHandle);
 	
 	SetCoolTime(LeftCoolTime);
-	
+
+	//end cool time
 	if (LeftCoolTime <= 0.f)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(LogTimerHandle);

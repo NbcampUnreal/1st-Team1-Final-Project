@@ -111,6 +111,14 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySkillMontage(UAnimMontage* Montage);
 
+	//[Spectate Other Player]
+	void SpectateNextPlayer();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCSpectateNextPlayer();
+	
+	virtual void OnDeath() override;
+	
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	

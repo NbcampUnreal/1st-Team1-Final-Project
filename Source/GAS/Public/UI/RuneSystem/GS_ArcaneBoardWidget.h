@@ -34,6 +34,12 @@ public:
 
 	//기본 기능
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void SetBoardManager(UGS_ArcaneBoardManager* InBoardManager);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	UGS_ArcaneBoardManager* GetBoardManager() const;
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void GenerateGridLayout();
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -77,13 +83,30 @@ public:
 	uint8 GetSelectedRuneID() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	bool HasUnsavedChanges() const;
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void OnCloseButtonClicked();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void OnResetButtonClicked();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void OnApplyButtonClicked();
 
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UButton* CloseButton;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+
+	class UButton* ApplyButton;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	class UButton* ResetButton;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+
 	UUniformGridPanel* GridPanel;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -117,8 +140,6 @@ protected:
 	UGS_DragVisualWidget* SelectionVisualWidget;
 
 private:
-	float DragVisualOffset;
-
 	void BindManagerEvents();
 	void UnbindManagerEvents();
 };

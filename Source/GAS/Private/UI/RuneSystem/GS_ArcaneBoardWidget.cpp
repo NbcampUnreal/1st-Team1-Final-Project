@@ -16,16 +16,6 @@
 UGS_ArcaneBoardWidget::UGS_ArcaneBoardWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	SelectedRuneID = 0;
-	bIsInSelectionMode = false;
-	SelectionVisualWidget = nullptr;
-	DragVisualOffset = 50;
-}
-
-void UGS_ArcaneBoardWidget::NativeConstruct()
-{
-	Super::NativeConstruct();
-
 	//임시
 	if (!IsValid(GridCellWidgetClass))
 	{
@@ -50,23 +40,29 @@ void UGS_ArcaneBoardWidget::NativeConstruct()
 		}
 	}
 
-	//임시
-	if (!IsValid(BoardManager))
-	{
-		BoardManager = NewObject<UGS_ArcaneBoardManager>(this);
-		BoardManager->InitDataCache();
-	}
+	SelectedRuneID = 0;
+	bIsInSelectionMode = false;
+	SelectionVisualWidget = nullptr;
+}
+
+void UGS_ArcaneBoardWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
 
 	if (CloseButton)
 	{
 		CloseButton->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnCloseButtonClicked);
 	}
 
-	BindManagerEvents();
+	if (ApplyButton)
+	{
+		ApplyButton->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnApplyButtonClicked);
+	}
 
-	GenerateGridLayout();
-	InitInventory();
-	InitStatPanel();
+	if (ResetButton)
+	{
+		ResetButton->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnResetButtonClicked);
+	}
 }
 
 void UGS_ArcaneBoardWidget::NativeDestruct()
@@ -109,7 +105,7 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 		MousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
 	}
 
-	SelectionVisualWidget->SetPositionInViewport(MousePos - DragVisualOffset, false);
+	SelectionVisualWidget->SetPositionInViewport(MousePos, false);
 
 	UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
 
@@ -165,6 +161,26 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseButtonDown(const FGeometry& InGeometr
 	}
 
 	return Reply;
+}
+
+void UGS_ArcaneBoardWidget::SetBoardManager(UGS_ArcaneBoardManager* InBoardManager)
+{
+	if (!InBoardManager)
+	{
+		return;
+	}
+
+	BoardManager = InBoardManager;
+
+	BindManagerEvents();
+	GenerateGridLayout();
+	InitInventory();
+	InitStatPanel();
+}
+
+UGS_ArcaneBoardManager* UGS_ArcaneBoardWidget::GetBoardManager() const
+{
+	return BoardManager;
 }
 
 void UGS_ArcaneBoardWidget::GenerateGridLayout()
@@ -286,17 +302,23 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 			}
 
 			SelectionVisualWidget->Setup(RuneID, RuneTexture);
+
+			float ScaleFactor = 1.0f;
+			FVector2D ActualDragVisualSize;
+
 			if (GridCells.Num() > 0)
 			{
 				FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
 				FVector2D BoardSize = this->GetCachedGeometry().GetLocalSize();
 
-				float ScaleFactor = BoardSize.Y / (ViewportSize.Y * 0.8f);
+				ScaleFactor = (ViewportSize.Y * 0.8f) / BoardSize.Y;
+				ScaleFactor = FMath::Max(ScaleFactor*1.5f, 1.5f);
 
 				SelectionVisualWidget->SetRenderScale(FVector2D(ScaleFactor, ScaleFactor));
+				
+				FVector2D OriginalSize = SelectionVisualWidget->GetDesiredSize();
+				ActualDragVisualSize = OriginalSize * ScaleFactor;
 			}
-
-			SelectionVisualWidget->AddToViewport(3);
 
 			if (GetWorld())
 			{
@@ -304,9 +326,12 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 				MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 				if (MousePos != FVector2D::ZeroVector)
 				{
-					SelectionVisualWidget->SetPositionInViewport(MousePos - DragVisualOffset, false);
+					FVector2D CenterOffset = ActualDragVisualSize * 0.5f;
+					SelectionVisualWidget->SetPositionInViewport(MousePos - CenterOffset, false);
 				}
 			}
+
+			SelectionVisualWidget->AddToViewport(3);
 		}
 	}
 }
@@ -427,6 +452,15 @@ uint8 UGS_ArcaneBoardWidget::GetSelectedRuneID() const
 	return SelectedRuneID;
 }
 
+bool UGS_ArcaneBoardWidget::HasUnsavedChanges() const
+{
+	if (IsValid(BoardManager))
+	{
+		return BoardManager->bHasUnsavedChanges;
+	}
+	return false;
+}
+
 void UGS_ArcaneBoardWidget::OnCloseButtonClicked()
 {
 	/*if (HasUnsavedChanges())
@@ -443,6 +477,27 @@ void UGS_ArcaneBoardWidget::OnCloseButtonClicked()
 	if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
 	{
 		LPS->TryCloseArcaneBoardUI();
+	}
+}
+
+void UGS_ArcaneBoardWidget::OnResetButtonClicked()
+{
+	//if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+	//{
+	//	//나중에 리셋 확인 팝업 추가 가능
+	//	LPS->ResetArcaneBoardConfig();
+	//	UE_LOG(LogTemp, Log, TEXT("아케인 보드 리셋 완료"));
+	//}
+}
+
+void UGS_ArcaneBoardWidget::OnApplyButtonClicked()
+{
+	if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+	{
+		if (HasUnsavedChanges())
+		{
+			LPS->ApplyBoardChanges();
+		}
 	}
 }
 

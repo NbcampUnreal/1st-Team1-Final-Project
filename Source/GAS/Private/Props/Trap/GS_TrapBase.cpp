@@ -95,19 +95,16 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 	AGS_Seeker* DamagedSeeker = Cast<AGS_Seeker>(OtherActor);
 	if (!DamagedSeeker) return;
 	if (TrapData.Effect.Damage <= 0.f) return;
-	UE_LOG(LogTemp, Warning, TEXT("Passed lv 1"));
  	//기본 데미지 부여
 	FDamageEvent DamageEvent;
 
 	
 	if (TrapData.Effect.bDoT)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TrapData.Effect.bDoT True"));
 		ApplyDotDamage(OtherActor);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TrapData.Effect.bDoT false"));
 		DamagedSeeker->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
 	}
 
