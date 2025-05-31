@@ -187,7 +187,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 
 	// 2. 카메라에서 정면으로 Ray를 쏨
 	FVector TraceStart = ViewLoc;
-	FVector TraceEnd = TraceStart + ViewRot.Vector() * 5000.0f;
+	FVector TraceEnd = TraceStart + ViewRot.Vector() * 2000.0f;
 	//Multicast_DrawDebugLine(TraceStart, TraceEnd, FColor::Green);
 
 	// 3. Ray가 무언가에 부딪히면 그 위치를 목표로 설정, 아니면 끝 지점 사용
@@ -207,6 +207,15 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
 	FRotator BaseRotation = LaunchDirection.Rotation();
 
+	float Distance = FVector::Dist(TargetLocation, SpawnLocation);
+
+	// 선형 보정 (예: 최대 2000 거리까지, 최대 20도 상승)
+	float MaxDistance = 5000.0f;
+	float MaxPitch = 40.0f;
+	// 제곱 보정 (거리가 멀수록 더 빠르게 증가)
+	float PitchAdjustment = FMath::Clamp(FMath::Square(Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
+	//float PitchAdjustment = FMath::Clamp((Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
+	BaseRotation.Pitch += PitchAdjustment;
 	// 5. 여러 발 발사 처리 (SpreadAngleDeg를 기준으로 좌우로 퍼지게 만듦)
 	int32 HalfCount = NumArrows / 2;
 	for (int32 i = 0; i < NumArrows; ++i)
@@ -221,8 +230,9 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		}
 
 		// Yaw(좌우)만 회전 적용하여 퍼지는 방향 구함
-		FRotator SpreadRot = FRotator(0.f, OffsetAngle, 0.f);
-		FVector SpreadDir = SpreadRot.RotateVector(LaunchDirection);
+		FRotator SpreadRot = BaseRotation;
+		SpreadRot.Yaw += OffsetAngle;
+		FVector SpreadDir = SpreadRot.Vector();
 		FRotator ArrowRot = SpreadDir.Rotation();
 
 		// 6. 화살 스폰
