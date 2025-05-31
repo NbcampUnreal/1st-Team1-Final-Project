@@ -9,6 +9,7 @@
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Player/Seeker/GS_Chan.h"
+#include "Kismet/GameplayStatics.h"
 
 UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 {
@@ -49,10 +50,23 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 
 	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitResults, Start, Start + Forward * 100.f, FQuat::Identity, ECC_Pawn, Shape, Params))
 	{
+		TSet<AActor*> HitActors;
+
 		for (const FHitResult& Hit : HitResults)
 		{
 			AActor* HitActor = Hit.GetActor();
-			if (!HitActor) continue;
+			UPrimitiveComponent* HitComponent = Hit.GetComponent();
+
+			if (!HitActor || HitActors.Contains(HitActor))
+			{
+				continue;
+			}
+
+			HitActors.Add(HitActor);
+
+			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s, Hit Component: %s"),
+				*HitActor->GetName(),
+				*HitComponent->GetName());
 
 			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
 			{
@@ -149,6 +163,9 @@ void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 	const FVector LaunchDirection = (Target->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
 	Target->LaunchCharacter(LaunchDirection * 500.f + FVector(0, 0, 200.f), true, true);
 
+	// 데미지
+	UGameplayStatics::ApplyDamage(Target, Damage, OwnerCharacter->GetController(), OwnerCharacter, UDamageType::StaticClass());
+
 	// 경직 디버프
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
 	{
@@ -159,6 +176,9 @@ void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 
 void UGS_ChanAimingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
+	// 데미지
+	UGameplayStatics::ApplyDamage(Target, Damage, OwnerCharacter->GetController(), OwnerCharacter, UDamageType::StaticClass());
+
 	// 경직 디버프
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
 	{
