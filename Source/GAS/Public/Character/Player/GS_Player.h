@@ -122,9 +122,7 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	virtual void PlaySkillMontage(UAnimMontage* Montage);
-
-	virtual void OnDeath() override;
-
+	
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FCharacterWantsToMove GetWantsToMove();
 };
