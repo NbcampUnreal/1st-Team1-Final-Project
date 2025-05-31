@@ -2,15 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
-#include "GS_BoseLevelGM.generated.h"
+#include "GS_BossLevelGM.generated.h"
 
 UCLASS()
-class GAS_API AGS_BoseLevelGM : public AGameMode
+class GAS_API AGS_BossLevelGM : public AGameMode
 {
 	GENERATED_BODY()
 	
 public:
-	AGS_BoseLevelGM();
+	AGS_BossLevelGM();
 	virtual TSubclassOf<APlayerController> GetPlayerControllerClassToSpawnForSeamlessTravel(APlayerController* PreviousPC) override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
