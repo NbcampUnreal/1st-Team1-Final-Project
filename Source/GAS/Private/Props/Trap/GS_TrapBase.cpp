@@ -22,7 +22,8 @@ AGS_TrapBase::AGS_TrapBase()
 	DamageBoxComp->SetupAttachment(MeshParentSceneComp);
 	// DamageBox 콜리전 설정
 	DamageBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	DamageBoxComp->SetCollisionObjectType(ECC_WorldDynamic);
+	//DamageBoxComp->SetCollisionObjectType(ECC_WorldDynamic);
+	DamageBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
 	DamageBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	DamageBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 }
@@ -61,25 +62,16 @@ void AGS_TrapBase::OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActo
 	}
 
 	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
-	if (!Seeker)
+	if (!Seeker ||!HasAuthority())
 	{
 		return;
 	}
-	if (!HasAuthority())
-	{
-		//클라이언트
-		Server_DamageBoxEffect(Seeker);
-		Server_CustomTrapEffect(Seeker);
-		Server_HandleTrapDamage(Seeker);
-	}
-	else
-	{
-		//서버
-		DamageBoxEffect(Seeker);
-		CustomTrapEffect(Seeker);
-		HandleTrapDamage(Seeker);
-		
-	}
+
+	//서버
+	DamageBoxEffect(Seeker);
+	CustomTrapEffect(Seeker);
+	HandleTrapDamage(Seeker);
+
 }
 
 void AGS_TrapBase::Server_HandleTrapDamage_Implementation(AActor* OtherActor)
@@ -90,7 +82,9 @@ void AGS_TrapBase::Server_HandleTrapDamage_Implementation(AActor* OtherActor)
 
 void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Player is damaged"));
+	//UE_LOG(LogTemp, Warning, TEXT("[Trap] HandleTrapDamage called by %s, Authority: %s"),
+	//	*GetNameSafe(OtherActor),
+	//	HasAuthority() ? TEXT("Server") : TEXT("Client"));
 	if (!OtherActor) return;
 	AGS_Seeker* DamagedSeeker = Cast<AGS_Seeker>(OtherActor);
 	if (!DamagedSeeker) return;
