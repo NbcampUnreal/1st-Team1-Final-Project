@@ -12,6 +12,15 @@
 						<Switch Name="Lava" ID="{9FA661EF-9442-48F6-B069-7B4141D21DE5}"/>
 					</ChildrenList>
 				</SwitchGroup>
+				<SwitchGroup Name="BossFootSteps" ID="{B6847FDB-A219-445B-8880-08AFD91F4E57}">
+					<ChildrenList>
+						<Switch Name="Stone" ID="{84123A02-2536-438C-85FD-8ADE15207576}"/>
+						<Switch Name="Dirt" ID="{5BFEB7D9-7BCB-4C93-9CCC-8BF538074FF2}"/>
+						<Switch Name="Grass" ID="{D2AFE85C-F925-413C-ADEB-494001ED4CB4}"/>
+						<Switch Name="Metal" ID="{AE6336BB-30DB-47DC-B64A-11CDF78AFD24}"/>
+						<Switch Name="Lava" ID="{8DA08B1B-F569-4C9E-9E1B-550EB1014C63}"/>
+					</ChildrenList>
+				</SwitchGroup>
 			</ChildrenList>
 		</WorkUnit>
 	</Switches>
