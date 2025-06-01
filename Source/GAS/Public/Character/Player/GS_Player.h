@@ -37,6 +37,7 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void PossessedBy(AController* NewController) override;
 
 	//component;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Components")
@@ -110,12 +111,18 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySkillMontage(UAnimMontage* Montage);
 
+	//[Spectate Other Player]
+	void SpectateNextPlayer();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCSpectateNextPlayer();
+	
+	virtual void OnDeath() override;
+	
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	virtual void PlaySkillMontage(UAnimMontage* Montage);
-
-	virtual void OnDeath() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FCharacterWantsToMove GetWantsToMove();

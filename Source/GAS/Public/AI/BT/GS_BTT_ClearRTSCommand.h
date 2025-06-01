@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "GS_BTD_ClearRTSCommand.generated.h"
+#include "GS_BTT_ClearRTSCommand.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GAS_API UGS_BTD_ClearRTSCommand : public UBTTaskNode
+class GAS_API UGS_BTT_ClearRTSCommand : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UGS_BTD_ClearRTSCommand();
+	UGS_BTT_ClearRTSCommand();
 	
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
