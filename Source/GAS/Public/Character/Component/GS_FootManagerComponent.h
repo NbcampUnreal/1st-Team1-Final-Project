@@ -130,7 +130,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Assets")
 	TMap<TEnumAsByte<EPhysicalSurface>, UNiagaraSystem*> FootDustEffects;
 
-	// ======== Blueprint Events (Delegates) ========
+	// ======== Blueprint Events  ========
 
 	/** 발소리가 재생되었을 때 호출되는 델리게이트 */
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnFootSoundPlayedDelegate, EPhysicalSurface, Surface, FVector, Location);
@@ -154,10 +154,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep", meta = (ClampMin = "10.0", ClampMax = "200.0"))
 	float MinimumFootstepDistance;
 
-	/** 마지막 발자국 시간 (추적용) */
+	/** 마지막 발자국 시간 */
 	float LastFootstepTime;
 
-	/** 마지막 발자국 위치 (추적용) */
+	/** 마지막 발자국 위치 */
 	FVector LastFootstepLocation;
 
 private:

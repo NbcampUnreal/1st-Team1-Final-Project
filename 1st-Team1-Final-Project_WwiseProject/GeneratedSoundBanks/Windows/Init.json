@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{8E12A259-8DCB-6607-000A-E59A326D701A}",
+    "Hash": "{64D197F0-32FF-F11D-6FED-94433F0238B4}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -168,10 +168,48 @@
         "GUID": "{5EB68FE6-A580-4AC2-AB44-C54536ADFA61}"
        }
       ]
+     },
+     {
+      "Id": "4110752327",
+      "Name": "BossFootSteps",
+      "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps",
+      "GUID": "{B6847FDB-A219-445B-8880-08AFD91F4E57}",
+      "Switches": [
+       {
+        "Id": "540301611",
+        "Name": "Lava",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Lava",
+        "GUID": "{8DA08B1B-F569-4C9E-9E1B-550EB1014C63}"
+       },
+       {
+        "Id": "1216965916",
+        "Name": "Stone",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Stone",
+        "GUID": "{84123A02-2536-438C-85FD-8ADE15207576}"
+       },
+       {
+        "Id": "2195636714",
+        "Name": "Dirt",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Dirt",
+        "GUID": "{5BFEB7D9-7BCB-4C93-9CCC-8BF538074FF2}"
+       },
+       {
+        "Id": "2473969246",
+        "Name": "Metal",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Metal",
+        "GUID": "{AE6336BB-30DB-47DC-B64A-11CDF78AFD24}"
+       },
+       {
+        "Id": "4248645337",
+        "Name": "Grass",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Grass",
+        "GUID": "{D2AFE85C-F925-413C-ADEB-494001ED4CB4}"
+       }
+      ]
      }
     ]
    }
   ],
-  "FileHash": "{5A282CD5-0A95-97C7-7C1F-D098FA008334}"
+  "FileHash": "{44FF86DD-07E8-94A4-9786-BB8634743CA4}"
  }
 }
