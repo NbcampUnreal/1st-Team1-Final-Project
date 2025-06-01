@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{E1C36D2F-973A-BF85-00F2-EF176C950E67}",
+    "Hash": "{651A484C-EA71-DE60-2CAA-8C23373A63C4}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -45,7 +45,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Crying_2_Female_Adult_Mature_DJ_Woman.wav",
-      "CachePath": "B5/{B5FFB231-E59A-101B-13A0-3C64558C07CC}.wem"
+      "CachePath": "0C/{0C1250DD-CCFA-3768-4AAB-FD507977397B}.wem"
      },
      {
       "Id": "15081757",
@@ -237,7 +237,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Dying_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "F2/{F21EC345-00E4-7F67-B514-9702AC869DAE}.wem"
+      "CachePath": "E4/{E4D7EBA9-15B8-F2D6-3C60-F89FE4D7DC5E}.wem"
      },
      {
       "Id": "245240366",
@@ -568,6 +568,14 @@
       "CachePath": "62/{62B0B2BE-46A4-E6EA-AABA-1C3934FDF197}.wem"
      },
      {
+      "Id": "587485477",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "PortalSFX.wav",
+      "CachePath": "46/{462133C6-E584-21AF-E4CB-1A99D480874B}.wem"
+     },
+     {
       "Id": "595941273",
       "Language": "SFX",
       "Streaming": "false",
@@ -734,14 +742,6 @@
       "Location": "Memory",
       "ShortName": "Footstep_Dirt5.wav",
       "CachePath": "75/{75504C83-31F2-823D-29B6-F44E6B71CAF2}.wem"
-     },
-     {
-      "Id": "795056826",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "Portal.wav",
-      "CachePath": "0E/{0E5D2A8A-2EC6-BF05-7C77-8F6519850EB7}.wem"
      },
      {
       "Id": "797000384",
@@ -928,14 +928,6 @@
       "CachePath": "F3/{F3C57AEE-16EF-BD32-FCC5-306214E504A9}.wem"
      },
      {
-      "Id": "1021834988",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_SGAL3_Cinematic_FX_scifi_loop_tonal_portal_drone_steady_smooth_tone.wav",
-      "CachePath": "49/{4938C769-A360-7665-92A3-5C6EED6F5C64}.wem"
-     },
-     {
       "Id": "1030029664",
       "Language": "SFX",
       "Streaming": "false",
@@ -974,6 +966,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
       "CachePath": "E0/{E01D6A67-8199-72E6-1273-CAE1BA24D718}.wem"
+     },
+     {
+      "Id": "1073517265",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Ancient_Game_Fire_Strike_Spell_3_Hit_Fantasy_Tonal_Accent_Hit_Stab.wav",
+      "CachePath": "3F/{3F38D5E3-0111-0662-C123-C79715234F67}.wem"
      }
     ],
     "Plugins": {
@@ -1245,7 +1245,7 @@
       "Name": "EV_ArrowImpact_Wood",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Wood",
       "GUID": "{5AF6D827-D199-47C8-9BED-CC9DB12DEE69}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.85634214",
       "DurationMax": "0.9072629",
@@ -1617,7 +1617,7 @@
       "Name": "FootSteps",
       "ObjectPath": "\\Events\\Default Work Unit\\FootSteps",
       "GUID": "{ACB43239-CB8C-41BC-9AC2-2E9257233BFE}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "360",
       "DurationType": "OneShot",
       "DurationMin": "0.14469069",
       "DurationMax": "1.0886393",
@@ -1674,7 +1674,8 @@
          "GroupType": "Switch",
          "GroupId": "2385628198",
          "Id": "1216965916",
-         "GUID": "{A2E9AE84-5D39-47B8-B5E3-0D1F4E1AF642}"
+         "GUID": "{A2E9AE84-5D39-47B8-B5E3-0D1F4E1AF642}",
+         "Default": "true"
         },
         "MediaRefs": [
          {
@@ -1725,8 +1726,7 @@
          "GroupType": "Switch",
          "GroupId": "2385628198",
          "Id": "540301611",
-         "GUID": "{9FA661EF-9442-48F6-B069-7B4141D21DE5}",
-         "Default": "true"
+         "GUID": "{9FA661EF-9442-48F6-B069-7B4141D21DE5}"
         },
         "MediaRefs": [
          {
@@ -1992,14 +1992,14 @@
       "Name": "Props_Portal",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Portal",
       "GUID": "{9141DA7A-2D2F-449C-88E2-C9754D09EDA8}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "600",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
-        "Id": "595941273"
+        "Id": "587485477"
        },
        {
-        "Id": "1021834988"
+        "Id": "595941273"
        }
       ]
      },
@@ -2010,11 +2010,11 @@
       "GUID": "{3DFD4CDA-F232-4F79-B00F-324E80CF48AF}",
       "MaxAttenuation": "400",
       "DurationType": "OneShot",
-      "DurationMin": "5.0896153",
-      "DurationMax": "5.0896153",
+      "DurationMin": "5.8785076",
+      "DurationMax": "5.8785076",
       "MediaRefs": [
        {
-        "Id": "795056826"
+        "Id": "1073517265"
        }
       ]
      },
@@ -2105,7 +2105,7 @@
       "Name": "Props_Torch",
       "ObjectPath": "\\Events\\Default Work Unit\\Props_Torch",
       "GUID": "{0FE8AE3D-0C62-4903-9226-37A060EB1543}",
-      "MaxAttenuation": "450",
+      "MaxAttenuation": "400",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2364,6 +2364,6 @@
     ]
    }
   ],
-  "FileHash": "{5C538C41-E1A1-273D-043B-976E32B208C8}"
+  "FileHash": "{DECD33C3-7708-E519-5C96-69A3BD382CF6}"
  }
 }
