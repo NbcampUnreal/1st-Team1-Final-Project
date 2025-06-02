@@ -86,6 +86,11 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 				continue;
 			}
 
+			if (HitComponent && HitComponent->GetCollisionProfileName() == FName("SoundTrigger"))
+			{
+				continue;
+			}
+
 			HitActors.Add(HitActor);
 
 			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s, Hit Component: %s"),
