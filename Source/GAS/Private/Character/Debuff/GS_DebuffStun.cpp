@@ -6,6 +6,7 @@
 #include "Character/GS_Character.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/GS_TpsController.h"
+#include "AI/GS_AIController.h"
 
 void UGS_DebuffStun::OnApply()
 {
@@ -17,13 +18,12 @@ void UGS_DebuffStun::OnApply()
 
 	if (TargetCharacter)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Apply Stun Debuff for %s"), *TargetCharacter->GetName());
 		// 움직임도 멈춤(가디언)
 		if(AGS_TpsController* Controller = Cast<AGS_TpsController>(TargetCharacter->GetController()))
 		{
 			Controller->SetCanMove(false);
 		}
-		else
+		else if(AGS_AIController* AI = Cast<AGS_AIController>(TargetCharacter->GetController()))
 		{
 			MaxSpeed = TargetCharacter->GetCharacterMovement()->MaxWalkSpeed;
 			TargetCharacter->GetCharacterMovement()->MaxWalkSpeed = 0.0f;
