@@ -8,8 +8,9 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Skill/GS_SkillComp.h"
-#include "Character/Player/Seeker/GS_Chan.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/Player/Seeker/GS_Chan.h"
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 
 UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 {
@@ -20,19 +21,37 @@ void UGS_ChanAimingSkill::ActiveSkill()
 {
 	if (!CanActive()) return;
 	Super::ActiveSkill();
-	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
-	OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		OwnerPlayer->Multicast_SetMoveControlValue(false, false);
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+	}
 	StartHoldUp();
 }
 
 void UGS_ChanAimingSkill::OnSkillCommand()
 {
-	if (!bIsHoldingUp || CurrentStamina < SlamStaminaCost)
+	
+	//f (!bIsHoldingUp || CurrentStamina < SlamStaminaCost)
+	if (!bIsHoldingUp)
 	{
 		return;
 	}
-	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
-	OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+	
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
+	OwnerPlayer->Multicast_SetMustTurnInPlace(false);
+	OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+	OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+	
+	OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+	UE_LOG(LogTemp, Warning, TEXT("Skill 2 %s"), *OwnerPlayer->GetCurrentMontage()->GetName());
+
+	OwnerPlayer->Multicast_SetLookControlValue(false, false);
+	OwnerPlayer->Multicast_SetMoveControlValue(false, false);
+	
 	OnShieldSlam();
 }
 
@@ -99,7 +118,7 @@ bool UGS_ChanAimingSkill::IsActive() const
 
 void UGS_ChanAimingSkill::OnShieldSlam()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Slam!!!!!!!"));
+	//UE_LOG(LogTemp, Warning, TEXT("Slam!!!!!!!"));
 	CurrentStamina -= SlamStaminaCost;
 	// UI 업데이트
 	UpdateProgressBar(CurrentStamina);
@@ -148,6 +167,12 @@ void UGS_ChanAimingSkill::EndHoldUp()
 	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
 	{
 		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
+		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerCharacter))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("EndHoldUp")); // SJE
+			Chan->ToIdle();
+		}
+		
 	}
 	// UI 숨기기
 	ShowProgressBar(false);
@@ -196,4 +221,10 @@ void UGS_ChanAimingSkill::ShowProgressBar(bool bShow)
 {
 	AGS_Chan* OwnerChan = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerChan->Client_ChanAimingSkillBar(bShow);
+}
+
+
+float UGS_ChanAimingSkill::GetCurrentStamina()
+{
+	return CurrentStamina;
 }

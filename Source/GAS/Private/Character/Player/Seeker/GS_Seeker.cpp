@@ -67,6 +67,11 @@ bool AGS_Seeker::GetDrawState()
 	return SeekerState.IsDraw;
 }
 
+void AGS_Seeker::Multicast_SetNewPlayRate_Implementation(float PlayRate)
+{
+	NewPlayRate = PlayRate;
+}
+
 /*EGait AGS_Seeker::GetGait()
 {
 	return Gait;

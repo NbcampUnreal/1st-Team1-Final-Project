@@ -13,7 +13,7 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	{
 		if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
-			OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+			//OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
 		}
 		else
 		{
@@ -28,17 +28,27 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 
 void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
+	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
 	if (!bCtrlHeld)
 	{
-		AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
 		if (ChanCharacter)
 		{
-			ChanCharacter->LeftClickPressed_Implementation();
+			if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
+			{
+				OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+			}
+			else
+			{
+				ChanCharacter->OnComboAttack();
+			} 
 		}
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+		if (ChanCharacter)
+		{
+			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+		}
 	}
 }
 

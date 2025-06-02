@@ -10,6 +10,35 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+USTRUCT(BlueprintType)
+struct FControlValue
+{
+	GENERATED_BODY()
+public:
+	FControlValue()
+	{
+		bCanLookUp = true;
+		bCanLookRight = true;
+		bCanMoveForward = true;
+		bCanMoveRight = true;
+	}
+
+	bool CanMove() const { return bCanMoveForward || bCanMoveRight; }
+	bool CanLook() const { return bCanLookUp || bCanLookRight; }
+	
+	UPROPERTY(EditAnywhere)
+	bool bCanLookUp;
+
+	UPROPERTY(EditAnywhere)
+	bool bCanLookRight;
+
+	UPROPERTY(EditAnywhere)
+	bool bCanMoveForward;
+
+	UPROPERTY(EditAnywhere)
+	bool bCanMoveRight;
+};
+
 UCLASS()
 class GAS_API AGS_TpsController : public APlayerController
 {
@@ -30,14 +59,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* WalkToggleAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* LClickAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* RClickAction;
-
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* LCtrlAction;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* PageUpAction;
@@ -59,6 +83,9 @@ public:
 	void SetCanMove(bool bInCanMove) { bCanMove = bInCanMove; }
 	bool GetCanMove() { return bCanMove; }
 
+	UFUNCTION()
+	FControlValue& GetControlValue();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -67,4 +94,7 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bCanMove;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+	FControlValue ControlValues;
 };
