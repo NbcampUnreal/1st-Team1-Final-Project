@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{06D22A8E-7582-671D-8070-50B4FCDE5274}",
+    "Hash": "{63AD1658-6DD8-5196-CBD6-66C7E47E0EEB}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -101,7 +101,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Growling_Sequence_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "88/{880DD2AF-D47F-3412-CC87-C4A75D9FA655}.wem"
+      "CachePath": "EE/{EE5E6DA2-C25F-0B54-A265-DE2CB75754BF}.wem"
      },
      {
       "Id": "107540085",
@@ -381,7 +381,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Grunt_4_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "14/{14FE1FEC-549C-37BB-D4A4-F5321571730B}.wem"
+      "CachePath": "C7/{C7AABDBE-738A-FE1B-4ED2-3876D9FBF42E}.wem"
      },
      {
       "Id": "360458544",
@@ -637,7 +637,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_rockbrk_mining_rocks_heavy_01_impact_destroy_material.wav",
-      "CachePath": "E3/{E3F7FD0E-6BA7-03ED-E808-ABD78DC603B7}.wem"
+      "CachePath": "66/{666C841C-D37C-C612-A66F-CF04027554FD}.wem"
      },
      {
       "Id": "576560667",
@@ -725,7 +725,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Empire_Game_Footsteps_Single_Metal_Armor_Movement_Knight_Walking_Marching_Foely.wav",
-      "CachePath": "33/{336F9C46-AFA2-5827-3C26-B6FCE01639AB}.wem"
+      "CachePath": "7A/{7AC7AAD3-2753-104C-B9A8-4DC5028924D9}.wem"
      },
      {
       "Id": "634809175",
@@ -733,7 +733,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Grunt_10_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "04/{047C3319-C5B9-F40E-8909-A96EC543EE47}.wem"
+      "CachePath": "ED/{ED9157A1-9B05-8B3E-2D7C-B7B6E2162CE8}.wem"
      },
      {
       "Id": "640069506",
@@ -997,7 +997,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_GETOVERHERE_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "88/{88696F6F-E28C-5A44-2FBE-B23A1221F948}.wem"
+      "CachePath": "AC/{AC484B33-FD56-57B1-1090-C35FD545DF32}.wem"
      },
      {
       "Id": "900809544",
@@ -1117,7 +1117,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_rockcrsh_destruction_knockdown_brick_pile_impact_fall_scatter_destroy_smash_big_break.wav",
-      "CachePath": "10/{1031E836-3C1E-91E4-FEE1-F4613176DFD2}.wem"
+      "CachePath": "BC/{BC63EFE6-7C3B-9623-E40A-BDC627B86D9C}.wem"
      },
      {
       "Id": "1030029664",
@@ -1678,7 +1678,7 @@
       "Name": "EV_ChanAggroSkill",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanAggroSkill",
       "GUID": "{28E1990D-73B5-403C-BA53-4DBAE2B3E962}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "520",
       "DurationType": "OneShot",
       "DurationMin": "2.3579764",
       "DurationMax": "2.483323",
@@ -1708,7 +1708,7 @@
       "Name": "EV_ChanAimingSkill_Slam",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanAimingSkill_Slam",
       "GUID": "{B5B5055B-9F50-45BF-8C07-B1DA58911028}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "440",
       "DurationType": "OneShot",
       "DurationMin": "2.138431",
       "DurationMax": "2.3696923",
@@ -2860,6 +2860,6 @@
     ]
    }
   ],
-  "FileHash": "{79F2FAAF-0038-B09E-CB86-DD1C9083EC56}"
+  "FileHash": "{DF1770E3-0D62-D837-53AD-1CA7DF4BA19A}"
  }
 }

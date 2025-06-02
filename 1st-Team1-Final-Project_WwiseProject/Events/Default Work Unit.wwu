@@ -559,12 +559,12 @@
 										</Action>
 									</ChildrenList>
 								</Event>
-								<Event Name="EV_ChanAimingSkill_Hold" ID="{40E52A35-A7E0-4366-B089-96E381CC811A}">
+								<Event Name="EV_ChanUltimateSkill" ID="{40E52A35-A7E0-4366-B089-96E381CC811A}">
 									<ChildrenList>
 										<Action Name="" ID="{BF6B78CF-114F-462D-8D12-8F7E07B704AE}" ShortID="952441864">
 											<ReferenceList>
 												<Reference Name="Target">
-													<ObjectRef Name="EV_ChanAimingSkill_Hold" ID="{78BBFF70-AA7B-436E-8658-4CE72E7CE006}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+													<ObjectRef Name="EV_ChanUltimateSkill" ID="{78BBFF70-AA7B-436E-8658-4CE72E7CE006}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>

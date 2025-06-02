@@ -14152,7 +14152,7 @@
 										</BlendContainer>
 									</ChildrenList>
 								</RandomSequenceContainer>
-								<Sound Name="EV_ChanAimingSkill_Hold" ID="{78BBFF70-AA7B-436E-8658-4CE72E7CE006}" ShortID="318357253">
+								<Sound Name="EV_ChanUltimateSkill" ID="{78BBFF70-AA7B-436E-8658-4CE72E7CE006}" ShortID="318357253">
 									<PropertyList>
 										<Property Name="3DSpatialization" Type="int16" Value="2"/>
 										<Property Name="Highpass" Type="int16">
@@ -14332,7 +14332,7 @@
 								</Property>
 								<Property Name="MakeUpGain" Type="Real64">
 									<ValueList>
-										<Value>-1</Value>
+										<Value>-3</Value>
 									</ValueList>
 								</Property>
 								<Property Name="Volume" Type="Real64">
@@ -14437,7 +14437,7 @@
 								</Property>
 								<Property Name="Volume" Type="Real64">
 									<ValueList>
-										<Value>-6</Value>
+										<Value>-7</Value>
 									</ValueList>
 								</Property>
 							</PropertyList>
