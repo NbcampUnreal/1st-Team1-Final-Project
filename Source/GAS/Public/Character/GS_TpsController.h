@@ -59,10 +59,16 @@ public:
 	void SetCanMove(bool bInCanMove) { bCanMove = bInCanMove; }
 	bool GetCanMove() { return bCanMove; }
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void AddWidget();
+	void InitControllerPerWorld();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+	virtual void PostSeamlessTravel() override;
+	virtual void BeginPlayingState() override;
 private:
 
 	UPROPERTY(Replicated)
