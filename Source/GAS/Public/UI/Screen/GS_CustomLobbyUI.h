@@ -20,13 +20,13 @@ protected:
 
 public:
 	UPROPERTY(meta = (BindWidget))
-	UButton* JobSelectionButton;
+	UUserWidget* JobSelectionButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* PerkOrDungeonButton;
+	UUserWidget* PerkOrDungeonButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* ReadyButton;
+	UUserWidget* ReadyButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* RoleChangeButton;
+	UUserWidget* RoleChangeButton;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* PerkDungeonText;
 	UPROPERTY(meta = (BindWidget))
@@ -47,4 +47,7 @@ public:
 	void UpdateReadyButtonText(bool bIsReady);
 
 	UOverlay* GetModalOverlay() const { return ModalOverlay; }
+
+private:
+	void ChangeRoleBtnIcon(EPlayerRole NewRole);
 };
