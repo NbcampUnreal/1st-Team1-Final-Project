@@ -5,6 +5,7 @@
 #include "Sound/GS_UIAudioSystem.h"
 #include "Sound/GS_EnvironmentAudioSystem.h"
 #include "AkAudioDevice.h"
+#include "System/GS_PlayerState.h"
 
 UGS_AudioManager::UGS_AudioManager()
 {
@@ -23,6 +24,9 @@ UGS_AudioManager::UGS_AudioManager()
 	// 전투 BGM 멤버 초기화
 	CurrentCombatMusicStartEvent = nullptr;
 	CurrentCombatMusicStopEvent = nullptr;
+
+	// 기본 전투 BGM StopEvent 로드
+	DefaultCombatStopEvent = nullptr;
 
 	// Wwise 에셋 로드
 	static ConstructorHelpers::FObjectFinder<UAkAudioEvent> MapBGMEventFinder(TEXT("/Game/WwiseAudio/Events/Default_Work_Unit/StateSound/EV_MapBGM_Play.EV_MapBGM_Play"));
@@ -43,6 +47,18 @@ UGS_AudioManager::UGS_AudioManager()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("맵 BGM 정지 이벤트 로드 실패 - 경로 확인!"));
+	}
+
+	// 기본 전투 BGM 정지 이벤트 로드
+	static ConstructorHelpers::FObjectFinder<UAkAudioEvent> CombatStopEventFinder(TEXT("/Game/WwiseAudio/Events/Default_Work_Unit/StateSound/EV_CombatStop.EV_CombatStop"));
+	if (CombatStopEventFinder.Succeeded())
+	{
+		DefaultCombatStopEvent = CombatStopEventFinder.Object;
+		UE_LOG(LogTemp, Warning, TEXT("기본 전투 BGM 정지 이벤트 로드 성공: EV_CombatStop"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("기본 전투 BGM 정지 이벤트 로드 실패 - 경로 확인: /Game/WwiseAudio/Events/Default_Work_Unit/StateSound/EV_CombatStop"));
 	}
 	
 	static ConstructorHelpers::FObjectFinder<UAkRtpc> MapBGMVolumeRTPCFinder(TEXT("/Game/WwiseAudio/Game_Parameters/Default_Work_Unit/MapBGMVolume.MapBGMVolume"));
@@ -100,6 +116,13 @@ void UGS_AudioManager::PlayEvent(UAkAudioEvent* Event, AActor* Context)
 
 void UGS_AudioManager::StartMapBGM(AActor* Context)
 {
+	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::StartMapBGM - Skipping audio on dedicated server"));
+		return;
+	}
+
 	if (!MapBGMEvent)
 	{
 		UE_LOG(LogTemp, Error, TEXT("MapBGMEvent가 null입니다!"));
@@ -152,6 +175,13 @@ void UGS_AudioManager::StartMapBGM(AActor* Context)
 
 void UGS_AudioManager::StopMapBGM(AActor* Context)
 {
+	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::StopMapBGM - Skipping audio on dedicated server"));
+		return;
+	}
+
 	if (!bIsMapBGMPlaying)
 	{
 		return;
@@ -275,6 +305,16 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 		return;
 	}
 
+	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::StartCombatSequence - Skipping audio on dedicated server"));
+		// 전투 시퀀스 정보만 저장하고 오디오 처리는 생략
+		CurrentCombatMusicStartEvent = CombatMusicStartEvent;
+		CurrentCombatMusicStopEvent = CombatMusicStopEvent;
+		return;
+	}
+
 	// 기존에 재생 중인 전투 음악이 있다면 정지
 	if (CurrentCombatMusicStartEvent && CurrentCombatMusicStopEvent)
 	{
@@ -314,27 +354,88 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 	}, DelayTime, false);
 }
 
-void UGS_AudioManager::EndCombatSequence(AActor* Context, float FadeTime)
+void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatMusicStopEvent, float FadeTime)
 {
-	if (!Context)
+	UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence called with Context: %s, StopEventParam: %s"), 
+		Context ? *Context->GetName() : TEXT("NULL"), 
+		CombatMusicStopEvent ? *CombatMusicStopEvent->GetName() : TEXT("NULL"));
+
+	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - Skipping audio on dedicated server"));
+		// 전투 시퀀스 정보만 초기화하고 오디오 처리는 생략
+		CurrentCombatMusicStartEvent = nullptr;
+		CurrentCombatMusicStopEvent = nullptr;
 		return;
 	}
 
-	// 현재 재생 중인 전투 BGM 정지
-	if (CurrentCombatMusicStartEvent && CurrentCombatMusicStopEvent)
+	// 1. 실제 사용할 StopEvent 결정 (파라미터 > 현재 저장된 것 > 기본값 순)
+	UAkAudioEvent* ActualStopEvent = CombatMusicStopEvent; // 파라미터로 받은 것을 최우선
+	if (!ActualStopEvent)
 	{
-		UAkGameplayStatics::PostEvent(CurrentCombatMusicStopEvent, Context, 0, FOnAkPostEventCallback());
+		ActualStopEvent = CurrentCombatMusicStopEvent; // 그 다음은 현재 AudioManager에 저장된 것
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - CombatMusicStopEvent param was null, using CurrentCombatMusicStopEvent: %s"), ActualStopEvent ? *ActualStopEvent->GetName() : TEXT("NULL"));
 	}
-	else if (CurrentCombatMusicStartEvent)
+	if (!ActualStopEvent)
 	{
-		UAkGameplayStatics::StopActor(Context);
+		ActualStopEvent = DefaultCombatStopEvent; // 마지막으로 기본 전투 정지 이벤트
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - CurrentCombatMusicStopEvent was also null, using DefaultCombatStopEvent: %s"), ActualStopEvent ? *ActualStopEvent->GetName() : TEXT("NULL"));
 	}
 
+	// TargetActor 결정 (이벤트 게시 또는 액터 사운드 중지용)
+	AActor* TargetActor = Context;
+	if (!TargetActor && GetWorld() && GetWorld()->GetFirstPlayerController())
+	{
+		TargetActor = GetWorld()->GetFirstPlayerController()->GetPawn();
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - Context was null, using FirstPlayerController's Pawn as TargetActor"));
+	}
+
+	bool bCombatMusicActionTaken = false;
+	// 2. 결정된 ActualStopEvent가 있으면 이를 사용해 정지 시도
+	if (ActualStopEvent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - Attempting to use determined StopEvent: %s"), *ActualStopEvent->GetName());
+		if (TargetActor)
+		{
+			UAkGameplayStatics::PostEvent(ActualStopEvent, TargetActor, 0, FOnAkPostEventCallback());
+			UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - Posted StopEvent on TargetActor: %s"), *TargetActor->GetName());
+		}
+		else
+		{
+			UAkGameplayStatics::PostEvent(ActualStopEvent, nullptr, 0, FOnAkPostEventCallback()); // Context 없이 전역 정지 시도
+			UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - Posted StopEvent globally (TargetActor was NULL)"));
+		}
+		bCombatMusicActionTaken = true;
+	}
+	// 3. ActualStopEvent가 없었지만, 이전에 어떤 전투 음악(StartEvent)이라도 재생된 기록이 있다면 StopActor로 전체 정지 시도 (폴백)
+	else if (CurrentCombatMusicStartEvent) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - No specific StopEvent found/determined, but a StartEvent (%s) was active. Using StopActor as fallback."), *CurrentCombatMusicStartEvent->GetName());
+		if (TargetActor)
+		{
+			UAkGameplayStatics::StopActor(TargetActor);
+			UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - Called StopActor on TargetActor: %s"), *TargetActor->GetName());
+		}
+		else
+		{
+			 UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - StopActor fallback: No TargetActor found, cannot StopActor."));
+		}
+		bCombatMusicActionTaken = true; 
+	}
+	
+	// 4. 아무런 조치도 취하지 못한 경우 (StopEvent도 없고, StartEvent 기록도 없음)
+	if (!bCombatMusicActionTaken)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - No combat music action taken (no valid StopEvent, and no StartEvent was active)."));
+	}
+
+	// 현재 전투 시퀀스 정보 초기화
 	CurrentCombatMusicStartEvent = nullptr;
 	CurrentCombatMusicStopEvent = nullptr;
 
-	// 맵 BGM 페이드인 후 재생
+	// 맵 BGM 복원 (로컬 클라이언트에서만)
+	UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::EndCombatSequence - Restoring Map BGM after combat"));
 	FadeInAndStartMapBGM(Context, FadeTime);
 }
 
@@ -423,6 +524,13 @@ void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
 
 void UGS_AudioManager::FadeInAndStartMapBGM(AActor* Context, float FadeTime)
 {
+	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::FadeInAndStartMapBGM - Skipping audio on dedicated server"));
+		return;
+	}
+
 	// 적절한 Context 찾기
 	AActor* TargetActor = Context;
 	if (!TargetActor && GetWorld() && GetWorld()->GetFirstPlayerController())

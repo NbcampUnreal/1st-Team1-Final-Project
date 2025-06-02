@@ -80,6 +80,9 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 	{
 		return;
 	}
+	
+	float PreviousHealth = CurrentHealth;
+	
 	//update health
 	CurrentHealth = InHealth;
 	OnCurrentHPChanged.Broadcast(this);
@@ -99,7 +102,7 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 		}
 
 		//dead
-		if (CurrentHealth <= KINDA_SMALL_NUMBER)
+		if (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("death"));
 			CurrentHealth = 0.f;
@@ -109,6 +112,11 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 			{
 				OwnerCharacter->OnDeath();
 			}
+		}
+		else if (CurrentHealth <= KINDA_SMALL_NUMBER)
+		{
+			// 이미 죽은 상태에서 추가 데미지를 받은 경우 HP를 0으로 고정만 하고 OnDeath()는 호출하지 않음
+			CurrentHealth = 0.f;
 		}
 	}
 }
@@ -142,8 +150,8 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 {
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
 
-	// 히트 사운드 쿨다운 체크
-	if (HitSoundEvent && CanPlayHitSound())
+	// 죽은 상태가 아닐 때만 히트 사운드 재생
+	if (HitSoundEvent && CanPlayHitSound() && CurrentHealth > KINDA_SMALL_NUMBER)
 	{
 		UAkGameplayStatics::PostEvent(HitSoundEvent, OwnerCharacter, 0, FOnAkPostEventCallback());
 		LastHitSoundTime = GetWorld()->GetTimeSeconds();

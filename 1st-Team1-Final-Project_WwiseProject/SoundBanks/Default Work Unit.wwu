@@ -5,6 +5,7 @@
 			<ChildrenList>
 				<SoundBank Name="Main" ID="{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}">
 					<ObjectInclusionList>
+						<ObjectRef Name="EV_ChanAggroSkill" ID="{28E1990D-73B5-403C-BA53-4DBAE2B3E962}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Chan_Move" ID="{FA35E9E7-77DD-410B-83DE-BD9F2372CDE5}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Amb_Dungeon" ID="{512023F1-7483-4146-89A7-57F6CFD88495}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Spike" ID="{87EFA3D2-5892-417F-A875-D06CCD556912}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -14,6 +15,7 @@
 						<ObjectRef Name="SFX_Arrow_Shot" ID="{289AE22F-CBA5-41FF-86A8-052F39810660}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Chan_Sick" ID="{E1DDF8F5-475F-4246-811D-FF8BB1D8636C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="BossFootSteps" ID="{69071155-5833-435C-A2EE-C31CC2FCA94B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_ChanAimingSkill_Hold" ID="{40E52A35-A7E0-4366-B089-96E381CC811A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Saw_Hit" ID="{DFBB5823-D275-437F-99C5-623B934A4616}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Merci_Hit" ID="{5098E2B9-90BA-4412-987D-8FC0FAE125C3}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_GrenadeTick" ID="{032BB249-4018-4415-AE23-D5223963CE2B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
@@ -21,6 +23,8 @@
 						<ObjectRef Name="Props_Lava" ID="{6686274F-8432-44ED-A70C-2B145099B0E2}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_MapBGM_Stop" ID="{D2D4F199-4E93-44F8-8B05-6D80892A0D4C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Lava_Hit" ID="{714D3788-7B53-452D-9C66-6FC35CD86958}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_ChanAimingSkill_Start" ID="{7C3AC2CE-3A77-4585-B3B8-C6EC25FF562B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_ChanAimingSkill_Slam" ID="{B5B5055B-9F50-45BF-8C07-B1DA58911028}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Bow_Pull" ID="{70E298F1-D671-45D2-BDB8-C18312B3AFC5}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_GrenadeFuse" ID="{F132EACB-2D2B-46AD-A69A-7A9E5F8BA8C2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_ArrowImpact_Wood" ID="{2D5A0BBF-EF0F-46C3-ABCE-A07D1D0AF082}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
