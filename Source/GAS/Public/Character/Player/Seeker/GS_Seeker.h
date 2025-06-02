@@ -107,7 +107,9 @@ public:
 
 private:
 	void StartCombatMusic();
-	void StopCombatMusic();
+	
+	UFUNCTION(Client, Unreliable)
+	void ClientRPCStopCombatMusic();
 	void UpdateCombatMusicState();
 
 protected:
