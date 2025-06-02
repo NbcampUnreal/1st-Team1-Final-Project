@@ -18,18 +18,18 @@ protected:
 
 public:
 	UPROPERTY(meta = (BindWidget))
-	UButton* JobSelectionButton;
+	UUserWidget* JobSelectionButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* PerkOrDungeonButton;
+	UUserWidget* PerkOrDungeonButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* ReadyButton;
+	UUserWidget* ReadyButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* RoleChangeButton;
+	UUserWidget* RoleChangeButton;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* PerkDungeonText;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* ReadyText;
-
+	
 	UFUNCTION()
 	void OnJobSelectionButtonClicked();
 	UFUNCTION()
@@ -41,4 +41,7 @@ public:
 
 	void UpdateRoleSpecificText(EPlayerRole NewRole);
 	void UpdateReadyButtonText(bool bIsReady);
+
+private:
+	void ChangeRoleBtnIcon(EPlayerRole NewRole);
 };

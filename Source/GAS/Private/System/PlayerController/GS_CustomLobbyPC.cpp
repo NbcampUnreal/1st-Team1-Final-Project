@@ -12,6 +12,7 @@
 #include "Interfaces/OnlineIdentityInterface.h"
 #include "Engine/NetConnection.h"
 #include "OnlineSubsystem.h"
+#include "UI/Popup/GS_CharacterSelectList.h"
 
 
 AGS_CustomLobbyPC::AGS_CustomLobbyPC()
@@ -253,9 +254,16 @@ void AGS_CustomLobbyPC::RequestOpenJobSelectionPopup()
 		if (!JobSelectionWidgetClass) UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyPC::RequestOpenJobSelectionPopup - JobSelectionWidgetClass is NULL."));
 		return;
 	}
-
+	
 	if (CurrentModalWidget && CurrentModalWidget->IsInViewport())
 	{
+		if (Cast<UGS_CharacterSelectList>(CurrentModalWidget))
+		{
+			// 나중에 하나로 기능을 묶는게 나을 것 같음.
+			CurrentModalWidget->RemoveFromParent();
+			CurrentModalWidget = nullptr;
+			return;
+		}
 		CurrentModalWidget->RemoveFromParent();
 		CurrentModalWidget = nullptr;
 	}
@@ -264,6 +272,11 @@ void AGS_CustomLobbyPC::RequestOpenJobSelectionPopup()
 	if (CurrentModalWidget)
 	{
 		CurrentModalWidget->AddToViewport();
+		CurrentModalWidget->SetPadding(FVector4(240.0, 100.0, 0.0, 0.0));
+		if (UGS_CharacterSelectList* CharacterSelectList = Cast<UGS_CharacterSelectList>(CurrentModalWidget))
+		{
+			CharacterSelectList->CreateChildWidgets(PS->CurrentPlayerRole);
+		}
 		UE_LOG(LogTemp, Log, TEXT("Job Selection Popup Opened for role: %s"), *UEnum::GetValueAsString(PS->CurrentPlayerRole));
 	}
 }

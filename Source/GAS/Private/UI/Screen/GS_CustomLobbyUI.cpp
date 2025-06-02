@@ -4,18 +4,45 @@
 #include "Kismet/GameplayStatics.h"
 #include "System/PlayerController/GS_CustomLobbyPC.h"
 #include "System/GS_PlayerState.h"
+#include "CommonUI/Public/CommonButtonBase.h"
+#include "UI/Common/CustomCommonButton.h"
 
 
 void UGS_CustomLobbyUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (JobSelectionButton) JobSelectionButton->OnClicked.AddDynamic(this, &UGS_CustomLobbyUI::OnJobSelectionButtonClicked);
-	if (PerkOrDungeonButton) PerkOrDungeonButton->OnClicked.AddDynamic(this, &UGS_CustomLobbyUI::OnPerkOrDungeonButtonClicked);
-	if (ReadyButton) ReadyButton->OnClicked.AddDynamic(this, &UGS_CustomLobbyUI::OnReadyButtonClicked);
-	if (RoleChangeButton) RoleChangeButton->OnClicked.AddDynamic(this, &UGS_CustomLobbyUI::OnRoleChangeButtonClicked);
+	if (JobSelectionButton)
+	{
+		if (UCommonButtonBase* JobSelectionButtonBase = Cast<UCommonButtonBase>(JobSelectionButton))
+		{
+			JobSelectionButtonBase->OnClicked().AddUObject(this, &UGS_CustomLobbyUI::OnJobSelectionButtonClicked);
+		}
+	}
 
-	if (PerkDungeonText) UpdateRoleSpecificText(EPlayerRole::PR_None);
+	if (PerkOrDungeonButton)
+	{
+		if (UCommonButtonBase* PerkOrDungeonButtonBase = Cast<UCommonButtonBase>(PerkOrDungeonButton))
+		{
+			PerkOrDungeonButtonBase->OnClicked().AddUObject(this, &UGS_CustomLobbyUI::OnPerkOrDungeonButtonClicked);
+		}
+	}
+
+	if (RoleChangeButton)
+	{
+		if (UCommonButtonBase* RoleChangeButtonBase = Cast<UCommonButtonBase>(RoleChangeButton))
+		{
+			RoleChangeButtonBase->OnClicked().AddUObject(this, &UGS_CustomLobbyUI::OnRoleChangeButtonClicked);
+		}
+	}
+	
+	if (ReadyButton)
+	{
+		if (UCommonButtonBase* ReadyButtonBase = Cast<UCommonButtonBase>(ReadyButton))
+		{
+			ReadyButtonBase->OnClicked().AddUObject(this, &UGS_CustomLobbyUI::OnReadyButtonClicked);
+		}
+	}
 }
 
 void UGS_CustomLobbyUI::OnJobSelectionButtonClicked()
@@ -72,6 +99,8 @@ void UGS_CustomLobbyUI::OnRoleChangeButtonClicked()
 
 void UGS_CustomLobbyUI::UpdateRoleSpecificText(EPlayerRole NewRole)
 {
+	ChangeRoleBtnIcon(NewRole);
+	
 	if (PerkDungeonText)
 	{
 		FText NewTextToShow;
@@ -89,6 +118,48 @@ void UGS_CustomLobbyUI::UpdateRoleSpecificText(EPlayerRole NewRole)
 		}
 		PerkDungeonText->SetText(NewTextToShow);
 		UE_LOG(LogTemp, Log, TEXT("UGS_CustomLobbyUI: PerkDungeonText updated for Role: %s"), *UEnum::GetValueAsString(NewRole));
+	}
+}
+
+void UGS_CustomLobbyUI::ChangeRoleBtnIcon(EPlayerRole NewRole)
+{
+	if (RoleChangeButton)
+	{
+		if (UCustomCommonButton* CustomButtonBase = Cast<UCustomCommonButton>(RoleChangeButton))
+		{
+			int Idx = 0;
+			if (NewRole == EPlayerRole::PR_Seeker)
+				Idx = 0;
+			else if (NewRole == EPlayerRole::PR_Guardian)
+				Idx = 1;
+			CustomButtonBase->ChangeLayerIconImage(Idx);
+		}
+	}
+
+	if (JobSelectionButton)
+	{
+		if (UCustomCommonButton* CustomButtonBase = Cast<UCustomCommonButton>(JobSelectionButton))
+		{
+			int Idx = 0;
+			if (NewRole == EPlayerRole::PR_Seeker)
+				Idx = 0;
+			else if (NewRole == EPlayerRole::PR_Guardian)
+				Idx = 1;
+			CustomButtonBase->ChangeLayerIconImage(Idx);
+		}
+	}
+
+	if (PerkOrDungeonButton)
+	{
+		if (UCustomCommonButton* CustomButtonBase = Cast<UCustomCommonButton>(PerkOrDungeonButton))
+		{
+			int Idx = 0;
+			if (NewRole == EPlayerRole::PR_Seeker)
+				Idx = 0;
+			else if (NewRole == EPlayerRole::PR_Guardian)
+				Idx = 1;
+			CustomButtonBase->ChangeLayerIconImage(Idx);
+		}
 	}
 }
 
