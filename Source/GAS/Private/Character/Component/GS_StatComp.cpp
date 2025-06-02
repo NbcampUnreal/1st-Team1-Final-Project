@@ -4,7 +4,7 @@
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatRow.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
-
+#include "RuneSystem/GS_EnumUtils.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -62,6 +62,28 @@ void UGS_StatComp::InitStat(FName RowName)
 void UGS_StatComp::UpdateStat(const FGS_StatRow& RuneStats)
 {
 	//update stats by rune system
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	FString CurrClass = UGS_EnumUtils::GetEnumAsString<ECharacterType>(OwnerCharacter->GetCharacterType());
+	FName RowName = FName(CurrClass);
+	const FGS_StatRow* FoundRow = StatDataTable->FindRow<FGS_StatRow>(RowName, TEXT("InitStat"));
+
+	if (FoundRow)
+	{
+		MaxHealth = FoundRow->HP + RuneStats.HP;
+		AttackPower = FoundRow->ATK + RuneStats.ATK;
+		Defense = FoundRow->DEF + RuneStats.DEF;
+		Agility = FoundRow->AGL + RuneStats.AGL;
+		AttackSpeed = FoundRow->ATS + RuneStats.ATS;
+
+		CurrentHealth = MaxHealth;
+
+		UE_LOG(LogTemp, Log, TEXT("캐릭터 스탯 업데이트 - HP: %.1f, ATK: %.1f, DEF: %.1f, AGL: %.1f, ATS: %.1f"),
+			MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("스탯 컴프 로우 네임 못찾음"));
+	}
 }
 
 float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
@@ -142,9 +164,11 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 {
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
 
-	if (HitSoundEvent)
+	// 히트 사운드 쿨다운 체크
+	if (HitSoundEvent && CanPlayHitSound())
 	{
 		UAkGameplayStatics::PostEvent(HitSoundEvent, OwnerCharacter, 0, FOnAkPostEventCallback());
+		LastHitSoundTime = GetWorld()->GetTimeSeconds();
 	}
 	
 	int32 idx = FMath::RandRange(0, TakeDamageMontages.Num() - 1);
@@ -201,4 +225,15 @@ void UGS_StatComp::ServerRPCHeal_Implementation(float InHealAmount)
 
     float NewHealth = FMath::Min(CurrentHealth + InHealAmount, MaxHealth);
     SetCurrentHealth(NewHealth, true);
+}
+
+bool UGS_StatComp::CanPlayHitSound() const
+{
+	if (!GetWorld())
+	{
+		return false;
+	}
+	
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	return (CurrentTime - LastHitSoundTime) >= HitSoundCooldownTime;
 }

@@ -45,6 +45,8 @@ public:
 	UFUNCTION()
 	void OnRep_DebuffList();
 
+	void ClearAllDebuffs();
+
 protected:
 	const FDebuffData* GetDebuffData(EDebuffType Type) const;
 	UGS_DebuffBase* GetActiveDebuff(EDebuffType Type) const;
@@ -54,7 +56,8 @@ protected:
 	void AddDebuffToQueue(UGS_DebuffBase* Debuff);
 	void ApplyNextDebuff();
 	void UpdateReplicatedDebuffList();
-	
+	UFUNCTION(Server, Reliable)
+	void Server_ClearAllDebuffs();
 
 	UPROPERTY(EditDefaultsOnly)
 	UDataTable* DebuffDataTable;

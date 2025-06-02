@@ -25,6 +25,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Component")
 	USphereComponent* SphereComp;

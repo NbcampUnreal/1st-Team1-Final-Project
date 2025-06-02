@@ -9,7 +9,8 @@ AGS_TrigTrapBase::AGS_TrigTrapBase()
 	
 	//Trigger Box 설정
 	TriggerBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	TriggerBoxComp->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	//TriggerBoxComp->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	TriggerBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
 	TriggerBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	TriggerBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 

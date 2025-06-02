@@ -3,8 +3,25 @@
 
 AGS_LavaTrap::AGS_LavaTrap()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.TickInterval = 0.2f;
 }
 
+void AGS_LavaTrap::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	CheckAndActivateFireEffects();
+}
+
+void AGS_LavaTrap::CheckAndActivateFireEffects_Implementation()
+{
+
+}
 
 void AGS_LavaTrap::StartLavaLoop(AGS_Seeker* Seeker)
 {

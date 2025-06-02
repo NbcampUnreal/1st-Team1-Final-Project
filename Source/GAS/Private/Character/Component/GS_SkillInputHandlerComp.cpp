@@ -16,7 +16,7 @@ UGS_SkillInputHandlerComp::UGS_SkillInputHandlerComp()
 
 void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputComponent)
 {
-	if (!OwnerCharacter) return;
+	if (!OwnerCharacter) OwnerCharacter = Cast<AGS_Character>(GetOwner());
 
 	if (APlayerController* PC = Cast<APlayerController>(OwnerCharacter->GetController()))
 	{
@@ -27,7 +27,7 @@ void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputC
 				if (SkillMappingContext)
 				{
 					Subsystem->AddMappingContext(SkillMappingContext, MappingPriority);
-					UE_LOG(LogTemp, Warning, TEXT("Skill Mapping Context Added"));
+					//UE_LOG(LogTemp, Warning, TEXT("Skill Mapping Context Added"));
 				}
 			}
 		}
@@ -61,8 +61,11 @@ void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputC
 void UGS_SkillInputHandlerComp::BeginPlay()
 {
 	Super::BeginPlay();
-
-	OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	if (!OwnerCharacter)
+	{
+		OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	}
+	
 	check(OwnerCharacter);
 }
 
@@ -75,11 +78,11 @@ void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instanc
 
 	if (bCtrlHeld)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Ctrl+Right Click"));
+		//UE_LOG(LogTemp, Warning, TEXT("Ctrl+Right Click"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Right Click"));
+		//UE_LOG(LogTemp, Warning, TEXT("Right Click"));
 	}
 }
 
@@ -92,38 +95,38 @@ void UGS_SkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance
 
 	if (bCtrlHeld)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Ctrl+Left Click"));
+		//UE_LOG(LogTemp, Warning, TEXT("Ctrl+Left Click"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Left Click"));
+		//UE_LOG(LogTemp, Warning, TEXT("Left Click"));
 	}
 }
 
 void UGS_SkillInputHandlerComp::OnCtrlModifierStarted()
 {
 	bCtrlHeld = true;
-	UE_LOG(LogTemp, Warning, TEXT("Ctrl Click Start"));
+	//UE_LOG(LogTemp, Warning, TEXT("Ctrl Click Start"));
 }
 
 void UGS_SkillInputHandlerComp::OnCtrlModifierEnded()
 {
 	bCtrlHeld = false;
-	UE_LOG(LogTemp, Warning, TEXT("Ctrl Click End"));
+	//UE_LOG(LogTemp, Warning, TEXT("Ctrl Click End"));
 }
 
 void UGS_SkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Right Click Release"));
+	//UE_LOG(LogTemp, Warning, TEXT("Right Click Release"));
 }
 
 void UGS_SkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Left Click Release"));
+	//UE_LOG(LogTemp, Warning, TEXT("Left Click Release"));
 }
 
 void UGS_SkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Scroll Mouse"));
+	//UE_LOG(LogTemp, Warning, TEXT("Scroll Mouse"));
 }
 

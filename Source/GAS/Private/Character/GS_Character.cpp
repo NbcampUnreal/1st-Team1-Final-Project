@@ -28,9 +28,12 @@ AGS_Character::AGS_Character()
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HPTextWidgetComp->SetVisibility(false);
 
-	//함정 - 화살발사기의 화살 채널 설정
+	//함정 - 화살발사기의 화살 채널 설정(Projectile)
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Overlap);
+	//함정 - 모든 함정 채널 설정(Trap)
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel4, ECR_Overlap);
+	GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel4, ECR_Ignore);
 }
 
 void AGS_Character::BeginPlay()
@@ -107,10 +110,7 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	float CurrentHealth = StatComp->GetCurrentHealth();
 
-	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f by %s"), *GetName(), ActualDamage, *DamageCauser->GetName());
-
 	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage, false);
-
 	return ActualDamage;
 }
 

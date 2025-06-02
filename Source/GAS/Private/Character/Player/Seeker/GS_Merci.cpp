@@ -189,9 +189,9 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 
 	// 2. 카메라에서 정면으로 Ray를 쏨
 	FVector TraceStart = ViewLoc;
-	FVector TraceEnd = TraceStart + ViewRot.Vector() * 5000.0f;
+	FVector TraceEnd = TraceStart + ViewRot.Vector() * 2000.0f;
 	//Multicast_DrawDebugLine(TraceStart, TraceEnd, FColor::Green);
-
+	
 	// 3. Ray가 무언가에 부딪히면 그 위치를 목표로 설정, 아니면 끝 지점 사용
 	FHitResult Hit;
 	FCollisionQueryParams Params;
@@ -206,12 +206,34 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 
 	// 4. 무기의 소켓 위치에서 목표 위치로 향하는 방향 계산
 	FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");
+	float Distance = FVector::Dist(TargetLocation, SpawnLocation);
+	UE_LOG(LogTemp, Warning, TEXT("Distance From Spawn To Target = %f"), Distance);
+
+	const float MinFireDistance = 250.0f;
+
+	if (Distance < MinFireDistance) // 너무 가까우면
+	{
+		TargetLocation = TraceStart + ViewRot.Vector() * 2000.0f; // 적당한 거리 보정
+		//Distance = FVector::Dist(TargetLocation, SpawnLocation); // 재계산
+	}
 	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
+	if (LaunchDirection.IsNearlyZero())
+	{
+		LaunchDirection = ViewRot.Vector(); // Fallback
+	}
 	FRotator BaseRotation = LaunchDirection.Rotation();
 
 	FVector VFXLocation = SpawnLocation;
 	FRotator VFXRotation = BaseRotation;
 
+	
+	// 선형 보정 (예: 최대 2000 거리까지, 최대 20도 상승)
+	float MaxDistance = 5000.0f;
+	float MaxPitch = 40.0f;
+	// 제곱 보정 (거리가 멀수록 더 빠르게 증가)
+	float PitchAdjustment = FMath::Clamp(FMath::Square(Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
+	//float PitchAdjustment = FMath::Clamp((Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
+	BaseRotation.Pitch += PitchAdjustment;
 	// 5. 여러 발 발사 처리 (SpreadAngleDeg를 기준으로 좌우로 퍼지게 만듦)
 	int32 HalfCount = NumArrows / 2;
 	for (int32 i = 0; i < NumArrows; ++i)
@@ -226,8 +248,13 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		}
 
 		// Yaw(좌우)만 회전 적용하여 퍼지는 방향 구함
-		FRotator SpreadRot = FRotator(0.f, OffsetAngle, 0.f);
-		FVector SpreadDir = SpreadRot.RotateVector(LaunchDirection);
+		FRotator SpreadRot = BaseRotation;
+		SpreadRot.Yaw += OffsetAngle;
+		FVector SpreadDir = SpreadRot.Vector();
+		if (SpreadDir.IsNearlyZero())
+		{
+			SpreadDir = ViewRot.Vector(); // Fallback
+		}
 		FRotator ArrowRot = SpreadDir.Rotation();
 
 		// 6. 화살 스폰
@@ -250,10 +277,13 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 				NormalArrow->ChangeArrowType(CurrentArrowType);
 			}
 		}
+		//Multicast_DrawDebugLine(SpawnLocation, TargetLocation, FColor::Red);
+		//Multicast_DrawDebugLine(SpawnLocation, SpawnLocation + SpreadDir * 500.0f, FColor::Cyan);
 	}
-	
 	// 8. 화살 발사 VFX 호출 (멀티캐스트로 모든 클라이언트에서 재생)
 	Multicast_PlayArrowShotVFX(VFXLocation, VFXRotation, NumArrows);
+
+	
 }
 
 void AGS_Merci::Server_ChangeArrowType_Implementation(int32 Direction)
