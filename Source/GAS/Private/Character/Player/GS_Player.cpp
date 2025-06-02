@@ -1,8 +1,18 @@
 #include "Character/Player/GS_Player.h"
+
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Camera/CameraComponent.h"
+#include "Character/Player/Seeker/GS_Chan.h"
+#include "Character/GS_TpsController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/PostProcessComponent.h"
+#include "Character/Component/GS_StatComp.h"
+#include "GameFramework/Controller.h"
+#include "System/GS_PlayerState.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/GameStateBase.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "System/GS_PlayerState.h"
 
 AGS_Player::AGS_Player()
 {
@@ -77,6 +87,41 @@ void AGS_Player::Tick(float DeltaSeconds)
 	}
 }
 
+void AGS_Player::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+
+	if (PS && StatComp)
+	{
+		float HealthToRestoreFromPS = PS->CurrentHealth;
+		bool bShouldBeAliveFromPS = PS->bIsAlive;
+
+		float ClampedHealthForStatComp = FMath::Clamp(HealthToRestoreFromPS, 0.f, StatComp->GetMaxHealth());
+
+		if (!bShouldBeAliveFromPS)
+		{
+			ClampedHealthForStatComp = 0.f;
+		}
+		else if (ClampedHealthForStatComp <= 0.f && StatComp->GetMaxHealth() > KINDA_SMALL_NUMBER)
+		{
+			ClampedHealthForStatComp = FMath::Min(1.f, StatComp->GetMaxHealth());
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Player (%s) PossessedBy: Restoring state from PlayerState. PS.Health: %f, PS.bIsAlive: %s. Setting StatComp Health to: %f"),
+			*GetName(), PS->CurrentHealth, PS->bIsAlive ? TEXT("True") : TEXT("False"), ClampedHealthForStatComp);
+
+		StatComp->SetCurrentHealth(ClampedHealthForStatComp, false);
+		PS->OnPawnStatInitialized();
+	}
+	else
+	{
+		if (!PS) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: PlayerState is NULL!"), *GetName());
+		if (!StatComp) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: StatComp is NULL!"), *GetName());
+	}
+}
+
 void AGS_Player::Client_StartVisionObscured_Implementation()
 {
 	StartVisionObscured();
@@ -145,18 +190,46 @@ void AGS_Player::OnTimelineFinished()
 	bIsObscuring = false;
 }
 
+
+
+
+
+
+
+
+void AGS_Player::OnDeath()
+{
+	Super::OnDeath();
+
+	// 죽음 사운드 재생
+	if (DeathSoundEvent)
+	{
+		PlaySound(DeathSoundEvent);
+	}
+
+	// 추가적인 플레이어 죽음 처리 로직을 여기에 구현할 수 있다
+	// 예: 카메라 연출, UI 변경, 리스폰 타이머 등
+	
+	GetCharacterMovement()->DisableMovement();
+
+	AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(GetPlayerState());
+	if (GS_PS)
+	{
+		GS_PS->bIsAlive = false;
+	}
+	SpectateNextPlayer();
+}
+
+
+void AGS_Player::Multicast_StopSkillMontage_Implementation(UAnimMontage* Montage)
+{
+	StopAnimMontage(Montage);
+	UE_LOG(LogTemp, Warning, TEXT("Skill Montage Stop!!!!!!!!!!!!!!"));
+}
+
 void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
-void AGS_Player::PlaySkillMontage(UAnimMontage* Montage)
-{
-	if (this->GetMesh() && Montage)
-	{
-		this->GetMesh()->GetAnimInstance()->Montage_Play(Montage);
-		UE_LOG(LogTemp, Warning, TEXT("Skill Montage Play!!!!!!!!!!!!!!"));
-	}
 }
 
 FCharacterWantsToMove AGS_Player::GetWantsToMove()
@@ -195,9 +268,59 @@ bool AGS_Player::IsLocalPlayer() const
 	return false;
 }
 
-void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage)
+void AGS_Player::SpectateNextPlayer()
 {
-	PlaySkillMontage(Montage);
+	for (const auto& PS : GetWorld()->GetGameState()->PlayerArray)
+	{
+		AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
+		if (IsValid(GS_PS))
+		{
+			if (GS_PS->bIsAlive) //[TODO] GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker 
+			{
+				AGS_TpsController* AlivePlayerController = Cast<AGS_TpsController>(GS_PS->GetPlayerController());
+				
+				if (IsValid(AlivePlayerController))
+				{
+					APlayerController* DeadPlayerPC = Cast<APlayerController>(GetController());
+					if (DeadPlayerPC)
+					{
+						DeadPlayerPC->UnPossess();
+						DeadPlayerPC->SetViewTargetWithBlend(AlivePlayerController);
+						SetLifeSpan(2.f);
+					}
+				}
+			}
+		}
+		//Game Over?
+		//all players dead
+	}
+}
+
+void AGS_Player::ServerRPCSpectateNextPlayer_Implementation()
+{
+	SpectateNextPlayer();
+}
+
+
+void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage, FName Section)
+{
+	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance && Montage)
+	{
+		if (Section == NAME_None)
+		{
+			AnimInstance->Montage_Play(Montage);
+		}
+		else
+		{
+			if (AnimInstance->Montage_IsPlaying(Montage))
+			{
+				AnimInstance->Montage_Stop(0.0f, Montage); // 이걸 꼭 해줘야 새로 PlayRate가 반영됨
+			}
+			AnimInstance->Montage_Play(Montage);
+			AnimInstance->Montage_JumpToSection(Section, Montage);
+		}
+	}
 }
 
 void AGS_Player::PlaySound(UAkAudioEvent* SoundEvent)
@@ -220,18 +343,4 @@ void AGS_Player::PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPos
 	}
 
 	AkComponent->PostAkEvent(SoundEvent, 0, Callback);
-}
-
-void AGS_Player::OnDeath()
-{
-	Super::OnDeath();
-
-	// 죽음 사운드 재생
-	if (DeathSoundEvent)
-	{
-		PlaySound(DeathSoundEvent);
-	}
-
-	// 추가적인 플레이어 죽음 처리 로직을 여기에 구현할 수 있다
-	// 예: 카메라 연출, UI 변경, 리스폰 타이머 등
 }

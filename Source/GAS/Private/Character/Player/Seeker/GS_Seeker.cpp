@@ -14,7 +14,6 @@
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
 
-
 // Sets default values
 AGS_Seeker::AGS_Seeker()
 {
@@ -66,6 +65,11 @@ void AGS_Seeker::SetDrawState(bool IsDraw)
 bool AGS_Seeker::GetDrawState()
 {
 	return SeekerState.IsDraw;
+}
+
+void AGS_Seeker::Multicast_SetNewPlayRate_Implementation(float PlayRate)
+{
+	NewPlayRate = PlayRate;
 }
 
 /*EGait AGS_Seeker::GetGait()

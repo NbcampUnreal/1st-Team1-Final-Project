@@ -13,6 +13,8 @@ const FName AGS_AIController::MoveLocationKey(TEXT("MoveLocation"));
 const FName AGS_AIController::TargetActorKey(TEXT("Target"));
 const FName AGS_AIController::CommandKey(TEXT("Command"));
 const FName AGS_AIController::TargetLockedKey(TEXT("bTargetLocked"));
+const FName AGS_AIController::CanAttackKey(TEXT("bCanAttack"));
+const FName AGS_AIController::LastAttackTimeKey(TEXT("LastAttackTime"));
 
 AGS_AIController::AGS_AIController()
 {
@@ -119,12 +121,14 @@ void AGS_AIController::EnterConfuseState()
 {
 	PrevTargetActor = Cast<AActor>(Blackboard->GetValueAsObject(TargetActorKey));
 	Blackboard->ClearValue(TargetActorKey);
+	Blackboard->SetValueAsBool(TargetLockedKey, true);
 	PerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), false);
 }
 
 void AGS_AIController::ExitConfuseState()
 {
 	PerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), true);
+	Blackboard->SetValueAsBool(TargetLockedKey, false);
 	
 	if (PrevTargetActor.IsValid())
 	{

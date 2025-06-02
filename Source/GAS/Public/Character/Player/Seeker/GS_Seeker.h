@@ -58,6 +58,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	UChildActorComponent* Weapon;
+
+	// Montage Set
+	UPROPERTY()
+	float NewPlayRate = 0.5f;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetNewPlayRate(float PlayRate);
 	
 	// ================
 	// LowHP 스크린 효과

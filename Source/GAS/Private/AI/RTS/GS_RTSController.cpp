@@ -202,7 +202,6 @@ void AGS_RTSController::OnLeftMousePressed()
 	
 	TArray<AGS_Monster*> Units;
 	GatherCommandableUnits(Units);
-	//UnlockTargets(Units);
 
 	// 명령 모드에 따라 
 	switch (CurrentCommand)
@@ -276,7 +275,6 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	// 명령 가능한 유닛들만 
 	TArray<AGS_Monster*> Units;
 	GatherCommandableUnits(Units);
-	//UnlockTargets(Units);
 	Server_RTSMove(Units, GroundHit.Location);
 }
 
@@ -389,11 +387,9 @@ void AGS_RTSController::SelectOnCtrlClick()
 				AGS_Monster* M = *It;
 				if (M->GetCharacterType() != MonsterType)
 				{
-					//continue;
 					SameTypeUnits.Add(M);
 				}
 
-				//AddUnitToSelection(M);
 				// 한 번에 선택하여 첫 번째 유닛만 소리 재생
 				AddMultipleUnitsToSelection(SameTypeUnits);
 			}
@@ -411,6 +407,11 @@ void AGS_RTSController::ToggleOnShiftClick()
 
 	if (AGS_Monster* Monster = Cast<AGS_Monster>(ShiftHit.GetActor()))
 	{
+		if (!IsSelectable(Monster))
+		{
+			return;
+		}
+		
 		if (UnitSelection.Contains(Monster))
 		{
 			RemoveUnitFromSelection(Monster);
@@ -438,7 +439,6 @@ void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 	
 	UnitSelection.AddUnique(Unit);
 	OnSelectionChanged.Broadcast(UnitSelection);
-	//Unit->SetSelected(true);
 	Unit->SetSelected(true, bShouldPlaySound);
 }
 
@@ -604,8 +604,6 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
-			//AIController->UnlockTarget();
-			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
@@ -632,14 +630,11 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
-			//AIController->UnlockTarget();
-			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Attack));
 				BlackboardComp->SetValueAsVector (AGS_AIController::MoveLocationKey, Dest);
-				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
 
 				// 첫 번째 유닛만 공격 소리 재생
 				if (i == 0 && Unit->MoveSoundEvent)
@@ -660,8 +655,6 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
-			//AIController->LockTarget(TargetActor);
-			
 			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
@@ -744,20 +737,6 @@ void AGS_RTSController::GatherCommandableUnits(TArray<AGS_Monster*>& Out) const
 bool AGS_RTSController::IsSelectable(AGS_Monster* Monster) const
 {
 	return IsValid(Monster) && Monster->IsSelectable();
-}
-
-void AGS_RTSController::UnlockTargets(const TArray<AGS_Monster*>& Units)
-{
-	for (AGS_Monster* Unit : Units)
-	{
-		if (!IsValid(Unit)) 
-			continue;
-
-		if (AGS_AIController* AI = Cast<AGS_AIController>(Unit->GetController()))
-		{
-			AI->UnlockTarget();
-		}
-	}
 }
 
 void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)

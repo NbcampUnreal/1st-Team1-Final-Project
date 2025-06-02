@@ -50,6 +50,11 @@ public:
 	
 	UFUNCTION()
 	void OnRep_GuardianState();
+
+	//[quit skill - server logic]
+	UFUNCTION(BlueprintCallable)
+	void QuitGuardianSkill();
+	
 	
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCDrawDebugLine(const FVector& Start, const FVector& End, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit);

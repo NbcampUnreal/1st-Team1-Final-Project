@@ -18,6 +18,7 @@ public:
 	UGS_ChanMovingSkill();
 
 	virtual void ActiveSkill() override;
+	virtual void DeactiveSkill() override;
 	virtual void ExecuteSkillEffect() override;
 
 protected:

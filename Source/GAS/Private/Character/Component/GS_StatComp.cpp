@@ -142,9 +142,11 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 {
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
 
-	if (HitSoundEvent)
+	// 히트 사운드 쿨다운 체크
+	if (HitSoundEvent && CanPlayHitSound())
 	{
 		UAkGameplayStatics::PostEvent(HitSoundEvent, OwnerCharacter, 0, FOnAkPostEventCallback());
+		LastHitSoundTime = GetWorld()->GetTimeSeconds();
 	}
 	
 	int32 idx = FMath::RandRange(0, TakeDamageMontages.Num() - 1);
@@ -201,4 +203,15 @@ void UGS_StatComp::ServerRPCHeal_Implementation(float InHealAmount)
 
     float NewHealth = FMath::Min(CurrentHealth + InHealAmount, MaxHealth);
     SetCurrentHealth(NewHealth, true);
+}
+
+bool UGS_StatComp::CanPlayHitSound() const
+{
+	if (!GetWorld())
+	{
+		return false;
+	}
+	
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	return (CurrentTime - LastHitSoundTime) >= HitSoundCooldownTime;
 }
