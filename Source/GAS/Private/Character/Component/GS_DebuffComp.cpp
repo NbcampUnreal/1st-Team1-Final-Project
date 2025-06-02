@@ -118,14 +118,19 @@ void UGS_DebuffComp::ClearAllDebuffs()
 
 	UE_LOG(LogTemp, Warning, TEXT("ClearAllDebuffs"));
 
-	// 모든 타이머 제거 및 OnExpire 호출
+	// 타이머 먼저 제거
 	for (auto& Elem : DebuffTimers)
 	{
-		if (Elem.Key)
+		GetWorld()->GetTimerManager().ClearTimer(Elem.Value);
+	}
+
+	// 이후 안전하게 OnExpire 호출
+	for (auto& Elem : DebuffTimers)
+	{
+		if (Elem.Key && IsValid(Elem.Key))
 		{
 			Elem.Key->OnExpire();
 		}
-		GetWorld()->GetTimerManager().ClearTimer(Elem.Value);
 	}
 	DebuffTimers.Empty();
 
@@ -136,6 +141,12 @@ void UGS_DebuffComp::ClearAllDebuffs()
 
 	// 복제 목록 갱신
 	UpdateReplicatedDebuffList();
+}
+
+void UGS_DebuffComp::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	ClearAllDebuffs();
 }
 
 const FDebuffData* UGS_DebuffComp::GetDebuffData(EDebuffType Type) const
@@ -176,21 +187,25 @@ void UGS_DebuffComp::RefreshDebuffTimer(UGS_DebuffBase* Debuff, float Duration)
 {
 	if (FTimerHandle* FoundHandle = DebuffTimers.Find(Debuff))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("RefreshDebuff exist timer handle"));
 		GetWorld()->GetTimerManager().ClearTimer(*FoundHandle);
-		GetWorld()->GetTimerManager().SetTimer(*FoundHandle, [this, Debuff]()
+
+		TWeakObjectPtr<UGS_DebuffBase> WeakDebuff(Debuff);
+
+		GetWorld()->GetTimerManager().SetTimer(*FoundHandle, [this, WeakDebuff]()
 			{
-				Debuff->OnExpire();
-				DebuffTimers.Remove(Debuff);
-				if (ConcurrentDebuffs.Contains(Debuff))
+				if (!IsValid(WeakDebuff.Get())) return;
+				UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+				ValidDebuff->OnExpire();
+				DebuffTimers.Remove(ValidDebuff);
+				if (ConcurrentDebuffs.Contains(ValidDebuff))
 				{
-					ConcurrentDebuffs.Remove(Debuff);
+					ConcurrentDebuffs.Remove(ValidDebuff);
 				}
-				else if (DebuffQueue.Contains(Debuff))
+				else if (DebuffQueue.Contains(ValidDebuff))
 				{
-					DebuffQueue.Remove(Debuff);
+					DebuffQueue.Remove(ValidDebuff);
 				}
-				else if (Debuff == CurrentDebuff)
+				else if (ValidDebuff == CurrentDebuff)
 				{
 					CurrentDebuff = nullptr;
 					ApplyNextDebuff();
@@ -198,63 +213,54 @@ void UGS_DebuffComp::RefreshDebuffTimer(UGS_DebuffBase* Debuff, float Duration)
 				UpdateReplicatedDebuffList();
 			}, Duration, false);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("RefreshDebuff not exist timer handle"));
-	}
 }
 
 void UGS_DebuffComp::CreateAndApplyConcurrentDebuff(UGS_DebuffBase* Debuff)
 {
-	// ConcurrentDebuffs에 추가
 	ConcurrentDebuffs.Add(Debuff);
-
-	// Debuff 효과 실행
 	Debuff->OnApply();
 
-	// 타이머 설정
 	FTimerHandle Handle;
-	GetWorld()->GetTimerManager().SetTimer(Handle, [this, Debuff]()
+	TWeakObjectPtr<UGS_DebuffBase> WeakDebuff(Debuff);
+
+	GetWorld()->GetTimerManager().SetTimer(Handle, [this, WeakDebuff]()
 		{
-			Debuff->OnExpire();
-			ConcurrentDebuffs.Remove(Debuff);
-			DebuffTimers.Remove(Debuff);
+			if (!IsValid(WeakDebuff.Get())) return;
+			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+			ValidDebuff->OnExpire();
+			ConcurrentDebuffs.Remove(ValidDebuff);
+			DebuffTimers.Remove(ValidDebuff);
 			UpdateReplicatedDebuffList();
 		}, Debuff->GetDuration(), false);
 
-	// 타이머 추가
 	DebuffTimers.Add(Debuff, Handle);
-	UE_LOG(LogTemp, Warning, TEXT("Create And Apply Concurrent Debuff"));
 }
 
 void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
 {
-	// DebuffQueue에 Debuff 추가
 	DebuffQueue.Add(Debuff);
-
-	// 우선순위에 따라 정렬
 	DebuffQueue.Sort([](const UGS_DebuffBase& A, const UGS_DebuffBase& B)
 		{
 			return A.GetPriority() > B.GetPriority();
 		});
 
-	// 타이머 세팅
 	FTimerHandle Handle;
-	GetWorld()->GetTimerManager().SetTimer(Handle, [this, Debuff]()
+	TWeakObjectPtr<UGS_DebuffBase> WeakDebuff(Debuff);
+
+	GetWorld()->GetTimerManager().SetTimer(Handle, [this, WeakDebuff]()
 		{
-			DebuffQueue.Remove(Debuff);
-			DebuffTimers.Remove(Debuff);
+			if (!IsValid(WeakDebuff.Get())) return;
+			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+			DebuffQueue.Remove(ValidDebuff);
+			DebuffTimers.Remove(ValidDebuff);
 		}, Debuff->GetDuration(), false);
 
 	DebuffTimers.Add(Debuff, Handle);
 
-	// 현재 디버프가 없으면 바로 효과적용
 	if (!CurrentDebuff)
 	{
 		ApplyNextDebuff();
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Add Debuff Queue"));
 }
 
 void UGS_DebuffComp::ApplyNextDebuff()
@@ -278,16 +284,21 @@ void UGS_DebuffComp::ApplyNextDebuff()
 
 	// 새 타이머 핸들 생성
 	FTimerHandle NewHandle;
-
+	TWeakObjectPtr<UGS_DebuffBase> WeakDebuff(CurrentDebuff);
 	// 디버프 남은 시간 받기
 	float Remaining = CurrentDebuff->GetRemainingTime(GetWorld()->GetTimeSeconds());
 
 	// 남은 시간으로 다시 타이머 세팅
-	GetWorld()->GetTimerManager().SetTimer(NewHandle, [this]()
+	GetWorld()->GetTimerManager().SetTimer(NewHandle, [this, WeakDebuff]()
 		{
-			CurrentDebuff->OnExpire();
-			DebuffTimers.Remove(CurrentDebuff);
-			CurrentDebuff = nullptr;
+			if (!IsValid(WeakDebuff.Get())) return;
+			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+			ValidDebuff->OnExpire();
+			DebuffTimers.Remove(ValidDebuff);
+			if (CurrentDebuff == ValidDebuff)
+			{
+				CurrentDebuff = nullptr;
+			}
 			UpdateReplicatedDebuffList();
 			ApplyNextDebuff();
 		}, Remaining, false);
