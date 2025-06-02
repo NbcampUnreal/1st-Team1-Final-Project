@@ -21,9 +21,18 @@ public:
 	FTimerHandle LavaTickTimer;
 	TMap<AActor*, FTimerHandle> ActiveLavaTimers;
 	
-	
+	UFUNCTION(BlueprintNativeEvent, Category = "Trap")
+	void CheckAndActivateFireEffects();
+	virtual void CheckAndActivateFireEffects_Implementation();
+
 	UFUNCTION(BlueprintCallable, Category = "Trap")
 	void StartLavaLoop(AGS_Seeker* Seeker);
 
 	void CheckLavaLoop(AGS_Seeker* Seeker);
+
+	
+
+
+protected:
+	virtual void Tick(float DeltaTime) override;
 };
