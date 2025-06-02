@@ -164,15 +164,10 @@
 								</ObjectList>
 							</ObjectLists>
 						</MusicSegment>
-						<MusicSegment Name="BGM_Temp" ID="{8CD33EC1-0AA1-43A8-B313-5230FD0BA1A4}" ShortID="27600649">
+						<MusicSegment Name="Amb_State" ID="{8CD33EC1-0AA1-43A8-B313-5230FD0BA1A4}" ShortID="27600649">
 							<PropertyList>
-								<Property Name="EndPosition" Type="Real64" Value="14117.664399093"/>
+								<Property Name="EndPosition" Type="Real64" Value="101078.9569161"/>
 								<Property Name="OverrideEffect" Type="bool" Value="True"/>
-								<Property Name="Volume" Type="Real64">
-									<ValueList>
-										<Value>-3</Value>
-									</ValueList>
-								</Property>
 							</PropertyList>
 							<ReferenceList>
 								<Reference Name="Conversion">
@@ -183,14 +178,14 @@
 								</Reference>
 							</ReferenceList>
 							<ChildrenList>
-								<MusicTrack Name="MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj" ID="{A50B952A-19CF-4603-A80F-D0537C1EB313}" ShortID="615928137">
+								<MusicTrack Name="DragonMosque_Demo" ID="{40398847-C350-4A2C-B75F-FB6AB7EF4510}" ShortID="332797532">
 									<ReferenceList>
 										<Reference Name="OutputBus">
 											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
 										</Reference>
 										<Reference Name="TransitionRoot">
 											<Custom>
-												<MusicTransition Name="Root" ID="{017304C6-9589-416C-AAFF-7AE36C0F11BF}">
+												<MusicTransition Name="Root" ID="{18D46370-C29F-40FE-B085-12DD3B318A78}">
 													<PropertyList>
 														<Property Name="IsFolder" Type="bool" Value="True"/>
 													</PropertyList>
@@ -200,11 +195,11 @@
 										</Reference>
 									</ReferenceList>
 									<ChildrenList>
-										<AudioFileSource Name="MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj" ID="{C57CABAE-88E0-43C2-89CD-D2D946EB11F0}">
+										<AudioFileSource Name="DragonMosque_Demo" ID="{76E585C0-09C3-41E9-B155-E4A1E9881BBB}">
 											<Language>SFX</Language>
-											<AudioFile>MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj.wav</AudioFile>
+											<AudioFile>DragonMosque_Demo.wav</AudioFile>
 											<MediaIDList>
-												<MediaID ID="624593524"/>
+												<MediaID ID="520127851"/>
 											</MediaIDList>
 										</AudioFileSource>
 									</ChildrenList>
@@ -212,18 +207,18 @@
 										<ObjectList Name="Sequences">
 											<Reference>
 												<Local>
-													<MusicTrackSequence Name="" ID="{AC20786B-BF81-4A44-8E2B-FC9463725D68}">
+													<MusicTrackSequence Name="" ID="{A92CA677-2A67-40B2-9397-DE54D46C3EF4}">
 														<ObjectLists>
 															<ObjectList Name="Clips">
 																<Reference>
 																	<Local>
-																		<MusicClip Name="MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj" ID="{20FA5B13-1010-4230-9B0D-1251D1073D6A}">
+																		<MusicClip Name="DragonMosque_Demo" ID="{D86C3601-DD07-4062-ACAE-B9BA61441915}">
 																			<PropertyList>
-																				<Property Name="EndTrimOffset" Type="Real64" Value="14117.664399093"/>
-																				<Property Name="FadeInDuration" Type="Real64" Value="521.445878390252"/>
-																				<Property Name="FadeOutDuration" Type="Real64" Value="1371.20953206325"/>
+																				<Property Name="EndTrimOffset" Type="Real64" Value="101078.9569161"/>
+																				<Property Name="FadeInMode" Type="int16" Value="0"/>
+																				<Property Name="FadeOutMode" Type="int16" Value="0"/>
 																			</PropertyList>
-																			<AudioSourceRef Name="MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj" ID="{C57CABAE-88E0-43C2-89CD-D2D946EB11F0}"/>
+																			<AudioSourceRef Name="DragonMosque_Demo" ID="{76E585C0-09C3-41E9-B155-E4A1E9881BBB}"/>
 																		</MusicClip>
 																	</Local>
 																</Reference>
@@ -254,45 +249,40 @@
 										</Local>
 									</Reference>
 								</ObjectList>
-								<ObjectList Name="Effects">
+								<ObjectList Name="RTPC">
 									<Reference>
 										<Local>
-											<EffectSlot Name="" ID="{0EC3F5C2-1D88-405B-8F16-8100B0D90CAC}" ShortID="569154616">
+											<RTPC Name="" ID="{B0D18206-B0CF-4B5C-A130-0FA9EA4D180F}" ShortID="216230448">
+												<PropertyList>
+													<Property Name="PropertyName" Type="string" Value="MakeUpGain"/>
+												</PropertyList>
 												<ReferenceList>
-													<Reference Name="Effect">
+													<Reference Name="ControlInput">
+														<ObjectRef Name="MapBGMVolume" ID="{2F3E4FB8-0714-4169-BAB2-33AE6207B7C7}" WorkUnitID="{FDFB093B-59E2-4879-BF96-CF460645B40F}"/>
+													</Reference>
+													<Reference Name="Curve">
 														<Custom>
-															<Effect Name="Pitch Shifter (Custom)" ID="{A5478D08-348B-4DE2-99AC-DD93BBFC8FEE}" ShortID="372897391" PluginName="Wwise Pitch Shifter" CompanyID="0" PluginID="136" PluginType="3">
+															<Curve Name="" ID="{45045FB3-C836-40EF-B7A6-983A30E86DB7}">
 																<PropertyList>
-																	<Property Name="Pitch" Type="Real32" Value="500"/>
+																	<Property Name="Flags" Type="int32" Value="3"/>
 																</PropertyList>
-															</Effect>
+																<PointList>
+																	<Point>
+																		<XPos>0</XPos>
+																		<YPos>-96</YPos>
+																		<Flags>5</Flags>
+																	</Point>
+																	<Point>
+																		<XPos>100</XPos>
+																		<YPos>0</YPos>
+																		<Flags>37</Flags>
+																	</Point>
+																</PointList>
+															</Curve>
 														</Custom>
 													</Reference>
 												</ReferenceList>
-											</EffectSlot>
-										</Local>
-									</Reference>
-									<Reference>
-										<Local>
-											<EffectSlot Name="" ID="{D992F838-E322-4AC5-823B-5D4F931701D3}" ShortID="222806684">
-												<ReferenceList>
-													<Reference Name="Effect">
-														<Custom CreatedFrom="{1A2EAB31-6283-4C0D-89B2-F050DF89D421}">
-															<Effect Name="Standard (Custom)" ID="{9C58A6F3-1787-4264-BBEF-11128E22A730}" ShortID="819178014" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
-																<PropertyList>
-																	<Property Name="DelayTime" Type="Real32" Value="1"/>
-																	<Property Name="DryLevel" Type="Real32" Value="0.1"/>
-																	<Property Name="FeedBackLevel" Type="Real32" Value="0.7"/>
-																	<Property Name="FeedForwardLevel" Type="Real32" Value="0.7"/>
-																	<Property Name="ModPWM" Type="Real32" Value="0"/>
-																	<Property Name="ModPhaseMode" Type="int32" Value="1"/>
-																	<Property Name="WetDryMix" Type="Real32" Value="60"/>
-																</PropertyList>
-															</Effect>
-														</Custom>
-													</Reference>
-												</ReferenceList>
-											</EffectSlot>
+											</RTPC>
 										</Local>
 									</Reference>
 								</ObjectList>
@@ -469,13 +459,335 @@
 									<MultiSwitchEntry Name="" ID="{3B67BBC4-059E-48A8-8465-69FC28859370}">
 										<ReferenceList>
 											<Reference Name="AudioNode">
-												<ObjectRef Name="BGM_Temp" ID="{8CD33EC1-0AA1-43A8-B313-5230FD0BA1A4}" WorkUnitID="{805731CD-25EB-4476-9DAF-C545D2251845}"/>
+												<ObjectRef Name="Amb_State" ID="{8CD33EC1-0AA1-43A8-B313-5230FD0BA1A4}" WorkUnitID="{805731CD-25EB-4476-9DAF-C545D2251845}"/>
 											</Reference>
 										</ReferenceList>
 										<ObjectLists>
 											<ObjectList Name="EntryPath">
 												<Reference>
 													<ObjectRef Name="Win" ID="{81F47699-C275-4308-BF58-11F7741DB094}" WorkUnitID="{35195DBF-7EEA-4091-8BFF-5F78C7A958EA}"/>
+												</Reference>
+											</ObjectList>
+										</ObjectLists>
+									</MultiSwitchEntry>
+								</Local>
+							</Reference>
+						</ObjectList>
+					</ObjectLists>
+				</MusicSwitchContainer>
+				<MusicSwitchContainer Name="BGM_StateMusic" ID="{1F41028D-4C13-4B00-BB92-FD93F3A1B3DE}" ShortID="750054597">
+					<ReferenceList>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+						</Reference>
+						<Reference Name="TransitionRoot">
+							<Custom>
+								<MusicTransition Name="Root" ID="{EA33EADB-309E-4F01-B14E-1CF468100C15}">
+									<PropertyList>
+										<Property Name="IsFolder" Type="bool" Value="True"/>
+									</PropertyList>
+									<ChildrenList>
+										<MusicTransition Name="Transition" ID="{9F63FD46-08C5-41FD-85FA-3BC3E498F6BD}">
+											<TransitionInfo/>
+										</MusicTransition>
+									</ChildrenList>
+									<TransitionInfo/>
+								</MusicTransition>
+							</Custom>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<MusicSegment Name="BGM_Combat" ID="{76175542-0F5E-4513-A3D1-6AA229B6F6B8}" ShortID="892708365">
+							<PropertyList>
+								<Property Name="EndPosition" Type="Real64" Value="96000"/>
+								<Property Name="Highpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>-3</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Volume" Type="Real64">
+									<ValueList>
+										<Value>-6</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<MusicTrack Name="GasCombat_Demo" ID="{89DB9FF9-AB9F-4F26-8E06-12435423543C}" ShortID="611791583">
+									<ReferenceList>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+										<Reference Name="TransitionRoot">
+											<Custom>
+												<MusicTransition Name="Root" ID="{127686D2-A8C8-452B-A5B6-7AA47BFAEFFB}">
+													<PropertyList>
+														<Property Name="IsFolder" Type="bool" Value="True"/>
+													</PropertyList>
+													<TransitionInfo/>
+												</MusicTransition>
+											</Custom>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="GasCombat_Demo" ID="{A4788E4F-66DC-4FE7-9BBB-D8FB5196978A}">
+											<Language>SFX</Language>
+											<AudioFile>GasCombat_Demo.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="172591083"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ObjectLists>
+										<ObjectList Name="Sequences">
+											<Reference>
+												<Local>
+													<MusicTrackSequence Name="" ID="{550B22E0-585A-42FA-9D08-36468EF2F694}">
+														<ObjectLists>
+															<ObjectList Name="Clips">
+																<Reference>
+																	<Local>
+																		<MusicClip Name="GasCombat_Demo" ID="{0C387A23-E23E-453B-999B-1C530A23130C}">
+																			<PropertyList>
+																				<Property Name="EndTrimOffset" Type="Real64" Value="96000"/>
+																				<Property Name="FadeInDuration" Type="Real64" Value="1825.39315633311"/>
+																				<Property Name="FadeOutDuration" Type="Real64" Value="4631.11318844505"/>
+																			</PropertyList>
+																			<AudioSourceRef Name="GasCombat_Demo" ID="{A4788E4F-66DC-4FE7-9BBB-D8FB5196978A}"/>
+																		</MusicClip>
+																	</Local>
+																</Reference>
+															</ObjectList>
+														</ObjectLists>
+													</MusicTrackSequence>
+												</Local>
+											</Reference>
+										</ObjectList>
+									</ObjectLists>
+								</MusicTrack>
+							</ChildrenList>
+							<ObjectLists>
+								<ObjectList Name="Cues">
+									<Reference>
+										<Local>
+											<MusicCue Name="Entry Cue" ID="{2138316F-B1AA-4809-A6B1-2D5F007C6CA3}"/>
+										</Local>
+									</Reference>
+									<Reference>
+										<Local>
+											<MusicCue Name="Exit Cue" ID="{7FD8EEC7-27EE-4B78-B822-5BC660DF8361}">
+												<PropertyList>
+													<Property Name="CueType" Type="int16" Value="1"/>
+													<Property Name="TimeMs" Type="Real64" Value="1000"/>
+												</PropertyList>
+											</MusicCue>
+										</Local>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</MusicSegment>
+						<MusicSegment Name="BGM_DragonMosque" ID="{F547E214-245D-4C29-A10E-AFD5F9338C2A}" ShortID="1033650011">
+							<PropertyList>
+								<Property Name="EndPosition" Type="Real64" Value="101078.9569161"/>
+								<Property Name="Highpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>-1</Value>
+									</ValueList>
+								</Property>
+								<Property Name="OverrideEffect" Type="bool" Value="True"/>
+								<Property Name="Volume" Type="Real64">
+									<ValueList>
+										<Value>-6</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<MusicTrack Name="DragonMosque_Demo" ID="{343D955F-A3C1-4387-BD7F-3886D07BC840}" ShortID="534919009">
+									<ReferenceList>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+										<Reference Name="TransitionRoot">
+											<Custom>
+												<MusicTransition Name="Root" ID="{BF38B258-C5C4-4EF0-A66C-452335B6C785}">
+													<PropertyList>
+														<Property Name="IsFolder" Type="bool" Value="True"/>
+													</PropertyList>
+													<TransitionInfo/>
+												</MusicTransition>
+											</Custom>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="DragonMosque_Demo" ID="{B3531824-E5D3-4332-9E4A-E78CFE7AEC4D}">
+											<Language>SFX</Language>
+											<AudioFile>DragonMosque_Demo.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="520127851"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ObjectLists>
+										<ObjectList Name="Sequences">
+											<Reference>
+												<Local>
+													<MusicTrackSequence Name="" ID="{F31893CE-E296-478E-85B5-EBACC9777C7E}">
+														<ObjectLists>
+															<ObjectList Name="Clips">
+																<Reference>
+																	<Local>
+																		<MusicClip Name="DragonMosque_Demo" ID="{4652CDAB-6C2C-4B1D-9701-FB55D0752390}">
+																			<PropertyList>
+																				<Property Name="EndTrimOffset" Type="Real64" Value="101078.9569161"/>
+																				<Property Name="FadeInDuration" Type="Real64" Value="2839.29653382034"/>
+																				<Property Name="FadeOutDuration" Type="Real64" Value="5542.68540688846"/>
+																			</PropertyList>
+																			<AudioSourceRef Name="DragonMosque_Demo" ID="{B3531824-E5D3-4332-9E4A-E78CFE7AEC4D}"/>
+																		</MusicClip>
+																	</Local>
+																</Reference>
+															</ObjectList>
+														</ObjectLists>
+													</MusicTrackSequence>
+												</Local>
+											</Reference>
+										</ObjectList>
+									</ObjectLists>
+								</MusicTrack>
+							</ChildrenList>
+							<ObjectLists>
+								<ObjectList Name="Cues">
+									<Reference>
+										<Local>
+											<MusicCue Name="Entry Cue" ID="{A2D65D37-2B68-4C0D-BD0F-DEA01419BBD9}"/>
+										</Local>
+									</Reference>
+									<Reference>
+										<Local>
+											<MusicCue Name="Exit Cue" ID="{76B51015-3B02-421E-86A6-EE6B990BEE9D}">
+												<PropertyList>
+													<Property Name="CueType" Type="int16" Value="1"/>
+													<Property Name="TimeMs" Type="Real64" Value="14117.664399093"/>
+												</PropertyList>
+											</MusicCue>
+										</Local>
+									</Reference>
+								</ObjectList>
+								<ObjectList Name="RTPC">
+									<Reference>
+										<Local>
+											<RTPC Name="" ID="{BA515A4A-FF39-4E9F-99A1-B2E7B19DA358}" ShortID="542637443">
+												<PropertyList>
+													<Property Name="PropertyName" Type="string" Value="MakeUpGain"/>
+												</PropertyList>
+												<ReferenceList>
+													<Reference Name="ControlInput">
+														<ObjectRef Name="MapBGMVolume" ID="{2F3E4FB8-0714-4169-BAB2-33AE6207B7C7}" WorkUnitID="{FDFB093B-59E2-4879-BF96-CF460645B40F}"/>
+													</Reference>
+													<Reference Name="Curve">
+														<Custom>
+															<Curve Name="" ID="{75FA83D8-96CF-488D-AA7B-53DD3DB9F749}">
+																<PropertyList>
+																	<Property Name="Flags" Type="int32" Value="3"/>
+																</PropertyList>
+																<PointList>
+																	<Point>
+																		<XPos>0</XPos>
+																		<YPos>-96</YPos>
+																		<Flags>5</Flags>
+																	</Point>
+																	<Point>
+																		<XPos>100</XPos>
+																		<YPos>0</YPos>
+																		<Flags>37</Flags>
+																	</Point>
+																</PointList>
+															</Curve>
+														</Custom>
+													</Reference>
+												</ReferenceList>
+											</RTPC>
+										</Local>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</MusicSegment>
+					</ChildrenList>
+					<ObjectLists>
+						<ObjectList Name="Arguments">
+							<Reference>
+								<ObjectRef Name="GameState" ID="{CCC9218E-CC79-4165-BB1C-EC62716FDE31}" WorkUnitID="{A3549E82-5CB2-4F42-AE3B-1D8A65A900E9}"/>
+							</Reference>
+						</ObjectList>
+						<ObjectList Name="Entries">
+							<Reference>
+								<Local>
+									<MultiSwitchEntry Name="" ID="{7E2360D1-AB1D-4204-8DB7-7AA96E76FA3A}">
+										<ReferenceList>
+											<Reference Name="AudioNode">
+												<ObjectRef Name="BGM_Combat" ID="{76175542-0F5E-4513-A3D1-6AA229B6F6B8}" WorkUnitID="{805731CD-25EB-4476-9DAF-C545D2251845}"/>
+											</Reference>
+										</ReferenceList>
+										<ObjectLists>
+											<ObjectList Name="EntryPath">
+												<Reference>
+													<ObjectRef Name="Combat" ID="{20D5D287-A504-4987-870C-9CBDAF27C23D}" WorkUnitID="{A3549E82-5CB2-4F42-AE3B-1D8A65A900E9}"/>
+												</Reference>
+											</ObjectList>
+										</ObjectLists>
+									</MultiSwitchEntry>
+								</Local>
+							</Reference>
+							<Reference>
+								<Local>
+									<MultiSwitchEntry Name="" ID="{2739B16B-A136-40D3-82F0-472D9B2D8482}">
+										<ReferenceList>
+											<Reference Name="AudioNode">
+												<ObjectRef Name="BGM_DragonMosque" ID="{F547E214-245D-4C29-A10E-AFD5F9338C2A}" WorkUnitID="{805731CD-25EB-4476-9DAF-C545D2251845}"/>
+											</Reference>
+										</ReferenceList>
+										<ObjectLists>
+											<ObjectList Name="EntryPath">
+												<Reference>
+													<ObjectRef Name="Normal" ID="{0209011D-830F-4311-8072-FE46FE3E3A93}" WorkUnitID="{A3549E82-5CB2-4F42-AE3B-1D8A65A900E9}"/>
 												</Reference>
 											</ObjectList>
 										</ObjectLists>

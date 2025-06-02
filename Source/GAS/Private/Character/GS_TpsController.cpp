@@ -19,7 +19,6 @@ AGS_TpsController::AGS_TpsController()
 	MoveAction = nullptr;
 	LookAction = nullptr;
 	WalkToggleAction = nullptr;
-	LClickAction = nullptr;
 	bCanMove = true;
 }
 
@@ -30,6 +29,17 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.0f);
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+    if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
+	{
+		if (ControlValues.bCanMoveForward)
+		{
+			ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.X);
+		}
+		if (ControlValues.bCanMoveRight)
+		{
+			ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.Y);
+		}
+	}
 	if(GetCanMove())
 	{
 		if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
@@ -45,8 +55,14 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
 	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
 	{
-		ControlledPawn->AddControllerYawInput(InputAxisVector.X);
-		ControlledPawn->AddControllerPitchInput(InputAxisVector.Y);
+		if (ControlValues.bCanLookRight)
+		{
+			ControlledPawn->AddControllerYawInput(InputAxisVector.X);
+		}
+		if (ControlValues.bCanLookUp)
+		{
+			ControlledPawn->AddControllerPitchInput(InputAxisVector.Y);
+		}
 	}
 }
 
@@ -55,18 +71,12 @@ void AGS_TpsController::WalkToggle(const FInputActionValue& InputValue)
 	
 }
 
-void AGS_TpsController::LClickPressed(const FInputActionValue& InputValue)
+FControlValue& AGS_TpsController::GetControlValue()
 {
-	if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
-	{
-		if (ControlledPlayer->GetClass()->ImplementsInterface(UGS_AttackInterface::StaticClass()))
-		{
-			IGS_AttackInterface::Execute_LeftClickPressed(ControlledPlayer);
-		}
-	}
+	return ControlValues;
 }
 
-void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
+/*void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
 {
 	if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
 	{
@@ -75,7 +85,7 @@ void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
 			IGS_AttackInterface::Execute_LeftClickRelease(ControlledPlayer);
 		}
 	}
-}
+}*/
 
 void AGS_TpsController::PageUp(const FInputActionValue& InputValue)
 {
@@ -156,11 +166,6 @@ void AGS_TpsController::SetupInputComponent()
 	if (LookAction)
 	{
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGS_TpsController::Look);
-	}
-	if (LClickAction)
-	{
-		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Started, this, &AGS_TpsController::LClickPressed);
-		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Completed, this, &AGS_TpsController::LClickRelease);
 	}
 	if (PageUpAction)
 	{

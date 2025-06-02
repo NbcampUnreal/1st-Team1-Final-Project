@@ -213,6 +213,16 @@ void UGS_ArcaneBoardManager::ApplyChanges()
 
 void UGS_ArcaneBoardManager::ResetAllRune()
 {
+	if (PlacedRunes.Num() == 0)
+	{
+		return;
+	}
+
+	PlacedRunes.Empty();
+	InitGridState();
+	CurrStatEffects = FGS_StatRow();
+	bHasUnsavedChanges = true;
+	OnStatsChanged.Broadcast(CurrStatEffects);
 }
 
 void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes)

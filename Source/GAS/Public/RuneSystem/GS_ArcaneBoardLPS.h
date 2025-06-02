@@ -28,18 +28,6 @@ public:
     FGS_StatRow RuneSystemStats;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void ShowArcaneBoardUI(UWidget* ParentWidget = nullptr);
-
-    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    UGS_ArcaneBoardWidget* CreateArcaneBoardWidget();
-
-    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void DestroyArcaneBoardWidget();
-
-    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    bool TryCloseArcaneBoardUI();
-
-    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     ECharacterClass GetCurrPlayerClass() const;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -60,12 +48,15 @@ public:
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void UpdateCharacterStats();
 
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    bool HasUnsavedChanges() const;
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    UGS_ArcaneBoardManager* GetOrCreateBoardManager();
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void ForceApplyChanges();
+
 private:
-    UPROPERTY()
-    UGS_ArcaneBoardWidget* CurrBoardWidget;
-
-    UPROPERTY()
-    TSubclassOf<UGS_ArcaneBoardWidget> ArcaneBoardWidgetClass;
-
     void RequestServerStatsUpdate();
 };

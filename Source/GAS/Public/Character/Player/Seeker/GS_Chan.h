@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GS_Seeker.h"
-#include "Character/Interface/GS_AttackInterface.h"
+#include "Iris/ReplicationSystem/ReplicationSystemTypes.h"
 #include "GS_Chan.generated.h"
 
 class AGS_WeaponShield;
@@ -12,7 +12,7 @@ class AGS_WeaponAxe;
 class UGS_ChanAimingSkillBar;
 
 UCLASS()
-class GAS_API AGS_Chan : public AGS_Seeker, public IGS_AttackInterface
+class GAS_API AGS_Chan : public AGS_Seeker
 {
 	GENERATED_BODY()
 
@@ -26,15 +26,25 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// Attack Interface
-	virtual void LeftClickPressed_Implementation() override;
-	virtual void LeftClickRelease_Implementation() override;
-
-	// Combo Attack
+	UFUNCTION()
+	void OnComboAttack();
+	
+	// Combo Attack Montage
 	void ComboInputOpen();
 	void ComboInputClose();
 	void EndMontage();
 
+	void ComboEnd();
+
+	// Move Skill
+	void OnMoveSkill();
+	void OffMoveSkill();
+
+	// Aim Skill
+	void OnReadyAimSkill();
+	void OnJumpAttackSkill();
+	void OffJumpAttackSkill();
+	void ToIdle();
 	
 	
 	UPROPERTY(EditAnywhere, Category="Animation")
@@ -46,28 +56,29 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerAttackMontage();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DrawSkillRange(FVector InLocation, float InRadius, FColor InColor, float InLifetime);
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayComboSection();
-	
 
-	// Weapon
-	UPROPERTY(EditAnywhere, Category = "Weapon")
-	TSubclassOf<class AGS_WeaponShield> WeaponShieldClass;
+	// AnimInstnace Slot State Value 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsUpperBodySlot(bool bUpperBodySlot);
 
-	UPROPERTY(Replicated)
-	AGS_WeaponShield* WeaponShield;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	FName WeaponShieldName = "Shield";
-	
-	UPROPERTY(EditAnywhere, Category = "Weapon")
-	TSubclassOf<class AGS_WeaponAxe> WeaponAxeClass;
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);
 
-	UPROPERTY(Replicated)
-	AGS_WeaponAxe* WeaponAxe;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	FName WeaponAxeName = "Axe";
+	// Control State Value
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetMoveControlValue(bool bMoveForward, bool bMoveRight);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetLookControlValue(bool bLookUp, bool bLookRight);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetMustTurnInPlace(bool MustTurn);
 
 	// ===============
 	// 전용 공격 사운드
@@ -78,8 +89,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Voice")
 	UAkAudioEvent* AttackVoiceSound;
 
-	template <typename T>
-	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);
+	/*template <typename T>
+	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);*/
 
 	// [Widget]
 	void SetChanAimingSkillBarWidget(UGS_ChanAimingSkillBar* Widget) { ChanAimingSkillBarWidget = Widget; }
@@ -97,31 +108,3 @@ protected:
 private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;
 };
-
-template <typename T>
-void AGS_Chan::SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon)
-{
-	if (!WeaponClass)
-	{
-		return;
-	}
-
-	UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-
-	T* SpawnWeapon = World->SpawnActor<T>(WeaponClass);
-	if (!SpawnWeapon)
-	{
-		return;
-	}
-
-	SpawnWeapon->AttachToComponent(GetMesh(),
-		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		SocketName);
-
-	SpawnWeapon->SetOwningCharacter(this);
-	OutWeapon = SpawnWeapon;
-}

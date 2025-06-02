@@ -61,7 +61,7 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	{
 		return;	
 	}
-
+	UE_LOG(LogTemp, Warning, TEXT("feng TakeDamage SJE"));
 	float Damage = DamagedStat->CalculateDamage(Attacker, Damaged);
 	FDamageEvent DamageEvent;
 	Damaged->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar);
