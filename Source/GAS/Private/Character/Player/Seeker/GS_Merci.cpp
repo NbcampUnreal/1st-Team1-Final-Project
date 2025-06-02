@@ -190,7 +190,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	// 2. 카메라에서 정면으로 Ray를 쏨
 	FVector TraceStart = ViewLoc;
 	FVector TraceEnd = TraceStart + ViewRot.Vector() * 2000.0f;
-	Multicast_DrawDebugLine(TraceStart, TraceEnd, FColor::Green);
+	//Multicast_DrawDebugLine(TraceStart, TraceEnd, FColor::Green);
 	
 	// 3. Ray가 무언가에 부딪히면 그 위치를 목표로 설정, 아니면 끝 지점 사용
 	FHitResult Hit;
@@ -264,8 +264,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 				NormalArrow->ChangeArrowType(CurrentArrowType);
 			}
 		}
-		Multicast_DrawDebugLine(SpawnLocation, TargetLocation, FColor::Red);
-		Multicast_DrawDebugLine(SpawnLocation, SpawnLocation + SpreadDir * 500.0f, FColor::Cyan);
+		//Multicast_DrawDebugLine(SpawnLocation, TargetLocation, FColor::Red);
 	}
 	// 8. 화살 발사 VFX 호출 (멀티캐스트로 모든 클라이언트에서 재생)
 	Multicast_PlayArrowShotVFX(VFXLocation, VFXRotation, NumArrows);
