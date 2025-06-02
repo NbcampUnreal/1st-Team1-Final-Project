@@ -1,48 +1,91 @@
 #include "UI/Screen/GS_MainMenuUI.h"
+
+#include "CommonButtonBase.h"
 #include "Components/Button.h"
+#include "Components/ScaleBox.h"
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "System/PlayerController/GS_MainMenuPC.h"
+#include "UI/Common/CustomCommonButton.h"
 
 void UGS_MainMenuUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (PlayButton) PlayButton->OnClicked.AddDynamic(this, &UGS_MainMenuUI::OnPlayButtonClicked);
+	if (PlayButton)
+	{
+		if (UCommonButtonBase* PlayButtonBase = Cast<UCommonButtonBase>(PlayButton))
+		{
+			PlayButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnPlayButtonClicked);
+		}
+	}
 	else UE_LOG(LogTemp, Error, TEXT("UGS_MainMenuUI: PlayButton is not bound in Blueprint!"));
 
-	if (CustomGameButton) CustomGameButton->OnClicked.AddDynamic(this, &UGS_MainMenuUI::OnCustomGameButtonClicked);
+	if (CustomGameButton)
+	{
+		if (UCommonButtonBase* CustomGameButtonBase = Cast<UCommonButtonBase>(CustomGameButton))
+		{
+			CustomGameButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnCustomGameButtonClicked);
+		}
+	}
 	else UE_LOG(LogTemp, Error, TEXT("UGS_MainMenuUI: CustomGameButton is not bound in Blueprint!"));
 
-	if (ExitButton) ExitButton->OnClicked.AddDynamic(this, &UGS_MainMenuUI::OnExitButtonClicked);
+	if (ExitButton)
+	{
+		if (UCommonButtonBase* ExitButtonBase = Cast<UCommonButtonBase>(ExitButton))
+		{
+			ExitButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnExitButtonClicked);
+		}
+	}
 	else UE_LOG(LogTemp, Error, TEXT("UGS_MainMenuUI: ExitButton is not bound in Blueprint!"));
 
 
 	//텍스트 초기 설정
-	if (PlayText) PlayText->SetText(FText::FromString(TEXT("Play")));
+	//if (PlayText) PlayText->SetText(FText::FromString(TEXT("Play")));
 
 	//초기 visibility 설정
-	if (SeekerButton) SeekerButton->SetVisibility(ESlateVisibility::Hidden);
-	if (GuardianButton) GuardianButton->SetVisibility(ESlateVisibility::Hidden);
-	if (CustomGameButton) CustomGameButton->SetVisibility(ESlateVisibility::Hidden);
+	if (PlayBtnPopUp)
+	{
+		PlayBtnPopUp->SetVisibility(ESlateVisibility::Hidden);
+	}
+	if (ExitPopUp)
+	{
+		ExitPopUp->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void UGS_MainMenuUI::OnPlayButtonClicked()
 {
 	if (!bIsPlayButtonClicked)
 	{
-		if (SeekerButton) SeekerButton->SetVisibility(ESlateVisibility::Visible);
-		if (GuardianButton) GuardianButton->SetVisibility(ESlateVisibility::Visible);
-		if (CustomGameButton) CustomGameButton->SetVisibility(ESlateVisibility::Visible);
-		if (PlayText) PlayText->SetText(FText::FromString(TEXT("Close")));
+		if (UCustomCommonButton* CustomPlayButton = Cast<UCustomCommonButton>(PlayButton))
+		{
+			CustomPlayButton->ChangeText(1);
+		}
+		if (PlayBtnPopUp)
+		{
+			PlayBtnPopUp->SetVisibility(ESlateVisibility::Visible);
+		}
+		if (CreditButton)
+		{
+			CreditButton->SetVisibility(ESlateVisibility::Hidden);
+		}
 		bIsPlayButtonClicked = true;
 	}
 	else
 	{
-		if (SeekerButton) SeekerButton->SetVisibility(ESlateVisibility::Hidden);
-		if (GuardianButton) GuardianButton->SetVisibility(ESlateVisibility::Hidden);
-		if (CustomGameButton) CustomGameButton->SetVisibility(ESlateVisibility::Hidden);
-		if (PlayText) PlayText->SetText(FText::FromString(TEXT("Play")));
+		if (UCustomCommonButton* CustomPlayButton = Cast<UCustomCommonButton>(PlayButton))
+		{
+			CustomPlayButton->ChangeText(0);
+		}
+		if (PlayBtnPopUp)
+		{
+			PlayBtnPopUp->SetVisibility(ESlateVisibility::Hidden);
+		}
+		if (CreditButton)
+		{
+			CreditButton->SetVisibility(ESlateVisibility::Visible);
+		}
 		bIsPlayButtonClicked = false;
 	}
 	
@@ -50,7 +93,10 @@ void UGS_MainMenuUI::OnPlayButtonClicked()
 
 void UGS_MainMenuUI::OnExitButtonClicked()
 {
-	//캔버스 패널 안에 띄우기
+	if (ExitPopUp)
+	{
+		ExitPopUp->SetVisibility(ESlateVisibility::Visible);
+	}
 }
 
 void UGS_MainMenuUI::OnCustomGameButtonClicked()

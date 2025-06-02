@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GS_MainMenuUI.generated.h"
 
+class UScaleBox;
 class UUserWidget;
 class UButton;
 class UTextBlock;
@@ -21,25 +22,24 @@ protected:
 
 public:
 	UPROPERTY(meta = (BindWidget))
-	UButton* PlayButton;
+	UUserWidget* PlayButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* CreditButton;
+	UUserWidget* CreditButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* ExitButton;
+	UUserWidget* ExitButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* SettingButton;
+	UUserWidget* SettingButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* SeekerButton;
+	UScaleBox* PlayBtnPopUp;
 	UPROPERTY(meta = (BindWidget))
-	UButton* GuardianButton;
+	UUserWidget* SeekerButton;
 	UPROPERTY(meta = (BindWidget))
-	UButton* CustomGameButton;
+	UUserWidget* GuardianButton;
+	UPROPERTY(meta = (BindWidget))
+	UUserWidget* CustomGameButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* PlayText;
-
-	UPROPERTY(meta = (BindWidget))
-	UCanvasPanel* ExitPopupCanvas;
+	UUserWidget* ExitPopUp;
 
 	bool bIsPlayButtonClicked = false;
 
