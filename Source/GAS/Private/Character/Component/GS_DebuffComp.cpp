@@ -108,6 +108,36 @@ void UGS_DebuffComp::OnRep_DebuffList()
 	// TODO : 클라이언트 UI 갱신 로직 들어가는 곳
 }
 
+void UGS_DebuffComp::ClearAllDebuffs()
+{
+	if (!GetOwner()->HasAuthority())
+	{
+		Server_ClearAllDebuffs();
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("ClearAllDebuffs"));
+
+	// 모든 타이머 제거 및 OnExpire 호출
+	for (auto& Elem : DebuffTimers)
+	{
+		if (Elem.Key)
+		{
+			Elem.Key->OnExpire();
+		}
+		GetWorld()->GetTimerManager().ClearTimer(Elem.Value);
+	}
+	DebuffTimers.Empty();
+
+	// 모든 디버프 컨테이너 초기화
+	ConcurrentDebuffs.Empty();
+	DebuffQueue.Empty();
+	CurrentDebuff = nullptr;
+
+	// 복제 목록 갱신
+	UpdateReplicatedDebuffList();
+}
+
 const FDebuffData* UGS_DebuffComp::GetDebuffData(EDebuffType Type) const
 {
 	if (!DebuffDataTable) return nullptr;
@@ -303,6 +333,11 @@ void UGS_DebuffComp::UpdateReplicatedDebuffList()
 	{
 		OnRep_DebuffList();
 	}
+}
+
+void UGS_DebuffComp::Server_ClearAllDebuffs_Implementation()
+{
+	ClearAllDebuffs();
 }
 
 void UGS_DebuffComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
