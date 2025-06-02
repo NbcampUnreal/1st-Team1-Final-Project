@@ -34,15 +34,10 @@ void AGS_Chan::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 void AGS_Chan::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (HasAuthority())
-	{
-		SpawnAndAttachWeapon(WeaponShieldClass, WeaponShieldName, WeaponShield);
-		SpawnAndAttachWeapon(WeaponAxeClass, WeaponAxeName, WeaponAxe);
-	}
 	
 	SetReplicateMovement(true);
 	GetMesh()->SetIsReplicated(true);
+	
 }
 
 // Called every frame
@@ -264,16 +259,18 @@ void AGS_Chan::MulticastPlayComboSection_Implementation()
 
 void AGS_Chan::ServerAttackMontage_Implementation()
 {
-	if (HasAuthority())
-	{
-		MulticastPlayComboSection();
-	}
+	MulticastPlayComboSection();
 }
 
-void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float InRadius, FColor InColor, float InLifetime)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AGS_Chan, WeaponAxe);
-	DOREPLIFETIME(AGS_Chan, WeaponShield);
+	DrawDebugSphere(
+		GetWorld(),
+		InLocation,
+		InRadius,
+		16,
+		InColor,
+		false,
+		InLifetime
+	);
 }

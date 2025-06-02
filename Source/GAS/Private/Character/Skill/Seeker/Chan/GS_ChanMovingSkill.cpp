@@ -55,12 +55,14 @@ void UGS_ChanMovingSkill::ExecuteSkillEffect()
 	TArray<FHitResult> HitResults;
 
 	const FVector Center = OwnerCharacter->GetActorLocation(); // 중심은 캐릭터
-	const float Radius = 4000.f;
+	const float Radius = 800.0f;
 
 	FCollisionShape Shape = FCollisionShape::MakeSphere(Radius);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
 
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	OwnerPlayer->Multicast_DrawSkillRange(Center, Radius, FColor::Red, 2.0f);
 	// 캐릭터를 중심으로 한 지점에 고정된 SphereOverlap
 	if (GetWorld()->SweepMultiByChannel(HitResults, Center, Center, FQuat::Identity, ECC_Pawn, Shape, Params))
 	{

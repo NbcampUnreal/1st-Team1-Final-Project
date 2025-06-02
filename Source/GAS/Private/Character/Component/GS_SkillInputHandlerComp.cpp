@@ -16,7 +16,7 @@ UGS_SkillInputHandlerComp::UGS_SkillInputHandlerComp()
 
 void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputComponent)
 {
-	if (!OwnerCharacter) return;
+	if (!OwnerCharacter) OwnerCharacter = Cast<AGS_Character>(GetOwner());
 
 	if (APlayerController* PC = Cast<APlayerController>(OwnerCharacter->GetController()))
 	{
@@ -61,8 +61,11 @@ void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputC
 void UGS_SkillInputHandlerComp::BeginPlay()
 {
 	Super::BeginPlay();
-
-	OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	if (!OwnerCharacter)
+	{
+		OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	}
+	
 	check(OwnerCharacter);
 }
 

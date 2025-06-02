@@ -13,7 +13,7 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	{
 		if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
-			//OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+			OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
 		}
 		else
 		{

@@ -148,13 +148,18 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
 
 void UGS_ArcaneBoardLPS::UpdateCharacterStats()
 {
+    if (!BoardManager)
+    {
+        return;
+    }
+
     if (APlayerController* PC = GetLocalPlayer()->GetPlayerController(GetWorld()))
     {
         if (AGS_Character* Character = Cast<AGS_Character>(PC->GetPawn()))
         {
             if (UGS_StatComp* StatComp = Character->GetStatComp())
             {
-                //StatComp->UpdateStat();
+                StatComp->UpdateStat(BoardManager->AppliedStatEffects);
             }
         }
     }

@@ -13,6 +13,8 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/GS_Player.h"
 #include "AkAudioEvent.h"
+#include "AI/GS_AIController.h"
+#include "Navigation/PathFollowingComponent.h"
 
 UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 {
@@ -41,13 +43,14 @@ void UGS_ChanAimingSkill::ActiveSkill()
 
 void UGS_ChanAimingSkill::OnSkillCommand()
 {
-	
-	//f (!bIsHoldingUp || CurrentStamina < SlamStaminaCost)
-	if (!bIsHoldingUp)
+	//if (!bIsHoldingUp || CurrentStamina < SlamStaminaCost)
+	if (!bIsHoldingUp || !bCanSlam || CurrentStamina < SlamStaminaCost)
 	{
 		return;
 	}
-	
+
+	bCanSlam = false; // 재사용 금지
+
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 	OwnerPlayer->Multicast_SetMustTurnInPlace(false);
@@ -67,6 +70,20 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 	}
 	
 	OnShieldSlam();
+
+	// 쿨타임 설정
+	OwnerCharacter->GetWorldTimerManager().SetTimer(
+		SlamCooldownHandle,
+		this,
+		&UGS_ChanAimingSkill::ResetSlamCooldown,
+		SlamCooldownTime,
+		false
+	);
+}
+
+void UGS_ChanAimingSkill::ResetSlamCooldown()
+{
+	bCanSlam = true;
 }
 
 void UGS_ChanAimingSkill::ExecuteSkillEffect()
@@ -75,13 +92,16 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 
 	const FVector Start = OwnerCharacter->GetActorLocation();
 	const FVector Forward = OwnerCharacter->GetActorForwardVector();
+	FVector SkillLocation = Start + Forward * 150.0f;
 	const float Radius = 200.f;
 
 	FCollisionShape Shape = FCollisionShape::MakeSphere(Radius);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
 
-	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitResults, Start, Start + Forward * 100.f, FQuat::Identity, ECC_Pawn, Shape, Params))
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	OwnerPlayer->Multicast_DrawSkillRange(SkillLocation, Radius, FColor::Red, 1.0f);
+	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitResults, SkillLocation, SkillLocation, FQuat::Identity, ECC_Pawn, Shape, Params))
 	{
 		TSet<AActor*> HitActors;
 
@@ -91,6 +111,11 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 			UPrimitiveComponent* HitComponent = Hit.GetComponent();
 
 			if (!HitActor || HitActors.Contains(HitActor))
+			{
+				continue;
+			}
+
+			if (HitComponent && HitComponent->GetCollisionProfileName() == FName("SoundTrigger"))
 			{
 				continue;
 			}
@@ -198,19 +223,18 @@ void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
 	if (!Target) return;
 
-	// 넉백
-	const FVector LaunchDirection = (Target->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
-	Target->LaunchCharacter(LaunchDirection * 500.f + FVector(0, 0, 200.f), true, true);
-
-	// 데미지
-	UGameplayStatics::ApplyDamage(Target, Damage, OwnerCharacter->GetController(), OwnerCharacter, UDamageType::StaticClass());
-
 	// 경직 디버프
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
 	{
 		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Stun, OwnerCharacter);
 	}
-	
+
+	// 넉백
+	const FVector LaunchDirection = (Target->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
+	Target->LaunchCharacter(LaunchDirection * 1000.0f + FVector(0, 0, 500.0f), true, true);
+
+	// 데미지
+	UGameplayStatics::ApplyDamage(Target, Damage, OwnerCharacter->GetController(), OwnerCharacter, UDamageType::StaticClass());
 }
 
 void UGS_ChanAimingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)

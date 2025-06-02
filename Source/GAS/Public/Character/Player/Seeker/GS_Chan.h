@@ -57,6 +57,10 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerAttackMontage();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DrawSkillRange(FVector InLocation, float InRadius, FColor InColor, float InLifetime);
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayComboSection();
 
@@ -76,25 +80,6 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetMustTurnInPlace(bool MustTurn);
-
-	// Weapon
-	UPROPERTY(EditAnywhere, Category = "Weapon")
-	TSubclassOf<class AGS_WeaponShield> WeaponShieldClass;
-
-	UPROPERTY(Replicated)
-	AGS_WeaponShield* WeaponShield;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	FName WeaponShieldName = "Shield";
-	
-	UPROPERTY(EditAnywhere, Category = "Weapon")
-	TSubclassOf<class AGS_WeaponAxe> WeaponAxeClass;
-
-	UPROPERTY(Replicated)
-	AGS_WeaponAxe* WeaponAxe;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	FName WeaponAxeName = "Axe";
 
 	// ===============
 	// 전용 공격 사운드
@@ -126,6 +111,8 @@ public:
 
 	template <typename T>
 	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);
+	/*template <typename T>
+	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);*/
 
 	// [Widget]
 	void SetChanAimingSkillBarWidget(UGS_ChanAimingSkillBar* Widget) { ChanAimingSkillBarWidget = Widget; }
@@ -143,31 +130,3 @@ protected:
 private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;
 };
-
-template <typename T>
-void AGS_Chan::SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon)
-{
-	if (!WeaponClass)
-	{
-		return;
-	}
-
-	UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-
-	T* SpawnWeapon = World->SpawnActor<T>(WeaponClass);
-	if (!SpawnWeapon)
-	{
-		return;
-	}
-
-	SpawnWeapon->AttachToComponent(GetMesh(),
-		FAttachmentTransformRules::SnapToTargetIncludingScale,
-		SocketName);
-
-	SpawnWeapon->SetOwningCharacter(this);
-	OutWeapon = SpawnWeapon;
-}
