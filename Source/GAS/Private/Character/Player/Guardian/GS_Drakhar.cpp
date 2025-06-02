@@ -257,6 +257,7 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	DamagedCharacters.Empty();
 	GuardianState = EGuardianState::None;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	ResetComboAttackVariables();
 }
 
 void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
@@ -270,11 +271,11 @@ void AGS_Drakhar::DashAttackCheck()
 {
 	TArray<FHitResult> OutHitResults;	
 	const FVector Start = GetActorLocation();
-	const FVector End = Start + GetActorForwardVector() * 100.f;
+	const FVector End = Start + GetActorForwardVector() * 10.f;
 	FCollisionQueryParams Params(NAME_None, false, this);
 
 	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity,
-		ECC_Camera, FCollisionShape::MakeCapsule(100.f, 200.f), Params);
+		ECC_Pawn, FCollisionShape::MakeCapsule(100.f, 100.f), Params);
 	
 	if (bIsHitDetected)
 	{
@@ -287,6 +288,7 @@ void AGS_Drakhar::DashAttackCheck()
 			}
 		}		
 	}
+	//MulticastRPCDrawDebugLine(Start,End, 100.f, 100.f, GetActorForwardVector(), bIsHitDetected);
 }
 
 void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
@@ -298,7 +300,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 	FCollisionQueryParams Params(NAME_None, false, this);
 	Params.AddIgnoredActor(this);
 
-	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(EarthquakeRadius), Params);
+	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(EarthquakeRadius), Params);
 
 	if (bIsHitDetected)
 	{
