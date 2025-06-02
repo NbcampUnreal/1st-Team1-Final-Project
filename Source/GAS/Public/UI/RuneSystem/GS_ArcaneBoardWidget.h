@@ -86,18 +86,12 @@ public:
 	bool HasUnsavedChanges() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void OnCloseButtonClicked();
-
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void OnResetButtonClicked();
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void OnApplyButtonClicked();
 
 protected:
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UButton* CloseButton;
-
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 
 	class UButton* ApplyButton;

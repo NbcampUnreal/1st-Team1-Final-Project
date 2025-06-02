@@ -49,11 +49,6 @@ void UGS_ArcaneBoardWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (CloseButton)
-	{
-		CloseButton->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnCloseButtonClicked);
-	}
-
 	if (ApplyButton)
 	{
 		ApplyButton->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnApplyButtonClicked);
@@ -461,33 +456,17 @@ bool UGS_ArcaneBoardWidget::HasUnsavedChanges() const
 	return false;
 }
 
-void UGS_ArcaneBoardWidget::OnCloseButtonClicked()
-{
-	/*if (HasUnsavedChanges())
-	{
-
-	}
-	else
-	{
-		if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
-		{
-			LPS->TryCloseArcaneBoardUI();
-		}
-	}*/
-	if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
-	{
-		LPS->TryCloseArcaneBoardUI();
-	}
-}
-
 void UGS_ArcaneBoardWidget::OnResetButtonClicked()
 {
-	//if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
-	//{
-	//	//나중에 리셋 확인 팝업 추가 가능
-	//	LPS->ResetArcaneBoardConfig();
-	//	UE_LOG(LogTemp, Log, TEXT("아케인 보드 리셋 완료"));
-	//}
+	if (!IsValid(BoardManager))
+	{
+		return;
+	}
+
+	BoardManager->ResetAllRune();
+
+	UpdateGridVisuals();
+	RuneInven->InitInven(BoardManager, this);
 }
 
 void UGS_ArcaneBoardWidget::OnApplyButtonClicked()

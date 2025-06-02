@@ -27,6 +27,7 @@ public:
 
 	// 스테미나 관리
 	void TickDrainStamina();
+	float GetCurrentStamina();
 
 protected:
 	// 스탠스 관리

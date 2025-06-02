@@ -90,6 +90,9 @@ public:
 
 	//UI 관련 함수
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void InitGridState();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	bool PreviewRunePlacement(uint8 RuneID, const FIntPoint& Pos, TArray<FIntPoint>& OutAffectedCells);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -118,8 +121,6 @@ private:
 
 	//현재 그리드의 셀 상태
 	TMap<FIntPoint, FGridCellData> CurrGridState;
-
-	void InitGridState();
 
 	void ApplyRuneToGrid(uint8 RuneID, const FIntPoint& Position, EGridCellState NewState, bool bApplyTexture = true);
 

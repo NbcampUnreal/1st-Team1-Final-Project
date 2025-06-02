@@ -8,6 +8,11 @@ void UGS_SeekerSkillBase::ActiveSkill()
 	Super::ActiveSkill();
 }
 
+void UGS_SeekerSkillBase::DeactiveSkill()
+{
+	Super::DeactiveSkill();
+}
+
 void UGS_SeekerSkillBase::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
 }

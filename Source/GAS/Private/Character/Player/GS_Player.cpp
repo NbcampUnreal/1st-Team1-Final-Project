@@ -1,5 +1,8 @@
 #include "Character/Player/GS_Player.h"
+
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Camera/CameraComponent.h"
+#include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/GS_TpsController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/PostProcessComponent.h"
@@ -187,6 +190,13 @@ void AGS_Player::OnTimelineFinished()
 	bIsObscuring = false;
 }
 
+
+
+
+
+
+
+
 void AGS_Player::OnDeath()
 {
 	Super::OnDeath();
@@ -210,18 +220,16 @@ void AGS_Player::OnDeath()
 	SpectateNextPlayer();
 }
 
+
+void AGS_Player::Multicast_StopSkillMontage_Implementation(UAnimMontage* Montage)
+{
+	StopAnimMontage(Montage);
+	UE_LOG(LogTemp, Warning, TEXT("Skill Montage Stop!!!!!!!!!!!!!!"));
+}
+
 void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
-void AGS_Player::PlaySkillMontage(UAnimMontage* Montage)
-{
-	if (this->GetMesh() && Montage)
-	{
-		this->GetMesh()->GetAnimInstance()->Montage_Play(Montage);
-		UE_LOG(LogTemp, Warning, TEXT("Skill Montage Play!!!!!!!!!!!!!!"));
-	}
 }
 
 FCharacterWantsToMove AGS_Player::GetWantsToMove()
@@ -294,9 +302,25 @@ void AGS_Player::ServerRPCSpectateNextPlayer_Implementation()
 }
 
 
-void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage)
+void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage, FName Section)
 {
-	PlaySkillMontage(Montage);
+	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstance && Montage)
+	{
+		if (Section == NAME_None)
+		{
+			AnimInstance->Montage_Play(Montage);
+		}
+		else
+		{
+			if (AnimInstance->Montage_IsPlaying(Montage))
+			{
+				AnimInstance->Montage_Stop(0.0f, Montage); // 이걸 꼭 해줘야 새로 PlayRate가 반영됨
+			}
+			AnimInstance->Montage_Play(Montage);
+			AnimInstance->Montage_JumpToSection(Section, Montage);
+		}
+	}
 }
 
 void AGS_Player::PlaySound(UAkAudioEvent* SoundEvent)

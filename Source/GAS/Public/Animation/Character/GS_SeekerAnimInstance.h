@@ -35,6 +35,12 @@ public:
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
 	bool ShouldTurnInPlace();
 
+	UFUNCTION()
+	bool GetMustTurnInPlace();
+
+	UFUNCTION()
+	void SetMustTurnInPlace(bool MustTurn);
+
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
 	bool ShouldSpinTransition();
 
@@ -55,14 +61,23 @@ public:
 
 	// Chan Combo Attack
 	UFUNCTION()
-	void AnimNotify_ComboInputOpen();
+	void AnimNotify_ComboInput();
 	UFUNCTION()
-	void AnimNotify_ComboInputClose();
+	void AnimNotify_CanProceed();
 	UFUNCTION()
-	void AnimNotify_EndMontage();
-	
+	void AnimNotify_ComboEnd();
+
 	UPROPERTY(BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
-	bool IsPlayingComboMontage = false;
+	bool IsPlayingUpperBodyMontage = false;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
+	bool IsPlayingFullBodyMontage = false;
+
+	/*UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetUpperBodySlotValue(bool IsPlayingUpperBody);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetFullBodySlotValue(bool IsPlayingFullBody);*/
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
@@ -100,4 +115,7 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Database")
 	TArray<FName> CurrentDatabasesTags;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bMustTurnInPlace = false;
 };

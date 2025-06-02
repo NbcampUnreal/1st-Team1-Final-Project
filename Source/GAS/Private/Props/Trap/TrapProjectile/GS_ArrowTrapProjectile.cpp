@@ -3,6 +3,7 @@
 #include "Character/Player/GS_Player.h"
 #include "Character/GS_Character.h"
 #include "Props/Trap/TrapProjectile/GS_TrapVisualProjectile.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -38,11 +39,11 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 		return;
 	}
 
-	AGS_Player* Player = Cast<AGS_Player>(OtherActor);
+	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
 
 	//UE_LOG(LogTemp, Warning, TEXT("OtherComp: %s, Type: %d"), *OtherComp->GetName(), OtherComp->GetCollisionObjectType());
 
-	if (Player && OtherComp == Player->GetMesh() && OwningTrap)
+	if (Seeker && OtherComp == Seeker->GetMesh() && OwningTrap)
 	{
 		//수정
 		OwningTrap->HandleTrapDamage(OtherActor);
