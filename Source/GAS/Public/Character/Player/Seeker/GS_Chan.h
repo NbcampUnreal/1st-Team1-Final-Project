@@ -56,6 +56,10 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerAttackMontage();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DrawSkillRange(FVector InLocation, float InRadius, FColor InColor, float InLifetime);
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayComboSection();
 
