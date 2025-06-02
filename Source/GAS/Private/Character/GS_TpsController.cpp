@@ -15,7 +15,7 @@ AGS_TpsController::AGS_TpsController()
 	MoveAction = nullptr;
 	LookAction = nullptr;
 	WalkToggleAction = nullptr;
-	LClickAction = nullptr;
+	/*LClickAction = nullptr;*/
 }
 
 void AGS_TpsController::Move(const FInputActionValue& InputValue)
@@ -27,8 +27,14 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
 	{
-		ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.X);
-		ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.Y);
+		if (ControlValues.bCanMoveForward)
+		{
+			ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.X);
+		}
+		if (ControlValues.bCanMoveRight)
+		{
+			ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.Y);
+		}
 	}
 }
 
@@ -37,8 +43,14 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
 	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
 	{
-		ControlledPawn->AddControllerYawInput(InputAxisVector.X);
-		ControlledPawn->AddControllerPitchInput(InputAxisVector.Y);
+		if (ControlValues.bCanLookRight)
+		{
+			ControlledPawn->AddControllerYawInput(InputAxisVector.X);
+		}
+		if (ControlValues.bCanLookUp)
+		{
+			ControlledPawn->AddControllerPitchInput(InputAxisVector.Y);
+		}
 	}
 }
 
@@ -47,26 +59,9 @@ void AGS_TpsController::WalkToggle(const FInputActionValue& InputValue)
 	
 }
 
-void AGS_TpsController::LClickPressed(const FInputActionValue& InputValue)
+FControlValue& AGS_TpsController::GetControlValue()
 {
-	if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
-	{
-		if (ControlledPlayer->GetClass()->ImplementsInterface(UGS_AttackInterface::StaticClass()))
-		{
-			IGS_AttackInterface::Execute_LeftClickPressed(ControlledPlayer);
-		}
-	}
-}
-
-void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
-{
-	if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
-	{
-		if (ControlledPlayer->GetClass()->ImplementsInterface(UGS_AttackInterface::StaticClass()))
-		{
-			IGS_AttackInterface::Execute_LeftClickRelease(ControlledPlayer);
-		}
-	}
+	return ControlValues;
 }
 
 void AGS_TpsController::BeginPlay()
@@ -121,9 +116,9 @@ void AGS_TpsController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGS_TpsController::Look);
 	}
-	if (LClickAction)
+	/*if (LClickAction)
 	{
 		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Started, this, &AGS_TpsController::LClickPressed);
 		EnhancedInputComponent->BindAction(LClickAction, ETriggerEvent::Completed, this, &AGS_TpsController::LClickRelease);
-	}
+	}*/
 }

@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GS_Seeker.h"
-#include "Character/Interface/GS_AttackInterface.h"
+#include "Iris/ReplicationSystem/ReplicationSystemTypes.h"
 #include "GS_Chan.generated.h"
 
 class AGS_WeaponShield;
 class AGS_WeaponAxe;
 
 UCLASS()
-class GAS_API AGS_Chan : public AGS_Seeker, public IGS_AttackInterface
+class GAS_API AGS_Chan : public AGS_Seeker
 {
 	GENERATED_BODY()
 
@@ -25,14 +25,23 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// Attack Interface
-	virtual void LeftClickPressed_Implementation() override;
-	virtual void LeftClickRelease_Implementation() override;
-
-	// Combo Attack
+	UFUNCTION()
+	void OnComboAttack();
+	
+	// Combo Attack Montage
 	void ComboInputOpen();
 	void ComboInputClose();
-	void EndMontage();
+	void ComboEnd();
+
+	// Move Skill
+	void OnMoveSkill();
+	void OffMoveSkill();
+
+	// Aim Skill
+	void OnReadyAimSkill();
+	void OnJumpAttackSkill();
+	void OffJumpAttackSkill();
+	void ToIdle();
 	
 	UPROPERTY(EditAnywhere, Category="Animation")
 	UAnimMontage* ComboAnimMontage;
@@ -45,7 +54,23 @@ public:
 	void ServerAttackMontage();
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastPlayComboSection();
-	
+
+	// AnimInstnace Slot State Value 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsUpperBodySlot(bool bUpperBodySlot);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);
+
+	// Control State Value
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetMoveControlValue(bool bMoveForward, bool bMoveRight);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetLookControlValue(bool bLookUp, bool bLookRight);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetMustTurnInPlace(bool MustTurn);
 
 	// Weapon
 	UPROPERTY(EditAnywhere, Category = "Weapon")

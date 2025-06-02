@@ -102,19 +102,30 @@ bool UGS_SeekerAnimInstance::IsMoving()
 
 bool UGS_SeekerAnimInstance::ShouldTurnInPlace()
 {
-	if (MovementState == EMovementState::Idle && LastMovementState == EMovementState::Moving)
+	//if (MovementState == EMovementState::Idle && LastMovementState == EMovementState::Moving)
+	if (bMustTurnInPlace)
 	{
 		const FRotator CharacterRot = CharacterTransform.GetRotation().Rotator();
 		const FRotator RootRot = RootTransform.GetRotation().Rotator();
+		
 		FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRot, RootRot);
 		DeltaRot.Yaw = FMath::Abs(DeltaRot.Yaw);
-
 		if (DeltaRot.Yaw >= 50)
 		{
 			return true;
 		}
 	}
 	return false;
+}
+
+bool UGS_SeekerAnimInstance::GetMustTurnInPlace()
+{
+	return bMustTurnInPlace;
+}
+
+void UGS_SeekerAnimInstance::SetMustTurnInPlace(bool MustTurn)
+{
+	bMustTurnInPlace = MustTurn;
 }
 
 bool UGS_SeekerAnimInstance::ShouldSpinTransition()
@@ -217,8 +228,9 @@ float UGS_SeekerAnimInstance::Get_LeanAmount()
 	return CalculateRelativeAccelerationAmount().Y * ClampedLeanAmount;
 }
 
-void UGS_SeekerAnimInstance::AnimNotify_ComboInputOpen()
+void UGS_SeekerAnimInstance::AnimNotify_ComboInput()
 {
+	UE_LOG(LogTemp, Warning, TEXT("AnimNotify_ComboInput"));
 	if (APawn* OwnerPawn = TryGetPawnOwner())
 	{
 		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
@@ -228,24 +240,24 @@ void UGS_SeekerAnimInstance::AnimNotify_ComboInputOpen()
 	}
 }
 
-void UGS_SeekerAnimInstance::AnimNotify_ComboInputClose()
+void UGS_SeekerAnimInstance::AnimNotify_CanProceed()
 {
 	if (APawn* OwnerPawn = TryGetPawnOwner())
 	{
 		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
 		{
-			Chan->ComboInputClose();
+			//Chan->CheckToNext();
 		}
 	}
 }
 
-void UGS_SeekerAnimInstance::AnimNotify_EndMontage()
+void UGS_SeekerAnimInstance::AnimNotify_ComboEnd()
 {
 	if (APawn* OwnerPawn = TryGetPawnOwner())
 	{
 		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
 		{
-			Chan->EndMontage();
+			//Chan->ComboEnd();
 		}
 	}
 }

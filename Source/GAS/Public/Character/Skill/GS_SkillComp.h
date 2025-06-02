@@ -66,6 +66,9 @@ public:
 	UFUNCTION()
 	void TryActivateSkill(ESkillSlot Slot);
 
+	UFUNCTION()
+	void TryDeactiveSkill(ESkillSlot Slot);
+
 	UFUNCTION(Server, Reliable)
 	void Server_TryDeactiveSkill(ESkillSlot Slot);
 

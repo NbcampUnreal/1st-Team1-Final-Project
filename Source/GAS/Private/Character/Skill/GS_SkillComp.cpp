@@ -50,39 +50,36 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 
 	if (SkillMap.Contains(Slot))
 	{
-		UGS_SkillBase* Skill = SkillMap[Slot];
-		if (Skill)
+		if (SkillMap[Slot]->CanActive())
 		{
-			if (Skill->CanActive())
-			{
-				Skill->ActiveSkill();
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("CanActive() = false"));
-			}
+			SkillMap[Slot]->ActiveSkill();
+			//UE_LOG(LogTemp, Warning, TEXT("CanActive() = true"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Skill is nullptr"));
+			UE_LOG(LogTemp, Warning, TEXT("CanActive() = false"));
 		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SkillMap does not contain slot"));
 	}
+
+	return;
 }
 
-void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
+void UGS_SkillComp::TryDeactiveSkill(ESkillSlot Slot)
 {
+	if (!GetOwner()->HasAuthority())
+	{
+		Server_TryDeactiveSkill(Slot);
+		return;
+	}
+
 	if (SkillMap.Contains(Slot))
 	{
-		UGS_SkillBase* Skill = SkillMap[Slot];
-		if (Skill)
-		{
-			Skill->DeactiveSkill();
-		}		
-	}	
+		SkillMap[Slot]->DeactiveSkill();
+	}
 }
 
 void UGS_SkillComp::TrySkillCommand(ESkillSlot Slot)
@@ -222,6 +219,11 @@ void UGS_SkillComp::OnRep_SkillStates()
 	{
 		SkillStates.Add(State.Slot, State);
 	}
+}
+
+void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
+{
+	TryDeactiveSkill(Slot);
 }
 
 void UGS_SkillComp::Server_TryActiveSkill_Implementation(ESkillSlot Slot)

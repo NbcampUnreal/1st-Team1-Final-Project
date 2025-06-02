@@ -10,6 +10,35 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
+USTRUCT(BlueprintType)
+struct FControlValue
+{
+	GENERATED_BODY()
+public:
+	FControlValue()
+	{
+		bCanLookUp = true;
+		bCanLookRight = true;
+		bCanMoveForward = true;
+		bCanMoveRight = true;
+	}
+
+	bool CanMove() const { return bCanMoveForward || bCanMoveRight; }
+	bool CanLook() const { return bCanLookUp || bCanLookRight; }
+	
+	UPROPERTY(EditAnywhere)
+	bool bCanLookUp;
+
+	UPROPERTY(EditAnywhere)
+	bool bCanLookRight;
+
+	UPROPERTY(EditAnywhere)
+	bool bCanMoveForward;
+
+	UPROPERTY(EditAnywhere)
+	bool bCanMoveRight;
+};
+
 UCLASS()
 class GAS_API AGS_TpsController : public APlayerController
 {
@@ -30,14 +59,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* WalkToggleAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* LClickAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* RClickAction;
-
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* LCtrlAction;*/
 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
     void SetupPlayerAudioListener();
@@ -45,11 +66,14 @@ public:
 	void Move(const FInputActionValue& InputValue);
 	void Look(const FInputActionValue& InputValue);
 	void WalkToggle(const FInputActionValue& InputValue);
-	void LClickPressed(const FInputActionValue& InputValue);
-	void LClickRelease(const FInputActionValue& InputValue);
-	
+
+	UFUNCTION()
+	FControlValue& GetControlValue();
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+	FControlValue ControlValues;
 };

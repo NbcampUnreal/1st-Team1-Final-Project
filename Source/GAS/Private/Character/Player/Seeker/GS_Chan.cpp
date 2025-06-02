@@ -7,6 +7,9 @@
 #include "Weapon/Equipable/GS_WeaponShield.h"
 #include "Net/UnrealNetwork.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
+#include "Character/GS_TpsController.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Character/Skill/GS_SkillComp.h"
 
 
 // Sets default values
@@ -17,6 +20,11 @@ AGS_Chan::AGS_Chan()
 	CharacterType = ECharacterType::Chan;
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_ChanSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 	bReplicates = true;
+}
+
+void AGS_Chan::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
+{
+	Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance())->SetMustTurnInPlace(MustTurn);
 }
 
 // Called when the game starts or when spawned
@@ -46,9 +54,8 @@ void AGS_Chan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AGS_Chan::LeftClickPressed_Implementation()
+void AGS_Chan::OnComboAttack()
 {
-	IGS_AttackInterface::LeftClickPressed_Implementation();
 	if (CanAcceptComboInput)
 	{
 		if (CurrentComboIndex == 0)
@@ -63,11 +70,6 @@ void AGS_Chan::LeftClickPressed_Implementation()
 	}
 }
 
-void AGS_Chan::LeftClickRelease_Implementation()
-{
-	IGS_AttackInterface::LeftClickRelease_Implementation();
-}
-
 void AGS_Chan::ComboInputOpen()
 {
 	CanAcceptComboInput = true;
@@ -76,37 +78,147 @@ void AGS_Chan::ComboInputOpen()
 void AGS_Chan::ComboInputClose()
 {
 	CanAcceptComboInput = false;
-}
-
-void AGS_Chan::EndMontage()
-{
 	if (bNextCombo)
 	{
 		ServerAttackMontage();
 		CanAcceptComboInput = false;
 		bNextCombo = false;
 	}
-	else
+}
+
+void AGS_Chan::ComboEnd()
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
-		if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+		StopAnimMontage();
+		//AnimInstance->Montage_Stop(0.1f);
+		AnimInstance->IsPlayingUpperBodyMontage = false;
+		CurrentComboIndex = 0;
+		CanAcceptComboInput = true;
+
+		AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
+		if (IsValid(TPSController))
 		{
-			AnimInstance->Montage_Stop(0.1f);
-			AnimInstance->IsPlayingComboMontage = false;
-			CurrentComboIndex = 0;
-			CanAcceptComboInput = true;
+			TPSController->GetControlValue().bCanLookRight = true;
 		}
+	}
+}
+
+void AGS_Chan::OnMoveSkill()
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingFullBodyMontage = true;
+	}
+	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController()))
+	{
+		TpsController->GetControlValue().bCanMoveRight = false;
+		TpsController->GetControlValue().bCanMoveForward = false;
+	}
+	bUseControllerRotationYaw = false;
+}
+
+void AGS_Chan::OffMoveSkill()
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingFullBodyMontage = false;
+	}
+	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController()))
+	{
+		TpsController->GetControlValue().bCanMoveRight = true;
+		TpsController->GetControlValue().bCanMoveForward = true;
+	}
+	StopAnimMontage();
+	bUseControllerRotationYaw = true;
+}
+
+void AGS_Chan::OnReadyAimSkill()
+{
+	
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingFullBodyMontage = false;
+		AnimInstance->IsPlayingUpperBodyMontage = true;
+	}
+}
+
+void AGS_Chan::OnJumpAttackSkill()
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingFullBodyMontage = true;
+	}
+}
+
+void AGS_Chan::OffJumpAttackSkill()
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingFullBodyMontage = false;
+	}
+	StopAnimMontage();
+}
+
+void AGS_Chan::ToIdle()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ToIdle"));
+	Multicast_StopSkillMontage(GetCurrentMontage());
+	Multicast_SetIsUpperBodySlot(false);
+	Multicast_SetIsFullBodySlot(false);
+	Multicast_SetMoveControlValue(true, true);
+	Multicast_SetLookControlValue(true, true);
+}
+
+void AGS_Chan::Multicast_SetLookControlValue_Implementation(bool bLookUp, bool bLookRight)
+{
+	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
+	{
+		TPSController->GetControlValue().bCanLookUp = bLookUp;
+		TPSController->GetControlValue().bCanLookRight = bLookRight;		
+	}
+	
+}
+
+void AGS_Chan::Multicast_SetMoveControlValue_Implementation(bool bMoveForward, bool bMoveRight)
+{
+	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
+	{
+		TPSController->GetControlValue().bCanMoveForward = bMoveForward;;
+		TPSController->GetControlValue().bCanMoveRight = bMoveRight;;		
+	}
+}
+
+void AGS_Chan::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingFullBodyMontage = bFullBodySlot;
+	}
+}
+
+void AGS_Chan::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingUpperBodyMontage = bUpperBodySlot;
 	}
 }
 
 void AGS_Chan::MulticastPlayComboSection_Implementation()
 {
+	AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
+	if (IsValid(TPSController))
+	{
+		TPSController->GetControlValue().bCanLookRight = false;
+	}
 	FName SectionName = FName(*FString::Printf(TEXT("Attack%d"), CurrentComboIndex + 1));
 	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
 	CurrentComboIndex++;
 	if (AnimInstance && ComboAnimMontage)
 	{
 		AnimInstance->Montage_Play(ComboAnimMontage);
-		AnimInstance->IsPlayingComboMontage = true;
+		AnimInstance->IsPlayingUpperBodyMontage = true;
 		AnimInstance->Montage_JumpToSection(SectionName, ComboAnimMontage);
 
 		// 콤보 공격 사운드와 공격 목소리 재생
