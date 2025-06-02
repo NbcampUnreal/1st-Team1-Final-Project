@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{63AD1658-6DD8-5196-CBD6-66C7E47E0EEB}",
+    "Hash": "{0C471628-C1D0-2426-1ED0-1E8B62AF649C}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -1072,6 +1072,14 @@
       "CachePath": "0A/{0AE591B5-A6DB-DD9A-FC4E-EB0608ABC463}.wem"
      },
      {
+      "Id": "966363054",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_shield_whoosh_strike_dull.wav",
+      "CachePath": "AB/{ABFD22F9-4870-56DA-131D-5AE7C5FC0264}.wem"
+     },
+     {
       "Id": "969253722",
       "Language": "SFX",
       "Streaming": "false",
@@ -1678,10 +1686,10 @@
       "Name": "EV_ChanAggroSkill",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanAggroSkill",
       "GUID": "{28E1990D-73B5-403C-BA53-4DBAE2B3E962}",
-      "MaxAttenuation": "520",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
-      "DurationMin": "2.3579764",
-      "DurationMax": "2.483323",
+      "DurationMin": "3.4341834",
+      "DurationMax": "3.8703742",
       "MediaRefs": [
        {
         "Id": "278485591"
@@ -1699,6 +1707,9 @@
         "Id": "889173008"
        },
        {
+        "Id": "966363054"
+       },
+       {
         "Id": "1054283662"
        }
       ]
@@ -1708,7 +1719,7 @@
       "Name": "EV_ChanAimingSkill_Slam",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanAimingSkill_Slam",
       "GUID": "{B5B5055B-9F50-45BF-8C07-B1DA58911028}",
-      "MaxAttenuation": "440",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "2.138431",
       "DurationMax": "2.3696923",
@@ -2860,6 +2871,6 @@
     ]
    }
   ],
-  "FileHash": "{DF1770E3-0D62-D837-53AD-1CA7DF4BA19A}"
+  "FileHash": "{422E2ACB-B9C4-FD11-9E3B-A9565E1F74C9}"
  }
 }
