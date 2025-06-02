@@ -58,10 +58,8 @@ public:
 	FOnMonsterDead OnMonsterDead;
 
 	// =============
-	// 전투 음악 관련
+	// 전투 음악 관련 (BGM 이벤트만 유지, 트리거는 제거)
 	// =============
-	UPROPERTY(VisibleAnywhere, Category = "Combat")
-	class USphereComponent* CombatTrigger;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAkAudioEvent* CombatMusicEvent;
@@ -102,12 +100,6 @@ protected:
 
 	virtual void OnDeath() override;
 	
-	UFUNCTION()
-	void OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-	void OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
 	UPROPERTY()
 	TObjectPtr<UGS_MonsterAnimInstance> MonsterAnim;
 	
