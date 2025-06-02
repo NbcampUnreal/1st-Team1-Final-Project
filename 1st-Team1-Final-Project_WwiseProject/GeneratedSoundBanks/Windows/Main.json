@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{1438C3F8-019B-D136-D2F5-601DFDB4EF0E}",
+    "Hash": "{C1F114C8-8025-4E16-FC40-6874E9B4A68A}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -461,7 +461,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_flame_extinguish_short_01_burn_fire_flame.wav",
-      "CachePath": "43/{434549BE-EB06-71AC-59CD-B70B80EEDA22}.wem"
+      "CachePath": "70/{70ED0456-1E0E-4E0D-47F4-EC34F3F43FB4}.wem"
      },
      {
       "Id": "454704061",
@@ -526,6 +526,14 @@
       "Location": "Memory",
       "ShortName": "Footstep_Dirt3.wav",
       "CachePath": "03/{03F7A63B-0B42-C67B-9025-81840E7CAC95}.wem"
+     },
+     {
+      "Id": "520127851",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "DragonMosque_Demo.wav",
+      "CachePath": "34/{34EFDC65-55C7-0461-652E-81A9A70E369C}.wem"
      },
      {
       "Id": "523547018",
@@ -664,14 +672,6 @@
       "CachePath": "08/{08598617-FF12-A9C2-5D2D-35A7CFFD5E2F}.wem"
      },
      {
-      "Id": "624593524",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "MO_DT_136_tonal_texture_booku_ambient_calming_Gmaj.wav",
-      "CachePath": "A9/{A959604A-6956-7167-0B32-0258C4DE17AB}.wem"
-     },
-     {
       "Id": "640069506",
       "Language": "SFX",
       "Streaming": "false",
@@ -798,14 +798,6 @@
       "Location": "Memory",
       "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
       "CachePath": "BF/{BF7D185E-D5C5-B172-7330-642937A5B5C8}.wem"
-     },
-     {
-      "Id": "763229215",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "SFX_Lava_Hit1.wav",
-      "CachePath": "FD/{FDB583FA-E91D-2649-E075-CAA822D48C97}.wem"
      },
      {
       "Id": "790427616",
@@ -1171,14 +1163,6 @@
        "LibId": "8912899"
       },
       {
-       "Id": "372897391",
-       "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Interactive Music Hierarchy\\Default Work Unit\\BGM_Theme\\BGM_Temp\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
-       "GUID": "{A5478D08-348B-4DE2-99AC-DD93BBFC8FEE}",
-       "LibName": "Wwise Pitch Shifter",
-       "LibId": "8912899"
-      },
-      {
        "Id": "459107489",
        "Name": "Pitch Shifter (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\SFX_Mon_SmallClaw\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
@@ -1201,14 +1185,6 @@
        "GUID": "{90895E04-6C77-4899-B5E6-4F5F9A428296}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
-      },
-      {
-       "Id": "819178014",
-       "Name": "Standard (Custom)",
-       "ObjectPath": "\\Interactive Music Hierarchy\\Default Work Unit\\BGM_Theme\\BGM_Temp\\[Effect Slot [1]: (Flanger)]\\Standard (Custom)",
-       "GUID": "{9C58A6F3-1787-4264-BBEF-11128E22A730}",
-       "LibName": "Wwise Flanger",
-       "LibId": "8192003"
       },
       {
        "Id": "975136076",
@@ -1290,7 +1266,7 @@
       "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "0.14469069",
-      "DurationMax": "1.5237615",
+      "DurationMax": "1.6143692",
       "SwitchContainers": [
        {
         "SwitchValue": {
@@ -1465,7 +1441,7 @@
       "Name": "EV_ArrowImpact_Body",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Body",
       "GUID": "{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}",
-      "MaxAttenuation": "500",
+      "MaxAttenuation": "440",
       "DurationType": "OneShot",
       "DurationMin": "0.30958745",
       "DurationMax": "0.32799646",
@@ -1621,7 +1597,7 @@
       "Name": "EV_Fire_Burn",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Burn",
       "GUID": "{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}",
-      "MaxAttenuation": "360",
+      "MaxAttenuation": "400",
       "DurationType": "OneShot",
       "DurationMin": "1.3835624",
       "DurationMax": "1.3835624",
@@ -1638,8 +1614,8 @@
       "GUID": "{1261AE45-6B7B-489A-93E1-50AC8218A43C}",
       "MaxAttenuation": "400",
       "DurationType": "OneShot",
-      "DurationMin": "1.4747763",
-      "DurationMax": "1.4747763",
+      "DurationMin": "1.3630031",
+      "DurationMax": "1.3630031",
       "MediaRefs": [
        {
         "Id": "454432692"
@@ -1688,21 +1664,33 @@
         },
         "MediaRefs": [
          {
-          "Id": "624593524"
+          "Id": "520127851"
          }
-        ],
-        "PluginRefs": {
-         "Custom": [
-          {
-           "Id": "372897391"
-          },
-          {
-           "Id": "819178014"
-          }
-         ]
-        }
+        ]
        }
       ]
+     },
+     {
+      "Id": "2143292400",
+      "Name": "EV_MapBGM_Play",
+      "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_MapBGM_Play",
+      "GUID": "{97CFC085-71D5-4ED9-898C-E53752C8E96F}",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "520127851"
+       }
+      ]
+     },
+     {
+      "Id": "450197394",
+      "Name": "EV_MapBGM_Stop",
+      "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_MapBGM_Stop",
+      "GUID": "{D2D4F199-4E93-44F8-8B05-6D80892A0D4C}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "1129758503",
@@ -1875,8 +1863,8 @@
       "GUID": "{ACB43239-CB8C-41BC-9AC2-2E9257233BFE}",
       "MaxAttenuation": "360",
       "DurationType": "OneShot",
-      "DurationMin": "0.14469069",
-      "DurationMax": "1.0886393",
+      "DurationMin": "0.14552888",
+      "DurationMax": "1.0949455",
       "SwitchContainers": [
        {
         "SwitchValue": {
@@ -2187,14 +2175,11 @@
       "Name": "Props_Lava_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Lava_Hit",
       "GUID": "{714D3788-7B53-452D-9C66-6FC35CD86958}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "320",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
         "Id": "65595387"
-       },
-       {
-        "Id": "763229215"
        }
       ]
      },
@@ -2542,6 +2527,12 @@
       "Name": "LowHPSound",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
       "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
+     },
+     {
+      "Id": "3561306875",
+      "Name": "MapBGMVolume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\MapBGMVolume",
+      "GUID": "{2F3E4FB8-0714-4169-BAB2-33AE6207B7C7}"
      }
     ],
     "StateGroups": [
@@ -2658,6 +2649,6 @@
     ]
    }
   ],
-  "FileHash": "{65E32928-5C92-D67E-7632-9F62F8E3FD28}"
+  "FileHash": "{5A9786C5-58FE-E0E6-3F09-BA9E253693A5}"
  }
 }

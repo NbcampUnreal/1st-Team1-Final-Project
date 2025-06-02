@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "AkAudioEvent.h"
+#include "Engine/World.h"
 #include "GS_CharacterAudioSystem.generated.h"
 
 /**
- * 
+ * 캐릭터 오디오 시스템 - 캐릭터 고유 사운드 관리 (발소리, 공격음 등)
  */
 UCLASS(BlueprintType)
 class GAS_API UGS_CharacterAudioSystem : public UObject
@@ -18,22 +19,15 @@ class GAS_API UGS_CharacterAudioSystem : public UObject
 public:
 	UGS_CharacterAudioSystem();
 
-	// 전투 음악 관련 함수
-	void PlayCombatMusic(AActor* Context);
-	void StopCombatMusic(AActor* Context);
-
-	// 전투 음악 이벤트
-	UPROPERTY(EditDefaultsOnly, Category = "Combat Audio")
-	UAkAudioEvent* CombatMusicEvent;
-
-	// 전투 음악 관련 함수
+	// === 캐릭터 사운드 함수들 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio|Character")
 	void PlayFootstepSound();
 
 	UFUNCTION(BlueprintCallable, Category = "Audio|Character")
 	void PlayCharacterCombatSound(FName CombatEventName, AActor* Context);
 
+protected:
+	// === 캐릭터 사운드 이벤트들 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|Character")
 	class UAkAudioEvent* TestEvent;
-
 };

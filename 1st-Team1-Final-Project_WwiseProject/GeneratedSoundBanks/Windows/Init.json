@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{64D197F0-32FF-F11D-6FED-94433F0238B4}",
+    "Hash": "{7A6BD3CD-E6FF-1329-C340-3285E97AE73B}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -94,6 +94,12 @@
       "Name": "LowHPSound",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
       "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
+     },
+     {
+      "Id": "3561306875",
+      "Name": "MapBGMVolume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\MapBGMVolume",
+      "GUID": "{2F3E4FB8-0714-4169-BAB2-33AE6207B7C7}"
      }
     ],
     "StateGroups": [
@@ -170,6 +176,26 @@
       ]
      },
      {
+      "Id": "4091656514",
+      "Name": "GameState",
+      "ObjectPath": "\\Switches\\Default Work Unit\\GameState",
+      "GUID": "{CCC9218E-CC79-4165-BB1C-EC62716FDE31}",
+      "Switches": [
+       {
+        "Id": "1160234136",
+        "Name": "Normal",
+        "ObjectPath": "\\Switches\\Default Work Unit\\GameState\\Normal",
+        "GUID": "{0209011D-830F-4311-8072-FE46FE3E3A93}"
+       },
+       {
+        "Id": "2764240573",
+        "Name": "Combat",
+        "ObjectPath": "\\Switches\\Default Work Unit\\GameState\\Combat",
+        "GUID": "{20D5D287-A504-4987-870C-9CBDAF27C23D}"
+       }
+      ]
+     },
+     {
       "Id": "4110752327",
       "Name": "BossFootSteps",
       "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps",
@@ -210,6 +236,6 @@
     ]
    }
   ],
-  "FileHash": "{44FF86DD-07E8-94A4-9786-BB8634743CA4}"
+  "FileHash": "{0E9AB86B-2186-DE97-EB95-3F2E5B1E41B9}"
  }
 }

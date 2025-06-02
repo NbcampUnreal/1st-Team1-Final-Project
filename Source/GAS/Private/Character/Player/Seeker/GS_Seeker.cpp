@@ -13,15 +13,13 @@
 #include "NiagaraComponent.h"
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Engine/GameInstance.h"
+#include "Sound/GS_AudioManager.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-	// 전투 음악 관련 초기화
-	CurrentCombatMusicID = 0;
-	ActiveCombatMusicStopEvent = nullptr;
 
 	// Post Process Component 생성 및 설정
 	LowHealthPostProcessComp = CreateDefaultSubobject<UPostProcessComponent>(TEXT("LowHealthPostProcessComp"));
@@ -277,57 +275,46 @@ void AGS_Seeker::RemoveCombatMonster(AGS_Monster* Monster)
 
 void AGS_Seeker::StartCombatMusic()
 {
-	// 로컬 클라이언트에서만 실행
-	if (!IsLocallyControlled())
+	if (!IsLocallyControlled() || NearbyMonsters.Num() == 0 || !NearbyMonsters[0])
 	{
 		return;
 	}
-	
-	// 이미 재생 중이면 중복 재생 방지
-	if (CurrentCombatMusicID != 0)
+
+	// AudioManager 가져오기
+	if (UGameInstance* GameInstance = GetGameInstance())
 	{
-		return;
-	}
-	
-	// 몬스터에서 음악 이벤트 가져오기
-	if (NearbyMonsters.Num() > 0 && NearbyMonsters[0])
-	{
-		if (UAkAudioEvent* CombatMusicEvent = NearbyMonsters[0]->CombatMusicEvent)
+		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
 		{
-			// 전투 음악 재생
-			CurrentCombatMusicID = UAkGameplayStatics::PostEvent(CombatMusicEvent, this, 0, FOnAkPostEventCallback());
-			ActiveCombatMusicStopEvent = NearbyMonsters[0]->CombatMusicStopEvent;
+			UAkAudioEvent* CombatStartEvent = NearbyMonsters[0]->CombatMusicEvent;
+			UAkAudioEvent* CombatStopEvent = NearbyMonsters[0]->CombatMusicStopEvent;
+
+			if (CombatStartEvent)
+			{
+				AudioManager->StartCombatSequence(this, CombatStartEvent, CombatStopEvent);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StartCombatMusic - Monster has no CombatMusicEvent."));
+			}
 		}
 	}
 }
 
 void AGS_Seeker::StopCombatMusic()
 {
-	// 로컬 클라이언트에서만 실행
 	if (!IsLocallyControlled())
 	{
 		return;
 	}
-	
-	if (CurrentCombatMusicID == 0)
-	{
-		return;
-	}
-	
-	// 저장된 Stop Event를 사용하여 Fade Out과 함께 음악 중지
-	if (ActiveCombatMusicStopEvent)
-	{
-		UAkGameplayStatics::PostEvent(ActiveCombatMusicStopEvent, this, 0, FOnAkPostEventCallback());
-	}
-	else
-	{
-		// Stop Event가 없는 경우, 중지하고 경고 로그
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic - ActiveCombatMusicStopEvent is null. Stopping music immediately."));
-		UAkGameplayStatics::StopActor(this);
-	}
 
-	CurrentCombatMusicID = 0;
-	ActiveCombatMusicStopEvent = nullptr;
+	// AudioManager 가져오기
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
+		{
+			AudioManager->EndCombatSequence(this);
+		}
+	}
 }
 
 void AGS_Seeker::UpdateCombatMusicState()
@@ -339,7 +326,7 @@ void AGS_Seeker::UpdateCombatMusicState()
 	});
 	
 	// 몬스터가 없으면 음악 중지
-	if (NearbyMonsters.Num() == 0 && CurrentCombatMusicID != 0)
+	if (NearbyMonsters.Num() == 0)
 	{
 		StopCombatMusic();
 	}
