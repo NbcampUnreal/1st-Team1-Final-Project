@@ -24,6 +24,7 @@ class GAS_API AGS_SeekerMerciArrow : public AGS_WeaponProjectile
 	GENERATED_BODY()
 
 public:
+	AGS_SeekerMerciArrow();
 	UPROPERTY()
 	TSet<AActor*> HitActors;
 
