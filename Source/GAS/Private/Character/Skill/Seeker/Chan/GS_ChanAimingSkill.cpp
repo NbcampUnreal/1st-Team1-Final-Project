@@ -35,13 +35,14 @@ void UGS_ChanAimingSkill::ActiveSkill()
 
 void UGS_ChanAimingSkill::OnSkillCommand()
 {
-	
-	//f (!bIsHoldingUp || CurrentStamina < SlamStaminaCost)
-	if (!bIsHoldingUp)
+	//if (!bIsHoldingUp || CurrentStamina < SlamStaminaCost)
+	if (!bIsHoldingUp || !bCanSlam || CurrentStamina < SlamStaminaCost)
 	{
 		return;
 	}
-	
+
+	bCanSlam = false; // 재사용 금지
+
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 	OwnerPlayer->Multicast_SetMustTurnInPlace(false);
@@ -55,6 +56,20 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 	OwnerPlayer->Multicast_SetMoveControlValue(false, false);
 	
 	OnShieldSlam();
+
+	// 쿨타임 설정
+	OwnerCharacter->GetWorldTimerManager().SetTimer(
+		SlamCooldownHandle,
+		this,
+		&UGS_ChanAimingSkill::ResetSlamCooldown,
+		SlamCooldownTime,
+		false
+	);
+}
+
+void UGS_ChanAimingSkill::ResetSlamCooldown()
+{
+	bCanSlam = true;
 }
 
 void UGS_ChanAimingSkill::ExecuteSkillEffect()
