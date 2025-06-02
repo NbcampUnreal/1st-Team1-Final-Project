@@ -76,6 +76,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetMustTurnInPlace(bool MustTurn);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DrawSkillRange(FVector InLocation, float InRadius, FColor InColor, float InLifetime);
+
 	// Weapon
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	TSubclassOf<class AGS_WeaponShield> WeaponShieldClass;

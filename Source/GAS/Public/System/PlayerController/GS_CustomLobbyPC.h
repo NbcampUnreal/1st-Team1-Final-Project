@@ -11,6 +11,7 @@ class UUserWidget;
 class AGS_PlayerState;
 class UUserWidget;
 class UGS_CustomLobbyUI;
+class UGS_ArcaneBoardWidget;
 
 UCLASS()
 class GAS_API AGS_CustomLobbyPC : public APlayerController
@@ -45,6 +46,9 @@ protected:
 	void HandleRoleChanged(EPlayerRole NewRole);
 	UFUNCTION()
 	void HandleReadyStatusChanged(bool bNewReadyStatus);
+	
+	UFUNCTION()
+	void InitPerkWidget(UGS_ArcaneBoardWidget* Widget);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Lobby Actions")

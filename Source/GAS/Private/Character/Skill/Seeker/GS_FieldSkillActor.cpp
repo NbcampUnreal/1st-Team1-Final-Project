@@ -42,6 +42,12 @@ void AGS_FieldSkillActor::BeginPlay()
 	
 }
 
+void AGS_FieldSkillActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	GetWorldTimerManager().ClearTimer(DestroyTimerHandle); // 안전하게 해제
+}
+
 void AGS_FieldSkillActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor == Caster) return;
@@ -97,7 +103,10 @@ void AGS_FieldSkillActor::ApplyFieldEffect()
 
 void AGS_FieldSkillActor::DestroySelf()
 {
-	Destroy();
+	if (!IsActorBeingDestroyed() && IsValid(this))
+	{
+		Destroy();
+	}
 }
 
 void AGS_FieldSkillActor::ApplyFieldEffectToMonster(AGS_Monster* Target)

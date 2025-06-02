@@ -96,15 +96,6 @@ public:
 private:
 	UPROPERTY()
 	TArray<class AGS_Monster*> NearbyMonsters;
-	
-	UPROPERTY()
-	int32 CurrentCombatMusicID;
-	
-	UPROPERTY()
-	FTimerHandle CombatMusicFadeTimerHandle;
-
-	UPROPERTY()
-	UAkAudioEvent* ActiveCombatMusicStopEvent; // 현재 재생 중인 전투 음악에 대한 Stop Event
 
 public:
 	// 몬스터가 전투 음악 시작/중지를 요청할 때 호출

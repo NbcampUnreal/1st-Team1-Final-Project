@@ -552,8 +552,8 @@
 							<ChildrenList>
 								<Action Name="" ID="{FCC7F9FC-2D22-431C-AB7F-07EF81BD65EA}" ShortID="306751028">
 									<PropertyList>
-										<Property Name="FadeInCurve" Type="int16" Value="7"/>
-										<Property Name="FadeTime" Type="Real64" Value="2.5"/>
+										<Property Name="FadeInCurve" Type="int16" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="2"/>
 									</PropertyList>
 									<ReferenceList>
 										<Reference Name="Target">
@@ -568,12 +568,44 @@
 								<Action Name="" ID="{7DA1B27F-902A-481F-9A93-50991A7F58CB}" ShortID="611338682">
 									<PropertyList>
 										<Property Name="ActionType" Type="int16" Value="2"/>
-										<Property Name="FadeOutCurve" Type="int16" Value="7"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="1"/>
 										<Property Name="FadeTime" Type="Real64" Value="2"/>
 									</PropertyList>
 									<ReferenceList>
 										<Reference Name="Target">
 											<ObjectRef Name="CombatMusic" ID="{8337F92F-C852-4576-AE80-24337AECED65}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_MapBGM_Play" ID="{97CFC085-71D5-4ED9-898C-E53752C8E96F}">
+							<ChildrenList>
+								<Action Name="" ID="{4F367D68-F036-4ACC-9A19-EAB7F9674E72}" ShortID="287160469">
+									<PropertyList>
+										<Property Name="FadeInCurve" Type="int16" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="2"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="NormalMusic" ID="{BF57A4A4-7C90-4A66-861B-2A54F23EDD9B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_MapBGM_Stop" ID="{D2D4F199-4E93-44F8-8B05-6D80892A0D4C}">
+							<ChildrenList>
+								<Action Name="" ID="{077B485C-4FA4-4AD4-B395-DBD4FBD5CA2F}" ShortID="748295023">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeInCurve" Type="int16" Value="1"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="2"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="NormalMusic" ID="{BF57A4A4-7C90-4A66-861B-2A54F23EDD9B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>

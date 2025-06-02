@@ -21,6 +21,12 @@
 						<Switch Name="Lava" ID="{8DA08B1B-F569-4C9E-9E1B-550EB1014C63}"/>
 					</ChildrenList>
 				</SwitchGroup>
+				<SwitchGroup Name="GameState" ID="{CCC9218E-CC79-4165-BB1C-EC62716FDE31}">
+					<ChildrenList>
+						<Switch Name="Normal" ID="{0209011D-830F-4311-8072-FE46FE3E3A93}"/>
+						<Switch Name="Combat" ID="{20D5D287-A504-4987-870C-9CBDAF27C23D}"/>
+					</ChildrenList>
+				</SwitchGroup>
 			</ChildrenList>
 		</WorkUnit>
 	</Switches>

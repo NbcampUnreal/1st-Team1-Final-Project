@@ -83,6 +83,8 @@ void AGS_SeekerMerciArrow::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, A
 
 	HitActors.Add(OtherActor);
 
+	UE_LOG(LogTemp, Error, TEXT("Arrow hit actor: %s"), *OtherActor->GetName());
+
 	// 맞은 대상 구분
 	ETargetType TargetType = DetermineTargetType(OtherActor);
 
