@@ -526,6 +526,50 @@
 										</Action>
 									</ChildrenList>
 								</Event>
+								<Event Name="EV_ChanAggroSkill" ID="{28E1990D-73B5-403C-BA53-4DBAE2B3E962}">
+									<ChildrenList>
+										<Action Name="" ID="{1C0CB9C7-103F-4D01-8F3A-843A9440CF7C}" ShortID="479748366">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_ChanAggroSkill" ID="{49C1336D-0985-4C5B-9B1A-D3ECD17F9C29}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_ChanAimingSkill_Slam" ID="{B5B5055B-9F50-45BF-8C07-B1DA58911028}">
+									<ChildrenList>
+										<Action Name="" ID="{E82ADC6B-324D-4E71-9061-DC5386EC35A1}" ShortID="964963513">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_ChanAimingSkill_Slam" ID="{E48ED402-BFAC-4B09-A465-3E6F8D3D88AD}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_ChanAimingSkill_Start" ID="{7C3AC2CE-3A77-4585-B3B8-C6EC25FF562B}">
+									<ChildrenList>
+										<Action Name="" ID="{1D9514E1-1F15-463A-B217-EB310A7DC44D}" ShortID="486865117">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_ChanAimingSkill_Start" ID="{AF1EFE1E-4B7E-47DA-B97C-72C1E65B8B4A}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_ChanUltimateSkill" ID="{40E52A35-A7E0-4366-B089-96E381CC811A}">
+									<ChildrenList>
+										<Action Name="" ID="{BF6B78CF-114F-462D-8D12-8F7E07B704AE}" ShortID="952441864">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_ChanUltimateSkill" ID="{78BBFF70-AA7B-436E-8658-4CE72E7CE006}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
 						</Folder>
 					</ChildrenList>
