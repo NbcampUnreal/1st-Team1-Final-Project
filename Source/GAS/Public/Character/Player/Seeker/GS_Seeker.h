@@ -97,9 +97,9 @@ public:
 	// ================
 	// 전투 음악 관리
 	// ================
-private:
-	UPROPERTY()
-	TArray<class AGS_Monster*> NearbyMonsters;
+	// 몬스터 감지용 컴포넌트 추가
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
+	class USphereComponent* CombatTrigger;
 
 public:
 	// 몬스터가 전투 음악 시작/중지를 요청할 때 호출
@@ -109,7 +109,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveCombatMonster(class AGS_Monster* Monster);
 
+	// 새로운 몬스터 감지 시스템 (시커의 CombatTrigger)
+	UFUNCTION()
+	void OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 private:
+	UPROPERTY()
+	TArray<class AGS_Monster*> NearbyMonsters;
+
 	void StartCombatMusic();
 	void StopCombatMusic();
 	void UpdateCombatMusicState();

@@ -38,16 +38,6 @@ AGS_Monster::AGS_Monster()
 	TeamId = FGenericTeamId(2);
 
 	Tags.Add("Monster");
-
-	CombatTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("CombatTrigger"));
-	CombatTrigger->SetupAttachment(RootComponent);
-	CombatTrigger->SetSphereRadius(1200.0f);
-
-	// SoundTrigger 프리셋 사용
-	CombatTrigger->SetCollisionProfileName(TEXT("SoundTrigger"));
-
-	CombatTrigger->OnComponentBeginOverlap.AddDynamic(this, &AGS_Monster::OnCombatTriggerBeginOverlap);
-	CombatTrigger->OnComponentEndOverlap.AddDynamic(this, &AGS_Monster::OnCombatTriggerEndOverlap);
 }
 
 void AGS_Monster::BeginPlay()
@@ -131,26 +121,4 @@ void AGS_Monster::Attack()
 void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 {
 	MonsterAnim->Montage_Play(AttackMontage);
-}
-
-void AGS_Monster::OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (OtherActor && OtherActor->IsA(AGS_Seeker::StaticClass()))
-	{
-		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor))
-		{
-			Seeker->AddCombatMonster(this);
-		}
-	}
-}
-
-void AGS_Monster::OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	if (OtherActor && OtherActor->IsA(AGS_Seeker::StaticClass()))
-	{
-		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor))
-		{
-			Seeker->RemoveCombatMonster(this);
-		}
-	}
 }
