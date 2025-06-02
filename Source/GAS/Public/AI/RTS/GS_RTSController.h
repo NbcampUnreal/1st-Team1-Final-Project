@@ -127,9 +127,15 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void MoveAIViaMinimap(const FVector& WorldLocation);
+
+	UFUNCTION(BlueprintCallable)
+	void AttackAIViaMinimap(const FVector& WorldLocation);
 	
 	UFUNCTION(BlueprintCallable)
 	void MoveCameraViaMinimap(const FVector& WorldLocation);
+
+	UFUNCTION(BlueprintPure)
+	ERTSCommand GetCurrentCommand() const { return CurrentCommand; }
 
 	// Server
 	UFUNCTION(Server, Reliable)
