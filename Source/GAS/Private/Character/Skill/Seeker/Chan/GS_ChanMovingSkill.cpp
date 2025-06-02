@@ -47,7 +47,7 @@ void UGS_ChanMovingSkill::ExecuteSkillEffect()
 	TArray<FHitResult> HitResults;
 
 	const FVector Center = OwnerCharacter->GetActorLocation(); // 중심은 캐릭터
-	const float Radius = 1000.0f;
+	const float Radius = 800.0f;
 
 	FCollisionShape Shape = FCollisionShape::MakeSphere(Radius);
 	FCollisionQueryParams Params;
