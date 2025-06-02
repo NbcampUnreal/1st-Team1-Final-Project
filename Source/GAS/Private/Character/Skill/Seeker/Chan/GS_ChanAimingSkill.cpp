@@ -61,13 +61,16 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 
 	const FVector Start = OwnerCharacter->GetActorLocation();
 	const FVector Forward = OwnerCharacter->GetActorForwardVector();
+	FVector SkillLocation = Start + Forward * 150.0f;
 	const float Radius = 200.f;
 
 	FCollisionShape Shape = FCollisionShape::MakeSphere(Radius);
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
 
-	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitResults, Start, Start + Forward * 100.f, FQuat::Identity, ECC_Pawn, Shape, Params))
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	OwnerPlayer->Multicast_DrawSkillRange(SkillLocation, Radius, FColor::Red, 1.0f);
+	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitResults, SkillLocation, SkillLocation, FQuat::Identity, ECC_Pawn, Shape, Params))
 	{
 		TSet<AActor*> HitActors;
 
