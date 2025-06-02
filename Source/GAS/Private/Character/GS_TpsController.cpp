@@ -12,6 +12,7 @@
 #include "Net/UnrealNetwork.h"
 #include "System/GS_PlayerState.h"
 
+
 AGS_TpsController::AGS_TpsController()
 {
 	InputMappingContext = nullptr;
@@ -109,10 +110,8 @@ void AGS_TpsController::PageDown(const FInputActionValue& InputValue)
 
 }
 
-void AGS_TpsController::BeginPlay()
+void AGS_TpsController::InitControllerPerWorld()
 {
-	Super::BeginPlay();
-
 	SetInputMode(FInputModeGameOnly());
 
 	if (!HasAuthority() && IsLocalController())
@@ -124,15 +123,22 @@ void AGS_TpsController::BeginPlay()
 		Subsystem->AddMappingContext(InputMappingContext, 0);
 
 		// 오디오 리스너 설정 (약간의 지연을 두고 실행)
-        FTimerHandle TimerHandle;
-        GetWorld()->GetTimerManager().SetTimer(
-			TimerHandle, 
-			this, 
-			&AGS_TpsController::SetupPlayerAudioListener, 
-			0.1f, 
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(
+			TimerHandle,
+			this,
+			&AGS_TpsController::SetupPlayerAudioListener,
+			0.1f,
 			false
-			);
+		);
 	}
+}
+
+void AGS_TpsController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitControllerPerWorld();
 }
 
 void AGS_TpsController::SetupPlayerAudioListener()
@@ -176,4 +182,22 @@ void AGS_TpsController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AGS_TpsController, bCanMove);
+}
+
+void AGS_TpsController::PostSeamlessTravel()
+{
+	Super::PostSeamlessTravel();
+
+	InitControllerPerWorld();
+}
+
+void AGS_TpsController::BeginPlayingState()
+{
+	Super::BeginPlayingState();
+
+	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s) --- BeginPlayingState CALLED ---"), *GetNameSafe(this));
+	if (IsLocalController())
+	{
+		AddWidget();
+	}
 }

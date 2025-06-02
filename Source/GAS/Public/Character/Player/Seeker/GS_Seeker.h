@@ -13,6 +13,7 @@ class UGS_SkillInputHandlerComp;
 class UPostProcessComponent;
 class UMaterialInterface;
 class UGS_StatComp;
+class AGS_PlayerState;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -43,6 +44,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	// OnDeath 오버라이드 추가
+	virtual void OnDeath() override;
 
 	UFUNCTION(BlueprintCallable)
 	void SetAimState(bool IsAim);
@@ -109,6 +113,10 @@ private:
 	void StartCombatMusic();
 	void StopCombatMusic();
 	void UpdateCombatMusicState();
+
+	// PlayerState 생존 상태 변경 핸들러
+	UFUNCTION()
+	void HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive);
 
 protected:
 	virtual void BeginPlay() override;

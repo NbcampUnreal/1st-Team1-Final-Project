@@ -7,6 +7,7 @@
 
 class UGS_SkillBase;
 class UImage;
+class UAkAudioEvent;
 
 USTRUCT(BlueprintType)
 struct GAS_API FSkillInfo
@@ -27,6 +28,19 @@ struct GAS_API FSkillInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* Image;
+
+	// 스킬 사운드 이벤트들
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	UAkAudioEvent* SkillStartSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	UAkAudioEvent* SkillCastSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	UAkAudioEvent* SkillImpactSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	UAkAudioEvent* SkillEndSound;
 };
 
 USTRUCT(BlueprintType)

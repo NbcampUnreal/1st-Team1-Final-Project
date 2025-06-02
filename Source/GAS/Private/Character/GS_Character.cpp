@@ -112,7 +112,8 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f by %s"), *GetName(), ActualDamage, *DamageCauser->GetName());
 
-	StatComp->SetCurrentHealth(CurrentHealth - ActualDamage, false);
+	float NewHealth = CurrentHealth - ActualDamage;
+	StatComp->SetCurrentHealth(NewHealth, false);
 
 	return ActualDamage;
 }

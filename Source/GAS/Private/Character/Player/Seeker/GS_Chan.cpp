@@ -11,6 +11,8 @@
 #include "Character/GS_TpsController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "AkComponent.h"
+#include "AkAudioEvent.h"
 
 
 // Sets default values
@@ -32,15 +34,10 @@ void AGS_Chan::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 void AGS_Chan::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (HasAuthority())
-	{
-		SpawnAndAttachWeapon(WeaponShieldClass, WeaponShieldName, WeaponShield);
-		SpawnAndAttachWeapon(WeaponAxeClass, WeaponAxeName, WeaponAxe);
-	}
 	
 	SetReplicateMovement(true);
 	GetMesh()->SetIsReplicated(true);
+	
 }
 
 // Called every frame
@@ -220,9 +217,15 @@ void AGS_Chan::Client_ChanAimingSkillBar_Implementation(bool bShow)
 	{
 		ChanAimingSkillBarWidget->ShowSkillBar(bShow);
 	}
-
 }
 
+void AGS_Chan::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
+{
+	if (SoundToPlay && AkComponent)
+	{
+		AkComponent->PostAkEvent(SoundToPlay);
+	}
+}
 
 void AGS_Chan::MulticastPlayComboSection_Implementation()
 {
@@ -256,16 +259,18 @@ void AGS_Chan::MulticastPlayComboSection_Implementation()
 
 void AGS_Chan::ServerAttackMontage_Implementation()
 {
-	if (HasAuthority())
-	{
-		MulticastPlayComboSection();
-	}
+	MulticastPlayComboSection();
 }
 
-void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float InRadius, FColor InColor, float InLifetime)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AGS_Chan, WeaponAxe);
-	DOREPLIFETIME(AGS_Chan, WeaponShield);
+	DrawDebugSphere(
+		GetWorld(),
+		InLocation,
+		InRadius,
+		16,
+		InColor,
+		false,
+		InLifetime
+	);
 }
