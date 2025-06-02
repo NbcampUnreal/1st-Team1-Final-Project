@@ -269,3 +269,16 @@ void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME(AGS_Chan, WeaponAxe);
 	DOREPLIFETIME(AGS_Chan, WeaponShield);
 }
+
+void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float InRadius, FColor InColor, float InLifetime)
+{
+	DrawDebugSphere(
+		GetWorld(),
+		InLocation,
+		InRadius,
+		16,
+		InColor,
+		false,
+		InLifetime
+	);
+}
