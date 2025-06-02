@@ -75,8 +75,8 @@ public:
 	void Move(const FInputActionValue& InputValue);
 	void Look(const FInputActionValue& InputValue);
 	void WalkToggle(const FInputActionValue& InputValue);
-	void LClickPressed(const FInputActionValue& InputValue);
-	void LClickRelease(const FInputActionValue& InputValue);
+	/*void LClickPressed(const FInputActionValue& InputValue);
+	void LClickRelease(const FInputActionValue& InputValue);*/
 	void PageUp(const FInputActionValue& InputValue);
 	void PageDown(const FInputActionValue& InputValue);
 	
@@ -86,6 +86,9 @@ public:
 	UFUNCTION()
 	FControlValue& GetControlValue();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+	FControlValue ControlValues;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -94,7 +97,4 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bCanMove;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
-	FControlValue ControlValues;
 };

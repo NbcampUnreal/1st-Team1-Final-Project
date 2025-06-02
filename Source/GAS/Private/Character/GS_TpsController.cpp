@@ -75,7 +75,7 @@ FControlValue& AGS_TpsController::GetControlValue()
 	return ControlValues;
 }
 
-void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
+/*void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
 {
 	if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
 	{
@@ -84,7 +84,7 @@ void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
 			IGS_AttackInterface::Execute_LeftClickRelease(ControlledPlayer);
 		}
 	}
-}
+}*/
 
 void AGS_TpsController::PageUp(const FInputActionValue& InputValue)
 {
