@@ -17,13 +17,12 @@ UGS_DebuffComp::UGS_DebuffComp()
 
 void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AGS_Character* Attacker)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Apply Debuff"));
 	if (!GetOwner()->HasAuthority())
 	{
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Apply Debuff: %s"), *UEnum::GetValueAsString(Type));
+	UE_LOG(LogTemp, Error, TEXT("Apply Debuff: %s"), *UEnum::GetValueAsString(Type));
 
 	// 해당 디버프 타입의 데이터 가져오기
 	const FDebuffData* Row = GetDebuffData(Type);
@@ -37,6 +36,7 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AGS_Character* Attacker)
 		Existing->StartTime = GetWorld()->GetTimeSeconds(); // 시작 시간 재저장
 		RefreshDebuffTimer(Existing, Row->Duration);
 		UpdateReplicatedDebuffList(); // 복제 정보 갱신
+		UE_LOG(LogTemp, Error, TEXT("Debuff Existing: %s"), *UEnum::GetValueAsString(Type));
 		return;
 	}
 
@@ -114,7 +114,7 @@ const FDebuffData* UGS_DebuffComp::GetDebuffData(EDebuffType Type) const
 	
 	// 디버프 데이터 Row 반환
 	FName RowName = *UEnum::GetValueAsString(Type).RightChop(13);
-	UE_LOG(LogTemp, Warning, TEXT("Get Debuff Data"));
+	/*UE_LOG(LogTemp, Warning, TEXT("Get Debuff Data"));*/
 	return DebuffDataTable->FindRow<FDebuffData>(RowName, TEXT(""));
 }
 
@@ -146,14 +146,31 @@ void UGS_DebuffComp::RefreshDebuffTimer(UGS_DebuffBase* Debuff, float Duration)
 {
 	if (FTimerHandle* FoundHandle = DebuffTimers.Find(Debuff))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("RefreshDebuff exist timer handle"));
 		GetWorld()->GetTimerManager().ClearTimer(*FoundHandle);
 		GetWorld()->GetTimerManager().SetTimer(*FoundHandle, [this, Debuff]()
 			{
 				Debuff->OnExpire();
-				ConcurrentDebuffs.Remove(Debuff);
 				DebuffTimers.Remove(Debuff);
+				if (ConcurrentDebuffs.Contains(Debuff))
+				{
+					ConcurrentDebuffs.Remove(Debuff);
+				}
+				else if (DebuffQueue.Contains(Debuff))
+				{
+					DebuffQueue.Remove(Debuff);
+				}
+				else if (Debuff == CurrentDebuff)
+				{
+					CurrentDebuff = nullptr;
+					ApplyNextDebuff();
+				}
 				UpdateReplicatedDebuffList();
 			}, Duration, false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("RefreshDebuff not exist timer handle"));
 	}
 }
 

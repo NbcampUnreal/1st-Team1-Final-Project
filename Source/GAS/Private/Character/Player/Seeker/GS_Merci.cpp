@@ -206,14 +206,21 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 
 	// 4. 무기의 소켓 위치에서 목표 위치로 향하는 방향 계산
 	FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");
+	float Distance = FVector::Dist(TargetLocation, SpawnLocation);
+	UE_LOG(LogTemp, Warning, TEXT("Distance From Spawn To Target = %f"), Distance);
+
+	if (Distance < 200.0f) // 너무 가까우면
+	{
+		TargetLocation = TraceStart + ViewRot.Vector() * 2000.0f; // 적당한 거리 보정
+		//Distance = FVector::Dist(TargetLocation, SpawnLocation); // 재계산
+	}
 	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
 	FRotator BaseRotation = LaunchDirection.Rotation();
 
 	FVector VFXLocation = SpawnLocation;
 	FRotator VFXRotation = BaseRotation;
 
-	float Distance = FVector::Dist(TargetLocation, SpawnLocation);
-
+	
 	// 선형 보정 (예: 최대 2000 거리까지, 최대 20도 상승)
 	float MaxDistance = 5000.0f;
 	float MaxPitch = 40.0f;
@@ -261,7 +268,6 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 			}
 		}
 	}
-	
 	// 8. 화살 발사 VFX 호출 (멀티캐스트로 모든 클라이언트에서 재생)
 	Multicast_PlayArrowShotVFX(VFXLocation, VFXRotation, NumArrows);
 }
