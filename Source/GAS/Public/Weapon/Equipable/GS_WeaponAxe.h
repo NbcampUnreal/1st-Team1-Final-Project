@@ -45,6 +45,9 @@ public:
 	//UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	//UAkAudioEvent* HitSound;
 
+	UPROPERTY()
+	class AGS_Character* OwnerChar;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -52,7 +55,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Attack")
 	class UBoxComponent* HitBox;
 
-	UPROPERTY()
-	class AGS_Character* OwnerChar;
+
 };
 

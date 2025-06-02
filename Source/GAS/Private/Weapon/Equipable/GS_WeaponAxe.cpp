@@ -39,7 +39,7 @@ void AGS_WeaponAxe::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 	{
 		return;
 	}
- 
+	
 	AGS_Character* Damaged = Cast<AGS_Character>(OtherActor);
 	AGS_Character* Attacker = OwnerChar;
 
@@ -57,8 +57,6 @@ void AGS_WeaponAxe::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 	float Damage = DamagedStat->CalculateDamage(Attacker, Damaged);
 	FDamageEvent DamageEvent;
 	Damaged->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar);
-
-	UE_LOG(LogTemp, Warning, TEXT("Axe TakeDamage SJE"));
 	
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
@@ -75,12 +73,12 @@ void AGS_WeaponAxe::DisableHit()
 
 void AGS_WeaponAxe::ServerDisableHit_Implementation()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGS_WeaponAxe::ServerEnableHit_Implementation()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 // Called when the game starts or when spawned

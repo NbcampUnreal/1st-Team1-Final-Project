@@ -3,6 +3,7 @@
 
 #include "Animation/Notifies/GS_ANS_HitWeaponForChan.h"
 #include "Character/GS_Character.h"
+#include "Character/Player/Seeker/GS_Chan.h"
 #include "Weapon/Equipable/GS_WeaponAxe.h"
 
 void UGS_ANS_HitWeaponForChan::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
@@ -16,9 +17,9 @@ void UGS_ANS_HitWeaponForChan::NotifyBegin(USkeletalMeshComponent* MeshComp, UAn
 		return;
 	}
 
-	if (AGS_Character* Monster = Cast<AGS_Character>(MeshComp->GetOwner()))
+	if (AGS_Chan* Attacker = Cast<AGS_Chan>(MeshComp->GetOwner()))
 	{
-		if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Monster->GetWeaponByIndex(0)))
+		if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Attacker->GetWeaponByIndex(0)))
 		{
 			Weapon->ServerEnableHit();
 		}
@@ -35,9 +36,9 @@ void UGS_ANS_HitWeaponForChan::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnim
 		return;
 	}
 
-	if (AGS_Character* Monster = Cast<AGS_Character>(MeshComp->GetOwner()))
+	if (AGS_Chan* Attacker = Cast<AGS_Chan>(MeshComp->GetOwner()))
 	{
-		if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Monster->GetWeaponByIndex(0)))
+		if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Attacker->GetWeaponByIndex(0)))
 		{
 			Weapon->ServerDisableHit();
 		}
