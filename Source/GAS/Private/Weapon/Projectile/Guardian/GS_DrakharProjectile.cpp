@@ -8,9 +8,13 @@
 
 AGS_DrakharProjectile::AGS_DrakharProjectile()
 {
-	CollisionComponent->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
-	CollisionComponent->SetCollisionObjectType(ECC_GameTraceChannel1);
-	CollisionComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+	//CollisionComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn);
+	//CollisionComponent->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+	//CollisionComponent->SetCollisionObjectType(ECC_GameTraceChannel1);
+	//CollisionComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
+
+	//CollisionComponent->SetCollisio
+	//CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AGS_DrakharProjectile::BeginPlay()
