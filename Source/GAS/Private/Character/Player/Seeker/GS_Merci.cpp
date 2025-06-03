@@ -211,16 +211,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 
 	const float MinFireDistance = 250.0f;
 
-	if (Distance < MinFireDistance) // 너무 가까우면
-	{
-		TargetLocation = TraceStart + ViewRot.Vector() * 2000.0f; // 적당한 거리 보정
-		//Distance = FVector::Dist(TargetLocation, SpawnLocation); // 재계산
-	}
 	FVector LaunchDirection = (TargetLocation - SpawnLocation).GetSafeNormal();
-	if (LaunchDirection.IsNearlyZero())
-	{
-		LaunchDirection = ViewRot.Vector(); // Fallback
-	}
 	FRotator BaseRotation = LaunchDirection.Rotation();
 
 	FVector VFXLocation = SpawnLocation;
@@ -251,10 +242,6 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		FRotator SpreadRot = BaseRotation;
 		SpreadRot.Yaw += OffsetAngle;
 		FVector SpreadDir = SpreadRot.Vector();
-		if (SpreadDir.IsNearlyZero())
-		{
-			SpreadDir = ViewRot.Vector(); // Fallback
-		}
 		FRotator ArrowRot = SpreadDir.Rotation();
 
 		// 6. 화살 스폰
@@ -278,7 +265,6 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 			}
 		}
 		//Multicast_DrawDebugLine(SpawnLocation, TargetLocation, FColor::Red);
-		//Multicast_DrawDebugLine(SpawnLocation, SpawnLocation + SpreadDir * 500.0f, FColor::Cyan);
 	}
 	// 8. 화살 발사 VFX 호출 (멀티캐스트로 모든 클라이언트에서 재생)
 	Multicast_PlayArrowShotVFX(VFXLocation, VFXRotation, NumArrows);

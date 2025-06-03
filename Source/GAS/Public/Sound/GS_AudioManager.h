@@ -71,7 +71,7 @@ public:
 	void StartCombatSequence(AActor* Context, UAkAudioEvent* CombatMusicStartEvent, UAkAudioEvent* CombatMusicStopEvent, float FadeTime = 2.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "Audio|Combat", meta = (DisplayName = "전투 시퀀스 종료", ToolTip = "전투 BGM을 중지하고 맵 BGM을 복원합니다."))
-	void EndCombatSequence(AActor* Context, float FadeTime = 3.0f);
+	void EndCombatSequence(AActor* Context, UAkAudioEvent* CombatMusicStopEvent = nullptr, float FadeTime = 3.0f);
 
 	// === 멀티플레이어 지원 함수들 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio|Multiplayer", meta = (DisplayName = "모든 클라이언트 맵 BGM 시작"))
@@ -92,6 +92,9 @@ public:
 
 	UFUNCTION(Exec, Category = "Audio|Debug")
 	void StopMapBGMDebug();
+
+	// 현재 재생 중인 전투 BGM Stop Event 가져오기
+	UAkAudioEvent* GetCurrentCombatMusicStopEvent() const { return CurrentCombatMusicStopEvent; }
 
 protected:
 	// === 맵 BGM 관련 에셋들 ===
@@ -121,6 +124,10 @@ private:
 
 	UPROPERTY()
 	UAkAudioEvent* CurrentCombatMusicStopEvent;
+
+	// 기본 전투 BGM 정지 이벤트 (EV_CombatStop)
+	UPROPERTY()
+	UAkAudioEvent* DefaultCombatStopEvent;
 
 	// RTPC 헬퍼 함수
 	void SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context, float InterpolationTime = 0.0f);

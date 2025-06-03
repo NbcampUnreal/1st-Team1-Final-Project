@@ -29,8 +29,13 @@ public:
 	
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 private:
 	void AddSpacerInHorizeontalBox();
 	void AddSpacerInVerticalBox();
+
+	void OnCharacterSelectClicked(int32 CharacterID, EPlayerRole PlayerRole);
+
+	TArray<TObjectPtr<UCustomCommonButton>> ButtonRefs;
 };

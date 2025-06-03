@@ -1,3 +1,4 @@
+
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
@@ -23,7 +24,7 @@ struct FDebuffRepInfo
 	float RemainingTime;
 };
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class GAS_API UGS_DebuffComp : public UActorComponent
 {
 	GENERATED_BODY()
@@ -48,6 +49,7 @@ public:
 	void ClearAllDebuffs();
 
 protected:
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	const FDebuffData* GetDebuffData(EDebuffType Type) const;
 	UGS_DebuffBase* GetActiveDebuff(EDebuffType Type) const;
 
@@ -67,7 +69,7 @@ protected:
 
 	UPROPERTY()
 	TArray<UGS_DebuffBase*> DebuffQueue;
-	
+
 	UPROPERTY()
 	TArray<UGS_DebuffBase*> ConcurrentDebuffs;
 
