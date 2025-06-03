@@ -11,6 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
+#include "Character/Player/GS_Player.h"
+#include "AkAudioEvent.h"
 #include "AI/GS_AIController.h"
 #include "Navigation/PathFollowingComponent.h"
 
@@ -29,6 +31,12 @@ void UGS_ChanAimingSkill::ActiveSkill()
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 		OwnerPlayer->Multicast_SetMoveControlValue(false, false);
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		
+		// 에이밍 스킬 시작 사운드 재생
+		if (OwnerPlayer->AimingSkillStartSound)
+		{
+			OwnerPlayer->PlaySound(OwnerPlayer->AimingSkillStartSound);
+		}
 	}
 	StartHoldUp();
 }
@@ -54,6 +62,12 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 
 	OwnerPlayer->Multicast_SetLookControlValue(false, false);
 	OwnerPlayer->Multicast_SetMoveControlValue(false, false);
+	
+	// 방패 슬램 사운드 재생
+	if (OwnerPlayer->AimingSkillSlamSound)
+	{
+		OwnerPlayer->PlaySound(OwnerPlayer->AimingSkillSlamSound);
+	}
 	
 	OnShieldSlam();
 

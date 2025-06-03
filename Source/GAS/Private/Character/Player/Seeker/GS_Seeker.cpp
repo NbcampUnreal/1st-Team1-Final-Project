@@ -11,10 +11,10 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 #include "NiagaraComponent.h"
-#include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Engine/GameInstance.h"
 #include "Sound/GS_AudioManager.h"
+#include "System/GS_PlayerState.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -87,6 +87,13 @@ void AGS_Seeker::BeginPlay()
 		if (UGS_StatComp* FoundStatComp = FindComponentByClass<UGS_StatComp>())
 		{
 			FoundStatComp->OnCurrentHPChanged.AddUObject(this, &AGS_Seeker::HandleLowHealthEffect);
+		}
+
+		// PlayerState 생존 상태 변경 델리게이트 바인딩
+		AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+		if (PS)
+		{
+			PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_Seeker::HandleAliveStatusChanged);
 		}
 	}
 }
@@ -169,6 +176,16 @@ void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		LowHealthPostProcessComp->bEnabled = false;
 		LowHealthPostProcessComp->Settings.WeightedBlendables.Array.Empty();
+	}
+
+	// PlayerState 생존 상태 변경 델리게이트 해제
+	if (IsLocallyControlled())
+	{
+		AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+		if (PS)
+		{
+			PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
+		}
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -274,7 +291,7 @@ void AGS_Seeker::RemoveCombatMonster(AGS_Monster* Monster)
 	// 모든 몬스터가 제거되면 음악 중지
 	if (NearbyMonsters.Num() == 0)
 	{
-		StopCombatMusic();
+		ClientRPCStopCombatMusic();
 	}
 }
 
@@ -305,20 +322,42 @@ void AGS_Seeker::StartCombatMusic()
 	}
 }
 
-void AGS_Seeker::StopCombatMusic()
+void AGS_Seeker::ClientRPCStopCombatMusic_Implementation()
 {
-	if (!IsLocallyControlled())
-	{
-		return;
-	}
+	// 죽었을 때는 IsLocallyControlled() 체크를 하지 않음
+	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() called for %s"), *GetName());
 
 	// AudioManager 가져오기
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
 		{
-			AudioManager->EndCombatSequence(this);
+			UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() - Calling EndCombatSequence"));
+			
+			// 현재 재생 중인 전투 BGM 이벤트 가져오기 (가장 마지막에 추가된 몬스터 기준 또는 다른 로직)
+			UAkAudioEvent* CombatStopEventToUse = nullptr;
+			if (AudioManager->GetCurrentCombatMusicStopEvent()) // AudioManager에 저장된 StopEvent가 우선
+			{
+				CombatStopEventToUse = AudioManager->GetCurrentCombatMusicStopEvent();
+				UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic - Using StopEvent from AudioManager: %s"), *CombatStopEventToUse->GetName());
+			}
+			else if (!NearbyMonsters.IsEmpty() && NearbyMonsters.Last()->CombatMusicStopEvent) // 몬스터 배열에서 가져오기
+			{
+				CombatStopEventToUse = NearbyMonsters.Last()->CombatMusicStopEvent;
+				UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic - Using StopEvent from Last Monster: %s"), *CombatStopEventToUse->GetName());
+			}
+
+			// EndCombatSequence 호출 시 CombatStopEvent도 전달
+			AudioManager->EndCombatSequence(this, CombatStopEventToUse);
 		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("AGS_Seeker::StopCombatMusic() - AudioManager not found"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGS_Seeker::StopCombatMusic() - GameInstance not found"));
 	}
 }
 
@@ -333,7 +372,44 @@ void AGS_Seeker::UpdateCombatMusicState()
 	// 몬스터가 없으면 음악 중지
 	if (NearbyMonsters.Num() == 0)
 	{
-		StopCombatMusic();
+		ClientRPCStopCombatMusic();
+	}
+}
+
+void AGS_Seeker::OnDeath()
+{
+	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::OnDeath() called for %s"), *GetName());
+	Super::OnDeath();
+	
+	// 확실하게 BGM 끄기 (백업용)
+	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::OnDeath() - Stopping combat music"));
+	ClientRPCStopCombatMusic();
+	NearbyMonsters.Empty();
+}
+
+void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive)
+{
+	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() called for %s"), *GetName());
+	
+	if (!IsLocallyControlled()) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Not locally controlled"));
+		return;
+	}
+
+	// 자신의 PlayerState인지 확인
+	AGS_PlayerState* MyPlayerState = GetPlayerState<AGS_PlayerState>();
+	if (ChangedPlayerState != MyPlayerState) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Not my PlayerState"));
+		return;
+	}
+
+	if (!bIsNowAlive) // 자신이 죽었을 때
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Player died, stopping combat music"));
+		ClientRPCStopCombatMusic();
+		NearbyMonsters.Empty();
 	}
 }
 

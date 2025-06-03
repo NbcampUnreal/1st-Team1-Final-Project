@@ -21,7 +21,9 @@ public:
 	TArray<TObjectPtr<UHorizontalBox>> HorizontalBoxes;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UCustomCommonButton> ButtonSlotWidgetClass;
-
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	TObjectPtr<UDataTable> CharacterInfoDataTable;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int SlotCount;
 
@@ -29,8 +31,13 @@ public:
 	
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 
 private:
 	void AddSpacerInHorizeontalBox();
 	void AddSpacerInVerticalBox();
+
+	void OnCharacterSelectClicked(int32 CharacterID, EPlayerRole PlayerRole);
+
+	TArray<TObjectPtr<UCustomCommonButton>> ButtonRefs;
 };

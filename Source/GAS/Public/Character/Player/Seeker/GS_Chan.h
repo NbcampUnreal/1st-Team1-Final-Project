@@ -10,6 +10,7 @@
 class AGS_WeaponShield;
 class AGS_WeaponAxe;
 class UGS_ChanAimingSkillBar;
+class UAkAudioEvent;
 
 UCLASS()
 class GAS_API AGS_Chan : public AGS_Seeker
@@ -89,6 +90,27 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Voice")
 	UAkAudioEvent* AttackVoiceSound;
 
+	// ===============
+	// 스킬 사운드
+	// ===============
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
+	UAkAudioEvent* AimingSkillStartSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
+	UAkAudioEvent* AimingSkillSlamSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
+	UAkAudioEvent* MovingSkillSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
+	UAkAudioEvent* UltimateSkillSound;
+
+	// 스킬 사운드 재생 함수
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlaySkillSound(UAkAudioEvent* SoundToPlay);
+
+	template <typename T>
+	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);
 	/*template <typename T>
 	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);*/
 

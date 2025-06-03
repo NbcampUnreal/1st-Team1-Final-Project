@@ -29,8 +29,6 @@ public:
 	UUserWidget* RoleChangeButton;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* PerkDungeonText;
-	UPROPERTY(meta = (BindWidget))
-	UTextBlock* ReadyText;
 	UPROPERTY(meta = (BindWidgetOptional))
 	UOverlay* ModalOverlay;
 

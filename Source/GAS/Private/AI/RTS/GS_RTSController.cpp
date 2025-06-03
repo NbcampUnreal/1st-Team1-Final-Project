@@ -12,6 +12,9 @@
 #include "Blueprint/UserWidget.h"
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "UI/Character/GS_HPTextWidgetComp.h"
 
 
 AGS_RTSController::AGS_RTSController()
@@ -60,6 +63,16 @@ void AGS_RTSController::BeginPlay()
 			{
 				RTSWidget->AddToViewport();
 			}
+		}
+	}
+
+	for (AGS_Seeker* Seeker : TActorRange<AGS_Seeker>(GetWorld()))
+	{
+		if (IsValid(Seeker))
+		{
+			//UE_LOG(LogTemp,Warning,TEXT("#######################find seeker"));
+			//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("FIND SEEKER")));
+			Seeker->HPTextWidgetComp->SetVisibility(true);
 		}
 	}
 }
@@ -117,6 +130,8 @@ void AGS_RTSController::Tick(float DeltaTime)
 	{
 		MoveCamera(FinalDir, DeltaTime);
 	}
+
+	
 }
 
 void AGS_RTSController::CameraMove(const FInputActionValue& InputValue)
@@ -578,11 +593,24 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 
 void AGS_RTSController::MoveAIViaMinimap(const FVector& WorldLocation)
 {
-	// 명령 가능한 유닛들만 
 	TArray<AGS_Monster*> Commandables;
 	GatherCommandableUnits(Commandables);
 	
 	Server_RTSMove(Commandables, WorldLocation);
+
+	CurrentCommand = ERTSCommand::None;
+	OnRTSCommandChanged.Broadcast(CurrentCommand);
+}
+
+void AGS_RTSController::AttackAIViaMinimap(const FVector& WorldLocation)
+{
+	TArray<AGS_Monster*> Commandables;
+	GatherCommandableUnits(Commandables);
+	
+	Server_RTSAttackMove(Commandables, WorldLocation);
+
+	CurrentCommand = ERTSCommand::None;
+	OnRTSCommandChanged.Broadcast(CurrentCommand);
 }
 
 void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)
@@ -627,6 +655,7 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 	{
 		AGS_Monster* Unit = Units[i];
 		if (!IsValid(Unit)) continue;
+		
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
