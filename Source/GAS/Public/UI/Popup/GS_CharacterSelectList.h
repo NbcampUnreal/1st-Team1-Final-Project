@@ -21,7 +21,9 @@ public:
 	TArray<TObjectPtr<UHorizontalBox>> HorizontalBoxes;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UCustomCommonButton> ButtonSlotWidgetClass;
-
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly)
+	TObjectPtr<UDataTable> CharacterInfoDataTable;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int SlotCount;
 
