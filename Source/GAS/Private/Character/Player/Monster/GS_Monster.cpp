@@ -4,6 +4,7 @@
 #include "Character/Player/Monster/GS_Monster.h"
 #include "AI/GS_AIController.h"
 #include "Components/DecalComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AkComponent.h"
 #include "Animation/Character/GS_MonsterAnimInstance.h"
@@ -13,6 +14,10 @@
 #include "Sound/GS_CharacterAudioSystem.h"
 #include "EngineUtils.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
+#include "DrawDebugHelpers.h"
+#include "Sound/GS_MonsterAudioComponent.h"
 
 
 AGS_Monster::AGS_Monster()
@@ -27,6 +32,9 @@ AGS_Monster::AGS_Monster()
 	AkComponent = CreateDefaultSubobject<UAkComponent>("AkComponent");
 	AkComponent->SetupAttachment(RootComponent);
 	
+	// 몬스터 오디오 컴포넌트 생성
+	MonsterAudioComponent = CreateDefaultSubobject<UGS_MonsterAudioComponent>("MonsterAudioComponent");
+	
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	if (MovementComponent)
 	{
@@ -38,6 +46,17 @@ AGS_Monster::AGS_Monster()
 	TeamId = FGenericTeamId(2);
 
 	Tags.Add("Monster");
+
+	// RTS 선택을 위한 콜리전 설정 (모든 몬스터에 적용)
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block); // Interactable
+	}
+	
+	if (GetMesh())
+	{
+		GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block); // Interactable
+	}
 }
 
 void AGS_Monster::BeginPlay()
@@ -63,6 +82,11 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 void AGS_Monster::OnDeath()
 {
 	Super::OnDeath();
+	
+	if (MonsterAudioComponent)
+	{
+		MonsterAudioComponent->PlayDeathSound();
+	}
 	
 	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
 	{
@@ -121,4 +145,9 @@ void AGS_Monster::Attack()
 void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 {
 	MonsterAnim->Montage_Play(AttackMontage);
+}
+
+void AGS_Monster::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }

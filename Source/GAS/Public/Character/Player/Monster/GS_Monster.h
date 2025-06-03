@@ -10,12 +10,10 @@
 #include "Weapon/GS_Weapon.h"
 #include "Components/SphereComponent.h"
 #include "Character/Player/GS_Player.h"
+#include "Sound/GS_MonsterAudioComponent.h"
 #include "GS_Monster.generated.h"
 
 class UGS_MonsterAnimInstance;
-/**
- * 
- */
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMonsterDead, AGS_Monster*, DeadUnit);
 
@@ -57,15 +55,21 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Dead")
 	FOnMonsterDead OnMonsterDead;
 
-	// =============
+	// ===================
 	// 전투 음악 관련 (BGM 이벤트만 유지, 트리거는 제거)
-	// =============
+	// ===================
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAkAudioEvent* CombatMusicEvent;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAkAudioEvent* CombatMusicStopEvent;
+
+	// ===================
+	// 몬스터 오디오 컴포넌트
+	// ===================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	class UGS_MonsterAudioComponent* MonsterAudioComponent;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();
@@ -97,6 +101,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void OnDeath() override;
 	
@@ -108,5 +113,4 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UAkComponent* AkComponent;
-};
-
+}; 
