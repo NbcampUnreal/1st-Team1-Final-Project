@@ -383,7 +383,7 @@ void AGS_Seeker::OnDeath()
 	
 	// 확실하게 BGM 끄기 (백업용)
 	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::OnDeath() - Stopping combat music"));
-	StopCombatMusic();
+	ClientRPCStopCombatMusic();
 	NearbyMonsters.Empty();
 }
 
@@ -408,7 +408,7 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 	if (!bIsNowAlive) // 자신이 죽었을 때
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Player died, stopping combat music"));
-		StopCombatMusic();
+		ClientRPCStopCombatMusic();
 		NearbyMonsters.Empty();
 	}
 }
