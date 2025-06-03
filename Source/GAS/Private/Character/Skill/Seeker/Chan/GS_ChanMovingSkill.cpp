@@ -58,10 +58,24 @@ void UGS_ChanMovingSkill::ExecuteSkillEffect()
 	// 캐릭터를 중심으로 한 지점에 고정된 SphereOverlap
 	if (GetWorld()->SweepMultiByChannel(HitResults, Center, Center, FQuat::Identity, ECC_Pawn, Shape, Params))
 	{
+		TSet<AActor*> HitActors;
+
 		for (const FHitResult& Hit : HitResults)
 		{
 			AActor* HitActor = Hit.GetActor();
-			if (!HitActor) continue;
+			UPrimitiveComponent* HitComponent = Hit.GetComponent();
+
+			if (!HitActor || HitActors.Contains(HitActor))
+			{
+				continue;
+			}
+
+			if (HitComponent && HitComponent->GetCollisionProfileName() == FName("SoundTrigger"))
+			{
+				continue;
+			}
+
+			HitActors.Add(HitActor);
 
 			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
 			{
