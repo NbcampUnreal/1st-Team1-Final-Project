@@ -11,7 +11,6 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 #include "NiagaraComponent.h"
-#include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Engine/GameInstance.h"
 #include "Sound/GS_AudioManager.h"
@@ -292,7 +291,7 @@ void AGS_Seeker::RemoveCombatMonster(AGS_Monster* Monster)
 	// 모든 몬스터가 제거되면 음악 중지
 	if (NearbyMonsters.Num() == 0)
 	{
-		StopCombatMusic();
+		ClientRPCStopCombatMusic();
 	}
 }
 
@@ -323,7 +322,7 @@ void AGS_Seeker::StartCombatMusic()
 	}
 }
 
-void AGS_Seeker::StopCombatMusic()
+void AGS_Seeker::ClientRPCStopCombatMusic_Implementation()
 {
 	// 죽었을 때는 IsLocallyControlled() 체크를 하지 않음
 	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() called for %s"), *GetName());
@@ -373,7 +372,7 @@ void AGS_Seeker::UpdateCombatMusicState()
 	// 몬스터가 없으면 음악 중지
 	if (NearbyMonsters.Num() == 0)
 	{
-		StopCombatMusic();
+		ClientRPCStopCombatMusic();
 	}
 }
 
