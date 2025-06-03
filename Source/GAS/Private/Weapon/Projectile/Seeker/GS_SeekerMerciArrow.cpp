@@ -59,12 +59,18 @@ void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 
 	if (VisualArrow)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("VisualArrow is Set"));
 		VisualArrow->SetArrowMesh(ProjectileMesh->GetSkeletalMeshAsset());
-		VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
+		if (Hit.BoneName != NAME_None)
+		{
+			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform, Hit.BoneName);
+		}
+		else
+		{
+			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
+		}
 	}
 
-	// 본 화살 제거
+	// 원래 화살 제거
 	Destroy();
 }
 
