@@ -9,7 +9,7 @@ struct FGS_UICharacterInfoRow : public FTableRowBase
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UTexture> Portrait;
+	TObjectPtr<UTexture2D> Portrait;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -287,11 +287,11 @@ void AGS_CustomLobbyPC::RequestOpenJobSelectionPopup()
 		return;
 	}
 	
-	if (CurrentModalWidget && CurrentModalWidget->IsInViewport())
+	if (CurrentModalWidget) //&& CurrentModalWidget->IsInViewport())
 	{
+		// 나중에 하나로 기능을 묶는게 나을 것 같음.
 		if (Cast<UGS_CharacterSelectList>(CurrentModalWidget))
 		{
-			// 나중에 하나로 기능을 묶는게 나을 것 같음.
 			CurrentModalWidget->RemoveFromParent();
 			CurrentModalWidget = nullptr;
 			return;
@@ -318,8 +318,15 @@ void AGS_CustomLobbyPC::RequestOpenPerkOrDungeonPopup()
 	AGS_PlayerState* PS = GetCachedPlayerState();
 	if (!PS) return;
 
-	if (CurrentModalWidget && CurrentModalWidget->GetParent())
+	if (CurrentModalWidget)// && CurrentModalWidget->GetParent())
 	{
+		// 나중에 하나로 기능을 묶는게 나을 것 같음.
+		if (Cast<UGS_ArcaneBoardWidget>(CurrentModalWidget))
+		{
+			CurrentModalWidget->RemoveFromParent();
+			CurrentModalWidget = nullptr;
+			return;
+		}
 		CurrentModalWidget->RemoveFromParent();
 		CurrentModalWidget = nullptr;
 	}
