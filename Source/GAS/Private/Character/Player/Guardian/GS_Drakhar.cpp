@@ -295,7 +295,7 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 {
 	DraconicFuryTargetArray.Empty();
 
-	for (int i = 0; i < 5; ++i)
+	for (int32 i = 0; i < 5; ++i)
 	{
 		FVector StartLocation = GetActorLocation();
 		FVector Offset = GetActorForwardVector() * 200.f + FVector(FMath::FRandRange(-300.f, 300.f), FMath::FRandRange(-300.f, 300.f), FMath::FRandRange(500.f, 600.f));

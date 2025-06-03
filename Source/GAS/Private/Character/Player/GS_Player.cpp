@@ -190,13 +190,6 @@ void AGS_Player::OnTimelineFinished()
 	bIsObscuring = false;
 }
 
-
-
-
-
-
-
-
 void AGS_Player::OnDeath()
 {
 	Super::OnDeath();
