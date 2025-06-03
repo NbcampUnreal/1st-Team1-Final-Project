@@ -12,6 +12,7 @@
 #include "Blueprint/UserWidget.h"
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Net/UnrealNetwork.h"
 
 
 AGS_RTSController::AGS_RTSController()
@@ -61,7 +62,27 @@ void AGS_RTSController::BeginPlay()
 				RTSWidget->AddToViewport();
 			}
 		}
+		
+		// Timer Manager를 사용한 주기적 유효성 검사 시작
+		GetWorldTimerManager().SetTimer(
+			CleanupTimerHandle,
+			this,
+			&AGS_RTSController::CleanupInvalidUnits,
+			CleanupInterval,
+			true  // 반복 실행
+		);
 	}
+}
+
+void AGS_RTSController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// Timer Manager에서 정리 타이머 해제
+	if (CleanupTimerHandle.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(CleanupTimerHandle);
+	}
+	
+	Super::EndPlay(EndPlayReason);
 }
 
 void AGS_RTSController::SetupInputComponent()
@@ -194,14 +215,15 @@ void AGS_RTSController::OnLeftMousePressed()
 		ToggleOnShiftClick();
 		return;
 	}
-	UE_LOG(LogTemp, Log, TEXT("--- OnLeftMousePressed: Command=%d"), static_cast<int32>(CurrentCommand));
 	
 	FHitResult Hit;
 	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel2), true, Hit);
-	UE_LOG(LogTemp, Log, TEXT("  bHit=%d, Hit.Actor=%s"), bHit, *GetNameSafe(Hit.GetActor()));
 	
 	TArray<AGS_Monster*> Units;
 	GatherCommandableUnits(Units);
+
+	// 명령이 실행되었는지 추적할 변수
+	bool bCommandExecuted = false;
 
 	// 명령 모드에 따라 
 	switch (CurrentCommand)
@@ -210,6 +232,7 @@ void AGS_RTSController::OnLeftMousePressed()
 		if (bHit)
 		{
 			Server_RTSMove(Units, Hit.Location);
+			bCommandExecuted = true;
 		}
 		break;
 	case ERTSCommand::Attack:
@@ -218,10 +241,12 @@ void AGS_RTSController::OnLeftMousePressed()
 			if (AGS_Character* Target = Cast<AGS_Character>(Hit.GetActor()))
 			{
 				Server_RTSAttack(Units, Target);
+				bCommandExecuted = true;
 			}
 			else
 			{
 				Server_RTSAttackMove(Units, Hit.Location);
+				bCommandExecuted = true;
 			}
 		}
 		break;
@@ -229,6 +254,7 @@ void AGS_RTSController::OnLeftMousePressed()
 		if (bHit)
 		{
 			Server_RTSSkill(Units, Hit.Location);
+			bCommandExecuted = true;
 		}
 		break;
 	default:
@@ -239,6 +265,9 @@ void AGS_RTSController::OnLeftMousePressed()
 		break;
 	}
 	
+	// 명령이 실행된 경우 bCommandJustExecuted 플래그 설정
+	bCommandJustExecuted = bCommandExecuted;
+	
 	CurrentCommand = ERTSCommand::None;
 	OnRTSCommandChanged.Broadcast(CurrentCommand);
 }
@@ -247,6 +276,13 @@ void AGS_RTSController::OnLeftMouseReleased()
 {
 	if (bShiftDown || bCtrlDown)
 	{
+		return;
+	}
+	
+	// 명령이 방금 실행되었다면 HUD의 StopSelection을 호출하지 않음
+	if (bCommandJustExecuted)
+	{
+		bCommandJustExecuted = false; // 플래그 리셋
 		return;
 	}
 	
@@ -385,14 +421,14 @@ void AGS_RTSController::SelectOnCtrlClick()
 			for (TActorIterator<AGS_Monster> It(GetWorld()); It; ++It)
 			{
 				AGS_Monster* M = *It;
-				if (M->GetCharacterType() != MonsterType)
+				if (M->GetCharacterType() == MonsterType)
 				{
 					SameTypeUnits.Add(M);
 				}
-
-				// 한 번에 선택하여 첫 번째 유닛만 소리 재생
-				AddMultipleUnitsToSelection(SameTypeUnits);
 			}
+
+			// 한 번에 선택하여 첫 번째 유닛만 소리 재생
+			AddMultipleUnitsToSelection(SameTypeUnits);
 		}
 	}
 }
@@ -531,7 +567,6 @@ void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, in
 	if (bCtrlDown) // Ctrl+숫자 → 부대 저장
 	{
 		UnitGroups[GroupIdx].Units = UnitSelection;
-		UE_LOG(LogTemp, Log, TEXT("Saved group %d (%d units)"), GroupIdx+1, UnitSelection.Num());
 	}
 	else // 숫자만 → 부대 호출
 	{
@@ -540,17 +575,16 @@ void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, in
 			return;
 		}
 		
+		// 유효하지 않은 몬스터들을 그룹에서 제거
+		UnitGroups[GroupIdx].Units.RemoveAll([](AGS_Monster* Monster)
+		{
+			return !IsValid(Monster);
+		});
+		
 		ClearUnitSelection();
-		//UnitSelection = UnitGroups[GroupIdx].Units;
-		//for (AGS_Monster* U : UnitSelection)
-		//{
-		//	U->SetSelected(true);
-		//}
 
 		// 부대 호출 시에도 첫 번째 유닛만 소리 재생
 		AddMultipleUnitsToSelection(UnitGroups[GroupIdx].Units);
-
-		UE_LOG(LogTemp, Log, TEXT("Loaded group %d (%d units)"), GroupIdx+1, UnitSelection.Num());
 	}
 }
 
@@ -562,7 +596,6 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 		if (CameraActor)
 		{
 			SavedCameraPositions.Add(CameraIndex, CameraActor->GetActorLocation());
-			UE_LOG(LogTemp, Log, TEXT("Saved camera pos %d: %s"), CameraIndex, *CameraActor->GetActorLocation().ToString());
 		}
 	}
 	else // 로드
@@ -570,7 +603,6 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 		if (CameraActor && SavedCameraPositions.Contains(CameraIndex))
 		{
 			CameraActor->SetActorLocation(SavedCameraPositions[CameraIndex]);
-			UE_LOG(LogTemp, Log, TEXT("Moved camera to saved pos %d: %s"), CameraIndex, *SavedCameraPositions[CameraIndex].ToString());
 		}
 	}
 }
@@ -595,11 +627,11 @@ void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)
 }
 
 
-void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>& Units, const FVector& Dest)
+void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>& UnitsToCommand, const FVector& Dest)
 {
-	for (int32 i = 0; i < Units.Num(); ++i)
+	for (int32 i = 0; i < UnitsToCommand.Num(); ++i)
 	{
-		AGS_Monster* Unit = Units[i];
+		AGS_Monster* Unit = UnitsToCommand[i];
 		if (!IsValid(Unit)) continue;
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
@@ -621,11 +653,11 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 	}
 }
 
-void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Monster*>& Units, const FVector& Dest)
+void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Monster*>& UnitsToCommand, const FVector& Dest)
 {
-	for (int32 i = 0; i < Units.Num(); ++i)
+	for (int32 i = 0; i < UnitsToCommand.Num(); ++i)
 	{
-		AGS_Monster* Unit = Units[i];
+		AGS_Monster* Unit = UnitsToCommand[i];
 		if (!IsValid(Unit)) continue;
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
@@ -646,11 +678,11 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 	}
 }
 
-void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster*>& Units, AGS_Character* TargetActor)
+void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster*>& UnitsToCommand, AGS_Character* TargetActor)
 {
-	for (int32 i = 0; i < Units.Num(); ++i)
+	for (int32 i = 0; i < UnitsToCommand.Num(); ++i)
 	{
-		AGS_Monster* Unit = Units[i];
+		AGS_Monster* Unit = UnitsToCommand[i];
 		if (!IsValid(Unit)) continue;
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
@@ -672,11 +704,11 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 	}
 }
 
-void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>& Units)
+void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>& UnitsToCommand)
 {
-	for (int32 i = 0; i < Units.Num(); ++i)
+	for (int32 i = 0; i < UnitsToCommand.Num(); ++i)
 	{
-		AGS_Monster* Unit = Units[i];
+		AGS_Monster* Unit = UnitsToCommand[i];
 		if (!IsValid(Unit)) continue;
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
@@ -698,11 +730,11 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 	}
 }
 
-void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc)
+void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*>& UnitsToCommand, const FVector& TargetLoc)
 {
-	for (int32 i = 0; i < Units.Num(); ++i)
+	for (int32 i = 0; i < UnitsToCommand.Num(); ++i)
 	{
-		AGS_Monster* Unit = Units[i];
+		AGS_Monster* Unit = UnitsToCommand[i];
 		if (!IsValid(Unit)) continue;
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
@@ -742,4 +774,46 @@ bool AGS_RTSController::IsSelectable(AGS_Monster* Monster) const
 void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)
 {
 	RemoveUnitFromSelection(Monster);
+}
+
+void AGS_RTSController::CleanupInvalidUnits()
+{
+	// 성능 최적화: 선택된 유닛이 없으면 바로 리턴
+	if (UnitSelection.IsEmpty())
+	{
+		return;
+	}
+	
+	// 유효하지 않은 유닛들을 찾아서 제거
+	TArray<AGS_Monster*> UnitsToRemove;
+	for (AGS_Monster* Unit : UnitSelection)
+	{
+		if (!IsValid(Unit))
+		{
+			UnitsToRemove.Add(Unit);
+		}
+	}
+	
+	// 발견된 유효하지 않은 유닛들 제거
+	for (AGS_Monster* Unit : UnitsToRemove)
+	{
+		RemoveUnitFromSelection(Unit);
+	}
+	
+	// 모든 그룹에서도 유효하지 않은 몬스터들 정리
+	for (FUnitGroup& Group : UnitGroups)
+	{
+		Group.Units.RemoveAll([](AGS_Monster* Monster)
+		{
+			return !IsValid(Monster);
+		});
+	}
+}
+
+void AGS_RTSController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_RTSController, UnitSelection);
+	DOREPLIFETIME(AGS_RTSController, UnitGroups);
 }

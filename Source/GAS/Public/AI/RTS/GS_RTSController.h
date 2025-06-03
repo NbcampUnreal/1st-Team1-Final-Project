@@ -81,6 +81,9 @@ public:
 	// 현재 선택된 유닛들
 	const TArray<AGS_Monster*>& GetUnitSelection() const { return UnitSelection; }
 
+	// 현재 명령 상태 반환
+	ERTSCommand GetCurrentCommand() const { return CurrentCommand; }
+
 	// 카메라 이동 입력 처리
 	void CameraMove(const FInputActionValue& InputValue);
 	void CameraMoveEnd();
@@ -133,24 +136,26 @@ public:
 
 	// Server
 	UFUNCTION(Server, Reliable)
-	void Server_RTSMove(const TArray<AGS_Monster*>& Units, const FVector& Dest);
+	void Server_RTSMove(const TArray<AGS_Monster*>& UnitsToCommand, const FVector& Dest);
 
 	UFUNCTION(Server, Reliable)
-	void Server_RTSAttackMove(const TArray<AGS_Monster*>& Units, const FVector& Dest);
+	void Server_RTSAttackMove(const TArray<AGS_Monster*>& UnitsToCommand, const FVector& Dest);
 
 	UFUNCTION(Server, Reliable)
-	void Server_RTSAttack(const TArray<AGS_Monster*>& Units, AGS_Character* TargetActor);
+	void Server_RTSAttack(const TArray<AGS_Monster*>& UnitsToCommand, AGS_Character* TargetActor);
 
 	UFUNCTION(Server, Reliable)
-	void Server_RTSStop(const TArray<AGS_Monster*>& Units);
+	void Server_RTSStop(const TArray<AGS_Monster*>& UnitsToCommand);
 
 	UFUNCTION(Server, Reliable)
-	void Server_RTSSkill(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc);
+	void Server_RTSSkill(const TArray<AGS_Monster*>& UnitsToCommand, const FVector& TargetLoc);
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	// 입력 상태
@@ -169,20 +174,29 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float EdgeScreenRatio;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<AGS_Monster*> UnitSelection; // 현재 선택된 유닛
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<FUnitGroup> UnitGroups; // 지정된 부대
 
 	bool bCtrlDown;
 	bool bShiftDown;
+
+	// 명령이 방금 실행되었는지 추적하는 플래그
+	bool bCommandJustExecuted = false;
 
 	UPROPERTY()
 	TMap<int32, FVector> SavedCameraPositions; // 카메라 저장 위치
 
 	UPROPERTY(EditAnywhere, Category="UI")
 	TSubclassOf<UUserWidget> RTSWidgetClass;
+
+	// 유효성 검사 타이머 (static 제거하고 멤버 변수로 변경)
+	FTimerHandle CleanupTimerHandle;
+	
+	UPROPERTY(EditAnywhere, Category="RTS", meta=(ClampMin="1.0", ClampMax="10.0"))
+	float CleanupInterval = 5.0f; // 5초마다 검사 (1초보다 느리게)
 
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
@@ -199,5 +213,8 @@ private:
 
 	UFUNCTION()
 	void OnSelectedUnitDead(AGS_Monster* Monster);
+	
+	// 유효하지 않은 유닛들 정리
+	void CleanupInvalidUnits();
 };
 
