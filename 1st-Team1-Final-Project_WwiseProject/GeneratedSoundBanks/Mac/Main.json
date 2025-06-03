@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{091AD851-92FE-C986-4670-246D95F219A8}",
+    "Hash": "{FEF06AC1-877A-18D4-2198-F04569926D93}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -78,14 +78,6 @@
       "Location": "Memory",
       "ShortName": "FootSteps_Lava (1).wav",
       "CachePath": "D4/{D468E696-B651-282D-0B5D-16825AE1B90F}.wem"
-     },
-     {
-      "Id": "64881237",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_CH_fx_combat_kick_gore_bone_breaks_01.wav",
-      "CachePath": "E8/{E8807888-F912-C69C-3596-3E8707B2D5AB}.wem"
      },
      {
       "Id": "65595387",
@@ -158,6 +150,30 @@
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_metlimpt_metal_bash_02_impact_smash_destroy.wav",
       "CachePath": "1E/{1EE4A4AD-A9DE-E6CD-E9F2-EC4229993EF0}.wem"
+     },
+     {
+      "Id": "140100063",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_1_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact.wav",
+      "CachePath": "07/{0795A916-0DDD-CAE8-C64E-0513BD7FEAB9}.wem"
+     },
+     {
+      "Id": "140776273",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_StoneTrap1.wav",
+      "CachePath": "0E/{0E8DC8A9-1EAA-1447-926A-936D284325B6}.wem"
+     },
+     {
+      "Id": "141516163",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Stone_Building_Destroy_4_Mobile_App_Game_FX_Sound_Magic_Fantasy_Touch_Accent_Stab_Transition_Movement_Whoosh.wav",
+      "CachePath": "CA/{CAF6D49B-F2AE-F600-C167-F5142175F7B5}.wem"
      },
      {
       "Id": "141938875",
@@ -264,20 +280,20 @@
       "CachePath": "39/{3904409D-71D1-AB20-F48A-8D01663764A7}.wem"
      },
      {
+      "Id": "230669099",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Empire_Game_Settlement_UI_Wall_Crumbling_3_Stone_Hit_Rock_Fall_Debris_Light_1.wav",
+      "CachePath": "B3/{B3524936-4133-8CDB-B086-99CDD9927869}.wem"
+     },
+     {
       "Id": "234128836",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Dying_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
       "CachePath": "E4/{E4D7EBA9-15B8-F2D6-3C60-F89FE4D7DC5E}.wem"
-     },
-     {
-      "Id": "244323578",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_CH_fx_combat_punch_swing_gore_liquid_hit_05.wav",
-      "CachePath": "30/{30CBF72E-96EF-7703-281E-1747FFDD8E8C}.wem"
      },
      {
       "Id": "245240366",
@@ -400,6 +416,14 @@
       "CachePath": "C7/{C7AABDBE-738A-FE1B-4ED2-3876D9FBF42E}.wem"
      },
      {
+      "Id": "356621308",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Stone_Building_Destroy_4_Mobile_App_Game_FX_Sound_Magic_Fantasy_Touch_Accent_Stab_Transition_Movement_Whoosh.wav",
+      "CachePath": "B3/{B3D252E6-94C3-C374-CE96-ECE487BBB094}.wem"
+     },
+     {
       "Id": "360458544",
       "Language": "SFX",
       "Streaming": "false",
@@ -448,6 +472,14 @@
       "CachePath": "9C/{9C30925B-3E67-B34B-4961-816EA4E0FCE2}.wem"
      },
      {
+      "Id": "387328789",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_EMDP1_fx_foley_loop_earthquake_stone_rumbling_debris_01.wav",
+      "CachePath": "96/{965C7087-9CCB-7D89-1618-41A235EC4162}.wem"
+     },
+     {
       "Id": "399735935",
       "Language": "SFX",
       "Streaming": "false",
@@ -464,28 +496,12 @@
       "CachePath": "35/{3516BDE1-BB27-E85B-7BDA-66F412F8B807}.wem"
      },
      {
-      "Id": "404610934",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_CH_fx_impact_gore_hit_liquid_crunching_04.wav",
-      "CachePath": "53/{5359D01A-04B3-75C1-ECAC-E5E95259B3DF}.wem"
-     },
-     {
       "Id": "418165151",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_rockcrsh_brick_wall_breaking_02_impact_smash_destroy_hit_scatter_shards.wav",
       "CachePath": "7C/{7CB34677-1A68-5A6E-64C4-CEDE224AB2CB}.wem"
-     },
-     {
-      "Id": "423380428",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_CH_fx_combat_kick_gore_bone_breaks_04.wav",
-      "CachePath": "2D/{2D987EE7-E5F8-64D7-E730-E5D801A0E99C}.wem"
      },
      {
       "Id": "434604945",
@@ -589,7 +605,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SmallClawDeath.wav",
-      "CachePath": "60/{6086A40F-20A0-7861-F853-A2C23AE7E488}.wem"
+      "CachePath": "51/{51306F8C-9AAA-7323-6DAE-CC517A8E1BFB}.wem"
      },
      {
       "Id": "518697165",
@@ -614,6 +630,14 @@
       "Location": "Memory",
       "ShortName": "FF_HFFX_foley_footstep_creature_cyan.wav",
       "CachePath": "DA/{DAA1B564-B4F7-90E7-6561-D0353AE5B6BF}.wem"
+     },
+     {
+      "Id": "525096005",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_cannon_explosion_blast_stone_gravel_debris_02.wav",
+      "CachePath": "3A/{3A61F971-5ABE-25BB-5956-1DD0BDDC44EF}.wem"
      },
      {
       "Id": "527820047",
@@ -654,14 +678,6 @@
       "Location": "Memory",
       "ShortName": "ESM_Undead_Vocal_Jump_2_Long_Raaa_2.wav",
       "CachePath": "BF/{BF7697DB-A607-C870-6035-236FAE6A8196}.wem"
-     },
-     {
-      "Id": "549077843",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_CH_fx_combat_punch_swing_hit_bone_shatter_03.wav",
-      "CachePath": "25/{251B558F-2A26-0C57-19B2-23D7F0A17010}.wem"
      },
      {
       "Id": "552526360",
@@ -856,6 +872,14 @@
       "CachePath": "8E/{8E0CD796-7256-E655-71DD-DE424054F802}.wem"
      },
      {
+      "Id": "721567443",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_EMDP1_fx_foley_loop_earthquake_stone_rumbling_debris_01.wav",
+      "CachePath": "03/{03560116-17FD-E619-A38E-EF0C5CA7F721}.wem"
+     },
+     {
       "Id": "732424984",
       "Language": "SFX",
       "Streaming": "false",
@@ -894,6 +918,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Jump_2_Female_Adult_Mature_DJ_Woman.wav",
       "CachePath": "CC/{CC42840E-C922-5480-879E-44DAFEC6E843}.wem"
+     },
+     {
+      "Id": "756075964",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_StoneTrap1.wav",
+      "CachePath": "A0/{A0F1257A-A3A4-2633-43A2-BB435717D9E2}.wem"
      },
      {
       "Id": "756368802",
@@ -1080,6 +1112,14 @@
       "CachePath": "AA/{AAA47AAD-DC56-2C23-1A77-C23CA52F9E69}.wem"
      },
      {
+      "Id": "933149701",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "PFS2_Stone_Scrape.wav",
+      "CachePath": "C1/{C11D03C6-C8A6-CA0A-E790-458B030E864F}.wem"
+     },
+     {
       "Id": "941890073",
       "Language": "SFX",
       "Streaming": "false",
@@ -1120,6 +1160,14 @@
       "CachePath": "0A/{0AE591B5-A6DB-DD9A-FC4E-EB0608ABC463}.wem"
      },
      {
+      "Id": "966061855",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_4_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact.wav",
+      "CachePath": "E5/{E5719337-5E0B-1837-68CA-9250A742B3B7}.wem"
+     },
+     {
       "Id": "966363054",
       "Language": "SFX",
       "Streaming": "false",
@@ -1157,7 +1205,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SmallClawDeath.wav",
-      "CachePath": "60/{60FBBF82-33A8-FF59-3AA5-D76255C059EA}.wem"
+      "CachePath": "C5/{C5596968-8328-1FDC-F370-7A8151C9DCC6}.wem"
      },
      {
       "Id": "997628724",
@@ -1184,14 +1232,6 @@
       "CachePath": "BC/{BC63EFE6-7C3B-9623-E40A-BDC627B86D9C}.wem"
      },
      {
-      "Id": "1015921958",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_CH_fx_combat_punch_swing_hit_bone_shatter_06.wav",
-      "CachePath": "DB/{DBF00581-5AC8-1332-4DB4-D1AA880CF993}.wem"
-     },
-     {
       "Id": "1030029664",
       "Language": "SFX",
       "Streaming": "false",
@@ -1206,6 +1246,14 @@
       "Location": "Memory",
       "ShortName": "Footstep_Grass (4).wav",
       "CachePath": "FD/{FD535CEA-A554-2814-1899-60A335860B6D}.wem"
+     },
+     {
+      "Id": "1039019029",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Stone_Building_Destroy_4_Mobile_App_Game_FX_Sound_Magic_Fantasy_Touch_Accent_Stab_Transition_Movement_Whoosh.wav",
+      "CachePath": "29/{29EF8DB4-BE77-813B-A888-F1F3E21CE8B3}.wem"
      },
      {
       "Id": "1040176000",
@@ -1985,36 +2033,6 @@
       "DurationMax": "0"
      },
      {
-      "Id": "4663620",
-      "Name": "EV_MeleeHit",
-      "ObjectPath": "\\Events\\Default Work Unit\\EV_MeleeHit",
-      "GUID": "{C1ED9DE8-655C-4D89-85CA-31BF6E8123AD}",
-      "MaxAttenuation": "500",
-      "DurationType": "OneShot",
-      "DurationMin": "0.40173274",
-      "DurationMax": "0.713804",
-      "MediaRefs": [
-       {
-        "Id": "64881237"
-       },
-       {
-        "Id": "244323578"
-       },
-       {
-        "Id": "404610934"
-       },
-       {
-        "Id": "423380428"
-       },
-       {
-        "Id": "549077843"
-       },
-       {
-        "Id": "1015921958"
-       }
-      ]
-     },
-     {
       "Id": "1129758503",
       "Name": "EV_Mon_IronFang_UI",
       "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_Mon_IronFang_UI",
@@ -2147,7 +2165,7 @@
       "Name": "EV_Mon_SmallClaw_Die",
       "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_Mon_SmallClaw_Die",
       "GUID": "{230CBF00-1C0F-4776-ACA6-FF8844E81B32}",
-      "MaxAttenuation": "500",
+      "MaxAttenuation": "600",
       "DurationType": "OneShot",
       "DurationMin": "0.98177713",
       "DurationMax": "1.174282",
@@ -2474,7 +2492,7 @@
       "Name": "Props_CrystalWallTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap",
       "GUID": "{9C89005A-CF4E-46F0-9A26-2606EC93E64B}",
-      "MaxAttenuation": "1000",
+      "MaxAttenuation": "600",
       "DurationType": "OneShot",
       "DurationMin": "1.8",
       "DurationMax": "1.9070336",
@@ -2680,6 +2698,81 @@
        },
        {
         "Id": "418165151"
+       }
+      ]
+     },
+     {
+      "Id": "2580207389",
+      "Name": "Props_StoneDooor_Close",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneDooor_Close",
+      "GUID": "{CAF2368B-2B31-4894-B890-6034FC2E534C}",
+      "MaxAttenuation": "1200",
+      "DurationType": "OneShot",
+      "DurationMin": "6.0440702",
+      "DurationMax": "6.1244774",
+      "MediaRefs": [
+       {
+        "Id": "140100063"
+       },
+       {
+        "Id": "140776273"
+       },
+       {
+        "Id": "141516163"
+       },
+       {
+        "Id": "525096005"
+       },
+       {
+        "Id": "721567443"
+       },
+       {
+        "Id": "756075964"
+       },
+       {
+        "Id": "933149701"
+       },
+       {
+        "Id": "966061855"
+       },
+       {
+        "Id": "1039019029"
+       }
+      ]
+     },
+     {
+      "Id": "1229688631",
+      "Name": "Props_StoneDooor_Open",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneDooor_Open",
+      "GUID": "{A5598EC5-E8E1-4CE5-83AF-3F8909B45F09}",
+      "MaxAttenuation": "750",
+      "DurationType": "OneShot",
+      "DurationMin": "3.527469",
+      "DurationMax": "3.572227",
+      "MediaRefs": [
+       {
+        "Id": "140100063"
+       },
+       {
+        "Id": "140776273"
+       },
+       {
+        "Id": "141516163"
+       },
+       {
+        "Id": "230669099"
+       },
+       {
+        "Id": "356621308"
+       },
+       {
+        "Id": "387328789"
+       },
+       {
+        "Id": "756075964"
+       },
+       {
+        "Id": "933149701"
        }
       ]
      },
@@ -3008,6 +3101,6 @@
     ]
    }
   ],
-  "FileHash": "{64977036-1734-E232-BF41-34B997D6D833}"
+  "FileHash": "{EB5ED62C-82D2-B2AC-6E50-DBFCDD97B2E6}"
  }
 }
