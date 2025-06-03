@@ -26,7 +26,7 @@
 						<Effect Name="Dialog_Leveler_Soft" ID="{9C1D0FCF-896E-4739-A8E8-B1E908F51CE6}" PluginName="Wwise Compressor" CompanyID="0" PluginID="108" PluginType="3">
 							<PropertyList>
 								<Property Name="Ratio" Type="Real32" Value="3"/>
-								<Property Name="Threshold" Type="Real32" Value="-20"/>
+								<Property Name="Threshold" Type="Real32" Value="-10"/>
 							</PropertyList>
 						</Effect>
 						<Effect Name="Dialog_Leveler_Hard" ID="{865FB36F-8717-4D30-AD05-14E56375CD40}" PluginName="Wwise Compressor" CompanyID="0" PluginID="108" PluginType="3">
@@ -838,11 +838,11 @@
 										<Property Name="Filter3Freq" Type="Real32" Value="11000"/>
 										<Property Name="Filter3Gain" Type="Real32" Value="-11.5"/>
 										<Property Name="HFDamping" Type="Real32" Value="5.05"/>
-										<Property Name="PreDelay" Type="Real32" Value="75"/>
+										<Property Name="PreDelay" Type="Real32" Value="70"/>
 										<Property Name="Quality" Type="int32" Value="16"/>
 										<Property Name="ReverbLevel" Type="Real32" Value="-35"/>
 										<Property Name="RoomShape" Type="Real32" Value="55"/>
-										<Property Name="RoomSize" Type="Real32" Value="60"/>
+										<Property Name="RoomSize" Type="Real32" Value="50"/>
 									</PropertyList>
 								</Effect>
 								<Effect Name="Hall_Medium_Dark" ID="{626B6E38-739B-4689-819F-F81AD3788BDE}" PluginName="Wwise RoomVerb" CompanyID="0" PluginID="118" PluginType="3">
