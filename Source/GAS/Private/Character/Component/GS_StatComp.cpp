@@ -188,7 +188,7 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 		{
 			//OwnerCharacter->PlayAnimMontage(AnimMontage, 2.f);
 		}
-		if(OwnerCharacter->HasAuthority())
+		if (OwnerCharacter->HasAuthority())
 		{
 			//stop character during damage animation
 			//CharacterWalkSpeed = OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
@@ -212,10 +212,12 @@ void UGS_StatComp::OnRep_CurrentHealth()
 void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+
 	if (!IsValid(OwnerCharacter))
 	{
 		return;
 	}
+	
 	if (OwnerCharacter->HasAuthority())
 	{
 		//can move

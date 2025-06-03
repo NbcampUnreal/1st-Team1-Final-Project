@@ -14,24 +14,16 @@ public:
 	UGS_DrakharAnimInstance();
 
 	virtual void NativeInitializeAnimation() override;
-
-	//[combo attack]
-	void PlayComboAttackMontage(int32 InCurrentComboIndex);
-	void StopComboAttackMontage(int32 InCurrentComboIndex);
 	
 private:
 	UPROPERTY()
 	TObjectPtr<AGS_Drakhar> Drakhar;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	TArray<UAnimMontage*> ComboAttackMontages;
+	UFUNCTION()
+	void AnimNotify_ComboAttack();
 
-	//[combo attack]
 	UFUNCTION()
-	void AnimNotify_ComboAttackCheck();
-	
-	UFUNCTION()
-	void AnimNotify_ComboAttackEnd();
+	void AnimNotify_Reset();
 
 	//[earthquake skill]
 	UFUNCTION()

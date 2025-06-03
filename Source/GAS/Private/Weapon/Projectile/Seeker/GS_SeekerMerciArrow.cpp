@@ -9,30 +9,29 @@
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Skill/Seeker/GS_FieldSkillActor.h"
 
+AGS_SeekerMerciArrow::AGS_SeekerMerciArrow()
+{
+	if (HasAuthority())
+	{
+		// 화살 스폰 직후
+		this->SetActorEnableCollision(false);
+	}
+}
+
 void AGS_SeekerMerciArrow::BeginPlay()
 {
 	Super::BeginPlay();
 	if (HasAuthority())
 	{
 		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AGS_SeekerMerciArrow::OnBeginOverlap);
-		// 화살 스폰 직후
-		this->SetActorEnableCollision(false);
-
-		// N초 뒤에 다시 Collision 활성화
-		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
-			{
-				this->SetActorEnableCollision(true);
-			}, 0.05f, false);
+		this->SetActorEnableCollision(true);
 
 		AActor* IgnoredActor = GetInstigator(); // 또는 GetInstigator();
 		if (IgnoredActor)
 		{
 			CollisionComponent->IgnoreActorWhenMoving(IgnoredActor, true);
 		}
-	}
-
-	
+	}	
 }
 
 void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
@@ -60,12 +59,18 @@ void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 
 	if (VisualArrow)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("VisualArrow is Set"));
 		VisualArrow->SetArrowMesh(ProjectileMesh->GetSkeletalMeshAsset());
-		VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
+		if (Hit.BoneName != NAME_None)
+		{
+			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform, Hit.BoneName);
+		}
+		else
+		{
+			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
+		}
 	}
 
-	// 본 화살 제거
+	// 원래 화살 제거
 	Destroy();
 }
 

@@ -5,13 +5,28 @@
 #include "Components/ScrollBox.h"
 #include "Components/Spacer.h"
 #include "RuneSystem/GS_EnumUtils.h"
+#include "System/GS_PlayerState.h"
 #include "System/PlayerController/GS_CustomLobbyPC.h"
 #include "UI/Common/CustomCommonButton.h"
+#include "UI/Data/GS_UICharacterInfoRow.h"
 
 void UGS_CharacterSelectList::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
+}
+
+void UGS_CharacterSelectList::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	for (int i = 0; i < ButtonRefs.Num(); ++i)
+	{
+		if (ButtonRefs[i])
+		{
+			ButtonRefs[i]->OnClicked().Clear();
+		}
+	}
 }
 
 void UGS_CharacterSelectList::CreateChildWidgets(EPlayerRole PlayerRole)
@@ -42,6 +57,36 @@ void UGS_CharacterSelectList::CreateChildWidgets(EPlayerRole PlayerRole)
 		}
 
 		UCustomCommonButton* NewBtn = CreateWidget<UCustomCommonButton>(GetWorld(), ButtonSlotWidgetClass);
+		// NewBtn->OnClicked().AddUObject(this, &UGS_CharacterSelectList::OnCharacterSelectClicked);
+		ButtonRefs.Add(NewBtn);
+		if (PlayerRole == EPlayerRole::PR_Seeker)
+		{
+			const ESeekerJob Job = static_cast<ESeekerJob>(i);
+			const FName RowName = FName(*UGS_EnumUtils::GetEnumAsString<ESeekerJob>(Job));
+			const FGS_UICharacterInfoRow* RowPtr = CharacterInfoDataTable->FindRow<FGS_UICharacterInfoRow>(RowName, TEXT("Lookup Character Info Row"));
+			// 나중에 못 찾은 애들은 None 찾아서 잠긴 이미지 넣어주면 될 것 같음.
+			if (RowPtr)
+			{
+				NewBtn->IconTexture0 = RowPtr->Portrait;
+				NewBtn->ChangeLayerIconImage(0);
+			}
+		}
+		if (PlayerRole == EPlayerRole::PR_Guardian)
+		{
+			const EGuardianJob Job = static_cast<EGuardianJob>(i);
+			const FName RowName = FName(*UGS_EnumUtils::GetEnumAsString<EGuardianJob>(Job));
+			const FGS_UICharacterInfoRow* RowPtr = CharacterInfoDataTable->FindRow<FGS_UICharacterInfoRow>(RowName, TEXT("Lookup Character Info Row"));
+			// 나중에 못 찾은 애들은 None 찾아서 잠긴 이미지 넣어주면 될 것 같음.
+			if (RowPtr)
+			{
+				NewBtn->IconTexture0 = RowPtr->Portrait;
+				NewBtn->ChangeLayerIconImage(0);
+			}
+		}
+		NewBtn->OnClicked().AddLambda([this, CharacterID = i, InPlayerRole = PlayerRole]()
+		{
+			OnCharacterSelectClicked(CharacterID, InPlayerRole);
+		});
 		if (!NewBtn) continue;
 
 		HorizontalBoxes.Last()->AddChild(NewBtn);
@@ -70,5 +115,23 @@ void UGS_CharacterSelectList::AddSpacerInVerticalBox()
 		NewSpacer->SetSize(FVector2D(0,20));
 		CharacterSlotList->AddChild(NewSpacer);
 
+	}
+}
+
+void UGS_CharacterSelectList::OnCharacterSelectClicked(int32 CharacterID, EPlayerRole PlayerRole)
+{
+	UE_LOG(LogTemp, Warning, TEXT("CallFunction"));
+	if (AGS_PlayerState* GSPlayerState = GetOwningPlayerState<AGS_PlayerState>())
+	{
+		if (PlayerRole == EPlayerRole::PR_Guardian)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Guardian Job %d"), CharacterID);
+			GSPlayerState->Server_SetGuardianJob((EGuardianJob)CharacterID);
+		}
+		else if (PlayerRole == EPlayerRole::PR_Seeker)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Seeker Job %d"), CharacterID);
+			GSPlayerState->Server_SetSeekerJob((ESeekerJob)CharacterID);
+		}
 	}
 }

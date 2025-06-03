@@ -1,0 +1,109 @@
+#include "Props/Interactables/GS_Door.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Net/UnrealNetwork.h"
+
+
+AGS_Door::AGS_Door()
+{
+	bReplicates = true;
+	SetReplicateMovement(true);
+
+	RootSceneComp = CreateDefaultSubobject<UBoxComponent>(TEXT("RootSceneComp"));
+	RootComponent = RootSceneComp;
+
+	DoorFrameMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorFrameMeshComp"));
+	DoorFrameMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	DoorFrameMeshComp->SetCollisionObjectType(ECC_WorldStatic);
+	DoorFrameMeshComp->SetCollisionResponseToAllChannels(ECR_Block);
+	DoorFrameMeshComp->SetupAttachment(RootComponent);
+
+	DoorMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorMeshComp"));
+	DoorMeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	DoorMeshComp->SetCollisionObjectType(ECC_WorldStatic);
+	DoorMeshComp->SetCollisionResponseToAllChannels(ECR_Block);
+	DoorMeshComp->SetupAttachment(DoorFrameMeshComp);
+
+
+	TriggerBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
+	TriggerBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
+	TriggerBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	TriggerBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	TriggerBoxComp->SetupAttachment(DoorFrameMeshComp);
+}
+
+//void AGS_Door::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+//{
+//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+//
+//	DOREPLIFETIME(AGS_Door, bIsOpen);
+//}
+
+void AGS_Door::BeginPlay()
+{
+	Super::BeginPlay();
+
+	TriggerBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_Door::OnTriggerBeginOverlap);
+}
+
+void AGS_Door::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+	bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!OtherActor || OtherActor == this)
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("trigger begin overlap called"));
+	AGS_Character* Character = Cast<AGS_Character>(OtherActor);
+	if (!Character || !HasAuthority())
+	{
+		return;
+	}
+	if (!bIsOpen)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Door was Not Open openning..."));
+		bIsOpen = true;
+		Server_DoorOpen(Character);
+	}
+	
+}
+
+
+void AGS_Door::Server_DoorOpen_Implementation(AActor* TargetActor)
+{
+	//문 열리는 함수 호출하고 
+	DoorOpen();
+	GetWorldTimerManager().ClearTimer(DoorCloseTimerHandle);
+	GetWorldTimerManager().SetTimer(DoorCloseTimerHandle, this, &AGS_Door::CheckForPlayerInTrigger, 3.0f, false);
+}
+
+void AGS_Door::CheckForPlayerInTrigger()
+{
+	TArray<AActor*> OverlappingActors;
+	TriggerBoxComp->GetOverlappingActors(OverlappingActors, AGS_Seeker::StaticClass());
+
+	if (OverlappingActors.Num() > 0)
+		//오버랩 되는 엑터가 있으면 타이머 초기화
+	{
+		GetWorldTimerManager().SetTimer(DoorCloseTimerHandle, this, &AGS_Door::CheckForPlayerInTrigger, 3.0f, false);
+	}
+	else
+	{
+		//오버랩 되는 엑터가 없으면 문 닫히는 함수 호출
+		DoorClose();
+		bIsOpen = false;
+		UE_LOG(LogTemp, Warning, TEXT("Door closing...bIsNotOpen"));
+	}
+
+
+}
+
+void AGS_Door::DoorOpen_Implementation()
+{
+
+}
+
+void AGS_Door::DoorClose_Implementation()
+{
+
+}

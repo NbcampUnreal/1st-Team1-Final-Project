@@ -49,6 +49,8 @@ protected:
 
 	bool bCtrlHeld = false;
 
+	bool bWasCtrlHeldWhenLeftClicked = false;
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Input")
 	TObjectPtr<UInputAction> IA_RightClick;

@@ -71,6 +71,8 @@ void UGS_SkillInputHandlerComp::BeginPlay()
 
 void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
+	bWasCtrlHeldWhenLeftClicked = bCtrlHeld;
+
 	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
 	{
 		return;
@@ -88,6 +90,8 @@ void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instanc
 
 void UGS_SkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
+	bWasCtrlHeldWhenLeftClicked = bCtrlHeld;
+
 	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
 	{
 		return;

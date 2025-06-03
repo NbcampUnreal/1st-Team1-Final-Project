@@ -167,14 +167,11 @@ void UGS_CustomLobbyUI::ChangeRoleBtnIcon(EPlayerRole NewRole)
 
 void UGS_CustomLobbyUI::UpdateReadyButtonText(bool bIsReady)
 {
-	if (ReadyText)
+	if (ReadyButton)
 	{
-		FText NewTextToShow = bIsReady ? FText::FromString(TEXT("Cancel")) : FText::FromString(TEXT("Ready"));
-		ReadyText->SetText(NewTextToShow);
-		UE_LOG(LogTemp, Log, TEXT("UGS_CustomLobbyUI: ReadyButton text updated to: %s"), *NewTextToShow.ToString());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("UGS_CustomLobbyUI: ReadyText is not bound in Blueprint!"));
+		if (UCustomCommonButton* CustomReadyButton = Cast<UCustomCommonButton>(ReadyButton))
+		{
+			CustomReadyButton->ChangeText(bIsReady ? 1 : 0);
+		}
 	}
 }
