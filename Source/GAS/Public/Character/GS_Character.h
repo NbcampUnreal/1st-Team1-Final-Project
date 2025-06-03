@@ -132,5 +132,6 @@ private:
 	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
 
 	void SpawnAndAttachWeapons();
+	void DestroyAllWeapons();
 };
 
