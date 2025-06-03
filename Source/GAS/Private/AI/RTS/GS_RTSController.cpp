@@ -578,11 +578,24 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 
 void AGS_RTSController::MoveAIViaMinimap(const FVector& WorldLocation)
 {
-	// 명령 가능한 유닛들만 
 	TArray<AGS_Monster*> Commandables;
 	GatherCommandableUnits(Commandables);
 	
 	Server_RTSMove(Commandables, WorldLocation);
+
+	CurrentCommand = ERTSCommand::None;
+	OnRTSCommandChanged.Broadcast(CurrentCommand);
+}
+
+void AGS_RTSController::AttackAIViaMinimap(const FVector& WorldLocation)
+{
+	TArray<AGS_Monster*> Commandables;
+	GatherCommandableUnits(Commandables);
+	
+	Server_RTSAttackMove(Commandables, WorldLocation);
+
+	CurrentCommand = ERTSCommand::None;
+	OnRTSCommandChanged.Broadcast(CurrentCommand);
 }
 
 void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)

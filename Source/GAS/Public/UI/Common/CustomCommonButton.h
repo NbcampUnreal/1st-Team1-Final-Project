@@ -16,7 +16,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void ChangeText(int32 LayerIndex);
 	
-protected:
+// protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	UTexture2D* IconTexture0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
