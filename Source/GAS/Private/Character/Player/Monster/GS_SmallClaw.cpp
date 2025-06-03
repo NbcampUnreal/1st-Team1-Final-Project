@@ -4,6 +4,7 @@
 #include "Character/Player/Monster/GS_SmallClaw.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
 
 AGS_SmallClaw::AGS_SmallClaw()
@@ -27,7 +28,21 @@ void AGS_SmallClaw::BeginPlay()
 	{
 		MoveSoundEvent = SmallClawMoveSound;
 	}
-} 
+
+	// SmallClaw 전용 몬스터 오디오 설정 (컴포넌트 사용)
+	if (MonsterAudioComponent)
+	{
+		MonsterAudioComponent->MonsterSoundVariant = 1; // SmallClaw = 1
+
+		// 작은 몬스터 특성: 가까운 거리에서 경계, 짧은 최대 거리
+		MonsterAudioComponent->AudioConfig.AlertDistance = 600.0f;
+		MonsterAudioComponent->AudioConfig.MaxAudioDistance = 2000.0f;
+
+		// 사운드 재생 간격 (작은 몬스터이므로 자주 울음)
+		MonsterAudioComponent->IdleSoundInterval = 4.0f;
+		MonsterAudioComponent->CombatSoundInterval = 2.5f;
+	}
+}
 
 void AGS_SmallClaw::SetBiteCollision(bool bEnable)
 {

@@ -65,7 +65,7 @@ void AGS_RTSController::BeginPlay()
 			}
 		}
 	}
-
+	
 	for (AGS_Seeker* Seeker : TActorRange<AGS_Seeker>(GetWorld()))
 	{
 		if (IsValid(Seeker))
@@ -130,8 +130,6 @@ void AGS_RTSController::Tick(float DeltaTime)
 	{
 		MoveCamera(FinalDir, DeltaTime);
 	}
-
-	
 }
 
 void AGS_RTSController::CameraMove(const FInputActionValue& InputValue)
@@ -404,10 +402,10 @@ void AGS_RTSController::SelectOnCtrlClick()
 				{
 					SameTypeUnits.Add(M);
 				}
-
-				// 한 번에 선택하여 첫 번째 유닛만 소리 재생
-				AddMultipleUnitsToSelection(SameTypeUnits);
 			}
+
+			// 한 번에 선택하여 첫 번째 유닛만 소리 재생
+			AddMultipleUnitsToSelection(SameTypeUnits);
 		}
 	}
 }
@@ -546,7 +544,6 @@ void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, in
 	if (bCtrlDown) // Ctrl+숫자 → 부대 저장
 	{
 		UnitGroups[GroupIdx].Units = UnitSelection;
-		UE_LOG(LogTemp, Log, TEXT("Saved group %d (%d units)"), GroupIdx+1, UnitSelection.Num());
 	}
 	else // 숫자만 → 부대 호출
 	{
@@ -564,8 +561,8 @@ void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, in
 
 		// 부대 호출 시에도 첫 번째 유닛만 소리 재생
 		AddMultipleUnitsToSelection(UnitGroups[GroupIdx].Units);
-
 		UE_LOG(LogTemp, Log, TEXT("Loaded group %d (%d units)"), GroupIdx+1, UnitSelection.Num());
+
 	}
 }
 
@@ -577,7 +574,7 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 		if (CameraActor)
 		{
 			SavedCameraPositions.Add(CameraIndex, CameraActor->GetActorLocation());
-			UE_LOG(LogTemp, Log, TEXT("Saved camera pos %d: %s"), CameraIndex, *CameraActor->GetActorLocation().ToString());
+			// UE_LOG(LogTemp, Log, TEXT("Saved camera pos %d: %s"), CameraIndex, *CameraActor->GetActorLocation().ToString());
 		}
 	}
 	else // 로드
@@ -585,11 +582,10 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 		if (CameraActor && SavedCameraPositions.Contains(CameraIndex))
 		{
 			CameraActor->SetActorLocation(SavedCameraPositions[CameraIndex]);
-			UE_LOG(LogTemp, Log, TEXT("Moved camera to saved pos %d: %s"), CameraIndex, *SavedCameraPositions[CameraIndex].ToString());
+			// UE_LOG(LogTemp, Log, TEXT("Moved camera to saved pos %d: %s"), CameraIndex, *SavedCameraPositions[CameraIndex].ToString());
 		}
 	}
 }
-
 
 void AGS_RTSController::MoveAIViaMinimap(const FVector& WorldLocation)
 {
@@ -621,7 +617,6 @@ void AGS_RTSController::MoveCameraViaMinimap(const FVector& WorldLocation)
 		CameraActor->SetActorLocation(NewLocation);
 	}
 }
-
 
 void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>& Units, const FVector& Dest)
 {
@@ -655,7 +650,6 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 	{
 		AGS_Monster* Unit = Units[i];
 		if (!IsValid(Unit)) continue;
-		
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
