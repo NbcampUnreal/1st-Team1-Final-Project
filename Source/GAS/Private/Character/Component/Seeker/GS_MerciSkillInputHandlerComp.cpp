@@ -49,7 +49,7 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
 {
 	Super::OnRightClickRelease(Instance);
-	if (!bCtrlHeld)
+	if (!bWasCtrlHeldWhenLeftClicked)
 	{
 		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
 	}
@@ -62,7 +62,7 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
 {
 	Super::OnLeftClickRelease(Instance);
-	if (!bCtrlHeld)
+	if (!bWasCtrlHeldWhenLeftClicked)
 	{
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 		if (MerciCharacter->NormalArrowClass)
