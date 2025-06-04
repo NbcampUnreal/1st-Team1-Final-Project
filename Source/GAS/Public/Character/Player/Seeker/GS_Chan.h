@@ -37,8 +37,8 @@ public:
 	void ComboEnd();
 
 	// Move Skill
-	void OnMoveSkill();
-	void OffMoveSkill();
+	/*void OnMoveSkill();
+	void OffMoveSkill();*/
 
 	// Aim Skill
 	void OnReadyAimSkill();

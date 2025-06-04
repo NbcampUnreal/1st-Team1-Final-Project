@@ -67,4 +67,5 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	int32 MappingPriority = 1;
+	
 };

@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
+#include "Character/Player/GS_Player.h"
 #include "Character/Skill/GS_SkillComp.h"
 
 // Sets default values for this component's properties
@@ -73,6 +74,11 @@ void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instanc
 		return;
 	}
 
+	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputRC)
+	{
+		return;
+	}
+
 	if (bCtrlHeld)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Ctrl+Right Click"));
@@ -86,6 +92,11 @@ void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instanc
 void UGS_SkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
+	{
+		return;
+	}
+
+	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputLC)
 	{
 		return;
 	}
@@ -126,4 +137,14 @@ void UGS_SkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Scroll Mouse"));
 }
+
+/*bool UGS_SkillInputHandlerComp::GetCanInput()
+{
+	return bCanInput;
+}
+
+void UGS_SkillInputHandlerComp::SetCanInput(bool CanInput)
+{
+	bCanInput = CanInput;
+}*/ // SJE
 

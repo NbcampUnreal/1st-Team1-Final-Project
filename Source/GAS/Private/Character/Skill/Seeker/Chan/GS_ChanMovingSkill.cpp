@@ -7,8 +7,8 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Debuff/EDebuffType.h"
-/*#include "Animation/Character/GS_SeekerAnimInstance.h"
-#include "Character/GS_TpsController.h"*/
+#include "Character/Player/GS_Player.h"
+#include "AkAudioEvent.h"
 
 UGS_ChanMovingSkill::UGS_ChanMovingSkill()
 {
@@ -25,6 +25,13 @@ void UGS_ChanMovingSkill::ActiveSkill()
 		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 		OwnerPlayer->Multicast_SetMoveControlValue(false, false);
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		
+		// 무빙 스킬 사운드 재생
+		if (OwnerPlayer->MovingSkillSound)
+		{
+			OwnerPlayer->PlaySound(OwnerPlayer->MovingSkillSound);
+		}
+		OwnerPlayer->Multicast_SetUseControllerRotationYaw(false);
 	}
 	ExecuteSkillEffect();
 }
@@ -39,6 +46,7 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->Multicast_SetMoveControlValue(true, true);
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
+		OwnerPlayer->Multicast_SetUseControllerRotationYaw(true);
 	}
 }
 

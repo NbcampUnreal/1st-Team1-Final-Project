@@ -18,7 +18,6 @@ AGS_TpsController::AGS_TpsController()
 	MoveAction = nullptr;
 	LookAction = nullptr;
 	WalkToggleAction = nullptr;
-	bCanMove = true;
 }
 
 void AGS_TpsController::Move(const FInputActionValue& InputValue)
@@ -36,14 +35,6 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 		}
 		if (ControlValues.bCanMoveRight)
 		{
-			ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.Y);
-		}
-	}
-	if(GetCanMove())
-	{
-		if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
-		{
-			ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.X);
 			ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.Y);
 		}
 	}
@@ -70,21 +61,10 @@ void AGS_TpsController::WalkToggle(const FInputActionValue& InputValue)
 	
 }
 
-FControlValue& AGS_TpsController::GetControlValue()
+FControlValue AGS_TpsController::GetControlValue() const
 {
 	return ControlValues;
 }
-
-/*void AGS_TpsController::LClickRelease(const FInputActionValue& InputValue)
-{
-	if (AGS_Player* ControlledPlayer = Cast<AGS_Player>(GetPawn()))
-	{
-		if (ControlledPlayer->GetClass()->ImplementsInterface(UGS_AttackInterface::StaticClass()))
-		{
-			IGS_AttackInterface::Execute_LeftClickRelease(ControlledPlayer);
-		}
-	}
-}*/
 
 void AGS_TpsController::PageUp(const FInputActionValue& InputValue)
 {
@@ -109,7 +89,20 @@ void AGS_TpsController::PageDown(const FInputActionValue& InputValue)
 
 }
 
-void AGS_TpsController::BeginPlay()
+
+void AGS_TpsController::SetMoveControlValue(bool CanMoveRight, bool CanMoveForward)
+{
+	ControlValues.bCanMoveForward = CanMoveForward;
+	ControlValues.bCanMoveRight = CanMoveRight;
+}
+
+void AGS_TpsController::SetLookControlValue(bool CanLookRight, bool CanLookUp)
+{
+	ControlValues.bCanLookUp = CanLookUp;
+	ControlValues.bCanLookRight = CanLookRight;
+}
+
+void AGS_TpsController::InitControllerPerWorld()
 {
 	Super::BeginPlay();
 
@@ -171,9 +164,20 @@ void AGS_TpsController::SetupInputComponent()
 	}
 }
 
-void AGS_TpsController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void AGS_TpsController::PostSeamlessTravel()
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	Super::PostSeamlessTravel();
 
-	DOREPLIFETIME(AGS_TpsController, bCanMove);
+	InitControllerPerWorld();
+}
+
+void AGS_TpsController::BeginPlayingState()
+{
+	Super::BeginPlayingState();
+
+	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s) --- BeginPlayingState CALLED ---"), *GetNameSafe(this));
+	if (IsLocalController())
+	{
+		AddWidget();
+	}
 }

@@ -79,6 +79,14 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetFullBodySlotValue(bool IsPlayingFullBody);*/
 
+	/*UFUNCTION()
+	FTransform GetTransform() const {return CharacterTransform;}
+	UFUNCTION()
+	FTransform GetRootTransform() const {return RootTransform;} // SJE*/
+
+	UFUNCTION()
+	void SetMotionMatchingPlayRate(float Min, float Max);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
 	FTransform CharacterTransform;
@@ -118,4 +126,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool bMustTurnInPlace = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+	FFloatInterval MotionMatchingPlayRate;
 };

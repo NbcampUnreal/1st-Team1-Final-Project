@@ -35,7 +35,6 @@ void AGS_Chan::BeginPlay()
 	
 	SetReplicateMovement(true);
 	GetMesh()->SetIsReplicated(true);
-	
 }
 
 // Called every frame
@@ -95,21 +94,21 @@ void AGS_Chan::ComboEnd()
 		AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
 		if (IsValid(TPSController))
 		{
-			TPSController->GetControlValue().bCanLookRight = true;
+			//TPSController->GetControlValue().bCanLookRight = true; SJE
+			TPSController->SetLookControlValue(true, true);
 		}
 	}
 }
 
-void AGS_Chan::OnMoveSkill()
+/*void AGS_Chan::OnMoveSkill()
 {
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->IsPlayingFullBodyMontage = true;
 	}
-	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController()))
+	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
 	{
-		TpsController->GetControlValue().bCanMoveRight = false;
-		TpsController->GetControlValue().bCanMoveForward = false;
+		TPSController->SetMoveControlValue(false,false);
 	}
 	bUseControllerRotationYaw = false;
 }
@@ -120,14 +119,15 @@ void AGS_Chan::OffMoveSkill()
 	{
 		AnimInstance->IsPlayingFullBodyMontage = false;
 	}
-	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController()))
+	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
 	{
-		TpsController->GetControlValue().bCanMoveRight = true;
-		TpsController->GetControlValue().bCanMoveForward = true;
+		/*TpsController->GetControlValue().bCanMoveRight = true;
+		TpsController->GetControlValue().bCanMoveForward = true;#1# // SJE
+		TPSController->SetMoveControlValue(true, true);
 	}
 	StopAnimMontage();
 	bUseControllerRotationYaw = true;
-}
+}*/
 
 void AGS_Chan::OnReadyAimSkill()
 {
@@ -170,8 +170,7 @@ void AGS_Chan::Multicast_SetLookControlValue_Implementation(bool bLookUp, bool b
 {
 	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
 	{
-		TPSController->GetControlValue().bCanLookUp = bLookUp;
-		TPSController->GetControlValue().bCanLookRight = bLookRight;		
+		TPSController->SetLookControlValue(bLookRight, bLookUp);
 	}
 	
 }
@@ -180,8 +179,7 @@ void AGS_Chan::Multicast_SetMoveControlValue_Implementation(bool bMoveForward, b
 {
 	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
 	{
-		TPSController->GetControlValue().bCanMoveForward = bMoveForward;;
-		TPSController->GetControlValue().bCanMoveRight = bMoveRight;;		
+		TPSController->SetMoveControlValue(bMoveRight, bMoveForward);
 	}
 }
 
@@ -222,10 +220,13 @@ void AGS_Chan::MulticastPlayComboSection_Implementation()
 	AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
 	if (IsValid(TPSController))
 	{
-		TPSController->GetControlValue().bCanLookRight = false;
+		TPSController->SetLookControlValue(false, true);
 	}
+	
 	FName SectionName = FName(*FString::Printf(TEXT("Attack%d"), CurrentComboIndex + 1));
 	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->SetMotionMatchingPlayRate(2.0f, 2.0f);
+	
 	CurrentComboIndex++;
 	if (AnimInstance && ComboAnimMontage)
 	{
