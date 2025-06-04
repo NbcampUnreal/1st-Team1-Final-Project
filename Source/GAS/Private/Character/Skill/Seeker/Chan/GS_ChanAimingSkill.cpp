@@ -193,8 +193,7 @@ void UGS_ChanAimingSkill::StartHoldUp()
 	}
 	CurrentStamina = MaxStamina;
 
-	OwnerCharacterMaxSpeed = OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
-	OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = OwnerCharacterMaxSpeed * 0.3;
+	OwnerCharacter->Server_SetCharacterSpeed(0.3f);
 	// UI 표시
 	ShowProgressBar(true);
 	UpdateProgressBar(CurrentStamina);
@@ -217,7 +216,7 @@ void UGS_ChanAimingSkill::EndHoldUp()
 		
 	}
 
-	OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = OwnerCharacterMaxSpeed;
+	OwnerCharacter->Server_SetCharacterSpeed(1.0f);
 
 	// UI 숨기기
 	ShowProgressBar(false);
