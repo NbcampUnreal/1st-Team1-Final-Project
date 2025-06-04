@@ -22,6 +22,7 @@ Event	ID	Name			Wwise Object Path	Notes
 	1139191950	EV_Mon_IronFang			\Default Work Unit\Monster\EV_Mon_IronFang	
 	1225088094	EV_ChanAggroSkill			\Default Work Unit\Player\Seeker\EV_ChanAggroSkill	
 	1229688631	Props_StoneDooor_Open			\Default Work Unit\Props\Props_StoneDooor_Open	
+	1439088316	Amb_Wind			\Default Work Unit\AmbientSound\Amb_Wind	
 	1613532296	EV_GameState			\Default Work Unit\EV_GameState	
 	1721776362	Props_BearTrap_Out			\Default Work Unit\Props\Props_BearTrap_Out	
 	1751144939	EV_CombatStop			\Default Work Unit\StateSound\EV_CombatStop	
@@ -107,6 +108,7 @@ Effect plug-ins	ID	Name	Type				Notes
 	625034061	Octave_Up (Custom)	Wwise Pitch Shifter			
 	675983341	Time Stretch (Custom)	Wwise Time Stretch			
 	975136076	Pitch Shifter (Custom)	Wwise Pitch Shifter			
+	1706684651	Plate_Medium	Wwise RoomVerb			
 	1724990773	New_Time_Stretch	Wwise Time Stretch			
 	1990128658	Room_Medium	Wwise RoomVerb			
 	2652646462	Dialog_Leveler_Soft	Wwise Compressor			
@@ -175,6 +177,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	399735935	Heartbeat	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\72\{72ECFA9B-8A1A-E6D7-D4FB-8A10A43EFD18}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Chan\SFX_ChanSick\Heartbeat		677472
 	401627905	FootstepMetal2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\35\{3516BDE1-BB27-E85B-7BDA-66F412F8B807}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Metal\FootstepMetal2		33196
 	418165151	ESM_GB_fx_foley_one_shot_rockcrsh_brick_wall_breaking_02_impact_smash_destroy_hit_scatter_shards	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\7C\{7CB34677-1A68-5A6E-64C4-CEDE224AB2CB}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_CrystalSpikeTrap\ESM_GB_fx_foley_one_shot_rockcrsh_brick_wall_breaking_02_impact_smash_destroy_hit_scatter_shards		115136
+	424654933	Amb_Wind	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\01\{018B8AA9-2E62-560F-03D5-3FA3606EF011}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Ambient\Amb_Wind		8290956
 	434604945	SFX_BearTrap_In0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\8B\{8B729338-3276-28E8-2FE5-3B0A7DCE0D62}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_BearTrap\SFX_BearTrap_Blend\SFX_BearTrap_In0		61884
 	444842476	Merci_Outch6	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BD\{BD0AF678-283E-9198-B671-BF8E4DC7BEC7}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Merci\Voice_Merci_Hit\Merci_Outch6		70792
 	446662238	SFX_CrystalSaw	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\07\{07808BB0-BE47-0C88-902A-56176633AFA0}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_CrystalSaw		933204
