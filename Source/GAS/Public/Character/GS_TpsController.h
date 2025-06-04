@@ -91,7 +91,7 @@ public:
 	UFUNCTION()
 	void SetLookControlValue(bool CanLookRight, bool CanLookUp);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Control") //KCY
 	FControlValue ControlValues;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
@@ -102,4 +102,5 @@ protected:
 	virtual void SetupInputComponent() override;
 	virtual void PostSeamlessTravel() override;
 	virtual void BeginPlayingState() override;
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override; // KCY
 };

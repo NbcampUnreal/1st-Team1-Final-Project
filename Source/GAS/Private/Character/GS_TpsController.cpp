@@ -187,3 +187,11 @@ void AGS_TpsController::BeginPlayingState()
 		AddWidget();
 	}
 }
+
+// KCY
+void AGS_TpsController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_TpsController, ControlValues);
+}
