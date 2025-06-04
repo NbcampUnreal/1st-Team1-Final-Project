@@ -16,7 +16,7 @@ Event	ID	Name			Wwise Object Path	Notes
 	764887418	EV_Mon_IronFang_RTS			\Default Work Unit\Monster\EV_Mon_IronFang_RTS	
 	831579122	EV_Mon_SmallClaw			\Default Work Unit\Monster\EV_Mon_SmallClaw	
 	907956692	EV_ChanAimingSkill_Start			\Default Work Unit\Player\Seeker\EV_ChanAimingSkill_Start	
-	942444514	Props_Torch			\Default Work Unit\Props_Torch	횃불 소리
+	942444514	Props_Torch			\Default Work Unit\Props\Props_Torch	횃불 소리
 	1013594477	EV_Mon_IronFang_Die			\Default Work Unit\Monster\EV_Mon_IronFang_Die	
 	1046362180	Props_StoneTrap_Hit			\Default Work Unit\Props\Props_StoneTrap_Hit	
 	1139191950	EV_Mon_IronFang			\Default Work Unit\Monster\EV_Mon_IronFang	
@@ -49,6 +49,7 @@ Event	ID	Name			Wwise Object Path	Notes
 	3187389166	EV_Mon_SmallClaw_RTS			\Default Work Unit\Monster\EV_Mon_SmallClaw_RTS	
 	3196207142	Props_Portal			\Default Work Unit\Props\Props_Portal	
 	3237405698	Voice_Chan_Hit			\Default Work Unit\Player\Seeker\Voice_Chan_Hit	
+	3240586175	Props_CampFire			\Default Work Unit\Props\Props_CampFire	횃불 소리
 	3369981961	EV_Fire_Burn			\Default Work Unit\EV_Fire_Burn	
 	3407877655	EV_Mon_ShadowFang_Die			\Default Work Unit\Monster\EV_Mon_ShadowFang_Die	
 	3432958693	EV_ArrowBy			\Default Work Unit\EV_ArrowBy	
@@ -165,7 +166,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	330289750	EV_ChanAimingSkill_Start	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\C7\{C7AABDBE-738A-FE1B-4ED2-3876D9FBF42E}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Chan\EV_ChanAimingSkill_Start		47456
 	356621308	StoneTouch_01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\41\{4109AD0C-C71A-906E-9167-FDDCFB4B1CD2}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_StoneDooor_Open\StoneTouch_01		83200
 	360458544	SFX_BoosFootStep_Lava3	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\61\{6194B5E4-1132-BF6B-A294-9E766F410DB7}.wem		\Actor-Mixer Hierarchy\Default Work Unit\BossFootSteps\Lava\SFX_BoosFootStep_Lava3		71912
-	369007659	TorchFlicker	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E9\{E93E11AF-4684-5D00-A49D-01E8163638B9}.wem		\Actor-Mixer Hierarchy\Default Work Unit\TorchFlicker		15893968
+	369007659	Props_TorchFlicker	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E9\{E93E11AF-4684-5D00-A49D-01E8163638B9}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TorchFlicker		15893968
 	369405294	AttackVoice1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\22\{229A5453-4A62-EF27-EAA1-F84C2AEC156F}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Chan\AttackSound_Voice\AttackVoice1		45068
 	373316616	SFX_Arrow_Shot	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\74\{74880479-9A9D-3F13-1BC5-D4E2BF33BD9B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Merci\SFX_Arrow_Shot		285096
 	377837800	Footstep_Grass (3)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\00\{00230D6F-B6B2-51BA-E447-CEE35C030F2D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\BossFootSteps\Grass\Footstep_Grass (3)		58648
@@ -216,6 +217,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	651266643	SFX_BoosFootStep_Stone3	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A5\{A55D50B9-5113-5242-B660-FFF08CB4D348}.wem		\Actor-Mixer Hierarchy\Default Work Unit\BossFootSteps\Stone\SFX_BoosFootStep_Stone3		223152
 	660206576	FootstepsDirt1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\63\{63659564-69FE-255F-0AE4-D8433FFF1F78}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\FootstepsDirt1		87944
 	674316476	Beast_Attack_Dry	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BB\{BB69DEC3-7850-9D9E-61A8-2C1A411383AC}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_Monster\SFX_Mon_IronFang_UI\Beast_Attack_Dry		80768
+	678238931	Props_CampFire	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CC\{CC1ACFFD-2993-61AD-7C6F-05F047CC3034}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_CampFire		1628452
 	689500474	SFX_ArrowImpact_Body	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\2F\{2F48D1A4-DA9C-10C9-EC73-0E5AA1A41B36}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_ArrowImpact_Body		61392
 	696638021	ESM_Undead_Vocal_I_Hunger	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B2\{B2E7A119-4959-00D4-16AF-70D19B99744B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_Monster\SFX_Mon_ShadowFang_UI\ESM_Undead_Vocal_I_Hunger		236108
 	705384360	SFX_BoosFootStep_Stone5	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B3\{B3AA8E39-4472-A583-C100-5A7D04E0780D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\BossFootSteps\Stone\SFX_BoosFootStep_Stone5		172216

@@ -28,18 +28,6 @@
 						</Action>
 					</ChildrenList>
 				</Event>
-				<Event Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}">
-					<Comment>횃불 소리</Comment>
-					<ChildrenList>
-						<Action Name="" ID="{49404C92-16D5-48EE-9F94-47B3C188EBA1}" ShortID="848011745">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="TorchFlicker" ID="{32881CE0-989D-4C38-8D9A-12376643AE6D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
 				<Event Name="FootSteps" ID="{ACB43239-CB8C-41BC-9AC2-2E9257233BFE}">
 					<ChildrenList>
 						<Action Name="" ID="{91427B88-7F96-43AA-88D6-17E3A5D51E28}" ShortID="429641729">
@@ -482,6 +470,30 @@
 									<ReferenceList>
 										<Reference Name="Target">
 											<ObjectRef Name="SFX_StoneDooor_Close" ID="{8A6F0607-E3A7-4FBA-8B04-460759311C6A}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}">
+							<Comment>횃불 소리</Comment>
+							<ChildrenList>
+								<Action Name="" ID="{49404C92-16D5-48EE-9F94-47B3C188EBA1}" ShortID="848011745">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Props_TorchFlicker" ID="{32881CE0-989D-4C38-8D9A-12376643AE6D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="Props_CampFire" ID="{BCEA7046-966A-4D96-8341-33FB4002A3CD}">
+							<Comment>횃불 소리</Comment>
+							<ChildrenList>
+								<Action Name="" ID="{94488CC4-1B7A-485A-A7DB-A0EE6F354A7A}" ShortID="714936233">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Props_CampFire" ID="{1B25F955-5553-4E88-9D95-D88E5145ABFE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
