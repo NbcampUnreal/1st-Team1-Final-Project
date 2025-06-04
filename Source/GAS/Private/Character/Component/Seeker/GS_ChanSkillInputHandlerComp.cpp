@@ -11,11 +11,7 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	Super::OnRightClick(Instance);
 	if (!bCtrlHeld)
 	{
-		if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
-		{
-			OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
-		}
-		else
+		if (!OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
 			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 		}
@@ -47,6 +43,7 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	{
 		if (ChanCharacter)
 		{
+			ChanCharacter->Multicast_SetUseControllerRotationYaw(false);
 			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 		}
 	}

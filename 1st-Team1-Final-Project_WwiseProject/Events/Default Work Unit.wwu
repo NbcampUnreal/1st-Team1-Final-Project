@@ -28,18 +28,6 @@
 						</Action>
 					</ChildrenList>
 				</Event>
-				<Event Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}">
-					<Comment>횃불 소리</Comment>
-					<ChildrenList>
-						<Action Name="" ID="{49404C92-16D5-48EE-9F94-47B3C188EBA1}" ShortID="848011745">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="TorchFlicker" ID="{32881CE0-989D-4C38-8D9A-12376643AE6D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
 				<Event Name="FootSteps" ID="{ACB43239-CB8C-41BC-9AC2-2E9257233BFE}">
 					<ChildrenList>
 						<Action Name="" ID="{91427B88-7F96-43AA-88D6-17E3A5D51E28}" ShortID="429641729">
@@ -174,7 +162,7 @@
 								</Action>
 							</ChildrenList>
 						</Event>
-						<Event Name="EV_Mon_SmallClaw_UI" ID="{23941479-25EC-40A0-81FC-A265BBDEF2B9}">
+						<Event Name="EV_Mon_SmallClaw_RTS" ID="{23941479-25EC-40A0-81FC-A265BBDEF2B9}">
 							<ChildrenList>
 								<Action Name="" ID="{C0069E8A-C79B-4DB7-8628-09CB746E7DD6}" ShortID="773636092">
 									<ReferenceList>
@@ -185,7 +173,7 @@
 								</Action>
 							</ChildrenList>
 						</Event>
-						<Event Name="EV_Mon_IronFang_UI" ID="{9F56E300-4B73-41DA-82E0-47C233DEC99F}">
+						<Event Name="EV_Mon_IronFang_RTS" ID="{9F56E300-4B73-41DA-82E0-47C233DEC99F}">
 							<ChildrenList>
 								<Action Name="" ID="{F5A55DCC-C1EB-4EE0-8AE6-452814847B3A}" ShortID="616702917">
 									<ReferenceList>
@@ -196,7 +184,7 @@
 								</Action>
 							</ChildrenList>
 						</Event>
-						<Event Name="EV_Mon_ShadowFang_UI" ID="{FB6892C7-53B4-41AA-9001-6655B1697F98}">
+						<Event Name="EV_Mon_ShadowFang_RTS" ID="{FB6892C7-53B4-41AA-9001-6655B1697F98}">
 							<ChildrenList>
 								<Action Name="" ID="{1BB8DD05-EC18-4868-836A-DC093C0759C6}" ShortID="327343643">
 									<ReferenceList>
@@ -207,9 +195,42 @@
 								</Action>
 							</ChildrenList>
 						</Event>
-						<Event Name="EV_Mon_SmallClaw_Die" ID="{230CBF00-1C0F-4776-ACA6-FF8844E81B32}">
+						<Event Name="EV_Mon_IronFang_Die" ID="{230CBF00-1C0F-4776-ACA6-FF8844E81B32}">
 							<ChildrenList>
 								<Action Name="" ID="{4EF37358-FB83-4F78-94DC-B14028B744C8}" ShortID="49346587">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_Mon_SmallClaw_Die" ID="{8F534DED-0B86-4831-AB00-BF216FAEAA83}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_Mon_IronFang" ID="{D36C465E-BF45-44B6-950D-FF21056CE83A}">
+							<ChildrenList>
+								<Action Name="" ID="{0A57DE76-D76A-4B26-A35A-F69E4490EAAA}" ShortID="363932703">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_Mon_SmallClaw" ID="{E6C158E7-FEA7-42E8-A880-09B5C3262710}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_Mon_ShadowFang" ID="{8EC51832-E441-4CC3-94F7-33551F4C039E}">
+							<ChildrenList>
+								<Action Name="" ID="{6E047A33-8859-4D60-B49E-01DB1F522C7A}" ShortID="168326634">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_Mon_SmallClaw" ID="{E6C158E7-FEA7-42E8-A880-09B5C3262710}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_Mon_ShadowFang_Die" ID="{A4F9815E-FE2F-4BA7-8D74-F4395326DCC4}">
+							<ChildrenList>
+								<Action Name="" ID="{6734C53F-BD6D-448E-ADD5-738BF99CACBA}" ShortID="51155444">
 									<ReferenceList>
 										<Reference Name="Target">
 											<ObjectRef Name="SFX_Mon_SmallClaw_Die" ID="{8F534DED-0B86-4831-AB00-BF216FAEAA83}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
@@ -454,6 +475,30 @@
 								</Action>
 							</ChildrenList>
 						</Event>
+						<Event Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}">
+							<Comment>횃불 소리</Comment>
+							<ChildrenList>
+								<Action Name="" ID="{49404C92-16D5-48EE-9F94-47B3C188EBA1}" ShortID="848011745">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Props_TorchFlicker" ID="{32881CE0-989D-4C38-8D9A-12376643AE6D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="Props_CampFire" ID="{BCEA7046-966A-4D96-8341-33FB4002A3CD}">
+							<Comment>횃불 소리</Comment>
+							<ChildrenList>
+								<Action Name="" ID="{94488CC4-1B7A-485A-A7DB-A0EE6F354A7A}" ShortID="714936233">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Props_CampFire" ID="{1B25F955-5553-4E88-9D95-D88E5145ABFE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
 					</ChildrenList>
 				</Folder>
 				<Folder Name="Player" ID="{5B530A9A-1B94-4771-9758-F7BC6453FCEA}" ShortID="925469267">
@@ -616,6 +661,17 @@
 									<ReferenceList>
 										<Reference Name="Target">
 											<ObjectRef Name="Amb_DungeonSound" ID="{2AD44FDF-140B-4BC0-AF2A-0D1166270A21}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="Amb_Wind" ID="{C10F7AAF-ADA8-4554-962C-70A592C37CEB}">
+							<ChildrenList>
+								<Action Name="" ID="{CBB929F6-D9AE-4E59-B128-B5547E08E62B}" ShortID="221507574">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Amb_Wind" ID="{0E5D9412-64BC-4EA3-9123-C08A00A37184}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>

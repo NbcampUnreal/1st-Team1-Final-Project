@@ -28,6 +28,7 @@ public:
 	UPROPERTY()
 	TSet<AActor*> HitActors;
 
+	//AGS_Player* OwnerPlayer;
 protected:
 	virtual void BeginPlay() override;
 	void StickWithVisualOnly(const FHitResult& Hit);

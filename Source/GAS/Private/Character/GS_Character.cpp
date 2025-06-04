@@ -13,6 +13,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Weapon/GS_Weapon.h"
 #include "AkGameplayStatics.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AGS_Character::AGS_Character()
 {
@@ -80,6 +81,9 @@ void AGS_Character::BeginPlay()
 		HPTextWidgetComp->SetVisibility(true);
 	}
 
+	DefaultCharacterSpeed = this->GetCharacterMovement()->MaxWalkSpeed;
+	CharacterSpeed = DefaultCharacterSpeed;
+
 	if (HasAuthority())
 	{
 		SpawnAndAttachWeapons();
@@ -103,6 +107,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
+	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 }
 
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -131,6 +136,7 @@ void AGS_Character::OnDeath()
 		UAkGameplayStatics::PostEvent(DeathSoundEvent, this, 0, FOnAkPostEventCallback());
 	}
 
+	DestroyAllWeapons();
 	MulticastRPCCharacterDeath();
 }
 
@@ -187,6 +193,19 @@ AGS_Weapon* AGS_Character::GetWeaponByIndex(int32 Index) const
 	return WeaponSlots.IsValidIndex(Index) ? WeaponSlots[Index].WeaponInstance : nullptr;
 }
 
+void AGS_Character::Server_SetCharacterSpeed_Implementation(float InRatio)
+{
+	if (InRatio >= 0 && InRatio <= 1)
+	{
+		CharacterSpeed = DefaultCharacterSpeed * InRatio;
+
+		if (HasAuthority())
+		{
+			OnRep_CharacterSpeed(); // 서버도 직접 반영
+		}
+	}
+}
+
 void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 {
 	 GetMesh()->SetSimulatePhysics(true);
@@ -219,16 +238,47 @@ void AGS_Character::SpawnAndAttachWeapons()
 	
 	for (FWeaponSlot& Slot : WeaponSlots)
 	{
-		if (!Slot.WeaponClass) continue;
+		if (!Slot.WeaponClass)
+		{
+			continue;
+		}
 
 		FActorSpawnParameters Params;
 		Params.Owner = this;
 		Slot.WeaponInstance = World->SpawnActor<AGS_Weapon>(Slot.WeaponClass, Params);
-		if (!Slot.WeaponInstance) continue;
+		if (!Slot.WeaponInstance)
+		{
+			continue;
+		}
 
 		Slot.WeaponInstance->AttachToComponent(
 			GetMesh(),
 			FAttachmentTransformRules::SnapToTargetIncludingScale,
 			Slot.SocketName);
 	}
+}
+
+void AGS_Character::DestroyAllWeapons()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+	
+	for (FWeaponSlot& Slot : WeaponSlots)
+	{
+		if (!Slot.WeaponInstance)
+		{
+			continue;
+		}
+		
+		Slot.WeaponInstance->Destroy();
+	}
+}
+
+
+void AGS_Character::OnRep_CharacterSpeed()
+{
+	GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
+	UE_LOG(LogTemp, Warning, TEXT("CharacterSpeedChange : %f"), CharacterSpeed);
 }

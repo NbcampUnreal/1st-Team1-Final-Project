@@ -115,6 +115,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	AGS_Weapon* GetWeaponByIndex(int32 Index) const;
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetCharacterSpeed(float InRatio);
 	
 protected:
 	//component
@@ -132,5 +135,13 @@ protected:
 
 private:
 	void SpawnAndAttachWeapons();
+	void DestroyAllWeapons();
+
+	UPROPERTY(ReplicatedUsing = OnRep_CharacterSpeed)
+	float CharacterSpeed;
+	float DefaultCharacterSpeed;
+
+	UFUNCTION()
+	void OnRep_CharacterSpeed();
 };
 
