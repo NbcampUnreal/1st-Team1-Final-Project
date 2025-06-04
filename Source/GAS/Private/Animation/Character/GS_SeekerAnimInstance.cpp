@@ -16,6 +16,9 @@ UGS_SeekerAnimInstance::UGS_SeekerAnimInstance()
 	MovementState = EMovementState::Idle;
 	RotationMode = ERotationMode::OrientToMovement;
 	Gait = EGait::Run;
+
+	MotionMatchingPlayRate.Min = 1.0f;
+	MotionMatchingPlayRate.Max = 1.0f;
 }
 
 void UGS_SeekerAnimInstance::NativeInitializeAnimation()
@@ -110,7 +113,7 @@ bool UGS_SeekerAnimInstance::ShouldTurnInPlace()
 		
 		FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRot, RootRot);
 		DeltaRot.Yaw = FMath::Abs(DeltaRot.Yaw);
-		if (DeltaRot.Yaw >= 50)
+		if (DeltaRot.Yaw >= 30)
 		{
 			return true;
 		}
@@ -230,7 +233,6 @@ float UGS_SeekerAnimInstance::Get_LeanAmount()
 
 void UGS_SeekerAnimInstance::AnimNotify_ComboInput()
 {
-	UE_LOG(LogTemp, Warning, TEXT("AnimNotify_ComboInput"));
 	if (APawn* OwnerPawn = TryGetPawnOwner())
 	{
 		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
@@ -260,4 +262,10 @@ void UGS_SeekerAnimInstance::AnimNotify_ComboEnd()
 			//Chan->ComboEnd();
 		}
 	}
+}
+
+void UGS_SeekerAnimInstance::SetMotionMatchingPlayRate(float Min, float Max)
+{
+	MotionMatchingPlayRate.Min = Min;
+	MotionMatchingPlayRate.Max = Max;
 }

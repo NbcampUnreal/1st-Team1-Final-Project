@@ -250,7 +250,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		SpawnParams.Instigator = this;
 
 		AGS_SeekerMerciArrow* SpawnedArrow =GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRot, SpawnParams);
-
+		SpawnedArrow->SetOwner(this);
 		// 7. 화살 타입 설정
 		if (AGS_SeekerMerciArrowNormal* NormalArrow = Cast<AGS_SeekerMerciArrowNormal>(SpawnedArrow)) // 연기화살 제외
 		{

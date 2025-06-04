@@ -13,6 +13,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "System/GS_PlayerState.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AGS_Player::AGS_Player()
 {
@@ -207,6 +208,18 @@ void AGS_Player::OnDeath()
 	SpectateNextPlayer();
 }
 
+void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick)
+{
+	SkillInputControl.CanInputLC = CanLeftClick;
+	SkillInputControl.CanInputRC = CanRightClick;
+}
+
+FSkillInputControl AGS_Player::GetSkillInputControl()
+{
+	return SkillInputControl;
+}
+
+
 void AGS_Player::Multicast_StopSkillMontage_Implementation(UAnimMontage* Montage)
 {
 	StopAnimMontage(Montage);
@@ -251,6 +264,11 @@ bool AGS_Player::IsLocalPlayer() const
 		return PC->IsLocalController();
 	}
 	return false;
+}
+
+void AGS_Player::Multicast_SetUseControllerRotationYaw_Implementation(bool UseControlRotationYaw)
+{
+	bUseControllerRotationYaw = UseControlRotationYaw;
 }
 
 void AGS_Player::SpectateNextPlayer()

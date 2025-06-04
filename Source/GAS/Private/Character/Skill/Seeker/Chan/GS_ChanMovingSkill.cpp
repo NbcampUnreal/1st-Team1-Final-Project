@@ -9,8 +9,6 @@
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Player/GS_Player.h"
 #include "AkAudioEvent.h"
-/*#include "Animation/Character/GS_SeekerAnimInstance.h"
-#include "Character/GS_TpsController.h"*/
 
 UGS_ChanMovingSkill::UGS_ChanMovingSkill()
 {
@@ -47,6 +45,7 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->Multicast_SetMoveControlValue(true, true);
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
+		OwnerPlayer->Multicast_SetUseControllerRotationYaw(true);
 	}
 }
 
