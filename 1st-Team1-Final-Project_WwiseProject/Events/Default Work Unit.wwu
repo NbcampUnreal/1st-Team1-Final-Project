@@ -174,7 +174,7 @@
 								</Action>
 							</ChildrenList>
 						</Event>
-						<Event Name="EV_Mon_SmallClaw_UI" ID="{23941479-25EC-40A0-81FC-A265BBDEF2B9}">
+						<Event Name="EV_Mon_SmallClaw_RTS" ID="{23941479-25EC-40A0-81FC-A265BBDEF2B9}">
 							<ChildrenList>
 								<Action Name="" ID="{C0069E8A-C79B-4DB7-8628-09CB746E7DD6}" ShortID="773636092">
 									<ReferenceList>
@@ -185,7 +185,7 @@
 								</Action>
 							</ChildrenList>
 						</Event>
-						<Event Name="EV_Mon_IronFang_UI" ID="{9F56E300-4B73-41DA-82E0-47C233DEC99F}">
+						<Event Name="EV_Mon_IronFang_RTS" ID="{9F56E300-4B73-41DA-82E0-47C233DEC99F}">
 							<ChildrenList>
 								<Action Name="" ID="{F5A55DCC-C1EB-4EE0-8AE6-452814847B3A}" ShortID="616702917">
 									<ReferenceList>
@@ -196,7 +196,7 @@
 								</Action>
 							</ChildrenList>
 						</Event>
-						<Event Name="EV_Mon_ShadowFang_UI" ID="{FB6892C7-53B4-41AA-9001-6655B1697F98}">
+						<Event Name="EV_Mon_ShadowFang_RTS" ID="{FB6892C7-53B4-41AA-9001-6655B1697F98}">
 							<ChildrenList>
 								<Action Name="" ID="{1BB8DD05-EC18-4868-836A-DC093C0759C6}" ShortID="327343643">
 									<ReferenceList>
@@ -207,9 +207,42 @@
 								</Action>
 							</ChildrenList>
 						</Event>
-						<Event Name="EV_Mon_SmallClaw_Die" ID="{230CBF00-1C0F-4776-ACA6-FF8844E81B32}">
+						<Event Name="EV_Mon_IronFang_Die" ID="{230CBF00-1C0F-4776-ACA6-FF8844E81B32}">
 							<ChildrenList>
 								<Action Name="" ID="{4EF37358-FB83-4F78-94DC-B14028B744C8}" ShortID="49346587">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_Mon_SmallClaw_Die" ID="{8F534DED-0B86-4831-AB00-BF216FAEAA83}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_Mon_IronFang" ID="{D36C465E-BF45-44B6-950D-FF21056CE83A}">
+							<ChildrenList>
+								<Action Name="" ID="{0A57DE76-D76A-4B26-A35A-F69E4490EAAA}" ShortID="363932703">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_Mon_SmallClaw" ID="{E6C158E7-FEA7-42E8-A880-09B5C3262710}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_Mon_ShadowFang" ID="{8EC51832-E441-4CC3-94F7-33551F4C039E}">
+							<ChildrenList>
+								<Action Name="" ID="{6E047A33-8859-4D60-B49E-01DB1F522C7A}" ShortID="168326634">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_Mon_SmallClaw" ID="{E6C158E7-FEA7-42E8-A880-09B5C3262710}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_Mon_ShadowFang_Die" ID="{A4F9815E-FE2F-4BA7-8D74-F4395326DCC4}">
+							<ChildrenList>
+								<Action Name="" ID="{6734C53F-BD6D-448E-ADD5-738BF99CACBA}" ShortID="51155444">
 									<ReferenceList>
 										<Reference Name="Target">
 											<ObjectRef Name="SFX_Mon_SmallClaw_Die" ID="{8F534DED-0B86-4831-AB00-BF216FAEAA83}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
