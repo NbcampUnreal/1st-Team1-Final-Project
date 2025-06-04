@@ -666,6 +666,17 @@
 								</Action>
 							</ChildrenList>
 						</Event>
+						<Event Name="Amb_Wind" ID="{C10F7AAF-ADA8-4554-962C-70A592C37CEB}">
+							<ChildrenList>
+								<Action Name="" ID="{CBB929F6-D9AE-4E59-B128-B5547E08E62B}" ShortID="221507574">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Amb_Wind" ID="{0E5D9412-64BC-4EA3-9123-C08A00A37184}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
 					</ChildrenList>
 				</Folder>
 				<Folder Name="StateSound" ID="{672C6E2B-2D90-4068-A13C-346D1A36720A}" ShortID="253688740">

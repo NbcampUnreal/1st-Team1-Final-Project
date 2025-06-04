@@ -104,4 +104,10 @@ protected:
     FDelegateHandle OnSessionUserInviteAcceptedDelegateHandle;
     virtual void OnSessionUserInviteAccepted_Impl(const bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
 
+
+
+    //타이머 넘기기
+public:
+    UPROPERTY(BlueprintReadWrite, Category = "Timer")
+    float RemainingTime;
 };
