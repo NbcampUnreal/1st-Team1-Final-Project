@@ -94,6 +94,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
 	FControlValue ControlValues;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+	FRotator LastRotatorInMoving;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

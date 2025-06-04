@@ -61,6 +61,17 @@ void AGS_Chan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AGS_Chan::OnComboAttack()
 {
+	float ControlYaw = GetControlRotation().Yaw;
+	AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController());
+	float YawDiff = FMath::Abs(FMath::FindDeltaAngleDegrees(ControlYaw, TpsController->LastRotatorInMoving.Yaw));
+
+	UE_LOG(LogTemp, Warning, TEXT("ActorYaw : %f , ControlYaw : %f, Deff : %f"), TpsController->LastRotatorInMoving.Yaw, ControlYaw, YawDiff);
+	
+	if (YawDiff > 50)
+	{
+		return;
+	}
+	
 	if (CanAcceptComboInput)
 	{
 		if (CurrentComboIndex == 0)
@@ -109,35 +120,6 @@ void AGS_Chan::ComboEnd()
 		}
 	}
 }
-
-/*void AGS_Chan::OnMoveSkill()
-{
-	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInstance->IsPlayingFullBodyMontage = true;
-	}
-	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
-	{
-		TPSController->SetMoveControlValue(false,false);
-	}
-	bUseControllerRotationYaw = false;
-}
-
-void AGS_Chan::OffMoveSkill()
-{
-	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInstance->IsPlayingFullBodyMontage = false;
-	}
-	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
-	{
-		/*TpsController->GetControlValue().bCanMoveRight = true;
-		TpsController->GetControlValue().bCanMoveForward = true;#1# // SJE
-		TPSController->SetMoveControlValue(true, true);
-	}
-	StopAnimMontage();
-	bUseControllerRotationYaw = true;
-}*/
 
 void AGS_Chan::OnReadyAimSkill()
 {
