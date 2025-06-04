@@ -17,28 +17,14 @@ void UGS_DrakharAnimInstance::NativeInitializeAnimation()
 	}
 }
 
-void UGS_DrakharAnimInstance::PlayComboAttackMontage(int32 InCurrentComboIndex)
+void UGS_DrakharAnimInstance::AnimNotify_ComboAttack()
 {
-	if (InCurrentComboIndex >= ComboAttackMontages.Num())
-	{
-		return;
-	}
-	Montage_Play(ComboAttackMontages[InCurrentComboIndex], 1.f);
+	Drakhar->MeleeAttackCheck();
 }
 
-void UGS_DrakharAnimInstance::StopComboAttackMontage(int32 InCurrentComboIndex)
+void UGS_DrakharAnimInstance::AnimNotify_Reset()
 {
-	Montage_Stop(0.f, ComboAttackMontages[InCurrentComboIndex]);
-}
-
-void UGS_DrakharAnimInstance::AnimNotify_ComboAttackCheck()
-{	
-	Drakhar->ServerRPCComboAttackCheck();	
-}
-
-void UGS_DrakharAnimInstance::AnimNotify_ComboAttackEnd()
-{
-	Drakhar->ServerRPCComboAttackEnd();
+	Drakhar->ServerRPCResetValue();
 }
 
 void UGS_DrakharAnimInstance::AnimNotify_EarthquakeCheck()

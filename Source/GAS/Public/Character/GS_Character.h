@@ -75,6 +75,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	ECharacterType CharacterType;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
+	
 	//getter
 	FORCEINLINE UGS_StatComp* GetStatComp() const { return StatComp; }
 	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }
@@ -128,9 +131,6 @@ protected:
 	TArray<FWeaponSlot> WeaponSlots;
 
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
-	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
-
 	void SpawnAndAttachWeapons();
 	void DestroyAllWeapons();
 };

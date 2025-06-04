@@ -80,7 +80,7 @@ public:
 
 	// 현재 선택된 유닛들
 	const TArray<AGS_Monster*>& GetUnitSelection() const { return UnitSelection; }
-
+	
 	// 카메라 이동 입력 처리
 	void CameraMove(const FInputActionValue& InputValue);
 	void CameraMoveEnd();
@@ -127,7 +127,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void MoveAIViaMinimap(const FVector& WorldLocation);
-
+	
 	UFUNCTION(BlueprintCallable)
 	void AttackAIViaMinimap(const FVector& WorldLocation);
 	
@@ -136,7 +136,7 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	ERTSCommand GetCurrentCommand() const { return CurrentCommand; }
-
+	
 	// Server
 	UFUNCTION(Server, Reliable)
 	void Server_RTSMove(const TArray<AGS_Monster*>& Units, const FVector& Dest);
@@ -183,7 +183,7 @@ private:
 
 	bool bCtrlDown;
 	bool bShiftDown;
-
+	
 	UPROPERTY()
 	TMap<int32, FVector> SavedCameraPositions; // 카메라 저장 위치
 
@@ -206,4 +206,3 @@ private:
 	UFUNCTION()
 	void OnSelectedUnitDead(AGS_Monster* Monster);
 };
-

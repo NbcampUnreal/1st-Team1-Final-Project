@@ -9,21 +9,19 @@
 
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Net/UnrealNetwork.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
 	PrimaryActorTick.bCanEverTick = false;
+
+	//combo attack
+	DefaultComboAttackSectionName = FName("Combo1");
+	ComboAttackSectionName = DefaultComboAttackSectionName;
+	bCanCombo = true;
+	bClientCanCombo = true;
 	
-	//combo attack variables
-	CurrentComboAttackIndex = 0;
-	MaxComboAttackIndex = 3;
-
-	bIsComboAttacking = false;
-	bCanDoNextComboAttack = false;
-	ClientNextComboAttack = false;
-
 	//dash skill variables
 	DashPower = 1500.f;
 	DashInterpAlpha = 0.f;
@@ -34,27 +32,27 @@ AGS_Drakhar::AGS_Drakhar()
 	EarthquakeRadius = 500.f;
 
 	//Guardian State Setting
-	ClientGuardianState = EGuardianState::None;
+	ClientGuardianState = EGuardianState::CtrlSkillEnd;
 }
 
 void AGS_Drakhar::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (GuardianAnim)
-	{
-		GuardianAnim->OnMontageEnded.AddDynamic(this, &AGS_Drakhar::OnMontageEnded);
-	}
+	
 	GuardianState = EGuardianState::CtrlSkillEnd;
+
+	UGS_DrakharAnimInstance* Anim = Cast<UGS_DrakharAnimInstance>(GetMesh()->GetAnimInstance());
+	if (IsValid(Anim))
+	{
+		Anim->OnPlayMontageNotifyBegin.AddDynamic(this, &ThisClass::OnMontageNotifyBegin);
+	}
 }
 
 void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, bIsComboAttacking);
-	DOREPLIFETIME(ThisClass, bCanDoNextComboAttack);
-	DOREPLIFETIME(ThisClass, CurrentComboAttackIndex);
+	DOREPLIFETIME(ThisClass, bCanCombo);
 }
 
 void AGS_Drakhar::Ctrl()
@@ -82,7 +80,7 @@ void AGS_Drakhar::LeftMouse()
 {
 	Super::LeftMouse();
 
-	if (IsLocallyControlled())
+	if (!HasAuthority() && IsLocallyControlled())
 	{
 		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
 		{
@@ -93,12 +91,12 @@ void AGS_Drakhar::LeftMouse()
 		//not flying
 		else if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
 		{
-			if (!ClientComboAttacking)
+			if (bClientCanCombo)
 			{
-				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("melee attack")), true, true, FLinearColor::Blue, 5.f);
-				GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
+				PlayComboAttackMontage();
+				ServerRPCNewComboAttack();
+				bClientCanCombo = false;
 			}
-			ServerRPCComboAttack();
 		}
 	}
 }
@@ -121,104 +119,57 @@ void AGS_Drakhar::RightMouse()
 	}
 }
 
-void AGS_Drakhar::ServerRPCComboAttack_Implementation()
+void AGS_Drakhar::SetNextComboAttackSection(FName InSectionName)
 {
-	//다음 공격 되는 것이 확정인 경우
-	if (bCanDoNextComboAttack)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("can combo attack ????? %d"), bIsComboAttacking);				
-	}
-
-	//prevent attack stacking
-	if (bIsComboAttacking)
-	{
-		//이미 공격하고 있는 중에 클릭을 입력받으면 CanDoNext를 true로
-		bCanDoNextComboAttack = true;
-		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-		return;
-	}
-	
-	//이미 공격하고 있는 중이 아니라면,
-	//몽타주 재생시켜주고
-	MulticastRPCPlayComboAttackMontage();
-	
-	//공격 몽타주 못하게 막기
-	bIsComboAttacking = true;
-	bCanDoNextComboAttack = false;
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
+	ComboAttackSectionName = InSectionName;
 }
 
-void AGS_Drakhar::MulticastRPCPlayComboAttackMontage_Implementation()
+void AGS_Drakhar::ResetComboAttackSection()
 {
-	if (IsLocallyControlled() || GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-	GuardianAnim->PlayComboAttackMontage(ClientComboAttackIndex);
+	ComboAttackSectionName = DefaultComboAttackSectionName;
 }
 
-void AGS_Drakhar::ServerRPCComboAttackCheck_Implementation()
+void AGS_Drakhar::PlayComboAttackMontage()
 {
-	MeleeAttackCheck();
+	PlayAnimMontage(ComboAttackMontage,1.f, ComboAttackSectionName);
+	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%s  %s"),*ComboAttackMontage.GetName(), *ComboAttackSectionName.ToString()), true, true, FLinearColor::Blue, 5.f);
+}
 
-	if (CurrentComboAttackIndex == MaxComboAttackIndex - 1)
+void AGS_Drakhar::OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& PayLoad)
+{
+	if (NotifyName == "None")
 	{
-		const FVector StartLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 50.f);
-		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(Projectile, StartLocation, GetActorRotation());
-		if (DrakharProjectile)
-		{
-			DrakharProjectile->SetOwner(this);
-		}
+		bClientCanCombo = true;
+		ServerRPCResetValue();
 	}
 }
 
-void AGS_Drakhar::ServerRPCComboAttackEnd_Implementation()
+void AGS_Drakhar::OnRep_CanCombo()
 {
-	//만약 다음 공격을 할 수 있는 상황이라면,
-	if (bCanDoNextComboAttack)
+	bClientCanCombo = bCanCombo;
+}
+
+void AGS_Drakhar::ServerRPCResetValue_Implementation()
+{
+	bCanCombo = true;
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+}
+
+void AGS_Drakhar::ServerRPCNewComboAttack_Implementation()
+{
+	MulticastRPCComboAttack();	
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+	bCanCombo = false;
+}
+
+void AGS_Drakhar::MulticastRPCComboAttack_Implementation()
+{
+	if (!IsLocallyControlled())
 	{
-		//인덱스 증가
-		CurrentComboAttackIndex++;
-		CurrentComboAttackIndex %= MaxComboAttackIndex;
+		PlayComboAttackMontage();
 	}
-	//아니라면
-	else
-	{
-		//초기화
-		CurrentComboAttackIndex = 0;
-	}
-
-	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("attack server end")), true, true, FLinearColor::Blue, 5.f);
-
-	//다음 몽타주 실행할 수 있게
-	ResetComboAttackVariables();
 }
 
-void AGS_Drakhar::OnRep_IsComboAttacking()
-{
-	ClientComboAttacking = bIsComboAttacking;
-}
-
-void AGS_Drakhar::OnRep_CurrentComboAttackIndex()
-{
-	ClientComboAttackIndex = CurrentComboAttackIndex;
-}
-
-void AGS_Drakhar::OnRep_CanDoNextComboAttack()
-{
-	ClientNextComboAttack = bCanDoNextComboAttack;
-}
-
-void AGS_Drakhar::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-}
-
-void AGS_Drakhar::ResetComboAttackVariables()
-{
-	bIsComboAttacking = false;
-	bCanDoNextComboAttack = false;
-	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
-}
 
 void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 {
@@ -255,9 +206,9 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	}
 
 	DamagedCharacters.Empty();
-	GuardianState = EGuardianState::None;
+	GuardianState = EGuardianState::CtrlSkillEnd;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-	ResetComboAttackVariables();
+	bCanCombo = true;
 }
 
 void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
@@ -344,7 +295,7 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 {
 	DraconicFuryTargetArray.Empty();
 
-	for (int i = 0; i < 5; ++i)
+	for (int32 i = 0; i < 5; ++i)
 	{
 		FVector StartLocation = GetActorLocation();
 		FVector Offset = GetActorForwardVector() * 200.f + FVector(FMath::FRandRange(-300.f, 300.f), FMath::FRandRange(-300.f, 300.f), FMath::FRandRange(500.f, 600.f));
