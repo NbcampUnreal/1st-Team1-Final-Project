@@ -14,6 +14,7 @@ UGS_GameInstance::UGS_GameInstance()
 	, DefaultLobbyGameModePath(TEXT("/Game/System/BP_GS_CustomLobbyGM.BP_GS_CustomLobbyGM_C"))
 	, DefaultMaxLobbyPlayers(5)
 {
+    RemainingTime = 900.f;
 }
 
 void UGS_GameInstance::Init()

@@ -1,5 +1,6 @@
 #include "System/GameMode/GS_InGameGM.h"
 #include "System/GameState/GS_InGameGS.h"
+#include "System/GS_GameInstance.h"
 #include "System/GS_PlayerState.h"
 #include "System/GS_GameInstance.h"
 #include "System/GS_PlayerRole.h"
@@ -108,11 +109,11 @@ AActor* AGS_InGameGM::ChoosePlayerStart_Implementation(AController* Player)
         {
             if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
             {
-                PlayerStartTagToFind = TEXT("None");
+                PlayerStartTagToFind = TEXT("SpawnPoint1");
             }
             else if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
             {
-                PlayerStartTagToFind = TEXT("None");
+                PlayerStartTagToFind = TEXT("SpawnPoint1");
                 
             }
         }
@@ -239,6 +240,17 @@ void AGS_InGameGM::EndGame(EGameResult Result)
         UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: Not All Seekers dead. Traveling to BossLevel."));
         SetGameResultOnAllPlayers(EGameResult::GR_InProgress);
         NextLevelName = TEXT("BossLevel");
+
+        AGS_InGameGS* InGameGS = GetGameState<AGS_InGameGS>();
+        if (InGameGS)
+        {
+			float RemainingTime = FMath::Max(0.0f, InGameGS->TotalGameTime - InGameGS->CurrentTime);
+			UGS_GameInstance* GI = Cast<UGS_GameInstance>(GetGameInstance());
+            if (GI)
+            {
+				GI->RemainingTime = RemainingTime;
+            }
+        }
     }
 
     if (!NextLevelName.IsEmpty())
