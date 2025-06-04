@@ -71,7 +71,7 @@ void AGS_Door::Server_DoorOpen_Implementation(AActor* TargetActor)
 	//문 열리는 함수 호출하고 
 	DoorOpen();
 	GetWorldTimerManager().ClearTimer(DoorCloseTimerHandle);
-	GetWorldTimerManager().SetTimer(DoorCloseTimerHandle, this, &AGS_Door::CheckForPlayerInTrigger, 3.0f, false);
+	GetWorldTimerManager().SetTimer(DoorCloseTimerHandle, this, &AGS_Door::CheckForPlayerInTrigger, 2.0f, false);
 }
 
 void AGS_Door::CheckForPlayerInTrigger()
@@ -82,7 +82,7 @@ void AGS_Door::CheckForPlayerInTrigger()
 	if (OverlappingActors.Num() > 0)
 		//오버랩 되는 엑터가 있으면 타이머 초기화
 	{
-		GetWorldTimerManager().SetTimer(DoorCloseTimerHandle, this, &AGS_Door::CheckForPlayerInTrigger, 3.0f, false);
+		GetWorldTimerManager().SetTimer(DoorCloseTimerHandle, this, &AGS_Door::CheckForPlayerInTrigger, 2.0f, false);
 	}
 	else
 	{
