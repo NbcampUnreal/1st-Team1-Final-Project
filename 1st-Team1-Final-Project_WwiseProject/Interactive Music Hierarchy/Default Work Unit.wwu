@@ -168,6 +168,11 @@
 							<PropertyList>
 								<Property Name="EndPosition" Type="Real64" Value="101078.9569161"/>
 								<Property Name="OverrideEffect" Type="bool" Value="True"/>
+								<Property Name="Volume" Type="Real64">
+									<ValueList>
+										<Value>-2</Value>
+									</ValueList>
+								</Property>
 							</PropertyList>
 							<ReferenceList>
 								<Reference Name="Conversion">

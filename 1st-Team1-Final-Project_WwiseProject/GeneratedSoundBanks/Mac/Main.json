@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{A8764B62-CFC1-C835-058C-FDBC50A7689C}",
+    "Hash": "{1279649B-E965-02D8-4778-158274136C60}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -502,6 +502,14 @@
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_rockcrsh_brick_wall_breaking_02_impact_smash_destroy_hit_scatter_shards.wav",
       "CachePath": "7C/{7CB34677-1A68-5A6E-64C4-CEDE224AB2CB}.wem"
+     },
+     {
+      "Id": "424654933",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Wind_Loop_Distant_Air_Steady_1.wav",
+      "CachePath": "01/{018B8AA9-2E62-560F-03D5-3FA3606EF011}.wem"
      },
      {
       "Id": "434604945",
@@ -1437,6 +1445,14 @@
      ],
      "ShareSets": [
       {
+       "Id": "1706684651",
+       "Name": "Plate_Medium",
+       "ObjectPath": "\\Effects\\Factory Effects\\RoomVerb\\Plates\\Plate_Medium",
+       "GUID": "{33384D0C-6ACB-4E3D-AC82-73AAB3AE1CA5}",
+       "LibName": "Wwise RoomVerb",
+       "LibId": "7733251"
+      },
+      {
        "Id": "1724990773",
        "Name": "New_Time_Stretch",
        "ObjectPath": "\\Effects\\Default Work Unit\\New_Time_Stretch",
@@ -1494,6 +1510,25 @@
        "ShareSets": [
         {
          "Id": "1990128658"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "1439088316",
+      "Name": "Amb_Wind",
+      "ObjectPath": "\\Events\\Default Work Unit\\AmbientSound\\Amb_Wind",
+      "GUID": "{C10F7AAF-ADA8-4554-962C-70A592C37CEB}",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "424654933"
+       }
+      ],
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "1706684651"
         }
        ]
       }
@@ -3239,6 +3274,6 @@
     ]
    }
   ],
-  "FileHash": "{666AB3C5-FCFA-F856-4AB0-4AFF8EB99D82}"
+  "FileHash": "{BAA76BAA-9CAD-23B1-D87C-EFC547C9C555}"
  }
 }
