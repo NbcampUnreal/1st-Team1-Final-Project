@@ -33,13 +33,11 @@ public:
 	// Combo Attack Montage
 	void ComboInputOpen();
 	void ComboInputClose();
-	void EndMontage();
-
 	void ComboEnd();
 
 	// Move Skill
-	void OnMoveSkill();
-	void OffMoveSkill();
+	/*void OnMoveSkill();
+	void OffMoveSkill();*/
 
 	// Aim Skill
 	void OnReadyAimSkill();
@@ -105,14 +103,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
 	UAkAudioEvent* UltimateSkillSound;
 
+
 	// 스킬 사운드 재생 함수
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySkillSound(UAkAudioEvent* SoundToPlay);
-
-	template <typename T>
-	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);
-	/*template <typename T>
-	void SpawnAndAttachWeapon(TSubclassOf<T> WeaponClass, FName SocketName, T*& OutWeapon);*/
 
 	// [Widget]
 	void SetChanAimingSkillBarWidget(UGS_ChanAimingSkillBar* Widget) { ChanAimingSkillBarWidget = Widget; }

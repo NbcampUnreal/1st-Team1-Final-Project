@@ -27,6 +27,17 @@ struct FCharacterWantsToMove
 	bool WantsToStrafe = false;
 };
 
+USTRUCT(BlueprintType)
+struct FSkillInputControl
+{
+	GENERATED_BODY();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Control")
+	bool CanInputLC = true; // Left Click
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Control")
+	bool CanInputRC = true; // Right Click
+};
+
 UCLASS()
 class GAS_API AGS_Player : public AGS_Character
 {
@@ -90,6 +101,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Movement")
 	FCharacterWantsToMove WantsToMove;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetUseControllerRotationYaw(bool UseControlRotationYaw);
+
 	// 오디오 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	UAkComponent* AkComponent;
@@ -121,10 +135,21 @@ public:
 	void ServerRPCSpectateNextPlayer();
 	
 	virtual void OnDeath() override;
+
+
+	// Skll Input Control
+	void SetSkillInputControl(bool CanLeftClick, bool CanRightClick);
+
+	FSkillInputControl GetSkillInputControl();
+	
 	
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FCharacterWantsToMove GetWantsToMove();
+
+private:
+	UPROPERTY()
+	FSkillInputControl SkillInputControl;
 };

@@ -4,6 +4,7 @@
 #include "Animation/Character/Seeker/Chan/GS_ANS_Aggro.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Skill/GS_SkillBase.h"
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 
 void UGS_ANS_Aggro::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration,
                                 const FAnimNotifyEventReference& EventReference)

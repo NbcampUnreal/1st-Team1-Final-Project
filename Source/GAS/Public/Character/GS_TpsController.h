@@ -75,20 +75,21 @@ public:
 	void Move(const FInputActionValue& InputValue);
 	void Look(const FInputActionValue& InputValue);
 	void WalkToggle(const FInputActionValue& InputValue);
-	/*void LClickPressed(const FInputActionValue& InputValue);
-	void LClickRelease(const FInputActionValue& InputValue);*/
 	void PageUp(const FInputActionValue& InputValue);
 	void PageDown(const FInputActionValue& InputValue);
-	
-	void SetCanMove(bool bInCanMove) { bCanMove = bInCanMove; }
-	bool GetCanMove() { return bCanMove; }
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void AddWidget();
 	void InitControllerPerWorld();
-	
+
 	UFUNCTION()
-	FControlValue& GetControlValue();
+	FControlValue GetControlValue() const;
+
+	UFUNCTION()
+	void SetMoveControlValue(bool CanMoveRight, bool CanMoveForward);
+
+	UFUNCTION()
+	void SetLookControlValue(bool CanLookRight, bool CanLookUp);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
 	FControlValue ControlValues;
@@ -96,11 +97,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
-	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 	virtual void PostSeamlessTravel() override;
 	virtual void BeginPlayingState() override;
-private:
-
-	UPROPERTY(Replicated)
-	bool bCanMove;
 };
