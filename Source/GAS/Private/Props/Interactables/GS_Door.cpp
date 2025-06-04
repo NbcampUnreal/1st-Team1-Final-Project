@@ -31,12 +31,6 @@ AGS_Door::AGS_Door()
 	TriggerBoxComp->SetupAttachment(DoorFrameMeshComp);
 }
 
-//void AGS_Door::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-//{
-//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-//
-//	DOREPLIFETIME(AGS_Door, bIsOpen);
-//}
 
 void AGS_Door::BeginPlay()
 {
@@ -53,7 +47,6 @@ void AGS_Door::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor
 	{
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("trigger begin overlap called"));
 	AGS_Character* Character = Cast<AGS_Character>(OtherActor);
 	if (!Character || !HasAuthority())
 	{
@@ -61,7 +54,6 @@ void AGS_Door::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor
 	}
 	if (!bIsOpen)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Door was Not Open openning..."));
 		bIsOpen = true;
 		Server_DoorOpen(Character);
 	}

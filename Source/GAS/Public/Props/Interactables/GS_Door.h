@@ -25,7 +25,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door")
 	UStaticMeshComponent* DoorMeshComp;
 	
-	//UPROPERTY(Replicated)
 	bool bIsOpen = false;
 
 	FTimerHandle DoorCloseTimerHandle;
