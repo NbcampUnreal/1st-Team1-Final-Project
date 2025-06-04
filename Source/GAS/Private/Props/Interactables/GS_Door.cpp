@@ -84,7 +84,6 @@ void AGS_Door::CheckForPlayerInTrigger()
 		//오버랩 되는 엑터가 없으면 문 닫히는 함수 호출
 		DoorClose();
 		bIsOpen = false;
-		UE_LOG(LogTemp, Warning, TEXT("Door closing...bIsNotOpen"));
 	}
 
 
