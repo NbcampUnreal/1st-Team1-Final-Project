@@ -11,11 +11,18 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 #include "NiagaraComponent.h"
-#include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Engine/GameInstance.h"
 #include "Sound/GS_AudioManager.h"
 #include "System/GS_PlayerState.h"
+#include "Animation/Character/GS_SeekerAnimInstance.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/ChildActorComponent.h"
+#include "GameFramework/Character.h"
+#include "Engine/PostProcessVolume.h"
+#include "Materials/MaterialInterface.h"
+#include "Camera/PlayerCameraManager.h"
+#include "Components/SphereComponent.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -44,6 +51,12 @@ AGS_Seeker::AGS_Seeker()
 	BodyLavaVFX->bAutoActivate = false;
 	BodyLavaVFX->SetRelativeLocation(FVector(-60.f, 0.f, 0.f));
 	BodyLavaVFX->SetRelativeRotation(FRotator(-90.f, 0.f, 0.f));
+
+	// 전투 BGM 트리거 생성 (시커가 몬스터를 감지)
+	CombatTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("CombatTrigger"));
+	CombatTrigger->SetupAttachment(RootComponent);
+	CombatTrigger->SetSphereRadius(1200.0f);
+	CombatTrigger->SetCollisionProfileName(TEXT("SoundTrigger"));
 }
 
 void AGS_Seeker::SetAimState(bool IsAim)
@@ -79,6 +92,13 @@ void AGS_Seeker::Multicast_SetNewPlayRate_Implementation(float PlayRate)
 void AGS_Seeker::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// CombatTrigger 오버랩 이벤트 바인딩
+	if (CombatTrigger)
+	{
+		CombatTrigger->OnComponentBeginOverlap.AddDynamic(this, &AGS_Seeker::OnCombatTriggerBeginOverlap);
+		CombatTrigger->OnComponentEndOverlap.AddDynamic(this, &AGS_Seeker::OnCombatTriggerEndOverlap);
+	}
 
 	if (IsLocallyControlled())
 	{
@@ -261,6 +281,30 @@ void AGS_Seeker::OnRep_CurrentEffectStrength()
 // =================
 // 전투 음악 관리 함수
 // =================
+
+// 새로운 몬스터 감지 시스템 (시커가 몬스터를 감지)
+void AGS_Seeker::OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor->IsA(AGS_Monster::StaticClass()))
+	{
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(OtherActor))
+		{
+			AddCombatMonster(Monster);
+		}
+	}
+}
+
+void AGS_Seeker::OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && OtherActor->IsA(AGS_Monster::StaticClass()))
+	{
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(OtherActor))
+		{
+			RemoveCombatMonster(Monster);
+		}
+	}
+}
+
 void AGS_Seeker::AddCombatMonster(AGS_Monster* Monster)
 {
 	if (!Monster)
@@ -292,7 +336,7 @@ void AGS_Seeker::RemoveCombatMonster(AGS_Monster* Monster)
 	// 모든 몬스터가 제거되면 음악 중지
 	if (NearbyMonsters.Num() == 0)
 	{
-		StopCombatMusic();
+		ClientRPCStopCombatMusic();
 	}
 }
 
@@ -323,7 +367,7 @@ void AGS_Seeker::StartCombatMusic()
 	}
 }
 
-void AGS_Seeker::StopCombatMusic()
+void AGS_Seeker::ClientRPCStopCombatMusic_Implementation()
 {
 	// 죽었을 때는 IsLocallyControlled() 체크를 하지 않음
 	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() called for %s"), *GetName());
@@ -373,7 +417,7 @@ void AGS_Seeker::UpdateCombatMusicState()
 	// 몬스터가 없으면 음악 중지
 	if (NearbyMonsters.Num() == 0)
 	{
-		StopCombatMusic();
+		ClientRPCStopCombatMusic();
 	}
 }
 
@@ -384,7 +428,7 @@ void AGS_Seeker::OnDeath()
 	
 	// 확실하게 BGM 끄기 (백업용)
 	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::OnDeath() - Stopping combat music"));
-	StopCombatMusic();
+	ClientRPCStopCombatMusic();
 	NearbyMonsters.Empty();
 }
 
@@ -409,7 +453,7 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 	if (!bIsNowAlive) // 자신이 죽었을 때
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Player died, stopping combat music"));
-		StopCombatMusic();
+		ClientRPCStopCombatMusic();
 		NearbyMonsters.Empty();
 	}
 }

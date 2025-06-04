@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "System/GS_PlayerRole.h"
+#include "Character/Player/GS_PawnMappingDataAsset.h"
 #include "GS_InGameGM.generated.h"
 
 class AGS_PlayerState;
@@ -18,12 +19,17 @@ public:
 	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+
 	virtual void StartPlay() override;
 
 	virtual void Logout(AController* Exiting) override;
 
 protected:
 	void StartMatchCheck();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Configuration")
+	UGS_PawnMappingDataAsset* PawnMappingDataAsset;
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Player Controller Classes")
@@ -34,12 +40,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player Controller Classes")
 	TSubclassOf<APlayerController> RTSControllerClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Player Pawn Classes")
-	TSubclassOf<APawn> SeekerPawnClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Player Pawn Classes")
-	TSubclassOf<APawn> GuardianPawnClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player Pawn Classes")
 	TSubclassOf<APawn> RTSPawnClass;

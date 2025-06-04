@@ -5,7 +5,7 @@
 			<ChildrenList>
 				<Attenuation Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" ShortID="683696575">
 					<PropertyList>
-						<Property Name="RadiusMax" Type="Real64" Value="400"/>
+						<Property Name="RadiusMax" Type="Real64" Value="800"/>
 					</PropertyList>
 					<CurveUsageInfoList>
 						<VolumeDryUsage>
@@ -22,7 +22,7 @@
 											<SegmentShape>Exp3</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>400</XPos>
+											<XPos>800</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>

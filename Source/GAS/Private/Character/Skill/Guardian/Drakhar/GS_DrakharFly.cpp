@@ -1,7 +1,6 @@
 ﻿#include "Character/Skill/Guardian/Drakhar/GS_DrakharFly.h"
 
 #include "Character/GS_Character.h"
-#include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Skill/GS_SkillComp.h"
 
 UGS_DrakharFly::UGS_DrakharFly()
@@ -21,12 +20,6 @@ void UGS_DrakharFly::ActiveSkill()
 	{
 		return;
 	}
-	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter);
-	if (IsValid(Drakhar))
-	{
-		Drakhar->ResetComboAttackVariables();
-	}
-	//UE_LOG(LogTemp,Warning,TEXT("#########################ACTIVE"));
 	bIsFlying = true;
 	
 	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
@@ -38,8 +31,6 @@ void UGS_DrakharFly::ActiveSkill()
 
 void UGS_DrakharFly::DeactiveSkill()
 {
-	//UE_LOG(LogTemp,Warning,TEXT("#########################DEACTIVE"));
-
 	bIsFlying = false;
 
 	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
@@ -48,7 +39,6 @@ void UGS_DrakharFly::DeactiveSkill()
 	}
 	
 	ExecuteSkillEffect();
-	//StartCoolDown();
 }
 
 void UGS_DrakharFly::ExecuteSkillEffect()

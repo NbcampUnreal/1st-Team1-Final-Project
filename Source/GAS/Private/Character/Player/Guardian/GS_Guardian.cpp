@@ -3,9 +3,10 @@
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 
 #include "Animation/AnimInstance.h"
-#include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Character/Component/GS_StatComp.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Components/CapsuleComponent.h"
+#include "Engine/DamageEvents.h"
 #include "Net/UnrealNetwork.h"
 
 AGS_Guardian::AGS_Guardian()
@@ -52,36 +53,46 @@ void AGS_Guardian::RightMouse()
 
 void AGS_Guardian::MeleeAttackCheck()
 {
-	TArray<FHitResult> OutHitResults;
-	TSet<AGS_Character*> DamagedCharacters;
-	FCollisionQueryParams Params(NAME_None, false, this);
-
-	const float MeleeAttackRange = 100.f;
-	const float MeleeAttackRadius = 80.f;
-
-	const FVector Forward = GetActorForwardVector();
-	const FVector Start = GetActorLocation() + Forward * GetCapsuleComponent()->GetScaledCapsuleRadius();
-	const FVector End = Start + GetActorForwardVector() * MeleeAttackRange;
-
-	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(MeleeAttackRadius), Params);
-	if (bIsHitDetected)
+	if (HasAuthority())
 	{
-		for (auto const& OutHitResult : OutHitResults)
+		TArray<FHitResult> OutHitResults;
+		TSet<AGS_Character*> DamagedCharacters;
+		FCollisionQueryParams Params(NAME_None, false, this);
+
+		const float MeleeAttackRange = 100.f;
+		const float MeleeAttackRadius = 80.f;
+
+		const FVector Forward = GetActorForwardVector();
+		const FVector Start = GetActorLocation() + Forward * GetCapsuleComponent()->GetScaledCapsuleRadius();
+		const FVector End = Start + GetActorForwardVector() * MeleeAttackRange;
+
+		bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(MeleeAttackRadius), Params);
+		if (bIsHitDetected)
 		{
-			AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
-			if (IsValid(DamagedCharacter))
+			for (auto const& OutHitResult : OutHitResults)
 			{
-				DamagedCharacters.Add(DamagedCharacter);
+				AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
+				if (IsValid(DamagedCharacter))
+				{
+					DamagedCharacters.Add(DamagedCharacter);
+				}
+			}
+
+			for (auto const& DamagedCharacter : DamagedCharacters)
+			{
+				//ServerRPCMeleeAttack(DamagedCharacter);
+				UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
+				if (IsValid(DamagedCharacterStat))
+				{
+					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
+					FDamageEvent DamageEvent;
+					DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(),this);
+				}
 			}
 		}
 
-		for (auto const& DamagedCharacter : DamagedCharacters)
-		{
-			ServerRPCMeleeAttack(DamagedCharacter);
-		}
+		MulticastRPCDrawDebugLine(Start, End, MeleeAttackRange, MeleeAttackRadius, Forward, bIsHitDetected);
 	}
-
-	MulticastRPCDrawDebugLine(Start, End, MeleeAttackRange, MeleeAttackRadius, Forward, bIsHitDetected);
 }
 
 void AGS_Guardian::ServerRPCStartCtrl_Implementation()
@@ -108,12 +119,6 @@ void AGS_Guardian::QuitGuardianSkill()
 
 	//fly end
 	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
-	
-	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
-	if (IsValid(Drakhar))
-	{
-		Drakhar->ResetComboAttackVariables();
-	}
 }
 
 void AGS_Guardian::MulticastRPCDrawDebugLine_Implementation(const FVector& Start, const FVector& End, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit)

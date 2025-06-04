@@ -17,15 +17,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	//[combo attack variables]
-	UPROPERTY(ReplicatedUsing = OnRep_IsComboAttacking, VisibleAnywhere, BlueprintReadOnly)
-	bool bIsComboAttacking;
-
-	UPROPERTY(ReplicatedUsing = OnRep_CanDoNextComboAttack, VisibleAnywhere, BlueprintReadOnly)
-	bool bCanDoNextComboAttack;
-
-	UPROPERTY(ReplicatedUsing = OnRep_CurrentComboAttackIndex, VisibleAnywhere, BlueprintReadOnly)
-	int32 CurrentComboAttackIndex;
-
+	UPROPERTY(ReplicatedUsing=OnRep_CanCombo)
+	bool bCanCombo;
+	
+	bool bClientCanCombo;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> Projectile;
 
@@ -41,33 +37,21 @@ public:
 	virtual void LeftMouse() override;
 	
 	virtual void RightMouse() override;
-	
-	//[combo attack]
+
+	//[COMBO ATTACK]
+	void SetNextComboAttackSection(FName InSectionName);
+	void ResetComboAttackSection();
+	void PlayComboAttackMontage();
+	UFUNCTION()
+	void OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& PayLoad);
 	UFUNCTION(Server, Reliable)
-	void ServerRPCComboAttack();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPCPlayComboAttackMontage();
-
+	void ServerRPCNewComboAttack();
 	UFUNCTION(Server, Reliable)
-	void ServerRPCComboAttackCheck();
-
-	UFUNCTION(Server, Reliable)
-	void ServerRPCComboAttackEnd();
-
+	void ServerRPCResetValue();
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCComboAttack();
 	UFUNCTION()
-	void OnRep_IsComboAttacking();
-
-	UFUNCTION()
-	void OnRep_CurrentComboAttackIndex();
-
-	UFUNCTION()
-	void OnRep_CanDoNextComboAttack();
-
-	UFUNCTION()
-	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
-	void ResetComboAttackVariables();
+	void OnRep_CanCombo();
 	
 	//[Dash Skill]
 	UFUNCTION(Server, Reliable)
@@ -91,12 +75,12 @@ public:
 	void ServerRPCSpawnDraconicFury();
 	
 private:
-	//[combo attack]
-	int32 MaxComboAttackIndex;
-	int32 ClientComboAttackIndex;
-	bool ClientComboAttacking;
-	bool ClientNextComboAttack;
-
+	//[NEW COMBO ATTACK]
+	FName ComboAttackSectionName;
+	FName DefaultComboAttackSectionName;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
+	TObjectPtr<UAnimMontage> ComboAttackMontage;
+	
 	//[dash skill]
 	UPROPERTY()
 	TSet<AGS_Character*> DamagedCharacters;

@@ -7,8 +7,8 @@
 
 AGS_PlayerState::AGS_PlayerState()
     : CurrentPlayerRole(EPlayerRole::PR_None)
-    , CurrentSeekerJob(ESeekerJob::SJ_Job1)
-    , CurrentGuardianJob(EGuardianJob::GJ_Job1)
+    , CurrentSeekerJob(ESeekerJob::Merci)
+    , CurrentGuardianJob(EGuardianJob::Drakhar)
     , CurrentGameResult(EGameResult::GR_InProgress)
     , bIsReady(false)
 	, CurrentHealth(200.f)
@@ -74,8 +74,8 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
 void AGS_PlayerState::InitializeDefaults()
 {
     CurrentPlayerRole = EPlayerRole::PR_Seeker;
-    CurrentSeekerJob = ESeekerJob::SJ_Job1;
-	CurrentGuardianJob = EGuardianJob::GJ_Job1;
+    CurrentSeekerJob = ESeekerJob::Merci;
+	CurrentGuardianJob = EGuardianJob::Drakhar;
     bIsReady = false;
 
     if (GetNetMode() != NM_Client)
