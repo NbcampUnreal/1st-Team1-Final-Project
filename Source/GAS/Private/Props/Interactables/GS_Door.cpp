@@ -25,18 +25,14 @@ AGS_Door::AGS_Door()
 
 
 	TriggerBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
-	TriggerBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
+	//TriggerBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
+	TriggerBoxComp->SetCollisionObjectType(ECC_WorldDynamic);
 	TriggerBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	TriggerBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	TriggerBoxComp->SetupAttachment(DoorFrameMeshComp);
+	TriggerBoxComp->SetGenerateOverlapEvents(true);
 }
 
-//void AGS_Door::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-//{
-//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-//
-//	DOREPLIFETIME(AGS_Door, bIsOpen);
-//}
 
 void AGS_Door::BeginPlay()
 {
@@ -53,15 +49,16 @@ void AGS_Door::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor
 	{
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("trigger begin overlap called"));
+	//UE_LOG(LogTemp, Warning, TEXT("Something overlapped: %s"), *OtherActor->GetName());
+
 	AGS_Character* Character = Cast<AGS_Character>(OtherActor);
 	if (!Character || !HasAuthority())
 	{
+		//UE_LOG(LogTemp, Warning, TEXT("Overlap but not AGS_Character: %s"), *OtherActor->GetName());
 		return;
 	}
 	if (!bIsOpen)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Door was Not Open openning..."));
 		bIsOpen = true;
 		Server_DoorOpen(Character);
 	}
@@ -80,7 +77,7 @@ void AGS_Door::Server_DoorOpen_Implementation(AActor* TargetActor)
 void AGS_Door::CheckForPlayerInTrigger()
 {
 	TArray<AActor*> OverlappingActors;
-	TriggerBoxComp->GetOverlappingActors(OverlappingActors, AGS_Seeker::StaticClass());
+	TriggerBoxComp->GetOverlappingActors(OverlappingActors, AGS_Character::StaticClass());
 
 	if (OverlappingActors.Num() > 0)
 		//오버랩 되는 엑터가 있으면 타이머 초기화
@@ -92,7 +89,6 @@ void AGS_Door::CheckForPlayerInTrigger()
 		//오버랩 되는 엑터가 없으면 문 닫히는 함수 호출
 		DoorClose();
 		bIsOpen = false;
-		UE_LOG(LogTemp, Warning, TEXT("Door closing...bIsNotOpen"));
 	}
 
 

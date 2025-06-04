@@ -11,11 +11,7 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	Super::OnRightClick(Instance);
 	if (!bCtrlHeld)
 	{
-		if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
-		{
-			OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
-		}
-		else
+		if (!OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
 			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 		}

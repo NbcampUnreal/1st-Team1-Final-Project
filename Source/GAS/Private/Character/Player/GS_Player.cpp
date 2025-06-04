@@ -273,6 +273,12 @@ void AGS_Player::Multicast_SetUseControllerRotationYaw_Implementation(bool UseCo
 
 void AGS_Player::SpectateNextPlayer()
 {
+	if (GetWorld()->GetGameState()->PlayerArray.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player Array EMPTY"));
+		return;
+	}
+	
 	for (const auto& PS : GetWorld()->GetGameState()->PlayerArray)
 	{
 		AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);

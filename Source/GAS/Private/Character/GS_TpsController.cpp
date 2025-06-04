@@ -105,8 +105,6 @@ void AGS_TpsController::SetLookControlValue(bool CanLookRight, bool CanLookUp)
 
 void AGS_TpsController::InitControllerPerWorld()
 {
-	Super::BeginPlay();
-
 	SetInputMode(FInputModeGameOnly());
 
 	if (!HasAuthority() && IsLocalController())
