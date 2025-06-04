@@ -2,6 +2,8 @@
 
 
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrowNormal.h"
+
+#include "Character/Component/GS_StatComp.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/Skill/GS_IgnoreDefenceDamageType.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
@@ -37,12 +39,19 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 	ETargetType TargetType = DetermineTargetType(OtherActor);
 	
 	// 추가 세부 처리
-	float DamageToApply = BaseDamage;
+	float DamageToApply = 0.f;// BaseDamage;
+	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	
 	TSubclassOf<UDamageType> DamageTypeClass = UDamageType::StaticClass();
 
 	switch (ArrowType)
 	{
 	case EArrowType::Normal:
+		if (IsValid(DamagedCharacter) && IsValid(OwnerCharacter))
+		{
+			DamageToApply = DamagedCharacter->GetStatComp()->CalculateDamage(OwnerCharacter, DamagedCharacter);
+		}
 		if (TargetType == ETargetType::Guardian)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Overlap - Normal - Guardian"));
@@ -58,9 +67,14 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 		break;
 
 	case EArrowType::Axe:
+		
 		//UE_LOG(LogTemp, Warning, TEXT("Overlap - Axe - Guardian, DungeonMonster"));
 		DamageTypeClass = UGS_IgnoreDefenceDamageType::StaticClass();
 		StickWithVisualOnly(SweepResult);
+		if (IsValid(DamagedCharacter) && IsValid(OwnerCharacter))
+		{
+			DamageToApply = DamagedCharacter->GetStatComp()->CalculateDamage(OwnerCharacter, DamagedCharacter,1.f,0.f);
+		}
 		break;
 
 	case EArrowType::Child:
