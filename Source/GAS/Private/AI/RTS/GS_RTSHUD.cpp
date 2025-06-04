@@ -29,11 +29,17 @@ void AGS_RTSHUD::StartSelection()
 	}
 
 	PointA = FVector2D(MouseX, MouseY);
-	bIsDrawing = true;	
+	bIsDrawing = true;
+	SelectionOfActors.Empty();
 }
 
 void AGS_RTSHUD::StopSelection()
 {
+	if (!bIsDrawing)
+	{
+		return;
+	}
+	
 	bIsDrawing = false;
 
 	if (!RTSController)
@@ -74,7 +80,6 @@ void AGS_RTSHUD::DrawHUD()
 	const float H = PointB.Y - PointA.Y;
 	DrawRect(FLinearColor(0,1,1,0.15f), X, Y, W, H);
 	
-	SelectionOfActors.Empty();
 	GetActorsInSelectionRectangle<AGS_Monster>(
 		PointA, PointB,
 		SelectionOfActors, 
