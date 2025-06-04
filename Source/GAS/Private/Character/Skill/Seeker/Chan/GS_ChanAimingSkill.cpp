@@ -15,6 +15,7 @@
 #include "AkAudioEvent.h"
 #include "AI/GS_AIController.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 {
@@ -44,7 +45,7 @@ void UGS_ChanAimingSkill::ActiveSkill()
 void UGS_ChanAimingSkill::OnSkillCommand()
 {
 	//if (!bIsHoldingUp || CurrentStamina < SlamStaminaCost)
-	if (!bIsHoldingUp || !bCanSlam || CurrentStamina < SlamStaminaCost)
+	if (!bIsHoldingUp || !bCanSlam)
 	{
 		return;
 	}
@@ -192,6 +193,7 @@ void UGS_ChanAimingSkill::StartHoldUp()
 	}
 	CurrentStamina = MaxStamina;
 
+	OwnerCharacter->Server_SetCharacterSpeed(0.3f);
 	// UI 표시
 	ShowProgressBar(true);
 	UpdateProgressBar(CurrentStamina);
@@ -213,6 +215,9 @@ void UGS_ChanAimingSkill::EndHoldUp()
 		}
 		
 	}
+
+	OwnerCharacter->Server_SetCharacterSpeed(1.0f);
+
 	// UI 숨기기
 	ShowProgressBar(false);
 	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);

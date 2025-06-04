@@ -46,7 +46,7 @@ private:
 	float MaxStamina=20.0f;
 	float CurrentStamina;
 	float StaminaDrainRate=1.0f; // 초당 소비량
-	float SlamStaminaCost=5.0f;
+	float SlamStaminaCost=20.0f;
 	FTimerHandle StaminaDrainHandle;
 
 	// Slam 관리
