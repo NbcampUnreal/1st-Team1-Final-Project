@@ -110,7 +110,7 @@ void AGS_Monster::OnDeath()
 	}
 	
 	DetachFromControllerPendingDestroy();
-	SetLifeSpan(4.f);
+	SetLifeSpan(2.f);
 	
 	Multicast_OnDeath();
 }

@@ -132,5 +132,6 @@ protected:
 
 private:
 	void SpawnAndAttachWeapons();
+	void DestroyAllWeapons();
 };
 
