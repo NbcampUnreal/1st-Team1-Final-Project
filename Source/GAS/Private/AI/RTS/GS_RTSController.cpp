@@ -26,7 +26,7 @@ AGS_RTSController::AGS_RTSController()
 	MouseEdgeDir = FVector2D::ZeroVector;
 	CameraActor = nullptr;
 	CameraSpeed = 2000.f;
-	EdgeScreenRatio = 0.02f;
+	EdgeScreenRatio = 0.01f;
 	UnitGroups.SetNum(9);
 	bCtrlDown = false;
 	bShiftDown = false;

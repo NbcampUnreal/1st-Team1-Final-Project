@@ -131,6 +131,7 @@ void AGS_Character::OnDeath()
 		UAkGameplayStatics::PostEvent(DeathSoundEvent, this, 0, FOnAkPostEventCallback());
 	}
 
+	DestroyAllWeapons();
 	MulticastRPCCharacterDeath();
 }
 
@@ -219,16 +220,40 @@ void AGS_Character::SpawnAndAttachWeapons()
 	
 	for (FWeaponSlot& Slot : WeaponSlots)
 	{
-		if (!Slot.WeaponClass) continue;
+		if (!Slot.WeaponClass)
+		{
+			continue;
+		}
 
 		FActorSpawnParameters Params;
 		Params.Owner = this;
 		Slot.WeaponInstance = World->SpawnActor<AGS_Weapon>(Slot.WeaponClass, Params);
-		if (!Slot.WeaponInstance) continue;
+		if (!Slot.WeaponInstance)
+		{
+			continue;
+		}
 
 		Slot.WeaponInstance->AttachToComponent(
 			GetMesh(),
 			FAttachmentTransformRules::SnapToTargetIncludingScale,
 			Slot.SocketName);
+	}
+}
+
+void AGS_Character::DestroyAllWeapons()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+	
+	for (FWeaponSlot& Slot : WeaponSlots)
+	{
+		if (!Slot.WeaponInstance)
+		{
+			continue;
+		}
+		
+		Slot.WeaponInstance->Destroy();
 	}
 }
