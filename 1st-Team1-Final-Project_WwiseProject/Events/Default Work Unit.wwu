@@ -207,6 +207,17 @@
 								</Action>
 							</ChildrenList>
 						</Event>
+						<Event Name="EV_Mon_SmallClaw_Die" ID="{230CBF00-1C0F-4776-ACA6-FF8844E81B32}">
+							<ChildrenList>
+								<Action Name="" ID="{4EF37358-FB83-4F78-94DC-B14028B744C8}" ShortID="49346587">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_Mon_SmallClaw_Die" ID="{8F534DED-0B86-4831-AB00-BF216FAEAA83}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
 					</ChildrenList>
 				</Folder>
 				<Folder Name="Props" ID="{0E04C431-8B91-44C6-B10A-6CC72F56E83F}" ShortID="225733664">
@@ -416,6 +427,28 @@
 									<ReferenceList>
 										<Reference Name="Target">
 											<ObjectRef Name="SFX_CrystalWallTrap_Hit" ID="{6786AD38-A246-4D4F-991C-6B947DAD639B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="Props_StoneDooor_Open" ID="{A5598EC5-E8E1-4CE5-83AF-3F8909B45F09}">
+							<ChildrenList>
+								<Action Name="" ID="{07349D8A-05E2-4DE9-A02C-D99AE02B6219}" ShortID="1071094070">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_StoneDooor_Open" ID="{B89E9F33-EC2D-4DA0-901F-5D23FABF0863}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="Props_StoneDooor_Close" ID="{CAF2368B-2B31-4894-B890-6034FC2E534C}">
+							<ChildrenList>
+								<Action Name="" ID="{392007A3-E193-491E-BC8D-EE9240E3B4C4}" ShortID="154069511">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_StoneDooor_Close" ID="{8A6F0607-E3A7-4FBA-8B04-460759311C6A}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>

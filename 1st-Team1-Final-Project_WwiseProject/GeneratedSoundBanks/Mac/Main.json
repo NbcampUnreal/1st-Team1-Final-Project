@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{0C471628-C1D0-2426-1ED0-1E8B62AF649C}",
+    "Hash": "{FEF06AC1-877A-18D4-2198-F04569926D93}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -152,6 +152,30 @@
       "CachePath": "1E/{1EE4A4AD-A9DE-E6CD-E9F2-EC4229993EF0}.wem"
      },
      {
+      "Id": "140100063",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_1_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact.wav",
+      "CachePath": "07/{0795A916-0DDD-CAE8-C64E-0513BD7FEAB9}.wem"
+     },
+     {
+      "Id": "140776273",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_StoneTrap1.wav",
+      "CachePath": "0E/{0E8DC8A9-1EAA-1447-926A-936D284325B6}.wem"
+     },
+     {
+      "Id": "141516163",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Stone_Building_Destroy_4_Mobile_App_Game_FX_Sound_Magic_Fantasy_Touch_Accent_Stab_Transition_Movement_Whoosh.wav",
+      "CachePath": "CA/{CAF6D49B-F2AE-F600-C167-F5142175F7B5}.wem"
+     },
+     {
       "Id": "141938875",
       "Language": "SFX",
       "Streaming": "false",
@@ -256,6 +280,14 @@
       "CachePath": "39/{3904409D-71D1-AB20-F48A-8D01663764A7}.wem"
      },
      {
+      "Id": "230669099",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Empire_Game_Settlement_UI_Wall_Crumbling_3_Stone_Hit_Rock_Fall_Debris_Light_1.wav",
+      "CachePath": "B3/{B3524936-4133-8CDB-B086-99CDD9927869}.wem"
+     },
+     {
       "Id": "234128836",
       "Language": "SFX",
       "Streaming": "false",
@@ -301,7 +333,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.269.wav",
-      "CachePath": "17/{17D3A7BD-8C71-C4DB-CBDD-897DDFEC52EF}.wem"
+      "CachePath": "D2/{D2C4446F-497F-10EB-0E32-84BC20DDF7B8}.wem"
      },
      {
       "Id": "278485591",
@@ -384,6 +416,14 @@
       "CachePath": "C7/{C7AABDBE-738A-FE1B-4ED2-3876D9FBF42E}.wem"
      },
      {
+      "Id": "356621308",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Stone_Building_Destroy_4_Mobile_App_Game_FX_Sound_Magic_Fantasy_Touch_Accent_Stab_Transition_Movement_Whoosh.wav",
+      "CachePath": "B3/{B3D252E6-94C3-C374-CE96-ECE487BBB094}.wem"
+     },
+     {
       "Id": "360458544",
       "Language": "SFX",
       "Streaming": "false",
@@ -430,6 +470,14 @@
       "Location": "Memory",
       "ShortName": "Footstep_Dirt4.wav",
       "CachePath": "9C/{9C30925B-3E67-B34B-4961-816EA4E0FCE2}.wem"
+     },
+     {
+      "Id": "387328789",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_EMDP1_fx_foley_loop_earthquake_stone_rumbling_debris_01.wav",
+      "CachePath": "96/{965C7087-9CCB-7D89-1618-41A235EC4162}.wem"
      },
      {
       "Id": "399735935",
@@ -541,7 +589,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Bloated_Zombie_Short_Attack_Dry_Mutant_Dead_Undead_Monster_Fat.wav",
-      "CachePath": "04/{04FD5821-75C5-B33A-257F-810B1C35DB93}.wem"
+      "CachePath": "85/{85F5361E-770E-B89D-F182-881B12B372B6}.wem"
      },
      {
       "Id": "492757837",
@@ -550,6 +598,14 @@
       "Location": "Memory",
       "ShortName": "ESM_SPG_fx_breakable_glass_smash_crash_shatter_04.wav",
       "CachePath": "97/{97FF4AD0-66F2-F626-D04C-AF09016675E3}.wem"
+     },
+     {
+      "Id": "493684920",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SmallClawDeath.wav",
+      "CachePath": "51/{51306F8C-9AAA-7323-6DAE-CC517A8E1BFB}.wem"
      },
      {
       "Id": "518697165",
@@ -574,6 +630,14 @@
       "Location": "Memory",
       "ShortName": "FF_HFFX_foley_footstep_creature_cyan.wav",
       "CachePath": "DA/{DAA1B564-B4F7-90E7-6561-D0353AE5B6BF}.wem"
+     },
+     {
+      "Id": "525096005",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_cannon_explosion_blast_stone_gravel_debris_02.wav",
+      "CachePath": "3A/{3A61F971-5ABE-25BB-5956-1DD0BDDC44EF}.wem"
      },
      {
       "Id": "527820047",
@@ -645,7 +709,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.267.wav",
-      "CachePath": "FE/{FE0A6440-808D-CF7E-4E22-B83C5116A20C}.wem"
+      "CachePath": "EF/{EFACC1E3-A525-147F-22D1-09E23C613441}.wem"
      },
      {
       "Id": "578835809",
@@ -773,7 +837,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Attack_Dry.wav",
-      "CachePath": "ED/{EDE91C50-8F83-8A5F-9FF1-79263F44D9F0}.wem"
+      "CachePath": "BB/{BB69DEC3-7850-9D9E-61A8-2C1A411383AC}.wem"
      },
      {
       "Id": "689500474",
@@ -808,6 +872,14 @@
       "CachePath": "8E/{8E0CD796-7256-E655-71DD-DE424054F802}.wem"
      },
      {
+      "Id": "721567443",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_EMDP1_fx_foley_loop_earthquake_stone_rumbling_debris_01.wav",
+      "CachePath": "03/{03560116-17FD-E619-A38E-EF0C5CA7F721}.wem"
+     },
+     {
       "Id": "732424984",
       "Language": "SFX",
       "Streaming": "false",
@@ -829,7 +901,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
-      "CachePath": "56/{56A58808-72BC-8108-94A0-DC72DBB3DFB3}.wem"
+      "CachePath": "7E/{7EB919C7-63E1-6412-2BA9-C0698C689D18}.wem"
      },
      {
       "Id": "750724736",
@@ -846,6 +918,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Jump_2_Female_Adult_Mature_DJ_Woman.wav",
       "CachePath": "CC/{CC42840E-C922-5480-879E-44DAFEC6E843}.wem"
+     },
+     {
+      "Id": "756075964",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_StoneTrap1.wav",
+      "CachePath": "A0/{A0F1257A-A3A4-2633-43A2-BB435717D9E2}.wem"
      },
      {
       "Id": "756368802",
@@ -949,7 +1029,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
-      "CachePath": "F5/{F50EEC36-D2B8-BE0F-93F4-E88B4BE7668D}.wem"
+      "CachePath": "19/{1995D7F9-FF12-1054-7CF2-43FF3B70532E}.wem"
      },
      {
       "Id": "866318197",
@@ -1032,6 +1112,14 @@
       "CachePath": "AA/{AAA47AAD-DC56-2C23-1A77-C23CA52F9E69}.wem"
      },
      {
+      "Id": "933149701",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "PFS2_Stone_Scrape.wav",
+      "CachePath": "C1/{C11D03C6-C8A6-CA0A-E790-458B030E864F}.wem"
+     },
+     {
       "Id": "941890073",
       "Language": "SFX",
       "Streaming": "false",
@@ -1072,6 +1160,14 @@
       "CachePath": "0A/{0AE591B5-A6DB-DD9A-FC4E-EB0608ABC463}.wem"
      },
      {
+      "Id": "966061855",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_4_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact.wav",
+      "CachePath": "E5/{E5719337-5E0B-1837-68CA-9250A742B3B7}.wem"
+     },
+     {
       "Id": "966363054",
       "Language": "SFX",
       "Streaming": "false",
@@ -1102,6 +1198,14 @@
       "Location": "Memory",
       "ShortName": "FootstepsDirt.wav",
       "CachePath": "2E/{2E27881F-A54F-C4E0-0AEC-EA8AE04C3AE2}.wem"
+     },
+     {
+      "Id": "995621401",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SmallClawDeath.wav",
+      "CachePath": "C5/{C5596968-8328-1FDC-F370-7A8151C9DCC6}.wem"
      },
      {
       "Id": "997628724",
@@ -1144,6 +1248,14 @@
       "CachePath": "FD/{FD535CEA-A554-2814-1899-60A335860B6D}.wem"
      },
      {
+      "Id": "1039019029",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Stone_Building_Destroy_4_Mobile_App_Game_FX_Sound_Magic_Fantasy_Touch_Accent_Stab_Transition_Movement_Whoosh.wav",
+      "CachePath": "29/{29EF8DB4-BE77-813B-A888-F1F3E21CE8B3}.wem"
+     },
+     {
       "Id": "1040176000",
       "Language": "SFX",
       "Streaming": "false",
@@ -1181,7 +1293,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
-      "CachePath": "E0/{E01D6A67-8199-72E6-1273-CAE1BA24D718}.wem"
+      "CachePath": "4B/{4B954174-5002-A301-D166-6C4FEBCF59B4}.wem"
      },
      {
       "Id": "1073517265",
@@ -1271,6 +1383,14 @@
        "Name": "Octave_Up (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_UI\\[Effect Slot [2]: (Pitch Shifter)]\\Octave_Up (Custom)",
        "GUID": "{2575F4DA-A728-43DF-93F3-2F1F2CBA5484}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
+      },
+      {
+       "Id": "455574876",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\SFX_Mon_SmallClaw_Die\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{A707AF59-D154-4A59-A7FA-611872EF3745}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
       },
@@ -1375,7 +1495,7 @@
       "Name": "BossFootSteps",
       "ObjectPath": "\\Events\\Default Work Unit\\BossFootSteps",
       "GUID": "{69071155-5833-435C-A2EE-C31CC2FCA94B}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.14469069",
       "DurationMax": "1.6143692",
@@ -1511,7 +1631,7 @@
       "Name": "EV_Arrow_Shot",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Arrow_Shot",
       "GUID": "{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "1.6107165",
       "DurationMax": "1.6200471",
@@ -1526,7 +1646,7 @@
       "Name": "EV_ArrowBy",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowBy",
       "GUID": "{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}",
-      "MaxAttenuation": "360",
+      "MaxAttenuation": "450",
       "DurationType": "OneShot",
       "DurationMin": "0.75643444",
       "DurationMax": "0.75643444",
@@ -1553,7 +1673,7 @@
       "Name": "EV_ArrowImpact_Body",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Body",
       "GUID": "{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}",
-      "MaxAttenuation": "440",
+      "MaxAttenuation": "550",
       "DurationType": "OneShot",
       "DurationMin": "0.30958745",
       "DurationMax": "0.32799646",
@@ -1568,7 +1688,7 @@
       "Name": "EV_ArrowImpact_Stone",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Stone",
       "GUID": "{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.54591566",
       "DurationMax": "0.7596884",
@@ -1589,7 +1709,7 @@
       "Name": "EV_ArrowImpact_Wood",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Wood",
       "GUID": "{5AF6D827-D199-47C8-9BED-CC9DB12DEE69}",
-      "MaxAttenuation": "500",
+      "MaxAttenuation": "625",
       "DurationType": "OneShot",
       "DurationMin": "0.85634214",
       "DurationMax": "0.9072629",
@@ -1604,7 +1724,7 @@
       "Name": "EV_Bow_Pull",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Bow_Pull",
       "GUID": "{70E298F1-D671-45D2-BDB8-C18312B3AFC5}",
-      "MaxAttenuation": "360",
+      "MaxAttenuation": "450",
       "DurationType": "OneShot",
       "DurationMin": "0.74920744",
       "DurationMax": "1.0554614",
@@ -1625,7 +1745,7 @@
       "Name": "EV_Bow_Realse",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Bow_Realse",
       "GUID": "{77A06439-AF10-4A18-AA52-5B5A3A9E5468}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.7148274",
       "DurationMax": "0.75733334",
@@ -1640,7 +1760,7 @@
       "Name": "EV_Chan_Attack",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_Chan_Attack",
       "GUID": "{241C638E-B089-4989-827A-E6D31828D946}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.8429317",
       "DurationMax": "1.0250889",
@@ -1665,7 +1785,7 @@
       "Name": "EV_Chan_Move",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_Chan_Move",
       "GUID": "{FA35E9E7-77DD-410B-83DE-BD9F2372CDE5}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.5410953",
       "DurationMax": "0.59006864",
@@ -1686,7 +1806,7 @@
       "Name": "EV_ChanAggroSkill",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanAggroSkill",
       "GUID": "{28E1990D-73B5-403C-BA53-4DBAE2B3E962}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "3.4341834",
       "DurationMax": "3.8703742",
@@ -1719,7 +1839,7 @@
       "Name": "EV_ChanAimingSkill_Slam",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanAimingSkill_Slam",
       "GUID": "{B5B5055B-9F50-45BF-8C07-B1DA58911028}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "2.138431",
       "DurationMax": "2.3696923",
@@ -1764,7 +1884,7 @@
       "Name": "EV_ChanAimingSkill_Start",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanAimingSkill_Start",
       "GUID": "{7C3AC2CE-3A77-4585-B3B8-C6EC25FF562B}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.50684077",
       "DurationMax": "0.50684077",
@@ -1779,7 +1899,7 @@
       "Name": "EV_ChanUltimateSkill",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanUltimateSkill",
       "GUID": "{40E52A35-A7E0-4366-B089-96E381CC811A}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "5.899214",
       "DurationMax": "5.899214",
@@ -1794,7 +1914,7 @@
       "Name": "EV_CombatPlay",
       "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_CombatPlay",
       "GUID": "{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}",
-      "MaxAttenuation": "480.00003",
+      "MaxAttenuation": "600",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -1817,7 +1937,7 @@
       "Name": "EV_Fire_Burn",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Burn",
       "GUID": "{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "1.3835624",
       "DurationMax": "1.3835624",
@@ -1832,7 +1952,7 @@
       "Name": "EV_Fire_Extinguish",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Extinguish",
       "GUID": "{1261AE45-6B7B-489A-93E1-50AC8218A43C}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "1.3630031",
       "DurationMax": "1.3630031",
@@ -2004,7 +2124,9 @@
       "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_Mon_SmallClaw",
       "GUID": "{CBF98796-A6A2-4A10-8163-018B83F0EB4C}",
       "MaxAttenuation": "600",
-      "DurationType": "Infinite",
+      "DurationType": "OneShot",
+      "DurationMin": "0.513278",
+      "DurationMax": "1.3191358",
       "MediaRefs": [
        {
         "Id": "45190972"
@@ -2026,6 +2148,39 @@
        "Custom": [
         {
          "Id": "459107489"
+        }
+       ],
+       "ShareSets": [
+        {
+         "Id": "2652646462"
+        },
+        {
+         "Id": "3157398371"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "3303258329",
+      "Name": "EV_Mon_SmallClaw_Die",
+      "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_Mon_SmallClaw_Die",
+      "GUID": "{230CBF00-1C0F-4776-ACA6-FF8844E81B32}",
+      "MaxAttenuation": "600",
+      "DurationType": "OneShot",
+      "DurationMin": "0.98177713",
+      "DurationMax": "1.174282",
+      "MediaRefs": [
+       {
+        "Id": "493684920"
+       },
+       {
+        "Id": "995621401"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "455574876"
         }
        ],
        "ShareSets": [
@@ -2081,7 +2236,7 @@
       "Name": "FootSteps",
       "ObjectPath": "\\Events\\Default Work Unit\\FootSteps",
       "GUID": "{ACB43239-CB8C-41BC-9AC2-2E9257233BFE}",
-      "MaxAttenuation": "360",
+      "MaxAttenuation": "450",
       "DurationType": "OneShot",
       "DurationMin": "0.14552888",
       "DurationMax": "1.0949455",
@@ -2217,7 +2372,7 @@
       "Name": "Play_waves",
       "ObjectPath": "\\Events\\Default Work Unit\\Play_waves",
       "GUID": "{D4D99DFE-1AFF-4742-A8A6-B7C19192CD0A}",
-      "MaxAttenuation": "320",
+      "MaxAttenuation": "400",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2230,7 +2385,7 @@
       "Name": "Props_Axe",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe",
       "GUID": "{597B061A-CE0A-4A56-8154-41280E86C596}",
-      "MaxAttenuation": "680",
+      "MaxAttenuation": "850",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2250,7 +2405,7 @@
       "Name": "Props_Axe_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe_Hit",
       "GUID": "{E6A16F60-3008-4709-B717-1D97F028AB1C}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.6745022",
       "DurationMax": "0.6745022",
@@ -2268,7 +2423,7 @@
       "Name": "Props_BearTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_BearTrap",
       "GUID": "{DCFFA37D-831E-4187-999F-FD2DB425816C}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "1.1340458",
       "DurationMax": "1.1406152",
@@ -2295,7 +2450,7 @@
       "Name": "Props_BearTrap_Out",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_BearTrap_Out",
       "GUID": "{A8F68B4C-166B-47F0-82AB-7DA87701254B}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.3267212",
       "DurationMax": "0.34614906",
@@ -2310,7 +2465,7 @@
       "Name": "Props_CrystalSpike_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalSpike_Hit",
       "GUID": "{36F0066E-709B-487B-AB1C-AAC04B8F753C}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.57722557",
       "DurationMax": "0.61154914",
@@ -2337,7 +2492,7 @@
       "Name": "Props_CrystalWallTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap",
       "GUID": "{9C89005A-CF4E-46F0-9A26-2606EC93E64B}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "600",
       "DurationType": "OneShot",
       "DurationMin": "1.8",
       "DurationMax": "1.9070336",
@@ -2358,7 +2513,7 @@
       "Name": "Props_FlameTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_FlameTrap",
       "GUID": "{E933E0D7-C994-4F16-A665-499CBF190223}",
-      "MaxAttenuation": "500",
+      "MaxAttenuation": "625",
       "DurationType": "OneShot",
       "DurationMin": "6.5923166",
       "DurationMax": "6.984317",
@@ -2379,7 +2534,7 @@
       "Name": "Props_Lava",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Lava",
       "GUID": "{6686274F-8432-44ED-A70C-2B145099B0E2}",
-      "MaxAttenuation": "720",
+      "MaxAttenuation": "900",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2395,7 +2550,7 @@
       "Name": "Props_Lava_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Lava_Hit",
       "GUID": "{714D3788-7B53-452D-9C66-6FC35CD86958}",
-      "MaxAttenuation": "320",
+      "MaxAttenuation": "400",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2408,7 +2563,7 @@
       "Name": "Props_MineExplode",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_MineExplode",
       "GUID": "{59F8482E-4399-4E6E-B401-0432CFED7550}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "1000",
       "DurationType": "OneShot",
       "DurationMin": "2.3256478",
       "DurationMax": "2.463938",
@@ -2423,7 +2578,7 @@
       "Name": "Props_MineFuse",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_MineFuse",
       "GUID": "{A35527D0-C2F4-47A0-BDE7-2C8FA15D748C}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.47876656",
       "DurationMax": "0.47876656",
@@ -2438,7 +2593,7 @@
       "Name": "Props_MineTick",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_MineTick",
       "GUID": "{74D1A5FF-BF72-4F0B-9EF1-9D75B1CBC0BA}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.09575816",
       "DurationMax": "0.09575816",
@@ -2453,7 +2608,7 @@
       "Name": "Props_Portal",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Portal",
       "GUID": "{9141DA7A-2D2F-449C-88E2-C9754D09EDA8}",
-      "MaxAttenuation": "520",
+      "MaxAttenuation": "650",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2469,7 +2624,7 @@
       "Name": "Props_Portal_Trigger",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Portal_Trigger",
       "GUID": "{3DFD4CDA-F232-4F79-B00F-324E80CF48AF}",
-      "MaxAttenuation": "440",
+      "MaxAttenuation": "550",
       "DurationType": "OneShot",
       "DurationMin": "5.8785076",
       "DurationMax": "5.8785076",
@@ -2484,7 +2639,7 @@
       "Name": "Props_Saw",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Saw",
       "GUID": "{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}",
-      "MaxAttenuation": "480.00003",
+      "MaxAttenuation": "600",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2497,7 +2652,7 @@
       "Name": "Props_Saw_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Saw_Hit",
       "GUID": "{DFBB5823-D275-437F-99C5-623B934A4616}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "1.5328146",
       "DurationMax": "1.6239605",
@@ -2524,7 +2679,7 @@
       "Name": "Props_Spike",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Spike",
       "GUID": "{87EFA3D2-5892-417F-A875-D06CCD556912}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.57722557",
       "DurationMax": "0.61154914",
@@ -2547,11 +2702,86 @@
       ]
      },
      {
+      "Id": "2580207389",
+      "Name": "Props_StoneDooor_Close",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneDooor_Close",
+      "GUID": "{CAF2368B-2B31-4894-B890-6034FC2E534C}",
+      "MaxAttenuation": "1200",
+      "DurationType": "OneShot",
+      "DurationMin": "6.0440702",
+      "DurationMax": "6.1244774",
+      "MediaRefs": [
+       {
+        "Id": "140100063"
+       },
+       {
+        "Id": "140776273"
+       },
+       {
+        "Id": "141516163"
+       },
+       {
+        "Id": "525096005"
+       },
+       {
+        "Id": "721567443"
+       },
+       {
+        "Id": "756075964"
+       },
+       {
+        "Id": "933149701"
+       },
+       {
+        "Id": "966061855"
+       },
+       {
+        "Id": "1039019029"
+       }
+      ]
+     },
+     {
+      "Id": "1229688631",
+      "Name": "Props_StoneDooor_Open",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneDooor_Open",
+      "GUID": "{A5598EC5-E8E1-4CE5-83AF-3F8909B45F09}",
+      "MaxAttenuation": "750",
+      "DurationType": "OneShot",
+      "DurationMin": "3.527469",
+      "DurationMax": "3.572227",
+      "MediaRefs": [
+       {
+        "Id": "140100063"
+       },
+       {
+        "Id": "140776273"
+       },
+       {
+        "Id": "141516163"
+       },
+       {
+        "Id": "230669099"
+       },
+       {
+        "Id": "356621308"
+       },
+       {
+        "Id": "387328789"
+       },
+       {
+        "Id": "756075964"
+       },
+       {
+        "Id": "933149701"
+       }
+      ]
+     },
+     {
       "Id": "1046362180",
       "Name": "Props_StoneTrap_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneTrap_Hit",
       "GUID": "{624349E1-2251-4E0E-8E91-39536798294E}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.4353176",
       "DurationMax": "0.48862755",
@@ -2566,7 +2796,7 @@
       "Name": "Props_Torch",
       "ObjectPath": "\\Events\\Default Work Unit\\Props_Torch",
       "GUID": "{0FE8AE3D-0C62-4903-9226-37A060EB1543}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2589,7 +2819,7 @@
       "Name": "Voice_Chan_Attack",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Attack",
       "GUID": "{EBADCE3E-03AD-4CE6-8FD3-AA2B341B5AF0}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.4243262",
       "DurationMax": "0.50989586",
@@ -2607,7 +2837,7 @@
       "Name": "Voice_Chan_Die",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Die",
       "GUID": "{B5D9F3B7-56D1-4E7E-B266-A42C91017124}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "3.464923",
       "DurationMax": "3.464923",
@@ -2622,7 +2852,7 @@
       "Name": "Voice_Chan_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Hit",
       "GUID": "{0473682A-3932-4A2B-B275-C5D3FFFCEDCC}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.4965172",
       "DurationMax": "0.8445003",
@@ -2649,7 +2879,7 @@
       "Name": "Voice_Chan_Sick",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Sick",
       "GUID": "{E1DDF8F5-475F-4246-811D-FF8BB1D8636C}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2672,7 +2902,7 @@
       "Name": "Voice_Merci_Die",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Die",
       "GUID": "{169823F8-E7B9-4D5E-AE2E-003C93280F66}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "1.4364586",
       "DurationMax": "1.4364586",
@@ -2687,7 +2917,7 @@
       "Name": "Voice_Merci_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Hit",
       "GUID": "{5098E2B9-90BA-4412-987D-8FC0FAE125C3}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "0.36159804",
       "DurationMax": "0.89162403",
@@ -2724,7 +2954,7 @@
       "Name": "Voice_Merci_Sick",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Sick",
       "GUID": "{7573A416-C37E-4A3F-8DDC-F3B908D97302}",
-      "MaxAttenuation": "400",
+      "MaxAttenuation": "500",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2871,6 +3101,6 @@
     ]
    }
   ],
-  "FileHash": "{422E2ACB-B9C4-FD11-9E3B-A9565E1F74C9}"
+  "FileHash": "{EB5ED62C-82D2-B2AC-6E50-DBFCDD97B2E6}"
  }
 }
