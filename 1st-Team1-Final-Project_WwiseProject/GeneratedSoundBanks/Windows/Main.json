@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{1279649B-E965-02D8-4778-158274136C60}",
+    "Hash": "{8F10C47C-9251-0142-F3F6-EC68AABCC548}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -509,7 +509,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Wind_Loop_Distant_Air_Steady_1.wav",
-      "CachePath": "01/{018B8AA9-2E62-560F-03D5-3FA3606EF011}.wem"
+      "CachePath": "F1/{F167245E-77FC-D86B-3EA2-E9364B79083A}.wem"
      },
      {
       "Id": "434604945",
@@ -1674,9 +1674,9 @@
       "Name": "EV_Arrow_Shot",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Arrow_Shot",
       "GUID": "{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "600",
       "DurationType": "OneShot",
-      "DurationMin": "1.6107165",
+      "DurationMin": "1.615375",
       "DurationMax": "1.6200471",
       "MediaRefs": [
        {
@@ -1957,7 +1957,6 @@
       "Name": "EV_CombatPlay",
       "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_CombatPlay",
       "GUID": "{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}",
-      "MaxAttenuation": "960.00006",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -3274,6 +3273,6 @@
     ]
    }
   ],
-  "FileHash": "{064F6FA1-123F-341A-7365-ECC977B8074E}"
+  "FileHash": "{ECFE8DFF-C5BA-E2ED-A937-1AB173DA7645}"
  }
 }

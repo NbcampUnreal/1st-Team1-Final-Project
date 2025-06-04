@@ -17,6 +17,8 @@
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_ArrowTypeWidget.h"
+#include "AkGameplayStatics.h"
+#include "Animation/AnimMontage.h"
 //#include "Weapon/Equipable/"
 
 // Sets default values
@@ -77,15 +79,12 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	
 	if (bIsFullyDrawn)
 	{
-		// 활 놓는 사운드 재생
-		PlaySound(BowReleaseSound);
-
 		Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 
 		bIsFullyDrawn = false;  // 상태 초기화
 
-		// 화살 발사 사운드 재생
-		PlaySound(ArrowShotSound);  // 부모 클래스의 PlaySound 함수 사용
+		// 화살 발사 사운드 재생 (멀티캐스트로 변경)
+		Multicast_PlayArrowShotSound();
 	}
 
 	Client_StopZoom();
@@ -513,5 +512,17 @@ void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRot
 			true,
 			true
 		);
+	}
+}
+
+void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
+{
+	if (ArrowShotSound)
+	{
+		UAkGameplayStatics::PostEvent(ArrowShotSound, this, 0, FOnAkPostEventCallback());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayArrowShotSound_Implementation: ArrowShotSound is null"));
 	}
 }
