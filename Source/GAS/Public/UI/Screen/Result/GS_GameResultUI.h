@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "GS_Result_GuardianUI.generated.h"
+#include "GS_GameResultUI.generated.h"
 
-
+/**
+ * 
+ */
 UCLASS()
-class GAS_API UGS_Result_GuardianUI : public UUserWidget
+class GAS_API UGS_GameResultUI : public UUserWidget
 {
 	GENERATED_BODY()
 	
