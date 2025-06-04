@@ -128,6 +128,13 @@ void AGS_TpsController::InitControllerPerWorld()
 	}
 }
 
+void AGS_TpsController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitControllerPerWorld();
+}
+
 void AGS_TpsController::SetupPlayerAudioListener()
 {
     if (!IsLocalController())

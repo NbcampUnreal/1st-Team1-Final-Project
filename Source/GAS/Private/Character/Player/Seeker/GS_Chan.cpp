@@ -28,6 +28,14 @@ void AGS_Chan::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 	Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance())->SetMustTurnInPlace(MustTurn);
 }
 
+void AGS_Chan::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
+{
+	if (SoundToPlay && AkComponent)
+	{
+		AkComponent->PostAkEvent(SoundToPlay);
+	}
+}
+
 // Called when the game starts or when spawned
 void AGS_Chan::BeginPlay()
 {

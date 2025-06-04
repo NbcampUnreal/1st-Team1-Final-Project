@@ -78,6 +78,10 @@ public:
 	void PageUp(const FInputActionValue& InputValue);
 	void PageDown(const FInputActionValue& InputValue);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void AddWidget();
+	void InitControllerPerWorld();
+
 	UFUNCTION()
 	FControlValue GetControlValue() const;
 
@@ -93,7 +97,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
-	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 	virtual void PostSeamlessTravel() override;
 	virtual void BeginPlayingState() override;
 };

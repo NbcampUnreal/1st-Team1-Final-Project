@@ -27,10 +27,10 @@ void UGS_ChanMovingSkill::ActiveSkill()
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 		
 		// 무빙 스킬 사운드 재생
-		if (OwnerPlayer->MovingSkillSound)
+		/*if (OwnerPlayer->MovingSkillSound)
 		{
 			OwnerPlayer->PlaySound(OwnerPlayer->MovingSkillSound);
-		}
+		}*/
 		OwnerPlayer->Multicast_SetUseControllerRotationYaw(false);
 	}
 	ExecuteSkillEffect();
