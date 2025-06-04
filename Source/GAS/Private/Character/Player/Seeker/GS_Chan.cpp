@@ -224,15 +224,6 @@ void AGS_Chan::Client_ChanAimingSkillBar_Implementation(bool bShow)
 		ChanAimingSkillBarWidget->ShowSkillBar(bShow);
 	}
 }
-
-void AGS_Chan::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
-{
-	if (SoundToPlay && AkComponent)
-	{
-		AkComponent->PostAkEvent(SoundToPlay);
-	}
-}
-
 void AGS_Chan::MulticastPlayComboSection_Implementation()
 {
 	AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
