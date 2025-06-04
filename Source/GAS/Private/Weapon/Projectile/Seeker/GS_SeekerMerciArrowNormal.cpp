@@ -35,6 +35,11 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 {
 	Super::OnBeginOverlap(OverlappedComp, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 
+	if (DamagedActors.Contains(OtherActor))
+	{
+		return; // 중복 데미지 방지
+	}
+
 	// 맞은 대상 구분
 	ETargetType TargetType = DetermineTargetType(OtherActor);
 	
@@ -78,6 +83,10 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 		break;
 
 	case EArrowType::Child:
+		if (IsValid(DamagedCharacter) && IsValid(OwnerCharacter))
+		{
+			DamageToApply = DamagedCharacter->GetStatComp()->CalculateDamage(OwnerCharacter, DamagedCharacter);
+		}
 		if (TargetType == ETargetType::Guardian)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Overlap - Child - Guardian"));
@@ -103,6 +112,9 @@ void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
 	else if (TargetType == ETargetType::DungeonMonster || TargetType == ETargetType::Guardian)
 	{
 		UGameplayStatics::ApplyPointDamage(OtherActor, DamageToApply, GetActorForwardVector(), SweepResult, GetInstigatorController(), this, DamageTypeClass);
+
+		// 데미지 적용 후 대상 기록
+		DamagedActors.Add(OtherActor);
 	}
 }
 

@@ -55,7 +55,7 @@ void UGS_DebuffStun::OnExpire()
 		if(AGS_TpsController* Controller = Cast<AGS_TpsController>(TargetCharacter->GetController()))
 		{
 			//Controller->SetCanMove(true); SJE
-			Controller->SetMoveControlValue(false, false);
+			Controller->SetMoveControlValue(true, true); // KCY
 		}
 		else
 		{
