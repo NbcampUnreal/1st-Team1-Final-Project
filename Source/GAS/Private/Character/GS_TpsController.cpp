@@ -24,8 +24,8 @@ AGS_TpsController::AGS_TpsController()
 void AGS_TpsController::Move(const FInputActionValue& InputValue)
 {
 	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
-	const FRotator Rotation = GetControlRotation();
-	const FRotator YawRotation(0.f, Rotation.Yaw, 0.0f);
+	LastRotatorInMoving = GetControlRotation();
+	const FRotator YawRotation(0.f, LastRotatorInMoving.Yaw, 0.0f);
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
     if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
