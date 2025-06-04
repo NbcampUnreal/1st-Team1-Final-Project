@@ -51,8 +51,91 @@ void AGS_InGameGM::HandleSeamlessTravelPlayer(AController*& C)
 UClass* AGS_InGameGM::GetDefaultPawnClassForController_Implementation(AController* InController)
 {
     const AGS_PlayerState* PS = InController ? InController->GetPlayerState<AGS_PlayerState>() : nullptr;
-    
-    return (PS && PS->CurrentPlayerRole == EPlayerRole::PR_Seeker) ? *SeekerPawnClass : *RTSPawnClass;
+    UClass* ResolvedPawnClass = nullptr;
+
+    if (!PawnMappingDataAsset)
+    {
+        UE_LOG(LogTemp, Error, TEXT("AGS_InGameGM: PawnMappingDataAsset is NOT ASSIGNED in the GameMode Blueprint! Attempting to use super's default."));
+        return Super::GetDefaultPawnClassForController_Implementation(InController);
+    }
+
+    if (PS)
+    {
+        if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+        {
+            UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Guardian player in InGameLevel. Returning nullptr for PawnClass."));
+            ResolvedPawnClass = nullptr;
+        }
+        else if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+        {
+            if (PS->CurrentSeekerJob != ESeekerJob::End)
+            {
+                const TSubclassOf<APawn>* FoundPawnClass = PawnMappingDataAsset->SeekerPawnClasses.Find(PS->CurrentSeekerJob);
+                if (FoundPawnClass && *FoundPawnClass)
+                {
+                    ResolvedPawnClass = *FoundPawnClass;
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: Seeker PawnClass not found in DataAsset for job: %s. Using default seeker pawn from DataAsset."), *UEnum::GetValueAsString(PS->CurrentSeekerJob));
+                    ResolvedPawnClass = PawnMappingDataAsset->DefaultSeekerPawn;
+                }
+            }
+            else
+            {
+                UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Seeker job is 'End'. Using default seeker pawn from DataAsset."));
+                ResolvedPawnClass = PawnMappingDataAsset->DefaultSeekerPawn;
+            }
+        }
+    }
+    if (!ResolvedPawnClass && (!PS || PS->CurrentPlayerRole != EPlayerRole::PR_Guardian))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: Pawn class not resolved (and not an intentionally unpawned Guardian). Attempting to use super's default."));
+        ResolvedPawnClass = Super::GetDefaultPawnClassForController_Implementation(InController);
+    }
+
+    return ResolvedPawnClass;
+}
+
+AActor* AGS_InGameGM::ChoosePlayerStart_Implementation(AController* Player)
+{
+    FString PlayerStartTagToFind = TEXT("");
+
+    if (Player)
+    {
+        AGS_PlayerState* PS = Player->GetPlayerState<AGS_PlayerState>();
+        if (PS)
+        {
+            if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+            {
+                PlayerStartTagToFind = TEXT("None");
+            }
+            else if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+            {
+                PlayerStartTagToFind = TEXT("None");
+                
+            }
+        }
+    }
+
+    AActor* FoundPlayerStart = FindPlayerStart_Implementation(Player, PlayerStartTagToFind);
+
+    if (FoundPlayerStart)
+    {
+        return FoundPlayerStart;
+    }
+
+    //Super::ChoosePlayerStart_Implementation(Player) 호출과 유사한 효과를 내지만, 재귀 호출 위험을 줄임
+    if (!PlayerStartTagToFind.IsEmpty())
+    {
+        FoundPlayerStart = FindPlayerStart_Implementation(Player, TEXT(""));
+
+        if (FoundPlayerStart)
+        {
+            return FoundPlayerStart;
+        }
+    }
+    return nullptr;
 }
 
 void AGS_InGameGM::StartPlay()
@@ -163,7 +246,7 @@ void AGS_InGameGM::EndGame(EGameResult Result)
         FTimerHandle TravelDelayHandle;
         GetWorldTimerManager().SetTimer(TravelDelayHandle, [this, NextLevelName]() {
             GetWorld()->ServerTravel(NextLevelName + "?listen", true);
-        }, 0.1f, false);
+        }, 3.f, false);
     }
 }
 
