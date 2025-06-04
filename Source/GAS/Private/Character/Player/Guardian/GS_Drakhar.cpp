@@ -1,6 +1,7 @@
 #include "Character/Player/Guardian/GS_Drakhar.h"
 
 #include "Character/GS_Character.h"
+#include "Character/Component/GS_StatComp.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 #include "Character/Skill/GS_SkillBase.h"
@@ -33,6 +34,9 @@ AGS_Drakhar::AGS_Drakhar()
 
 	//Guardian State Setting
 	ClientGuardianState = EGuardianState::CtrlSkillEnd;
+
+	//boss monster tag for user widget
+	Tags.Add("Monster");
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -200,9 +204,11 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	
 	for (auto const& DamagedCharacter : DamagedCharacters)
 	{
-		float SkillDamage = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Moving)->Damage;
+		float SkillCoefficient = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Moving)->Damage;
+		float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter,SkillCoefficient);
+		
 		FDamageEvent DamageEvent;
-		DamagedCharacter->TakeDamage(SkillDamage, DamageEvent, GetController(), this);
+		DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
 	}
 
 	DamagedCharacters.Empty();
@@ -246,7 +252,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 {
 	TSet<AGS_Character*> EarthquakeDamagedCharacters;
 	TArray<FHitResult> OutHitResults;
-	const FVector Start = GetActorLocation() + 200.f;
+	const FVector Start = GetActorLocation() + 100.f;
 	const FVector End = Start + GetActorForwardVector() * 100.f;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	Params.AddIgnoredActor(this);
@@ -265,11 +271,15 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 		}
 		for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)
 		{
-			float SkillDamage = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)->Damage;
-			
+			float SkillCoefficient = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)->Damage;
+			float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter,SkillCoefficient);
+
 			FDamageEvent DamageEvent;
-			DamagedCharacter->TakeDamage(SkillDamage, DamageEvent, GetController(), this);
-			DamagedCharacter->LaunchCharacter(GetActorForwardVector() * EarthquakePower, false, false);
+			if (IsValid(DamagedCharacter))
+			{
+				DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+				DamagedCharacter->LaunchCharacter(GetActorForwardVector() * EarthquakePower, false, false);
+			}
 		}
 	}
 	MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
