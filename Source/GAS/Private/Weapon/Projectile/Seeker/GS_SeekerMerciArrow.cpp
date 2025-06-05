@@ -8,6 +8,8 @@
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Skill/Seeker/GS_FieldSkillActor.h"
+#include "AkGameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
 
 AGS_SeekerMerciArrow::AGS_SeekerMerciArrow()
 {
@@ -93,6 +95,12 @@ void AGS_SeekerMerciArrow::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, A
 	// 맞은 대상 구분
 	ETargetType TargetType = DetermineTargetType(OtherActor);
 
+	// 히트 사운드 재생
+	PlayHitSound(TargetType, SweepResult);
+
+	// 히트 VFX 재생
+	PlayHitVFX(TargetType, SweepResult);
+
 	// 공통 처리
 	HandleTargetTypeGeneric(TargetType, SweepResult);
 }
@@ -134,5 +142,79 @@ void AGS_SeekerMerciArrow::HandleTargetTypeGeneric(ETargetType TargetType, const
 		break;
 	default:
 		break;
+	}
+}
+
+void AGS_SeekerMerciArrow::PlayHitSound(ETargetType TargetType, const FHitResult& SweepResult)
+{
+	UAkAudioEvent* SoundEventToPlay = nullptr;
+
+	switch (TargetType)
+	{
+	case ETargetType::Guardian:
+	case ETargetType::DungeonMonster:
+		// 적 캐릭터(가디언, 던전몬스터)에 맞았을 때 Wwise 이벤트
+		SoundEventToPlay = HitPawnSoundEvent;
+		break;
+	case ETargetType::Structure:
+		// 벽이나 구조물에 맞았을 때 Wwise 이벤트
+		SoundEventToPlay = HitStructureSoundEvent;
+		break;
+	case ETargetType::Seeker:
+	case ETargetType::Skill:
+		// 아군 시커나 스킬에 맞았을 때는 사운드 없음
+		break;
+	default:
+		break;
+	}
+
+	// Wwise 사운드 재생
+	if (SoundEventToPlay && GetWorld())
+	{
+		UAkGameplayStatics::PostEventAtLocation(
+			SoundEventToPlay,
+			SweepResult.ImpactPoint,
+			FRotator::ZeroRotator,
+			GetWorld()
+		);
+	}
+}
+
+void AGS_SeekerMerciArrow::PlayHitVFX(ETargetType TargetType, const FHitResult& SweepResult)
+{
+	UNiagaraSystem* VFXToPlay = nullptr;
+
+	switch (TargetType)
+	{
+	case ETargetType::Guardian:
+	case ETargetType::DungeonMonster:
+		// 적 캐릭터(가디언, 던전몬스터)에 맞았을 때 VFX
+		VFXToPlay = HitPawnVFX;
+		break;
+	case ETargetType::Structure:
+		// 벽이나 구조물에 맞았을 때 VFX
+		VFXToPlay = HitStructureVFX;
+		break;
+	case ETargetType::Seeker:
+	case ETargetType::Skill:
+		// 아군 시커나 스킬에 맞았을 때는 VFX 없음
+		break;
+	default:
+		break;
+	}
+
+	// VFX 재생
+	if (VFXToPlay && GetWorld())
+	{
+		// 히트 포인트에서 VFX 재생
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			VFXToPlay,
+			SweepResult.ImpactPoint,
+			SweepResult.ImpactNormal.Rotation(), // 히트 표면의 법선 방향으로 VFX 회전
+			FVector(1.0f), // Scale (float → FVector)
+			true, // Auto Destroy
+			true  // Auto Activate
+		);
 	}
 }
