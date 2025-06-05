@@ -127,12 +127,6 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_StopSkillMontage(UAnimMontage* Montage);
-
-	//[Spectate Other Player]
-	void SpectateNextPlayer();
-
-	UFUNCTION(Server, Reliable)
-	void ServerRPCSpectateNextPlayer();
 	
 	virtual void OnDeath() override;
 	

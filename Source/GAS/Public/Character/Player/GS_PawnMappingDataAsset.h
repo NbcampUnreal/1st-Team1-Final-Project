@@ -5,6 +5,7 @@
 #include "System/GS_PlayerRole.h"
 #include "Engine/SkeletalMesh.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimMontage.h"
 #include "GS_PawnMappingDataAsset.generated.h"
 
 USTRUCT(BlueprintType)
@@ -16,13 +17,16 @@ struct FAssetToSpawn
     TSubclassOf<APawn> PawnClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    USkeletalMesh* ReadyPose;
+    TSubclassOf<AActor> DefaultActor;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    USkeletalMesh* WinPose;
+    TObjectPtr<UAnimMontage> ReadyPose;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    USkeletalMesh* LosePose;
+    TObjectPtr<UAnimMontage> WinPose;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+    TObjectPtr<UAnimMontage> LosePose;
 };
 
 UCLASS(BlueprintType)

@@ -31,6 +31,12 @@ public:
 
 	UPROPERTY(ReplicatedUsing=OnRep_GuardianState)
 	EGuardianState GuardianState;
+
+	UPROPERTY(ReplicatedUsing=OnRep_MoveSpeed)
+	float MoveSpeed;
+
+	UFUNCTION()
+	void OnRep_MoveSpeed();
 	
 	virtual void LeftMouse();
 	virtual void Ctrl();
@@ -62,8 +68,12 @@ protected:
 	UPROPERTY()
 	EGuardianState ClientGuardianState;
 	
+	float NormalMoveSpeed;
+	float SpeedUpMoveSpeed;
+
 private:
 	//for fever mode
 	float FeverTime;
 	float FeverGage;
+	
 };
