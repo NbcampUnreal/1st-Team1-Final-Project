@@ -22,6 +22,7 @@
 #include "Engine/PostProcessVolume.h"
 #include "Materials/MaterialInterface.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 
 // Sets default values
@@ -57,6 +58,15 @@ AGS_Seeker::AGS_Seeker()
 	CombatTrigger->SetupAttachment(RootComponent);
 	CombatTrigger->SetSphereRadius(1200.0f);
 	CombatTrigger->SetCollisionProfileName(TEXT("SoundTrigger"));
+
+	//함정 - 화살발사기의 화살 채널 설정(Projectile)
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel3, ECR_Overlap);
+	//함정 - 모든 함정 채널 설정(Trap)
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel4, ECR_Overlap);
+	GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel4, ECR_Ignore);
+
+
 }
 
 void AGS_Seeker::SetAimState(bool IsAim)
