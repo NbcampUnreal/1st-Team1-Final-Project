@@ -238,7 +238,7 @@ void AGS_Chan::ServerAttackMontage_Implementation()
 
 void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float InRadius, FColor InColor, float InLifetime)
 {
-	DrawDebugSphere(
+	/*DrawDebugSphere(
 		GetWorld(),
 		InLocation,
 		InRadius,
@@ -246,5 +246,5 @@ void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float
 		InColor,
 		false,
 		InLifetime
-	);
+	);*/
 }
