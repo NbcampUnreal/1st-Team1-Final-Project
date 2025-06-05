@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Character/GS_Character.h"
 #include "GS_TpsController.generated.h"
 
 class UInputMappingContext;
@@ -69,6 +70,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* PageDownAction;
 	
+	UPROPERTY()
+	TObjectPtr<UUserWidget> PlayerWidgetInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TMap<ECharacterType, TSubclassOf<UUserWidget>> PlayerWidgetClasses;
+	
+	UFUNCTION(BlueprintCallable)
+	UUserWidget* GetPlayerWidget();
+	
 	UFUNCTION(BlueprintCallable, Category = "Audio")
     void SetupPlayerAudioListener();
 
@@ -82,6 +92,10 @@ public:
 	void AddWidget();
 	void InitControllerPerWorld();
 
+	//[Spectate Other Player]
+	UFUNCTION(Server, Unreliable)
+	void ServerRPCSpectatePlayer();
+	
 	UFUNCTION()
 	FControlValue GetControlValue() const;
 
@@ -90,6 +104,11 @@ public:
 
 	UFUNCTION()
 	void SetLookControlValue(bool CanLookRight, bool CanLookUp);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+	FControlValue ControlValues;
+
+	
 
 	UPROPERTY(Replicated)
 	FControlValue ControlValues;
