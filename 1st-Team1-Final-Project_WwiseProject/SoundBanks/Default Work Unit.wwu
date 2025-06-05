@@ -21,7 +21,7 @@
 						<ObjectRef Name="Voice_Merci_Hit" ID="{5098E2B9-90BA-4412-987D-8FC0FAE125C3}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_GrenadeTick" ID="{032BB249-4018-4415-AE23-D5223963CE2B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_IronFang" ID="{D36C465E-BF45-44B6-950D-FF21056CE83A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
-						<ObjectRef Name="SFX_Mon_SmallClaw_UI" ID="{9F91CF19-E3D0-44E4-AB7B-AA5DE1A9EA71}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="SFX_Mon_SmallClaw_RTS" ID="{9F91CF19-E3D0-44E4-AB7B-AA5DE1A9EA71}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Lava" ID="{6686274F-8432-44ED-A70C-2B145099B0E2}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_MapBGM_Stop" ID="{D2D4F199-4E93-44F8-8B05-6D80892A0D4C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Lava_Hit" ID="{714D3788-7B53-452D-9C66-6FC35CD86958}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>

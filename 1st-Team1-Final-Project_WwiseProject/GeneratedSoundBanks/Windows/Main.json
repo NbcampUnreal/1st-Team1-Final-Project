@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{8F10C47C-9251-0142-F3F6-EC68AABCC548}",
+    "Hash": "{2022D076-CA2A-26C6-5E46-25C62A5948BD}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -1333,7 +1333,7 @@
       {
        "Id": "145320127",
        "Name": "Special_Effect_1 (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_UI\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_RTS\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
        "GUID": "{9D7DC88F-39C0-4C1A-8FDC-D000F73CD8F3}",
        "LibName": "Wwise Flanger",
        "LibId": "8192003"
@@ -1341,7 +1341,7 @@
       {
        "Id": "149789954",
        "Name": "Special_Effect_1 (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_UI\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_RTS\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
        "GUID": "{32B310AD-36DE-4D7E-8E52-27707418671F}",
        "LibName": "Wwise Flanger",
        "LibId": "8192003"
@@ -1381,7 +1381,7 @@
       {
        "Id": "296962076",
        "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_UI\\[Effect Slot [2]: (Time Stretch)]\\Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_RTS\\[Effect Slot [2]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{02C0AFA9-0983-4966-95AD-85EB4FE85DFD}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
@@ -1397,7 +1397,7 @@
       {
        "Id": "368091700",
        "Name": "Octave_Up (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_UI\\[Effect Slot [2]: (Pitch Shifter)]\\Octave_Up (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_RTS\\[Effect Slot [2]: (Pitch Shifter)]\\Octave_Up (Custom)",
        "GUID": "{2575F4DA-A728-43DF-93F3-2F1F2CBA5484}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -1421,7 +1421,7 @@
       {
        "Id": "625034061",
        "Name": "Octave_Up (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_UI\\[Effect Slot [1]: (Pitch Shifter)]\\Octave_Up (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_RTS\\[Effect Slot [1]: (Pitch Shifter)]\\Octave_Up (Custom)",
        "GUID": "{DBCE2BCD-8DEE-4594-A1F8-8B82FD92CD59}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -1437,7 +1437,7 @@
       {
        "Id": "975136076",
        "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_IronFang_UI\\[Effect Slot [1]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_IronFang_RTS\\[Effect Slot [1]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
        "GUID": "{30E3210D-1A3F-4B49-A940-0E14020D0E47}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -2664,7 +2664,7 @@
       "Name": "Props_CrystalWallTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap",
       "GUID": "{9C89005A-CF4E-46F0-9A26-2606EC93E64B}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "660",
       "DurationType": "OneShot",
       "DurationMin": "1.8",
       "DurationMax": "1.9070336",
@@ -2685,7 +2685,7 @@
       "Name": "Props_FlameTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_FlameTrap",
       "GUID": "{E933E0D7-C994-4F16-A665-499CBF190223}",
-      "MaxAttenuation": "1000",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "6.5923166",
       "DurationMax": "6.984317",
@@ -3273,6 +3273,6 @@
     ]
    }
   ],
-  "FileHash": "{ECFE8DFF-C5BA-E2ED-A937-1AB173DA7645}"
+  "FileHash": "{74129603-DC04-39D2-4685-2A9CE974BF8E}"
  }
 }
