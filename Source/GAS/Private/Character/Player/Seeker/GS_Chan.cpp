@@ -25,11 +25,6 @@ AGS_Chan::AGS_Chan()
 	bReplicates = true;
 }
 
-void AGS_Chan::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
-{
-	Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance())->SetMustTurnInPlace(MustTurn);
-}
-
 void AGS_Chan::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
 {
 	if (SoundToPlay && AkComponent)
@@ -115,19 +110,8 @@ void AGS_Chan::ComboEnd()
 		AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
 		if (IsValid(TPSController))
 		{
-			//TPSController->GetControlValue().bCanLookRight = true; SJE
 			TPSController->SetLookControlValue(true, true);
 		}
-	}
-}
-
-void AGS_Chan::OnReadyAimSkill()
-{
-	
-	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInstance->IsPlayingFullBodyMontage = false;
-		AnimInstance->IsPlayingUpperBodyMontage = true;
 	}
 }
 
@@ -154,24 +138,30 @@ void AGS_Chan::ToIdle()
 	Multicast_StopSkillMontage(GetCurrentMontage());
 	Multicast_SetIsUpperBodySlot(false);
 	Multicast_SetIsFullBodySlot(false);
-	Multicast_SetMoveControlValue(true, true);
-	Multicast_SetLookControlValue(true, true);
+	SetMoveControlValue(true, true);
+	SetLookControlValue(true, true);
 }
 
-void AGS_Chan::Multicast_SetLookControlValue_Implementation(bool bLookUp, bool bLookRight)
+void AGS_Chan::SetMoveControlValue(bool bMoveForward, bool bMoveRight)
+{
+	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
+	{
+		TPSController->SetMoveControlValue(bMoveRight, bMoveForward);
+	}
+}
+void AGS_Chan::SetLookControlValue(bool bLookUp, bool bLookRight)
 {
 	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
 	{
 		TPSController->SetLookControlValue(bLookRight, bLookUp);
 	}
-	
 }
 
-void AGS_Chan::Multicast_SetMoveControlValue_Implementation(bool bMoveForward, bool bMoveRight)
+void AGS_Chan::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 {
-	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
-		TPSController->SetMoveControlValue(bMoveRight, bMoveForward);
+		AnimInstance->SetMustTurnInPlace(MustTurn);
 	}
 }
 
@@ -180,6 +170,7 @@ void AGS_Chan::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->IsPlayingFullBodyMontage = bFullBodySlot;
+		UE_LOG(LogTemp, Warning, TEXT("Set Is FullBodyslot : %s"), AnimInstance->IsPlayingFullBodyMontage ? TEXT("true") : TEXT("false"));
 	}
 }
 
@@ -188,6 +179,7 @@ void AGS_Chan::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->IsPlayingUpperBodyMontage = bUpperBodySlot;
+		UE_LOG(LogTemp, Warning, TEXT("Set Is UpperBodyslot : %s"), AnimInstance->IsPlayingUpperBodyMontage ? TEXT("true") : TEXT("false"));
 	}
 }
 

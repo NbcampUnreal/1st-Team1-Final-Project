@@ -67,23 +67,12 @@ public:
 	UFUNCTION()
 	void AnimNotify_ComboEnd();
 
-	UPROPERTY(BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingUpperBodyMontage = false;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingFullBodyMontage = false;
-
-	/*UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetUpperBodySlotValue(bool IsPlayingUpperBody);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetFullBodySlotValue(bool IsPlayingFullBody);*/
-
-	/*UFUNCTION()
-	FTransform GetTransform() const {return CharacterTransform;}
-	UFUNCTION()
-	FTransform GetRootTransform() const {return RootTransform;} // SJE*/
-
+	
 	UFUNCTION()
 	void SetMotionMatchingPlayRate(float Min, float Max);
 
@@ -124,8 +113,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Database")
 	TArray<FName> CurrentDatabasesTags;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Control")
 	bool bMustTurnInPlace = false;
+
+	/*virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 	FFloatInterval MotionMatchingPlayRate;
