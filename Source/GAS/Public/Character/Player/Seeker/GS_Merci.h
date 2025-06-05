@@ -37,6 +37,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayArrowShotVFX(FVector Location, FRotator Rotation, int32 NumArrows);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayArrowShotSound();
+
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;
 
@@ -111,9 +114,6 @@ protected:
 
 	UFUNCTION()
 	void UpdateZoom(float Alpha);
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-    class UAkAudioEvent* ArrowShotSound_C;
 
 	// 활 관련 사운드
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")

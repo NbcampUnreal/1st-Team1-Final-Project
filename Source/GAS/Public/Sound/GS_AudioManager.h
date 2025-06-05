@@ -7,6 +7,7 @@
 #include "AkGameplayStatics.h"
 #include "AkAudioEvent.h"
 #include "AkRtpc.h"
+#include "Engine/TimerHandle.h"
 #include "GS_AudioManager.generated.h"
 
 /**
@@ -82,17 +83,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Audio|Debug", meta = (DisplayName = "BGM 상태 로깅"))
 	void LogCurrentBGMStatus() const;
-
-	// === 콘솔 명령어 (디버그용) ===
-	UFUNCTION(Exec, Category = "Audio|Debug")
-	void DebugMapBGM();
-
-	UFUNCTION(Exec, Category = "Audio|Debug") 
-	void RestartMapBGM();
-
-	UFUNCTION(Exec, Category = "Audio|Debug")
-	void StopMapBGMDebug();
-
+	
 	// 현재 재생 중인 전투 BGM Stop Event 가져오기
 	UAkAudioEvent* GetCurrentCombatMusicStopEvent() const { return CurrentCombatMusicStopEvent; }
 
@@ -128,6 +119,9 @@ private:
 	// 기본 전투 BGM 정지 이벤트 (EV_CombatStop)
 	UPROPERTY()
 	UAkAudioEvent* DefaultCombatStopEvent;
+
+	// 맵 BGM 페이드인 타이머 핸들
+	FTimerHandle MapBGMFadeInTimerHandle;
 
 	// RTPC 헬퍼 함수
 	void SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context, float InterpolationTime = 0.0f);

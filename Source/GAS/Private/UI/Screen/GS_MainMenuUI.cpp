@@ -1,12 +1,12 @@
 #include "UI/Screen/GS_MainMenuUI.h"
 
 #include "CommonButtonBase.h"
-#include "Components/Button.h"
 #include "Components/ScaleBox.h"
 #include "Components/TextBlock.h"
-#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "System/PlayerController/GS_MainMenuPC.h"
 #include "UI/Common/CustomCommonButton.h"
+#include "UI/Common//GS_CommonTwoBtnPopup.h"
 
 void UGS_MainMenuUI::NativeConstruct()
 {
@@ -91,14 +91,6 @@ void UGS_MainMenuUI::OnPlayButtonClicked()
 	
 }
 
-void UGS_MainMenuUI::OnExitButtonClicked()
-{
-	if (ExitPopUp)
-	{
-		ExitPopUp->SetVisibility(ESlateVisibility::Visible);
-	}
-}
-
 void UGS_MainMenuUI::OnCustomGameButtonClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("UGS_MainMenuUI: OnCustomGameButtonClicked() CALLED."));
@@ -110,3 +102,22 @@ void UGS_MainMenuUI::OnCustomGameButtonClicked()
 	}
 }
 
+void UGS_MainMenuUI::OnExitButtonClicked()
+{
+	if (ExitPopUp)
+	{
+		ExitPopUp->SetDescription(FText::FromString(TEXT("게임을 종료하시겠습니까?")));
+		ExitPopUp->OnYesClicked.BindUObject(this, &UGS_MainMenuUI::OnExitPopupYesButtonClicked);
+		ExitPopUp->OnNoClicked.BindUObject(this, &UGS_MainMenuUI::OnExitPopupNoButtonClicked);
+		ExitPopUp->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void UGS_MainMenuUI::OnExitPopupYesButtonClicked()
+{
+	UKismetSystemLibrary::QuitGame(GetWorld(), GetOwningPlayer(),EQuitPreference::Quit,false);
+}
+
+void UGS_MainMenuUI::OnExitPopupNoButtonClicked()
+{
+}
