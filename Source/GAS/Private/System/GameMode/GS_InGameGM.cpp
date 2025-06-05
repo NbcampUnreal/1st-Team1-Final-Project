@@ -7,8 +7,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Pawn.h"
 #include "EngineUtils.h"
+#include "Blueprint/UserWidget.h"
+#include "Character/GS_TpsController.h"
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/HUD.h"
+#include "UI/Character/GS_HPBoardWidget.h"
 
 AGS_InGameGM::AGS_InGameGM()
 {
@@ -194,6 +197,23 @@ void AGS_InGameGM::BindToPlayerState(APlayerController* PlayerController)
 {
     if (PlayerController)
     {
+        // [TODO] 플레이어 widget 업데이트
+        AGS_TpsController* TpsPC = Cast<AGS_TpsController>(PlayerController);
+        if (IsValid(TpsPC))
+        {
+            UUserWidget* Widget = TpsPC->GetPlayerWidget();
+            if (Widget)
+            {
+                UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(Widget->GetWidgetFromName(TEXT("WBP_HPBoard")));
+                UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid widget"));
+                if (IsValid(HPBoardWidget))
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid HPBoard Widget"));
+                    HPBoardWidget->InitBoardWidget();
+                }
+            }
+        }
+        
         AGS_PlayerState* GS_PS = PlayerController->GetPlayerState<AGS_PlayerState>();
         if (GS_PS)
         {

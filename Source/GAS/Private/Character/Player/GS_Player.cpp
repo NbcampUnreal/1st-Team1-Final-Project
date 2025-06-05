@@ -205,7 +205,6 @@ void AGS_Player::OnDeath()
 	{
 		GS_PS->bIsAlive = false;
 	}
-	SpectateNextPlayer();
 }
 
 void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick)
@@ -269,39 +268,6 @@ bool AGS_Player::IsLocalPlayer() const
 void AGS_Player::Multicast_SetUseControllerRotationYaw_Implementation(bool UseControlRotationYaw)
 {
 	bUseControllerRotationYaw = UseControlRotationYaw;
-}
-
-void AGS_Player::SpectateNextPlayer()
-{
-	for (const auto& PS : GetWorld()->GetGameState()->PlayerArray)
-	{
-		AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
-		if (IsValid(GS_PS))
-		{
-			if (GS_PS->bIsAlive) //[TODO] GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker 
-			{
-				AGS_TpsController* AlivePlayerController = Cast<AGS_TpsController>(GS_PS->GetPlayerController());
-				
-				if (IsValid(AlivePlayerController))
-				{
-					APlayerController* DeadPlayerPC = Cast<APlayerController>(GetController());
-					if (DeadPlayerPC)
-					{
-						DeadPlayerPC->UnPossess();
-						DeadPlayerPC->SetViewTargetWithBlend(AlivePlayerController);
-						SetLifeSpan(2.f);
-					}
-				}
-			}
-		}
-		//Game Over?
-		//all players dead
-	}
-}
-
-void AGS_Player::ServerRPCSpectateNextPlayer_Implementation()
-{
-	SpectateNextPlayer();
 }
 
 void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage, FName Section)

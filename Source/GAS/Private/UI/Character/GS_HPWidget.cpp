@@ -14,8 +14,15 @@ void UGS_HPWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	OwningCharacter = Cast<AGS_Character>(GetOwningPlayer()->GetPawn());
+	//if (OwningCharacter)
+	
 
+	//SetOwningActor()
+	if (!IsValid(OwningCharacter))
+	{
+		OwningCharacter = Cast<AGS_Character>(GetOwningPlayer()->GetPawn());
+	}
+	
 	if (IsValid(OwningCharacter))
 	{
 		OwningCharacter->SetHPBarWidget(this);
