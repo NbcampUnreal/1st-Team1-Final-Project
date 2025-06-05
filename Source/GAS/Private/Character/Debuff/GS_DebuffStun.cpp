@@ -53,7 +53,7 @@ void UGS_DebuffStun::OnExpire()
 		// 움직임(가디언
 		if(AGS_TpsController* Controller = Cast<AGS_TpsController>(TargetCharacter->GetController()))
 		{
-			Controller->SetMoveControlValue(false, false);
+			Controller->SetMoveControlValue(true, true);
 		}
 		else
 		{
