@@ -36,11 +36,11 @@ void UGS_CharacterSelectList::CreateChildWidgets(EPlayerRole PlayerRole)
 	int LoopCount = 0;
 	if (PlayerRole == EPlayerRole::PR_Seeker)
 	{
-		LoopCount = UGS_EnumUtils::GetEnumCount<ESeekerJob>() - 1;
+		LoopCount = static_cast<int> (ESeekerJob::End);
 	}
 	else if (PlayerRole == EPlayerRole::PR_Guardian)
 	{
-		LoopCount = UGS_EnumUtils::GetEnumCount<EGuardianJob>() - 1;
+		LoopCount = static_cast<int> (EGuardianJob::End);
 	}
 	
 	for (int32 i = 0; i < LoopCount; ++i)
@@ -57,14 +57,12 @@ void UGS_CharacterSelectList::CreateChildWidgets(EPlayerRole PlayerRole)
 		}
 
 		UCustomCommonButton* NewBtn = CreateWidget<UCustomCommonButton>(GetWorld(), ButtonSlotWidgetClass);
-		// NewBtn->OnClicked().AddUObject(this, &UGS_CharacterSelectList::OnCharacterSelectClicked);
 		ButtonRefs.Add(NewBtn);
 		if (PlayerRole == EPlayerRole::PR_Seeker)
 		{
 			const ESeekerJob Job = static_cast<ESeekerJob>(i);
 			const FName RowName = FName(*UGS_EnumUtils::GetEnumAsString<ESeekerJob>(Job));
 			const FGS_UICharacterInfoRow* RowPtr = CharacterInfoDataTable->FindRow<FGS_UICharacterInfoRow>(RowName, TEXT("Lookup Character Info Row"));
-			// 나중에 못 찾은 애들은 None 찾아서 잠긴 이미지 넣어주면 될 것 같음.
 			if (RowPtr)
 			{
 				NewBtn->IconTexture0 = RowPtr->Portrait;
@@ -76,7 +74,6 @@ void UGS_CharacterSelectList::CreateChildWidgets(EPlayerRole PlayerRole)
 			const EGuardianJob Job = static_cast<EGuardianJob>(i);
 			const FName RowName = FName(*UGS_EnumUtils::GetEnumAsString<EGuardianJob>(Job));
 			const FGS_UICharacterInfoRow* RowPtr = CharacterInfoDataTable->FindRow<FGS_UICharacterInfoRow>(RowName, TEXT("Lookup Character Info Row"));
-			// 나중에 못 찾은 애들은 None 찾아서 잠긴 이미지 넣어주면 될 것 같음.
 			if (RowPtr)
 			{
 				NewBtn->IconTexture0 = RowPtr->Portrait;
@@ -120,18 +117,36 @@ void UGS_CharacterSelectList::AddSpacerInVerticalBox()
 
 void UGS_CharacterSelectList::OnCharacterSelectClicked(int32 CharacterID, EPlayerRole PlayerRole)
 {
-	UE_LOG(LogTemp, Warning, TEXT("CallFunction"));
-	if (AGS_PlayerState* GSPlayerState = GetOwningPlayerState<AGS_PlayerState>())
+	AGS_PlayerState* GSPlayerState = GetOwningPlayerState<AGS_PlayerState>();
+	if (!GSPlayerState)
+		return;
+	
+	if (PlayerRole == EPlayerRole::PR_Guardian)
 	{
-		if (PlayerRole == EPlayerRole::PR_Guardian)
+		const FName RowName = FName(*UGS_EnumUtils::GetEnumAsString<EGuardianJob>(static_cast<EGuardianJob>(CharacterID)));
+		if (const FGS_UICharacterInfoRow* RowPtr = CharacterInfoDataTable->FindRow<FGS_UICharacterInfoRow>(RowName, TEXT("Lookup Character Info Row")))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Guardian Job %d"), CharacterID);
 			GSPlayerState->Server_SetGuardianJob((EGuardianJob)CharacterID);
 		}
-		else if (PlayerRole == EPlayerRole::PR_Seeker)
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("This UI is Locked"));
+			return;
+		}
+	}
+	else if (PlayerRole == EPlayerRole::PR_Seeker)
+	{
+		const FName RowName = FName(*UGS_EnumUtils::GetEnumAsString<ESeekerJob>(static_cast<ESeekerJob>(CharacterID)));
+		if (const FGS_UICharacterInfoRow* RowPtr = CharacterInfoDataTable->FindRow<FGS_UICharacterInfoRow>(RowName, TEXT("Lookup Character Info Row")))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Seeker Job %d"), CharacterID);
 			GSPlayerState->Server_SetSeekerJob((ESeekerJob)CharacterID);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("This UI is Locked"));
+			return;
 		}
 	}
 }
