@@ -11,6 +11,7 @@
 
 void UGS_MiniPortrait::Init(AGS_Monster* Monster)
 {
+	BoundMonster = Monster;
 	PortraitImage->SetBrushFromTexture(Monster->GetPortrait());
 	DebuffColor = DebuffBorder->GetBrushColor(); 
 
@@ -55,4 +56,9 @@ void UGS_MiniPortrait::OnDebuffChanged(const TArray<FDebuffRepInfo>& List)
 	
 	DebuffColor.A = bHasDebuff ? 1.f : 0.f;
 	DebuffBorder->SetBrushColor(DebuffColor);
+}
+
+void UGS_MiniPortrait::OnPortraitClicked()
+{
+	UE_LOG(LogTemp, Log, TEXT("몬스터: %s"), *BoundMonster->GetName());
 }

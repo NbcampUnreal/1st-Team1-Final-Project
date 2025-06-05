@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GS_MiniPortrait.generated.h"
 
+struct FDebuffRepInfo;
 class AGS_Monster;
 class UGS_StatComp;
 class UGS_DebuffComp;
@@ -18,6 +19,9 @@ class GAS_API UGS_MiniPortrait : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	AGS_Monster* BoundMonster = nullptr;
+	
 	UFUNCTION(BlueprintCallable, Category="UI")
 	void Init(AGS_Monster* Monster);
 
@@ -38,6 +42,9 @@ protected:
 	
 	UFUNCTION()          
 	void OnDebuffChanged(const TArray<FDebuffRepInfo>& List);
+	
+	UFUNCTION(BlueprintCallable)
+	void OnPortraitClicked();
 
 private:
 	FLinearColor DebuffColor;
