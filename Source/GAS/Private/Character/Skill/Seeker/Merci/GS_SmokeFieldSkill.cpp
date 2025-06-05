@@ -24,19 +24,17 @@ void AGS_SmokeFieldSkill::BeginPlay()
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
-	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
+	// 레벨에 따른 연기 화살 하강 정도
+	FString LevelName = GetWorld()->GetMapName();
+	LevelName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix); // 맵 이름에서 "UEDPIE_0_" 같은 접두어 제거
+
+	if (LevelName == TEXT("InGameTestLevel"))
 	{
-		FVector HitNormal = Hit.ImpactNormal;
-		if (HitNormal.Z > 0.7f)
-		{
-			TargetGroundLocation = Hit.Location; // 목표 위치 저장
-			bShouldDescendToGround = true;       // Tick에서 움직일지 여부
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Hit was a wall, not the ground."));
-		}
+		GroundZ = 100.0f; // 특정 맵일 때만 다르게
 	}
+
+	TargetGroundLocation = FVector(GetActorLocation().X, GetActorLocation().Y, GroundZ);
+	bShouldDescendToGround = true;
 }
 
 void AGS_SmokeFieldSkill::Tick(float DeltaTime)
