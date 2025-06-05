@@ -140,12 +140,6 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 				// 넉백
 				const FVector LaunchDirection = (Target->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
 				Target->LaunchCharacter(LaunchDirection * 1000.0f + FVector(0, 0, 500.0f), true, true);
-
-				// 경직 디버프
-				if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
-				{
-					Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Stun, OwnerCharacter);
-				}
 			}
 		}
 	}
