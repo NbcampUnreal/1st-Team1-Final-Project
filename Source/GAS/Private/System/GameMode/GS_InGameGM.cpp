@@ -197,17 +197,19 @@ void AGS_InGameGM::BindToPlayerState(APlayerController* PlayerController)
         AGS_TpsController* TpsPC = Cast<AGS_TpsController>(PlayerController);
         if (IsValid(TpsPC))
         {
-            UUserWidget* Widget = TpsPC->GetPlayerWidget();
-            if (Widget)
-            {
-                UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(Widget->GetWidgetFromName(TEXT("WBP_HPBoard")));
-                UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid widget"));
-                if (IsValid(HPBoardWidget))
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid HPBoard Widget"));
-                    HPBoardWidget->InitBoardWidget();
-                }
-            }
+            TpsPC->TestFunction();
+            
+            // UUserWidget* Widget = TpsPC->GetPlayerWidget();
+            // if (Widget)
+            // {
+            //     UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(Widget->GetWidgetFromName(TEXT("WBP_HPBoard")));
+            //     UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid widget"));
+            //     if (IsValid(HPBoardWidget))
+            //     {
+            //         UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid HPBoard Widget"));
+            //         HPBoardWidget->InitBoardWidget();
+            //     }
+            // }
         }
         
         AGS_PlayerState* GS_PS = PlayerController->GetPlayerState<AGS_PlayerState>();

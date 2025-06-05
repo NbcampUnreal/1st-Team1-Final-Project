@@ -13,6 +13,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "System/GS_PlayerState.h"
+#include "UI/Character/GS_HPBoardWidget.h"
 
 
 AGS_TpsController::AGS_TpsController()
@@ -177,25 +178,37 @@ void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
 	}
 }
 
+void AGS_TpsController::TestFunction()
+{
+	AGS_Character* GS_Character = Cast<AGS_Character>(GetPawn());
+	if (IsValid(GS_Character))
+	{
+		TSubclassOf<UUserWidget> Widget = PlayerWidgetClasses[GS_Character->GetCharacterType()];
+		if (IsValid(Widget))
+		{
+			PlayerWidgetInstance = CreateWidget<UUserWidget>(this, Widget);
+			if (IsValid(PlayerWidgetInstance))
+			{
+				UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(PlayerWidgetInstance->GetWidgetFromName(TEXT("WBP_HPBoard")));
+				if (HPBoardWidget)
+				{
+					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Valid HP Board Widget ")),true, true, FLinearColor::Red,5.f);
+					HPBoardWidget->InitBoardWidget();
+
+					PlayerWidgetInstance->AddToViewport(0);
+				}
+			}
+		}
+	}
+}
+
 void AGS_TpsController::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	if (IsLocalController())
 	{
-		AGS_Character* GS_Character = Cast<AGS_Character>(GetPawn());
-		if (IsValid(GS_Character))
-		{
-			TSubclassOf<UUserWidget> Widget = PlayerWidgetClasses[GS_Character->GetCharacterType()];
-			if (IsValid(Widget))
-			{
-				PlayerWidgetInstance = CreateWidget<UUserWidget>(this, Widget);
-				if (IsValid(PlayerWidgetInstance))
-				{
-					PlayerWidgetInstance->AddToViewport(0);
-				}
-			}
-		}
+		//TestFunction();
 	}
 	
 	InitControllerPerWorld();
@@ -260,6 +273,8 @@ void AGS_TpsController::BeginPlayingState()
 	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s) --- BeginPlayingState CALLED ---"), *GetNameSafe(this));
 	if (IsLocalController())
 	{
-		AddWidget();
+		//ServerRPCTestFunction();
+		//AddWidget();
+		//TestFunction();
 	}
 }

@@ -113,9 +113,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
 	FRotator LastRotatorInMoving;
 
+	UFUNCTION(BlueprintCallable)
+	void TestFunction();
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void PostSeamlessTravel() override;
 	virtual void BeginPlayingState() override;
+
 };
