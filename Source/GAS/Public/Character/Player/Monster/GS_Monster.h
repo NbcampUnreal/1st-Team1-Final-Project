@@ -103,6 +103,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Tick(float DeltaTime) override;
 
+	void HandleDelayedDestroy();
 	virtual void OnDeath() override;
 	
 	UPROPERTY()

@@ -24,12 +24,19 @@ struct FDebuffRepInfo
 	float RemainingTime;
 };
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDebuffListUpdated, const TArray<FDebuffRepInfo>&);
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class GAS_API UGS_DebuffComp : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
+	FOnDebuffListUpdated OnDebuffListUpdated;
+
+	UPROPERTY(ReplicatedUsing = OnRep_DebuffList)
+	TArray<FDebuffRepInfo> ReplicatedDebuffs;
+	
 	// Sets default values for this component's properties
 	UGS_DebuffComp();
 
@@ -40,9 +47,8 @@ public:
 	// Type 디버프가 있는지 확인
 	bool IsDebuffActive(EDebuffType Type);
 
-	UPROPERTY(ReplicatedUsing = OnRep_DebuffList)
-	TArray<FDebuffRepInfo> ReplicatedDebuffs;
-
+	const TArray<FDebuffRepInfo>& GetDebuffList() const { return ReplicatedDebuffs; }
+	
 	UFUNCTION()
 	void OnRep_DebuffList();
 

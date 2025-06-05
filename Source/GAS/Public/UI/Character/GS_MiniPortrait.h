@@ -7,6 +7,8 @@
 #include "GS_MiniPortrait.generated.h"
 
 class AGS_Monster;
+class UGS_StatComp;
+class UGS_DebuffComp;
 /**
  * 
  */
@@ -20,12 +22,26 @@ public:
 	void Init(AGS_Monster* Monster);
 
 protected:
+	virtual void NativeDestruct() override;
+	
 	UPROPERTY(meta=(BindWidget))
 	class UImage* PortraitImage;
 
 	UPROPERTY(meta=(BindWidget))
 	class UTextBlock* HPText;
 
+	UPROPERTY(meta=(BindWidget))
+	class UBorder* DebuffBorder;
+	
 	UFUNCTION()          
 	void OnHPChanged(UGS_StatComp* InStatComp);
+	
+	UFUNCTION()          
+	void OnDebuffChanged(const TArray<FDebuffRepInfo>& List);
+
+private:
+	FLinearColor DebuffColor;
+
+	TWeakObjectPtr<UGS_StatComp> BoundStatComp;
+	TWeakObjectPtr<UGS_DebuffComp> BoundDebuffComp;
 };
