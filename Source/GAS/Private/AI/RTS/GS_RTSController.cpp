@@ -13,7 +13,6 @@
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 
 
@@ -398,7 +397,7 @@ void AGS_RTSController::SelectOnCtrlClick()
 			for (TActorIterator<AGS_Monster> It(GetWorld()); It; ++It)
 			{
 				AGS_Monster* M = *It;
-				if (M->GetCharacterType() != MonsterType)
+				if (M->GetCharacterType() == MonsterType)
 				{
 					SameTypeUnits.Add(M);
 				}

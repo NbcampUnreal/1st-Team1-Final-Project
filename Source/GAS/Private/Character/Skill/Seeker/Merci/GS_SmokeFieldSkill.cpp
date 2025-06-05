@@ -26,8 +26,16 @@ void AGS_SmokeFieldSkill::BeginPlay()
 
 	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
 	{
-		TargetGroundLocation = Hit.Location; // 목표 위치 저장
-		bShouldDescendToGround = true;       // Tick에서 움직일지 여부
+		FVector HitNormal = Hit.ImpactNormal;
+		if (HitNormal.Z > 0.7f)
+		{
+			TargetGroundLocation = Hit.Location; // 목표 위치 저장
+			bShouldDescendToGround = true;       // Tick에서 움직일지 여부
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit was a wall, not the ground."));
+		}
 	}
 }
 
