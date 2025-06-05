@@ -14,6 +14,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "System/GS_PlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 AGS_Player::AGS_Player()
 {
@@ -191,6 +192,11 @@ void AGS_Player::OnTimelineFinished()
 	bIsObscuring = false;
 }
 
+void AGS_Player::Multicast_SetUseControllerRotationYaw_Implementation(bool UseControlRotationYaw)
+{
+	bUseControllerRotationYaw = UseControlRotationYaw;
+}
+
 void AGS_Player::OnDeath()
 {
 	Super::OnDeath();
@@ -217,6 +223,12 @@ void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick)
 FSkillInputControl AGS_Player::GetSkillInputControl()
 {
 	return SkillInputControl;
+}
+
+void AGS_Player::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AGS_Player, SkillInputControl);
 }
 
 
@@ -264,11 +276,6 @@ bool AGS_Player::IsLocalPlayer() const
 		return PC->IsLocalController();
 	}
 	return false;
-}
-
-void AGS_Player::Multicast_SetUseControllerRotationYaw_Implementation(bool UseControlRotationYaw)
-{
-	bUseControllerRotationYaw = UseControlRotationYaw;
 }
 
 void AGS_Player::SpectateNextPlayer()

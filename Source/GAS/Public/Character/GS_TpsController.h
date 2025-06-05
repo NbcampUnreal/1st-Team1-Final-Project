@@ -91,8 +91,10 @@ public:
 	UFUNCTION()
 	void SetLookControlValue(bool CanLookRight, bool CanLookUp);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+	UPROPERTY(Replicated)
 	FControlValue ControlValues;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
 	FRotator LastRotatorInMoving;

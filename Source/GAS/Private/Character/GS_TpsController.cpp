@@ -103,6 +103,12 @@ void AGS_TpsController::SetLookControlValue(bool CanLookRight, bool CanLookUp)
 	ControlValues.bCanLookRight = CanLookRight;
 }
 
+void AGS_TpsController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AGS_TpsController, ControlValues);
+}
+
 void AGS_TpsController::InitControllerPerWorld()
 {
 	SetInputMode(FInputModeGameOnly());

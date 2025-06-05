@@ -79,11 +79,6 @@ void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instanc
 		return;
 	}
 
-	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputRC)
-	{
-		return;
-	}
-
 	if (bCtrlHeld)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Ctrl+Right Click"));
@@ -99,11 +94,6 @@ void UGS_SkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance
 	bWasCtrlHeldWhenLeftClicked = bCtrlHeld;
 
 	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
-	{
-		return;
-	}
-
-	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputLC)
 	{
 		return;
 	}

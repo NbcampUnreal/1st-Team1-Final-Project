@@ -13,4 +13,6 @@ UCLASS()
 class GAS_API UGS_AN_EndAimSkill : public UAnimNotify
 {
 	GENERATED_BODY()
+public:
+	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 };

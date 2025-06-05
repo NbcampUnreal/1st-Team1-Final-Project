@@ -27,63 +27,78 @@ void UGS_ChanAimingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		OwnerPlayer->Multicast_SetMoveControlValue(false, false);
-		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		if (OwnerPlayer->HasAuthority())
+		{
+			// Control Input Key
+			OwnerPlayer->SetSkillInputControl(false, false);
+			OwnerPlayer->SetMoveControlValue(false, false);
+			// Change Slot
+			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+
+			// Play Montage
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		}
 		
 		// 에이밍 스킬 시작 사운드 재생
 		if (OwnerPlayer->AimingSkillStartSound)
 		{
 			OwnerPlayer->PlaySound(OwnerPlayer->AimingSkillStartSound);
 		}
+
+		// Skill Stat
+		CurrentStamina = MaxStamina;
+		// UI
+		ShowProgressBar(true);
+		UpdateProgressBar(CurrentStamina);
+		OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 1.0f, true);
+		// Skill State
+		if (OwnerCharacter->GetSkillComp())
+		{
+			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
+		}
 	}
-	StartHoldUp();
 }
 
 void UGS_ChanAimingSkill::OnSkillCommand()
 {
-	//if (!bIsHoldingUp || CurrentStamina < SlamStaminaCost)
-	if (!bIsHoldingUp || !bCanSlam || CurrentStamina < SlamStaminaCost)
+	Super::OnSkillCommand();
+	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		return;
+		if (OwnerPlayer->HasAuthority())
+		{
+			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
+			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
+		
+			// Change Slot
+			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+
+			// Play Montage
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+
+			// Control Input Value
+			OwnerPlayer->SetLookControlValue(false, false);
+			OwnerPlayer->SetMoveControlValue(false, false);
+			OwnerPlayer->SetSkillInputControl(false, false);
+		}
+		
+	
+		// 방패 슬램 사운드 재생
+		if (OwnerPlayer->AimingSkillSlamSound)
+		{
+			OwnerPlayer->PlaySound(OwnerPlayer->AimingSkillSlamSound);
+		}
+
+		// End Skill
+		ExecuteSkillEffect();
+		if (OwnerCharacter->GetSkillComp())
+		{
+			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
+		}
+		ShowProgressBar(false);
+		OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 	}
-
-	bCanSlam = false; // 재사용 금지
-
-	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-	OwnerPlayer->Multicast_SetMustTurnInPlace(false);
-	OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-	OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-	
-	OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
-	UE_LOG(LogTemp, Warning, TEXT("Skill 2 %s"), *OwnerPlayer->GetCurrentMontage()->GetName());
-
-	OwnerPlayer->Multicast_SetLookControlValue(false, false);
-	OwnerPlayer->Multicast_SetMoveControlValue(false, false);
-	
-	// 방패 슬램 사운드 재생
-	if (OwnerPlayer->AimingSkillSlamSound)
-	{
-		OwnerPlayer->PlaySound(OwnerPlayer->AimingSkillSlamSound);
-	}
-	
-	OnShieldSlam();
-
-	// 쿨타임 설정
-	OwnerCharacter->GetWorldTimerManager().SetTimer(
-		SlamCooldownHandle,
-		this,
-		&UGS_ChanAimingSkill::ResetSlamCooldown,
-		SlamCooldownTime,
-		false
-	);
-}
-
-void UGS_ChanAimingSkill::ResetSlamCooldown()
-{
-	bCanSlam = true;
 }
 
 void UGS_ChanAimingSkill::ExecuteSkillEffect()
@@ -190,14 +205,6 @@ void UGS_ChanAimingSkill::StartHoldUp()
 	{
 		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
 	}
-	CurrentStamina = MaxStamina;
-
-	// UI 표시
-	ShowProgressBar(true);
-	UpdateProgressBar(CurrentStamina);
-
-	UE_LOG(LogTemp, Warning, TEXT("Start Hold Up!!!!!!!"));
-	OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 1.0f, true);
 }
 
 void UGS_ChanAimingSkill::EndHoldUp()
@@ -208,15 +215,13 @@ void UGS_ChanAimingSkill::EndHoldUp()
 		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
 		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerCharacter))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("EndHoldUp")); // SJE
 			Chan->ToIdle();
 		}
-		
 	}
+	
 	// UI 숨기기
 	ShowProgressBar(false);
 	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
-	UE_LOG(LogTemp, Warning, TEXT("End Hold Up!!!!!!"));
 }
 
 void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
