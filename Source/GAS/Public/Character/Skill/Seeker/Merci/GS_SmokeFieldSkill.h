@@ -29,4 +29,5 @@ private:
 	bool bShouldDescendToGround = false;
 	FVector TargetGroundLocation;
 	float DescendSpeed = 0.1f; // 초당 200cm 정도로 내려오기
+	float GroundZ = -1.0f; // 기본 높이
 };

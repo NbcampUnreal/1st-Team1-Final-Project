@@ -11,5 +11,6 @@ enum class EDebuffType : uint8
 	Aggro	UMETA(DisplayName = "Aggro"),
 	Obscure	UMETA(DisplayName = "Obscure"),
 	Confuse	UMETA(DisplayName = "Confuse"),
-	Mute	UMETA(DisplayName = "Mute")
+	Mute	UMETA(DisplayName = "Mute"),
+	Slow	UMETA(DisplayName = "Slow")
 };
