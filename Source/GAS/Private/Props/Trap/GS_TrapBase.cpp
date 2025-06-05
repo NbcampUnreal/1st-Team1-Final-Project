@@ -131,35 +131,81 @@ void AGS_TrapBase::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors)
 {
 }
 
+void AGS_TrapBase::ClearDotTimerForActor(AActor* Actor)
+{
+	if (!Actor)
+	{
+		return;
+	}
+	FTimerHandle TimerHandle;
+	if (ActiveDoTTimers.RemoveAndCopyValue(Actor, TimerHandle))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+		UE_LOG(LogTemp, Warning, TEXT("DoT Timer Successfully ended - Actor: %s"), *GetNameSafe(Actor));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DoT Timer failed to end - Actor: %s (no timer)"), *GetNameSafe(Actor));
+	}
+
+}
+
+
+
+
 
 void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
 {
-	if (!DamagedActor || !HasAuthority() || !TrapData.Effect.bDoT) return;
+	if (!DamagedActor || !HasAuthority() || !TrapData.Effect.bDoT)
+	{
+		return;
+	}
 
 	if (ActiveDoTTimers.Contains(DamagedActor))
 	{
-		//이미 해당 엑터의 타이머가 작동 중이라면 타이머 초기화(처음부터 다시 시작)
-		GetWorld()->GetTimerManager().ClearTimer(ActiveDoTTimers[DamagedActor]);
+		ClearDotTimerForActor(DamagedActor);
 	}
 
 	int32 CurrentTick = 0;
 	FTimerHandle TimerHandle;
+
+	TWeakObjectPtr<AActor> WeakActor = DamagedActor;
+
 	FTimerDelegate Delegate;
 	//타이머가 끝나면 실행되는 람다
 	Delegate.BindLambda([=, this]() mutable
 		{
-			if (!DamagedActor || !TrapData.Effect.bDoT) return;
+			if (!WeakActor.IsValid() || !TrapData.Effect.bDoT)
+			{
+				ClearDotTimerForActor(WeakActor.Get());
+				return;
+			}
+			
+			AActor* ValidActor = WeakActor.Get();
 
+			if (!ValidActor || !IsValid(ValidActor))
+			{
+				ClearDotTimerForActor(ValidActor);
+				return;
+			}
 			FDamageEvent DamageEvent;
-			DamagedActor->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
+			ValidActor->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
 			UE_LOG(LogTemp, Warning, TEXT("CurrentTick : %d"), CurrentTick);
 			CurrentTick++;
 
 			if (CurrentTick >= TrapData.Effect.DamageCount)
 			{
-				//current tick이 damage count보다 같거나 크다면 타이머 초기화 후 ActiveDoTTimers 맵에서 제거
-				GetWorld()->GetTimerManager().ClearTimer(ActiveDoTTimers[DamagedActor]);
-				ActiveDoTTimers.Remove(DamagedActor);
+				////current tick이 damage count보다 같거나 크다면 타이머 초기화 후 ActiveDoTTimers 맵에서 제거
+				//if (ActiveDoTTimers.Contains(ValidActor))
+				//{
+				//	GetWorld()->GetTimerManager().ClearTimer(ActiveDoTTimers[ValidActor]);
+				//	
+				//	//크래시 지점
+				//	ActiveDoTTimers.Remove(ValidActor);
+				//	//
+				//}
+
+				ClearDotTimerForActor(ValidActor);
 			}
 		});
 

@@ -5,6 +5,7 @@
 #include "AkGameplayStatics.h"
 #include "AkComponent.h"
 #include "Engine/TimerHandle.h"
+#include "Net/UnrealNetwork.h"
 #include "GS_MonsterAudioComponent.generated.h"
 
 class AGS_Monster;
@@ -65,6 +66,10 @@ class GAS_API UGS_MonsterAudioComponent : public UActorComponent
 public:
     UGS_MonsterAudioComponent();
 
+    // RTPC 이름 상수
+    static const FName DistanceToPlayerRTPCName;
+    static const FName MonsterVariantRTPCName;
+
 protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -113,6 +118,9 @@ public:
     UFUNCTION(BlueprintPure, Category = "Monster Audio")
     EMonsterAudioState GetCurrentAudioState() const { return CurrentAudioState; }
 
+    // Replication
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 private:
     // ======================
     // 내부 변수
@@ -121,7 +129,7 @@ private:
     UPROPERTY()
     TObjectPtr<AGS_Monster> OwnerMonster;
 
-    UPROPERTY()
+    UPROPERTY(ReplicatedUsing = OnRep_CurrentAudioState)
     EMonsterAudioState CurrentAudioState;
 
     UPROPERTY()
@@ -146,9 +154,6 @@ private:
     /** 시커와의 거리 계산 */
     float CalculateDistanceToNearestSeeker() const;
 
-    /** Wwise RTPC 설정 (거리에 따른 실시간 파라미터) */
-    void SetDistanceRTPC(float Distance);
-
     /** 자동 사운드 재생 (타이머 콜백) */
     void PlayIdleSound();
     void PlayCombatSound();
@@ -160,11 +165,25 @@ private:
 
     /** Wwise 이벤트 실제 재생 (Wwise가 거리 감쇠 자동 처리) */
     UAkAudioEvent* GetSoundEvent(EMonsterAudioState SoundType) const;
-    void PostWwiseEvent(UAkAudioEvent* Event);
-
+    
     /** 몬스터 상태 변화 감지 */
     void CheckForStateChanges();
     
     /** 디버그 정보 표시 */
     void DrawDebugInfo() const;
+
+    UFUNCTION()
+    void OnRep_CurrentAudioState();
+
+    // New RPC for triggering sound check on clients
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_TriggerSound(EMonsterAudioState SoundTypeToTrigger, bool bIsImmediate);
+
+    // Client-side map to track the last play time for each sound type to manage cooldowns locally
+    TMap<EMonsterAudioState, float> LocalLastSoundPlayTimes;
+
+    // Server-side map to track the last time a timed sound broadcast was made
+    // Not replicated, used by server authority only.
+    UPROPERTY(Transient) 
+    TMap<EMonsterAudioState, float> ServerLastBroadcastTime;
 }; 

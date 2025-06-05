@@ -33,55 +33,43 @@ UClass* AGS_BossLevelGM::GetDefaultPawnClassForController_Implementation(AContro
         return Super::GetDefaultPawnClassForController_Implementation(InController);
     }
 
-    if (PS)
+    if (!PS->bIsAlive)
     {
-        if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+        return nullptr;
+    }
+    if (!PS)
+    {
+		return Super::GetDefaultPawnClassForController_Implementation(InController);
+    }
+
+    if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+    {
+        const FAssetToSpawn* FoundAssetSetup = PawnMappingDataAsset->GuardianPawnClasses.Find(PS->CurrentGuardianJob);
+        if (FoundAssetSetup && *FoundAssetSetup->PawnClass)
         {
-            if (PS->CurrentGuardianJob != EGuardianJob::End)
-            {
-                const TSubclassOf<APawn>* FoundPawnClass = PawnMappingDataAsset->GuardianPawnClasses.Find(PS->CurrentGuardianJob);
-                if (FoundPawnClass && *FoundPawnClass)
-                {
-                    ResolvedPawnClass = *FoundPawnClass;
-                }
-                else
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Guardian PawnClass not found in DataAsset for job %s. Using default guardian pawn from DataAsset."), *UEnum::GetValueAsString(PS->CurrentGuardianJob));
-                    ResolvedPawnClass = PawnMappingDataAsset->DefaultGuardianPawn;
-                }
-            }
-            else
-            {
-                UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Guardian job is 'End'. Using default guardian pawn from DataAsset."));
-                ResolvedPawnClass = PawnMappingDataAsset->DefaultGuardianPawn;
-            }
+            ResolvedPawnClass = *FoundAssetSetup->PawnClass;
         }
-        else if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+        else
         {
-            if (PS->CurrentSeekerJob != ESeekerJob::End)
-            {
-                const TSubclassOf<APawn>* FoundPawnClass = PawnMappingDataAsset->SeekerPawnClasses.Find(PS->CurrentSeekerJob);
-                if (FoundPawnClass && *FoundPawnClass)
-                {
-                    ResolvedPawnClass = *FoundPawnClass;
-                }
-                else
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Seeker PawnClass not found in DataAsset for job: %s. Using default seeker pawn from DataAsset."), *UEnum::GetValueAsString(PS->CurrentSeekerJob));
-                    ResolvedPawnClass = PawnMappingDataAsset->DefaultSeekerPawn;
-                }
-            }
-            else
-            {
-                UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Seeker job is 'End'. Using default seeker pawn from DataAsset."));
-                ResolvedPawnClass = PawnMappingDataAsset->DefaultSeekerPawn;
-            }
+            ResolvedPawnClass = PawnMappingDataAsset->DefaultGuardianPawn;
+        }
+    }
+    else if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+    {
+        const FAssetToSpawn* FoundAssetSetup = PawnMappingDataAsset->SeekerPawnClasses.Find(PS->CurrentSeekerJob);
+        if (FoundAssetSetup && *FoundAssetSetup->PawnClass)
+        {
+            ResolvedPawnClass = *FoundAssetSetup->PawnClass;
+        }
+        else
+        {
+            ResolvedPawnClass = PawnMappingDataAsset->DefaultSeekerPawn;
         }
     }
 
     if (!ResolvedPawnClass)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Pawn class not resolved by role/job logic or PS is null. Attempting to use super's default."));
+        
         ResolvedPawnClass = Super::GetDefaultPawnClassForController_Implementation(InController);
     }
 
@@ -144,7 +132,7 @@ void AGS_BossLevelGM::StartPlay()
                 {
                     GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
                     GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_BossLevelGM::HandlePlayerAliveStatusChanged);
-                    UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Bound to existing player (No PC) %s"), *GS_PS->GetPlayerName());
+                    UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Bound to existing player (No PC) %s"), *GS_PS->GetPlayerName());
                     HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
                 }
             }
@@ -163,7 +151,7 @@ void AGS_BossLevelGM::Logout(AController* Exiting)
         if (GS_PS)
         {
             GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
-            UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Unbound from logging out player %s"), *GS_PS->GetPlayerName());
+            UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Unbound from logging out player %s"), *GS_PS->GetPlayerName());
         }
     }
     Super::Logout(Exiting);
@@ -181,7 +169,7 @@ void AGS_BossLevelGM::BindToPlayerState(APlayerController* PlayerController)
         {
             GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
             GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_BossLevelGM::HandlePlayerAliveStatusChanged);
-            UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Bound to player %s"), *GS_PS->GetPlayerName());
+            UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Bound to player %s"), *GS_PS->GetPlayerName());
             HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
         }
     }
@@ -189,14 +177,14 @@ void AGS_BossLevelGM::BindToPlayerState(APlayerController* PlayerController)
 
 void AGS_BossLevelGM::StartMatchCheck()
 {
-    UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Match checks started. bMatchHasStarted = true"));
+    UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Match checks started. bMatchHasStarted = true"));
     bMatchHasStarted = true;
     CheckAllPlayersDead(); //이거 지워도 상관 없음
 }
 
 void AGS_BossLevelGM::OnTimerEnd()
 {
-    UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: OnTimerEnd called (likely by GameState). Seekers Lose."));
+    UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: OnTimerEnd called (likely by GameState). Seekers Lose."));
     EndGame(EGameResult::GR_SeekersLost);
 }
 
@@ -212,12 +200,12 @@ void AGS_BossLevelGM::EndGame(EGameResult Result)
 
     if (Result == EGameResult::GR_SeekersLost)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: Seekers Lost. Traveling to EndingLevel."));
+        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Seekers Lost. Traveling to EndingLevel."));
         SetGameResultOnAllPlayers(EGameResult::GR_SeekersLost);
     }
     else if (Result == EGameResult::GR_SeekersWon)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: Not All Seekers dead. Traveling to BossLevel."));
+        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Not All Seekers dead. Traveling to BossLevel."));
         SetGameResultOnAllPlayers(EGameResult::GR_SeekersWon);
     }
 
@@ -245,7 +233,7 @@ void AGS_BossLevelGM::SetGameResultOnAllPlayers(EGameResult Result)
 
 void AGS_BossLevelGM::HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, bool bIsAlive)
 {
-    UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Player %s alive status changed to %s"),
+    UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Player %s alive status changed to %s"),
         *PlayerState->GetPlayerName(),
         bIsAlive ? TEXT("True") : TEXT("False"));
 
@@ -259,37 +247,52 @@ void AGS_BossLevelGM::CheckAllPlayersDead()
 {
     if (!GameState) return;
 
-    bool bAllPlayersDead = true;
-    int32 PlayerCount = 0;
+    bool bAllSeekersDead = true;
 
     for (APlayerState* PS : GameState->PlayerArray)
     {
         AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
         if (GS_PS && GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
         {
-            PlayerCount++;
             if (GS_PS->bIsAlive)
             {
-                bAllPlayersDead = false;
+                bAllSeekersDead = false;
+                break;
+            }
+        }
+    }
+    bool bGuardianDead = true;
+    for (APlayerState* PS : GameState->PlayerArray)
+    {
+        AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
+        if (GS_PS && GS_PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+        {
+            if (GS_PS->bIsAlive)
+            {
+                bGuardianDead = false;
                 break;
             }
         }
     }
 
-    if (PlayerCount > 0 && bAllPlayersDead)
+    if (bAllSeekersDead)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: All relevant players are dead!"));
+        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: All relevant players are dead!"));
         if (bMatchHasStarted)
         {
             EndGame(EGameResult::GR_SeekersLost);
         }
-        else
-        {
-            UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: All dead check triggered, but match not started yet. Ignoring EndGame."));
-        }
+    }
+    else if (bGuardianDead)
+    {
+		UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Guardian is dead! Seekers Win."));
+		if (bMatchHasStarted)
+		{
+			EndGame(EGameResult::GR_SeekersWon);
+		}
     }
     else
     {
-        UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Not all players are dead yet. (%d players checked)"), PlayerCount);
+        UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Not all players are dead yet."));
     }
 }

@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GS_MiniPortrait.generated.h"
 
+class AGS_Monster;
 /**
  * 
  */
@@ -16,10 +17,15 @@ class GAS_API UGS_MiniPortrait : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable, Category="UI")
-	void Init(UTexture2D* InPortrait);
+	void Init(AGS_Monster* Monster);
 
 protected:
 	UPROPERTY(meta=(BindWidget))
 	class UImage* PortraitImage;
-	
+
+	UPROPERTY(meta=(BindWidget))
+	class UTextBlock* HPText;
+
+	UFUNCTION()          
+	void OnHPChanged(UGS_StatComp* InStatComp);
 };

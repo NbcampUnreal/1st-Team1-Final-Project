@@ -493,3 +493,20 @@ void AGS_CustomLobbyPC::Client_UpdateReadyButtonUI_Implementation(bool bIsReady)
 	}
 	
 }
+
+bool AGS_CustomLobbyPC::HasCurrentModalWidget()
+{
+	if (CurrentModalWidget)
+		return true;
+	else
+		return false;
+}
+
+void AGS_CustomLobbyPC::ClearCurrentModalWidget()
+{
+	if (CurrentModalWidget)
+	{
+		CurrentModalWidget->RemoveFromParent();
+	}
+	CurrentModalWidget = nullptr;
+}

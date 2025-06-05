@@ -11,8 +11,15 @@ void UGS_AN_CheckAimSkillReady::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 	Super::Notify(MeshComp, Animation, EventReference);
 	if (AGS_Chan* Character = Cast<AGS_Chan>(MeshComp->GetOwner()))
 	{
-		Character->OnReadyAimSkill();
-		Character->Multicast_SetMustTurnInPlace(true);
-		Character->Multicast_SetLookControlValue(true, true);
+		if (Character->HasAuthority())
+		{
+			Character->Multicast_SetIsFullBodySlot(false);
+			Character->Multicast_SetIsUpperBodySlot(true);
+			Character->SetSkillInputControl(true, false);
+			Character->Multicast_SetMustTurnInPlace(true);
+			Character->SetLookControlValue(true, true);
+			Character->SetMoveControlValue(false, false);
+		}
+		
 	}
 }

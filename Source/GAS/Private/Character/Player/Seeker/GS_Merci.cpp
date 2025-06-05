@@ -17,6 +17,7 @@
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_ArrowTypeWidget.h"
+#include "AkGameplayStatics.h"
 //#include "Weapon/Equipable/"
 
 // Sets default values
@@ -85,7 +86,9 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		bIsFullyDrawn = false;  // 상태 초기화
 
 		// 화살 발사 사운드 재생
-		PlaySound(ArrowShotSound);  // 부모 클래스의 PlaySound 함수 사용
+		//PlaySound(ArrowShotSound);  // 부모 클래스의 PlaySound 함수 사용
+		Multicast_PlayArrowShotSound();
+
 	}
 
 	Client_StopZoom();
@@ -250,7 +253,12 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		SpawnParams.Instigator = this;
 
 		AGS_SeekerMerciArrow* SpawnedArrow =GetWorld()->SpawnActor<AGS_SeekerMerciArrow>(ArrowClass, SpawnLocation, ArrowRot, SpawnParams);
-		SpawnedArrow->SetOwner(this);
+		
+		if(SpawnedArrow)
+		{
+			SpawnedArrow->SetOwner(this);
+		}
+		
 		// 7. 화살 타입 설정
 		if (AGS_SeekerMerciArrowNormal* NormalArrow = Cast<AGS_SeekerMerciArrowNormal>(SpawnedArrow)) // 연기화살 제외
 		{
@@ -515,3 +523,17 @@ void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRot
 		);
 	}
 }
+
+
+void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
+{
+	if (ArrowShotSound)
+	{
+		UAkGameplayStatics::PostEvent(ArrowShotSound, this, 0, FOnAkPostEventCallback());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayArrowShotSound_Implementation: ArrowShotSound is null"));
+	}
+}
+

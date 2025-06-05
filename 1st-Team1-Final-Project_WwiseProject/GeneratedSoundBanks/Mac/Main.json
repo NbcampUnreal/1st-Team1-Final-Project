@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{AC7242D9-5841-60F9-1E40-F59599FE0AE3}",
+    "Hash": "{44965052-9A4D-66A3-970E-BFB286189B49}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -328,12 +328,28 @@
       "CachePath": "E4/{E4362B59-0A9A-4535-8495-A5FD31975BB3}.wem"
      },
      {
+      "Id": "268195963",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ButtonSFX_Disable.wav",
+      "CachePath": "28/{284B0DB1-117A-D6F5-E366-590734C0AC8D}.wem"
+     },
+     {
       "Id": "269881452",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.269.wav",
       "CachePath": "D2/{D2C4446F-497F-10EB-0E32-84BC20DDF7B8}.wem"
+     },
+     {
+      "Id": "273427146",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ButtonSFX3_Select.wav",
+      "CachePath": "14/{14859412-C6E0-FCFF-F757-F08DBC124940}.wem"
      },
      {
       "Id": "278485591",
@@ -502,6 +518,14 @@
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_rockcrsh_brick_wall_breaking_02_impact_smash_destroy_hit_scatter_shards.wav",
       "CachePath": "7C/{7CB34677-1A68-5A6E-64C4-CEDE224AB2CB}.wem"
+     },
+     {
+      "Id": "424654933",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Wind_Loop_Distant_Air_Steady_1.wav",
+      "CachePath": "F1/{F167245E-77FC-D86B-3EA2-E9364B79083A}.wem"
      },
      {
       "Id": "434604945",
@@ -840,6 +864,14 @@
       "CachePath": "BB/{BB69DEC3-7850-9D9E-61A8-2C1A411383AC}.wem"
      },
      {
+      "Id": "678238931",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_CampFire.wav",
+      "CachePath": "CC/{CC1ACFFD-2993-61AD-7C6F-05F047CC3034}.wem"
+     },
+     {
       "Id": "689500474",
       "Language": "SFX",
       "Streaming": "false",
@@ -998,6 +1030,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Coughing_1_Male_Human_Voice_Over_Vocal_English_Russian.wav",
       "CachePath": "BA/{BA48F7C2-D46B-FF4C-E6A0-C9E691A87A03}.wem"
+     },
+     {
+      "Id": "831285636",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ButtonSFX_Able.wav",
+      "CachePath": "25/{25C57E73-5327-875E-E17C-144084CDC13B}.wem"
      },
      {
       "Id": "843270474",
@@ -1317,7 +1357,7 @@
       {
        "Id": "145320127",
        "Name": "Special_Effect_1 (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_UI\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_RTS\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
        "GUID": "{9D7DC88F-39C0-4C1A-8FDC-D000F73CD8F3}",
        "LibName": "Wwise Flanger",
        "LibId": "8192003"
@@ -1325,7 +1365,7 @@
       {
        "Id": "149789954",
        "Name": "Special_Effect_1 (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_UI\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_RTS\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
        "GUID": "{32B310AD-36DE-4D7E-8E52-27707418671F}",
        "LibName": "Wwise Flanger",
        "LibId": "8192003"
@@ -1365,7 +1405,7 @@
       {
        "Id": "296962076",
        "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_UI\\[Effect Slot [2]: (Time Stretch)]\\Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_RTS\\[Effect Slot [2]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{02C0AFA9-0983-4966-95AD-85EB4FE85DFD}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
@@ -1381,7 +1421,7 @@
       {
        "Id": "368091700",
        "Name": "Octave_Up (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_UI\\[Effect Slot [2]: (Pitch Shifter)]\\Octave_Up (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_RTS\\[Effect Slot [2]: (Pitch Shifter)]\\Octave_Up (Custom)",
        "GUID": "{2575F4DA-A728-43DF-93F3-2F1F2CBA5484}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -1405,7 +1445,7 @@
       {
        "Id": "625034061",
        "Name": "Octave_Up (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_UI\\[Effect Slot [1]: (Pitch Shifter)]\\Octave_Up (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_RTS\\[Effect Slot [1]: (Pitch Shifter)]\\Octave_Up (Custom)",
        "GUID": "{DBCE2BCD-8DEE-4594-A1F8-8B82FD92CD59}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -1421,13 +1461,21 @@
       {
        "Id": "975136076",
        "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_IronFang_UI\\[Effect Slot [1]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_IronFang_RTS\\[Effect Slot [1]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
        "GUID": "{30E3210D-1A3F-4B49-A940-0E14020D0E47}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
       }
      ],
      "ShareSets": [
+      {
+       "Id": "1706684651",
+       "Name": "Plate_Medium",
+       "ObjectPath": "\\Effects\\Factory Effects\\RoomVerb\\Plates\\Plate_Medium",
+       "GUID": "{33384D0C-6ACB-4E3D-AC82-73AAB3AE1CA5}",
+       "LibName": "Wwise RoomVerb",
+       "LibId": "7733251"
+      },
       {
        "Id": "1724990773",
        "Name": "New_Time_Stretch",
@@ -1486,6 +1534,25 @@
        "ShareSets": [
         {
          "Id": "1990128658"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "1439088316",
+      "Name": "Amb_Wind",
+      "ObjectPath": "\\Events\\Default Work Unit\\AmbientSound\\Amb_Wind",
+      "GUID": "{C10F7AAF-ADA8-4554-962C-70A592C37CEB}",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "424654933"
+       }
+      ],
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "1706684651"
         }
        ]
       }
@@ -1631,9 +1698,9 @@
       "Name": "EV_Arrow_Shot",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Arrow_Shot",
       "GUID": "{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "600",
       "DurationType": "OneShot",
-      "DurationMin": "1.6107165",
+      "DurationMin": "1.615375",
       "DurationMax": "1.6200471",
       "MediaRefs": [
        {
@@ -1646,7 +1713,7 @@
       "Name": "EV_ArrowBy",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowBy",
       "GUID": "{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}",
-      "MaxAttenuation": "720",
+      "MaxAttenuation": "640",
       "DurationType": "OneShot",
       "DurationMin": "0.75643444",
       "DurationMax": "0.75643444",
@@ -1673,7 +1740,7 @@
       "Name": "EV_ArrowImpact_Body",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Body",
       "GUID": "{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "640",
       "DurationType": "OneShot",
       "DurationMin": "0.30958745",
       "DurationMax": "0.32799646",
@@ -1914,7 +1981,6 @@
       "Name": "EV_CombatPlay",
       "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_CombatPlay",
       "GUID": "{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}",
-      "MaxAttenuation": "960.00006",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -2578,6 +2644,19 @@
       ]
      },
      {
+      "Id": "3240586175",
+      "Name": "Props_CampFire",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CampFire",
+      "GUID": "{BCEA7046-966A-4D96-8341-33FB4002A3CD}",
+      "MaxAttenuation": "800",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "678238931"
+       }
+      ]
+     },
+     {
       "Id": "2640261390",
       "Name": "Props_CrystalSpike_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalSpike_Hit",
@@ -2609,7 +2688,7 @@
       "Name": "Props_CrystalWallTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap",
       "GUID": "{9C89005A-CF4E-46F0-9A26-2606EC93E64B}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "660",
       "DurationType": "OneShot",
       "DurationMin": "1.8",
       "DurationMax": "1.9070336",
@@ -2630,7 +2709,7 @@
       "Name": "Props_FlameTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_FlameTrap",
       "GUID": "{E933E0D7-C994-4F16-A665-499CBF190223}",
-      "MaxAttenuation": "1000",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "6.5923166",
       "DurationMax": "6.984317",
@@ -2823,7 +2902,7 @@
       "Name": "Props_StoneDooor_Close",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneDooor_Close",
       "GUID": "{CAF2368B-2B31-4894-B890-6034FC2E534C}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "1000",
       "DurationType": "OneShot",
       "DurationMin": "4.24407",
       "DurationMax": "4.3244777",
@@ -2862,7 +2941,7 @@
       "Name": "Props_StoneDooor_Open",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_StoneDooor_Open",
       "GUID": "{A5598EC5-E8E1-4CE5-83AF-3F8909B45F09}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "1000",
       "DurationType": "OneShot",
       "DurationMin": "3.527469",
       "DurationMax": "3.572227",
@@ -2911,7 +2990,7 @@
      {
       "Id": "942444514",
       "Name": "Props_Torch",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props_Torch",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Torch",
       "GUID": "{0FE8AE3D-0C62-4903-9226-37A060EB1543}",
       "MaxAttenuation": "800",
       "DurationType": "Infinite",
@@ -2930,6 +3009,48 @@
       "DurationType": "OneShot",
       "DurationMin": "0",
       "DurationMax": "0"
+     },
+     {
+      "Id": "4033375466",
+      "Name": "UI_ButtonSFX_Able",
+      "ObjectPath": "\\Events\\Default Work Unit\\UI_SOUND\\UI_ButtonSFX_Able",
+      "GUID": "{4B543912-C03A-4EEC-96E4-B06A2F9B579A}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.9230839",
+      "DurationMax": "0.9230839",
+      "MediaRefs": [
+       {
+        "Id": "831285636"
+       }
+      ]
+     },
+     {
+      "Id": "1277181590",
+      "Name": "UI_ButtonSFX_Disable",
+      "ObjectPath": "\\Events\\Default Work Unit\\UI_SOUND\\UI_ButtonSFX_Disable",
+      "GUID": "{39B3734C-350B-4435-8668-E75DB82F1D5B}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.9230839",
+      "DurationMax": "0.9230839",
+      "MediaRefs": [
+       {
+        "Id": "268195963"
+       }
+      ]
+     },
+     {
+      "Id": "1562823702",
+      "Name": "UI_ButtonSFX_Select",
+      "ObjectPath": "\\Events\\Default Work Unit\\UI_SOUND\\UI_ButtonSFX_Select",
+      "GUID": "{440A0D46-796D-4C69-9C71-5EEB6C876D51}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.9230839",
+      "DurationMax": "0.9230839",
+      "MediaRefs": [
+       {
+        "Id": "273427146"
+       }
+      ]
      },
      {
       "Id": "197987059",
@@ -3218,6 +3339,6 @@
     ]
    }
   ],
-  "FileHash": "{2E4AB43E-1DB2-C0D5-E639-D3A8AA3B9820}"
+  "FileHash": "{539C4A8D-F5B2-649C-28D1-BABEE815AF8C}"
  }
 }

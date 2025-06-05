@@ -1,13 +1,10 @@
 #include "UI/Screen/GS_CustomLobbyUI.h"
-#include "Components/Button.h"
 #include "Components/TextBlock.h"
-#include "Components/CanvasPanel.h"
-#include "Components/Overlay.h"
-#include "Kismet/GameplayStatics.h"
 #include "System/PlayerController/GS_CustomLobbyPC.h"
-#include "System/GS_PlayerState.h"
 #include "CommonUI/Public/CommonButtonBase.h"
 #include "UI/Common/CustomCommonButton.h"
+#include "UI/Common/GS_CommonTwoBtnPopup.h"
+#include "System/GS_GameInstance.h"
 
 
 void UGS_CustomLobbyUI::NativeConstruct()
@@ -44,6 +41,19 @@ void UGS_CustomLobbyUI::NativeConstruct()
 		{
 			ReadyButtonBase->OnClicked().AddUObject(this, &UGS_CustomLobbyUI::OnReadyButtonClicked);
 		}
+	}
+
+	if (BackButton)
+	{
+		if (UCommonButtonBase* BackButtonBase = Cast<UCommonButtonBase>(BackButton))
+		{
+			BackButtonBase->OnClicked().AddUObject(this, &UGS_CustomLobbyUI::OnBackButtonClicked);
+		}
+	}
+
+	if (CommonPopUpUI)
+	{
+		CommonPopUpUI->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -97,6 +107,23 @@ void UGS_CustomLobbyUI::OnRoleChangeButtonClicked()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to get PlayerController"));
 	}
+}
+
+void UGS_CustomLobbyUI::OnBackButtonClicked()
+{
+	AGS_CustomLobbyPC* PC = GetOwningPlayer<AGS_CustomLobbyPC>();
+	if (PC)
+	{
+		if (PC->HasCurrentModalWidget())
+		{
+			PC->ClearCurrentModalWidget();
+			return;
+		}
+	}
+	CommonPopUpUI->SetVisibility(ESlateVisibility::Visible);
+	CommonPopUpUI->SetDescription(FText::FromString(TEXT("세션을 나가시겠습니까?")));
+	CommonPopUpUI->OnYesClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupYesButtonClicked);
+	CommonPopUpUI->OnNoClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupNoButtonClicked);
 }
 
 void UGS_CustomLobbyUI::UpdateRoleSpecificText(EPlayerRole NewRole)
@@ -175,3 +202,32 @@ void UGS_CustomLobbyUI::UpdateReadyButtonText(bool bIsReady)
 		}
 	}
 }
+
+void UGS_CustomLobbyUI::OnBackPopupYesButtonClicked()
+{
+	AGS_CustomLobbyPC* PC = GetOwningPlayer<AGS_CustomLobbyPC>();
+	if (PC)
+	{
+		UGS_GameInstance* GI = Cast<UGS_GameInstance>(GetGameInstance());
+		if (GI)
+		{
+			GI->GSLeaveSession(PC);
+			UE_LOG(LogTemp, Log, TEXT("UGS_CustomLobbyUI: OnBackPopupYesButtonClicked - Leaving session."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to get GameInstance"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to get PlayerController"));
+	}
+	CommonPopUpUI->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UGS_CustomLobbyUI::OnBackPopupNoButtonClicked()
+{
+	CommonPopUpUI->SetVisibility(ESlateVisibility::Hidden);
+}
+

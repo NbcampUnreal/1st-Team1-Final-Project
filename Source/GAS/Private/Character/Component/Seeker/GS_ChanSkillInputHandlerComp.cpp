@@ -9,13 +9,16 @@
 void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
 	Super::OnRightClick(Instance);
+
+	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputRC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Right Click Lock"));
+		return;
+	}
+	
 	if (!bCtrlHeld)
 	{
-		if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
-		{
-			OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
-		}
-		else
+		if (!OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
 			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 		}
@@ -29,6 +32,13 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
+
+	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputLC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Left Click Lock"));
+		return;
+	}
+	
 	if (!bCtrlHeld)
 	{
 		if (ChanCharacter)

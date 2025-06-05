@@ -10,6 +10,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/Player/Seeker/GS_Chan.h"
+#include "Net/UnrealNetwork.h"
 
 UGS_SeekerAnimInstance::UGS_SeekerAnimInstance()
 {
@@ -40,6 +41,12 @@ void UGS_SeekerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		UpdateEssentialValue();
 		UpdateTrajectory();
 		UpdateState();
+		/*AGS_Player* playerdd = Cast<AGS_Player>(OwnerCharacter);
+		if (playerdd->HasAuthority())
+		{
+			playerdd->GetSkillInputControl();
+			UE_LOG(LogTemp, Warning, TEXT("Left Can : %s / Right Can : %s"), playerdd->GetSkillInputControl().CanInputLC ? TEXT("True") : TEXT("False"), playerdd->GetSkillInputControl().CanInputRC ? TEXT("True") : TEXT("False")); // SJE
+		}*/
 	}
 }
 
@@ -105,15 +112,14 @@ bool UGS_SeekerAnimInstance::IsMoving()
 
 bool UGS_SeekerAnimInstance::ShouldTurnInPlace()
 {
-	//if (MovementState == EMovementState::Idle && LastMovementState == EMovementState::Moving)
-	if (bMustTurnInPlace)
+	if ((MovementState == EMovementState::Idle && LastMovementState == EMovementState::Moving) || bMustTurnInPlace)
 	{
 		const FRotator CharacterRot = CharacterTransform.GetRotation().Rotator();
 		const FRotator RootRot = RootTransform.GetRotation().Rotator();
 		
 		FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRot, RootRot);
 		DeltaRot.Yaw = FMath::Abs(DeltaRot.Yaw);
-		if (DeltaRot.Yaw >= 30)
+		if (DeltaRot.Yaw >= 50)
 		{
 			return true;
 		}
@@ -268,4 +274,11 @@ void UGS_SeekerAnimInstance::SetMotionMatchingPlayRate(float Min, float Max)
 {
 	MotionMatchingPlayRate.Min = Min;
 	MotionMatchingPlayRate.Max = Max;
+}
+
+void UGS_SeekerAnimInstance::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UGS_SeekerAnimInstance, IsPlayingUpperBodyMontage);
+	DOREPLIFETIME(UGS_SeekerAnimInstance, IsPlayingFullBodyMontage);
 }

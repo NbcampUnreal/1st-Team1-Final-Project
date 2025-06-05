@@ -22,6 +22,12 @@
 											<SegmentShape>Exp3</SegmentShape>
 										</Point>
 										<Point>
+											<XPos>696.44013</XPos>
+											<YPos>-1.17849</YPos>
+											<Flags>0</Flags>
+											<SegmentShape>Exp2</SegmentShape>
+										</Point>
+										<Point>
 											<XPos>800</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>

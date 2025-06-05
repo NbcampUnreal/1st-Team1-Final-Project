@@ -15,6 +15,7 @@
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
+#include "Sound/GS_AudioManager.h"
 
 
 AGS_RTSController::AGS_RTSController()
@@ -73,6 +74,18 @@ void AGS_RTSController::BeginPlay()
 			//UE_LOG(LogTemp,Warning,TEXT("#######################find seeker"));
 			//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("FIND SEEKER")));
 			Seeker->HPTextWidgetComp->SetVisibility(true);
+		}
+	}
+
+	// RTS 모드에서 BGM 시작 (로컬 플레이어에게만)
+	if (IsLocalController())
+	{
+		if (UGameInstance* GameInstance = GetGameInstance())
+		{
+			if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
+			{
+				AudioManager->StartMapBGM(this);
+			}
 		}
 	}
 }
@@ -147,6 +160,10 @@ void AGS_RTSController::CameraMoveEnd()
 void AGS_RTSController::OnCommandMove(const FInputActionValue& Value)
 {
 	MoveSelectedUnits();
+		if (CommandButtonSound)
+	{
+		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
+	}
 }
 
 void AGS_RTSController::MoveSelectedUnits()
@@ -158,6 +175,10 @@ void AGS_RTSController::MoveSelectedUnits()
 void AGS_RTSController::OnCommandAttack(const FInputActionValue& Value)
 {
 	AttackSelectedUnits();
+	if (CommandButtonSound)
+	{
+		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
+	}
 }
 
 void AGS_RTSController::AttackSelectedUnits()
@@ -169,6 +190,10 @@ void AGS_RTSController::AttackSelectedUnits()
 void AGS_RTSController::OnCommandStop(const FInputActionValue& Value)
 {
 	StopSelectedUnits();
+	if (CommandButtonSound)
+	{
+		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
+	}
 }
 
 void AGS_RTSController::StopSelectedUnits()
@@ -183,6 +208,10 @@ void AGS_RTSController::StopSelectedUnits()
 void AGS_RTSController::OnCommandSkill(const FInputActionValue& Value)
 {
 	SkillSelectedUnits();
+	if (CommandButtonSound)
+	{
+		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
+	}
 }
 
 void AGS_RTSController::SkillSelectedUnits()
@@ -291,6 +320,18 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	Server_RTSMove(Units, GroundHit.Location);
 }
 
+void AGS_RTSController::OnEscapeButtonClicked()
+{
+	if (CurrentCommand != ERTSCommand::None)
+	{
+		if (CommandCancelSound)
+		{
+			UAkGameplayStatics::PostEvent(CommandCancelSound, this, 0, FOnAkPostEventCallback());
+		}
+		CurrentCommand = ERTSCommand::None;
+		OnRTSCommandChanged.Broadcast(CurrentCommand);
+	}
+}
 
 FVector2D AGS_RTSController::GetKeyboardDirection() const
 {

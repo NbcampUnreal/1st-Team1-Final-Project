@@ -28,18 +28,6 @@
 						</Action>
 					</ChildrenList>
 				</Event>
-				<Event Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}">
-					<Comment>횃불 소리</Comment>
-					<ChildrenList>
-						<Action Name="" ID="{49404C92-16D5-48EE-9F94-47B3C188EBA1}" ShortID="848011745">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="TorchFlicker" ID="{32881CE0-989D-4C38-8D9A-12376643AE6D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
 				<Event Name="FootSteps" ID="{ACB43239-CB8C-41BC-9AC2-2E9257233BFE}">
 					<ChildrenList>
 						<Action Name="" ID="{91427B88-7F96-43AA-88D6-17E3A5D51E28}" ShortID="429641729">
@@ -179,7 +167,7 @@
 								<Action Name="" ID="{C0069E8A-C79B-4DB7-8628-09CB746E7DD6}" ShortID="773636092">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_Mon_SmallClaw_UI" ID="{9F91CF19-E3D0-44E4-AB7B-AA5DE1A9EA71}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_Mon_SmallClaw_RTS" ID="{9F91CF19-E3D0-44E4-AB7B-AA5DE1A9EA71}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -190,7 +178,7 @@
 								<Action Name="" ID="{F5A55DCC-C1EB-4EE0-8AE6-452814847B3A}" ShortID="616702917">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_Mon_IronFang_UI" ID="{608693E5-55B3-4BF2-A0C9-717B70825A0D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_Mon_IronFang_RTS" ID="{608693E5-55B3-4BF2-A0C9-717B70825A0D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -201,7 +189,7 @@
 								<Action Name="" ID="{1BB8DD05-EC18-4868-836A-DC093C0759C6}" ShortID="327343643">
 									<ReferenceList>
 										<Reference Name="Target">
-											<ObjectRef Name="SFX_Mon_ShadowFang_UI" ID="{7B76D522-CE9F-47C0-BB97-49831B85EC39}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											<ObjectRef Name="SFX_Mon_ShadowFang_RTS" ID="{7B76D522-CE9F-47C0-BB97-49831B85EC39}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 										</Reference>
 									</ReferenceList>
 								</Action>
@@ -487,6 +475,30 @@
 								</Action>
 							</ChildrenList>
 						</Event>
+						<Event Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}">
+							<Comment>횃불 소리</Comment>
+							<ChildrenList>
+								<Action Name="" ID="{49404C92-16D5-48EE-9F94-47B3C188EBA1}" ShortID="848011745">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Props_TorchFlicker" ID="{32881CE0-989D-4C38-8D9A-12376643AE6D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="Props_CampFire" ID="{BCEA7046-966A-4D96-8341-33FB4002A3CD}">
+							<Comment>횃불 소리</Comment>
+							<ChildrenList>
+								<Action Name="" ID="{94488CC4-1B7A-485A-A7DB-A0EE6F354A7A}" ShortID="714936233">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Props_CampFire" ID="{1B25F955-5553-4E88-9D95-D88E5145ABFE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
 					</ChildrenList>
 				</Folder>
 				<Folder Name="Player" ID="{5B530A9A-1B94-4771-9758-F7BC6453FCEA}" ShortID="925469267">
@@ -654,6 +666,17 @@
 								</Action>
 							</ChildrenList>
 						</Event>
+						<Event Name="Amb_Wind" ID="{C10F7AAF-ADA8-4554-962C-70A592C37CEB}">
+							<ChildrenList>
+								<Action Name="" ID="{CBB929F6-D9AE-4E59-B128-B5547E08E62B}" ShortID="221507574">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Amb_Wind" ID="{0E5D9412-64BC-4EA3-9123-C08A00A37184}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
 					</ChildrenList>
 				</Folder>
 				<Folder Name="StateSound" ID="{672C6E2B-2D90-4068-A13C-346D1A36720A}" ShortID="253688740">
@@ -734,6 +757,43 @@
 						</Action>
 					</ChildrenList>
 				</Event>
+				<Folder Name="UI_SOUND" ID="{5839DA73-6907-4F9B-B094-C998DD1D8C49}" ShortID="544599336">
+					<ChildrenList>
+						<Event Name="UI_ButtonSFX_Select" ID="{440A0D46-796D-4C69-9C71-5EEB6C876D51}">
+							<ChildrenList>
+								<Action Name="" ID="{505CE042-3D4D-40AB-9733-D4D0D3858423}" ShortID="854429870">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="ButtonSFX_Select" ID="{DE3B6A60-142A-48A1-A625-47EE131AA6C3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="UI_ButtonSFX_Able" ID="{4B543912-C03A-4EEC-96E4-B06A2F9B579A}">
+							<ChildrenList>
+								<Action Name="" ID="{31FB4994-DB9F-48D9-9F3A-C537003DA2A1}" ShortID="1055535668">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="ButtonSFX_Able" ID="{0BB6FDA0-2401-49BA-9C2C-8E7661DBBAF3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="UI_ButtonSFX_Disable" ID="{39B3734C-350B-4435-8668-E75DB82F1D5B}">
+							<ChildrenList>
+								<Action Name="" ID="{5CEFC9CF-D754-404D-8063-6AECB01C49B4}" ShortID="529374263">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="ButtonSFX_Disable" ID="{DF5921B4-DF6B-44A2-9566-76AC4292B0D8}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>

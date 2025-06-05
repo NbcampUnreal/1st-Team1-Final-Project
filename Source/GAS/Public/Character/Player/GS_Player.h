@@ -129,14 +129,14 @@ public:
 	void Multicast_StopSkillMontage(UAnimMontage* Montage);
 	
 	virtual void OnDeath() override;
-
-
+	
 	// Skll Input Control
 	void SetSkillInputControl(bool CanLeftClick, bool CanRightClick);
 
 	FSkillInputControl GetSkillInputControl();
-	
-	
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -144,6 +144,6 @@ protected:
 	FCharacterWantsToMove GetWantsToMove();
 
 private:
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FSkillInputControl SkillInputControl;
 };

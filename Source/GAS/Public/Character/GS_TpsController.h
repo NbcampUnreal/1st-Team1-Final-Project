@@ -109,6 +109,15 @@ public:
 	FControlValue ControlValues;
 
 	
+
+	UPROPERTY(Replicated)
+	FControlValue ControlValues;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
+	FRotator LastRotatorInMoving;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

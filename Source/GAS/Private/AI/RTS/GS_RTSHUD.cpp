@@ -29,11 +29,17 @@ void AGS_RTSHUD::StartSelection()
 	}
 
 	PointA = FVector2D(MouseX, MouseY);
-	bIsDrawing = true;	
+	bIsDrawing = true;
+	SelectionOfActors.Empty();
 }
 
 void AGS_RTSHUD::StopSelection()
 {
+	if (!bIsDrawing)
+	{
+		return;
+	}
+	
 	bIsDrawing = false;
 
 	if (!RTSController)
@@ -41,6 +47,23 @@ void AGS_RTSHUD::StopSelection()
 		return;
 	}
 
+	// 단일 클릭
+	FVector2D DragVec = PointB - PointA;
+	if (DragVec.SizeSquared() < 16.f)
+	{
+		FHitResult Hit;
+		if (RTSController->GetHitResultAtScreenPosition(PointA, ECC_GameTraceChannel1, true, Hit))
+		{
+			if (AGS_Monster* Unit = Cast<AGS_Monster>(Hit.GetActor()))
+			{
+				RTSController->ClearUnitSelection();
+				RTSController->AddUnitToSelection(Unit);
+			}
+		}
+		return;  
+	}
+
+	// 드래그 선택
 	if (SelectionOfActors.Num() > 0)
 	{
 		RTSController->ClearUnitSelection();
@@ -73,7 +96,7 @@ void AGS_RTSHUD::DrawHUD()
 	const float W = PointB.X - PointA.X;
 	const float H = PointB.Y - PointA.Y;
 	DrawRect(FLinearColor(0,1,1,0.15f), X, Y, W, H);
-	
+
 	SelectionOfActors.Empty();
 	GetActorsInSelectionRectangle<AGS_Monster>(
 		PointA, PointB,

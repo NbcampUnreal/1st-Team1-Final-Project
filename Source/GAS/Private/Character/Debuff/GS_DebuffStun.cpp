@@ -21,7 +21,6 @@ void UGS_DebuffStun::OnApply()
 		// 움직임도 멈춤(가디언)
 		if(AGS_TpsController* Controller = Cast<AGS_TpsController>(TargetCharacter->GetController()))
 		{
-			//Controller->SetCanMove(false); SJE
 			Controller->SetMoveControlValue(false, false);
 		}
 		else if(AGS_AIController* AI = Cast<AGS_AIController>(TargetCharacter->GetController()))
@@ -54,7 +53,6 @@ void UGS_DebuffStun::OnExpire()
 		// 움직임(가디언
 		if(AGS_TpsController* Controller = Cast<AGS_TpsController>(TargetCharacter->GetController()))
 		{
-			//Controller->SetCanMove(true); SJE
 			Controller->SetMoveControlValue(false, false);
 		}
 		else
