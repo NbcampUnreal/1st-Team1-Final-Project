@@ -35,6 +35,9 @@ protected:
 	
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* TypeText;
+
+	//UPROPERTY(meta=(BindWidget))
+	//UTextBlock* DebuffText;
 	
 	UPROPERTY(meta=(BindWidget))
 	class UUniformGridPanel* MultiIconsGrid;
@@ -43,9 +46,13 @@ protected:
 	TSubclassOf<UGS_MiniPortrait> MiniPortraitWidgetClass;
 
 private:
+	TWeakObjectPtr<UGS_StatComp> BoundStatComp;
+	
 	UFUNCTION()
 	void HandleSelectionChanged(const TArray<AGS_Monster*>& NewSelection);
+
+	UFUNCTION()          
+	void OnHPChanged(UGS_StatComp* InStatComp);
 	
 	class AGS_RTSController* GetRTSController() const;
-	
 };
