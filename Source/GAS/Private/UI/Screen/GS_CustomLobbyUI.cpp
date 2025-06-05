@@ -4,6 +4,7 @@
 #include "CommonUI/Public/CommonButtonBase.h"
 #include "UI/Common/CustomCommonButton.h"
 #include "UI/Common/GS_CommonTwoBtnPopup.h"
+#include "System/GS_GameInstance.h"
 
 
 void UGS_CustomLobbyUI::NativeConstruct()
@@ -204,9 +205,29 @@ void UGS_CustomLobbyUI::UpdateReadyButtonText(bool bIsReady)
 
 void UGS_CustomLobbyUI::OnBackPopupYesButtonClicked()
 {
+	AGS_CustomLobbyPC* PC = GetOwningPlayer<AGS_CustomLobbyPC>();
+	if (PC)
+	{
+		UGS_GameInstance* GI = Cast<UGS_GameInstance>(GetGameInstance());
+		if (GI)
+		{
+			GI->GSLeaveSession(PC);
+			UE_LOG(LogTemp, Log, TEXT("UGS_CustomLobbyUI: OnBackPopupYesButtonClicked - Leaving session."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to get GameInstance"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to get PlayerController"));
+	}
+	CommonPopUpUI->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UGS_CustomLobbyUI::OnBackPopupNoButtonClicked()
 {
+	CommonPopUpUI->SetVisibility(ESlateVisibility::Hidden);
 }
 
