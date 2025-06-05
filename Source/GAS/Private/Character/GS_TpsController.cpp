@@ -186,6 +186,13 @@ void AGS_TpsController::TestFunction()
 		TSubclassOf<UUserWidget> Widget = PlayerWidgetClasses[GS_Character->GetCharacterType()];
 		if (IsValid(Widget))
 		{
+			if (PlayerWidgetInstance)
+			{
+				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Remove ")),true, true, FLinearColor::Blue,5.f);
+				PlayerWidgetInstance->RemoveFromParent();
+				PlayerWidgetInstance = nullptr;
+			}
+			
 			PlayerWidgetInstance = CreateWidget<UUserWidget>(this, Widget);
 			if (IsValid(PlayerWidgetInstance))
 			{
@@ -208,7 +215,7 @@ void AGS_TpsController::BeginPlay()
 	
 	if (IsLocalController())
 	{
-		//TestFunction();
+		TestFunction();
 	}
 	
 	InitControllerPerWorld();

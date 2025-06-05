@@ -197,6 +197,7 @@ void AGS_InGameGM::BindToPlayerState(APlayerController* PlayerController)
         AGS_TpsController* TpsPC = Cast<AGS_TpsController>(PlayerController);
         if (IsValid(TpsPC))
         {
+            UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ TPS PC @@@@@@@@@@@@@@@@@@@@@"));
             TpsPC->TestFunction();
             
             // UUserWidget* Widget = TpsPC->GetPlayerWidget();
