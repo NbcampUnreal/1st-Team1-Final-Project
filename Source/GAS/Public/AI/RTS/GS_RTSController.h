@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "RTSCommand.h"
+#include "AkGameplayStatics.h"
+#include "AkAudioEvent.h"
 #include "GS_RTSController.generated.h"
 
 struct FInputActionInstance;
@@ -152,6 +154,17 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_RTSSkill(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc);
+
+	// UI 반응 사운드
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	UAkAudioEvent* CommandButtonSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	UAkAudioEvent* CommandCancelSound;
+
+	// UI 버튼 클릭 함수
+	UFUNCTION(BlueprintCallable, Category="RTS")
+	void OnEscapeButtonClicked();
 
 protected:
 	virtual void BeginPlay() override;

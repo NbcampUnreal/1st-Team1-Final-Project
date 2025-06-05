@@ -19,6 +19,10 @@ AGS_TpsController::AGS_TpsController()
 	MoveAction = nullptr;
 	LookAction = nullptr;
 	WalkToggleAction = nullptr;
+
+	//KimYJ
+	bReplicates = true;
+	SetReplicates(true);
 }
 
 void AGS_TpsController::Move(const FInputActionValue& InputValue)

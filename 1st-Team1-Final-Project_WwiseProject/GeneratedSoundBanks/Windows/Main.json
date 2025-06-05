@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{8F10C47C-9251-0142-F3F6-EC68AABCC548}",
+    "Hash": "{44965052-9A4D-66A3-970E-BFB286189B49}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -328,12 +328,28 @@
       "CachePath": "E4/{E4362B59-0A9A-4535-8495-A5FD31975BB3}.wem"
      },
      {
+      "Id": "268195963",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ButtonSFX_Disable.wav",
+      "CachePath": "28/{284B0DB1-117A-D6F5-E366-590734C0AC8D}.wem"
+     },
+     {
       "Id": "269881452",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.269.wav",
       "CachePath": "D2/{D2C4446F-497F-10EB-0E32-84BC20DDF7B8}.wem"
+     },
+     {
+      "Id": "273427146",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ButtonSFX3_Select.wav",
+      "CachePath": "14/{14859412-C6E0-FCFF-F757-F08DBC124940}.wem"
      },
      {
       "Id": "278485591",
@@ -1016,6 +1032,14 @@
       "CachePath": "BA/{BA48F7C2-D46B-FF4C-E6A0-C9E691A87A03}.wem"
      },
      {
+      "Id": "831285636",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ButtonSFX_Able.wav",
+      "CachePath": "25/{25C57E73-5327-875E-E17C-144084CDC13B}.wem"
+     },
+     {
       "Id": "843270474",
       "Language": "SFX",
       "Streaming": "false",
@@ -1333,7 +1357,7 @@
       {
        "Id": "145320127",
        "Name": "Special_Effect_1 (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_UI\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_RTS\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
        "GUID": "{9D7DC88F-39C0-4C1A-8FDC-D000F73CD8F3}",
        "LibName": "Wwise Flanger",
        "LibId": "8192003"
@@ -1341,7 +1365,7 @@
       {
        "Id": "149789954",
        "Name": "Special_Effect_1 (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_UI\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_RTS\\[Effect Slot [3]: (Flanger)]\\Special_Effect_1 (Custom)",
        "GUID": "{32B310AD-36DE-4D7E-8E52-27707418671F}",
        "LibName": "Wwise Flanger",
        "LibId": "8192003"
@@ -1381,7 +1405,7 @@
       {
        "Id": "296962076",
        "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_UI\\[Effect Slot [2]: (Time Stretch)]\\Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_RTS\\[Effect Slot [2]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{02C0AFA9-0983-4966-95AD-85EB4FE85DFD}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
@@ -1397,7 +1421,7 @@
       {
        "Id": "368091700",
        "Name": "Octave_Up (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_UI\\[Effect Slot [2]: (Pitch Shifter)]\\Octave_Up (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_RTS\\[Effect Slot [2]: (Pitch Shifter)]\\Octave_Up (Custom)",
        "GUID": "{2575F4DA-A728-43DF-93F3-2F1F2CBA5484}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -1421,7 +1445,7 @@
       {
        "Id": "625034061",
        "Name": "Octave_Up (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_UI\\[Effect Slot [1]: (Pitch Shifter)]\\Octave_Up (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_RTS\\[Effect Slot [1]: (Pitch Shifter)]\\Octave_Up (Custom)",
        "GUID": "{DBCE2BCD-8DEE-4594-A1F8-8B82FD92CD59}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -1437,7 +1461,7 @@
       {
        "Id": "975136076",
        "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_IronFang_UI\\[Effect Slot [1]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_IronFang_RTS\\[Effect Slot [1]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
        "GUID": "{30E3210D-1A3F-4B49-A940-0E14020D0E47}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -2664,7 +2688,7 @@
       "Name": "Props_CrystalWallTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap",
       "GUID": "{9C89005A-CF4E-46F0-9A26-2606EC93E64B}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "660",
       "DurationType": "OneShot",
       "DurationMin": "1.8",
       "DurationMax": "1.9070336",
@@ -2685,7 +2709,7 @@
       "Name": "Props_FlameTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_FlameTrap",
       "GUID": "{E933E0D7-C994-4F16-A665-499CBF190223}",
-      "MaxAttenuation": "1000",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "6.5923166",
       "DurationMax": "6.984317",
@@ -2987,6 +3011,48 @@
       "DurationMax": "0"
      },
      {
+      "Id": "4033375466",
+      "Name": "UI_ButtonSFX_Able",
+      "ObjectPath": "\\Events\\Default Work Unit\\UI_SOUND\\UI_ButtonSFX_Able",
+      "GUID": "{4B543912-C03A-4EEC-96E4-B06A2F9B579A}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.9230839",
+      "DurationMax": "0.9230839",
+      "MediaRefs": [
+       {
+        "Id": "831285636"
+       }
+      ]
+     },
+     {
+      "Id": "1277181590",
+      "Name": "UI_ButtonSFX_Disable",
+      "ObjectPath": "\\Events\\Default Work Unit\\UI_SOUND\\UI_ButtonSFX_Disable",
+      "GUID": "{39B3734C-350B-4435-8668-E75DB82F1D5B}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.9230839",
+      "DurationMax": "0.9230839",
+      "MediaRefs": [
+       {
+        "Id": "268195963"
+       }
+      ]
+     },
+     {
+      "Id": "1562823702",
+      "Name": "UI_ButtonSFX_Select",
+      "ObjectPath": "\\Events\\Default Work Unit\\UI_SOUND\\UI_ButtonSFX_Select",
+      "GUID": "{440A0D46-796D-4C69-9C71-5EEB6C876D51}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.9230839",
+      "DurationMax": "0.9230839",
+      "MediaRefs": [
+       {
+        "Id": "273427146"
+       }
+      ]
+     },
+     {
       "Id": "197987059",
       "Name": "Voice_Chan_Attack",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Attack",
@@ -3273,6 +3339,6 @@
     ]
    }
   ],
-  "FileHash": "{ECFE8DFF-C5BA-E2ED-A937-1AB173DA7645}"
+  "FileHash": "{BC07C432-DBE8-7A9C-5FD6-77CEED0A778F}"
  }
 }
