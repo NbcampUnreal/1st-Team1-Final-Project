@@ -71,6 +71,9 @@ public:
 	void Client_UpdateReadyButtonUI(bool bIsReady);
 
 
+	bool HasCurrentModalWidget();
+	void ClearCurrentModalWidget();
+
 	// 오버레이 초대
 private:
 	void UpdateRichPresenceForServerInvite();

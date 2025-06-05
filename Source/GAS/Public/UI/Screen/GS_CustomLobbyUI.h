@@ -5,6 +5,7 @@
 #include "System/GS_PlayerRole.h"
 #include "GS_CustomLobbyUI.generated.h"
 
+class UGS_CommonTwoBtnPopup;
 class UButton;
 class UTextBlock;
 class UCanvasPanel;
@@ -29,8 +30,13 @@ public:
 	UUserWidget* RoleChangeButton;
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* PerkDungeonText;
+	UPROPERTY(meta = (BindWidget))
+	UUserWidget* BackButton;
 	UPROPERTY(meta = (BindWidgetOptional))
 	UOverlay* ModalOverlay;
+
+	UPROPERTY(meta = (BindWidget))
+	UGS_CommonTwoBtnPopup* CommonPopUpUI;
 
 	UFUNCTION()
 	void OnJobSelectionButtonClicked();
@@ -40,12 +46,17 @@ public:
 	void OnReadyButtonClicked();
 	UFUNCTION()
 	void OnRoleChangeButtonClicked();
+	UFUNCTION()
+	void OnBackButtonClicked();
 
 	void UpdateRoleSpecificText(EPlayerRole NewRole);
 	void UpdateReadyButtonText(bool bIsReady);
 
 	UOverlay* GetModalOverlay() const { return ModalOverlay; }
 
+	void OnBackPopupYesButtonClicked();
+	void OnBackPopupNoButtonClicked();
+	
 private:
 	void ChangeRoleBtnIcon(EPlayerRole NewRole);
 };
