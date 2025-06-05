@@ -277,11 +277,6 @@ bool AGS_Player::IsLocalPlayer() const
 	return false;
 }
 
-void AGS_Player::Multicast_SetUseControllerRotationYaw_Implementation(bool UseControlRotationYaw)
-{
-	bUseControllerRotationYaw = UseControlRotationYaw;
-}
-
 void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage, FName Section)
 {
 	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
