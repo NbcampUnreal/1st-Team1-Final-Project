@@ -131,6 +131,28 @@ void AGS_TrapBase::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors)
 {
 }
 
+void AGS_TrapBase::ClearDotTimerForActor(AActor* Actor)
+{
+	if (!Actor)
+	{
+		return;
+	}
+	FTimerHandle TimerHandle;
+	if (ActiveDoTTimers.RemoveAndCopyValue(Actor, TimerHandle))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+		UE_LOG(LogTemp, Warning, TEXT("DoT Timer Successfully ended - Actor: %s"), *GetNameSafe(Actor));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DoT Timer failed to end - Actor: %s (no timer)"), *GetNameSafe(Actor));
+	}
+
+}
+
+
+
+
 
 void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
 {
@@ -141,9 +163,7 @@ void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
 
 	if (ActiveDoTTimers.Contains(DamagedActor))
 	{
-		//이미 해당 엑터의 타이머가 작동 중이라면 타이머 초기화(처음부터 다시 시작)
-		GetWorld()->GetTimerManager().ClearTimer(ActiveDoTTimers[DamagedActor]);
-		ActiveDoTTimers.Remove(DamagedActor);
+		ClearDotTimerForActor(DamagedActor);
 	}
 
 	int32 CurrentTick = 0;
@@ -157,6 +177,7 @@ void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
 		{
 			if (!WeakActor.IsValid() || !TrapData.Effect.bDoT)
 			{
+				ClearDotTimerForActor(WeakActor.Get());
 				return;
 			}
 			
@@ -164,6 +185,7 @@ void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
 
 			if (!ValidActor || !IsValid(ValidActor))
 			{
+				ClearDotTimerForActor(ValidActor);
 				return;
 			}
 			FDamageEvent DamageEvent;
@@ -173,12 +195,17 @@ void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
 
 			if (CurrentTick >= TrapData.Effect.DamageCount)
 			{
-				//current tick이 damage count보다 같거나 크다면 타이머 초기화 후 ActiveDoTTimers 맵에서 제거
-				if (ActiveDoTTimers.Contains(ValidActor))
-				{
-					GetWorld()->GetTimerManager().ClearTimer(ActiveDoTTimers[ValidActor]);
-					ActiveDoTTimers.Remove(ValidActor);
-				}
+				////current tick이 damage count보다 같거나 크다면 타이머 초기화 후 ActiveDoTTimers 맵에서 제거
+				//if (ActiveDoTTimers.Contains(ValidActor))
+				//{
+				//	GetWorld()->GetTimerManager().ClearTimer(ActiveDoTTimers[ValidActor]);
+				//	
+				//	//크래시 지점
+				//	ActiveDoTTimers.Remove(ValidActor);
+				//	//
+				//}
+
+				ClearDotTimerForActor(ValidActor);
 			}
 		});
 
