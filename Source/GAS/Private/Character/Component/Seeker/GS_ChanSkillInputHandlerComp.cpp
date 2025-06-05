@@ -57,7 +57,7 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	{
 		if (ChanCharacter)
 		{
-			ChanCharacter->Multicast_SetUseControllerRotationYaw(false);
+			//ChanCharacter->Multicast_SetUseControllerRotationYaw(false);
 			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 		}
 	}

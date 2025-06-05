@@ -29,6 +29,10 @@ AGS_Seeker::AGS_Seeker()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	GetMesh()->bEnableUpdateRateOptimizations = false;
+	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	GetMesh()->bOnlyAllowAutonomousTickPose = false;
+
 	// Post Process Component 생성 및 설정
 	LowHealthPostProcessComp = CreateDefaultSubobject<UPostProcessComponent>(TEXT("LowHealthPostProcessComp"));
 	LowHealthPostProcessComp->SetupAttachment(CameraComp);
