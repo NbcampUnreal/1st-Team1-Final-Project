@@ -48,10 +48,12 @@ void UGS_MonsterAudioComponent::OnRep_CurrentAudioState()
 {
     if (OwnerMonster && GetWorld() && GetWorld()->IsNetMode(NM_Client))
     {
-        UE_LOG(LogTemp, Log, TEXT("Client %s: Monster Audio State Replicated: %s -> %s"),
-               *GetNameSafe(UGameplayStatics::GetPlayerController(GetWorld(), 0)),
-               *UEnum::GetValueAsString(PreviousAudioState),
-               *UEnum::GetValueAsString(CurrentAudioState));
+        UE_LOG(LogTemp, Log, TEXT("[Multicast_TriggerSound] Client %s: Monster %s Audio State Replicated: %s -> %s, Location: %s"),
+            *GetNameSafe(UGameplayStatics::GetPlayerController(GetWorld(), 0)),
+            *GetNameSafe(OwnerMonster),
+            *UEnum::GetValueAsString(PreviousAudioState),
+            *UEnum::GetValueAsString(CurrentAudioState),
+            *OwnerMonster->GetActorLocation().ToString());
         UpdateSoundTimer();
     }
     PreviousAudioState = CurrentAudioState;
@@ -140,10 +142,11 @@ void UGS_MonsterAudioComponent::SetMonsterAudioState(EMonsterAudioState NewState
     CurrentAudioState = NewState;
     // CurrentAudioState가 복제 변수이므로, 서버에서 변경되면 OnRep_CurrentAudioState가 클라이언트에서 자동 호출됨
     
-    UE_LOG(LogTemp, Log, TEXT("Server: Monster %s Audio State Changed: %s -> %s"), 
-           *GetNameSafe(OwnerMonster), 
-           *UEnum::GetValueAsString(PreviousAudioState), 
-           *UEnum::GetValueAsString(CurrentAudioState));
+    UE_LOG(LogTemp, Log, TEXT("[Multicast_TriggerSound] Server: Monster %s Audio State Changed: %s -> %s, Location: %s"), 
+        *GetNameSafe(OwnerMonster), 
+        *UEnum::GetValueAsString(PreviousAudioState), 
+        *UEnum::GetValueAsString(CurrentAudioState),
+        *OwnerMonster->GetActorLocation().ToString());
     
     // 서버에서 상태 변화에 따른 타이머 업데이트
     UpdateSoundTimer();
@@ -171,7 +174,10 @@ void UGS_MonsterAudioComponent::PlaySound(EMonsterAudioState SoundType, bool bFo
         float CurrentTime = GetWorld()->GetTimeSeconds();
         if ((CurrentTime - ServerLastBroadcastTime.FindOrAdd(SoundType, 0.0f)) < Interval)
         {
-            UE_LOG(LogTemp, Verbose, TEXT("Server: Monster %s SKIPPING broadcast for %s sound due to server cooldown."), *GetNameSafe(OwnerMonster), *UEnum::GetValueAsString(SoundType));
+            UE_LOG(LogTemp, Verbose, TEXT("[Multicast_TriggerSound] Server: Monster %s SKIPPING broadcast for %s sound due to server cooldown. Time since last: %.2f"), 
+                *GetNameSafe(OwnerMonster), 
+                *UEnum::GetValueAsString(SoundType),
+                CurrentTime - ServerLastBroadcastTime.FindOrAdd(SoundType, 0.0f));
             return;
         }
         ServerLastBroadcastTime.Emplace(SoundType, CurrentTime);
@@ -179,38 +185,66 @@ void UGS_MonsterAudioComponent::PlaySound(EMonsterAudioState SoundType, bool bFo
     
     Multicast_TriggerSound(SoundType, bForcePlay);
 
-    UE_LOG(LogTemp, Log, TEXT("Server: Monster %s triggered Multicast_TriggerSound for %s (bImmediate: %d)."),
-           *GetNameSafe(OwnerMonster),
-           *UEnum::GetValueAsString(SoundType),
-           bForcePlay);
+    UE_LOG(LogTemp, Log, TEXT("[Multicast_TriggerSound] Server: Monster %s triggered sound broadcast. Type: %s, ForcePlay: %d, Location: %s"), 
+        *GetNameSafe(OwnerMonster),
+        *UEnum::GetValueAsString(SoundType),
+        bForcePlay,
+        *OwnerMonster->GetActorLocation().ToString());
 }
 
 void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAudioState SoundTypeToTrigger, bool bIsImmediate)
 {
     if (!OwnerMonster || !GetWorld())
     {
-        UE_LOG(LogTemp, Warning, TEXT("Multicast_TriggerSound: Invalid OwnerMonster or World on %s."), *GetNameSafe(this));
+        UE_LOG(LogTemp, Warning, TEXT("[Multicast_TriggerSound] ERROR: Invalid OwnerMonster or World on %s. SoundType: %s"), 
+            *GetNameSafe(this), 
+            *UEnum::GetValueAsString(SoundTypeToTrigger));
         return;
     }
 
     APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (!LocalPC || !LocalPC->GetPawn())
+    if (!LocalPC)
     {
+        UE_LOG(LogTemp, Warning, TEXT("[Multicast_TriggerSound] ERROR: LocalPlayerController is NULL on %s. Monster: %s, SoundType: %s, Location: %s"), 
+            *GetNameSafe(this), 
+            OwnerMonster ? *OwnerMonster->GetName() : TEXT("null"),
+            *UEnum::GetValueAsString(SoundTypeToTrigger),
+            OwnerMonster ? *OwnerMonster->GetActorLocation().ToString() : TEXT("unknown"));
         return; 
+    }
+    if (!LocalPC->GetPawn())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Multicast_TriggerSound] ERROR: LocalPlayerController's Pawn is NULL on %s (Controller: %s). Monster: %s, SoundType: %s, Location: %s"), 
+            *GetNameSafe(this), 
+            *GetNameSafe(LocalPC),
+            OwnerMonster ? *OwnerMonster->GetName() : TEXT("null"),
+            *UEnum::GetValueAsString(SoundTypeToTrigger),
+            OwnerMonster ? *OwnerMonster->GetActorLocation().ToString() : TEXT("unknown"));
+        return;
     }
 
     float DistanceToLocalPlayer = FVector::Dist(OwnerMonster->GetActorLocation(), LocalPC->GetPawn()->GetActorLocation());
 
     if (DistanceToLocalPlayer > AudioConfig.MaxAudioDistance)
     {
-        UE_LOG(LogTemp, Verbose, TEXT("Client %s: Monster %s too far (%.1f > %.1f) for %s sound."), *GetNameSafe(LocalPC), *GetNameSafe(OwnerMonster), DistanceToLocalPlayer, AudioConfig.MaxAudioDistance, *UEnum::GetValueAsString(SoundTypeToTrigger));
+        UE_LOG(LogTemp, Verbose, TEXT("[Multicast_TriggerSound] Client %s: Monster %s too far (%.1f > %.1f) for %s sound. Location: %s"), 
+            *GetNameSafe(LocalPC), 
+            *GetNameSafe(OwnerMonster), 
+            DistanceToLocalPlayer, 
+            AudioConfig.MaxAudioDistance, 
+            *UEnum::GetValueAsString(SoundTypeToTrigger),
+            *OwnerMonster->GetActorLocation().ToString());
         return;
     }
     
     UAkAudioEvent* SoundEvent = GetSoundEvent(SoundTypeToTrigger);
     if (!SoundEvent)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Client %s: No SoundEvent for SoundType %s on monster %s."), *GetNameSafe(LocalPC), *UEnum::GetValueAsString(SoundTypeToTrigger), *GetNameSafe(OwnerMonster));
+        UE_LOG(LogTemp, Warning, TEXT("[Multicast_TriggerSound] ERROR: No SoundEvent for SoundType %s on monster %s. Client: %s, Location: %s"), 
+            *UEnum::GetValueAsString(SoundTypeToTrigger), 
+            *GetNameSafe(OwnerMonster),
+            *GetNameSafe(LocalPC),
+            *OwnerMonster->GetActorLocation().ToString());
         return;
     }
 
@@ -224,26 +258,46 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
         float CurrentTime = GetWorld()->GetTimeSeconds();
         if ((CurrentTime - LocalLastSoundPlayTimes.FindOrAdd(SoundTypeToTrigger, 0.0f)) < (Interval * 0.9f)) 
         {
-            UE_LOG(LogTemp, Verbose, TEXT("Client %s: Monster %s SKIPPING %s sound locally due to client cooldown."), *GetNameSafe(LocalPC), *GetNameSafe(OwnerMonster), *UEnum::GetValueAsString(SoundTypeToTrigger));
+            UE_LOG(LogTemp, Verbose, TEXT("[Multicast_TriggerSound] Client %s: Monster %s SKIPPING %s sound locally due to client cooldown. Time since last: %.2f"), 
+                *GetNameSafe(LocalPC), 
+                *GetNameSafe(OwnerMonster), 
+                *UEnum::GetValueAsString(SoundTypeToTrigger),
+                CurrentTime - LocalLastSoundPlayTimes.FindOrAdd(SoundTypeToTrigger, 0.0f));
             return; 
         }
         LocalLastSoundPlayTimes.Emplace(SoundTypeToTrigger, CurrentTime);
     }
     
-    UE_LOG(LogTemp, Log, TEXT("Client %s: Monster %s POSTING %s sound (bImmediate: %d) locally. Distance: %.1f. Event: %s"), 
+    UE_LOG(LogTemp, Log, TEXT("[Multicast_TriggerSound] Client %s: Attempting to play %s sound for monster %s. Distance: %.1f, Event: %s, Location: %s"), 
         *GetNameSafe(LocalPC), 
-        *GetNameSafe(OwnerMonster), 
         *UEnum::GetValueAsString(SoundTypeToTrigger), 
-        bIsImmediate, 
+        *GetNameSafe(OwnerMonster), 
         DistanceToLocalPlayer, 
-        *SoundEvent->GetName());
+        *SoundEvent->GetName(),
+        *OwnerMonster->GetActorLocation().ToString());
     
     CurrentPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerMonster, 0, FOnAkPostEventCallback());
 
     if (CurrentPlayingID == AK_INVALID_PLAYING_ID && SoundEvent)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Client %s: Monster %s FAILED to post %s. AkGameplayStatics::PostEvent returned AK_INVALID_PLAYING_ID. Event: %s"), 
-            *GetNameSafe(LocalPC), *GetNameSafe(OwnerMonster), *UEnum::GetValueAsString(SoundTypeToTrigger), *SoundEvent->GetName());
+        UE_LOG(LogTemp, Warning, TEXT("[Multicast_TriggerSound] ERROR: Failed to post sound. Client: %s, Monster: %s, Type: %s, Event: %s, Location: %s, Distance: %.1f"), 
+            *GetNameSafe(LocalPC), 
+            *GetNameSafe(OwnerMonster), 
+            *UEnum::GetValueAsString(SoundTypeToTrigger), 
+            *SoundEvent->GetName(),
+            *OwnerMonster->GetActorLocation().ToString(),
+            DistanceToLocalPlayer);
+    }
+    else if (CurrentPlayingID != AK_INVALID_PLAYING_ID)
+    {
+        UE_LOG(LogTemp, Log, TEXT("[Multicast_TriggerSound] SUCCESS: Sound posted. Client: %s, Monster: %s, Type: %s, Event: %s, PlayingID: %d, Location: %s, Distance: %.1f"), 
+            *GetNameSafe(LocalPC), 
+            *GetNameSafe(OwnerMonster), 
+            *UEnum::GetValueAsString(SoundTypeToTrigger), 
+            *SoundEvent->GetName(),
+            CurrentPlayingID,
+            *OwnerMonster->GetActorLocation().ToString(),
+            DistanceToLocalPlayer);
     }
 }
 
@@ -372,7 +426,9 @@ UAkAudioEvent* UGS_MonsterAudioComponent::GetSoundEvent(EMonsterAudioState Sound
         case EMonsterAudioState::Combat:  return AudioConfig.CombatSound;
         case EMonsterAudioState::Hurt:    return AudioConfig.HurtSound;
         case EMonsterAudioState::Death:   return AudioConfig.DeathSound;
-        default:                        return nullptr;
+        default:
+            ensureMsgf(false, TEXT("GetSoundEvent: Unknown SoundType %s requested for monster %s"), *UEnum::GetValueAsString(SoundType), OwnerMonster ? *OwnerMonster->GetName() : TEXT("UnknownMonster"));
+            return nullptr;
     }
 }
 
