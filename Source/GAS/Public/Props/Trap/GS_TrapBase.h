@@ -96,8 +96,7 @@ public:
 
 	bool IsBlockedInDirection(const FVector& Start, const FVector& Direction, float Distance, AGS_Character* CharacterToIgnore);
 
-	
-
+	void ClearDotTimerForActor(AActor* Actor);
 
 protected:
 	TMap<AActor*, FTimerHandle> ActiveDoTTimers;

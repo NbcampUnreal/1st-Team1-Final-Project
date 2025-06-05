@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GS_MainMenuUI.generated.h"
 
+class UGS_CommonTwoBtnPopup;
 class UScaleBox;
 class UUserWidget;
 class UButton;
@@ -39,7 +40,7 @@ public:
 	UUserWidget* CustomGameButton;
 
 	UPROPERTY(meta = (BindWidget))
-	UUserWidget* ExitPopUp;
+	UGS_CommonTwoBtnPopup* ExitPopUp;
 
 	bool bIsPlayButtonClicked = false;
 
@@ -50,4 +51,6 @@ public:
 	UFUNCTION()
 	void OnExitButtonClicked();
 
+	void OnExitPopupYesButtonClicked();
+	void OnExitPopupNoButtonClicked();
 };
