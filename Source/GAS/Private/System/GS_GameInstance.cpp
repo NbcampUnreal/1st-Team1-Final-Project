@@ -11,6 +11,7 @@
 
 UGS_GameInstance::UGS_GameInstance()
     : DefaultLobbyMapName(TEXT("/Game/Maps/CustomLobbyLevel"))
+    , MainMenuMapPath(TEXT("/Game/Maps/MainLevel"))
 	, DefaultLobbyGameModePath(TEXT("/Game/System/BP_GS_CustomLobbyGM.BP_GS_CustomLobbyGM_C"))
 	, DefaultMaxLobbyPlayers(5)
 {
@@ -53,6 +54,7 @@ void UGS_GameInstance::Init()
             JoinSessionCompleteDelegate = FOnJoinSessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnJoinSessionComplete);
             DestroySessionCompleteDelegateForInvite = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnDestroySessionCompleteForInvite);
             OnSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UGS_GameInstance::OnSessionUserInviteAccepted_Impl);
+            LeaveSessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnLeaveSessionComplete);
             if (OnSessionUserInviteAcceptedDelegate.IsBound()) //FOnSessionUserInviteAcceptedDelegate는 게임 인스턴스 초기화 시점부터 계속 리스닝해야 하므로 Init()에서 핸들까지 등록
             {
                 OnSessionUserInviteAcceptedDelegateHandle = SessionInterface->AddOnSessionUserInviteAcceptedDelegate_Handle(OnSessionUserInviteAcceptedDelegate);
@@ -564,5 +566,76 @@ void UGS_GameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCo
         }
         UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnJoinSessionComplete - JoinSession for '%s' failed. Result: %s. PC Valid: %s"),
             *SessionName.ToString(), *ResultStr, PC ? TEXT("true") : TEXT("false"));
+    }
+}
+
+void UGS_GameInstance::GSLeaveSession(APlayerController* RequestingPlayer)
+{
+    if (!SessionInterface.IsValid())
+    {
+        UE_LOG(LogTemp, Error, TEXT("GSLeaveSession: SessionInterface is not valid."));
+        APlayerController* PC = GetFirstLocalPlayerController();
+        if (PC && !MainMenuMapPath.IsEmpty())
+        {
+            PC->ClientTravel(MainMenuMapPath, ETravelType::TRAVEL_Absolute);
+        }
+        return;
+    }
+
+    FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
+    if (CurrentSession)
+    {
+        LeaveSessionCompleteDelegateHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(LeaveSessionCompleteDelegate);
+
+        if (!SessionInterface->DestroySession(NAME_GameSession))
+        {
+            SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(LeaveSessionCompleteDelegateHandle);
+            LeaveSessionCompleteDelegateHandle.Reset();
+
+            APlayerController* PC = GetFirstLocalPlayerController();
+            if (PC && !MainMenuMapPath.IsEmpty())
+            {
+                PC->ClientTravel(MainMenuMapPath, ETravelType::TRAVEL_Absolute);
+            }
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("GSLeaveSession: No active session (NAME_GameSession) found to leave. Traveling to main menu."));
+        APlayerController* PC = GetFirstLocalPlayerController();
+        if (PC && !MainMenuMapPath.IsEmpty())
+        {
+            PC->ClientTravel(MainMenuMapPath, ETravelType::TRAVEL_Absolute);
+        }
+    }
+}
+
+void UGS_GameInstance::OnLeaveSessionComplete(FName SessionName, bool bWasSuccessful)
+{
+    UE_LOG(LogTemp, Log, TEXT("OnLeaveSessionComplete: SessionName: %s, Success: %d"), *SessionName.ToString(), bWasSuccessful);
+
+    // 델리게이트 핸들 정리
+    if (SessionInterface.IsValid())
+    {
+        SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(LeaveSessionCompleteDelegateHandle);
+    }
+    LeaveSessionCompleteDelegateHandle.Reset();
+
+    APlayerController* PC = GetFirstLocalPlayerController();
+    if (PC)
+    {
+        if (!MainMenuMapPath.IsEmpty())
+        {
+            PC->ClientTravel(MainMenuMapPath, ETravelType::TRAVEL_Absolute);
+            UE_LOG(LogTemp, Log, TEXT("OnLeaveSessionComplete: Traveling to Main Menu (Client Mode): %s"), *MainMenuMapPath);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("OnLeaveSessionComplete: MainMenuMapPath is empty. Cannot travel."));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("OnLeaveSessionComplete: Failed to get PlayerController to travel to Main Menu."));
     }
 }

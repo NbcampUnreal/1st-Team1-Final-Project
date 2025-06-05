@@ -50,13 +50,13 @@ private:
 	FTimerHandle StaminaDrainHandle;
 
 	// Slam 관리
-	FTimerHandle SlamCooldownHandle;
-	bool bCanSlam = true;
+	// FTimerHandle SlamCooldownHandle;
+	/*bool bCanSlam = true;*/
 
-	UPROPERTY(EditDefaultsOnly, Category = "Skill")
-	float SlamCooldownTime = 1.5f; // 슬램 이후 재사용 대기 시간
+	/*UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	float SlamCooldownTime = 1.5f; // 슬램 이후 재사용 대기 시간*/
 
-	void ResetSlamCooldown();
+	//void ResetSlamCooldown();
 
 	// UI
 	void UpdateProgressBar(float InStamina);

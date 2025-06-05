@@ -35,12 +35,8 @@ public:
 	void ComboInputClose();
 	void ComboEnd();
 
-	// Move Skill
-	/*void OnMoveSkill();
-	void OffMoveSkill();*/
-
 	// Aim Skill
-	void OnReadyAimSkill();
+	/*void OnReadyAimSkill();*/
 	void OnJumpAttackSkill();
 	void OffJumpAttackSkill();
 	void ToIdle();
@@ -70,12 +66,10 @@ public:
 	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);
 
 	// Control State Value
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetMoveControlValue(bool bMoveForward, bool bMoveRight);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetLookControlValue(bool bLookUp, bool bLookRight);
-
+	UFUNCTION()
+	void SetMoveControlValue(bool bMoveForward, bool bMoveRight);
+	UFUNCTION()
+	void SetLookControlValue(bool bLookUp, bool bLookRight);
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetMustTurnInPlace(bool MustTurn);
 

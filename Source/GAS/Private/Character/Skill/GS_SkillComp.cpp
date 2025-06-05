@@ -49,7 +49,6 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 		if (SkillMap[Slot]->CanActive())
 		{
 			SkillMap[Slot]->ActiveSkill();
-			//UE_LOG(LogTemp, Warning, TEXT("CanActive() = true"));
 		}
 		else
 		{
