@@ -115,13 +115,12 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 			DebuffComp->ApplyDebuff(EDebuffType::Stun, nullptr);
 		}
 
-		////Obscure
-		//if (Effect.bObscure)
+		////Slow
+		//if (Effect.bSlow)
 		//{
-		//	DebuffComp->ApplyDebuff(EDebuffType::Obscure, nullptr);
+		//	DebuffComp->ApplyDebuff(EDebuffType::Slow, nullptr);
+		//	DebuffComp->RemoveDebuff(EDbuffType::Slow, nullptr);
 		//}
-
-
 	}
 
 
