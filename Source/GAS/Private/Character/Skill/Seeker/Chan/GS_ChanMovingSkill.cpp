@@ -19,19 +19,22 @@ void UGS_ChanMovingSkill::ActiveSkill()
 {
 	if (!CanActive()) return;
 	Super::ActiveSkill();
-	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if (OwnerPlayer->HasAuthority())
+	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-		OwnerPlayer->Multicast_SetMoveControlValue(false, false);
-		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-		
+		if (OwnerPlayer->HasAuthority())
+		{
+			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+			OwnerPlayer->SetMoveControlValue(false, false);
+			OwnerPlayer->SetSkillInputControl(false, false);
+		}
 		// 무빙 스킬 사운드 재생
 		if (OwnerPlayer->MovingSkillSound)
 		{
 			OwnerPlayer->PlaySound(OwnerPlayer->MovingSkillSound);
 		}
 	}
+	
 	ExecuteSkillEffect();
 }
 
@@ -43,9 +46,10 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 	if (OwnerPlayer->HasAuthority())
 	{
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->Multicast_SetMoveControlValue(true, true);
+		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 		OwnerPlayer->Multicast_SetUseControllerRotationYaw(true);
+		OwnerPlayer->SetSkillInputControl(true, true);
 	}
 }
 

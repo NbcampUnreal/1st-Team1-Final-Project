@@ -67,6 +67,19 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Network|Session Settings")
     int32 DefaultMaxLobbyPlayers;
 
+    // 세션 나가기
+public:
+	UFUNCTION(BlueprintCallable, Category = "Network|Session")
+	void GSLeaveSession(APlayerController* RequestingPlayer);
+
+protected:
+    FOnDestroySessionCompleteDelegate LeaveSessionCompleteDelegate;
+    FDelegateHandle LeaveSessionCompleteDelegateHandle;
+    void OnLeaveSessionComplete(FName SessionName, bool bWasSuccessful);
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Network|Session Settings")
+    FString MainMenuMapPath;
+
     // 스팀 오버레이 초대
 protected:
     FString PendingConnectStringFromCmd;

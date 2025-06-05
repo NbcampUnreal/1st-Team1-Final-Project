@@ -60,35 +60,30 @@ UClass* AGS_InGameGM::GetDefaultPawnClassForController_Implementation(AControlle
         return Super::GetDefaultPawnClassForController_Implementation(InController);
     }
 
-    if (PS)
+    if (!PS)
     {
-        if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
-        {
-            UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Guardian player in InGameLevel. Returning nullptr for PawnClass."));
-            ResolvedPawnClass = nullptr;
-        }
-        else if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
-        {
-            if (PS->CurrentSeekerJob != ESeekerJob::End)
-            {
-                const TSubclassOf<APawn>* FoundPawnClass = PawnMappingDataAsset->SeekerPawnClasses.Find(PS->CurrentSeekerJob);
-                if (FoundPawnClass && *FoundPawnClass)
-                {
-                    ResolvedPawnClass = *FoundPawnClass;
-                }
-                else
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: Seeker PawnClass not found in DataAsset for job: %s. Using default seeker pawn from DataAsset."), *UEnum::GetValueAsString(PS->CurrentSeekerJob));
-                    ResolvedPawnClass = PawnMappingDataAsset->DefaultSeekerPawn;
-                }
-            }
-            else
-            {
-                UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Seeker job is 'End'. Using default seeker pawn from DataAsset."));
-                ResolvedPawnClass = PawnMappingDataAsset->DefaultSeekerPawn;
-            }
-        }
+        return Super::GetDefaultPawnClassForController_Implementation(InController);
     }
+
+    if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+    {
+        UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Guardian player in InGameLevel. Returning nullptr for PawnClass."));
+        ResolvedPawnClass = nullptr;
+    }
+    else if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+    {
+        const FAssetToSpawn* FoundAssetSetup = PawnMappingDataAsset->SeekerPawnClasses.Find(PS->CurrentSeekerJob);
+        if (FoundAssetSetup && *FoundAssetSetup->PawnClass)
+        {
+            ResolvedPawnClass = *FoundAssetSetup->PawnClass;
+        }
+        else
+        {
+            ResolvedPawnClass = PawnMappingDataAsset->DefaultSeekerPawn;
+        }
+            
+    }
+
     if (!ResolvedPawnClass && (!PS || PS->CurrentPlayerRole != EPlayerRole::PR_Guardian))
     {
         UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: Pawn class not resolved (and not an intentionally unpawned Guardian). Attempting to use super's default."));

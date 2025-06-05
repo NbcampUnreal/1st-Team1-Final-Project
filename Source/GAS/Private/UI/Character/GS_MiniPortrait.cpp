@@ -2,12 +2,23 @@
 
 
 #include "UI/Character/GS_MiniPortrait.h"
+#include "Character/Component/GS_StatComp.h"
+#include "Character/Player/Monster/GS_Monster.h"
 #include "Components/Image.h"
+#include "Components/TextBlock.h"
 
-void UGS_MiniPortrait::Init(UTexture2D* InPortrait)
+void UGS_MiniPortrait::Init(AGS_Monster* Monster)
 {
-	if (PortraitImage)
+	PortraitImage->SetBrushFromTexture(Monster->GetPortrait());
+
+	if (UGS_StatComp* StatComp = Monster->GetStatComp())
 	{
-		PortraitImage->SetBrushFromTexture(InPortrait);
+		StatComp->OnCurrentHPChanged.AddUObject(this, &UGS_MiniPortrait::OnHPChanged);
+		OnHPChanged(StatComp); 
 	}
+}
+
+void UGS_MiniPortrait::OnHPChanged(UGS_StatComp* InStatComp)
+{
+	HPText->SetText(FText::FromString(FString::Printf(TEXT("%d"),FMath::RoundToInt(InStatComp->GetCurrentHealth()))));
 }
