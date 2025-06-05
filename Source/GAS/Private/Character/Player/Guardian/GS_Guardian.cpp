@@ -7,6 +7,7 @@
 #include "Character/Skill/GS_SkillComp.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
 AGS_Guardian::AGS_Guardian()
@@ -15,6 +16,9 @@ AGS_Guardian::AGS_Guardian()
 
 	FeverTime = 0.f;
 	FeverGage = 0.f;
+
+	NormalMoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	SpeedUpMoveSpeed = 1200.f;
 }
 
 void AGS_Guardian::BeginPlay()
@@ -33,6 +37,13 @@ void AGS_Guardian::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, GuardianState);
+	DOREPLIFETIME(ThisClass, MoveSpeed);
+}
+
+
+void AGS_Guardian::OnRep_MoveSpeed()
+{
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
 void AGS_Guardian::LeftMouse()
@@ -98,11 +109,17 @@ void AGS_Guardian::MeleeAttackCheck()
 void AGS_Guardian::ServerRPCStartCtrl_Implementation()
 {
 	GuardianState = EGuardianState::CtrlUp;
+	
+	MoveSpeed = SpeedUpMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
 void AGS_Guardian::ServerRPCStopCtrl_Implementation()
 {
 	GuardianState = EGuardianState::CtrlSkillEnd;
+	
+	MoveSpeed = NormalMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
 void AGS_Guardian::OnRep_GuardianState()
