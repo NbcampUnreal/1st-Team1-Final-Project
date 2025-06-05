@@ -33,31 +33,37 @@ UClass* AGS_BossLevelGM::GetDefaultPawnClassForController_Implementation(AContro
         return Super::GetDefaultPawnClassForController_Implementation(InController);
     }
 
-    if (PS)
+    if (!PS->bIsAlive)
     {
-        if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+        return nullptr;
+    }
+    if (!PS)
+    {
+		return Super::GetDefaultPawnClassForController_Implementation(InController);
+    }
+
+    if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+    {
+        const FAssetToSpawn* FoundAssetSetup = PawnMappingDataAsset->GuardianPawnClasses.Find(PS->CurrentGuardianJob);
+        if (FoundAssetSetup && *FoundAssetSetup->PawnClass)
         {
-            const TSubclassOf<APawn>* FoundPawnClass = PawnMappingDataAsset->GuardianPawnClasses.Find(PS->CurrentGuardianJob);
-            if (FoundPawnClass && *FoundPawnClass)
-            {
-                ResolvedPawnClass = *FoundPawnClass;
-            }
-            else
-            {
-                ResolvedPawnClass = PawnMappingDataAsset->DefaultGuardianPawn;
-            }
+            ResolvedPawnClass = *FoundAssetSetup->PawnClass;
         }
-        else if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+        else
         {
-            const TSubclassOf<APawn>* FoundPawnClass = PawnMappingDataAsset->SeekerPawnClasses.Find(PS->CurrentSeekerJob);
-            if (FoundPawnClass && *FoundPawnClass)
-            {
-                ResolvedPawnClass = *FoundPawnClass;
-            }
-            else
-            {
-                ResolvedPawnClass = PawnMappingDataAsset->DefaultSeekerPawn;
-            }
+            ResolvedPawnClass = PawnMappingDataAsset->DefaultGuardianPawn;
+        }
+    }
+    else if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+    {
+        const FAssetToSpawn* FoundAssetSetup = PawnMappingDataAsset->SeekerPawnClasses.Find(PS->CurrentSeekerJob);
+        if (FoundAssetSetup && *FoundAssetSetup->PawnClass)
+        {
+            ResolvedPawnClass = *FoundAssetSetup->PawnClass;
+        }
+        else
+        {
+            ResolvedPawnClass = PawnMappingDataAsset->DefaultSeekerPawn;
         }
     }
 
