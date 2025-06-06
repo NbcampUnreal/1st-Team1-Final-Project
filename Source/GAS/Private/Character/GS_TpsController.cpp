@@ -215,7 +215,7 @@ void AGS_TpsController::BeginPlay()
 	
 	if (IsLocalController())
 	{
-		TestFunction();
+		//TestFunction();
 	}
 	
 	InitControllerPerWorld();
