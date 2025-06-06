@@ -13,7 +13,8 @@ void UGS_HPBoardWidget::NativeConstruct()
 
 	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT]--------------Start???")),true, true, FLinearColor::Red,5.f);
 
-	//InitBoardWidget();
+	FTimerHandle WidgetTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(WidgetTimerHandle, this, &UGS_HPBoardWidget::InitBoardWidget, 1.f);
 }
 
 void UGS_HPBoardWidget::InitBoardWidget()

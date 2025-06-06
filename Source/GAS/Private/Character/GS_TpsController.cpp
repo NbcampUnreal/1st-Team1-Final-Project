@@ -282,6 +282,6 @@ void AGS_TpsController::BeginPlayingState()
 	{
 		//ServerRPCTestFunction();
 		//AddWidget();
-		//TestFunction();
+		TestFunction();
 	}
 }
