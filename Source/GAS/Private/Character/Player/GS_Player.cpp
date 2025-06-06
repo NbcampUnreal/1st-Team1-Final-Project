@@ -20,8 +20,6 @@ AGS_Player::AGS_Player()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	bUseControllerRotationYaw = false; // SJE
-
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->TargetArmLength = 400.f;
 	SpringArmComp->bUsePawnControlRotation = true;
