@@ -71,6 +71,8 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //가디언 1명 아니면 시작
     UE_LOG(LogTemp, Verbose, TEXT("LobbyGM: Checking ready status for %d players in GameState. Min players: %d. Players in local map: %d"),
         CurrentPlayerCount, MinPlayersToStart, PlayerReadyStates.Num());
 
+
+
     // 최소 시작 인원 확인
     if (CurrentPlayerCount < MinPlayersToStart)
     {
@@ -83,18 +85,13 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //가디언 1명 아니면 시작
     {
         if (!Player)
         {
-            UE_LOG(LogTemp, Warning, TEXT("LobbyGM: Null PlayerState found in GameState PlayerArray."));
             bAllReady = false;
             break;
-            // 지금처럼 Null PlayerState는 준비 안된 것으로 간주해야 되나? 디버깅 하고 나서 결정.
         }
 
-        // 맵에 해당 플레이어가 등록되어 있는지, 상태가 true인지 확인
         const bool* PlayerStatusInMap = PlayerReadyStates.Find(Player);
         if (PlayerStatusInMap == nullptr)
         {
-            // GameState에는 있지만 우리 맵에 없는 경우 (PostLogin에서 뭔가 잘못되었을 수 있음) 방 다시 파야 하나?
-            UE_LOG(LogTemp, Error, TEXT("LobbyGM: Player %s from GameState NOT FOUND in local PlayerReadyStates map. Assuming not ready."), *Player->GetPlayerName());
             bAllReady = false;
             break;
         }

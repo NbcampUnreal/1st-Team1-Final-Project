@@ -4,6 +4,7 @@
 #include "UI/Character/GS_Timer.h"
 #include "Components/TextBlock.h"
 #include "System/GameState/GS_InGameGS.h"
+#include "System/GameState/GS_BossLevelGS.h"
 
 void UGS_Timer::NativeConstruct()
 {
@@ -16,6 +17,12 @@ void UGS_Timer::NativeConstruct()
 		// 델리게이트에 바인딩
 		GS->OnTimerUpdated.AddDynamic(this, &UGS_Timer::HandleTimeUpdated);
 		TimerText->SetText(GS->GetFormattedTime());
+	}
+
+	if (AGS_BossLevelGS* GS = GetWorld()->GetGameState<AGS_BossLevelGS>())
+	{
+		GS->OnBossTimerUpdatedDelegate.AddDynamic(this, &UGS_Timer::HandleTimeUpdated);
+		TimerText->SetText(GS->GetFormattedBossTime());
 	}
 }
 

@@ -51,6 +51,22 @@ void UGS_UnitSelection::HandleSelectionChanged(const TArray<AGS_Monster*>& NewSe
 
 			OnHPChanged(StatComp); 
 		}
+
+		if (UGS_DebuffComp* DebuffComp = Monster->GetDebuffComp())
+		{
+			if (BoundDebuffComp != DebuffComp)
+			{
+				if (BoundDebuffComp.IsValid())
+				{
+					BoundDebuffComp->OnDebuffListUpdated.RemoveAll(this);
+				}
+				
+				DebuffComp->OnDebuffListUpdated.AddUObject(this, &UGS_UnitSelection::OnDebuffChanged);
+				BoundDebuffComp = DebuffComp;
+			}
+
+			OnDebuffChanged(DebuffComp->GetDebuffList()); 
+		}
 	}
 	else
 	{
@@ -80,6 +96,19 @@ void UGS_UnitSelection::HandleSelectionChanged(const TArray<AGS_Monster*>& NewSe
 void UGS_UnitSelection::OnHPChanged(UGS_StatComp* InStatComp)
 {
 	HPText->SetText(FText::FromString(FString::Printf(TEXT("%d"),FMath::RoundToInt(InStatComp->GetCurrentHealth()))));
+}
+
+void UGS_UnitSelection::OnDebuffChanged(const TArray<FDebuffRepInfo>& List)
+{
+	static const UEnum* EnumPtr = StaticEnum<EDebuffType>();
+	FString Result;
+	for (const FDebuffRepInfo& Debuff : List)
+	{
+		FText Display = EnumPtr->GetDisplayNameTextByValue(int64(Debuff.Type));
+		Result += Display.ToString() + TEXT(" ");
+	}
+	
+	DebuffText->SetText(FText::FromString(Result));
 }
 
 AGS_RTSController* UGS_UnitSelection::GetRTSController() const

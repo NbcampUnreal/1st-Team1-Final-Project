@@ -41,11 +41,6 @@ void AGS_Character::BeginPlay()
 	if (CharacterEnum)
 	{
 		FString EnumToName = CharacterEnum->GetNameStringByValue((int64)CharacterType);
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Character::BeginPlay - CharacterType Value: %d, EnumToName: '%s' for Actor: %s"),
-			(int64)CharacterType,
-			*EnumToName,
-			*GetName());
-		StatComp->InitStat(FName(EnumToName));
 		bStatInitialized = true;
 	}
 	if (bStatInitialized)
@@ -55,18 +50,9 @@ void AGS_Character::BeginPlay()
 		{
 			if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
 			{
-				UE_LOG(LogTemp, Log, TEXT("AGS_Character (%s): Notifying PlayerState to initialize StatComp binding."), *GetName());
 				PS->OnPawnStatInitialized();
 			}
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Character (%s): PlayerState is NULL when trying to notify OnPawnStatInitialized."), *GetName());
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("AGS_Character (%s): Stat initialization failed or MaxHealth is 0. Not notifying PlayerState."), *GetName());
 	}
 	
 	if (HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))

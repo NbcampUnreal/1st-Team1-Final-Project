@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "GS_GameResultBoardUI.h"
-#include "Components/Overlay.h"
 #include "GS_GameResultUI.generated.h"
 
 
 class UCommonButtonBase;
 class UOverlay;
+class UGS_GameResultBoardUI;
+class UGS_PawnMappingDataAsset;
 
 UCLASS()
 class GAS_API UGS_GameResultUI : public UUserWidget
@@ -21,9 +21,17 @@ protected:
 	virtual void NativeConstruct() override;
 
 public:
-	UPROPERTY(meta = (BindWidget))
-	class UOverlay* ResultBoardOverlay;
+	UPROPERTY(EditAnywhere, Category = "Game Result UI | Setup")
+	TSubclassOf<UGS_GameResultBoardUI> GameResultBoardUIClass;
 
+	UPROPERTY(EditAnywhere, Category = "Game Result UI | Setup")
+	UGS_PawnMappingDataAsset* PawnMappingDataAsset;
+
+	UPROPERTY(meta = (BindWidget))
+	UOverlay* GuardianResultBoardOverlay;
+
+	UPROPERTY(meta = (BindWidget))
+	UOverlay* SeekerResultBoardOverlay;
 
 	UPROPERTY(meta = (BindWidget))
 	UCommonButtonBase* ContinueButton;
