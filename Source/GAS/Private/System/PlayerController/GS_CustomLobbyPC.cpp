@@ -275,6 +275,11 @@ void AGS_CustomLobbyPC::RequestToggleRole()
 		EPlayerRole NewRole = (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker) ? EPlayerRole::PR_Guardian : EPlayerRole::PR_Seeker;
 		PS->Server_SetPlayerRole(NewRole);
 	}
+
+	if (HasCurrentModalWidget())
+	{
+		ClearCurrentModalWidget();
+	}
 }
 
 void AGS_CustomLobbyPC::RequestOpenJobSelectionPopup()

@@ -108,13 +108,15 @@ void AGS_DEPawn::Move(const FInputActionValue& Value)
 
 	const FVector2d MoveInput = Value.Get<FVector2d>();
 
+	float MoveSpeed = CameraComp->OrthoWidth / 2500.0f;
+	
 	if (!FMath::IsNearlyZero(MoveInput.X))
 	{
-		AddMovementInput(GetActorForwardVector(), MoveInput.X);
+		AddMovementInput(GetActorForwardVector(), MoveInput.X * MoveSpeed);
 	}
 	if (!FMath::IsNearlyZero(MoveInput.Y))
 	{
-		AddMovementInput(GetActorRightVector(), MoveInput.Y);
+		AddMovementInput(GetActorRightVector(), MoveInput.Y * MoveSpeed);
 	}
 }
 

@@ -83,22 +83,22 @@ protected:
 	float CharacterWalkSpeed;
 
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly, Category = "Stat", meta = (AllowPrivateAccess))
 	float MaxHealth;
 
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly, Category = "Stat", meta = (AllowPrivateAccess))
 	float AttackPower;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly, Category = "Stat", meta = (AllowPrivateAccess))
 	float Defense;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly, Category = "Stat", meta = (AllowPrivateAccess))
 	float Agility;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly, Category = "Stat", meta = (AllowPrivateAccess))
 	float AttackSpeed;
 
 	// 마지막 히트 사운드 재생 시간
