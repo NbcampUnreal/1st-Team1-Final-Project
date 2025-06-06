@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Weapon/Projectile/GS_WeaponProjectile.h"
+#include "Engine/Engine.h" 
+#include "Components/PrimitiveComponent.h"
+#include "Engine/HitResult.h"
 #include "AkAudioEvent.h"
 #include "NiagaraSystem.h"
 #include "GS_SeekerMerciArrow.generated.h"
@@ -61,4 +64,15 @@ protected:
 	virtual void HandleTargetTypeGeneric(ETargetType TargetType, const FHitResult& SweepResult);
 	virtual void PlayHitSound(ETargetType TargetType, const FHitResult& SweepResult);
 	virtual void PlayHitVFX(ETargetType TargetType, const FHitResult& SweepResult);
+
+	// 멀티캐스트 함수들
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayHitSound(ETargetType TargetType, const FHitResult& SweepResult);
+	bool Multicast_PlayHitSound_Validate(ETargetType TargetType, const FHitResult& SweepResult);
+	void Multicast_PlayHitSound_Implementation(ETargetType TargetType, const FHitResult& SweepResult);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayHitVFX(ETargetType TargetType, const FHitResult& SweepResult);
+	bool Multicast_PlayHitVFX_Validate(ETargetType TargetType, const FHitResult& SweepResult);
+	void Multicast_PlayHitVFX_Implementation(ETargetType TargetType, const FHitResult& SweepResult);
 };
