@@ -8,6 +8,11 @@
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Skill/Seeker/GS_FieldSkillActor.h"
+#include "AkGameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Engine/World.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 AGS_SeekerMerciArrow::AGS_SeekerMerciArrow()
 {
@@ -23,11 +28,14 @@ void AGS_SeekerMerciArrow::BeginPlay()
 	Super::BeginPlay();
 	if (HasAuthority())
 	{
-		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AGS_SeekerMerciArrow::OnBeginOverlap);
+		if (CollisionComponent)
+		{
+			CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AGS_SeekerMerciArrow::OnBeginOverlap);
+		}
 		this->SetActorEnableCollision(true);
 
-		AActor* IgnoredActor = GetInstigator(); // 또는 GetInstigator();
-		if (IgnoredActor)
+		AActor* IgnoredActor = GetInstigator();
+		if (IgnoredActor && CollisionComponent)
 		{
 			CollisionComponent->IgnoreActorWhenMoving(IgnoredActor, true);
 		}
@@ -55,18 +63,21 @@ void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	AGS_ArrowVisualActor* VisualArrow = GetWorld()->SpawnActor<AGS_ArrowVisualActor>(VisualArrowClass, SpawnLocation, AdjustedRotation, Params);
-
-	if (VisualArrow)
+	if (VisualArrowClass && GetWorld())
 	{
-		VisualArrow->SetArrowMesh(ProjectileMesh->GetSkeletalMeshAsset());
-		if (Hit.BoneName != NAME_None)
+		AGS_ArrowVisualActor* VisualArrow = GetWorld()->SpawnActor<AGS_ArrowVisualActor>(VisualArrowClass, SpawnLocation, AdjustedRotation, Params);
+
+		if (VisualArrow)
 		{
-			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform, Hit.BoneName);
-		}
-		else
-		{
-			VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
+			VisualArrow->SetArrowMesh(ProjectileMesh->GetSkeletalMeshAsset());
+			if (Hit.BoneName != NAME_None)
+			{
+				VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform, Hit.BoneName);
+			}
+			else
+			{
+				VisualArrow->AttachToComponent(Hit.GetComponent(), FAttachmentTransformRules::KeepWorldTransform);
+			}
 		}
 	}
 
@@ -76,11 +87,6 @@ void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 
 void AGS_SeekerMerciArrow::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!HasAuthority()) 
-	{
-		return;
-	}
-
 	if (!OtherActor || OtherActor == this || HitActors.Contains(OtherActor))
 	{
 		return;
@@ -93,8 +99,17 @@ void AGS_SeekerMerciArrow::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, A
 	// 맞은 대상 구분
 	ETargetType TargetType = DetermineTargetType(OtherActor);
 
-	// 공통 처리
-	HandleTargetTypeGeneric(TargetType, SweepResult);
+	// 히트 사운드 재생 (멀티캐스트)
+	Multicast_PlayHitSound(TargetType, SweepResult);
+
+	// 히트 VFX 재생 (멀티캐스트)
+	Multicast_PlayHitVFX(TargetType, SweepResult);
+
+	// 서버에서만 로직 처리
+	if (HasAuthority())
+	{
+		HandleTargetTypeGeneric(TargetType, SweepResult);
+	}
 }
 
 ETargetType AGS_SeekerMerciArrow::DetermineTargetType(AActor* OtherActor) const
@@ -135,4 +150,99 @@ void AGS_SeekerMerciArrow::HandleTargetTypeGeneric(ETargetType TargetType, const
 	default:
 		break;
 	}
+}
+
+void AGS_SeekerMerciArrow::PlayHitSound(ETargetType TargetType, const FHitResult& SweepResult)
+{
+	UAkAudioEvent* SoundEventToPlay = nullptr;
+
+	switch (TargetType)
+	{
+	case ETargetType::Guardian:
+	case ETargetType::DungeonMonster:
+		// 적 캐릭터(가디언, 던전몬스터)에 맞았을 때 Wwise 이벤트
+		SoundEventToPlay = HitPawnSoundEvent;
+		break;
+	case ETargetType::Structure:
+		// 벽이나 구조물에 맞았을 때 Wwise 이벤트
+		SoundEventToPlay = HitStructureSoundEvent;
+		break;
+	case ETargetType::Seeker:
+	case ETargetType::Skill:
+		// 아군 시커나 스킬에 맞았을 때는 사운드 없음
+		break;
+	default:
+		break;
+	}
+
+	// Wwise 사운드 재생
+	if (SoundEventToPlay && GetWorld())
+	{
+		UAkGameplayStatics::PostEventAtLocation(
+			SoundEventToPlay,
+			SweepResult.ImpactPoint,
+			FRotator::ZeroRotator,
+			GetWorld()
+		);
+	}
+}
+
+void AGS_SeekerMerciArrow::PlayHitVFX(ETargetType TargetType, const FHitResult& SweepResult)
+{
+	UNiagaraSystem* VFXToPlay = nullptr;
+
+	switch (TargetType)
+	{
+	case ETargetType::Guardian:
+	case ETargetType::DungeonMonster:
+		// 적 캐릭터(가디언, 던전몬스터)에 맞았을 때 VFX
+		VFXToPlay = HitPawnVFX;
+		break;
+	case ETargetType::Structure:
+		// 벽이나 구조물에 맞았을 때 VFX
+		VFXToPlay = HitStructureVFX;
+		break;
+	case ETargetType::Seeker:
+	case ETargetType::Skill:
+		// 아군 시커나 스킬에 맞았을 때는 VFX 없음
+		break;
+	default:
+		break;
+	}
+
+	// VFX 재생
+	if (VFXToPlay && GetWorld())
+	{
+		// 히트 포인트에서 VFX 재생
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			VFXToPlay,
+			SweepResult.ImpactPoint,
+			SweepResult.ImpactNormal.Rotation(), // 히트 표면의 법선 방향으로 VFX 회전
+			FVector(1.0f), // Scale (float → FVector)
+			true, // Auto Destroy
+			true  // Auto Activate
+		);
+	}
+}
+
+// 멀티캐스트 함수 구현
+bool AGS_SeekerMerciArrow::Multicast_PlayHitSound_Validate(ETargetType TargetType, const FHitResult& SweepResult)
+{
+	return true;
+}
+
+void AGS_SeekerMerciArrow::Multicast_PlayHitSound_Implementation(ETargetType TargetType, const FHitResult& SweepResult)
+{
+	PlayHitSound(TargetType, SweepResult);
+}
+
+bool AGS_SeekerMerciArrow::Multicast_PlayHitVFX_Validate(ETargetType TargetType, const FHitResult& SweepResult)
+{
+	return true;
+}
+
+void AGS_SeekerMerciArrow::Multicast_PlayHitVFX_Implementation(ETargetType TargetType, const FHitResult& SweepResult)
+{
+	PlayHitVFX(TargetType, SweepResult);
 }
