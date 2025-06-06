@@ -1,12 +1,14 @@
 #include "UI/Screen/GS_MainMenuUI.h"
 
 #include "CommonButtonBase.h"
+#include "Blueprint/WidgetTree.h"
 #include "Components/ScaleBox.h"
 #include "Components/TextBlock.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "System/PlayerController/GS_MainMenuPC.h"
 #include "UI/Common/CustomCommonButton.h"
 #include "UI/Common//GS_CommonTwoBtnPopup.h"
+#include "UI/Screen/Option/GS_OptionMenuUI.h"
 
 void UGS_MainMenuUI::NativeConstruct()
 {
@@ -38,8 +40,7 @@ void UGS_MainMenuUI::NativeConstruct()
 		}
 	}
 	else UE_LOG(LogTemp, Error, TEXT("UGS_MainMenuUI: ExitButton is not bound in Blueprint!"));
-
-
+	
 	//텍스트 초기 설정
 	//if (PlayText) PlayText->SetText(FText::FromString(TEXT("Play")));
 
