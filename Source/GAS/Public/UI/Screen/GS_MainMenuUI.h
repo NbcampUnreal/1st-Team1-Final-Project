@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GS_MainMenuUI.generated.h"
 
+class UGS_OptionMenuUI;
 class UGS_CommonTwoBtnPopup;
 class UScaleBox;
 class UUserWidget;
@@ -18,9 +19,6 @@ class GAS_API UGS_MainMenuUI : public UUserWidget
 {
 	GENERATED_BODY()
 
-protected:
-	virtual void NativeConstruct() override;
-
 public:
 	UPROPERTY(meta = (BindWidget))
 	UUserWidget* PlayButton;
@@ -28,8 +26,6 @@ public:
 	UUserWidget* CreditButton;
 	UPROPERTY(meta = (BindWidget))
 	UUserWidget* ExitButton;
-	UPROPERTY(meta = (BindWidget))
-	UUserWidget* SettingButton;
 	UPROPERTY(meta = (BindWidget))
 	UScaleBox* PlayBtnPopUp;
 	UPROPERTY(meta = (BindWidget))
@@ -50,7 +46,10 @@ public:
 	void OnCustomGameButtonClicked();
 	UFUNCTION()
 	void OnExitButtonClicked();
-
+	
 	void OnExitPopupYesButtonClicked();
 	void OnExitPopupNoButtonClicked();
+	
+protected:
+	virtual void NativeConstruct() override;
 };

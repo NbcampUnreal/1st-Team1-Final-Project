@@ -26,6 +26,21 @@ struct FTrapEffect
     //stun
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bStun = false;
+
+    //slow
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bSlow = false;
+
+
+
+    ////knockback
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //bool bKnockback = false;
+
+    ////push
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //bool bPush = false;
+
     //Obscure
     //UPROPERTY(EditAnywhere, BlueprintReadWrite)
     //bool bObscure = false;
@@ -36,18 +51,6 @@ struct FTrapEffect
     ////Mute
     //UPROPERTY(EditAnywhere, BlueprintReadWrite)
     //bool bMute = false;
-
-    //slow
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    //bool bSlow = false;
-
-    ////knockback
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    //bool bKnockback = false;
-
-    ////push
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    //bool bPush = false;
 
 
     //dot damage
