@@ -26,6 +26,9 @@ AGS_TrapBase::AGS_TrapBase()
 	DamageBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
 	DamageBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	DamageBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+
+
 }
 
 
@@ -67,12 +70,22 @@ void AGS_TrapBase::OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActo
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Overlapped Actor: %s (%s)"), *OtherActor->GetName(), *OtherActor->GetClass()->GetName());
+	if (OtherComp)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Overlapped Component: %s (%s)"), *OtherComp->GetName(), *OtherComp->GetClass()->GetName());
+	}
+
+
+
 	//서버
 	DamageBoxEffect(Seeker);
 	CustomTrapEffect(Seeker);
 	HandleTrapDamage(Seeker);
 
 }
+
+
 
 void AGS_TrapBase::Server_HandleTrapDamage_Implementation(AActor* OtherActor)
 {
@@ -115,13 +128,12 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 			DebuffComp->ApplyDebuff(EDebuffType::Stun, nullptr);
 		}
 
-		////Obscure
-		//if (Effect.bObscure)
-		//{
-		//	DebuffComp->ApplyDebuff(EDebuffType::Obscure, nullptr);
-		//}
+		//Slow
+		if (Effect.bSlow)
+		{
+			DebuffComp->ApplyDebuff(EDebuffType::Slow, nullptr);
 
-
+		}
 	}
 
 
