@@ -73,7 +73,7 @@ void UGS_UnitSelection::HandleSelectionChanged(const TArray<AGS_Monster*>& NewSe
 		SelectionSwitcher->SetActiveWidgetIndex(1);
 		MultiIconsGrid->ClearChildren();
 
-		const int32 Cols = 5;  
+		const int32 Cols = 6;  
 		int32 Index = 0;
 		for (AGS_Monster* Monster : NewSelection)
 		{
@@ -101,13 +101,15 @@ void UGS_UnitSelection::OnHPChanged(UGS_StatComp* InStatComp)
 void UGS_UnitSelection::OnDebuffChanged(const TArray<FDebuffRepInfo>& List)
 {
 	static const UEnum* EnumPtr = StaticEnum<EDebuffType>();
-	FString Result;
+	TArray<FString> DebuffNames;
+	
 	for (const FDebuffRepInfo& Debuff : List)
 	{
 		FText Display = EnumPtr->GetDisplayNameTextByValue(int64(Debuff.Type));
-		Result += Display.ToString() + TEXT(" ");
+		DebuffNames.Add(Display.ToString());
 	}
 	
+	FString Result = FString::Join(DebuffNames, TEXT(" | "));
 	DebuffText->SetText(FText::FromString(Result));
 }
 
