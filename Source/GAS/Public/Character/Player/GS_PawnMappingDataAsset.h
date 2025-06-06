@@ -27,6 +27,9 @@ struct FAssetToSpawn
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
     TObjectPtr<UAnimMontage> LosePose;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+    TObjectPtr<UTexture2D> AvatarTexture;
 };
 
 UCLASS(BlueprintType)
