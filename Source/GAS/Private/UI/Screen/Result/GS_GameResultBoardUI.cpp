@@ -66,15 +66,29 @@ void UGS_GameResultBoardUI::SetupResultBoard(AGS_PlayerState* TargetPlayerState,
 
 	if (Result == EGameResult::GR_SeekersWon)
 	{
-		Text_Victory->SetText(FText::FromString(TEXT("Victory")));
+		if (PlayerRole == EPlayerRole::PR_Seeker)
+		{
+			Text_Victory->SetText(FText::FromString(TEXT("Victory")));
+		}
+		else
+		{
+			Text_Victory->SetText(FText::FromString(TEXT("Defeat")));
+		}
 	}
 	else if (Result == EGameResult::GR_SeekersLost)
 	{
-		Text_Victory->SetText(FText::FromString(TEXT("Defeat")));
+		if (PlayerRole == EPlayerRole::PR_Seeker)
+		{
+			Text_Victory->SetText(FText::FromString(TEXT("Defeat")));
+		}
+		else
+		{
+			Text_Victory->SetText(FText::FromString(TEXT("Victory")));
+		}
 	}
 	else
 	{
-		Text_Victory->SetText(FText::FromString(TEXT("진행 중")));
+		Text_Victory->SetText(FText::FromString(TEXT("Draw")));
 	}
 
     //플레이어 생사

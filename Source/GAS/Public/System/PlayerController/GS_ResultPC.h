@@ -19,5 +19,6 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_ShowResultUI();
 	
-	
+	UFUNCTION(Server, Reliable)
+	void Server_RequestTravelToLobby();
 };
