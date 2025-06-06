@@ -17,9 +17,6 @@ UGS_SeekerAnimInstance::UGS_SeekerAnimInstance()
 	MovementState = EMovementState::Idle;
 	RotationMode = ERotationMode::OrientToMovement;
 	Gait = EGait::Run;
-
-	MotionMatchingPlayRate.Min = 1.0f;
-	MotionMatchingPlayRate.Max = 1.0f;
 }
 
 void UGS_SeekerAnimInstance::NativeInitializeAnimation()
@@ -30,6 +27,11 @@ void UGS_SeekerAnimInstance::NativeInitializeAnimation()
 	{
 		OwnerCharacter = OwnerPawn;
 		OwnerCharacterMovement =  OwnerCharacter->GetCharacterMovement();
+
+		if (OwnerPawn->HasAuthority())
+		{
+			bUseOffsetRootBone = true;
+		}
 	}
 }
 
@@ -41,12 +43,6 @@ void UGS_SeekerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		UpdateEssentialValue();
 		UpdateTrajectory();
 		UpdateState();
-		/*AGS_Player* playerdd = Cast<AGS_Player>(OwnerCharacter);
-		if (playerdd->HasAuthority())
-		{
-			playerdd->GetSkillInputControl();
-			UE_LOG(LogTemp, Warning, TEXT("Left Can : %s / Right Can : %s"), playerdd->GetSkillInputControl().CanInputLC ? TEXT("True") : TEXT("False"), playerdd->GetSkillInputControl().CanInputRC ? TEXT("True") : TEXT("False")); // SJE
-		}*/
 	}
 }
 
@@ -91,10 +87,12 @@ void UGS_SeekerAnimInstance::UpdateState_Implementation()
 	LastMovementState = MovementState;
 	if (IsMoving())
 	{
+		OwnerCharacter->bUseControllerRotationYaw = true;
 		MovementState = EMovementState::Moving;
 	}
 	else
 	{
+		OwnerCharacter->bUseControllerRotationYaw = false;
 		MovementState = EMovementState::Idle;
 	}
 
@@ -198,9 +196,9 @@ float UGS_SeekerAnimInstance::GetOffsetRootTranslationHalfLife()
 	switch (MovementState)
 	{
 		case EMovementState::Idle :
-			return 0.1;
+			return 0.15;
 		case EMovementState::Moving:
-			return 0.2;
+			return 0.4;
 	}
 	return 0;
 }
@@ -268,12 +266,6 @@ void UGS_SeekerAnimInstance::AnimNotify_ComboEnd()
 			//Chan->ComboEnd();
 		}
 	}
-}
-
-void UGS_SeekerAnimInstance::SetMotionMatchingPlayRate(float Min, float Max)
-{
-	MotionMatchingPlayRate.Min = Min;
-	MotionMatchingPlayRate.Max = Max;
 }
 
 void UGS_SeekerAnimInstance::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

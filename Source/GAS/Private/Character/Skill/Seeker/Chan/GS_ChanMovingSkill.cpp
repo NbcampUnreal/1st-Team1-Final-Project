@@ -48,7 +48,7 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-		OwnerPlayer->Multicast_SetUseControllerRotationYaw(true);
+		//OwnerPlayer->Multicast_SetUseControllerRotationYaw(false);
 		OwnerPlayer->SetSkillInputControl(true, true);
 	}
 }

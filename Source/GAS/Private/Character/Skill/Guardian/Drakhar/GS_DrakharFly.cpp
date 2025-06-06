@@ -20,6 +20,7 @@ void UGS_DrakharFly::ActiveSkill()
 	{
 		return;
 	}
+
 	bIsFlying = true;
 	
 	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
@@ -37,7 +38,7 @@ void UGS_DrakharFly::DeactiveSkill()
 	{
 		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ready, false);
 	}
-	
+
 	ExecuteSkillEffect();
 }
 

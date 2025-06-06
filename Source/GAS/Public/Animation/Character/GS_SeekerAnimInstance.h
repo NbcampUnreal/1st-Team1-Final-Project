@@ -72,9 +72,6 @@ public:
 
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingFullBodyMontage = false;
-	
-	UFUNCTION()
-	void SetMotionMatchingPlayRate(float Min, float Max);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
@@ -116,8 +113,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Control")
 	bool bMustTurnInPlace = false;
 
-	/*virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;*/
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
-	FFloatInterval MotionMatchingPlayRate;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OffsetRootBone")
+	bool bUseOffsetRootBone = false;
 };

@@ -33,10 +33,12 @@ void AGS_FieldSkillActor::BeginPlay()
 
 	ApplyFieldEffect();
 
+	// 디버깅 용 원 그리기
 	if (HasAuthority())
 	{
-		Multicast_DrawDebugSphere();
+		//Multicast_DrawDebugSphere();
 	}
+
 	// 지속 시간 후 제거
 	GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AGS_FieldSkillActor::DestroySelf, Duration);
 	

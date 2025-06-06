@@ -20,6 +20,8 @@ AGS_Player::AGS_Player()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	bUseControllerRotationYaw = false; // SJE
+
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->TargetArmLength = 400.f;
 	SpringArmComp->bUsePawnControlRotation = true;
@@ -28,7 +30,7 @@ AGS_Player::AGS_Player()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->bUsePawnControlRotation = false;
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
-
+	
 	PostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
 	PostProcessComponent->SetupAttachment(GetRootComponent());
 	PostProcessComponent->bUnbound = true; // 시야 안 전체에만 적용할 경우 false
@@ -211,7 +213,6 @@ void AGS_Player::OnDeath()
 	{
 		GS_PS->bIsAlive = false;
 	}
-	SpectateNextPlayer();
 }
 
 void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick)
@@ -276,45 +277,6 @@ bool AGS_Player::IsLocalPlayer() const
 		return PC->IsLocalController();
 	}
 	return false;
-}
-
-void AGS_Player::SpectateNextPlayer()
-{
-	if (GetWorld()->GetGameState()->PlayerArray.IsEmpty())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Player Array EMPTY"));
-		return;
-	}
-	
-	for (const auto& PS : GetWorld()->GetGameState()->PlayerArray)
-	{
-		AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
-		if (IsValid(GS_PS))
-		{
-			if (GS_PS->bIsAlive) //[TODO] GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker 
-			{
-				AGS_TpsController* AlivePlayerController = Cast<AGS_TpsController>(GS_PS->GetPlayerController());
-				
-				if (IsValid(AlivePlayerController))
-				{
-					APlayerController* DeadPlayerPC = Cast<APlayerController>(GetController());
-					if (DeadPlayerPC)
-					{
-						DeadPlayerPC->UnPossess();
-						DeadPlayerPC->SetViewTargetWithBlend(AlivePlayerController);
-						SetLifeSpan(2.f);
-					}
-				}
-			}
-		}
-		//Game Over?
-		//all players dead
-	}
-}
-
-void AGS_Player::ServerRPCSpectateNextPlayer_Implementation()
-{
-	SpectateNextPlayer();
 }
 
 void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage, FName Section)

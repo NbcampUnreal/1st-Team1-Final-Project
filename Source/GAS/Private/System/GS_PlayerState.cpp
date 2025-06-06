@@ -11,7 +11,7 @@ AGS_PlayerState::AGS_PlayerState()
     , CurrentGuardianJob(EGuardianJob::Drakhar)
     , CurrentGameResult(EGameResult::GR_InProgress)
     , bIsReady(false)
-	, CurrentHealth(200.f)
+	, CurrentHealth(99999.f)
 	, bIsAlive(true)
 	, BoundStatComp(nullptr)
 {
@@ -76,7 +76,9 @@ void AGS_PlayerState::InitializeDefaults()
     CurrentPlayerRole = EPlayerRole::PR_Seeker;
     CurrentSeekerJob = ESeekerJob::Merci;
 	CurrentGuardianJob = EGuardianJob::Drakhar;
+	CurrentGameResult = EGameResult::GR_InProgress;
     bIsReady = false;
+    bIsAlive = true;
 
     if (GetNetMode() != NM_Client)
     {
@@ -84,6 +86,7 @@ void AGS_PlayerState::InitializeDefaults()
 		OnRep_SeekerJob();
 		OnRep_GuardianJob();
         OnRep_IsReady();
+		OnRep_IsAlive();
     }
 }
 
