@@ -14,6 +14,7 @@
 #include "Net/UnrealNetwork.h"
 #include "System/GS_PlayerState.h"
 #include "UI/Character/GS_HPBoardWidget.h"
+#include "System/GS_GameInstance.h"
 
 
 AGS_TpsController::AGS_TpsController()
@@ -53,13 +54,17 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
 	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
 	{
-		if (ControlValues.bCanLookRight)
+		if(GameInstance)
 		{
-			ControlledPawn->AddControllerYawInput(InputAxisVector.X);
-		}
-		if (ControlValues.bCanLookUp)
-		{
-			ControlledPawn->AddControllerPitchInput(InputAxisVector.Y);
+			float SensitivityMultiplier = GameInstance->GetMouseSensitivity();
+			if (ControlValues.bCanLookRight)
+			{
+				ControlledPawn->AddControllerYawInput(InputAxisVector.X * SensitivityMultiplier);
+			}
+			if (ControlValues.bCanLookUp)
+			{
+				ControlledPawn->AddControllerPitchInput(InputAxisVector.Y * SensitivityMultiplier);
+			}
 		}
 	}
 }
@@ -104,6 +109,15 @@ void AGS_TpsController::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AGS_TpsController, ControlValues);
+}
+
+float AGS_TpsController::GetCurrentMouseSensitivity() const
+{
+	if (GameInstance)
+	{
+		return GameInstance->GetMouseSensitivity();
+	}
+	return 1.0f;
 }
 
 void AGS_TpsController::InitControllerPerWorld()
@@ -217,6 +231,8 @@ void AGS_TpsController::BeginPlay()
 	{
 		TestFunction();
 	}
+
+	GameInstance = Cast<UGS_GameInstance>(GetGameInstance());
 	
 	InitControllerPerWorld();
 }
