@@ -343,8 +343,8 @@ void AGS_Merci::UpdateZoom(float Alpha)
 	}
 
 	float TargetArmLength = FMath::Lerp(400.0f, 180.0f, Alpha);
-	float SocketOffsetY = FMath::Lerp(0.f, 20.f, Alpha);
-	float SocketOffsetZ = FMath::Lerp(0.f, -40.0f, Alpha);
+	float SocketOffsetY = FMath::Lerp(67.f, 87.f, Alpha);
+	float SocketOffsetZ = FMath::Lerp(174.f, 134.f, Alpha);
 
 	SpringArmComp->TargetArmLength = TargetArmLength;
 	FVector OffSet(0.f, SocketOffsetY, SocketOffsetZ);

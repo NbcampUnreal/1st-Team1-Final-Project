@@ -1120,8 +1120,8 @@
 				</SwitchContainer>
 				<Sound Name="SFX_ArrowImpact_Wood" ID="{2D5A0BBF-EF0F-46C3-ABCE-A07D1D0AF082}" ShortID="1041767505">
 					<PropertyList>
+						<Property Name="3DPosition" Type="int16" Value="1"/>
 						<Property Name="3DSpatialization" Type="int16" Value="2"/>
-						<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.25"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
 								<Value>20</Value>
@@ -1169,7 +1169,7 @@
 					</PropertyList>
 					<ReferenceList>
 						<Reference Name="Attenuation">
-							<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+							<ObjectRef Name="ArrowAttenuation" ID="{E8C3AD10-3E92-476B-BCB9-940E50098DC5}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
 						</Reference>
 						<Reference Name="Conversion">
 							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
@@ -1193,14 +1193,17 @@
 							</MediaIDList>
 						</AudioFileSource>
 					</ChildrenList>
+					<PositioningInfo>
+						<Position Name="" ID="{20200059-7451-4CCD-B067-91B9B662B84A}"/>
+					</PositioningInfo>
 					<ActiveSourceList>
 						<ActiveSource Name="ArrowImpactWood_BW_54281" ID="{5F4DAF45-1EE3-438E-8F88-C9FC853AE307}" Platform="Linked"/>
 					</ActiveSourceList>
 				</Sound>
 				<Sound Name="SFX_ArrowImpact_Body" ID="{DE6A5A1B-DCBE-4500-9C0F-8B184E9F72B3}" ShortID="937758878">
 					<PropertyList>
-						<Property Name="3DSpatialization" Type="int16" Value="1"/>
-						<Property Name="AttenuationDistanceScaling" Type="Real32" Value="0.8"/>
+						<Property Name="3DSpatialization" Type="int16" Value="2"/>
+						<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.2"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
 								<Value>20</Value>
@@ -1250,7 +1253,7 @@
 					</PropertyList>
 					<ReferenceList>
 						<Reference Name="Attenuation">
-							<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+							<ObjectRef Name="ArrowAttenuation" ID="{E8C3AD10-3E92-476B-BCB9-940E50098DC5}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
 						</Reference>
 						<Reference Name="Conversion">
 							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
@@ -1275,13 +1278,17 @@
 							</MediaIDList>
 						</AudioFileSource>
 					</ChildrenList>
+					<PositioningInfo>
+						<Position Name="" ID="{21DDDD55-DAE2-4A97-B9DC-633C85F53F7F}"/>
+					</PositioningInfo>
 					<ActiveSourceList>
 						<ActiveSource Name="ArrowImpactBody_BW_54264" ID="{B8299D45-EF2A-4F79-BFB9-7088CBCA82B9}" Platform="Linked"/>
 					</ActiveSourceList>
 				</Sound>
 				<RandomSequenceContainer Name="SFX_ArrowImpact_Stone" ID="{5B4DA841-68C7-48EF-90AB-20E344778912}" ShortID="775247812">
 					<PropertyList>
-						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="3DPosition" Type="int16" Value="1"/>
+						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="Highpass" Type="int16">
 							<ValueList>
 								<Value>20</Value>
@@ -1323,7 +1330,7 @@
 					</PropertyList>
 					<ReferenceList>
 						<Reference Name="Attenuation">
-							<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+							<ObjectRef Name="ArrowAttenuation" ID="{E8C3AD10-3E92-476B-BCB9-940E50098DC5}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
 						</Reference>
 						<Reference Name="Conversion">
 							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
@@ -1496,6 +1503,9 @@
 							</ActiveSourceList>
 						</Sound>
 					</ChildrenList>
+					<PositioningInfo>
+						<Position Name="" ID="{0C5DD4AF-1DBC-4FD4-982F-96A66BCEE9F2}"/>
+					</PositioningInfo>
 				</RandomSequenceContainer>
 				<Sound Name="SFX_Fire_Burn" ID="{FEB4D4C7-8CE2-48DA-B308-EAA571DC9D18}" ShortID="296267272">
 					<PropertyList>
@@ -10591,7 +10601,7 @@
 											<Custom>
 												<Attenuation Name="Attenuation (Custom)" ID="{51D16D4D-E680-4112-9581-591410FB7942}" ShortID="268705846">
 													<PropertyList>
-														<Property Name="RadiusMax" Type="Real64" Value="600"/>
+														<Property Name="RadiusMax" Type="Real64" Value="500"/>
 													</PropertyList>
 													<CurveUsageInfoList>
 														<VolumeDryUsage>
@@ -10608,7 +10618,7 @@
 																			<SegmentShape>Exp3</SegmentShape>
 																		</Point>
 																		<Point>
-																			<XPos>600</XPos>
+																			<XPos>500</XPos>
 																			<YPos>-200</YPos>
 																			<Flags>37</Flags>
 																		</Point>
@@ -10784,6 +10794,11 @@
 												<Value>1</Value>
 											</ValueList>
 										</Property>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
 										<Property Name="Lowpass" Type="int16">
 											<ValueList>
 												<Value>10</Value>
@@ -10791,7 +10806,7 @@
 										</Property>
 										<Property Name="MakeUpGain" Type="Real64">
 											<ValueList>
-												<Value>-1.5</Value>
+												<Value>-3</Value>
 											</ValueList>
 										</Property>
 										<Property Name="MaxSoundPerInstance" Type="int16">
@@ -10804,7 +10819,6 @@
 												<Value>300</Value>
 											</ValueList>
 										</Property>
-										<Property Name="SpeakerPanning" Type="int16" Value="1"/>
 										<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
 										<Property Name="UseMaxSoundPerInstance" Type="bool">
 											<ValueList>
@@ -10813,7 +10827,7 @@
 										</Property>
 										<Property Name="Volume" Type="Real64">
 											<ValueList>
-												<Value>-9</Value>
+												<Value>-10</Value>
 											</ValueList>
 											<ModifierList>
 												<ModifierInfo>
@@ -11371,6 +11385,11 @@
 									<PropertyList>
 										<Property Name="3DSpatialization" Type="int16" Value="1"/>
 										<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>1</Value>
+											</ValueList>
+										</Property>
 									</PropertyList>
 									<ReferenceList>
 										<Reference Name="Attenuation">

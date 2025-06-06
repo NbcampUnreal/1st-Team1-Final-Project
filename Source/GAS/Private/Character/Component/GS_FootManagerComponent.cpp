@@ -391,6 +391,19 @@ void UGS_FootManagerComponent::SpawnFootstepDecal(EPhysicalSurface /*Surface*/, 
 
 void UGS_FootManagerComponent::PlayFootstepSound(EPhysicalSurface Surface, const FVector& Location)
 {
+	if (!FAkAudioDevice::IsInitialized())
+	{
+		UE_LOG(LogTemp, Error, TEXT("GS_FootManagerComponent: PlayFootstepSound - Wwise Audio Device is NOT initialized!"));
+		return; // Wwise가 준비되지 않았으므로 아무것도 하지 않음
+	}
+
+	FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get();
+	if (!AkAudioDevice) // 이중 확인
+	{
+		UE_LOG(LogTemp, Error, TEXT("GS_FootManagerComponent: PlayFootstepSound - FAkAudioDevice::Get() returned NULL even after IsInitialized() check!"));
+		return;
+	}
+
 	// Check if we have a footstep sound event
 	if (!FootstepSoundEvent)
 	{
@@ -405,19 +418,11 @@ void UGS_FootManagerComponent::PlayFootstepSound(EPhysicalSurface Surface, const
 	}
 
 	// Set switch value before playing sound
-	if (FAkAudioDevice* AudioDevice = FAkAudioDevice::Get())
-	{
-		AudioDevice->SetSwitch(
-			*SwitchGroupName,
-			**SwitchValue,
-			GetOwner()
-		);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("GS_FootManagerComponent: AudioDevice is NULL!"));
-		return;
-	}
+	AkAudioDevice->SetSwitch(
+		*SwitchGroupName,
+		**SwitchValue,
+		GetOwner()
+	);
 
 	// Play sound using the AkComponent (same Game Object that has the Switch set)
 	UAkComponent* AkComp = GetOwner()->FindComponentByClass<UAkComponent>();

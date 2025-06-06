@@ -28,7 +28,7 @@ AGS_Player::AGS_Player()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComp->bUsePawnControlRotation = false;
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
-
+	
 	PostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
 	PostProcessComponent->SetupAttachment(GetRootComponent());
 	PostProcessComponent->bUnbound = true; // 시야 안 전체에만 적용할 경우 false

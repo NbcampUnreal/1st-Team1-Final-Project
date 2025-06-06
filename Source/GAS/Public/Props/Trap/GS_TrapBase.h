@@ -47,6 +47,7 @@ public:
 		bool bFromSweep, const FHitResult& SweepResult);
 
 
+
 	UFUNCTION(BlueprintNativeEvent)
 	void DamageBoxEffect(AActor* OtherActor);
 	void DamageBoxEffect_Implementation(AActor* OtherActor);

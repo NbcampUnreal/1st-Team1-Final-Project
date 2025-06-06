@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{44965052-9A4D-66A3-970E-BFB286189B49}",
+    "Hash": "{ED539C9A-8CC3-CDEA-0CBF-711B26704AA7}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -1698,7 +1698,7 @@
       "Name": "EV_Arrow_Shot",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Arrow_Shot",
       "GUID": "{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}",
-      "MaxAttenuation": "600",
+      "MaxAttenuation": "500",
       "DurationType": "OneShot",
       "DurationMin": "1.615375",
       "DurationMax": "1.6200471",
@@ -1740,7 +1740,7 @@
       "Name": "EV_ArrowImpact_Body",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Body",
       "GUID": "{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}",
-      "MaxAttenuation": "640",
+      "MaxAttenuation": "1800.0001",
       "DurationType": "OneShot",
       "DurationMin": "0.30958745",
       "DurationMax": "0.32799646",
@@ -1755,7 +1755,7 @@
       "Name": "EV_ArrowImpact_Stone",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Stone",
       "GUID": "{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "1500",
       "DurationType": "OneShot",
       "DurationMin": "0.54591566",
       "DurationMax": "0.7596884",
@@ -1776,7 +1776,7 @@
       "Name": "EV_ArrowImpact_Wood",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Wood",
       "GUID": "{5AF6D827-D199-47C8-9BED-CC9DB12DEE69}",
-      "MaxAttenuation": "1000",
+      "MaxAttenuation": "1500",
       "DurationType": "OneShot",
       "DurationMin": "0.85634214",
       "DurationMax": "0.9072629",
@@ -3339,6 +3339,6 @@
     ]
    }
   ],
-  "FileHash": "{BC07C432-DBE8-7A9C-5FD6-77CEED0A778F}"
+  "FileHash": "{17B4BE89-B721-E7D8-C146-CF6DF7A3405F}"
  }
 }

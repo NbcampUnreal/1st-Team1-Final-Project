@@ -28,8 +28,8 @@ struct FTrapEffect
     bool bStun = false;
 
     //slow
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    //bool bSlow = false;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bSlow = false;
 
 
 
