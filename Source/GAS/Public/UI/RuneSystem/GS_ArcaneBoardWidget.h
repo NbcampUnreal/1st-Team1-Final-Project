@@ -91,6 +91,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void OnApplyButtonClicked();
 
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	FVector2D GetGridCellSize() const;
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	FVector2D CalculateDragVisualScale(uint8 RuneID) const;
+
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 

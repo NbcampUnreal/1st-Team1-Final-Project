@@ -4,6 +4,11 @@
 #include "GameFramework/GameMode.h"
 #include "GS_CustomLobbyGM.generated.h"
 
+class AGS_SpawnSlot;
+class AGS_PlayerState;
+class APawn;
+class UGS_PawnMappingDataAsset;
+
 UCLASS()
 class GAS_API AGS_CustomLobbyGM : public AGameMode
 {
@@ -11,6 +16,7 @@ class GAS_API AGS_CustomLobbyGM : public AGameMode
 	
 public:
 	AGS_CustomLobbyGM();
+	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
 	void UpdatePlayerReadyStatus(APlayerState* Player, bool bIsReady);
@@ -27,4 +33,21 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
 	int32 MinPlayersToStart = 1;
 
+	//폰 배치
+public:
+	void HandlePlayerStateUpdated(AGS_PlayerState* UpdatedPlayerState);
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Lobby")
+	TObjectPtr<UGS_PawnMappingDataAsset> PawnMappingData;
+
+private:
+	TArray<AGS_SpawnSlot*> GuardianSlots;
+	TArray<AGS_SpawnSlot*> SeekerSlots;
+
+	UPROPERTY()
+	TMap<TObjectPtr<AGS_PlayerState>, TObjectPtr<APawn>> SpawnedLobbyPawns;
+
+	void CollectSpawnSlots();
+	void UpdateLobbyPawns();
 };
