@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/LocalPlayer.h"
+#include "System/Save/GS_OptionSettinsSaveGame.h"
 
 UGS_GameInstance::UGS_GameInstance()
     : DefaultLobbyMapName(TEXT("/Game/Maps/CustomLobbyLevel"))
@@ -16,6 +17,10 @@ UGS_GameInstance::UGS_GameInstance()
 	, DefaultMaxLobbyPlayers(5)
 {
     RemainingTime = 900.f;
+
+    MouseSensitivity = 1.0f;
+    MinSensitivity = 0.1f;
+    MaxSensitivity = 10.0f;
 }
 
 void UGS_GameInstance::Init()
@@ -91,6 +96,9 @@ void UGS_GameInstance::Init()
     {
         UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Init() - Not a Dedicated Server Instance."));
     }
+
+    // 저장된 옵션 세팅 로드
+    LoadSettings();
 }
 
 FString UGS_GameInstance::GetAndClearPendingConnectString()
@@ -637,5 +645,36 @@ void UGS_GameInstance::OnLeaveSessionComplete(FName SessionName, bool bWasSucces
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("OnLeaveSessionComplete: Failed to get PlayerController to travel to Main Menu."));
+    }
+}
+
+float UGS_GameInstance::GetMouseSensitivity() const
+{
+    return MouseSensitivity;
+}
+
+void UGS_GameInstance::SetMouseSensitivity(float NewSensitivity)
+{
+    MouseSensitivity = NewSensitivity;
+    SaveSettings();
+}
+
+void UGS_GameInstance::SaveSettings()
+{
+    if (UGS_OptionSettinsSaveGame* SaveGameInstance = Cast<UGS_OptionSettinsSaveGame>(UGameplayStatics::CreateSaveGameObject(UGS_OptionSettinsSaveGame::StaticClass())))
+    {
+        SaveGameInstance->MouseSensitivity = MouseSensitivity;
+        UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("SettingsSlot"), 0);
+    }
+}
+
+void UGS_GameInstance::LoadSettings()
+{
+    if (UGameplayStatics::DoesSaveGameExist(TEXT("SettingsSlot"), 0))
+    {
+        if (UGS_OptionSettinsSaveGame* LoadGameInstance = Cast<UGS_OptionSettinsSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("SettingsSlot"), 0)))
+        {
+            MouseSensitivity = LoadGameInstance->MouseSensitivity;
+        }
     }
 }
