@@ -4,6 +4,7 @@
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatRow.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
+#include "Character/Player/Monster/GS_Monster.h"
 #include "RuneSystem/GS_EnumUtils.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -184,22 +185,23 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 
 	if (IsValid(OwnerCharacter))
 	{
-		if (Cast<AGS_Guardian>(OwnerCharacter)->GuardianState != EGuardianState::None)
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(OwnerCharacter))
 		{
-			//OwnerCharacter->PlayAnimMontage(AnimMontage, 2.f);
-		}
-		if (OwnerCharacter->HasAuthority())
-		{
-			//stop character during damage animation
-			//CharacterWalkSpeed = OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
-			//OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = 0.f;
-		}
-		
-		if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
-		{
-			FOnMontageBlendingOutStarted BlendOut;
-			BlendOut.BindUObject(this, &UGS_StatComp::OnDamageMontageEnded);
-			AnimInstance->Montage_SetBlendingOutDelegate(BlendOut, AnimMontage);
+			Monster->PlayAnimMontage(AnimMontage);
+
+			if (Monster->HasAuthority())
+			{
+				//stop character during damage animation
+				CharacterWalkSpeed = Monster->GetCharacterMovement()->MaxWalkSpeed;
+				Monster->GetCharacterMovement()->MaxWalkSpeed = 0.f;
+			}
+
+			if (UAnimInstance* AnimInstance = Monster->GetMesh()->GetAnimInstance())
+			{
+				FOnMontageBlendingOutStarted BlendOut;
+				BlendOut.BindUObject(this, &UGS_StatComp::OnDamageMontageEnded);
+				AnimInstance->Montage_SetBlendingOutDelegate(BlendOut, AnimMontage);
+			}
 		}
 	}
 }
@@ -221,7 +223,7 @@ void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	if (OwnerCharacter->HasAuthority())
 	{
 		//can move
-		//OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CharacterWalkSpeed;
+		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CharacterWalkSpeed;
 	}
 }
 
