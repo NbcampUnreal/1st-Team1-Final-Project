@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Character/Component/GS_DebuffComp.h"
 #include "GS_UnitSelection.generated.h"
 
 class UGS_MiniPortrait;
+class UGS_StatComp;
+class UGS_DebuffComp;
 /**
  * 
  */
@@ -36,8 +39,8 @@ protected:
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* TypeText;
 
-	//UPROPERTY(meta=(BindWidget))
-	//UTextBlock* DebuffText;
+	UPROPERTY(meta=(BindWidget))
+	UTextBlock* DebuffText;
 	
 	UPROPERTY(meta=(BindWidget))
 	class UUniformGridPanel* MultiIconsGrid;
@@ -47,12 +50,16 @@ protected:
 
 private:
 	TWeakObjectPtr<UGS_StatComp> BoundStatComp;
+	TWeakObjectPtr<UGS_DebuffComp> BoundDebuffComp;
 	
 	UFUNCTION()
 	void HandleSelectionChanged(const TArray<AGS_Monster*>& NewSelection);
 
 	UFUNCTION()          
 	void OnHPChanged(UGS_StatComp* InStatComp);
+
+	UFUNCTION()          
+	void OnDebuffChanged(const TArray<FDebuffRepInfo>& List);
 	
 	class AGS_RTSController* GetRTSController() const;
 };

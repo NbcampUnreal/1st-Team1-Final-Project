@@ -110,9 +110,21 @@ void AGS_Monster::OnDeath()
 	}
 	
 	DetachFromControllerPendingDestroy();
-	SetLifeSpan(2.f);
 	
+	FTimerHandle DestroyTimerHandle;
+	GetWorldTimerManager().SetTimer(
+		DestroyTimerHandle,
+		this,
+		&AGS_Monster::HandleDelayedDestroy,
+		2.f,
+		false
+	);
+}
+
+void AGS_Monster::HandleDelayedDestroy()
+{
 	Multicast_OnDeath();
+	Destroy();
 }
 
 void AGS_Monster::Multicast_OnDeath_Implementation()

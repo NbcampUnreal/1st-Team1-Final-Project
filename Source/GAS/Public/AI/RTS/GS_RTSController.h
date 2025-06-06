@@ -74,14 +74,21 @@ public:
 	TArray<UInputAction*> CameraKeyActions;
 
 	// 선택 변경 델리게이트
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Selection")
+	UPROPERTY(BlueprintAssignable, Category="Selection")
 	FOnSelectionChanged OnSelectionChanged;
 
 	UPROPERTY(BlueprintAssignable, Category="Command")
 	FOnRTSCommandChanged OnRTSCommandChanged;
 
 	// 현재 선택된 유닛들
+	UFUNCTION(BlueprintCallable)
 	const TArray<AGS_Monster*>& GetUnitSelection() const { return UnitSelection; }
+
+	UFUNCTION(BlueprintCallable)
+	bool IsCtrlDown() const { return bCtrlDown; }
+	
+	UFUNCTION(BlueprintCallable)
+	bool IsShiftDown() const { return bShiftDown; }
 	
 	// 카메라 이동 입력 처리
 	void CameraMove(const FInputActionValue& InputValue);
@@ -112,9 +119,18 @@ public:
 	void OnRightMousePressed(const FInputActionValue& InputValue);
 
 	// 유닛 선택
+	UFUNCTION(BlueprintCallable)
 	void AddUnitToSelection(AGS_Monster* Unit);
+	
 	void AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& Units); // 다중 선택
+
+	UFUNCTION(BlueprintCallable)
+	void SelectSameTypeFromSelection(AGS_Monster* Unit);
+	
+	UFUNCTION(BlueprintCallable)
 	void RemoveUnitFromSelection(AGS_Monster* Unit);
+
+	UFUNCTION(BlueprintCallable)
 	void ClearUnitSelection();
 
 	// 부대 지정, 호출 
@@ -136,7 +152,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MoveCameraViaMinimap(const FVector& WorldLocation);
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintCallable)
 	ERTSCommand GetCurrentCommand() const { return CurrentCommand; }
 	
 	// Server
