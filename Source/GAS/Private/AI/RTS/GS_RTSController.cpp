@@ -30,6 +30,7 @@ AGS_RTSController::AGS_RTSController()
 	UnitGroups.SetNum(9);
 	bCtrlDown = false;
 	bShiftDown = false;
+	MaxSelectableUnits = 12;
 }
 
 void AGS_RTSController::BeginPlay()
@@ -500,6 +501,11 @@ void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 		return;
 	}
 
+	if (UnitSelection.Num() >= MaxSelectableUnits)
+	{
+		return;
+	}
+
 	// 첫 번째로 추가되는 유닛만 소리 재생
 	bool bShouldPlaySound = UnitSelection.IsEmpty();
 
@@ -520,10 +526,15 @@ void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& 
 	}
 
 	ClearUnitSelection();
-	bool bShouldPlaySound = UnitSelection.IsEmpty();
-	
+
+	int32 AddedCount = 0;
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
+		if (AddedCount >= MaxSelectableUnits)
+		{
+			break; // 12개 채웠으면 더 이상 추가하지 않음
+		}
+		
 		AGS_Monster* Unit = Units[i];
 		if (!Unit)
 		{
@@ -535,7 +546,8 @@ void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& 
 		
 		UnitSelection.AddUnique(Unit);
 		// 첫 번째 유닛만 소리 재생
-		Unit->SetSelected(true, bShouldPlaySound && i == 0);
+		Unit->SetSelected(true, i == 0);
+		AddedCount++;
 	}
 	
 	OnSelectionChanged.Broadcast(UnitSelection);
