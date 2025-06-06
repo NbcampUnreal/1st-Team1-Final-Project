@@ -75,7 +75,7 @@ void AGS_Character::BeginPlay()
 	}
 
 	DefaultCharacterSpeed = this->GetCharacterMovement()->MaxWalkSpeed;
-	CharacterSpeed = DefaultCharacterSpeed;
+	//CharacterSpeed = DefaultCharacterSpeed;
 
 	if (HasAuthority())
 	{
