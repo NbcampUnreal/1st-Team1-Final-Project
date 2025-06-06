@@ -204,6 +204,11 @@ void AGS_PlayerState::Server_SetPlayerRole_Implementation(EPlayerRole NewRole)
         CurrentPlayerRole = NewRole;
         OnRep_PlayerRole();
 
+        if (AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        {
+            GM->HandlePlayerStateUpdated(this);
+        }
+
         if (bIsReady)
         {
             Server_SetReadyStatus(false);
@@ -228,6 +233,11 @@ void AGS_PlayerState::Server_SetSeekerJob_Implementation(ESeekerJob NewJob)
 		CurrentSeekerJob = NewJob;
 		OnRep_SeekerJob();
 
+        if (AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        {
+            GM->HandlePlayerStateUpdated(this);
+        }
+
         if (bIsReady)
         {
             Server_SetReadyStatus(false);
@@ -251,6 +261,11 @@ void AGS_PlayerState::Server_SetGuardianJob_Implementation(EGuardianJob NewJob)
 		UE_LOG(LogTemp, Warning, TEXT("Server: Player %s changed Guardian job from %s to %s"), *GetPlayerName(), *UEnum::GetValueAsString(CurrentGuardianJob), *UEnum::GetValueAsString(NewJob));
 		CurrentGuardianJob = NewJob;
 		OnRep_GuardianJob();
+
+        if (AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        {
+            GM->HandlePlayerStateUpdated(this);
+        }
 
         if (bIsReady)
         {
