@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{ED539C9A-8CC3-CDEA-0CBF-711B26704AA7}",
+    "Hash": "{702B1FE6-9A77-F780-139F-19B2E86FA0A8}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -102,6 +102,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Growling_Sequence_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
       "CachePath": "EE/{EE5E6DA2-C25F-0B54-A265-DE2CB75754BF}.wem"
+     },
+     {
+      "Id": "100216115",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_combat_punch_swing_hit_bone_shatter_06.wav",
+      "CachePath": "B8/{B8DBF317-B68F-3D8C-2274-D9D85B52D02E}.wem"
      },
      {
       "Id": "107540085",
@@ -760,6 +768,14 @@
       "CachePath": "46/{462133C6-E584-21AF-E4CB-1A99D480874B}.wem"
      },
      {
+      "Id": "589916228",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_combat_kick_gore_bone_breaks_01.wav",
+      "CachePath": "75/{755DCC81-9AE5-1857-3D48-E36A49D66DF8}.wem"
+     },
+     {
       "Id": "591081456",
       "Language": "SFX",
       "Streaming": "false",
@@ -1256,6 +1272,22 @@
       "CachePath": "F3/{F3C57AEE-16EF-BD32-FCC5-306214E504A9}.wem"
      },
      {
+      "Id": "999430707",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_combat_kick_gore_bone_breaks_04.wav",
+      "CachePath": "2D/{2D987EE7-E5F8-64D7-E730-E5D801A0E99C}.wem"
+     },
+     {
+      "Id": "1005360274",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_combat_punch_swing_gore_liquid_hit_05.wav",
+      "CachePath": "70/{700E422A-3107-4249-1E7E-CE16666E5661}.wem"
+     },
+     {
       "Id": "1006289215",
       "Language": "SFX",
       "Streaming": "false",
@@ -1698,7 +1730,7 @@
       "Name": "EV_Arrow_Shot",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Arrow_Shot",
       "GUID": "{EE87CA91-ECF4-4558-A3A0-74815D3C4D33}",
-      "MaxAttenuation": "500",
+      "MaxAttenuation": "700",
       "DurationType": "OneShot",
       "DurationMin": "1.615375",
       "DurationMax": "1.6200471",
@@ -1755,7 +1787,7 @@
       "Name": "EV_ArrowImpact_Stone",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Stone",
       "GUID": "{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}",
-      "MaxAttenuation": "1500",
+      "MaxAttenuation": "1050",
       "DurationType": "OneShot",
       "DurationMin": "0.54591566",
       "DurationMax": "0.7596884",
@@ -2097,6 +2129,30 @@
       "DurationType": "OneShot",
       "DurationMin": "0",
       "DurationMax": "0"
+     },
+     {
+      "Id": "4663620",
+      "Name": "EV_MeleeHit",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_MeleeHit",
+      "GUID": "{FFED896C-A767-4D36-8C11-0F881352CDAC}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.40904403",
+      "DurationMax": "0.6737413",
+      "MediaRefs": [
+       {
+        "Id": "100216115"
+       },
+       {
+        "Id": "589916228"
+       },
+       {
+        "Id": "999430707"
+       },
+       {
+        "Id": "1005360274"
+       }
+      ]
      },
      {
       "Id": "1139191950",
@@ -3339,6 +3395,6 @@
     ]
    }
   ],
-  "FileHash": "{17B4BE89-B721-E7D8-C146-CF6DF7A3405F}"
+  "FileHash": "{463A77CD-8664-26C5-2634-2A01495F489F}"
  }
 }
