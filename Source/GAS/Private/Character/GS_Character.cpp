@@ -41,6 +41,7 @@ void AGS_Character::BeginPlay()
 	if (CharacterEnum)
 	{
 		FString EnumToName = CharacterEnum->GetNameStringByValue((int64)CharacterType);
+		StatComp->InitStat(FName(EnumToName));
 		bStatInitialized = true;
 	}
 	if (bStatInitialized)
