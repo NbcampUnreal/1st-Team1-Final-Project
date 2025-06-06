@@ -121,6 +121,9 @@ public:
 	void AddUnitToSelection(AGS_Monster* Unit);
 	
 	void AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& Units); // 다중 선택
+
+	UFUNCTION(BlueprintCallable)
+	void SelectSameTypeFromSelection(AGS_Monster* Unit);
 	
 	UFUNCTION(BlueprintCallable)
 	void RemoveUnitFromSelection(AGS_Monster* Unit);

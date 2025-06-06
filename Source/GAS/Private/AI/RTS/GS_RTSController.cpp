@@ -377,6 +377,9 @@ void AGS_RTSController::InitCameraActor()
 
 void AGS_RTSController::SelectOnCtrlClick()
 {
+	int32 ViewportX, ViewportY;
+	GetViewportSize(ViewportX, ViewportY);
+	
 	FHitResult Hit;		
 	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, Hit);
 	if (bHit && Hit.GetActor())
@@ -387,9 +390,7 @@ void AGS_RTSController::SelectOnCtrlClick()
 			{
 				return;
 			}
-				
-			ClearUnitSelection();
-				
+			
 			ECharacterType MonsterType = Monster->GetCharacterType();
 			TArray<AGS_Monster*> SameTypeUnits;
 				
@@ -397,7 +398,22 @@ void AGS_RTSController::SelectOnCtrlClick()
 			for (TActorIterator<AGS_Monster> It(GetWorld()); It; ++It)
 			{
 				AGS_Monster* M = *It;
-				if (M->GetCharacterType() == MonsterType)
+				if (M->GetCharacterType() != MonsterType)
+				{
+					continue;
+				}
+
+				// 월드 좌표를 스크린 좌표로 투영
+				FVector WorldLoc = M->GetActorLocation();
+				FVector2D ScreenPos;
+				bool bProjected = ProjectWorldLocationToScreen(WorldLoc, ScreenPos, true);
+				if (!bProjected)
+				{
+					continue;
+				}
+
+				// HUD 제외 카메라 뷰에서만 보이는 몬스터만 선택되도록 
+				if (ScreenPos.X >= 0.0f && ScreenPos.X <= ViewportX && ScreenPos.Y >= 0.0f && ScreenPos.Y <= ViewportY*0.77)
 				{
 					SameTypeUnits.Add(M);
 				}
@@ -461,7 +477,8 @@ void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& 
 	{
 		return;
 	}
-	
+
+	ClearUnitSelection();
 	bool bShouldPlaySound = UnitSelection.IsEmpty();
 	
 	for (int32 i = 0; i < Units.Num(); ++i)
@@ -481,6 +498,33 @@ void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& 
 	}
 	
 	OnSelectionChanged.Broadcast(UnitSelection);
+}
+
+void AGS_RTSController::SelectSameTypeFromSelection(AGS_Monster* Unit)
+{
+	if (!Unit)
+	{
+		return;
+	}
+
+	if (!UnitSelection.Contains(Unit))
+	{
+		return;
+	}
+	
+	ECharacterType MonsterType = Unit->GetCharacterType();
+	TArray<AGS_Monster*> SameTypeUnits;
+	for (AGS_Monster* Monster : UnitSelection)
+	{
+		if (Monster->GetCharacterType() != MonsterType)
+		{
+			continue;
+		}
+
+		SameTypeUnits.Add(Monster);
+	}
+	
+	AddMultipleUnitsToSelection(SameTypeUnits);
 }
 
 void AGS_RTSController::RemoveUnitFromSelection(AGS_Monster* Unit)
@@ -519,21 +563,25 @@ void AGS_RTSController::ClearUnitSelection()
 void AGS_RTSController::OnCtrlPressed(const FInputActionInstance& InputInstance)
 {
 	bCtrlDown = true;
+	UE_LOG(LogTemp, Log, TEXT("Ctrl - True"));
 }
 
 void AGS_RTSController::OnCtrlReleased(const FInputActionInstance& InputInstance)
 {
 	bCtrlDown = false;
+	UE_LOG(LogTemp, Log, TEXT("Ctrl - False"));
 }
 
 void AGS_RTSController::OnShiftPressed(const FInputActionInstance& InputInstance)
 {
 	bShiftDown = true;
+	UE_LOG(LogTemp, Log, TEXT("Shift - True"));
 }
 
 void AGS_RTSController::OnShiftReleased(const FInputActionInstance& InputInstance)
 {
 	bShiftDown = false;
+	UE_LOG(LogTemp, Log, TEXT("Shift - False"));
 }
 
 
@@ -550,13 +598,6 @@ void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, in
 		{
 			return;
 		}
-		
-		ClearUnitSelection();
-		//UnitSelection = UnitGroups[GroupIdx].Units;
-		//for (AGS_Monster* U : UnitSelection)
-		//{
-		//	U->SetSelected(true);
-		//}
 
 		// 부대 호출 시에도 첫 번째 유닛만 소리 재생
 		AddMultipleUnitsToSelection(UnitGroups[GroupIdx].Units);
