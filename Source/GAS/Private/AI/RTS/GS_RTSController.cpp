@@ -13,7 +13,6 @@
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "Sound/GS_AudioManager.h"
 
@@ -605,25 +604,21 @@ void AGS_RTSController::ClearUnitSelection()
 void AGS_RTSController::OnCtrlPressed(const FInputActionInstance& InputInstance)
 {
 	bCtrlDown = true;
-	UE_LOG(LogTemp, Log, TEXT("Ctrl - True"));
 }
 
 void AGS_RTSController::OnCtrlReleased(const FInputActionInstance& InputInstance)
 {
 	bCtrlDown = false;
-	UE_LOG(LogTemp, Log, TEXT("Ctrl - False"));
 }
 
 void AGS_RTSController::OnShiftPressed(const FInputActionInstance& InputInstance)
 {
 	bShiftDown = true;
-	UE_LOG(LogTemp, Log, TEXT("Shift - True"));
 }
 
 void AGS_RTSController::OnShiftReleased(const FInputActionInstance& InputInstance)
 {
 	bShiftDown = false;
-	UE_LOG(LogTemp, Log, TEXT("Shift - False"));
 }
 
 
@@ -656,7 +651,6 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 		if (CameraActor)
 		{
 			SavedCameraPositions.Add(CameraIndex, CameraActor->GetActorLocation());
-			// UE_LOG(LogTemp, Log, TEXT("Saved camera pos %d: %s"), CameraIndex, *CameraActor->GetActorLocation().ToString());
 		}
 	}
 	else // 로드
@@ -664,7 +658,6 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 		if (CameraActor && SavedCameraPositions.Contains(CameraIndex))
 		{
 			CameraActor->SetActorLocation(SavedCameraPositions[CameraIndex]);
-			// UE_LOG(LogTemp, Log, TEXT("Moved camera to saved pos %d: %s"), CameraIndex, *SavedCameraPositions[CameraIndex].ToString());
 		}
 	}
 }
