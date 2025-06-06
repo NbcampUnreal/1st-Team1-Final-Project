@@ -6,7 +6,7 @@
 
 AGS_BossLevelGS::AGS_BossLevelGS()
 {
-	BossTotalTime = 600.f;
+	BossTotalTime = 900.f;
 	BossCurrentTime = 0.f;
 }
 
