@@ -64,6 +64,12 @@ void UGS_ArcaneBoardWidget::NativeDestruct()
 {
 	UnbindManagerEvents();
 
+	if (IsValid(SelectionVisualWidget))
+	{
+		SelectionVisualWidget->RemoveFromParent();
+		SelectionVisualWidget = nullptr;
+	}
+
 	Super::NativeDestruct();
 }
 
@@ -298,27 +304,18 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 
 			SelectionVisualWidget->Setup(RuneID, RuneTexture);
 
-			float ScaleFactor = 1.0f;
-			FVector2D ActualDragVisualSize;
+			FVector2D ScaleFactors = CalculateDragVisualScale(RuneID);
+			SelectionVisualWidget->SetRenderScale(ScaleFactors);
 
-			if (GridCells.Num() > 0)
-			{
-				FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
-				FVector2D BoardSize = this->GetCachedGeometry().GetLocalSize();
-
-				ScaleFactor = (ViewportSize.Y * 0.8f) / BoardSize.Y;
-				ScaleFactor = FMath::Max(ScaleFactor*1.5f, 1.5f);
-
-				SelectionVisualWidget->SetRenderScale(FVector2D(ScaleFactor, ScaleFactor));
-				
-				FVector2D OriginalSize = SelectionVisualWidget->GetDesiredSize();
-				ActualDragVisualSize = OriginalSize * ScaleFactor;
-			}
+			FVector2D OriginalSize = SelectionVisualWidget->GetDesiredSize();
+			FVector2D ActualDragVisualSize = FVector2D(
+				OriginalSize.X * ScaleFactors.X,
+				OriginalSize.Y * ScaleFactors.Y
+			);
 
 			if (GetWorld())
 			{
-				FVector2D MousePos = FVector2D::ZeroVector;
-				MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
+				FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 				if (MousePos != FVector2D::ZeroVector)
 				{
 					FVector2D CenterOffset = ActualDragVisualSize * 0.5f;
@@ -478,6 +475,59 @@ void UGS_ArcaneBoardWidget::OnApplyButtonClicked()
 			LPS->ApplyBoardChanges();
 		}
 	}
+}
+
+FVector2D UGS_ArcaneBoardWidget::GetGridCellSize() const
+{
+	if (GridCells.Num() == 0 || !IsValid(GridPanel))
+	{
+		return FVector2D::ZeroVector;
+	}
+
+	for (const auto& CellPair : GridCells)
+	{
+		if (IsValid(CellPair.Value))
+		{
+			FGeometry CellGeometry = CellPair.Value->GetCachedGeometry();
+			return CellGeometry.GetLocalSize();
+		}
+	}
+
+	return FVector2D::ZeroVector;
+}
+
+FVector2D UGS_ArcaneBoardWidget::CalculateDragVisualScale(uint8 RuneID) const
+{
+	if (!IsValid(BoardManager))
+	{
+		return FVector2D(1.0f, 1.0f);
+	}
+
+	FRuneTableRow RuneData;
+	if (!BoardManager->GetRuneData(RuneID, RuneData))
+	{
+		return FVector2D(1.0f, 1.0f);
+	}
+
+	FVector2D CellSize = GetGridCellSize();
+	if (CellSize.IsZero())
+	{
+		return FVector2D(1.0f, 1.0f);
+	}
+
+	FIntPoint RuneSize = RuneData.RuneSize;
+
+	FVector2D TargetSize = FVector2D(
+		CellSize.X * RuneSize.Y,
+		CellSize.Y * RuneSize.X
+	);
+
+	float BaseSize = 64.0f;
+
+	float ScaleX = TargetSize.X / BaseSize;
+	float ScaleY = TargetSize.Y / BaseSize;
+
+	return FVector2D(ScaleX * 0.8f, ScaleY * 0.8f);
 }
 
 void UGS_ArcaneBoardWidget::UpdateGridVisuals()
