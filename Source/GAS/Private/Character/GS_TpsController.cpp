@@ -229,7 +229,7 @@ void AGS_TpsController::BeginPlay()
 	
 	if (IsLocalController())
 	{
-		TestFunction();
+		//TestFunction();
 	}
 
 	GameInstance = Cast<UGS_GameInstance>(GetGameInstance());
@@ -298,6 +298,6 @@ void AGS_TpsController::BeginPlayingState()
 	{
 		//ServerRPCTestFunction();
 		//AddWidget();
-		//TestFunction();
+		TestFunction();
 	}
 }
