@@ -1,5 +1,6 @@
 #include "System/GameMode/GS_ResultGM.h"
 #include "System/GameState/GS_ResultGS.h"
+#include "System/PlayerController/GS_ResultPC.h"
 #include "System/GS_PlayerState.h"
 #include "GameFramework/GameStateBase.h"
 #include "Character/Player/GS_PawnMappingDataAsset.h"
@@ -14,21 +15,37 @@ AGS_ResultGM::AGS_ResultGM()
 	bUseSeamlessTravel = true;
 }
 
-//void AGS_ResultGM::ExtractResult()
-//{
-//	if (!GameState) return;
-//
-//	for (APlayerState* PS : GameState->PlayerArray)
-//	{
-//		AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
-//		if (GS_PS)
-//		{
-//			SpawnPlayersWithPoseByResult(GS_PS->CurrentGameResult);
-//			return;
-//		}
-//	}
-//}
-//
+void AGS_ResultGM::RestartPlayer(AController* NewPlayer)
+{
+	Super::RestartPlayer(NewPlayer);
+
+	for (APlayerState* PS : GameState->PlayerArray)
+	{
+		if (APlayerController* PC = Cast<APlayerController>(PS->GetOwner()))
+		{
+			if (AGS_ResultPC* GS_PC = Cast<AGS_ResultPC>(PC))
+			{
+				GS_PC->Client_ShowResultUI();
+			}
+		}
+
+	}
+}
+
+void AGS_ResultGM::ExtractResult()
+{
+	if (!GameState) return;
+	for (APlayerState* PS : GameState->PlayerArray)
+	{
+		AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
+		if (GS_PS)
+		{
+			Result = GS_PS->CurrentGameResult;
+			return;
+		}
+	}
+}
+
 //void AGS_ResultGM::SpawnPlayersWithPoseByResult(EGameResult Result)
 //{
 //	if (Result != EGameResult::GR_SeekersLost && Result != EGameResult::GR_SeekersWon)

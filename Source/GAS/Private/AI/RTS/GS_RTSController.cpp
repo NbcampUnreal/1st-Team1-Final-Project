@@ -13,7 +13,6 @@
 #include "AkGameplayStatics.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "Sound/GS_AudioManager.h"
 
@@ -31,6 +30,7 @@ AGS_RTSController::AGS_RTSController()
 	UnitGroups.SetNum(9);
 	bCtrlDown = false;
 	bShiftDown = false;
+	MaxSelectableUnits = 12;
 }
 
 void AGS_RTSController::BeginPlay()
@@ -419,6 +419,9 @@ void AGS_RTSController::InitCameraActor()
 
 void AGS_RTSController::SelectOnCtrlClick()
 {
+	int32 ViewportX, ViewportY;
+	GetViewportSize(ViewportX, ViewportY);
+	
 	FHitResult Hit;		
 	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, Hit);
 	if (bHit && Hit.GetActor())
@@ -429,9 +432,7 @@ void AGS_RTSController::SelectOnCtrlClick()
 			{
 				return;
 			}
-				
-			ClearUnitSelection();
-				
+			
 			ECharacterType MonsterType = Monster->GetCharacterType();
 			TArray<AGS_Monster*> SameTypeUnits;
 				
@@ -440,6 +441,21 @@ void AGS_RTSController::SelectOnCtrlClick()
 			{
 				AGS_Monster* M = *It;
 				if (M->GetCharacterType() != MonsterType)
+				{
+					continue;
+				}
+
+				// 월드 좌표를 스크린 좌표로 투영
+				FVector WorldLoc = M->GetActorLocation();
+				FVector2D ScreenPos;
+				bool bProjected = ProjectWorldLocationToScreen(WorldLoc, ScreenPos, true);
+				if (!bProjected)
+				{
+					continue;
+				}
+
+				// HUD 제외 카메라 뷰에서만 보이는 몬스터만 선택되도록 
+				if (ScreenPos.X >= 0.0f && ScreenPos.X <= ViewportX && ScreenPos.Y >= 0.0f && ScreenPos.Y <= ViewportY*0.77)
 				{
 					SameTypeUnits.Add(M);
 				}
@@ -485,6 +501,11 @@ void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 		return;
 	}
 
+	if (UnitSelection.Num() >= MaxSelectableUnits)
+	{
+		return;
+	}
+
 	// 첫 번째로 추가되는 유닛만 소리 재생
 	bool bShouldPlaySound = UnitSelection.IsEmpty();
 
@@ -503,11 +524,17 @@ void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& 
 	{
 		return;
 	}
-	
-	bool bShouldPlaySound = UnitSelection.IsEmpty();
-	
+
+	ClearUnitSelection();
+
+	int32 AddedCount = 0;
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
+		if (AddedCount >= MaxSelectableUnits)
+		{
+			break; // 12개 채웠으면 더 이상 추가하지 않음
+		}
+		
 		AGS_Monster* Unit = Units[i];
 		if (!Unit)
 		{
@@ -519,10 +546,38 @@ void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& 
 		
 		UnitSelection.AddUnique(Unit);
 		// 첫 번째 유닛만 소리 재생
-		Unit->SetSelected(true, bShouldPlaySound && i == 0);
+		Unit->SetSelected(true, i == 0);
+		AddedCount++;
 	}
 	
 	OnSelectionChanged.Broadcast(UnitSelection);
+}
+
+void AGS_RTSController::SelectSameTypeFromSelection(AGS_Monster* Unit)
+{
+	if (!Unit)
+	{
+		return;
+	}
+
+	if (!UnitSelection.Contains(Unit))
+	{
+		return;
+	}
+	
+	ECharacterType MonsterType = Unit->GetCharacterType();
+	TArray<AGS_Monster*> SameTypeUnits;
+	for (AGS_Monster* Monster : UnitSelection)
+	{
+		if (Monster->GetCharacterType() != MonsterType)
+		{
+			continue;
+		}
+
+		SameTypeUnits.Add(Monster);
+	}
+	
+	AddMultipleUnitsToSelection(SameTypeUnits);
 }
 
 void AGS_RTSController::RemoveUnitFromSelection(AGS_Monster* Unit)
@@ -592,13 +647,6 @@ void AGS_RTSController::OnGroupKey(const FInputActionInstance& InputInstance, in
 		{
 			return;
 		}
-		
-		ClearUnitSelection();
-		//UnitSelection = UnitGroups[GroupIdx].Units;
-		//for (AGS_Monster* U : UnitSelection)
-		//{
-		//	U->SetSelected(true);
-		//}
 
 		// 부대 호출 시에도 첫 번째 유닛만 소리 재생
 		AddMultipleUnitsToSelection(UnitGroups[GroupIdx].Units);
@@ -615,7 +663,6 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 		if (CameraActor)
 		{
 			SavedCameraPositions.Add(CameraIndex, CameraActor->GetActorLocation());
-			// UE_LOG(LogTemp, Log, TEXT("Saved camera pos %d: %s"), CameraIndex, *CameraActor->GetActorLocation().ToString());
 		}
 	}
 	else // 로드
@@ -623,7 +670,6 @@ void AGS_RTSController::OnCameraKey(const FInputActionInstance& InputInstance, i
 		if (CameraActor && SavedCameraPositions.Contains(CameraIndex))
 		{
 			CameraActor->SetActorLocation(SavedCameraPositions[CameraIndex]);
-			// UE_LOG(LogTemp, Log, TEXT("Moved camera to saved pos %d: %s"), CameraIndex, *SavedCameraPositions[CameraIndex].ToString());
 		}
 	}
 }

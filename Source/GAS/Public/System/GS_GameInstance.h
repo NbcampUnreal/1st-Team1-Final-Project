@@ -123,4 +123,28 @@ protected:
 public:
     UPROPERTY(BlueprintReadWrite, Category = "Timer")
     float RemainingTime;
+
+    //플레이어 옵션 세팅
+public:
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    float GetMouseSensitivity() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    void SetMouseSensitivity(float NewSensitivity);
+
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    void SaveSettings();
+
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    void LoadSettings();
+
+ private:
+     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+     float MouseSensitivity;
+
+     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+     float MinSensitivity;
+
+     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+     float MaxSensitivity;
 };

@@ -52,11 +52,6 @@ AGS_Monster::AGS_Monster()
 	{
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block); // Interactable
 	}
-	
-	if (GetMesh())
-	{
-		GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block); // Interactable
-	}
 }
 
 void AGS_Monster::BeginPlay()
@@ -110,9 +105,21 @@ void AGS_Monster::OnDeath()
 	}
 	
 	DetachFromControllerPendingDestroy();
-	SetLifeSpan(2.f);
 	
+	FTimerHandle DestroyTimerHandle;
+	GetWorldTimerManager().SetTimer(
+		DestroyTimerHandle,
+		this,
+		&AGS_Monster::HandleDelayedDestroy,
+		2.f,
+		false
+	);
+}
+
+void AGS_Monster::HandleDelayedDestroy()
+{
 	Multicast_OnDeath();
+	Destroy();
 }
 
 void AGS_Monster::Multicast_OnDeath_Implementation()
@@ -145,9 +152,4 @@ void AGS_Monster::Attack()
 void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 {
 	MonsterAnim->Montage_Play(AttackMontage);
-}
-
-void AGS_Monster::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }

@@ -59,8 +59,6 @@ void AGS_Chan::OnComboAttack()
 	float ControlYaw = GetControlRotation().Yaw;
 	AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController());
 	float YawDiff = FMath::Abs(FMath::FindDeltaAngleDegrees(ControlYaw, TpsController->LastRotatorInMoving.Yaw));
-
-	UE_LOG(LogTemp, Warning, TEXT("ActorYaw : %f , ControlYaw : %f, Deff : %f"), TpsController->LastRotatorInMoving.Yaw, ControlYaw, YawDiff);
 	
 	if (YawDiff > 50)
 	{
@@ -167,19 +165,27 @@ void AGS_Chan::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 
 void AGS_Chan::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
 {
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->IsPlayingFullBodyMontage = bFullBodySlot;
-		UE_LOG(LogTemp, Warning, TEXT("Set Is FullBodyslot : %s"), AnimInstance->IsPlayingFullBodyMontage ? TEXT("true") : TEXT("false"));
 	}
 }
 
 void AGS_Chan::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
 {
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->IsPlayingUpperBodyMontage = bUpperBodySlot;
-		UE_LOG(LogTemp, Warning, TEXT("Set Is UpperBodyslot : %s"), AnimInstance->IsPlayingUpperBodyMontage ? TEXT("true") : TEXT("false"));
 	}
 }
 
@@ -208,7 +214,6 @@ void AGS_Chan::MulticastPlayComboSection_Implementation()
 	
 	FName SectionName = FName(*FString::Printf(TEXT("Attack%d"), CurrentComboIndex + 1));
 	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
-	AnimInstance->SetMotionMatchingPlayRate(2.0f, 2.0f);
 	
 	CurrentComboIndex++;
 	if (AnimInstance && ComboAnimMontage)

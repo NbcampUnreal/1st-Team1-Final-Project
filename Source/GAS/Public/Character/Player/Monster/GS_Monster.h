@@ -101,8 +101,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void Tick(float DeltaTime) override;
 
+	void HandleDelayedDestroy();
 	virtual void OnDeath() override;
 	
 	UPROPERTY()

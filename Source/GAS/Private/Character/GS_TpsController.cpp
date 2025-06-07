@@ -13,6 +13,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "System/GS_PlayerState.h"
+#include "UI/Character/GS_HPBoardWidget.h"
+#include "System/GS_GameInstance.h"
 
 
 AGS_TpsController::AGS_TpsController()
@@ -52,13 +54,17 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
 	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
 	{
-		if (ControlValues.bCanLookRight)
+		if(GameInstance)
 		{
-			ControlledPawn->AddControllerYawInput(InputAxisVector.X);
-		}
-		if (ControlValues.bCanLookUp)
-		{
-			ControlledPawn->AddControllerPitchInput(InputAxisVector.Y);
+			float SensitivityMultiplier = GameInstance->GetMouseSensitivity();
+			if (ControlValues.bCanLookRight)
+			{
+				ControlledPawn->AddControllerYawInput(InputAxisVector.X * SensitivityMultiplier);
+			}
+			if (ControlValues.bCanLookUp)
+			{
+				ControlledPawn->AddControllerPitchInput(InputAxisVector.Y * SensitivityMultiplier);
+			}
 		}
 	}
 }
@@ -103,6 +109,15 @@ void AGS_TpsController::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AGS_TpsController, ControlValues);
+}
+
+float AGS_TpsController::GetCurrentMouseSensitivity() const
+{
+	if (GameInstance)
+	{
+		return GameInstance->GetMouseSensitivity();
+	}
+	return 1.0f;
 }
 
 void AGS_TpsController::InitControllerPerWorld()
@@ -177,26 +192,47 @@ void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
 	}
 }
 
+void AGS_TpsController::TestFunction()
+{
+	AGS_Character* GS_Character = Cast<AGS_Character>(GetPawn());
+	if (IsValid(GS_Character))
+	{
+		TSubclassOf<UUserWidget> Widget = PlayerWidgetClasses[GS_Character->GetCharacterType()];
+		if (IsValid(Widget))
+		{
+			if (PlayerWidgetInstance)
+			{
+				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Remove ")),true, true, FLinearColor::Blue,5.f);
+				PlayerWidgetInstance->RemoveFromParent();
+				PlayerWidgetInstance = nullptr;
+			}
+			
+			PlayerWidgetInstance = CreateWidget<UUserWidget>(this, Widget);
+			if (IsValid(PlayerWidgetInstance))
+			{
+				UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(PlayerWidgetInstance->GetWidgetFromName(TEXT("WBP_HPBoard")));
+				if (HPBoardWidget)
+				{
+					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Valid HP Board Widget ")),true, true, FLinearColor::Red,5.f);
+					HPBoardWidget->InitBoardWidget();
+
+					PlayerWidgetInstance->AddToViewport(0);
+				}
+			}
+		}
+	}
+}
+
 void AGS_TpsController::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	if (IsLocalController())
 	{
-		AGS_Character* GS_Character = Cast<AGS_Character>(GetPawn());
-		if (IsValid(GS_Character))
-		{
-			TSubclassOf<UUserWidget> Widget = PlayerWidgetClasses[GS_Character->GetCharacterType()];
-			if (IsValid(Widget))
-			{
-				PlayerWidgetInstance = CreateWidget<UUserWidget>(this, Widget);
-				if (IsValid(PlayerWidgetInstance))
-				{
-					PlayerWidgetInstance->AddToViewport(0);
-				}
-			}
-		}
+		//TestFunction();
 	}
+
+	GameInstance = Cast<UGS_GameInstance>(GetGameInstance());
 	
 	InitControllerPerWorld();
 }
@@ -260,6 +296,8 @@ void AGS_TpsController::BeginPlayingState()
 	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s) --- BeginPlayingState CALLED ---"), *GetNameSafe(this));
 	if (IsLocalController())
 	{
-		AddWidget();
+		//ServerRPCTestFunction();
+		//AddWidget();
+		TestFunction();
 	}
 }

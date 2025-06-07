@@ -65,15 +65,35 @@ void UGS_SkillBase::StartCoolDown()
 
 	bIsCoolingDown = true;
 	
-	OwnerCharacter->GetWorldTimerManager().SetTimer(CooldownHandle, [this]()
-		{
-			bIsCoolingDown = false;
-			UE_LOG(LogTemp, Warning, TEXT("Cool Down Complete"));
+	TWeakObjectPtr<UGS_SkillBase> WeakThis(this);
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->GetWorldTimerManager().SetTimer(CooldownHandle, [WeakThis]()
+			{
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
 
-		
-		}, Cooltime, false);
+				WeakThis->bIsCoolingDown = false;
+				UE_LOG(LogTemp, Warning, TEXT("Cool Down Complete"));
 
-	GetWorld()->GetTimerManager().SetTimer(LogTimerHandle, this, &UGS_SkillBase::LogRemainingTime, 0.07f, true);
+			}, Cooltime, false);
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(LogTimerHandle, [WeakThis]()
+			{
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+
+				WeakThis->LogRemainingTime();
+
+			}, 0.07f, true);
+	}
 
 	// //guardian state setting
 	// AGS_Guardian* Guardian = Cast<AGS_Guardian>(OwnerCharacter);
@@ -85,6 +105,7 @@ void UGS_SkillBase::StartCoolDown()
 
 void UGS_SkillBase::LogRemainingTime()
 {
+	if (!GetWorld()) return;
 	//server logic
 	
 	LeftCoolTime = GetWorld()->GetTimerManager().GetTimerRemaining(CooldownHandle);

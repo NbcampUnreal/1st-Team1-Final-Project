@@ -13,6 +13,21 @@ class GAS_API AGS_ResultGM : public AGameMode
 public:
 	AGS_ResultGM();
 
+	virtual void RestartPlayer(AController* NewPlayer) override;
+
+private:
+	void ExtractResult();
+	EGameResult Result;
+public:
+	EGameResult GetGameResult() const { return Result; }
+
+	//결과 위젯
+
+
+
+
+	//폰 스폰
+
 	/*void ExtractResult();
 
 	void SpawnPlayersWithPoseByResult(EGameResult Result);

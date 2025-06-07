@@ -38,6 +38,7 @@ void AGS_Door::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InitDoor();
 	TriggerBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_Door::OnTriggerBeginOverlap);
 }
 

@@ -7,6 +7,7 @@
 #include "Character/GS_Character.h"
 #include "GS_TpsController.generated.h"
 
+class UGS_GameInstance;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
@@ -113,9 +114,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
 	FRotator LastRotatorInMoving;
 
+	UFUNCTION(BlueprintCallable)
+	void TestFunction();
+	
+	//마우스 민감도 관련 함수
+	UFUNCTION(BlueprintCallable, Category = "Settings")
+	float GetCurrentMouseSensitivity() const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void PostSeamlessTravel() override;
 	virtual void BeginPlayingState() override;
+
+	//게임 인스턴스 참조
+	UPROPERTY(BlueprintReadOnly, Category = "Settings")
+	UGS_GameInstance* GameInstance;
 };
