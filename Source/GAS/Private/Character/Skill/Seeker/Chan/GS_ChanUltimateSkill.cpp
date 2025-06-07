@@ -20,7 +20,7 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	// 궁극기 사운드 재생
 	if (OwnerPlayer && OwnerPlayer->UltimateSkillSound)
 	{
-		OwnerPlayer->PlaySound(OwnerPlayer->UltimateSkillSound);
+		OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->UltimateSkillSound);
 	}
 	
 	OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);

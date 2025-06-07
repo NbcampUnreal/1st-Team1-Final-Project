@@ -6,6 +6,7 @@
 
 class UGS_HPWidget;
 class UVerticalBox;
+class AGS_Character;
 
 UCLASS()
 class GAS_API UGS_HPBoardWidget : public UUserWidget
@@ -17,6 +18,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void InitBoardWidget();
+
 	
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -24,5 +26,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UGS_HPWidget> HPWidgetClass;
-	
+
+	UPROPERTY()
+	TObjectPtr<AGS_Character> OwningCharacter;
 };

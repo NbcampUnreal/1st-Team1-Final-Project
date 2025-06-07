@@ -36,7 +36,7 @@ AGS_Drakhar::AGS_Drakhar()
 	ClientGuardianState = EGuardianState::CtrlSkillEnd;
 
 	//boss monster tag for user widget
-	Tags.Add("Monster");
+	Tags.Add("Guardian");
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -238,6 +238,11 @@ void AGS_Drakhar::DashAttackCheck()
 	{
 		for (auto const& OutHitResult : OutHitResults)
 		{
+			if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
+			{
+				continue;
+			}
+
 			AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
 			if (IsValid(DamagedCharacter))
 			{
@@ -263,6 +268,11 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 	{
 		for (auto const& OutHitResult : OutHitResults)
 		{
+			if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
+			{
+				continue;
+			}
+
 			AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
 			if (IsValid(DamagedCharacter))
 			{
@@ -282,7 +292,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			}
 		}
 	}
-	MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
+	//MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
 }
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()

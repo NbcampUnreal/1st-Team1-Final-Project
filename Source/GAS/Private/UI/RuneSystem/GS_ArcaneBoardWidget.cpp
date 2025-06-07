@@ -58,6 +58,8 @@ void UGS_ArcaneBoardWidget::NativeConstruct()
 	{
 		ResetButton->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnResetButtonClicked);
 	}
+
+	RefreshForCurrentCharacter();
 }
 
 void UGS_ArcaneBoardWidget::NativeDestruct()
@@ -77,6 +79,7 @@ void UGS_ArcaneBoardWidget::BindManagerEvents()
 {
 	if (IsValid(BoardManager))
 	{
+		UnbindManagerEvents();
 		BoardManager->OnStatsChanged.AddDynamic(this, &UGS_ArcaneBoardWidget::OnStatsChanged);
 	}
 }
@@ -171,17 +174,28 @@ void UGS_ArcaneBoardWidget::SetBoardManager(UGS_ArcaneBoardManager* InBoardManag
 		return;
 	}
 
-	BoardManager = InBoardManager;
-
-	BindManagerEvents();
-	GenerateGridLayout();
-	InitInventory();
-	InitStatPanel();
+	RefreshForCurrentCharacter();
 }
 
 UGS_ArcaneBoardManager* UGS_ArcaneBoardWidget::GetBoardManager() const
 {
 	return BoardManager;
+}
+
+void UGS_ArcaneBoardWidget::RefreshForCurrentCharacter()
+{
+	if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+	{
+		BoardManager = LPS->GetOrCreateBoardManager();
+
+		if (IsValid(BoardManager))
+		{
+			BindManagerEvents();
+			GenerateGridLayout();
+			InitInventory();
+			InitStatPanel();
+		}
+	}
 }
 
 void UGS_ArcaneBoardWidget::GenerateGridLayout()
