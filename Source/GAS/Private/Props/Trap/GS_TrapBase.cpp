@@ -305,9 +305,5 @@ bool AGS_TrapBase::IsBlockedInDirection(const FVector& Start, const FVector& Dir
 		Params.AddIgnoredActor(CharacterToIgnore);
 	}
 
-	#if WITH_EDITOR
-		DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 1.0f, 0, 2.0f);
-	#endif
-
 	return GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, Params);
 }
