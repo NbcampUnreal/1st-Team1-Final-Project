@@ -82,6 +82,11 @@ void AGS_Guardian::MeleeAttackCheck()
 		{
 			for (auto const& OutHitResult : OutHitResults)
 			{
+				if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
+				{
+					continue;
+				}
+
 				AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
 				if (IsValid(DamagedCharacter))
 				{

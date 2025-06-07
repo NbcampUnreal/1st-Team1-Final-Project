@@ -238,6 +238,11 @@ void AGS_Drakhar::DashAttackCheck()
 	{
 		for (auto const& OutHitResult : OutHitResults)
 		{
+			if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
+			{
+				continue;
+			}
+
 			AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
 			if (IsValid(DamagedCharacter))
 			{
@@ -263,6 +268,11 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 	{
 		for (auto const& OutHitResult : OutHitResults)
 		{
+			if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
+			{
+				continue;
+			}
+
 			AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
 			if (IsValid(DamagedCharacter))
 			{
