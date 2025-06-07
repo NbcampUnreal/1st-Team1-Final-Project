@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Subsystems/LocalPlayerSubsystem.h"
 #include "GS_ArcaneBoardTypes.h"
+#include "System/GS_PlayerRole.h"
+#include "System/GS_PlayerState.h"
 #include "GS_ArcaneBoardLPS.generated.h"
 
 class UGS_ArcaneBoardManager;
@@ -28,7 +30,16 @@ public:
     FGS_StatRow RuneSystemStats;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    ECharacterClass GetCurrPlayerClass() const;
+    ECharacterClass GetPlayerCharacterClass() const;
+
+    UFUNCTION()
+    void OnPlayerJobChanged(EPlayerRole CurrentRole);
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void InitializeRunes();
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void RefreshBoardForCurrentCharacter();
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void UpdateStatsUI();
@@ -57,6 +68,15 @@ public:
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void ForceApplyChanges();
 
+    void BindPlayerStateEvents();
+    void UnbindPlayerStateEvents();
+
 private:
     void RequestServerStatsUpdate();
+
+    UPROPERTY()
+    TWeakObjectPtr<AGS_PlayerState> BoundPlayerState;
+
+    //ENUM 통일 전 임시
+    ECharacterClass MapSeekerJobToCharacterClass(ESeekerJob SeekerJob) const;
 };
