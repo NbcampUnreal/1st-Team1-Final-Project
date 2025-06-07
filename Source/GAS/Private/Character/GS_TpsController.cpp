@@ -160,7 +160,7 @@ void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
 		if (IsValid(GS_PS))
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("---valid GS_PS"));
-			if (GS_PS->bIsAlive) //[TODO] GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker 
+			if (GS_PS->bIsAlive && GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker) 
 			{
 				AGS_TpsController* AlivePlayerController = Cast<AGS_TpsController>(GS_PS->GetPlayerController());
 				

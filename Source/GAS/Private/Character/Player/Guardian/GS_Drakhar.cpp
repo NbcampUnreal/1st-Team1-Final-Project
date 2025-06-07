@@ -15,7 +15,7 @@
 
 AGS_Drakhar::AGS_Drakhar()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	//combo attack
 	DefaultComboAttackSectionName = FName("Combo1");
@@ -282,7 +282,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			}
 		}
 	}
-	MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
+	//MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
 }
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()

@@ -70,8 +70,8 @@ void AGS_Guardian::MeleeAttackCheck()
 		TSet<AGS_Character*> DamagedCharacters;
 		FCollisionQueryParams Params(NAME_None, false, this);
 
-		const float MeleeAttackRange = 100.f;
-		const float MeleeAttackRadius = 80.f;
+		const float MeleeAttackRange = 200.f;
+		const float MeleeAttackRadius = 150.f;
 
 		const FVector Forward = GetActorForwardVector();
 		const FVector Start = GetActorLocation() + Forward * GetCapsuleComponent()->GetScaledCapsuleRadius();
@@ -102,7 +102,7 @@ void AGS_Guardian::MeleeAttackCheck()
 			}
 		}
 
-		MulticastRPCDrawDebugLine(Start, End, MeleeAttackRange, MeleeAttackRadius, Forward, bIsHitDetected);
+		//MulticastRPCDrawDebugLine(Start, End, MeleeAttackRange, MeleeAttackRadius, Forward, bIsHitDetected);
 	}
 }
 
