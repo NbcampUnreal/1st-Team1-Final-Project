@@ -36,7 +36,7 @@ AGS_Drakhar::AGS_Drakhar()
 	ClientGuardianState = EGuardianState::CtrlSkillEnd;
 
 	//boss monster tag for user widget
-	Tags.Add("Monster");
+	Tags.Add("Guardian");
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -292,7 +292,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			}
 		}
 	}
-	MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
+	//MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
 }
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
