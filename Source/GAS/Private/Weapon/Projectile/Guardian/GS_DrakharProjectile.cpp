@@ -25,6 +25,12 @@ void AGS_DrakharProjectile::BeginPlay()
 
 void AGS_DrakharProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	// SoundTrigger 콜리전 프로파일을 가진 컴포넌트 제외
+	if (OtherComp && OtherComp->GetCollisionProfileName() == FName("SoundTrigger"))
+	{
+		return;
+	}
+
 	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
 	
 	if (IsValid(DamagedCharacter))

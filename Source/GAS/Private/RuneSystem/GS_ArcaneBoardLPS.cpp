@@ -5,6 +5,8 @@
 #include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "RuneSystem/GS_ArcaneBoardSaveGame.h"
 #include "Character/GS_Character.h"
+#include "System/GS_PlayerState.h"
+#include "System/GS_PlayerRole.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/PanelWidget.h"
@@ -12,11 +14,80 @@
 void UGS_ArcaneBoardLPS::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
+
+    BindPlayerStateEvents();
 }
 
-ECharacterClass UGS_ArcaneBoardLPS::GetCurrPlayerClass() const
+ECharacterClass UGS_ArcaneBoardLPS::GetPlayerCharacterClass() const
 {
-    return BoardManager->GetCurrClass();
+    if (APlayerController* PC = GetLocalPlayer()->GetPlayerController(GetWorld()))
+    {
+        if (AGS_PlayerState* GSPlayerState = PC->GetPlayerState<AGS_PlayerState>())
+        {
+            if (GSPlayerState->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+            {
+                ESeekerJob SeekerJob = GSPlayerState->CurrentSeekerJob;
+                return MapSeekerJobToCharacterClass(SeekerJob);
+            }
+        }
+    }
+
+    return ECharacterClass::Ares;
+}
+
+void UGS_ArcaneBoardLPS::OnPlayerJobChanged(EPlayerRole CurrentRole)
+{
+    UE_LOG(LogTemp, Error, TEXT("=== 델리게이트 콜백 호출됨! Role: %d ==="), (int32)CurrentRole);
+
+    // 핵심: 즉시 BoardManager 업데이트 (위젯이 열리기 전에 미리 준비)
+    ECharacterClass NewClass = GetPlayerCharacterClass();
+
+    if (!IsValid(BoardManager))
+    {
+        GetOrCreateBoardManager();
+    }
+
+    if (IsValid(BoardManager) && BoardManager->GetCurrClass() != NewClass)
+    {
+        UE_LOG(LogTemp, Error, TEXT("즉시 BoardManager 업데이트: %d → %d"),
+            (int32)BoardManager->GetCurrClass(), (int32)NewClass);
+
+        BoardManager->SetCurrClass(NewClass);
+        LoadBoardConfig();
+        UpdateCharacterStats();
+    }
+}
+
+void UGS_ArcaneBoardLPS::InitializeRunes()
+{
+    if (!IsValid(BoardManager))
+    {
+        GetOrCreateBoardManager();
+    }
+
+    LoadBoardConfig();
+    UpdateCharacterStats();
+}
+
+void UGS_ArcaneBoardLPS::RefreshBoardForCurrentCharacter()
+{
+    ECharacterClass CurrentClass = GetPlayerCharacterClass();
+
+    if (!IsValid(BoardManager))
+    {
+        GetOrCreateBoardManager();
+    }
+
+    if (IsValid(BoardManager))
+    {
+        if (BoardManager->GetCurrClass() != CurrentClass)
+        {
+            BoardManager->SetCurrClass(CurrentClass);
+            LoadBoardConfig();
+        }
+
+        UpdateCharacterStats();
+    }
 }
 
 void UGS_ArcaneBoardLPS::UpdateStatsUI()
@@ -182,7 +253,7 @@ UGS_ArcaneBoardManager* UGS_ArcaneBoardLPS::GetOrCreateBoardManager()
         BoardManager = NewObject<UGS_ArcaneBoardManager>(this);
         BoardManager->OnStatsChanged.AddDynamic(this, &UGS_ArcaneBoardLPS::OnBoardStatsChanged);
 
-        ECharacterClass CurrPlayerClass = GetCurrPlayerClass();
+        ECharacterClass CurrPlayerClass = GetPlayerCharacterClass();
     }
 
     return BoardManager;
@@ -200,4 +271,39 @@ void UGS_ArcaneBoardLPS::ForceApplyChanges()
 
 void UGS_ArcaneBoardLPS::RequestServerStatsUpdate()
 {
+}
+
+void UGS_ArcaneBoardLPS::BindPlayerStateEvents()
+{
+    if (APlayerController* PC = GetLocalPlayer()->GetPlayerController(GetWorld()))
+    {
+        if (AGS_PlayerState* GSPlayerState = PC->GetPlayerState<AGS_PlayerState>())
+        {
+            UnbindPlayerStateEvents();
+            GSPlayerState->OnJobChangedDelegate.AddDynamic(this, &UGS_ArcaneBoardLPS::OnPlayerJobChanged);
+            BoundPlayerState = GSPlayerState;
+            UE_LOG(LogTemp, Log, TEXT("PlayerState 델리게이트 바인딩 완료"));
+        }
+    }
+}
+
+void UGS_ArcaneBoardLPS::UnbindPlayerStateEvents()
+{
+    if (BoundPlayerState.IsValid())
+    {
+        BoundPlayerState->OnJobChangedDelegate.RemoveDynamic(this, &UGS_ArcaneBoardLPS::OnPlayerJobChanged);
+        BoundPlayerState.Reset();
+    }
+}
+
+ECharacterClass UGS_ArcaneBoardLPS::MapSeekerJobToCharacterClass(ESeekerJob SeekerJob) const
+{
+    switch (SeekerJob)
+    {
+    case ESeekerJob::Ares: return ECharacterClass::Ares;
+    case ESeekerJob::Chan: return ECharacterClass::Chan;
+    case ESeekerJob::Merci: return ECharacterClass::Merci;
+    default:
+        return ECharacterClass::Ares;
+    }
 }
