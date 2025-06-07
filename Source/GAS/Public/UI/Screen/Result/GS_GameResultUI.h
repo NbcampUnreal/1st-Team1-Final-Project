@@ -6,9 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "GS_GameResultUI.generated.h"
 
-
+class UTextBlock;
 class UCommonButtonBase;
-class UOverlay;
+class UHorizontalBox;
 class UGS_GameResultBoardUI;
 class UGS_PawnMappingDataAsset;
 
@@ -28,10 +28,13 @@ public:
 	UGS_PawnMappingDataAsset* PawnMappingDataAsset;
 
 	UPROPERTY(meta = (BindWidget))
-	UOverlay* GuardianResultBoardOverlay;
+	UHorizontalBox* PlayerResultHorizontalBox;
 
 	UPROPERTY(meta = (BindWidget))
-	UOverlay* SeekerResultBoardOverlay;
+	UTextBlock* Text_MyRole;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* Text_Victory;
 
 	UPROPERTY(meta = (BindWidget))
 	UCommonButtonBase* ContinueButton;

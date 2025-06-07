@@ -212,6 +212,7 @@ private:
 
 	bool bCtrlDown;
 	bool bShiftDown;
+	int32 MaxSelectableUnits;
 	
 	UPROPERTY()
 	TMap<int32, FVector> SavedCameraPositions; // 카메라 저장 위치

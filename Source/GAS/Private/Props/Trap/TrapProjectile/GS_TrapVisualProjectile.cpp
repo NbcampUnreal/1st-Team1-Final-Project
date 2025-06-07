@@ -11,12 +11,14 @@ AGS_TrapVisualProjectile::AGS_TrapVisualProjectile()
 
 	ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ProjectileMesh->SetSimulatePhysics(false);
-	
+	ProjectileMesh->SetRelativeScale3D(FVector(0.5f));
+
 	//박히는 화살 에셋 여기서 교체
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> ArrowMeshObj(TEXT("/Game/Props/Trap/WallTrap/ArrowTrap/Mesh/SM_Arrow_old.SM_Arrow_old"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ArrowMeshObj(TEXT("/Game/Props/Trap/WallTrap/ArrowTrap/Mesh/Final/Arrow_Head.Arrow_Head"));
 	if (ArrowMeshObj.Succeeded())
 	{
 		ProjectileMesh->SetStaticMesh(ArrowMeshObj.Object);
+		
 	}
 }
 
