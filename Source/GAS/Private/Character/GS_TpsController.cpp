@@ -15,6 +15,7 @@
 #include "System/GS_PlayerState.h"
 #include "UI/Character/GS_HPBoardWidget.h"
 #include "System/GS_GameInstance.h"
+#include "UI/Character/GS_BossHP.h"
 
 
 AGS_TpsController::AGS_TpsController()
@@ -202,7 +203,7 @@ void AGS_TpsController::TestFunction()
 		{
 			if (PlayerWidgetInstance)
 			{
-				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Remove ")),true, true, FLinearColor::Blue,5.f);
+				//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Remove ")),true, true, FLinearColor::Blue,5.f);
 				PlayerWidgetInstance->RemoveFromParent();
 				PlayerWidgetInstance = nullptr;
 			}
@@ -211,13 +212,23 @@ void AGS_TpsController::TestFunction()
 			if (IsValid(PlayerWidgetInstance))
 			{
 				UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(PlayerWidgetInstance->GetWidgetFromName(TEXT("WBP_HPBoard")));
+				UGS_BossHP* BossWidget = Cast<UGS_BossHP>(PlayerWidgetInstance->GetWidgetFromName(TEXT("BossHP")));
+				
+				if (BossWidget)
+				{
+					BossWidget->SetOwningActor(GS_Character);
+					BossWidget->InitBossHPWidget();
+					BossWidget->SetVisibility(ESlateVisibility::Hidden);
+					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- FIND ")),true, true, FLinearColor::Blue,5.f);
+				}
+
 				if (HPBoardWidget)
 				{
 					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Valid HP Board Widget ")),true, true, FLinearColor::Red,5.f);
 					HPBoardWidget->InitBoardWidget();
-
-					PlayerWidgetInstance->AddToViewport(0);
 				}
+				
+				PlayerWidgetInstance->AddToViewport(0);
 			}
 		}
 	}

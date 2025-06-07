@@ -18,6 +18,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void InitBoardWidget();
+
 	
 protected:
 	UPROPERTY(meta = (BindWidget))

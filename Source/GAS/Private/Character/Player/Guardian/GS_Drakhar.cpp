@@ -15,7 +15,7 @@
 
 AGS_Drakhar::AGS_Drakhar()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	//combo attack
 	DefaultComboAttackSectionName = FName("Combo1");
@@ -36,7 +36,7 @@ AGS_Drakhar::AGS_Drakhar()
 	ClientGuardianState = EGuardianState::CtrlSkillEnd;
 
 	//boss monster tag for user widget
-	Tags.Add("Monster");
+	Tags.Add("Guardian");
 }
 
 void AGS_Drakhar::BeginPlay()

@@ -1,6 +1,8 @@
 ﻿#include "UI/Character/GS_HPBoardWidget.h"
 
 #include "Character/GS_Character.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
+#include "Character/Player/Guardian/GS_GuardianController.h"
 #include "Components/VerticalBox.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
