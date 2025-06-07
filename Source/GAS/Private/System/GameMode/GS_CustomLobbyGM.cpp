@@ -7,6 +7,7 @@
 #include "System/GameState/GS_InGameGS.h"
 #include "System/GS_SpawnSlot.h"
 #include "Character/Player/GS_PawnMappingDataAsset.h"
+#include "Animation/SkeletalMeshActor.h"
 
 AGS_CustomLobbyGM::AGS_CustomLobbyGM()
 {
@@ -58,6 +59,16 @@ void AGS_CustomLobbyGM::Logout(AController* Exiting)
         }
         SpawnedLobbyPawns.Remove(PS);
     }
+
+    /*if (PS && SpawnedLobbyActors.Contains(PS))
+    {
+        AActor* PawnToDestroy = SpawnedLobbyActors[PS];
+        if (PawnToDestroy)
+        {
+            PawnToDestroy->Destroy();
+        }
+        SpawnedLobbyActors.Remove(PS);
+    }*/
 
     Super::Logout(Exiting);
 
@@ -202,7 +213,6 @@ void AGS_CustomLobbyGM::UpdateLobbyPawns()
     }
     if (!GS) return;
 
-    // 1. 기존에 스폰된 모든 폰을 먼저 파괴합니다
     for (auto& Pair : SpawnedLobbyPawns)
     {
         if (Pair.Value)
@@ -212,7 +222,6 @@ void AGS_CustomLobbyGM::UpdateLobbyPawns()
     }
     SpawnedLobbyPawns.Empty();
 
-    // 2. 역할을 선택한 플레이어들을 분류합니다
     TArray<AGS_PlayerState*> Guardians;
     TArray<AGS_PlayerState*> Seekers;
 
@@ -226,7 +235,9 @@ void AGS_CustomLobbyGM::UpdateLobbyPawns()
         }
     }
 
-    // 3. Guardian 폰을 스폰합니다
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
     for (int32 i = 0; i < Guardians.Num() && i < GuardianSlots.Num(); ++i)
     {
         AGS_PlayerState* GuardianPS = Guardians[i];
@@ -235,13 +246,15 @@ void AGS_CustomLobbyGM::UpdateLobbyPawns()
         const FAssetToSpawn* SpawnInfo = PawnMappingData->GuardianPawnClasses.Find(GuardianPS->CurrentGuardianJob);
         if (SpawnInfo && SpawnInfo->PawnClass)
         {
+            FTransform SpawnTransform = Slot->GetActorTransform();
+            SpawnTransform.AddToTranslation(FVector(0, 0, -90.0f));
+
             TSubclassOf<APawn> PawnToSpawn = SpawnInfo->PawnClass;
-            APawn* NewPawn = GetWorld()->SpawnActor<APawn>(PawnToSpawn, Slot->GetActorTransform());
+            APawn* NewPawn = GetWorld()->SpawnActor<APawn>(PawnToSpawn, SpawnTransform, SpawnParams);
             SpawnedLobbyPawns.Add(GuardianPS, NewPawn);
         }
     }
 
-    // 4. Seeker 폰들을 스폰합니다
     for (int32 i = 0; i < Seekers.Num() && i < SeekerSlots.Num(); ++i)
     {
         AGS_PlayerState* SeekerPS = Seekers[i];
@@ -250,9 +263,102 @@ void AGS_CustomLobbyGM::UpdateLobbyPawns()
         const FAssetToSpawn* SpawnInfo = PawnMappingData->SeekerPawnClasses.Find(SeekerPS->CurrentSeekerJob);
         if (SpawnInfo && SpawnInfo->PawnClass)
         {
+            FTransform SpawnTransform = Slot->GetActorTransform();
+            SpawnTransform.AddToTranslation(FVector(0, 0, -90.0f));
+
             TSubclassOf<APawn> PawnToSpawn = SpawnInfo->PawnClass;
-            APawn* NewPawn = GetWorld()->SpawnActor<APawn>(PawnToSpawn, Slot->GetActorTransform());
+            APawn* NewPawn = GetWorld()->SpawnActor<APawn>(PawnToSpawn, SpawnTransform, SpawnParams);
             SpawnedLobbyPawns.Add(SeekerPS, NewPawn);
         }
     }
 }
+
+//void AGS_CustomLobbyGM::UpdateLobbyPawns()
+//{
+//    AGS_CustomLobbyGS* GS = GetGameState<AGS_CustomLobbyGS>();
+//    if (!PawnMappingData)
+//    {
+//        UE_LOG(LogTemp, Error, TEXT("AGS_CustomLobbyGM::UpdateLobbyActors - PawnMappingData is not set!"));
+//        return;
+//    }
+//    if (!GS) return;
+//
+//    for (auto& Pair : SpawnedLobbyActors)
+//    {
+//        if (Pair.Value)
+//        {
+//            Pair.Value->Destroy();
+//        }
+//    }
+//    SpawnedLobbyActors.Empty();
+//
+//    TArray<AGS_PlayerState*> Guardians;
+//    TArray<AGS_PlayerState*> Seekers;
+//
+//    for (APlayerState* PS : GS->PlayerArray)
+//    {
+//        AGS_PlayerState* Player = Cast<AGS_PlayerState>(PS);
+//        if (Player)
+//        {
+//            if (Player->CurrentPlayerRole == EPlayerRole::PR_Guardian) Guardians.Add(Player);
+//            else if (Player->CurrentPlayerRole == EPlayerRole::PR_Seeker) Seekers.Add(Player);
+//        }
+//    }
+//
+//    FActorSpawnParameters SpawnParams;
+//	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+//
+//    for (int32 i = 0; i < Guardians.Num() && i < GuardianSlots.Num(); ++i)
+//    {
+//        AGS_PlayerState* GuardianPS = Guardians[i];
+//        AGS_SpawnSlot* Slot = GuardianSlots[i];
+//
+//        const FAssetToSpawn* SpawnInfo = PawnMappingData->GuardianPawnClasses.Find(GuardianPS->CurrentGuardianJob);
+//        if (SpawnInfo && SpawnInfo->SkeletalMeshClass && SpawnInfo->ReadyPose)
+//        {
+//            FTransform SpawnTransform = Slot->GetActorTransform();
+//            SpawnTransform.AddToTranslation(FVector(0, 0, -90.0f));
+//
+//            ASkeletalMeshActor* NewActor = GetWorld()->SpawnActor<ASkeletalMeshActor>(ASkeletalMeshActor::StaticClass(), SpawnTransform, SpawnParams);
+//            if (NewActor)
+//            {
+//                USkeletalMeshComponent* MeshComponent = NewActor->GetSkeletalMeshComponent();
+//                MeshComponent->SetSkeletalMesh(SpawnInfo->SkeletalMeshClass);
+//                MeshComponent->SetAnimInstanceClass(SpawnInfo->AnimBlueprintClass);
+//
+//                if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
+//                {
+//                    AnimInstance->Montage_Play(SpawnInfo->ReadyPose);
+//                }
+//                SpawnedLobbyActors.Emplace(GuardianPS, NewActor);
+//            }
+//        }
+//    }
+//
+//    for (int32 i = 0; i < Seekers.Num() && i < SeekerSlots.Num(); ++i)
+//    {
+//        AGS_PlayerState* SeekerPS = Seekers[i];
+//        AGS_SpawnSlot* Slot = SeekerSlots[i];
+//
+//        const FAssetToSpawn* SpawnInfo = PawnMappingData->SeekerPawnClasses.Find(SeekerPS->CurrentSeekerJob);
+//        if (SpawnInfo && SpawnInfo->SkeletalMeshClass && SpawnInfo->ReadyPose)
+//        {
+//            FTransform SpawnTransform = Slot->GetActorTransform();
+//            SpawnTransform.AddToTranslation(FVector(0, 0, -90.0f));
+//
+//            ASkeletalMeshActor* NewActor = GetWorld()->SpawnActor<ASkeletalMeshActor>(ASkeletalMeshActor::StaticClass(), SpawnTransform, SpawnParams);
+//            if (NewActor)
+//            {
+//                USkeletalMeshComponent* MeshComponent = NewActor->GetSkeletalMeshComponent();
+//                MeshComponent->SetSkeletalMesh(SpawnInfo->SkeletalMeshClass);
+//                MeshComponent->SetAnimInstanceClass(SpawnInfo->AnimBlueprintClass);
+//
+//                if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
+//                {
+//                    AnimInstance->Montage_Play(SpawnInfo->ReadyPose);
+//                }
+//                SpawnedLobbyActors.Emplace(SeekerPS, NewActor);
+//            }
+//        }
+//    }
+//}

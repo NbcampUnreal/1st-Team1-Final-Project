@@ -17,7 +17,10 @@ struct FAssetToSpawn
     TSubclassOf<APawn> PawnClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    TSubclassOf<AActor> DefaultActor;
+    USkeletalMesh* SkeletalMeshClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+    TSubclassOf<UAnimInstance> AnimBlueprintClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
     TObjectPtr<UAnimMontage> ReadyPose;

@@ -165,6 +165,11 @@ void AGS_Chan::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 
 void AGS_Chan::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
 {
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->IsPlayingFullBodyMontage = bFullBodySlot;
@@ -173,6 +178,11 @@ void AGS_Chan::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
 
 void AGS_Chan::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
 {
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->IsPlayingUpperBodyMontage = bUpperBodySlot;

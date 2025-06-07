@@ -47,6 +47,8 @@ private:
 
 	UPROPERTY()
 	TMap<TObjectPtr<AGS_PlayerState>, TObjectPtr<APawn>> SpawnedLobbyPawns;
+	/*UPROPERTY()
+	TMap<TObjectPtr<AGS_PlayerState>, TObjectPtr<AActor>> SpawnedLobbyActors;*/
 
 	void CollectSpawnSlots();
 	void UpdateLobbyPawns();
