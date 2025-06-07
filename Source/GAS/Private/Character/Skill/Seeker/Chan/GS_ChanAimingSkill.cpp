@@ -44,7 +44,7 @@ void UGS_ChanAimingSkill::ActiveSkill()
 		// 에이밍 스킬 시작 사운드 재생
 		if (OwnerPlayer->AimingSkillStartSound)
 		{
-			OwnerPlayer->PlaySound(OwnerPlayer->AimingSkillStartSound);
+			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillStartSound);
 		}
 
 		// Skill Stat
@@ -88,7 +88,7 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		// 방패 슬램 사운드 재생
 		if (OwnerPlayer->AimingSkillSlamSound)
 		{
-			OwnerPlayer->PlaySound(OwnerPlayer->AimingSkillSlamSound);
+			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillSlamSound);
 		}
 
 		// End Skill

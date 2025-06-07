@@ -31,7 +31,7 @@ void UGS_ChanMovingSkill::ActiveSkill()
 		// 무빙 스킬 사운드 재생
 		if (OwnerPlayer->MovingSkillSound)
 		{
-			OwnerPlayer->PlaySound(OwnerPlayer->MovingSkillSound);
+			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->MovingSkillSound);
 		}
 	}
 	
@@ -81,6 +81,7 @@ void UGS_ChanMovingSkill::ExecuteSkillEffect()
 				continue;
 			}
 
+			// SoundTrigger 콜리전 프로파일을 가진 컴포넌트 제외
 			if (HitComponent && HitComponent->GetCollisionProfileName() == FName("SoundTrigger"))
 			{
 				continue;

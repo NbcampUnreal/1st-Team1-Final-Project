@@ -225,11 +225,11 @@ void AGS_Chan::MulticastPlayComboSection_Implementation()
 		// 콤보 공격 사운드와 공격 목소리 재생
 		if (AxeSwingSound)
 		{
-			PlaySound(AxeSwingSound);
+			Multicast_PlaySkillSound(AxeSwingSound);
 		}
 		if (AttackVoiceSound)
 		{
-			PlaySound(AttackVoiceSound);
+			Multicast_PlaySkillSound(AttackVoiceSound);
 		}
 	}
 	CanAcceptComboInput = false;
