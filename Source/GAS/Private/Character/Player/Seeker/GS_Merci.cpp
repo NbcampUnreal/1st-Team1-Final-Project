@@ -445,6 +445,12 @@ void AGS_Merci::OnRep_CurrentArrowType()
 			ArrowTypeWidget->UpdateArrowCount(CurrentChildArrows);
 		}
 	}
+
+	// 화살 타입 변경 사운드 재생
+	if (ArrowTypeChangeSound && IsLocallyControlled())
+	{
+		UAkGameplayStatics::PostEvent(ArrowTypeChangeSound, this, 0, FOnAkPostEventCallback());
+	}
 }
 
 void AGS_Merci::OnRep_CurrentAxeArrows()

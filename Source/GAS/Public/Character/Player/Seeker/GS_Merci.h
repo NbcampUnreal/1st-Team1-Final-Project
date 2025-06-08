@@ -125,6 +125,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
 	UAkAudioEvent* ArrowShotSound; // 활 놓을 때(릴리즈)
 
+	// 화살 타입 변경 사운드
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Arrow")
+	UAkAudioEvent* ArrowTypeChangeSound; // 화살 타입 변경할 때
+
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 	// [화살 관리]
