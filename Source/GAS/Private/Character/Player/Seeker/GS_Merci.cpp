@@ -85,9 +85,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 
 		bIsFullyDrawn = false;  // 상태 초기화
 
-		// 화살 발사 사운드 재생
-		//PlaySound(ArrowShotSound);  // 부모 클래스의 PlaySound 함수 사용
-		Multicast_PlayArrowShotSound();
+		// 화살 발사 사운드는 Server_FireArrow에서 실제 발사할 때만 재생
 
 	}
 
@@ -162,11 +160,13 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	if (CurrentArrowType == EArrowType::Axe && CurrentAxeArrows <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Axe Empty"));
+		Multicast_PlayArrowEmptySound(); // 빈 화살 사운드 재생
 		return;
 	}
 	if (CurrentArrowType == EArrowType::Child && CurrentChildArrows <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Child Empty"));
+		Multicast_PlayArrowEmptySound(); // 빈 화살 사운드 재생
 		return;
 	}
 
@@ -274,8 +274,11 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		}
 		//Multicast_DrawDebugLine(SpawnLocation, TargetLocation, FColor::Red);
 	}
-	// 8. 화살 발사 VFX 호출 (멀티캐스트로 모든 클라이언트에서 재생)
+	// 8. 화살 발사 VFX 및 사운드 호출 (멀티캐스트로 모든 클라이언트에서 재생)
 	Multicast_PlayArrowShotVFX(VFXLocation, VFXRotation, NumArrows);
+	
+	// 실제로 화살이 발사될 때만 사운드 재생
+	Multicast_PlayArrowShotSound();
 
 	
 }
@@ -540,6 +543,15 @@ void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayArrowShotSound_Implementation: ArrowShotSound is null"));
+	}
+}
+
+void AGS_Merci::Multicast_PlayArrowEmptySound_Implementation()
+{
+	// 로컬 플레이어에게만 사운드 재생 (화살 부족은 개인적인 피드백)
+	if (ArrowEmptySound && IsLocallyControlled())
+	{
+		UAkGameplayStatics::PostEvent(ArrowEmptySound, this, 0, FOnAkPostEventCallback());
 	}
 }
 
