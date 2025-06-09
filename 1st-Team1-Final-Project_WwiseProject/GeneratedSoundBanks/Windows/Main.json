@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{C07920A9-587F-8F69-1F4A-80F81AE9160C}",
+    "Hash": "{36DC9E85-35FE-2EDC-20C9-C4A6F68926C3}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -158,6 +158,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_No_3_Female_Adult_Mature_DJ_Woman.wav",
       "CachePath": "C5/{C5B87615-7A55-4059-BA7E-95EFE1009266}.wem"
+     },
+     {
+      "Id": "132193652",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_combat_punch_swing_gore_liquid_hit_05.wav",
+      "CachePath": "12/{12668229-438A-8CE3-F426-F91FF32D7922}.wem"
      },
      {
       "Id": "134763393",
@@ -366,6 +374,14 @@
       "Location": "Memory",
       "ShortName": "ButtonSFX3_Select.wav",
       "CachePath": "14/{14859412-C6E0-FCFF-F757-F08DBC124940}.wem"
+     },
+     {
+      "Id": "275944875",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_combat_kick_gore_bone_breaks_01.wav",
+      "CachePath": "4C/{4CC0968F-31EE-0E98-08F0-62EBF8A8ECD9}.wem"
      },
      {
       "Id": "278485591",
@@ -848,6 +864,14 @@
       "CachePath": "7A/{7AC7AAD3-2753-104C-B9A8-4DC5028924D9}.wem"
      },
      {
+      "Id": "631777347",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_combat_punch_swing_hit_bone_shatter_03.wav",
+      "CachePath": "47/{478CA285-DDB5-37B8-CA8F-8603B02D2218}.wem"
+     },
+     {
       "Id": "634809175",
       "Language": "SFX",
       "Streaming": "false",
@@ -877,7 +901,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "PackageOpenSmall_S011FO.714.wav",
-      "CachePath": "89/{89025283-B4D3-DB39-264D-FE8FC62AD859}.wem"
+      "CachePath": "EC/{EC713A99-799B-E127-862B-63C00E3E7467}.wem"
      },
      {
       "Id": "651266643",
@@ -1064,6 +1088,14 @@
       "CachePath": "BD/{BD3AE8AA-6BA5-8124-4732-95AD7BCF0892}.wem"
      },
      {
+      "Id": "812504196",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_combat_punch_swing_hit_bone_shatter_06.wav",
+      "CachePath": "ED/{ED7468A0-5F82-C714-61EB-1166C25A8A1B}.wem"
+     },
+     {
       "Id": "829138029",
       "Language": "SFX",
       "Streaming": "false",
@@ -1086,6 +1118,14 @@
       "Location": "Memory",
       "ShortName": "ButtonSFX_Able.wav",
       "CachePath": "25/{25C57E73-5327-875E-E17C-144084CDC13B}.wem"
+     },
+     {
+      "Id": "842637062",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_CH_fx_combat_kick_gore_bone_breaks_04.wav",
+      "CachePath": "30/{30190332-5A80-DA82-753A-2D783A2C0013}.wem"
      },
      {
       "Id": "843270474",
@@ -1513,6 +1553,14 @@
        "GUID": "{90895E04-6C77-4899-B5E6-4F5F9A428296}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
+      },
+      {
+       "Id": "956691143",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_MeleeHit\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{C1F03FC2-B995-452B-80B2-40FC1DB50C92}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
       },
       {
        "Id": "975136076",
@@ -2153,6 +2201,40 @@
       "DurationType": "OneShot",
       "DurationMin": "0",
       "DurationMax": "0"
+     },
+     {
+      "Id": "2908138241",
+      "Name": "EV_MeleeAttack",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_MeleeAttack",
+      "GUID": "{711FAB82-E203-463E-846A-2577FBDF70FA}",
+      "MaxAttenuation": "720",
+      "DurationType": "OneShot",
+      "DurationMin": "0.19974408",
+      "DurationMax": "0.502778",
+      "MediaRefs": [
+       {
+        "Id": "132193652"
+       },
+       {
+        "Id": "275944875"
+       },
+       {
+        "Id": "631777347"
+       },
+       {
+        "Id": "812504196"
+       },
+       {
+        "Id": "842637062"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "956691143"
+        }
+       ]
+      }
      },
      {
       "Id": "2442023259",
@@ -3443,6 +3525,6 @@
     ]
    }
   ],
-  "FileHash": "{73CFC694-4ACE-F5AE-6F96-8C2D9EC45ACB}"
+  "FileHash": "{CE704051-CDC5-D96C-B5D6-561951A23B10}"
  }
 }
