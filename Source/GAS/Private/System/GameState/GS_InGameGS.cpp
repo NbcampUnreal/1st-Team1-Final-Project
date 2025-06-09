@@ -55,6 +55,10 @@ FText AGS_InGameGS::GetFormattedTime() const
 	return FText::FromString(FString::Printf(TEXT("%02d:%02d"), Min, Sec));
 }
 
+float AGS_InGameGS::GetRemainingTime() const
+{
+	return FMath::Max(0.0f, TotalGameTime - CurrentTime);
+}
 
 void AGS_InGameGS::OnRep_CurrentTime()
 {
