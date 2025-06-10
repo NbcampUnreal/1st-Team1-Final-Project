@@ -103,6 +103,7 @@ void AGS_RTSController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandMove);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandAttack);
 		EnhancedInputComponent->BindAction(StopAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandStop);
+		EnhancedInputComponent->BindAction(HoldAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandHold);
 		EnhancedInputComponent->BindAction(SkillAction, ETriggerEvent::Started, this, &AGS_RTSController::OnCommandSkill);
 		
 		EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Started, this, &AGS_RTSController::OnLeftMousePressed);
@@ -204,6 +205,24 @@ void AGS_RTSController::StopSelectedUnits()
 	GatherCommandableUnits(Commandables);
 
 	Server_RTSStop(Commandables);
+}
+
+void AGS_RTSController::OnCommandHold(const FInputActionValue& Value)
+{
+	HoldSelectedUnits();
+	if (CommandButtonSound)
+	{
+		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
+	}
+}
+
+void AGS_RTSController::HoldSelectedUnits()
+{
+	CurrentCommand = ERTSCommand::Hold;
+	TArray<AGS_Monster*> Commandables;
+	GatherCommandableUnits(Commandables);
+
+	Server_RTSHold(Commandables);
 }
 
 void AGS_RTSController::OnCommandSkill(const FInputActionValue& Value)
@@ -803,6 +822,30 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 			{
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::None));
+
+				// 첫 번째 유닛만 정지 소리 재생
+				if (i == 0 && Unit->MoveSoundEvent)
+				{
+					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
+				}
+			}
+		}
+	}
+}
+
+void AGS_RTSController::Server_RTSHold_Implementation(const TArray<AGS_Monster*>& Units)
+{
+	for (int32 i = 0; i < Units.Num(); ++i)
+	{
+		AGS_Monster* Unit = Units[i];
+		if (!IsValid(Unit)) continue;
+		
+		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
+		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
+				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Hold));
 
 				// 첫 번째 유닛만 정지 소리 재생
 				if (i == 0 && Unit->MoveSoundEvent)
