@@ -55,13 +55,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer Colors")
 	FLinearColor UrgentColor = FLinearColor(1.0f, 0.3f, 0.3f, 1.0f); // 더 밝은 빨간색
 
-	// 흔들림 애니메이션 (블루프린트에서 설정)
-	UPROPERTY(BlueprintReadOnly, Transient, meta=(BindWidgetAnim))
-	class UWidgetAnimation* ShakeAnimation;
+	// 흔들림 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Settings", meta = (ClampMin = "1.0", ClampMax = "10.0"))
+	float ShakeIntensity = 3.0f; // 흔들림 강도
 
-	// 애니메이션 강도 설정
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Settings", meta = (ClampMin = "0.1", ClampMax = "5.0"))
-	float ShakeIntensity = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Settings", meta = (ClampMin = "0.1", ClampMax = "2.0"))
+	float ShakeSpeed = 0.8f; // 흔들림 속도
 
 private:
 	UFUNCTION()
@@ -70,10 +69,17 @@ private:
 	// 남은 시간에 따라 텍스트 색상을 업데이트
 	void UpdateTextColor(float RemainingTimeInSeconds);
 
-	// 흔들림 애니메이션 제어
-	void StartShakeAnimation();
-	void StopShakeAnimation();
+	// 흔들림 효과
+	void StartShakeEffect();
+	void StopShakeEffect();
+	void UpdateShakeEffect();
 
-	// 현재 애니메이션 상태 추적
+	// 흔들림 상태 추적
 	bool bIsShaking = false;
+	float ShakeTimer = 0.0f;
+	FVector2D OriginalPosition = FVector2D::ZeroVector;
+	bool bOriginalPositionSaved = false;
+
+	// 타이머 핸들
+	FTimerHandle ShakeTimerHandle;
 };

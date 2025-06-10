@@ -6,6 +6,7 @@
 #include "System/GameState/GS_InGameGS.h"
 #include "System/GameState/GS_BossLevelGS.h"
 #include "Engine/World.h"
+#include "Components/CanvasPanelSlot.h"
 
 void UGS_Timer::NativeConstruct()
 {
@@ -70,49 +71,89 @@ void UGS_Timer::UpdateTextColor(float RemainingTimeInSeconds)
 	{
 		// 10초 이하 - 긴급 상황 (밝은 빨간색 + 흔들림)
 		TargetColor = UrgentColor;
-		StartShakeAnimation();
+		StartShakeEffect();
 	}
 	else if (RemainingTimeInSeconds <= CriticalTimeThreshold)
 	{
 		// 1분 이하 - 빨간색 (흔들림 중지)
 		TargetColor = CriticalColor;
-		StopShakeAnimation();
+		StopShakeEffect();
 	}
 	else if (RemainingTimeInSeconds <= WarningTimeThreshold)
 	{
 		// 5분 이하 - 노란색
 		TargetColor = WarningColor;
-		StopShakeAnimation();
+		StopShakeEffect();
 	}
 	else
 	{
 		// 그 외 - 기본 색상 (흰색)
 		TargetColor = NormalColor;
-		StopShakeAnimation();
+		StopShakeEffect();
 	}
 	
 	// 텍스트 색상 적용
 	TimerText->SetColorAndOpacity(FSlateColor(TargetColor));
 }
 
-void UGS_Timer::StartShakeAnimation()
+void UGS_Timer::StartShakeEffect()
 {
-	if (!ShakeAnimation || bIsShaking) return;
+	if (bIsShaking) return;
 	
-	// 흔들림 애니메이션 무한 반복으로 재생
-	PlayAnimation(ShakeAnimation, 0.0f, 0, EUMGSequencePlayMode::PingPong, ShakeIntensity);
 	bIsShaking = true;
+	ShakeTimer = 0.0f;
 	
-	UE_LOG(LogTemp, Warning, TEXT("Timer: 긴급! 흔들림 애니메이션 시작!"));
+	// 원본 위치 저장
+	if (!bOriginalPositionSaved)
+	{
+		if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(TimerText->Slot))
+		{
+			OriginalPosition = CanvasSlot->GetPosition();
+			bOriginalPositionSaved = true;
+		}
+	}
+	
+	// 흔들림 타이머 시작 (60fps로 부드러운 애니메이션)
+	GetWorld()->GetTimerManager().SetTimer(ShakeTimerHandle, this, &UGS_Timer::UpdateShakeEffect, 1.0f / 60.0f, true);
+	
+	UE_LOG(LogTemp, Warning, TEXT("Timer: 흔들림 효과 시작!"));
 }
 
-void UGS_Timer::StopShakeAnimation()
+void UGS_Timer::StopShakeEffect()
 {
-	if (!ShakeAnimation || !bIsShaking) return;
+	if (!bIsShaking) return;
 	
-	// 애니메이션 중지
-	StopAnimation(ShakeAnimation);
 	bIsShaking = false;
 	
-	UE_LOG(LogTemp, Log, TEXT("Timer: 흔들림 애니메이션 중지"));
+	// 타이머 중지
+	GetWorld()->GetTimerManager().ClearTimer(ShakeTimerHandle);
+	
+	// 원본 위치로 복원
+	if (bOriginalPositionSaved)
+	{
+		if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(TimerText->Slot))
+		{
+			CanvasSlot->SetPosition(OriginalPosition);
+		}
+	}
+	
+	UE_LOG(LogTemp, Log, TEXT("Timer: 흔들림 효과 중지"));
+}
+
+void UGS_Timer::UpdateShakeEffect()
+{
+	if (!bIsShaking || !TimerText) return;
+	
+	ShakeTimer += 1.0f / 60.0f; // 델타타임 추가
+	
+	// 사인파를 이용한 좌우 흔들림 계산
+	float ShakeOffsetX = FMath::Sin(ShakeTimer * ShakeSpeed * 10.0f) * ShakeIntensity;
+	float ShakeOffsetY = FMath::Sin(ShakeTimer * ShakeSpeed * 12.0f) * (ShakeIntensity * 0.5f); // Y축은 더 부드럽게
+	
+	// 위치 적용
+	if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(TimerText->Slot))
+	{
+		FVector2D NewPosition = OriginalPosition + FVector2D(ShakeOffsetX, ShakeOffsetY);
+		CanvasSlot->SetPosition(NewPosition);
+	}
 }
