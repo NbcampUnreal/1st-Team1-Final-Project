@@ -12081,7 +12081,7 @@
 						</Folder>
 						<Folder Name="Chan" ID="{51207146-34BA-4509-A4DE-E3C35A48426C}" ShortID="451123922">
 							<ChildrenList>
-								<BlendContainer Name="MoveSound" ID="{3543D7BE-CBA5-47D0-88AD-87E92946B8AF}" ShortID="810498603">
+								<BlendContainer Name="ChanMoveSound" ID="{3543D7BE-CBA5-47D0-88AD-87E92946B8AF}" ShortID="810498603">
 									<PropertyList>
 										<Property Name="3DSpatialization" Type="int16" Value="2"/>
 										<Property Name="Highpass" Type="int16">
@@ -12353,7 +12353,7 @@
 										</Sound>
 									</ChildrenList>
 								</BlendContainer>
-								<RandomSequenceContainer Name="AttackSound" ID="{0FAC94E7-2F25-48B7-992D-1AEC462E1555}" ShortID="767654975">
+								<RandomSequenceContainer Name="EV_ChanAttackSound" ID="{0FAC94E7-2F25-48B7-992D-1AEC462E1555}" ShortID="767654975">
 									<PropertyList>
 										<Property Name="3DSpatialization" Type="int16" Value="2"/>
 										<Property Name="Highpass" Type="int16">
@@ -12586,7 +12586,7 @@
 										</Sound>
 									</ChildrenList>
 								</RandomSequenceContainer>
-								<RandomSequenceContainer Name="AttackSound_Voice" ID="{C87D2CD4-68EF-4CC3-A952-E30BEB0BB41D}" ShortID="536494478">
+								<RandomSequenceContainer Name="Voice_ChanAttackSound" ID="{C87D2CD4-68EF-4CC3-A952-E30BEB0BB41D}" ShortID="536494478">
 									<PropertyList>
 										<Property Name="3DSpatialization" Type="int16" Value="2"/>
 										<Property Name="Pitch" Type="int32">
@@ -19360,6 +19360,659 @@
 						</ObjectList>
 					</ObjectLists>
 				</RandomSequenceContainer>
+				<Folder Name="Guardian" ID="{5202232D-956C-421B-A823-7921BEEF1928}" ShortID="888899393">
+					<ChildrenList>
+						<RandomSequenceContainer Name="Voice_Drakhar_Hit" ID="{131885E9-BED2-42E7-91CE-EB8C11C54CD5}" ShortID="219953123">
+							<PropertyList>
+								<Property Name="3DSpatialization" Type="int16" Value="2"/>
+								<Property Name="GlobalOrPerObject" Type="int16" Value="0"/>
+								<Property Name="Highpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MaxSoundPerInstance" Type="int16">
+									<ValueList>
+										<Value>1</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Pitch" Type="int32">
+									<ValueList>
+										<Value>-100</Value>
+									</ValueList>
+								</Property>
+								<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+								<Property Name="UseMaxSoundPerInstance" Type="bool">
+									<ValueList>
+										<Value>True</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Volume" Type="Real64">
+									<ModifierList>
+										<ModifierInfo>
+											<Modifier Name="" ID="{20433603-8EE9-428D-91A4-E843A48B21BB}">
+												<PropertyList>
+													<Property Name="Enabled" Type="bool" Value="True"/>
+													<Property Name="Min" Type="Real64" Value="-3"/>
+												</PropertyList>
+											</Modifier>
+										</ModifierInfo>
+									</ModifierList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Attenuation">
+									<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+								</Reference>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="Drakhar_Outch1" ID="{11AF83D9-7F89-4F84-9FD0-17DAC30A87E6}" ShortID="715460874">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="ESM_Character_Sharon_Groan_1_Female_Adult_Mature_DJ_Woman" ID="{CBC81FF4-0AEB-408C-8A85-CA6EB6DB1C90}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0118104205866411"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.252561301775864"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0199868656081619"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.51693301221744"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Character_Sharon_Groan_1_Female_Adult_Mature_DJ_Woman.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="527820047"/>
+											</MediaIDList>
+										</AudioFileSource>
+										<AudioFileSource Name="ESM_Dragon_Vocal_Jumping_Jump_Short_Monster_Creature_Voice" ID="{C416F3AD-C0D5-4E94-928D-F6352D1FC797}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0418547090544577"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.167418836217831"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Dragon_Vocal_Jumping_Jump_Short_Monster_Creature_Voice.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="766479874"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="ESM_Dragon_Vocal_Jumping_Jump_Short_Monster_Creature_Voice" ID="{C416F3AD-C0D5-4E94-928D-F6352D1FC797}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="Drakhar_Outch2" ID="{A153D96A-A60D-430A-9107-589930EEB353}" ShortID="604470962">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="ESM_Character_Sharon_Grunt_1_Female_Adult_Mature_DJ_Woman" ID="{625E5B26-8EFD-4BCD-95D5-1C68C1929D51}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0239893454803894"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.0211106240227427"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0374233789494075"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Character_Sharon_Grunt_1_Female_Adult_Mature_DJ_Woman.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="957899954"/>
+											</MediaIDList>
+										</AudioFileSource>
+										<AudioFileSource Name="ESM_Dragon_Vocal_Pain_Death_Monster_Creature_Voice" ID="{71A67668-D5A2-48A4-A986-F85A3483D497}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0328063034213609"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.127944583343307"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Dragon_Vocal_Pain_Death_Monster_Creature_Voice.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="165801011"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="ESM_Dragon_Vocal_Pain_Death_Monster_Creature_Voice" ID="{71A67668-D5A2-48A4-A986-F85A3483D497}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="Drakhar_Outch3" ID="{7259263B-9ABB-488E-B5E3-28DACDC0C468}" ShortID="500627251">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="ESM_Character_Sharon_Jump_2_Female_Adult_Mature_DJ_Woman" ID="{968CB5A4-1C4C-463D-927B-A422C3E31CE5}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0153239929947461"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0544001751313485"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Character_Sharon_Jump_2_Female_Adult_Mature_DJ_Woman.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="755959048"/>
+											</MediaIDList>
+										</AudioFileSource>
+										<AudioFileSource Name="ESM_Dragon_Vocal_Pain_Dying_Short_Monster_Creature_Voice" ID="{9B0BAF03-0B0C-4768-B494-C5FCAC3D59FB}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0605728012478485"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.137085813350394"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Dragon_Vocal_Pain_Dying_Short_Monster_Creature_Voice.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="243265281"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="ESM_Dragon_Vocal_Pain_Dying_Short_Monster_Creature_Voice" ID="{9B0BAF03-0B0C-4768-B494-C5FCAC3D59FB}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="Drakhar_Outch5" ID="{95759526-9C95-468A-B8F5-6D0FD2DD42A9}" ShortID="1065647951">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="ESM_Character_Sharon_Ouch_2_Female_Adult_Mature_DJ_Woman" ID="{54A5242E-831E-4A6D-AC65-112809200D80}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0103254527010141"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.178114059092493"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0283949949277888"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Character_Sharon_Ouch_2_Female_Adult_Mature_DJ_Woman.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="1016849281"/>
+											</MediaIDList>
+										</AudioFileSource>
+										<AudioFileSource Name="ESM_Character_Sharon_Grunt_2_Female_Adult_Mature_DJ_Woman" ID="{FB5FEF0D-6C59-4E9C-B3BE-398B6CAC7345}">
+											<Language>SFX</Language>
+											<AudioFile>ESM_Character_Sharon_Grunt_2_Female_Adult_Mature_DJ_Woman.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="147470122"/>
+											</MediaIDList>
+										</AudioFileSource>
+										<AudioFileSource Name="ESM_Dragon_Vocal_Pain_Wounded_Monster_Creature_Voice" ID="{63C555E8-6EB5-4B6E-9A5F-64715D125746}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0344866015654071"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.100324659099366"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Dragon_Vocal_Pain_Wounded_Monster_Creature_Voice.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="304594696"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="ESM_Dragon_Vocal_Pain_Wounded_Monster_Creature_Voice" ID="{63C555E8-6EB5-4B6E-9A5F-64715D125746}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="Drakhar_Outch4" ID="{7BC65126-3D20-4135-A31C-38DD3E5BFAC4}" ShortID="732749467">
+									<PropertyList>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-3</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="ESM_Character_Sharon_Ouch_1_Female_Adult_Mature_DJ_Woman" ID="{9019A12F-810B-45B5-AEBF-C196B799F2E4}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0515670613524375"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.0795926381744145"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0280255768219769"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.628893935937876"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Character_Sharon_Ouch_1_Female_Adult_Mature_DJ_Woman.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="689440783"/>
+											</MediaIDList>
+										</AudioFileSource>
+										<AudioFileSource Name="ESM_Character_Sharon_Coughing_6_Female_Adult_Mature_DJ_Woman" ID="{962DB3C3-3B22-44AB-9FA0-31F8F5B55EDF}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.108240326600415"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.15744047505515"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Character_Sharon_Coughing_6_Female_Adult_Mature_DJ_Woman.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="484226950"/>
+											</MediaIDList>
+										</AudioFileSource>
+										<AudioFileSource Name="ESM_Dragon_Vocal_Fight_Grunt_Ah_Monster_Creature_Voice" ID="{1F2D67ED-256D-406A-B255-A264DD543AB2}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0420661010263578"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0729145751123535"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>ESM_Dragon_Vocal_Fight_Grunt_Ah_Monster_Creature_Voice.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="1053226406"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="ESM_Dragon_Vocal_Fight_Grunt_Ah_Monster_Creature_Voice" ID="{1F2D67ED-256D-406A-B255-A264DD543AB2}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+							<ObjectLists>
+								<ObjectList Name="Effects">
+									<Reference>
+										<Local>
+											<EffectSlot Name="" ID="{10D0DEB3-7059-4520-9A45-A7BFD1B81795}" ShortID="321760119">
+												<ReferenceList>
+													<Reference Name="Effect">
+														<Custom>
+															<Effect Name="Pitch Shifter (Custom)" ID="{3F99539B-BD43-4D3E-A80C-F5697BC19B4E}" ShortID="662805310" PluginName="Wwise Pitch Shifter" CompanyID="0" PluginID="136" PluginType="3">
+																<PropertyList>
+																	<Property Name="DelayTime" Type="Real32" Value="10"/>
+																	<Property Name="Pitch" Type="Real32" Value="-100"/>
+																	<Property Name="WetLevel" Type="Real32" Value="3"/>
+																</PropertyList>
+															</Effect>
+														</Custom>
+													</Reference>
+												</ReferenceList>
+											</EffectSlot>
+										</Local>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</RandomSequenceContainer>
+						<Sound Name="Voice_Drakhar_Death" ID="{AE9623E4-6636-4D94-BF15-57B7587690EC}" ShortID="684828009">
+							<PropertyList>
+								<Property Name="3DSpatialization" Type="int16" Value="2"/>
+								<Property Name="Highpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>1</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Pitch" Type="int32">
+									<ValueList>
+										<Value>-100</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Attenuation">
+									<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+								</Reference>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<AudioFileSource Name="ESM_Dragon_Vocal_Pain_Dying_Monster_Creature_Voice" ID="{E948D3E9-38F4-4F9A-81CE-BC91E3BAE055}">
+									<PropertyList>
+										<Property Name="FadeInDuration" Type="Real64" Value="0.102704927380643"/>
+										<Property Name="FadeOutDuration" Type="Real64" Value="0.0684699515870957"/>
+										<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+										<Property Name="TrimBegin" Type="Real64" Value="0.154057391070965"/>
+										<Property Name="TrimEnd" Type="Real64" Value="2.18247966805592"/>
+									</PropertyList>
+									<Language>SFX</Language>
+									<AudioFile>ESM_Dragon_Vocal_Pain_Dying_Monster_Creature_Voice.wav</AudioFile>
+									<MediaIDList>
+										<MediaID ID="312008108"/>
+									</MediaIDList>
+								</AudioFileSource>
+							</ChildrenList>
+							<ActiveSourceList>
+								<ActiveSource Name="ESM_Dragon_Vocal_Pain_Dying_Monster_Creature_Voice" ID="{E948D3E9-38F4-4F9A-81CE-BC91E3BAE055}" Platform="Linked"/>
+							</ActiveSourceList>
+						</Sound>
+						<RandomSequenceContainer Name="EV_DrakharAttackSound" ID="{9893D0EF-472B-4BC4-BDF2-3496C0A2DCFE}" ShortID="65259503">
+							<PropertyList>
+								<Property Name="3DSpatialization" Type="int16" Value="2"/>
+								<Property Name="Highpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>15</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>1</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Pitch" Type="int32">
+									<ValueList>
+										<Value>-50</Value>
+									</ValueList>
+									<ModifierList>
+										<ModifierInfo>
+											<Modifier Name="" ID="{F381AA2E-CACF-4EFB-8050-804762A479B7}">
+												<PropertyList>
+													<Property Name="Enabled" Type="bool" Value="True"/>
+													<Property Name="Min" Type="Real64" Value="-5"/>
+												</PropertyList>
+											</Modifier>
+										</ModifierInfo>
+									</ModifierList>
+								</Property>
+								<Property Name="RandomOrSequence" Type="int16" Value="0"/>
+								<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+								<Property Name="Volume" Type="Real64">
+									<ValueList>
+										<Value>-2</Value>
+									</ValueList>
+									<ModifierList>
+										<ModifierInfo>
+											<Modifier Name="" ID="{7FFF94C6-6E64-490E-82AC-C8A30463CCCA}">
+												<PropertyList>
+													<Property Name="Enabled" Type="bool" Value="True"/>
+													<Property Name="Max" Type="Real64" Value="1"/>
+													<Property Name="Min" Type="Real64" Value="-3"/>
+												</PropertyList>
+											</Modifier>
+										</ModifierInfo>
+									</ModifierList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Attenuation">
+									<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+								</Reference>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="DrakharAttack03" ID="{463C5ABB-02E5-4A75-A63B-D728731AC77A}" ShortID="526682492">
+									<PropertyList>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Pitch" Type="int32">
+											<ValueList>
+												<Value>-500</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{0AEA5F07-1D63-4C0B-AE19-A99525F8CB34}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{33E2C07C-03B3-49DC-AAC0-3910C7E42526}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="WhipWhoosh_SFXB_1075" ID="{D3015F8B-34B8-461E-A1A2-631B114680D5}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0420003124113601"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.123402979765336"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0527203053350193"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>WhipWhoosh_SFXB.1075.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="1038004403"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="WhipWhoosh_SFXB_1075" ID="{D3015F8B-34B8-461E-A1A2-631B114680D5}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="DrakharAttack01" ID="{00939B6F-209B-4A82-BE26-9AD156B3E055}" ShortID="566834006">
+									<PropertyList>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="InitialDelay" Type="Real64">
+											<ValueList>
+												<Value>0.1</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Pitch" Type="int32">
+											<ValueList>
+												<Value>100</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{441F6B3F-C381-4796-B264-815660D1953A}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{F94013BE-036E-435F-8196-A8701677A9A0}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="MARS_FOUND_FX_one_shot_fire_woosh_tube" ID="{63A1313A-3C2D-4781-BBAF-D0F5CF7C0F6E}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.112335026660655"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.155147564455479"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0710680201592573"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.540275447885498"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>MARS_FOUND_FX_one_shot_fire_woosh_tube.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="921567406"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="MARS_FOUND_FX_one_shot_fire_woosh_tube" ID="{63A1313A-3C2D-4781-BBAF-D0F5CF7C0F6E}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="DrakharAttack02" ID="{5EFD9E51-5166-4B0F-B172-D21A1272D469}" ShortID="540064167">
+									<PropertyList>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>5</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Pitch" Type="int32">
+											<ValueList>
+												<Value>100</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{517B4D8E-5961-41AE-8AF2-8545ABE78405}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{455FEC87-409D-4687-9D97-222804E4ADD5}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="PE-Whoosh_BW_43364" ID="{7B8532F0-CF69-4E7F-A470-F3A6D96662D3}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0763668103458776"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.175048328908403"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.024500638817462"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.417090456826685"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>PE-Whoosh_BW.43364.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="622179163"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="PE-Whoosh_BW_43364" ID="{7B8532F0-CF69-4E7F-A470-F3A6D96662D3}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+							<ObjectLists>
+								<ObjectList Name="Playlist">
+									<Reference>
+										<ObjectRef Name="DrakharAttack01" ID="{00939B6F-209B-4A82-BE26-9AD156B3E055}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+									</Reference>
+									<Reference>
+										<ObjectRef Name="DrakharAttack03" ID="{463C5ABB-02E5-4A75-A63B-D728731AC77A}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+									</Reference>
+									<Reference>
+										<ObjectRef Name="DrakharAttack02" ID="{5EFD9E51-5166-4B0F-B172-D21A1272D469}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</RandomSequenceContainer>
+					</ChildrenList>
+				</Folder>
 			</ChildrenList>
 		</WorkUnit>
 	</AudioObjects>

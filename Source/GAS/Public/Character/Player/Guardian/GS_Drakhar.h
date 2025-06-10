@@ -5,6 +5,8 @@
 #include "GS_Drakhar.generated.h"
 
 class AGS_DrakharProjectile;
+class UAkAudioEvent;
+class UAkComponent;
 
 UCLASS()
 class GAS_API AGS_Drakhar : public AGS_Guardian
@@ -28,6 +30,22 @@ public:
 	//[Draconic Fury Variables]
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> DraconicProjectile;
+
+	// === Wwise 사운드 이벤트들 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "NormalAttack"))
+	UAkAudioEvent* ComboAttackSoundEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "WingRush"))
+	UAkAudioEvent* DashSkillSoundEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "Earthquake"))
+	UAkAudioEvent* EarthquakeSkillSoundEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "DraconicFury"))
+	UAkAudioEvent* DraconicFurySkillSoundEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "DraconicFury Projectile"))
+	UAkAudioEvent* DraconicProjectileSoundEvent;
 
 	//[Input Binding Function]
 	virtual void Ctrl() override;
@@ -73,6 +91,38 @@ public:
 	//[DraconicFury Skill]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCSpawnDraconicFury();
+
+	// === Wwise 사운드 재생 함수들 ===
+	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "콤보 공격 사운드 재생"))
+	void PlayComboAttackSound();
+
+	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "대시 스킬 사운드 재생"))
+	void PlayDashSkillSound();
+
+	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "지진 스킬 사운드 재생"))
+	void PlayEarthquakeSkillSound();
+
+	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "드래곤 분노 스킬 사운드 재생"))
+	void PlayDraconicFurySkillSound();
+
+	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "드래곤 분노 투사체 사운드 재생"))
+	void PlayDraconicProjectileSound(const FVector& Location);
+
+	// === Multicast 사운드 RPC 함수들 ===
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayComboAttackSound();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayDashSkillSound();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayEarthquakeSkillSound();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayDraconicFurySkillSound();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayDraconicProjectileSound(const FVector& Location);
 	
 private:
 	//[NEW COMBO ATTACK]
@@ -103,4 +153,8 @@ private:
 	//[Draconic Fury]
 	TArray<FTransform> DraconicFuryTargetArray;
 	void GetRandomDraconicFuryTarget();
+
+	// === Wwise 관련 헬퍼 함수들 ===
+	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);
+	UAkComponent* GetOrCreateAkComponent();
 };
