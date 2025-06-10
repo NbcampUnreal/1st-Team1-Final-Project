@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Animation/Character/Seeker/Chan/GS_AN_UnlockMove.h"
+#include "Animation/Notifies/Chan/GS_AN_UnlockMove.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 
 void UGS_AN_UnlockMove::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,

@@ -235,38 +235,7 @@ float UGS_SeekerAnimInstance::Get_LeanAmount()
 	return CalculateRelativeAccelerationAmount().Y * ClampedLeanAmount;
 }
 
-void UGS_SeekerAnimInstance::AnimNotify_ComboInput()
-{
-	if (APawn* OwnerPawn = TryGetPawnOwner())
-	{
-		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
-		{
-			Chan->ComboInputOpen();
-		}
-	}
-}
 
-void UGS_SeekerAnimInstance::AnimNotify_CanProceed()
-{
-	if (APawn* OwnerPawn = TryGetPawnOwner())
-	{
-		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
-		{
-			//Chan->CheckToNext();
-		}
-	}
-}
-
-void UGS_SeekerAnimInstance::AnimNotify_ComboEnd()
-{
-	if (APawn* OwnerPawn = TryGetPawnOwner())
-	{
-		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
-		{
-			//Chan->ComboEnd();
-		}
-	}
-}
 
 void UGS_SeekerAnimInstance::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {

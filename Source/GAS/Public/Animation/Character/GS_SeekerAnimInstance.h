@@ -20,7 +20,7 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	// Update
+	// Anim Update
 	UFUNCTION(BlueprintNativeEvent, Category = "Update")
 	void UpdateEssentialValue();
 	UFUNCTION(BlueprintImplementableEvent, Category = "Update")
@@ -28,7 +28,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Update")
 	void UpdateState();
 
-	// Movement 
+	// Movement control Flags 
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"),Category = "Movement")
 	bool IsMoving();
 
@@ -50,23 +50,18 @@ public:
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
 	bool IsStarting();
 
+	// Offset Root Bone
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "OffsetRootBone")
 	float GetOffsetRootTranslationHalfLife();
 
+	// Lean
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Lean")
 	FVector CalculateRelativeAccelerationAmount();
-
+	
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Lean")
 	float Get_LeanAmount();
 
-	// Chan Combo Attack
-	UFUNCTION()
-	void AnimNotify_ComboInput();
-	UFUNCTION()
-	void AnimNotify_CanProceed();
-	UFUNCTION()
-	void AnimNotify_ComboEnd();
-
+	// Slot Change Control Value
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingUpperBodyMontage = false;
 
