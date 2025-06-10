@@ -39,7 +39,6 @@ void UGS_ArcaneBoardLPS::OnPlayerJobChanged(EPlayerRole CurrentRole)
 {
     UE_LOG(LogTemp, Error, TEXT("=== 델리게이트 콜백 호출됨! Role: %d ==="), (int32)CurrentRole);
 
-    // 핵심: 즉시 BoardManager 업데이트 (위젯이 열리기 전에 미리 준비)
     ECharacterClass NewClass = GetPlayerCharacterClass();
 
     if (!IsValid(BoardManager))
@@ -230,6 +229,7 @@ UGS_ArcaneBoardManager* UGS_ArcaneBoardLPS::GetOrCreateBoardManager()
         BoardManager->OnStatsChanged.AddDynamic(this, &UGS_ArcaneBoardLPS::OnBoardStatsChanged);
 
         ECharacterClass CurrPlayerClass = GetPlayerCharacterClass();
+        BoardManager->SetCurrClass(CurrPlayerClass);
     }
 
     return BoardManager;
