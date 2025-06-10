@@ -14,6 +14,7 @@
 #include "Weapon/GS_Weapon.h"
 #include "AkGameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Character/Component/GS_HitReactComp.h"
 
 AGS_Character::AGS_Character()
 {
@@ -22,6 +23,7 @@ AGS_Character::AGS_Character()
 	StatComp = CreateDefaultSubobject<UGS_StatComp>(TEXT("StatComp"));
 	SkillComp = CreateDefaultSubobject<UGS_SkillComp>(TEXT("SkillComp"));
 	DebuffComp = CreateDefaultSubobject<UGS_DebuffComp>(TEXT("DebuffComp"));
+	HitReactComp = CreateDefaultSubobject<UGS_HitReactComp>(TEXT("HitReactComp"));
 	
 	HPTextWidgetComp = CreateDefaultSubobject<UGS_HPTextWidgetComp>(TEXT("TextWidgetComp"));
 	HPTextWidgetComp->SetupAttachment(RootComponent);
@@ -94,6 +96,17 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	float CurrentHealth = StatComp->GetCurrentHealth();
+
+	// SJE
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent* PointEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+		FVector HitDirection = -PointEvent->ShotDirection;
+		if (UGS_HitReactComp* HitReactComponent = GetComponentByClass<UGS_HitReactComp>())
+		{
+			HitReactComponent->PlayHitReact(EHitReactType::Additive, HitDirection);
+		}
+	}
 
 	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f by %s"), *GetName(), ActualDamage, *DamageCauser->GetName());
 

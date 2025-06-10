@@ -18,7 +18,7 @@ void UGS_AN_CheckStaminaEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 			
 			if (Skill->GetCurrentStamina() <= 0)
 			{
-				//Chan->ToIdle();
+				Chan->ToIdle();
 			}
 		}
 	}

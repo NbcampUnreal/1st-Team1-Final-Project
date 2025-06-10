@@ -10,6 +10,7 @@
 #include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Character/Component/GS_HitReactComp.h"
 
 UGS_StatComp::UGS_StatComp()
 {

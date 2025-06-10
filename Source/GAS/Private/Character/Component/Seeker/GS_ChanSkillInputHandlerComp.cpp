@@ -35,7 +35,6 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 
 	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputLC)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Left Click Lock"));
 		return;
 	}
 	
@@ -49,15 +48,21 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 			}
 			else
 			{
-				ChanCharacter->OnComboAttack();
-			} 
+				
+				if (ChanCharacter->CanAcceptComboInput)
+				{
+					ChanCharacter->OnComboAttack();
+				}
+				else
+				{
+				}
+			}
 		}
 	}
 	else
 	{
 		if (ChanCharacter)
 		{
-			//ChanCharacter->Multicast_SetUseControllerRotationYaw(false);
 			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 		}
 	}
