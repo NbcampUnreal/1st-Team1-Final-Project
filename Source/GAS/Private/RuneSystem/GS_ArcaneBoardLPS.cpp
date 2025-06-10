@@ -54,7 +54,6 @@ void UGS_ArcaneBoardLPS::OnPlayerJobChanged(EPlayerRole CurrentRole)
 
         BoardManager->SetCurrClass(NewClass);
         LoadBoardConfig();
-        UpdateCharacterStats();
     }
 }
 
@@ -66,7 +65,6 @@ void UGS_ArcaneBoardLPS::InitializeRunes()
     }
 
     LoadBoardConfig();
-    UpdateCharacterStats();
 }
 
 void UGS_ArcaneBoardLPS::RefreshBoardForCurrentCharacter()
@@ -85,8 +83,6 @@ void UGS_ArcaneBoardLPS::RefreshBoardForCurrentCharacter()
             BoardManager->SetCurrClass(CurrentClass);
             LoadBoardConfig();
         }
-
-        UpdateCharacterStats();
     }
 }
 
@@ -99,7 +95,6 @@ void UGS_ArcaneBoardLPS::ApplyBoardChanges()
     if (BoardManager)
     {
         BoardManager->ApplyChanges();
-        UpdateCharacterStats();
         SaveBoardConfig();
     }
 }
@@ -217,25 +212,6 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
     BoardManager->bHasUnsavedChanges = false;
 }
 
-void UGS_ArcaneBoardLPS::UpdateCharacterStats()
-{
-    if (!BoardManager)
-    {
-        return;
-    }
-
-    if (APlayerController* PC = GetLocalPlayer()->GetPlayerController(GetWorld()))
-    {
-        if (AGS_Character* Character = Cast<AGS_Character>(PC->GetPawn()))
-        {
-            if (UGS_StatComp* StatComp = Character->GetStatComp())
-            {
-                StatComp->UpdateStat(BoardManager->AppliedStatEffects);
-            }
-        }
-    }
-}
-
 bool UGS_ArcaneBoardLPS::HasUnsavedChanges() const
 {
     if(IsValid(BoardManager))
@@ -264,7 +240,6 @@ void UGS_ArcaneBoardLPS::ForceApplyChanges()
     if (IsValid(BoardManager))
     {
         BoardManager->ApplyChanges();
-        UpdateCharacterStats();
         SaveBoardConfig();
     }
 }

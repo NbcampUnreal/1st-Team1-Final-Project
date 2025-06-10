@@ -23,6 +23,10 @@ void UGS_ChanMovingSkill::ActiveSkill()
 	{
 		if (OwnerPlayer->HasAuthority())
 		{
+			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
+			//OwnerPlayer->CanAcceptComboInput = false;
+			OwnerPlayer->ComboInputClose();
+			OwnerPlayer->CurrentComboIndex = 0;
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->SetMoveControlValue(false, false);
@@ -45,6 +49,7 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 
 	if (OwnerPlayer->HasAuthority())
 	{
+		OwnerPlayer->ComboInputOpen();
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);

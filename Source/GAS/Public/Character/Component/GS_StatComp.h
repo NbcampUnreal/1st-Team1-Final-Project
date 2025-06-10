@@ -106,4 +106,8 @@ private:
 
 	UFUNCTION()
 	void OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	//Enum 통일 전 임시
+	UFUNCTION()
+	ECharacterClass MapCharacterTypeToCharacterClass(ECharacterType CharacterType);
 };

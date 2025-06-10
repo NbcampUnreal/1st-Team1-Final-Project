@@ -19,7 +19,6 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 	
 	if (AGS_Player* OwnerCharacter = Cast<AGS_Player>(GetOwner()))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Hit Direction Section : %s"), *Section.ToString()); // SJE
 		OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[ReactType], Section);
 	}
 }

@@ -90,7 +90,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	}
 
 	Client_StopZoom();
-	Client_SetWidgetVisibility(false);
+	//Client_SetWidgetVisibility(false);
 }
 
 void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)
@@ -222,12 +222,13 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 
 	
 	// 선형 보정 (예: 최대 2000 거리까지, 최대 20도 상승)
-	float MaxDistance = 5000.0f;
-	float MaxPitch = 40.0f;
-	// 제곱 보정 (거리가 멀수록 더 빠르게 증가)
-	float PitchAdjustment = FMath::Clamp(FMath::Square(Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
-	//float PitchAdjustment = FMath::Clamp((Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
-	BaseRotation.Pitch += PitchAdjustment;
+	//float MaxDistance = 5000.0f;
+	//float MaxPitch = 40.0f;
+	//// 제곱 보정 (거리가 멀수록 더 빠르게 증가)
+	//float PitchAdjustment = FMath::Clamp(FMath::Square(Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
+	////float PitchAdjustment = FMath::Clamp((Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
+	//BaseRotation.Pitch += PitchAdjustment;
+
 	// 5. 여러 발 발사 처리 (SpreadAngleDeg를 기준으로 좌우로 퍼지게 만듦)
 	int32 HalfCount = NumArrows / 2;
 	for (int32 i = 0; i < NumArrows; ++i)
@@ -362,7 +363,7 @@ void AGS_Merci::Multicast_DrawDebugLine_Implementation(FVector Start, FVector En
 void AGS_Merci::OnDrawMontageEnded()
 {
 	bIsFullyDrawn = true;  // 활 완전히 당김 상태 설정
-	Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
+	//Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
 
 	// 서버로 전달
 	if (HasAuthority() == false)
