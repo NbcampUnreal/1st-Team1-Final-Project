@@ -143,6 +143,15 @@ void AGS_Guardian::QuitGuardianSkill()
 	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
 }
 
+void AGS_Guardian::MulticastRPCDrawDebug_Implementation(const FVector& Start,float Radius, bool bHit )
+{
+	DrawDebugSphere(
+	   GetWorld(), Start, Radius, 16,
+	   bHit ? FColor::Red : FColor::Green,
+	   false, 3.f, 0, 1.f);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 3.f);
+}
+
 void AGS_Guardian::MulticastRPCDrawDebugLine_Implementation(const FVector& Start, const FVector& End, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit)
 {
 	FColor Color = bIsHit ? FColor::Green : FColor::Red;

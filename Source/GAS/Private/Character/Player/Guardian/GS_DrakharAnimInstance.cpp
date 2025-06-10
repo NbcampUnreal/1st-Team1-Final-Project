@@ -27,6 +27,12 @@ void UGS_DrakharAnimInstance::AnimNotify_Reset()
 	Drakhar->ServerRPCResetValue();
 }
 
+void UGS_DrakharAnimInstance::AnimNotify_ShootEnergy()
+{
+	Drakhar->ComboLastAttack();
+	//Drakhar->ServerRPCShootEnergy();
+}
+
 void UGS_DrakharAnimInstance::AnimNotify_EarthquakeCheck()
 {	
 	Drakhar->ServerRPCEarthquakeAttackCheck();

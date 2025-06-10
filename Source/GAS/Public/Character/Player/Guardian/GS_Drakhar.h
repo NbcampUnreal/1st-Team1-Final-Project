@@ -40,18 +40,30 @@ public:
 	
 	//[COMBO ATTACK]
 	void SetNextComboAttackSection(FName InSectionName);
+	
 	void ResetComboAttackSection();
+	
 	void PlayComboAttackMontage();
+	
 	UFUNCTION()
 	void OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& PayLoad);
+	
 	UFUNCTION(Server, Reliable)
 	void ServerRPCNewComboAttack();
+
+	UFUNCTION(Server,Reliable)
+	void ServerRPCShootEnergy();
+	
 	UFUNCTION(Server, Reliable)
 	void ServerRPCResetValue();
+	
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCComboAttack();
+	
 	UFUNCTION()
 	void OnRep_CanCombo();
+
+	void ComboLastAttack();
 	
 	//[Dash Skill]
 	UFUNCTION(Server, Reliable)
@@ -86,6 +98,8 @@ private:
 	TSet<AGS_Character*> DamagedCharacters;
 	FVector DashStartLocation;
 	FVector DashEndLocation;
+	FVector DashDirection;
+	
 	float DashPower;
 	float DashInterpAlpha;
 	float DashDuration;
