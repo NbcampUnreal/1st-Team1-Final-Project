@@ -85,14 +85,12 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 
 		bIsFullyDrawn = false;  // 상태 초기화
 
-		// 화살 발사 사운드 재생
-		//PlaySound(ArrowShotSound);  // 부모 클래스의 PlaySound 함수 사용
-		Multicast_PlayArrowShotSound();
+		// 화살 발사 사운드는 Server_FireArrow에서 실제 발사할 때만 재생
 
 	}
 
 	Client_StopZoom();
-	Client_SetWidgetVisibility(false);
+	//Client_SetWidgetVisibility(false);
 }
 
 void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)
@@ -162,11 +160,13 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	if (CurrentArrowType == EArrowType::Axe && CurrentAxeArrows <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Axe Empty"));
+		Multicast_PlayArrowEmptySound(); // 빈 화살 사운드 재생
 		return;
 	}
 	if (CurrentArrowType == EArrowType::Child && CurrentChildArrows <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Child Empty"));
+		Multicast_PlayArrowEmptySound(); // 빈 화살 사운드 재생
 		return;
 	}
 
@@ -222,12 +222,13 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 
 	
 	// 선형 보정 (예: 최대 2000 거리까지, 최대 20도 상승)
-	float MaxDistance = 5000.0f;
-	float MaxPitch = 40.0f;
-	// 제곱 보정 (거리가 멀수록 더 빠르게 증가)
-	float PitchAdjustment = FMath::Clamp(FMath::Square(Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
-	//float PitchAdjustment = FMath::Clamp((Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
-	BaseRotation.Pitch += PitchAdjustment;
+	//float MaxDistance = 5000.0f;
+	//float MaxPitch = 40.0f;
+	//// 제곱 보정 (거리가 멀수록 더 빠르게 증가)
+	//float PitchAdjustment = FMath::Clamp(FMath::Square(Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
+	////float PitchAdjustment = FMath::Clamp((Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
+	//BaseRotation.Pitch += PitchAdjustment;
+
 	// 5. 여러 발 발사 처리 (SpreadAngleDeg를 기준으로 좌우로 퍼지게 만듦)
 	int32 HalfCount = NumArrows / 2;
 	for (int32 i = 0; i < NumArrows; ++i)
@@ -274,8 +275,11 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		}
 		//Multicast_DrawDebugLine(SpawnLocation, TargetLocation, FColor::Red);
 	}
-	// 8. 화살 발사 VFX 호출 (멀티캐스트로 모든 클라이언트에서 재생)
+	// 8. 화살 발사 VFX 및 사운드 호출 (멀티캐스트로 모든 클라이언트에서 재생)
 	Multicast_PlayArrowShotVFX(VFXLocation, VFXRotation, NumArrows);
+	
+	// 실제로 화살이 발사될 때만 사운드 재생
+	Multicast_PlayArrowShotSound();
 
 	
 }
@@ -359,7 +363,7 @@ void AGS_Merci::Multicast_DrawDebugLine_Implementation(FVector Start, FVector En
 void AGS_Merci::OnDrawMontageEnded()
 {
 	bIsFullyDrawn = true;  // 활 완전히 당김 상태 설정
-	Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
+	//Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
 
 	// 서버로 전달
 	if (HasAuthority() == false)
@@ -444,6 +448,12 @@ void AGS_Merci::OnRep_CurrentArrowType()
 		{
 			ArrowTypeWidget->UpdateArrowCount(CurrentChildArrows);
 		}
+	}
+
+	// 화살 타입 변경 사운드 재생
+	if (ArrowTypeChangeSound && IsLocallyControlled())
+	{
+		UAkGameplayStatics::PostEvent(ArrowTypeChangeSound, this, 0, FOnAkPostEventCallback());
 	}
 }
 
@@ -534,6 +544,15 @@ void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayArrowShotSound_Implementation: ArrowShotSound is null"));
+	}
+}
+
+void AGS_Merci::Multicast_PlayArrowEmptySound_Implementation()
+{
+	// 로컬 플레이어에게만 사운드 재생 (화살 부족은 개인적인 피드백)
+	if (ArrowEmptySound && IsLocallyControlled())
+	{
+		UAkGameplayStatics::PostEvent(ArrowEmptySound, this, 0, FOnAkPostEventCallback());
 	}
 }
 
