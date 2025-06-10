@@ -6,7 +6,7 @@
 #include "Character/Component/GS_StatComp.h"
 
 AGS_PlayerState::AGS_PlayerState()
-    : CurrentPlayerRole(EPlayerRole::PR_None)
+    : CurrentPlayerRole(EPlayerRole::PR_Seeker)
     , CurrentSeekerJob(ESeekerJob::Merci)
     , CurrentGuardianJob(EGuardianJob::Drakhar)
     , CurrentGameResult(EGameResult::GR_InProgress)
@@ -38,8 +38,6 @@ void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
 {
     Super::CopyProperties(NewPlayerState);
 
-    // this  == Old PlayerState
-    // NewPlayerState == Newly-created PlayerState
     if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
     {
         // 다음 맵으로 넘길 애들 추가 까먹지 말기!!!!!!!!
@@ -57,7 +55,6 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
 {
     Super::SeamlessTravelTo(NewPlayerState);
 
-    // 여기서는 this == Old, NewPlayerState == New 와 동일.
     if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
     {
         // 다음 맵으로 넘길 애들 추가 까먹지 말기!!!!!!!!
@@ -73,10 +70,8 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
 
 void AGS_PlayerState::InitializeDefaults()
 {
-    CurrentPlayerRole = EPlayerRole::PR_Seeker;
-    CurrentSeekerJob = ESeekerJob::Merci;
-	CurrentGuardianJob = EGuardianJob::Drakhar;
 	CurrentGameResult = EGameResult::GR_InProgress;
+	CurrentHealth = 99999.f;
     bIsReady = false;
     bIsAlive = true;
 
@@ -183,15 +178,9 @@ void AGS_PlayerState::SetIsAlive(bool bNewIsAlive)
     {
         bIsAlive = bNewIsAlive;
 
-        // 서버에서 델리게이트 브로드캐스트
         OnPlayerAliveStatusChangedDelegate.Broadcast(this, bIsAlive);
 
-        // 서버에서도 OnRep_IsAlive를 호출하여 서버 측 로직을 동일하게 처리할 수 있음 (선택 사항)
-        // OnRep_IsAlive(); 
-
-        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) SetIsAlive called on Server. New State: %s"),
-            *GetName(),
-            bIsAlive ? TEXT("True") : TEXT("False"));
+        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) SetIsAlive called on Server. New State: %s"), *GetName(), bIsAlive ? TEXT("True") : TEXT("False"));
     }
 }
 

@@ -179,7 +179,6 @@ void AGS_BossLevelGM::StartMatchCheck()
 {
     UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Match checks started. bMatchHasStarted = true"));
     bMatchHasStarted = true;
-    CheckAllPlayersDead(); //이거 지워도 상관 없음
 }
 
 void AGS_BossLevelGM::OnTimerEnd()
