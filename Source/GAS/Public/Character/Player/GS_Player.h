@@ -100,10 +100,6 @@ public:
 	//Wants To Move
 	UPROPERTY(BlueprintReadWrite, Category = "Movement")
 	FCharacterWantsToMove WantsToMove;
-	
-	/*// React
-	UPROPERTY(EditAnywhere, Category = "Animation")
-	UAnimMontage* AM_HitReact;*/
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetUseControllerRotationYaw(bool UseControlRotationYaw);
