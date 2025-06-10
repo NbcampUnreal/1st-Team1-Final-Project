@@ -62,8 +62,12 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 		return;	
 	}
 	float Damage = DamagedStat->CalculateDamage(Attacker, Damaged);
-	FDamageEvent DamageEvent;
-	Damaged->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar);
+	FVector ShotDir = (Damaged->GetActorLocation() - OwnerChar->GetActorLocation()).GetSafeNormal();
+	FPointDamageEvent DamageEvent;
+	DamageEvent.ShotDirection = ShotDir;
+	DamageEvent.HitInfo = SweepResult;
+	DamageEvent.DamageTypeClass = UDamageType::StaticClass();
+	Damaged->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar); // SJE
 
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

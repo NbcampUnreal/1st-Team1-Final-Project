@@ -29,7 +29,9 @@ struct FSeekerState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsAim;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsDraw;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsEquip;
 };
 
