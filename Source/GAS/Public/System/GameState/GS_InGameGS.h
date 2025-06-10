@@ -27,6 +27,10 @@ public:
 	void UpdateGameTime();
 	FText GetFormattedTime() const;
 
+	// 남은 시간을 초 단위로 반환
+	UFUNCTION(BlueprintPure, Category = "Timer")
+	float GetRemainingTime() const;
+
 	UPROPERTY(BlueprintAssignable, Category="Timer")
 	FOnTimerUpdatedDelegate OnTimerUpdated;
 	

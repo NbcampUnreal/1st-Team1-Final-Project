@@ -192,6 +192,7 @@ void UGS_ArcaneBoardWidget::RefreshForCurrentCharacter()
 		{
 			BindManagerEvents();
 			GenerateGridLayout();
+			UpdateGridVisuals();
 			InitInventory();
 			InitStatPanel();
 		}

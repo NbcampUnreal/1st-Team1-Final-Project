@@ -8,6 +8,7 @@
 #include "RuneSystem/GS_EnumUtils.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Character/Component/GS_HitReactComp.h"
 
 UGS_StatComp::UGS_StatComp()
 {
@@ -121,6 +122,7 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 		//[TODO] play take damage montage
 		if (!TakeDamageMontages.IsEmpty())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Take Damage Montage Play // SJE")); // SJE
 			MulticastRPCPlayTakeDamageMontage();
 		}
 

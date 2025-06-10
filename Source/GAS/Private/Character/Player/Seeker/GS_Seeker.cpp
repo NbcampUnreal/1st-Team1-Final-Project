@@ -60,7 +60,7 @@ AGS_Seeker::AGS_Seeker()
 	// 전투 BGM 트리거 생성 (시커가 몬스터를 감지)
 	CombatTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("CombatTrigger"));
 	CombatTrigger->SetupAttachment(RootComponent);
-	CombatTrigger->SetSphereRadius(1200.0f);
+	CombatTrigger->SetSphereRadius(800.0f);
 	CombatTrigger->SetCollisionProfileName(TEXT("SoundTrigger"));
 
 	//함정 - 화살발사기의 화살 채널 설정(Projectile)

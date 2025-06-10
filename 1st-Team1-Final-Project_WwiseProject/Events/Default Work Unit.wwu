@@ -794,6 +794,39 @@
 						</Event>
 					</ChildrenList>
 				</Folder>
+				<Event Name="EV_Merci_ArrowChange" ID="{E705CDED-3EB0-4631-B23E-66B019AFD271}">
+					<ChildrenList>
+						<Action Name="" ID="{81F2774E-4793-4F68-935D-8DB6AEC7A0FB}" ShortID="991105841">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_ArrowChange" ID="{41E0BC3C-C294-49E2-AE15-CF2D9C1AA381}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="EV_Merci_ArrowZero" ID="{1A835349-0C17-4D22-AF35-BAFC0385C29C}">
+					<ChildrenList>
+						<Action Name="" ID="{94EF75B3-CF9D-4A2E-9306-658FDC4D81BF}" ShortID="124936351">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="Voice_Merci_ArrowZero" ID="{951016DF-4806-4FB1-B6D2-8168F284546B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="EV_MeleeAttack" ID="{711FAB82-E203-463E-846A-2577FBDF70FA}">
+					<ChildrenList>
+						<Action Name="" ID="{A74AE3FC-B1FD-4EAB-84E8-C47C63FCDD41}" ShortID="774880259">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_MeleeHit" ID="{903F1C7F-7380-44A5-8CE5-F4126AF4F991}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>
