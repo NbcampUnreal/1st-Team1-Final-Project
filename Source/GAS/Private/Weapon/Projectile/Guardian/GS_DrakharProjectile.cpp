@@ -1,6 +1,7 @@
 #include "Weapon/Projectile/Guardian/GS_DrakharProjectile.h"
 
 #include "Character/GS_Character.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 
 #include "Engine/DamageEvents.h"
 #include "Components/SphereComponent.h"
@@ -21,6 +22,13 @@ void AGS_DrakharProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (HasAuthority())
+	{
+		if (GetInstigator())
+		{
+			CollisionComponent->IgnoreActorWhenMoving(GetInstigator(), true);
+		}
+	}
 }
 
 void AGS_DrakharProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -36,6 +44,7 @@ void AGS_DrakharProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherAct
 	if (IsValid(DamagedCharacter))
 	{
 		FDamageEvent DamageEvent;
+		//UE_LOG(LogTemp, Warning, TEXT("DAMAGED!!!!"));
 		DamagedCharacter->TakeDamage(120.f, DamageEvent, GetOwner()->GetInstigatorController(), this);
 	}
 	Destroy();

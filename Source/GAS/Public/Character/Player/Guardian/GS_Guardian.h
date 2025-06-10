@@ -64,6 +64,9 @@ public:
 	
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCDrawDebugLine(const FVector& Start, const FVector& End, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCDrawDebug(const FVector& Start, float Radius, bool bHit);
 protected:
 	UPROPERTY()
 	EGuardianState ClientGuardianState;

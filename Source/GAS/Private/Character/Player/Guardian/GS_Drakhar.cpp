@@ -32,7 +32,7 @@ AGS_Drakhar::AGS_Drakhar()
 	DashDuration = 1.f;
 
 	//earthquake skill variables
-	EarthquakePower = 3000.f;
+	EarthquakePower = 100.f;
 	EarthquakeRadius = 500.f;
 
 	//Guardian State Setting
@@ -172,6 +172,52 @@ void AGS_Drakhar::OnRep_CanCombo()
 {
 	bClientCanCombo = bCanCombo;
 }
+void AGS_Drakhar::ComboLastAttack()
+{
+	if (HasAuthority())
+	{
+		TArray<FHitResult> OutHitResults;
+		const FVector Start = GetActorLocation();
+		FCollisionQueryParams Params(NAME_None, false, this);
+		Params.AddIgnoredActor(this);
+
+		bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, Start, FQuat::Identity, ECC_Pawn,
+			FCollisionShape::MakeSphere(300.f), Params);
+		
+		if (bIsHitDetected)
+		{
+			TSet<AGS_Character*> DamagedCharacterArray;
+			for (auto const& OutHitResult : OutHitResults)
+			{
+				if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Sound Trigger!!"));
+					continue;
+				}
+
+				AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
+				if (IsValid(DamagedCharacter))
+				{
+					DamagedCharacterArray.Add(DamagedCharacter);
+				}
+			}
+
+			for (auto const& DamagedCharacter : DamagedCharacterArray)
+			{
+				//ServerRPCMeleeAttack(DamagedCharacter);
+				UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
+				if (IsValid(DamagedCharacterStat))
+				{
+					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
+					FDamageEvent DamageEvent;
+					DamagedCharacter->TakeDamage(Damage + 20.f, DamageEvent, GetController(),this);
+				}
+			}
+			DamagedCharacterArray.Empty();
+		}
+		//MulticastRPCDrawDebug(Start, 300.f, bIsHitDetected);
+	}
+}
 
 void AGS_Drakhar::ServerRPCResetValue_Implementation()
 {
@@ -189,9 +235,14 @@ void AGS_Drakhar::ServerRPCNewComboAttack_Implementation()
 	PlayComboAttackSound();
 }
 
+void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
+{
+	ComboLastAttack();
+}
+
 void AGS_Drakhar::MulticastRPCComboAttack_Implementation()
 {
-	if (!IsLocallyControlled())
+	if (!IsLocallyControlled()) // && !HasAuthority()
 	{
 		PlayComboAttackMontage();
 	}
@@ -216,6 +267,7 @@ void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 		SetActorLocation(NewLocation, true);
 		DashStartLocation = NewLocation;
 	}
+	DashDirection = GetActorForwardVector().GetSafeNormal();
 }
 
 void AGS_Drakhar::ServerRPCEndDash_Implementation()
@@ -232,6 +284,16 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		
 		FDamageEvent DamageEvent;
 		DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+
+		FVector DrakharPos = GetActorLocation();
+		FVector DamagedPos = DamagedCharacter->GetActorLocation();
+		FVector OutVector = (DamagedPos - DrakharPos);
+		FVector TempVector = -OutVector.Dot(DashDirection) * DashDirection;
+		FVector ResultVector = TempVector + OutVector;
+		
+		DamagedCharacter->LaunchCharacter(ResultVector.GetSafeNormal() * 10000.f,true,true);
+
+		//MulticastRPCDrawDebugVector(GetActorLocation(), DamagedCharacter->GetActorLocation());
 	}
 
 	DamagedCharacters.Empty();
@@ -317,7 +379,12 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			if (IsValid(DamagedCharacter))
 			{
 				DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
-				DamagedCharacter->LaunchCharacter(GetActorForwardVector() * EarthquakePower, false, false);
+				FVector DrakharLocation = GetActorLocation();
+				FVector DamagedLocation = DamagedCharacter->GetActorLocation();
+				
+				FVector LaunchVector = (DamagedLocation - DrakharLocation).GetSafeNormal();
+				//Guardian 쪽으로 당겨오기
+				DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f,0.f,500.f), false, false);
 			}
 		}
 	}
