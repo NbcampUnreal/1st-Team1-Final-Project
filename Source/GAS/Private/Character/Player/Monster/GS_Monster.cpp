@@ -105,7 +105,8 @@ void AGS_Monster::OnDeath()
 	}
 	
 	DetachFromControllerPendingDestroy();
-	
+	Multicast_OnDeath();
+
 	FTimerHandle DestroyTimerHandle;
 	GetWorldTimerManager().SetTimer(
 		DestroyTimerHandle,
@@ -118,7 +119,6 @@ void AGS_Monster::OnDeath()
 
 void AGS_Monster::HandleDelayedDestroy()
 {
-	Multicast_OnDeath();
 	Destroy();
 }
 

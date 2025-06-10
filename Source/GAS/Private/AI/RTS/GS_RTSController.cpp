@@ -11,6 +11,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "AkGameplayStatics.h"
+#include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
@@ -496,7 +497,7 @@ void AGS_RTSController::ToggleOnShiftClick()
 
 void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 {
-	if (!Unit)
+	if (!Unit || !IsSelectable(Unit))
 	{
 		return;
 	}
@@ -537,6 +538,11 @@ void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& 
 		
 		AGS_Monster* Unit = Units[i];
 		if (!Unit)
+		{
+			continue;
+		}
+
+		if (!IsSelectable(Unit))
 		{
 			continue;
 		}
@@ -846,7 +852,20 @@ void AGS_RTSController::GatherCommandableUnits(TArray<AGS_Monster*>& Out) const
 
 bool AGS_RTSController::IsSelectable(AGS_Monster* Monster) const
 {
-	return IsValid(Monster) && Monster->IsSelectable();
+	if (!IsValid(Monster))
+	{
+		return false;
+	}
+	
+	if (UGS_StatComp* Stat = Monster->GetStatComp())
+	{
+		if (Stat->GetCurrentHealth() <= 0.f)
+		{
+			return false;  
+		}
+	}
+	
+	return Monster->IsSelectable();
 }
 
 void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)
