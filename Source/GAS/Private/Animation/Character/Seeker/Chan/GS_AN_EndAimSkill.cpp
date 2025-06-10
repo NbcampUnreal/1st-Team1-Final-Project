@@ -4,9 +4,10 @@
 #include "Animation/Character/Seeker/Chan/GS_AN_EndAimSkill.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
+#include "Character/Skill/GS_SkillComp.h"
 
 void UGS_AN_EndAimSkill::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
-	const FAnimNotifyEventReference& EventReference)
+                                const FAnimNotifyEventReference& EventReference)
 {
 	Super::Notify(MeshComp, Animation, EventReference);
 
@@ -14,16 +15,9 @@ void UGS_AN_EndAimSkill::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 	{
 		if (Character->HasAuthority())
 		{
-			// Slot
-			Character->Multicast_SetIsFullBodySlot(false);
-			Character->Multicast_SetIsUpperBodySlot(false);
-			// Control Input Value
-			Character->Multicast_SetMustTurnInPlace(false);
-			Character->SetLookControlValue(true, true);
-			Character->SetMoveControlValue(true, true);
-			Character->SetSkillInputControl(true, true);
-
+			Character->GetSkillComp()->TryDeactiveSkill(ESkillSlot::Aiming);
 			Character->Multicast_StopSkillMontage(Character->GetCurrentMontage());
+
 		}
 	}
 }

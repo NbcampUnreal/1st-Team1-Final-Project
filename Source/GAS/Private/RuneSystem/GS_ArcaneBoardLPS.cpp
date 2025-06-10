@@ -39,7 +39,6 @@ void UGS_ArcaneBoardLPS::OnPlayerJobChanged(EPlayerRole CurrentRole)
 {
     UE_LOG(LogTemp, Error, TEXT("=== 델리게이트 콜백 호출됨! Role: %d ==="), (int32)CurrentRole);
 
-    // 핵심: 즉시 BoardManager 업데이트 (위젯이 열리기 전에 미리 준비)
     ECharacterClass NewClass = GetPlayerCharacterClass();
 
     if (!IsValid(BoardManager))
@@ -54,7 +53,6 @@ void UGS_ArcaneBoardLPS::OnPlayerJobChanged(EPlayerRole CurrentRole)
 
         BoardManager->SetCurrClass(NewClass);
         LoadBoardConfig();
-        UpdateCharacterStats();
     }
 }
 
@@ -66,7 +64,6 @@ void UGS_ArcaneBoardLPS::InitializeRunes()
     }
 
     LoadBoardConfig();
-    UpdateCharacterStats();
 }
 
 void UGS_ArcaneBoardLPS::RefreshBoardForCurrentCharacter()
@@ -85,8 +82,6 @@ void UGS_ArcaneBoardLPS::RefreshBoardForCurrentCharacter()
             BoardManager->SetCurrClass(CurrentClass);
             LoadBoardConfig();
         }
-
-        UpdateCharacterStats();
     }
 }
 
@@ -99,7 +94,6 @@ void UGS_ArcaneBoardLPS::ApplyBoardChanges()
     if (BoardManager)
     {
         BoardManager->ApplyChanges();
-        UpdateCharacterStats();
         SaveBoardConfig();
     }
 }
@@ -217,25 +211,6 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
     BoardManager->bHasUnsavedChanges = false;
 }
 
-void UGS_ArcaneBoardLPS::UpdateCharacterStats()
-{
-    if (!BoardManager)
-    {
-        return;
-    }
-
-    if (APlayerController* PC = GetLocalPlayer()->GetPlayerController(GetWorld()))
-    {
-        if (AGS_Character* Character = Cast<AGS_Character>(PC->GetPawn()))
-        {
-            if (UGS_StatComp* StatComp = Character->GetStatComp())
-            {
-                StatComp->UpdateStat(BoardManager->AppliedStatEffects);
-            }
-        }
-    }
-}
-
 bool UGS_ArcaneBoardLPS::HasUnsavedChanges() const
 {
     if(IsValid(BoardManager))
@@ -254,6 +229,7 @@ UGS_ArcaneBoardManager* UGS_ArcaneBoardLPS::GetOrCreateBoardManager()
         BoardManager->OnStatsChanged.AddDynamic(this, &UGS_ArcaneBoardLPS::OnBoardStatsChanged);
 
         ECharacterClass CurrPlayerClass = GetPlayerCharacterClass();
+        BoardManager->SetCurrClass(CurrPlayerClass);
     }
 
     return BoardManager;
@@ -264,7 +240,6 @@ void UGS_ArcaneBoardLPS::ForceApplyChanges()
     if (IsValid(BoardManager))
     {
         BoardManager->ApplyChanges();
-        UpdateCharacterStats();
         SaveBoardConfig();
     }
 }

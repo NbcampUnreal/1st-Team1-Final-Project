@@ -250,9 +250,6 @@ void UGS_ArcaneBoardWidget::OnStatsChanged(const FGS_StatRow& NewStats)
 	if (IsValid(StatPanel))
 	{
 		StatPanel->UpdateStats(NewStats);
-
-		UE_LOG(LogTemp, Warning, TEXT("스탯 UI 업데이트 완료 - HP+%.1f, ATK+%.1f, DEF+%.1f, AGL+%.1f, ATS+%.1f"),
-			NewStats.HP, NewStats.ATK, NewStats.DEF, NewStats.AGL, NewStats.ATS);
 	}
 }
 

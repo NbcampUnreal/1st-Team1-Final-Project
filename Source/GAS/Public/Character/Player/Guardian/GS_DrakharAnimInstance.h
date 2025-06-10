@@ -25,6 +25,9 @@ private:
 	UFUNCTION()
 	void AnimNotify_Reset();
 
+	UFUNCTION()
+	void AnimNotify_ShootEnergy();
+
 	//[earthquake skill]
 	UFUNCTION()
 	void AnimNotify_EarthquakeCheck();

@@ -14,25 +14,22 @@ void AGS_BossLevelGS::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority())
+	UGS_GameInstance* GI = Cast<UGS_GameInstance>(GetGameInstance());
+	if (GI)
 	{
-		UGS_GameInstance* GI = Cast<UGS_GameInstance>(GetGameInstance());
-		if (GI)
-		{
-			BossTotalTime = GI->RemainingTime;
-		}
+		BossTotalTime = GI->RemainingTime;
+	}
 
-		if (BossTotalTime > 0.f)
+	if (BossTotalTime > 0.f)
+	{
+		GetWorldTimerManager().SetTimer(BossTimerHandle, this, &AGS_BossLevelGS::UpdateBossTime, 1.0f, true);
+	}
+	else
+	{
+		AGS_BossLevelGM* GM = GetWorld()->GetAuthGameMode<AGS_BossLevelGM>();
+		if (GM)
 		{
-			GetWorldTimerManager().SetTimer(BossTimerHandle, this, &AGS_BossLevelGS::UpdateBossTime, 1.0f, true);
-		}
-		else
-		{
-			AGS_BossLevelGM* GM = GetWorld()->GetAuthGameMode<AGS_BossLevelGM>();
-			if (GM)
-			{
-				GM->OnTimerEnd();
-			}
+			GM->OnTimerEnd();
 		}
 	}
 }
@@ -41,7 +38,6 @@ void AGS_BossLevelGS::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AGS_BossLevelGS, BossCurrentTime);
-	DOREPLIFETIME(AGS_BossLevelGS, BossTotalTime);
 }
 
 FText AGS_BossLevelGS::GetFormattedBossTime() const
@@ -50,11 +46,6 @@ FText AGS_BossLevelGS::GetFormattedBossTime() const
 	int32 Min = Remain / 60;
 	int32 Sec = Remain % 60;
 	return FText::FromString(FString::Printf(TEXT("%02d:%02d"), Min, Sec));
-}
-
-float AGS_BossLevelGS::GetRemainingBossTime() const
-{
-	return FMath::Max(0.0f, BossTotalTime - BossCurrentTime);
 }
 
 void AGS_BossLevelGS::UpdateBossTime()

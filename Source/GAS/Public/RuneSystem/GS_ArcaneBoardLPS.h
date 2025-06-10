@@ -57,9 +57,6 @@ public:
     void LoadBoardConfig();
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void UpdateCharacterStats();
-
-    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     bool HasUnsavedChanges() const;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")

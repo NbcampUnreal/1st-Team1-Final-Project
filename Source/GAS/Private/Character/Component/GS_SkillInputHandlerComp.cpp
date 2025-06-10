@@ -135,13 +135,3 @@ void UGS_SkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
 	//UE_LOG(LogTemp, Warning, TEXT("Scroll Mouse"));
 }
 
-/*bool UGS_SkillInputHandlerComp::GetCanInput()
-{
-	return bCanInput;
-}
-
-void UGS_SkillInputHandlerComp::SetCanInput(bool CanInput)
-{
-	bCanInput = CanInput;
-}*/ // SJE
-
