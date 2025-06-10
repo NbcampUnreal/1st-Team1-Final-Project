@@ -8,6 +8,7 @@
 class UGS_StatComp;
 class UGS_SkillComp;
 class UGS_DebuffComp;
+class UGS_HitReactComp;
 class UGS_HPTextWidgetComp;
 class UGS_HPText;
 class UGS_HPWidget;
@@ -129,10 +130,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_StatComp> StatComp;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_HitReactComp> HitReactComp;
+	
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TArray<FWeaponSlot> WeaponSlots;
-
 private:
 	void SpawnAndAttachWeapons();
 	void DestroyAllWeapons();
