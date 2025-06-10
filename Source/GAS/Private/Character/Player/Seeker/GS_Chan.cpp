@@ -33,6 +33,14 @@ void AGS_Chan::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPla
 	}
 }
 
+void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_Chan, CanAcceptComboInput);
+	DOREPLIFETIME(AGS_Chan, CurrentComboIndex);
+}
+
 // Called when the game starts or when spawned
 void AGS_Chan::BeginPlay()
 {
@@ -132,7 +140,6 @@ void AGS_Chan::OffJumpAttackSkill()
 
 void AGS_Chan::ToIdle()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ToIdle"));
 	Multicast_StopSkillMontage(GetCurrentMontage());
 	Multicast_SetIsUpperBodySlot(false);
 	Multicast_SetIsFullBodySlot(false);

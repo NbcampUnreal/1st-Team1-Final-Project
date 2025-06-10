@@ -45,8 +45,12 @@ public:
 	UPROPERTY(EditAnywhere, Category="Animation")
 	UAnimMontage* ComboAnimMontage;
 
+	UPROPERTY(Replicated)
 	int32 CurrentComboIndex;
+	
+	UPROPERTY(Replicated)
 	bool CanAcceptComboInput = true;
+	
 	bool bNextCombo = false;
 
 	UFUNCTION(Server, Reliable)
@@ -111,6 +115,7 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_ChanAimingSkillBar(bool bShow);
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

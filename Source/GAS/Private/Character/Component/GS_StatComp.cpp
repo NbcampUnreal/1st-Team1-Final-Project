@@ -122,7 +122,6 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 		//[TODO] play take damage montage
 		if (!TakeDamageMontages.IsEmpty())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Take Damage Montage Play // SJE")); // SJE
 			MulticastRPCPlayTakeDamageMontage();
 		}
 
