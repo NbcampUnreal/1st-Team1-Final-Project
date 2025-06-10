@@ -6,6 +6,8 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "RuneSystem/GS_EnumUtils.h"
+#include "RuneSystem/GS_ArcaneBoardLPS.h"
+#include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -26,6 +28,26 @@ void UGS_StatComp::BeginPlay()
 {
 	Super::BeginPlay();
 
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	APlayerController* PC = Cast<APlayerController>(OwnerCharacter->GetController());
+	if (PC && PC->IsLocalController())
+	{
+		if (UGS_ArcaneBoardLPS* LPS = PC->GetLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+		{
+			if (UGS_ArcaneBoardManager* Manager = LPS->GetOrCreateBoardManager())
+			{
+				FGS_StatRow RuneStats = Manager->AppliedStatEffects;
+				UpdateStat(RuneStats);
+
+				UE_LOG(LogTemp, Warning, TEXT("StatComp BeginPlay: 룬 스탯 적용 완료"));
+			}
+		}
+	}
 }
 
 void UGS_StatComp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -248,4 +270,20 @@ bool UGS_StatComp::CanPlayHitSound() const
 	
 	float CurrentTime = GetWorld()->GetTimeSeconds();
 	return (CurrentTime - LastHitSoundTime) >= HitSoundCooldownTime;
+}
+
+ECharacterClass UGS_StatComp::MapCharacterTypeToCharacterClass(ECharacterType CharacterType)
+{
+	switch (CharacterType)
+	{
+	case ECharacterType::Ares:
+		return ECharacterClass::Ares;
+	case ECharacterType::Chan:
+		return ECharacterClass::Chan;
+	case ECharacterType::Merci:
+		return ECharacterClass::Merci;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("MapCharacterTypeToCharacterClass: 알 수 없는 캐릭터 타입, 기본값 Ares 반환"));
+		return ECharacterClass::Ares;
+	}
 }
