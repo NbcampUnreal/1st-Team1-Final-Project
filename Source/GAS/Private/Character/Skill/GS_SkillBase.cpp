@@ -94,13 +94,6 @@ void UGS_SkillBase::StartCoolDown()
 
 			}, 0.07f, true);
 	}
-
-	// //guardian state setting
-	// AGS_Guardian* Guardian = Cast<AGS_Guardian>(OwnerCharacter);
-	// if (IsValid(Guardian))
-	// {
-	// 	Guardian->GuardianState = EGuardianState::SKillCoolDown;
-	// }
 }
 
 void UGS_SkillBase::LogRemainingTime()

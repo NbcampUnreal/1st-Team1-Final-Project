@@ -67,7 +67,7 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	DamageEvent.ShotDirection = ShotDir;
 	DamageEvent.HitInfo = SweepResult;
 	DamageEvent.DamageTypeClass = UDamageType::StaticClass();
-	Damaged->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar); // SJE
+	Damaged->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar);
 
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
