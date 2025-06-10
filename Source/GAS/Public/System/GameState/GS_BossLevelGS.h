@@ -20,10 +20,6 @@ public:
     UFUNCTION(BlueprintPure, Category = "Timer")
     FText GetFormattedBossTime() const;
 
-    // 보스 레벨의 남은 시간을 초 단위로 반환
-    UFUNCTION(BlueprintPure, Category = "Timer")
-    float GetRemainingBossTime() const;
-
     UPROPERTY(BlueprintAssignable, Category = "Timer")
     FOnBossTimerUpdated OnBossTimerUpdatedDelegate;
 
