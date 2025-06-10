@@ -51,6 +51,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* StopAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* HoldAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* SkillAction;
@@ -98,6 +101,7 @@ public:
 	void OnCommandMove(const FInputActionValue& Value);
 	void OnCommandAttack(const FInputActionValue& Value);
 	void OnCommandStop(const FInputActionValue& Value);
+	void OnCommandHold(const FInputActionValue& Value);
 	void OnCommandSkill(const FInputActionValue& Value);
 
 	// 실제 구현 + HUD 버튼 클릭시
@@ -109,6 +113,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="RTS")
 	void StopSelectedUnits();
+	
+	UFUNCTION(BlueprintCallable, Category="RTS")
+	void HoldSelectedUnits();
 
 	UFUNCTION(BlueprintCallable, Category="RTS")
 	void SkillSelectedUnits();
@@ -167,6 +174,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_RTSStop(const TArray<AGS_Monster*>& Units);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RTSHold(const TArray<AGS_Monster*>& Units);
 
 	UFUNCTION(Server, Reliable)
 	void Server_RTSSkill(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc);
