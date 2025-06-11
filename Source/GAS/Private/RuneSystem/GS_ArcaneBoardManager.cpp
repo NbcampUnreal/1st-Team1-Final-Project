@@ -94,8 +94,22 @@ ECharacterClass UGS_ArcaneBoardManager::GetCurrClass()
 
 bool UGS_ArcaneBoardManager::CanPlaceRuneAt(uint8 RuneID, const FIntPoint& Pos)
 {
-	TArray<FIntPoint> AffectedCells;
-	return PreviewRunePlacement(RuneID, Pos, AffectedCells);
+	TArray<FIntPoint> RuneShape;
+	if (!GetRuneShape(RuneID, RuneShape))
+	{
+		return false;
+	}
+
+	for (const FIntPoint& Offset : RuneShape)
+	{
+		FIntPoint CellPos = Pos + Offset;
+		if (!IsValidCell(CellPos))
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 bool UGS_ArcaneBoardManager::FindOptimalPlacementPos(uint8 RuneID, const FIntPoint& ClickedCell, FIntPoint& OutBestPos)
@@ -112,8 +126,7 @@ bool UGS_ArcaneBoardManager::FindOptimalPlacementPos(uint8 RuneID, const FIntPoi
 	{
 		FIntPoint CandidatePos = ClickedCell - ShapeOffset;
 
-		TArray<FIntPoint> AffectedCells;
-		if (PreviewRunePlacement(RuneID, CandidatePos, AffectedCells))
+		if (CanPlaceRuneAt(RuneID, CandidatePos))
 		{
 			ValidPos.Add(CandidatePos);
 		}
@@ -155,13 +168,13 @@ bool UGS_ArcaneBoardManager::FindOptimalPlacementPos(uint8 RuneID, const FIntPoi
 
 bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
 {
-	TMap<FIntPoint, UTexture2D*> RuneShape;
-	if (!GetFragmentedRuneTexture(RuneID, RuneShape))
+	if (!CanPlaceRuneAt(RuneID, Pos))
 	{
 		return false;
 	}
 
-	if (!CanPlaceRuneAt(RuneID, Pos))
+	TMap<FIntPoint, UTexture2D*> RuneShape;
+	if (!GetFragmentedRuneTexture(RuneID, RuneShape))
 	{
 		return false;
 	}
