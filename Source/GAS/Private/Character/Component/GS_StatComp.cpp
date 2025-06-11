@@ -83,7 +83,7 @@ void UGS_StatComp::InitStat(FName RowName)
 	OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed *= Agility;
 }
 
-void UGS_StatComp::UpdateStat(const FGS_StatRow& RuneStats)
+void UGS_StatComp::UpdateStat_Implementation(const FGS_StatRow& RuneStats)
 {
 	//update stats by rune system
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
