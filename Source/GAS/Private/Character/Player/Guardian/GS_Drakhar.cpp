@@ -1,5 +1,4 @@
 #include "Character/Player/Guardian/GS_Drakhar.h"
-
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Skill/GS_SkillComp.h"
@@ -32,7 +31,7 @@ AGS_Drakhar::AGS_Drakhar()
 	DashDuration = 1.f;
 
 	//earthquake skill variables
-	EarthquakePower = 100.f;
+	EarthquakePower = 3000.f;
 	EarthquakeRadius = 500.f;
 
 	//Guardian State Setting
@@ -47,6 +46,10 @@ AGS_Drakhar::AGS_Drakhar()
 	EarthquakeSkillSoundEvent = nullptr;
 	DraconicFurySkillSoundEvent = nullptr;
 	DraconicProjectileSoundEvent = nullptr;
+
+	// === 날기 사운드 이벤트 초기화 ===
+	FlyStartSoundEvent = nullptr;
+	FlyEndSoundEvent = nullptr;
 
 	// AkComponent 추가 (3D 위치기반 사운드용)
 	if (!FindComponentByClass<UAkComponent>())
@@ -86,7 +89,7 @@ void AGS_Drakhar::Ctrl()
 		if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
 		{
 			GetSkillComp()->TryActivateSkill(ESkillSlot::Ready);
-			ServerRPCStartCtrl();
+			this->ServerRPCStartCtrl();
 		}
 	}
 }
@@ -96,7 +99,7 @@ void AGS_Drakhar::CtrlStop()
 	if (IsLocallyControlled())
 	{		
 		GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
-		ServerRPCStopCtrl();
+		this->ServerRPCStopCtrl();
 	}
 }
 
@@ -172,51 +175,11 @@ void AGS_Drakhar::OnRep_CanCombo()
 {
 	bClientCanCombo = bCanCombo;
 }
+
 void AGS_Drakhar::ComboLastAttack()
 {
-	if (HasAuthority())
-	{
-		TArray<FHitResult> OutHitResults;
-		const FVector Start = GetActorLocation();
-		FCollisionQueryParams Params(NAME_None, false, this);
-		Params.AddIgnoredActor(this);
-
-		bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, Start, FQuat::Identity, ECC_Pawn,
-			FCollisionShape::MakeSphere(300.f), Params);
-		
-		if (bIsHitDetected)
-		{
-			TSet<AGS_Character*> DamagedCharacterArray;
-			for (auto const& OutHitResult : OutHitResults)
-			{
-				if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Sound Trigger!!"));
-					continue;
-				}
-
-				AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
-				if (IsValid(DamagedCharacter))
-				{
-					DamagedCharacterArray.Add(DamagedCharacter);
-				}
-			}
-
-			for (auto const& DamagedCharacter : DamagedCharacterArray)
-			{
-				//ServerRPCMeleeAttack(DamagedCharacter);
-				UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
-				if (IsValid(DamagedCharacterStat))
-				{
-					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
-					FDamageEvent DamageEvent;
-					DamagedCharacter->TakeDamage(Damage + 20.f, DamageEvent, GetController(),this);
-				}
-			}
-			DamagedCharacterArray.Empty();
-		}
-		//MulticastRPCDrawDebug(Start, 300.f, bIsHitDetected);
-	}
+	// 콤보 마지막 공격 로직 구현
+	// TODO: 필요시 특별한 콤보 마지막 공격 로직을 여기에 추가
 }
 
 void AGS_Drakhar::ServerRPCResetValue_Implementation()
@@ -235,19 +198,13 @@ void AGS_Drakhar::ServerRPCNewComboAttack_Implementation()
 	PlayComboAttackSound();
 }
 
-void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
-{
-	ComboLastAttack();
-}
-
 void AGS_Drakhar::MulticastRPCComboAttack_Implementation()
 {
-	if (!IsLocallyControlled()) // && !HasAuthority()
+	if (!IsLocallyControlled())
 	{
 		PlayComboAttackMontage();
 	}
 }
-
 
 void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 {
@@ -267,7 +224,6 @@ void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 		SetActorLocation(NewLocation, true);
 		DashStartLocation = NewLocation;
 	}
-	DashDirection = GetActorForwardVector().GetSafeNormal();
 }
 
 void AGS_Drakhar::ServerRPCEndDash_Implementation()
@@ -284,16 +240,6 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		
 		FDamageEvent DamageEvent;
 		DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
-
-		FVector DrakharPos = GetActorLocation();
-		FVector DamagedPos = DamagedCharacter->GetActorLocation();
-		FVector OutVector = (DamagedPos - DrakharPos);
-		FVector TempVector = -OutVector.Dot(DashDirection) * DashDirection;
-		FVector ResultVector = TempVector + OutVector;
-		
-		DamagedCharacter->LaunchCharacter(ResultVector.GetSafeNormal() * 10000.f,true,true);
-
-		//MulticastRPCDrawDebugVector(GetActorLocation(), DamagedCharacter->GetActorLocation());
 	}
 
 	DamagedCharacters.Empty();
@@ -379,21 +325,35 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			if (IsValid(DamagedCharacter))
 			{
 				DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
-				FVector DrakharLocation = GetActorLocation();
-				FVector DamagedLocation = DamagedCharacter->GetActorLocation();
-				
-				FVector LaunchVector = (DamagedLocation - DrakharLocation).GetSafeNormal();
-				//Guardian 쪽으로 당겨오기
-				DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f,0.f,500.f), false, false);
+				DamagedCharacter->LaunchCharacter(GetActorForwardVector() * EarthquakePower, false, false);
 			}
 		}
 	}
 	//MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
 }
 
+void AGS_Drakhar::ServerRPCStartCtrl_Implementation()
+{
+	GuardianState = EGuardianState::CtrlUp;
+	
+	MoveSpeed = SpeedUpMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+	
+	PlayFlyStartSound();
+}
+
+void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
+{
+	GuardianState = EGuardianState::CtrlSkillEnd;
+	
+	MoveSpeed = NormalMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+
+	PlayFlyEndSound();
+}
+
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 {
-	// 드래곤 분노 스킬 사운드 재생
 	PlayDraconicFurySkillSound();
 	
 	GetRandomDraconicFuryTarget();
@@ -535,13 +495,11 @@ void AGS_Drakhar::PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Locat
 	// 특정 위치에서 재생하는 경우 (투사체 등)
 	if (Location != FVector::ZeroVector)
 	{
-		// 임시로 해당 위치에서 사운드 재생
 		FOnAkPostEventCallback DummyCallback;
 		UAkGameplayStatics::PostEventAtLocation(SoundEvent, Location, FRotator::ZeroRotator, GetWorld());
 	}
 	else
 	{
-		// 캐릭터 위치에서 재생
 		AkComp->PostAkEvent(SoundEvent);
 	}
 }
@@ -563,4 +521,39 @@ UAkComponent* AGS_Drakhar::GetOrCreateAkComponent()
 	}
 	
 	return AkComp;
+}
+
+// === 날기 사운드 재생 함수들 구현 ===
+
+void AGS_Drakhar::PlayFlyStartSound()
+{
+	if (HasAuthority())
+	{
+		MulticastPlayFlyStartSound();
+	}
+}
+
+void AGS_Drakhar::PlayFlyEndSound()
+{
+	if (HasAuthority())
+	{
+		MulticastPlayFlyEndSound();
+	}
+}
+
+// === 날기 사운드 Multicast RPC 함수들 구현 ===
+
+void AGS_Drakhar::MulticastPlayFlyStartSound_Implementation()
+{
+	PlaySoundEvent(FlyStartSoundEvent);
+}
+
+void AGS_Drakhar::MulticastPlayFlyEndSound_Implementation()
+{
+	PlaySoundEvent(FlyEndSoundEvent);
+}
+
+void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
+{
+	// TODO: 투사체 발사 로직 구현
 }

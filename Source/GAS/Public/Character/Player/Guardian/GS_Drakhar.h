@@ -47,6 +47,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "DraconicFury Projectile"))
 	UAkAudioEvent* DraconicProjectileSoundEvent;
 
+	// === 날기 관련 사운드 이벤트들 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "FlyStart"))
+	UAkAudioEvent* FlyStartSoundEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "FlyEnd"))
+	UAkAudioEvent* FlyEndSoundEvent;
+
 	//[Input Binding Function]
 	virtual void Ctrl() override;
 
@@ -104,6 +111,13 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPCSpawnDraconicFury();
 
+	//[Fly Skill]
+	UFUNCTION(Server, Reliable)
+	void ServerRPCStartCtrl();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCStopCtrl();
+
 	// === Wwise 사운드 재생 함수들 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "콤보 공격 사운드 재생"))
 	void PlayComboAttackSound();
@@ -120,6 +134,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "드래곤 분노 투사체 사운드 재생"))
 	void PlayDraconicProjectileSound(const FVector& Location);
 
+	// === 날기 사운드 재생 함수들 ===
+	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "날기 시작 사운드 재생"))
+	void PlayFlyStartSound();
+
+	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "날기 종료 사운드 재생"))
+	void PlayFlyEndSound();
+
 	// === Multicast 사운드 RPC 함수들 ===
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayComboAttackSound();
@@ -135,6 +156,13 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayDraconicProjectileSound(const FVector& Location);
+
+	// === 날기 사운드 Multicast RPC 함수들 ===
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayFlyStartSound();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayFlyEndSound();
 	
 private:
 	//[NEW COMBO ATTACK]
