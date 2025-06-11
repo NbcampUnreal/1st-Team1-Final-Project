@@ -14,8 +14,6 @@
 void UGS_ArcaneBoardLPS::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
-
-    BindPlayerStateEvents();
 }
 
 ECharacterClass UGS_ArcaneBoardLPS::GetPlayerCharacterClass() const
@@ -35,26 +33,19 @@ ECharacterClass UGS_ArcaneBoardLPS::GetPlayerCharacterClass() const
     return ECharacterClass::Ares;
 }
 
-void UGS_ArcaneBoardLPS::OnPlayerJobChanged(EPlayerRole CurrentRole)
+void UGS_ArcaneBoardLPS::OnPlayerJobChanged(ESeekerJob SeekerJob)
 {
-    UE_LOG(LogTemp, Error, TEXT("=== 델리게이트 콜백 호출됨! Role: %d ==="), (int32)CurrentRole);
-
-    // 핵심: 즉시 BoardManager 업데이트 (위젯이 열리기 전에 미리 준비)
-    ECharacterClass NewClass = GetPlayerCharacterClass();
-
     if (!IsValid(BoardManager))
     {
         GetOrCreateBoardManager();
     }
 
-    if (IsValid(BoardManager) && BoardManager->GetCurrClass() != NewClass)
-    {
-        UE_LOG(LogTemp, Error, TEXT("즉시 BoardManager 업데이트: %d → %d"),
-            (int32)BoardManager->GetCurrClass(), (int32)NewClass);
+    ECharacterClass NewCharacterClass = MapSeekerJobToCharacterClass(SeekerJob);
 
-        BoardManager->SetCurrClass(NewClass);
+    if (IsValid(BoardManager) && BoardManager->GetCurrClass() != NewCharacterClass)
+    {
+        BoardManager->SetCurrClass(NewCharacterClass);
         LoadBoardConfig();
-        UpdateCharacterStats();
     }
 }
 
@@ -66,7 +57,6 @@ void UGS_ArcaneBoardLPS::InitializeRunes()
     }
 
     LoadBoardConfig();
-    UpdateCharacterStats();
 }
 
 void UGS_ArcaneBoardLPS::RefreshBoardForCurrentCharacter()
@@ -85,8 +75,6 @@ void UGS_ArcaneBoardLPS::RefreshBoardForCurrentCharacter()
             BoardManager->SetCurrClass(CurrentClass);
             LoadBoardConfig();
         }
-
-        UpdateCharacterStats();
     }
 }
 
@@ -99,7 +87,6 @@ void UGS_ArcaneBoardLPS::ApplyBoardChanges()
     if (BoardManager)
     {
         BoardManager->ApplyChanges();
-        UpdateCharacterStats();
         SaveBoardConfig();
     }
 }
@@ -217,25 +204,6 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
     BoardManager->bHasUnsavedChanges = false;
 }
 
-void UGS_ArcaneBoardLPS::UpdateCharacterStats()
-{
-    if (!BoardManager)
-    {
-        return;
-    }
-
-    if (APlayerController* PC = GetLocalPlayer()->GetPlayerController(GetWorld()))
-    {
-        if (AGS_Character* Character = Cast<AGS_Character>(PC->GetPawn()))
-        {
-            if (UGS_StatComp* StatComp = Character->GetStatComp())
-            {
-                StatComp->UpdateStat(BoardManager->AppliedStatEffects);
-            }
-        }
-    }
-}
-
 bool UGS_ArcaneBoardLPS::HasUnsavedChanges() const
 {
     if(IsValid(BoardManager))
@@ -254,6 +222,7 @@ UGS_ArcaneBoardManager* UGS_ArcaneBoardLPS::GetOrCreateBoardManager()
         BoardManager->OnStatsChanged.AddDynamic(this, &UGS_ArcaneBoardLPS::OnBoardStatsChanged);
 
         ECharacterClass CurrPlayerClass = GetPlayerCharacterClass();
+        BoardManager->SetCurrClass(CurrPlayerClass);
     }
 
     return BoardManager;
@@ -264,36 +233,12 @@ void UGS_ArcaneBoardLPS::ForceApplyChanges()
     if (IsValid(BoardManager))
     {
         BoardManager->ApplyChanges();
-        UpdateCharacterStats();
         SaveBoardConfig();
     }
 }
 
 void UGS_ArcaneBoardLPS::RequestServerStatsUpdate()
 {
-}
-
-void UGS_ArcaneBoardLPS::BindPlayerStateEvents()
-{
-    if (APlayerController* PC = GetLocalPlayer()->GetPlayerController(GetWorld()))
-    {
-        if (AGS_PlayerState* GSPlayerState = PC->GetPlayerState<AGS_PlayerState>())
-        {
-            UnbindPlayerStateEvents();
-            GSPlayerState->OnJobChangedDelegate.AddDynamic(this, &UGS_ArcaneBoardLPS::OnPlayerJobChanged);
-            BoundPlayerState = GSPlayerState;
-            UE_LOG(LogTemp, Log, TEXT("PlayerState 델리게이트 바인딩 완료"));
-        }
-    }
-}
-
-void UGS_ArcaneBoardLPS::UnbindPlayerStateEvents()
-{
-    if (BoundPlayerState.IsValid())
-    {
-        BoundPlayerState->OnJobChangedDelegate.RemoveDynamic(this, &UGS_ArcaneBoardLPS::OnPlayerJobChanged);
-        BoundPlayerState.Reset();
-    }
 }
 
 ECharacterClass UGS_ArcaneBoardLPS::MapSeekerJobToCharacterClass(ESeekerJob SeekerJob) const

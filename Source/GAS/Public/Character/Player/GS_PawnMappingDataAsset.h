@@ -20,6 +20,9 @@ struct FAssetToSpawn
     USkeletalMesh* SkeletalMeshClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+    UPhysicsAsset* PhysicsAsset;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
     TSubclassOf<UAnimInstance> AnimBlueprintClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")

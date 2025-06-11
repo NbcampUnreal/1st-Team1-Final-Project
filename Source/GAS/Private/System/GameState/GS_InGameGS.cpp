@@ -7,6 +7,7 @@ AGS_InGameGS::AGS_InGameGS()
 {
 	TotalGameTime = 900.0f;
 	CurrentTime = 0.0f;
+	LastServerTimeUpdate = 0.0f;
 }
 
 void AGS_InGameGS::BeginPlay()
@@ -22,7 +23,8 @@ void AGS_InGameGS::BeginPlay()
 void AGS_InGameGS::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
+
+	DOREPLIFETIME(AGS_InGameGS, TotalGameTime);
 	DOREPLIFETIME(AGS_InGameGS, CurrentTime);
 }
 
@@ -62,6 +64,6 @@ float AGS_InGameGS::GetRemainingTime() const
 
 void AGS_InGameGS::OnRep_CurrentTime()
 {
-	OnTimerUpdated.Broadcast(GetFormattedTime());
+	LastServerTimeUpdate = GetWorld()->GetTimeSeconds();
 }
 

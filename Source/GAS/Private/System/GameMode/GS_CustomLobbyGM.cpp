@@ -40,6 +40,23 @@ void AGS_CustomLobbyGM::PostLogin(APlayerController* NewPlayer)
     UpdateLobbyPawns();
 }
 
+void AGS_CustomLobbyGM::RestartPlayer(AController* NewPlayer)
+{
+    Super::RestartPlayer(NewPlayer);
+
+    if (APlayerController* PC = Cast<APlayerController>(NewPlayer))
+    {
+        AGS_PlayerState* PS = PC->GetPlayerState<AGS_PlayerState>();
+        if (PS)
+        {
+            PlayerReadyStates.Add(PS, false);
+            PS->InitializeDefaults();
+            UE_LOG(LogTemp, Log, TEXT("LobbyGM: Player %s has (re)entered the lobby. Resetting state."), *PS->GetPlayerName());
+        }
+    }
+    UpdateLobbyPawns();
+}
+
 void AGS_CustomLobbyGM::Logout(AController* Exiting)
 {
 	AGS_PlayerState* PS = Cast<AGS_PlayerState>(Exiting->PlayerState);

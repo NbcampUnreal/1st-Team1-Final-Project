@@ -8,6 +8,7 @@ AGS_BossLevelGS::AGS_BossLevelGS()
 {
 	BossTotalTime = 900.f;
 	BossCurrentTime = 0.f;
+	LastServerTimeUpdate = 0.f;
 }
 
 void AGS_BossLevelGS::BeginPlay()
@@ -80,5 +81,5 @@ void AGS_BossLevelGS::UpdateBossTime()
 
 void AGS_BossLevelGS::OnRep_BossCurrentTime()
 {
-	OnBossTimerUpdatedDelegate.Broadcast(GetFormattedBossTime());
+	LastServerTimeUpdate = GetWorld()->GetTimeSeconds();
 }

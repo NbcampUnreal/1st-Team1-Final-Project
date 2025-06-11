@@ -33,7 +33,7 @@ public:
     ECharacterClass GetPlayerCharacterClass() const;
 
     UFUNCTION()
-    void OnPlayerJobChanged(EPlayerRole CurrentRole);
+    void OnPlayerJobChanged(ESeekerJob SeekerJob);
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void InitializeRunes();
@@ -57,9 +57,6 @@ public:
     void LoadBoardConfig();
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void UpdateCharacterStats();
-
-    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     bool HasUnsavedChanges() const;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -68,15 +65,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void ForceApplyChanges();
 
-    void BindPlayerStateEvents();
-    void UnbindPlayerStateEvents();
+    //ENUM 통일 전 임시
+    ECharacterClass MapSeekerJobToCharacterClass(ESeekerJob SeekerJob) const;
 
 private:
     void RequestServerStatsUpdate();
 
     UPROPERTY()
     TWeakObjectPtr<AGS_PlayerState> BoundPlayerState;
-
-    //ENUM 통일 전 임시
-    ECharacterClass MapSeekerJobToCharacterClass(ESeekerJob SeekerJob) const;
 };

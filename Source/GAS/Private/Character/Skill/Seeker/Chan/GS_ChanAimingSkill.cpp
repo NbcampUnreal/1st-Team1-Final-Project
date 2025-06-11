@@ -30,6 +30,11 @@ void UGS_ChanAimingSkill::ActiveSkill()
 	{
 		if (OwnerPlayer->HasAuthority())
 		{
+			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
+			// Combo Control Value
+			OwnerPlayer->ComboInputClose();
+			OwnerPlayer->CurrentComboIndex = 0;
+			
 			// Control Input Key
 			OwnerPlayer->SetSkillInputControl(false, false);
 			OwnerPlayer->SetMoveControlValue(false, false);
@@ -57,6 +62,33 @@ void UGS_ChanAimingSkill::ActiveSkill()
 		if (OwnerCharacter->GetSkillComp())
 		{
 			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
+		}
+	}
+}
+
+void UGS_ChanAimingSkill::DeactiveSkill()
+{
+	Super::DeactiveSkill();
+
+	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
+	{
+		if (OwnerPlayer->HasAuthority())
+		{
+			OwnerPlayer->ComboInputOpen();
+			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+			// Control Input Key
+			OwnerPlayer->SetSkillInputControl(true, true);
+			OwnerPlayer->SetMoveControlValue(true, true);
+			// Change Slot
+			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
+			OwnerPlayer->SetLookControlValue(true, true);
+			OwnerPlayer->SetSkillInputControl(true, true);
+
+			if (OwnerCharacter->GetSkillComp())
+			{
+				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
+			}
 		}
 	}
 }

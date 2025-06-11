@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/TextBlock.h"
 #include "Animation/WidgetAnimation.h"
 #include "GS_Timer.generated.h"
 
-/**
- * 
- */
+class UTextBlock;
+class AGS_InGameGS;
+class AGS_BossLevelGS;
+
 UCLASS()
 class GAS_API UGS_Timer : public UUserWidget
 {
@@ -18,10 +18,11 @@ class GAS_API UGS_Timer : public UUserWidget
 
 public:
 	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 protected:
-	UPROPERTY(meta=(BindWidget))
-	class UTextBlock* TimerText;
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* TimerText;
 
 	// 게임 총 시간 (초 단위)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer Settings", meta = (ClampMin = "1.0"))
@@ -63,8 +64,14 @@ protected:
 	float ShakeSpeed = 0.8f; // 흔들림 속도
 
 private:
-	UFUNCTION()
-	void HandleTimeUpdated(const FText& NewTime);
+	UPROPERTY()
+	TWeakObjectPtr<AGS_InGameGS> CachedInGameGS;
+	UPROPERTY()
+	TWeakObjectPtr<AGS_BossLevelGS> CachedBossLevelGS;
+
+	FTimerHandle InitTimerHandle;
+
+	void TryInitialize();
 
 	// 남은 시간에 따라 텍스트 색상을 업데이트
 	void UpdateTextColor(float RemainingTimeInSeconds);

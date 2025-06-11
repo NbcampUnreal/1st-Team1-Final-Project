@@ -6,10 +6,6 @@
 #include "GameFramework/GameState.h"
 #include "GS_InGameGS.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTimerUpdatedDelegate, const FText&, FormattedTime);
-/**
- * 
- */
 UCLASS()
 class GAS_API AGS_InGameGS : public AGameState
 {
@@ -17,28 +13,27 @@ class GAS_API AGS_InGameGS : public AGameState
 
 public:
 	AGS_InGameGS();
-	
-	UPROPERTY(EditAnywhere, Category="Timer")
-	float TotalGameTime;
 
-	UPROPERTY(ReplicatedUsing=OnRep_CurrentTime, BlueprintReadOnly, Category="Timer")
-	float CurrentTime;
-	
-	void UpdateGameTime();
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintPure, Category = "Timer")
 	FText GetFormattedTime() const;
-
-	// 남은 시간을 초 단위로 반환
 	UFUNCTION(BlueprintPure, Category = "Timer")
 	float GetRemainingTime() const;
 
-	UPROPERTY(BlueprintAssignable, Category="Timer")
-	FOnTimerUpdatedDelegate OnTimerUpdated;
-	
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Timer")
+	float TotalGameTime;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentTime, BlueprintReadOnly, Category = "Timer")
+	float CurrentTime;
+
+	float LastServerTimeUpdate;
+
 protected:
 	virtual void BeginPlay() override;
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-private:
+	void UpdateGameTime();
+
 	UFUNCTION()
 	void OnRep_CurrentTime();
 
