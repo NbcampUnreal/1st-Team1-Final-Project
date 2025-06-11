@@ -85,6 +85,51 @@ void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 	Destroy();
 }
 
+void AGS_SeekerMerciArrow::InitHomingTarget(AActor* Target)
+{
+	if (!ProjectileMovementComponent)
+	{
+		return;
+	}
+
+	if(Target)
+	{
+		UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(Target->GetRootComponent());
+		if (!RootPrim)
+		{
+			UE_LOG(LogTemp, Error, TEXT("HomingTargetComponent is not a primitive component!"));
+			return;
+		}
+
+		ProjectileMovementComponent->HomingTargetComponent = RootPrim;
+		ProjectileMovementComponent->bIsHomingProjectile = true;
+		ProjectileMovementComponent->InitialSpeed = 1500.f;
+		ProjectileMovementComponent->MaxSpeed = 2000.f;
+		ProjectileMovementComponent->HomingAccelerationMagnitude = 20000.f;
+		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
+		ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileMovementComponent->InitialSpeed;
+
+		HomingTarget = Target;
+		UE_LOG(LogTemp, Warning, TEXT("HomingTarget set to %s"), *Target->GetName());
+	}
+	else
+	{
+		// 유도 해제 : 일반 직선 화살로 설정
+		ProjectileMovementComponent->HomingTargetComponent = nullptr;
+		ProjectileMovementComponent->bIsHomingProjectile = false;
+		ProjectileMovementComponent->InitialSpeed = 6000.0f;
+		ProjectileMovementComponent->MaxSpeed = 6000.0f;
+		ProjectileMovementComponent->ProjectileGravityScale = 1.0f;
+
+		HomingTarget = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("HomingTarget is null — switching to normal arrow"));
+
+	}
+
+	// 방향성 초기화
+	ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileMovementComponent->InitialSpeed;
+}
+
 void AGS_SeekerMerciArrow::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!OtherActor || OtherActor == this || HitActors.Contains(OtherActor))

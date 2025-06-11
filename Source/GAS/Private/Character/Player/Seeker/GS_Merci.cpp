@@ -18,6 +18,8 @@
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_ArrowTypeWidget.h"
 #include "AkGameplayStatics.h"
+#include "Character/GS_Character.h"
+#include "Character/Skill/GS_SkillComp.h"
 //#include "Weapon/Equipable/"
 
 // Sets default values
@@ -272,6 +274,25 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 			else // 한 발일 경우
 			{
 				NormalArrow->ChangeArrowType(CurrentArrowType);
+			}
+		}
+
+		// 8. 유도 화살
+		if (this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
+		{
+			if (AGS_SeekerMerciArrow* HomingArrow = Cast<AGS_SeekerMerciArrow>(SpawnedArrow))
+			{
+				if (AutoAimTarget)
+				{
+					HomingArrow->InitHomingTarget(AutoAimTarget);
+				}
+			}
+		}
+		else
+		{
+			if (AGS_SeekerMerciArrow* HomingArrow = Cast<AGS_SeekerMerciArrow>(SpawnedArrow))
+			{
+				HomingArrow->InitHomingTarget(nullptr);
 			}
 		}
 		//Multicast_DrawDebugLine(SpawnLocation, TargetLocation, FColor::Red);
