@@ -14,6 +14,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "Components/ArrowComponent.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
@@ -51,7 +55,7 @@ AGS_Drakhar::AGS_Drakhar()
 	FlyStartSoundEvent = nullptr;
 	FlyEndSoundEvent = nullptr;
 
-	// AkComponent 추가 (3D 위치기반 사운드용)
+	// AkComponent 추가
 	if (!FindComponentByClass<UAkComponent>())
 	{
 		UAkComponent* AkComp = CreateDefaultSubobject<UAkComponent>(TEXT("AkAudioComponent"));
@@ -59,6 +63,25 @@ AGS_Drakhar::AGS_Drakhar()
 		{
 			AkComp->SetupAttachment(RootComponent);
 		}
+	}
+
+	// === 나이아가라 VFX 초기화 ===
+	WingRushRibbonVFX = nullptr;
+	ActiveWingRushVFXComponent = nullptr;
+
+	// === VFX 위치 제어용 화살표 컴포넌트 생성 ===
+	WingRushVFXSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("WingRushVFXSpawnPoint"));
+	if (WingRushVFXSpawnPoint)
+	{
+		WingRushVFXSpawnPoint->SetupAttachment(GetMesh(), FName("foot_l"));
+		WingRushVFXSpawnPoint->SetRelativeLocation(FVector(-20.f, 0.f, 0.f));
+		WingRushVFXSpawnPoint->SetRelativeRotation(FRotator(0.f, 180.f, 0.f));
+		WingRushVFXSpawnPoint->SetArrowSize(2.0f);
+		WingRushVFXSpawnPoint->SetArrowColor(FLinearColor::Blue);
+		
+#if WITH_EDITOR
+		WingRushVFXSpawnPoint->bIsEditorOnly = false;
+#endif
 	}
 }
 
@@ -246,6 +269,9 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	GuardianState = EGuardianState::CtrlSkillEnd;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	bCanCombo = true;
+	
+	// 대시 VFX 종료
+	StopWingRushVFX();
 }
 
 void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
@@ -256,6 +282,9 @@ void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
 	
 	// 대시 스킬 사운드 재생
 	PlayDashSkillSound();
+	
+	// 대시 VFX 시작
+	StartWingRushVFX();
 }
 
 void AGS_Drakhar::DashAttackCheck()
@@ -393,7 +422,7 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 	}
 }
 
-// === Wwise 사운드 재생 함수들 구현 ===
+// === Wwise 사운드 재생 함수 구현 ===
 
 void AGS_Drakhar::PlayComboAttackSound()
 {
@@ -462,7 +491,7 @@ void AGS_Drakhar::MulticastPlayDraconicProjectileSound_Implementation(const FVec
 	PlaySoundEvent(DraconicProjectileSoundEvent, Location);
 }
 
-// === Wwise 헬퍼 함수들 구현 ===
+// === Wwise 헬퍼 함수 구현 ===
 
 void AGS_Drakhar::PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location)
 {
@@ -556,4 +585,108 @@ void AGS_Drakhar::MulticastPlayFlyEndSound_Implementation()
 void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
 {
 	// TODO: 투사체 발사 로직 구현
+}
+
+// === 나이아가라 VFX 함수 구현 ===
+
+void AGS_Drakhar::StartWingRushVFX()
+{
+	if (HasAuthority())
+	{
+		MulticastStartWingRushVFX();
+	}
+}
+
+void AGS_Drakhar::StopWingRushVFX()
+{
+	if (HasAuthority())
+	{
+		MulticastStopWingRushVFX();
+	}
+}
+
+void AGS_Drakhar::MulticastStartWingRushVFX_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	// 이미 활성화된 VFX가 있다면 정리
+	if (ActiveWingRushVFXComponent && IsValid(ActiveWingRushVFXComponent))
+	{
+		ActiveWingRushVFXComponent->DestroyComponent();
+		ActiveWingRushVFXComponent = nullptr;
+	}
+
+	if (!WingRushRibbonVFX)
+	{
+		return;
+	}
+
+	// 화살표 컴포넌트를 사용한 스폰
+	if (WingRushVFXSpawnPoint && IsValid(WingRushVFXSpawnPoint))
+	{
+		ActiveWingRushVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			WingRushRibbonVFX,
+			WingRushVFXSpawnPoint,
+			NAME_None,
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,
+			EAttachLocation::KeepRelativeOffset,
+			true
+		);
+	}
+
+	// 폴백: 발 소켓에 직접 부착
+	if (!ActiveWingRushVFXComponent)
+	{
+		ActiveWingRushVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			WingRushRibbonVFX,
+			GetMesh(),
+			FName("foot_l"),
+			FVector(-20.f, 0.f, 0.f),
+			FRotator::ZeroRotator,
+			EAttachLocation::KeepRelativeOffset,
+			true
+		);
+	}
+
+	if (ActiveWingRushVFXComponent)
+	{
+		// VFX 파라미터 설정
+		FVector CurrentDashDirection = (DashEndLocation - DashStartLocation).GetSafeNormal();
+		if (!CurrentDashDirection.IsZero())
+		{
+			ActiveWingRushVFXComponent->SetVectorParameter(FName("DashDirection"), CurrentDashDirection);
+		}
+		
+		float DashSpeed = DashPower / DashDuration;
+		ActiveWingRushVFXComponent->SetFloatParameter(FName("DashSpeed"), DashSpeed);
+		ActiveWingRushVFXComponent->SetFloatParameter(FName("Scale"), 2.0f);
+		ActiveWingRushVFXComponent->SetWorldScale3D(FVector(3.0f, 3.0f, 3.0f));
+	}
+}
+
+void AGS_Drakhar::MulticastStopWingRushVFX_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (ActiveWingRushVFXComponent && IsValid(ActiveWingRushVFXComponent))
+	{
+		ActiveWingRushVFXComponent->Deactivate();
+		
+		FTimerHandle VFXCleanupTimer;
+		GetWorld()->GetTimerManager().SetTimer(VFXCleanupTimer, [this]()
+		{
+			if (ActiveWingRushVFXComponent && IsValid(ActiveWingRushVFXComponent))
+			{
+				ActiveWingRushVFXComponent->DestroyComponent();
+			}
+			ActiveWingRushVFXComponent = nullptr;
+		}, 2.0f, false);
+	}
 }
