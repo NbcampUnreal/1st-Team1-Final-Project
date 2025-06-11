@@ -110,6 +110,7 @@ void AGS_Merci::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	DOREPLIFETIME(AGS_Merci, CurrentAxeArrows);
 	DOREPLIFETIME(AGS_Merci, CurrentChildArrows);
 	DOREPLIFETIME(AGS_Merci, CurrentArrowType);
+	DOREPLIFETIME(AGS_Merci, AutoAimTarget);
 }
 
 void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
@@ -295,6 +296,22 @@ void AGS_Merci::Server_ChangeArrowType_Implementation(int32 Direction)
 	CurrentArrowType = static_cast<EArrowType>(CurrentIndex);
 
 	UE_LOG(LogTemp, Log, TEXT("Arrow Changed to: %d"), CurrentIndex);
+}
+
+void AGS_Merci::SetAutoAimTarget(AActor* Target)
+{ 
+	if (HasAuthority())
+	{
+		AutoAimTarget = Target;
+		OnRep_AutoAimTarget(); // 즉시 로컬 처리
+
+		// 스피어 표시
+		if (Target)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Aiming Target: %s !!!!!!!!!!!!!!!!!!!!!!!!!"), *Target->GetName());
+			Client_DrawDebugSphere(Target->GetActorLocation(), 100.0f, FColor::Red, 0.2f);
+		}
+	}
 }
 
 // Called when the game starts or when spawned
@@ -505,6 +522,29 @@ void AGS_Merci::RegenChildArrow()
 		++CurrentChildArrows;
 		UE_LOG(LogTemp, Log, TEXT("Child regen: %d"), CurrentChildArrows);
 	}
+}
+
+void AGS_Merci::OnRep_AutoAimTarget()
+{
+	if (AutoAimTarget)
+	{
+		// 예: 조준 HUD 표시, 자동 공격 유도 등
+	}
+}
+
+void AGS_Merci::Client_DrawDebugSphere_Implementation(FVector Loc, float Radius, FColor Color, float Duration)
+{
+	DrawDebugSphere(
+		GetWorld(),
+		Loc,
+		Radius,              // 반지름
+		16,                 // 세그먼트
+		Color,        // 색상
+		false,              // 지속 여부
+		Duration,               // 지속 시간 (2초)
+		0,
+		2.0f                // 선 두께
+	);
 }
 
 void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRotator Rotation, int32 NumArrows)

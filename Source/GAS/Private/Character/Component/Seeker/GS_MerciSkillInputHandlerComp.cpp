@@ -24,7 +24,7 @@ void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& In
 	}
 	else
 	{
-		
+		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
 	}
 }
 

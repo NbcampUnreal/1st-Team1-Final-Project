@@ -90,6 +90,9 @@ public:
 
 	void SetArrowTypeWidget(UGS_ArrowTypeWidget* Widget) { ArrowTypeWidget = Widget; }
 
+	// Auto Aiming
+	void SetAutoAimTarget(AActor* Target);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -200,4 +203,14 @@ private:
 
 	UFUNCTION()
 	void RegenChildArrow();
+
+	// Auto Aiming
+	UPROPERTY(ReplicatedUsing = OnRep_AutoAimTarget)
+	AActor* AutoAimTarget;
+
+	UFUNCTION()
+	void OnRep_AutoAimTarget();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Client_DrawDebugSphere(FVector Loc, float Radius, FColor Color, float Duration);
 };
