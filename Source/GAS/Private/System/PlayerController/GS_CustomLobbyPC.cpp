@@ -59,14 +59,6 @@ void AGS_CustomLobbyPC::OnRep_PlayerState()
 		UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC::OnRep_PlayerState - PlayerState changed after initial setup for PC: %s. Re-evaluating bindings/UI."), *GetNameSafe(this));
 		TryBindToPlayerStateDelegates();
 	}
-
-	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
-	{
-		if (UGS_ArcaneBoardLPS* LPS = LocalPlayer->GetSubsystem<UGS_ArcaneBoardLPS>())
-		{
-			LPS->BindPlayerStateEvents();
-		}
-	}
 }
 
 void AGS_CustomLobbyPC::TryBindToPlayerStateDelegates()
