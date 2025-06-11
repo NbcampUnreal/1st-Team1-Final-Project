@@ -35,7 +35,7 @@ UGS_MonsterAudioComponent::UGS_MonsterAudioComponent()
     
     MonsterSoundVariant = 1;
 
-    SetIsReplicatedByDefault(true); // 컴포넌트 복제 활성화
+    SetIsReplicatedByDefault(true);
 }
 
 void UGS_MonsterAudioComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -60,7 +60,6 @@ void UGS_MonsterAudioComponent::BeginPlay()
     OwnerMonster = Cast<AGS_Monster>(GetOwner());
     if (!OwnerMonster)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UGS_MonsterAudioComponent: Owner is not a Monster!"));
         return;
     }
 
@@ -72,7 +71,7 @@ void UGS_MonsterAudioComponent::BeginPlay()
         }
     }
     
-    if (GetOwner()->HasAuthority()) // HasAuthority()가 더 명확하고 일반적인 서버 체크 방식입니다.
+    if (GetOwner()->HasAuthority())
     {
         StartSoundTimer();
     }
@@ -176,7 +175,6 @@ void UGS_MonsterAudioComponent::UpdateDistanceRTPC()
     }
 }
 
-// Server-authoritative function to decide to broadcast a sound trigger
 void UGS_MonsterAudioComponent::PlaySound(EMonsterAudioState SoundType, bool bForcePlay)
 {
     if (!OwnerMonster || !GetOwner()->HasAuthority())
@@ -283,7 +281,7 @@ AGS_Seeker* UGS_MonsterAudioComponent::FindNearestSeeker() const
         OverlapResults,
         MonsterLocation,
         FQuat::Identity,
-        ECC_Pawn, // 시커가 Pawn 콜리전 채널을 사용한다고 가정
+        ECC_Pawn,
         Sphere,
         QueryParams
     );
@@ -319,7 +317,6 @@ float UGS_MonsterAudioComponent::CalculateDistanceToNearestSeeker() const
 
 void UGS_MonsterAudioComponent::PlayIdleSound()
 {
-    // 서버에서만 타이머에 의해 호출됨
     if (GetOwner() && GetOwner()->HasAuthority())
     {
         PlaySound(EMonsterAudioState::Idle, false);
@@ -328,7 +325,6 @@ void UGS_MonsterAudioComponent::PlayIdleSound()
 
 void UGS_MonsterAudioComponent::PlayCombatSound()
 {
-    // 서버에서만 타이머에 의해 호출됨
     if (GetOwner() && GetOwner()->HasAuthority())
     {
         PlaySound(EMonsterAudioState::Combat, false);
@@ -337,7 +333,6 @@ void UGS_MonsterAudioComponent::PlayCombatSound()
 
 void UGS_MonsterAudioComponent::StartSoundTimer()
 {
-    // 서버에서만 타이머 시작/제어
     if (!GetOwner() || !GetOwner()->HasAuthority() || !GetWorld())
         return;
 
@@ -391,7 +386,7 @@ UAkAudioEvent* UGS_MonsterAudioComponent::GetSoundEvent(EMonsterAudioState Sound
         case EMonsterAudioState::Hurt:    return AudioConfig.HurtSound;
         case EMonsterAudioState::Death:   return AudioConfig.DeathSound;
         default:
-            ensureMsgf(false, TEXT("GetSoundEvent: Unknown SoundType %s requested for monster %s"), *UEnum::GetValueAsString(SoundType), OwnerMonster ? *OwnerMonster->GetName() : TEXT("UnknownMonster"));
+            // ensureMsgf(false, TEXT("GetSoundEvent: Unknown SoundType %s requested for monster %s"), *UEnum::GetValueAsString(SoundType), OwnerMonster ? *OwnerMonster->GetName() : TEXT("UnknownMonster"));
             return nullptr;
     }
 }
@@ -443,11 +438,9 @@ void UGS_MonsterAudioComponent::DrawDebugInfo() const
     FVector MonsterLocation = OwnerMonster->GetActorLocation();
     float Duration = PrimaryComponentTick.TickInterval + 0.1f; 
 
-    // 기본 거리 원형 표시
     DrawDebugCircle(GetWorld(), MonsterLocation, AudioConfig.AlertDistance, 32, FColor::Red, false, Duration, 0, 3.0f, FVector(0, 1, 0), FVector(1, 0, 0));
     DrawDebugCircle(GetWorld(), MonsterLocation, AudioConfig.MaxAudioDistance, 32, FColor::Yellow, false, Duration, 0, 1.0f, FVector(0, 1, 0), FVector(1, 0, 0));
     
-    // 상태 정보 표시
     FString StateText = FString::Printf(TEXT("Audio State: %s"), *UEnum::GetValueAsString(CurrentAudioState));
     DrawDebugString(GetWorld(), MonsterLocation + FVector(0, 0, 200), StateText, nullptr, FColor::White, Duration);
 } 
