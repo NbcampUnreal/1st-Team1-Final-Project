@@ -4,13 +4,11 @@
 #include "GameFramework/GameState.h"
 #include "GS_BossLevelGS.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBossTimerUpdated, const FText&, FormattedTime);
-
 UCLASS()
 class GAS_API AGS_BossLevelGS : public AGameState
 {
-	GENERATED_BODY()
-	
+    GENERATED_BODY()
+
 public:
     AGS_BossLevelGS();
 
@@ -20,14 +18,17 @@ public:
     UFUNCTION(BlueprintPure, Category = "Timer")
     FText GetFormattedBossTime() const;
 
-    UPROPERTY(BlueprintAssignable, Category = "Timer")
-    FOnBossTimerUpdated OnBossTimerUpdatedDelegate;
+    // 보스 레벨의 남은 시간을 초 단위로 반환
+    UFUNCTION(BlueprintPure, Category = "Timer")
+    float GetRemainingBossTime() const;
 
     UPROPERTY(ReplicatedUsing = OnRep_BossCurrentTime, VisibleAnywhere, BlueprintReadOnly, Category = "Timer")
     float BossCurrentTime;
 
     UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Timer")
     float BossTotalTime;
+
+    float LastServerTimeUpdate;
 
 protected:
     FTimerHandle BossTimerHandle;
@@ -36,6 +37,6 @@ protected:
 
     UFUNCTION()
     void OnRep_BossCurrentTime();
-	
-	
+
+
 };
