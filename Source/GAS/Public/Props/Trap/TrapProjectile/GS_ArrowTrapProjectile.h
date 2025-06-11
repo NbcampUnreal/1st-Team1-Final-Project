@@ -2,11 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Weapon/Projectile/GS_WeaponProjectile.h"
-#include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
 #include "Props/Trap/GS_TrapBase.h"
-#include "Props/Trap/TriggerTrap/GS_TrigTrapBase.h"
+#include "Props/Trap/NonTriggerTrap/GS_NonTrigTrapBase.h"
 #include "Weapon/Projectile/Seeker/GS_ArrowVisualActor.h"
-#include "Weapon/Projectile/Seeker/GS_SeekerMerciArrowNormal.h"
 #include "GS_ArrowTrapProjectile.generated.h"
 
 
@@ -22,11 +20,11 @@ public:
 	USkeletalMeshComponent* ArrowMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
-	AGS_TrigTrapBase* OwningTrap;
+	AGS_NonTrigTrapBase* OwningTrap;
 
 
 	UFUNCTION(BlueprintCallable, Category = "Trap")
-	void Init(AGS_TrigTrapBase* InTrap);
+	void Init(AGS_NonTrigTrapBase* InTrap);
 
 	UFUNCTION()
 	void OnBeginOverlap(

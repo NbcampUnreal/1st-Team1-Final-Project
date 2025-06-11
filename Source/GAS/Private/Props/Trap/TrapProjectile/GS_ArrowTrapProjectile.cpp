@@ -18,7 +18,7 @@ void AGS_ArrowTrapProjectile::BeginPlay()
 }
 
 
-void AGS_ArrowTrapProjectile::Init(AGS_TrigTrapBase* InTrap)
+void AGS_ArrowTrapProjectile::Init(AGS_NonTrigTrapBase* InTrap)
 {
 	OwningTrap = InTrap;
 	if (HasAuthority())
