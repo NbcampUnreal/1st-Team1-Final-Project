@@ -33,6 +33,7 @@ public:
 	UPROPERTY()
 	TSet<AActor*> HitActors;
 
+	void InitHomingTarget(AActor* Target);
 	//AGS_Player* OwnerPlayer;
 protected:
 	virtual void BeginPlay() override;
@@ -54,6 +55,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
 	UNiagaraSystem* HitStructureVFX;
+
+	// 유도 화살
+	UPROPERTY()
+	AActor* HomingTarget = nullptr;
+
+	
 
 	UFUNCTION()
 	virtual void OnBeginOverlap(
