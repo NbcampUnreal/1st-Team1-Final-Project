@@ -3,16 +3,16 @@
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Engine/World.h"
-#include "EngineUtils.h"
-#include "Engine/Engine.h"
+#include "Engine/OverlapResult.h"
 #include "TimerManager.h"
-#include "DrawDebugHelpers.h"
+#include "CollisionQueryParams.h"
+#include "CollisionShape.h"
 #include "AkComponent.h"
 #include "AkGameplayStatics.h"
 #include "AkAudioDevice.h"
 #include "AkAudioEvent.h"
-#include "Net/UnrealNetwork.h" // For DOREPLIFETIME
-#include "Kismet/GameplayStatics.h" // For GetPlayerController
+#include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 
 // RTPC 이름을 상수로 정의 (클래스 외부)
 const FName UGS_MonsterAudioComponent::DistanceToPlayerRTPCName = TEXT("Distance_to_Player");
@@ -20,8 +20,8 @@ const FName UGS_MonsterAudioComponent::MonsterVariantRTPCName = TEXT("Monster_Va
 
 UGS_MonsterAudioComponent::UGS_MonsterAudioComponent()
 {
-    PrimaryComponentTick.bCanEverTick = true;
-    PrimaryComponentTick.TickInterval = 0.5f; // 0.5초마다 틱
+    PrimaryComponentTick.bCanEverTick = false; // 틱 비활성화
+    //PrimaryComponentTick.TickInterval = 0.5f; // 0.5초마다 틱
     
     CurrentAudioState = EMonsterAudioState::Idle;
     PreviousAudioState = EMonsterAudioState::Idle;
@@ -77,11 +77,14 @@ void UGS_MonsterAudioComponent::BeginPlay()
         StartSoundTimer();
     }
     PreviousAudioState = CurrentAudioState; 
+    // 거리 체크 타이머 시작
+    GetWorld()->GetTimerManager().SetTimer(DistanceCheckTimerHandle, this, &UGS_MonsterAudioComponent::UpdateDistanceRTPC, 0.5f, true);
 }
 
 void UGS_MonsterAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     StopSoundTimer(); // 서버/클라이언트 모두 타이머 중지
+    GetWorld()->GetTimerManager().ClearTimer(DistanceCheckTimerHandle); // 거리 체크 타이머 중지
     
     // 로컬에서 재생 중인 사운드 중지
     if (CurrentPlayingID != AK_INVALID_PLAYING_ID)
@@ -96,6 +99,7 @@ void UGS_MonsterAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason
     Super::EndPlay(EndPlayReason);
 }
 
+/*
 void UGS_MonsterAudioComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -122,6 +126,7 @@ void UGS_MonsterAudioComponent::TickComponent(float DeltaTime, ELevelTick TickTy
         }
     }
 }
+*/
 
 void UGS_MonsterAudioComponent::SetMonsterAudioState(EMonsterAudioState NewState)
 {
@@ -143,6 +148,31 @@ void UGS_MonsterAudioComponent::SetMonsterAudioState(EMonsterAudioState NewState
     if (NewState == EMonsterAudioState::Combat && CurrentAudioState != PreviousAudioState) // 중복 방지
     {
         PlaySound(NewState, true);
+    }
+}
+
+void UGS_MonsterAudioComponent::UpdateDistanceRTPC()
+{
+    if (!OwnerMonster) return;
+
+    APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (LocalPC && LocalPC->GetPawn())
+    {
+        float DistanceToLocalPlayer = FVector::Dist(OwnerMonster->GetActorLocation(), LocalPC->GetPawn()->GetActorLocation());
+
+        if (DistanceToLocalPlayer <= AudioConfig.MaxAudioDistance)
+        {
+            if (FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get())
+            {
+                AkAudioDevice->SetRTPCValue(*DistanceToPlayerRTPCName.ToString(), DistanceToLocalPlayer, 0, OwnerMonster);
+            }
+        }
+    }
+
+    // 서버에서만 상태 변경 체크
+    if (GetOwner() && GetOwner()->HasAuthority())
+    {
+        CheckForStateChanges();
     }
 }
 
@@ -239,30 +269,47 @@ void UGS_MonsterAudioComponent::PlayDeathSound()
 AGS_Seeker* UGS_MonsterAudioComponent::FindNearestSeeker() const
 {
     if (!GetWorld() || !OwnerMonster) return nullptr;
-    
+
     AGS_Seeker* NearestSeeker = nullptr;
-    float NearestDistance = FLT_MAX;
+    float MinDistanceSq = FLT_MAX;
     FVector MonsterLocation = OwnerMonster->GetActorLocation();
-    
-    for (TActorIterator<AGS_Seeker> SeekerIterator(GetWorld()); SeekerIterator; ++SeekerIterator)
+
+    TArray<FOverlapResult> OverlapResults;
+    FCollisionShape Sphere = FCollisionShape::MakeSphere(AudioConfig.AlertDistance);
+    FCollisionQueryParams QueryParams;
+    QueryParams.AddIgnoredActor(OwnerMonster);
+
+    bool bHasOverlap = GetWorld()->OverlapMultiByChannel(
+        OverlapResults,
+        MonsterLocation,
+        FQuat::Identity,
+        ECC_Pawn, // 시커가 Pawn 콜리전 채널을 사용한다고 가정
+        Sphere,
+        QueryParams
+    );
+
+    if (bHasOverlap)
     {
-        AGS_Seeker* Seeker = *SeekerIterator;
-        if (!Seeker || !Seeker->IsValidLowLevel() || !IsValid(Seeker)) 
-            continue;
-            
-        float Distance = FVector::Dist(MonsterLocation, Seeker->GetActorLocation());
-        if (Distance < NearestDistance)
+        for (const FOverlapResult& Result : OverlapResults)
         {
-            NearestDistance = Distance;
-            NearestSeeker = Seeker;
+            AGS_Seeker* Seeker = Cast<AGS_Seeker>(Result.GetActor());
+            if (Seeker)
+            {
+                float DistanceSq = FVector::DistSquared(MonsterLocation, Seeker->GetActorLocation());
+                if (DistanceSq < MinDistanceSq)
+                {
+                    MinDistanceSq = DistanceSq;
+                    NearestSeeker = Seeker;
+                }
+            }
         }
     }
+
     return NearestSeeker;
 }
 
 float UGS_MonsterAudioComponent::CalculateDistanceToNearestSeeker() const
 {
-    // 서버에서 주로 사용. 클라이언트에서는 로컬 플레이어와의 거리를 계산하는 별도 로직이 Tick에 있음.
     AGS_Seeker* NearestSeeker = FindNearestSeeker();
     if (!NearestSeeker || !OwnerMonster)
         return -1.0f; // 혹은 FLT_MAX

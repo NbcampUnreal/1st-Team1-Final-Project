@@ -7,6 +7,9 @@
 class AGS_DrakharProjectile;
 class UAkAudioEvent;
 class UAkComponent;
+class UNiagaraSystem;
+class UNiagaraComponent;
+class UArrowComponent;
 
 UCLASS()
 class GAS_API AGS_Drakhar : public AGS_Guardian
@@ -46,6 +49,24 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "DraconicFury Projectile"))
 	UAkAudioEvent* DraconicProjectileSoundEvent;
+
+	// === 날기 관련 사운드 이벤트들 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "FlyStart"))
+	UAkAudioEvent* FlyStartSoundEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "FlyEnd"))
+	UAkAudioEvent* FlyEndSoundEvent;
+
+	// === 나이아가라 VFX 시스템 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "WingRush Ribbon VFX"))
+	UNiagaraSystem* WingRushRibbonVFX;
+
+	UPROPERTY(BlueprintReadOnly, Category = "VFX|Drakhar")
+	UNiagaraComponent* ActiveWingRushVFXComponent;
+
+	// === VFX 위치 제어용 화살표 컴포넌트 ===
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX|Drakhar", meta = (DisplayName = "WingRush VFX Spawn Point"))
+	UArrowComponent* WingRushVFXSpawnPoint;
 
 	//[Input Binding Function]
 	virtual void Ctrl() override;
@@ -104,23 +125,37 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPCSpawnDraconicFury();
 
-	// === Wwise 사운드 재생 함수들 ===
-	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "콤보 공격 사운드 재생"))
+	//[Fly Skill]
+	UFUNCTION(Server, Reliable)
+	void ServerRPCStartCtrl();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPCStopCtrl();
+
+	// === Wwise 사운드 재생 함수 ===
+	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Normal Attack"))
 	void PlayComboAttackSound();
 
-	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "대시 스킬 사운드 재생"))
+	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Wing Rush"))
 	void PlayDashSkillSound();
 
-	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "지진 스킬 사운드 재생"))
+	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Earthquake"))
 	void PlayEarthquakeSkillSound();
 
-	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "드래곤 분노 스킬 사운드 재생"))
+	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Draconic Fury"))
 	void PlayDraconicFurySkillSound();
 
-	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (DisplayName = "드래곤 분노 투사체 사운드 재생"))
+	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Draconic Fury Projectile"))
 	void PlayDraconicProjectileSound(const FVector& Location);
 
-	// === Multicast 사운드 RPC 함수들 ===
+	// === 날기 사운드 재생 함수 ===
+	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Flying Start"))
+	void PlayFlyStartSound();
+
+	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Flying End"))
+	void PlayFlyEndSound();
+
+	// === Multicast 사운드 RPC 함수 ===
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayComboAttackSound();
 
@@ -135,6 +170,26 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayDraconicProjectileSound(const FVector& Location);
+
+	// === 날기 사운드 Multicast RPC 함수 ===
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayFlyStartSound();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayFlyEndSound();
+
+	// === 나이아가라 VFX 관련 ===
+	UFUNCTION(BlueprintCallable, Category = "VFX", meta = (DisplayName = "WingRush VFX 시작"))
+	void StartWingRushVFX();
+
+	UFUNCTION(BlueprintCallable, Category = "VFX", meta = (DisplayName = "WingRush VFX 종료"))
+	void StopWingRushVFX();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastStartWingRushVFX();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastStopWingRushVFX();
 	
 private:
 	//[NEW COMBO ATTACK]
@@ -168,7 +223,7 @@ private:
 	TArray<FTransform> DraconicFuryTargetArray;
 	void GetRandomDraconicFuryTarget();
 
-	// === Wwise 관련 헬퍼 함수들 ===
+	// === Wwise 관련 헬퍼 함수 ===
 	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);
 	UAkComponent* GetOrCreateAkComponent();
 };
