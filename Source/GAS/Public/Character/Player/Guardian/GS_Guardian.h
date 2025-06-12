@@ -12,6 +12,7 @@ enum class EGuardianState : uint8
 	None,
 	CtrlUp,
 	CtrlSkillEnd,
+	ForceLanded,
 };
 
 UCLASS()
