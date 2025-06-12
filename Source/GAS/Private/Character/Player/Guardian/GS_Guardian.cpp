@@ -2,6 +2,7 @@
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 #include "Animation/AnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
@@ -11,10 +12,7 @@
 AGS_Guardian::AGS_Guardian()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
-	FeverTime = 0.f;
-	FeverGage = 0.f;
-
+	
 	NormalMoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	SpeedUpMoveSpeed = 1200.f;
 }
@@ -101,6 +99,16 @@ void AGS_Guardian::MeleeAttackCheck()
 					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
 					FDamageEvent DamageEvent;
 					DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(),this);
+
+					//server
+					AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
+					if (!Drakhar->GetIsFeverMode())
+					{
+						//UE_LOG(LogTemp,Warning, TEXT("@@@@@@@@@@@Not Fever Mode"));
+						
+						Drakhar->MulticastRPCSetFeverGauge(10.f);
+					}
+					//UE_LOG(LogTemp,Warning, TEXT("@@@@@@@@@@@@@@@Fever Mode"));
 				}
 			}
 		}

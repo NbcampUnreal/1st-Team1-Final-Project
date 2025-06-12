@@ -4,12 +4,15 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "GS_Drakhar.generated.h"
 
+class UGS_DrakharFeverGauge;
 class AGS_DrakharProjectile;
 class UAkAudioEvent;
 class UAkComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
 class UArrowComponent;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFeverGageChangedDelegate, float);
 
 UCLASS()
 class GAS_API AGS_Drakhar : public AGS_Guardian
@@ -68,6 +71,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX|Drakhar", meta = (DisplayName = "WingRush VFX Spawn Point"))
 	UArrowComponent* WingRushVFXSpawnPoint;
 
+	FOnCurrentFeverGageChangedDelegate OnCurrentFeverGageChanged;
+	
 	//[Input Binding Function]
 	virtual void Ctrl() override;
 
@@ -131,7 +136,24 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPCStopCtrl();
+	
+	//[Fever Mode]
+	FORCEINLINE float GetCurrentFeverGage() const { return CurrentFeverGage; }
+	FORCEINLINE float GetMaxFeverGage() const { return MaxFeverGage; }
+	FORCEINLINE bool GetIsFeverMode() const {return IsFeverMode; }
+	
+	void SetFeverGageWidget(UGS_DrakharFeverGauge* InDrakharFeverGageWidget);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCSetFeverGauge(float InValue);
+
+	//max fever gage
+	void StartFeverMode();
+	//when fever gage > 0
+	void DecreaseFeverGauge();
+	//minus 1 values per one seconds
+	void MinusFeverGaugeValue();
+	
 	// === Wwise 사운드 재생 함수 ===
 	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Normal Attack"))
 	void PlayComboAttackSound();
@@ -221,8 +243,19 @@ private:
 
 	//[Draconic Fury]
 	TArray<FTransform> DraconicFuryTargetArray;
-	void GetRandomDraconicFuryTarget();
 
+	//[Fever Mode]
+	float MaxFeverGage;
+	float CurrentFeverGage;
+	
+	//UPROPERTY(ReplicatedUsing=OnRep_FeverMode)
+	bool IsFeverMode;
+	
+	FTimerHandle FeverTimer;
+	
+	//[draconic fury]
+	void GetRandomDraconicFuryTarget();
+	
 	// === Wwise 관련 헬퍼 함수 ===
 	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);
 	UAkComponent* GetOrCreateAkComponent();

@@ -66,10 +66,4 @@ protected:
 	
 	float NormalMoveSpeed;
 	float SpeedUpMoveSpeed;
-
-private:
-	//for fever mode
-	float FeverTime;
-	float FeverGage;
-	
 };

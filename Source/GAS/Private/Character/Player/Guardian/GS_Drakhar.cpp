@@ -9,7 +9,6 @@
 #include "AkGameplayStatics.h"
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
-#include "Sound/GS_AudioManager.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -18,6 +17,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/ArrowComponent.h"
+#include "UI/Character/GS_DrakharFeverGauge.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
@@ -30,7 +30,7 @@ AGS_Drakhar::AGS_Drakhar()
 	bClientCanCombo = true;
 	
 	//dash skill variables
-	DashPower = 1500.f;
+	DashPower = 500.f;
 	DashInterpAlpha = 0.f;
 	DashDuration = 1.f;
 
@@ -44,6 +44,10 @@ AGS_Drakhar::AGS_Drakhar()
 	//boss monster tag for user widget
 	Tags.Add("Guardian");
 
+	//fever mode
+	MaxFeverGage = 100.f;
+	CurrentFeverGage = 0.f;
+	
 	// === Wwise 사운드 이벤트 초기화 ===
 	ComboAttackSoundEvent = nullptr;
 	DashSkillSoundEvent = nullptr;
@@ -165,7 +169,6 @@ void AGS_Drakhar::RightMouse()
 		{
 			GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 		}
-		
 	}
 }
 
@@ -201,8 +204,54 @@ void AGS_Drakhar::OnRep_CanCombo()
 
 void AGS_Drakhar::ComboLastAttack()
 {
-	// 콤보 마지막 공격 로직 구현
-	// TODO: 필요시 특별한 콤보 마지막 공격 로직을 여기에 추가
+	if (HasAuthority())
+	{
+		TArray<FHitResult> OutHitResults;
+		const FVector Start = GetActorLocation();
+		FCollisionQueryParams Params(NAME_None, false, this);
+		Params.AddIgnoredActor(this);
+
+		bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, Start, FQuat::Identity, ECC_Pawn,
+			FCollisionShape::MakeSphere(300.f), Params);
+		
+		if (bIsHitDetected)
+		{
+			TSet<AGS_Character*> DamagedCharacterArray;
+			for (auto const& OutHitResult : OutHitResults)
+			{
+				if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
+				{
+					//UE_LOG(LogTemp, Warning, TEXT("Sound Trigger!!"));
+					continue;
+				}
+
+				AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
+				if (IsValid(DamagedCharacter))
+				{
+					DamagedCharacterArray.Add(DamagedCharacter);
+				}
+			}
+
+			for (auto const& DamagedCharacter : DamagedCharacterArray)
+			{
+				//ServerRPCMeleeAttack(DamagedCharacter);
+				UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
+				if (IsValid(DamagedCharacterStat))
+				{
+					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
+					FDamageEvent DamageEvent;
+					DamagedCharacter->TakeDamage(Damage + 20.f, DamageEvent, GetController(),this);
+					
+					if (!IsFeverMode)
+					{
+						MulticastRPCSetFeverGauge(10.f);
+					}
+				}
+			}
+			DamagedCharacterArray.Empty();
+		}
+		//MulticastRPCDrawDebug(Start, 300.f, bIsHitDetected);
+	}
 }
 
 void AGS_Drakhar::ServerRPCResetValue_Implementation()
@@ -247,6 +296,8 @@ void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 		SetActorLocation(NewLocation, true);
 		DashStartLocation = NewLocation;
 	}
+
+	DashDirection = GetActorForwardVector().GetSafeNormal();
 }
 
 void AGS_Drakhar::ServerRPCEndDash_Implementation()
@@ -263,6 +314,16 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		
 		FDamageEvent DamageEvent;
 		DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+		
+		FVector DrakharPos = GetActorLocation();
+		FVector DamagedPos = DamagedCharacter->GetActorLocation();
+		FVector OutVector = (DamagedPos - DrakharPos);
+		FVector TempVector = -OutVector.Dot(DashDirection) * DashDirection;
+		FVector ResultVector = TempVector + OutVector;
+		
+		DamagedCharacter->LaunchCharacter(ResultVector.GetSafeNormal() * 10000.f,true,true);
+
+		//MulticastRPCDrawDebugVector(GetActorLocation(), DamagedCharacter->GetActorLocation());
 	}
 
 	DamagedCharacters.Empty();
@@ -354,7 +415,12 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			if (IsValid(DamagedCharacter))
 			{
 				DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
-				DamagedCharacter->LaunchCharacter(GetActorForwardVector() * EarthquakePower, false, false);
+				FVector DrakharLocation = GetActorLocation();
+				FVector DamagedLocation = DamagedCharacter->GetActorLocation();
+				
+				FVector LaunchVector = (DamagedLocation - DrakharLocation).GetSafeNormal();
+				//Guardian 쪽으로 당겨오기
+				DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f,0.f,500.f), false, false);
 			}
 		}
 	}
@@ -402,6 +468,77 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 	}
 }
 
+void AGS_Drakhar::SetFeverGageWidget(UGS_DrakharFeverGauge* InDrakharFeverGageWidget)
+{
+	UGS_DrakharFeverGauge* DrakharFeverGaugeWidget = Cast<UGS_DrakharFeverGauge>(InDrakharFeverGageWidget);
+	if (IsValid(DrakharFeverGaugeWidget))
+	{
+		//client
+		DrakharFeverGaugeWidget->InitializeGage(GetCurrentFeverGage());
+		OnCurrentFeverGageChanged.AddUObject(DrakharFeverGaugeWidget, &UGS_DrakharFeverGauge::OnCurrentFeverGageChanged);
+	}
+}
+
+void AGS_Drakhar::MulticastRPCSetFeverGauge_Implementation(float InValue)
+{
+	//client & server
+	CurrentFeverGage += InValue;
+
+	if (CurrentFeverGage < KINDA_SMALL_NUMBER)
+	{
+		CurrentFeverGage = 0.f;
+		
+		if (HasAuthority())
+		{
+			IsFeverMode = false;
+			GetWorldTimerManager().ClearTimer(FeverTimer);
+			//UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@Current Fever Gage %f"), CurrentFeverGage);
+		}
+	}
+	if (CurrentFeverGage >= MaxFeverGage)
+	{
+		CurrentFeverGage = MaxFeverGage;
+
+		//server
+		if (HasAuthority())
+		{
+			//StartFeverMode();
+			IsFeverMode = true;
+			//UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@Current Fever Gage %f"), CurrentFeverGage);
+		}
+	}
+	if (CurrentFeverGage > 0.f)
+	{
+		if (HasAuthority())
+		{
+			DecreaseFeverGauge();
+			//UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@Current Fever Gage %f"), CurrentFeverGage);
+		}
+	}
+	OnCurrentFeverGageChanged.Broadcast(CurrentFeverGage);
+}
+
+void AGS_Drakhar::StartFeverMode()
+{
+	//server
+	if (IsFeverMode)
+	{
+		UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Start Fever Mode!!!!!")));
+		GetWorldTimerManager().SetTimer(FeverTimer, this, &AGS_Drakhar::MinusFeverGaugeValue, true, 1.f);
+	}
+}
+
+void AGS_Drakhar::DecreaseFeverGauge()
+{
+	GetWorldTimerManager().SetTimer(FeverTimer, this, &AGS_Drakhar::MinusFeverGaugeValue, true, 1.f);
+}
+
+void AGS_Drakhar::MinusFeverGaugeValue()
+{
+	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Minus Fever Gauge %f!!!!!"), GetCurrentFeverGage()));
+	MulticastRPCSetFeverGauge(-1.f);
+}
+
 void AGS_Drakhar::GetRandomDraconicFuryTarget()
 {
 	DraconicFuryTargetArray.Empty();
@@ -422,7 +559,17 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 	}
 }
 
+// void AGS_Drakhar::OnRep_FeverMode()
+// {
+// 	ClientIsFeverMode = IsFeverMode;
+// }
+
+// void AGS_Drakhar::ServerRPCSetFeverMode_Implementation()
+// {
+// }
+
 // === Wwise 사운드 재생 함수 구현 ===
+
 
 void AGS_Drakhar::PlayComboAttackSound()
 {
