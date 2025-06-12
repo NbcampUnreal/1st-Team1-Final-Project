@@ -18,10 +18,20 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/ArrowComponent.h"
+#include "Character/Component/GS_CameraShakeComponent.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	
+	CameraShakeComponent = CreateDefaultSubobject<UGS_CameraShakeComponent>(TEXT("CameraShakeComponent"));
+
+	// === 어스퀘이크 카메라 쉐이크 기본값 설정 ===
+	EarthquakeShakeInfo.Intensity = 8.0f;
+	EarthquakeShakeInfo.MaxDistance = 2500.0f;
+	EarthquakeShakeInfo.MinDistance = 300.0f;
+	EarthquakeShakeInfo.PropagationSpeed = 300000.0f; // 지진파 속도
+	EarthquakeShakeInfo.bUseFalloff = true;
 
 	//combo attack
 	DefaultComboAttackSectionName = FName("Combo1");
@@ -38,6 +48,9 @@ AGS_Drakhar::AGS_Drakhar()
 	EarthquakePower = 3000.f;
 	EarthquakeRadius = 500.f;
 
+	//DraconicFury
+	DraconicAttackPersistenceTime = 5.f;
+
 	//Guardian State Setting
 	ClientGuardianState = EGuardianState::CtrlSkillEnd;
 
@@ -50,6 +63,9 @@ AGS_Drakhar::AGS_Drakhar()
 	EarthquakeSkillSoundEvent = nullptr;
 	DraconicFurySkillSoundEvent = nullptr;
 	DraconicProjectileSoundEvent = nullptr;
+	
+	// 사운드 중복 재생 방지 초기화
+	bDraconicFurySoundPlayed = false;
 
 	// === 날기 사운드 이벤트 초기화 ===
 	FlyStartSoundEvent = nullptr;
@@ -65,9 +81,16 @@ AGS_Drakhar::AGS_Drakhar()
 		}
 	}
 
-	// === 나이아가라 VFX 초기화 ===
 	WingRushRibbonVFX = nullptr;
 	ActiveWingRushVFXComponent = nullptr;
+
+	DustVFX = nullptr;
+	ActiveDustVFXComponent = nullptr;
+
+	GroundCrackVFX = nullptr;
+	ActiveGroundCrackVFXComponent = nullptr;
+	DustCloudVFX = nullptr;
+	ActiveDustCloudVFXComponent = nullptr;
 
 	// === VFX 위치 제어용 화살표 컴포넌트 생성 ===
 	WingRushVFXSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("WingRushVFXSpawnPoint"));
@@ -81,6 +104,21 @@ AGS_Drakhar::AGS_Drakhar()
 		
 #if WITH_EDITOR
 		WingRushVFXSpawnPoint->bIsEditorOnly = false;
+#endif
+	}
+
+	// === 어스퀘이크 VFX 위치 제어용 화살표 컴포넌트 생성 ===
+	EarthquakeVFXSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("EarthquakeVFXSpawnPoint"));
+	if (EarthquakeVFXSpawnPoint)
+	{
+		EarthquakeVFXSpawnPoint->SetupAttachment(GetMesh(), FName("hand_r")); // 오른손 본에 부착
+		EarthquakeVFXSpawnPoint->SetRelativeLocation(FVector(100.f, 0.f, -150.f));
+		EarthquakeVFXSpawnPoint->SetRelativeRotation(FRotator(0.f, 0.f, -90.f)); // 아래쪽 향하게
+		EarthquakeVFXSpawnPoint->SetArrowSize(5.0f);
+		EarthquakeVFXSpawnPoint->SetArrowColor(FLinearColor::Red);
+		
+#if WITH_EDITOR
+		EarthquakeVFXSpawnPoint->bIsEditorOnly = false;
 #endif
 	}
 }
@@ -155,10 +193,10 @@ void AGS_Drakhar::RightMouse()
 {
 	if (IsLocallyControlled())
 	{
-		//ultimate skill
+		//ultimate skill (DraconicFury)
 		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
 		{	
-			GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+			ServerRPC_BeginDraconicFury();
 		}
 		//dash skill
 		else if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
@@ -270,8 +308,9 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	bCanCombo = true;
 	
-	// 대시 VFX 종료
+	// 대시 VFX 종료 (Wing Rush + Dust)
 	StopWingRushVFX();
+	StopDustVFX();
 }
 
 void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
@@ -285,6 +324,7 @@ void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
 	
 	// 대시 VFX 시작
 	StartWingRushVFX();
+	StartDustVFX();
 }
 
 void AGS_Drakhar::DashAttackCheck()
@@ -320,6 +360,16 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 {
 	// 지진 스킬 사운드 재생
 	PlayEarthquakeSkillSound();
+
+	// === 카메라 쉐이크 재생 ===
+	if (CameraShakeComponent)
+	{
+		CameraShakeComponent->PlayCameraShake(EarthquakeShakeInfo);
+	}
+
+	// === 어스퀘이크 VFX 재생 ===
+	StartGroundCrackVFX();
+	StartDustCloudVFX();
 	
 	TSet<AGS_Character*> EarthquakeDamagedCharacters;
 	TArray<FHitResult> OutHitResults;
@@ -383,7 +433,18 @@ void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 {
-	PlayDraconicFurySkillSound();
+	// 스킬 사운드는 첫 번째 투사체 생성 시에만 재생
+	if (!bDraconicFurySoundPlayed)
+	{
+		PlayDraconicFurySkillSound();
+		bDraconicFurySoundPlayed = true;
+		
+		FTimerHandle ResetSoundTimer;
+		GetWorld()->GetTimerManager().SetTimer(ResetSoundTimer, [this]()
+		{
+			bDraconicFurySoundPlayed = false;
+		}, 7.0f, false); // 리셋 (스킬 지속시간에 맞게 조정)
+	}
 	
 	GetRandomDraconicFuryTarget();
 
@@ -397,7 +458,7 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 	{
 		DrakharProjectile->SetOwner(this);
 		
-		// 투사체 위치에서 사운드 재생
+		// 투사체 위치에서 사운드 재생 (각 투사체마다 개별 사운드)
 		PlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
 	}
 }
@@ -520,6 +581,8 @@ void AGS_Drakhar::PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Locat
 		UE_LOG(LogTemp, Warning, TEXT("GS_Drakhar::PlaySoundEvent - Failed to get AkComponent"));
 		return;
 	}
+
+
 
 	// 특정 위치에서 재생하는 경우 (투사체 등)
 	if (Location != FVector::ZeroVector)
@@ -688,5 +751,339 @@ void AGS_Drakhar::MulticastStopWingRushVFX_Implementation()
 			}
 			ActiveWingRushVFXComponent = nullptr;
 		}, 2.0f, false);
+	}
+}
+
+// === DustVFX 제어 함수 ===
+
+void AGS_Drakhar::StartDustVFX()
+{
+	if (HasAuthority())
+	{
+		MulticastStartDustVFX();
+	}
+}
+
+void AGS_Drakhar::StopDustVFX()
+{
+	if (HasAuthority())
+	{
+		MulticastStopDustVFX();
+	}
+}
+
+// === DustVFX Multicast 구현 함수 ===
+void AGS_Drakhar::MulticastStartDustVFX_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (ActiveDustVFXComponent && IsValid(ActiveDustVFXComponent))
+	{
+		ActiveDustVFXComponent->DestroyComponent();
+		ActiveDustVFXComponent = nullptr;
+	}
+
+	if (!DustVFX)
+	{
+		return;
+	}
+
+	if (WingRushVFXSpawnPoint && IsValid(WingRushVFXSpawnPoint))
+	{
+		ActiveDustVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			DustVFX,
+			WingRushVFXSpawnPoint,
+			NAME_None,
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,
+			EAttachLocation::KeepRelativeOffset,
+			true
+		);
+	}
+
+	// 폴백: 발 소켓에 직접 부착 (WingRush와 동일한 위치)
+	if (!ActiveDustVFXComponent)
+	{
+		ActiveDustVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			DustVFX,
+			GetMesh(),
+			FName("foot_l"),
+			FVector(-20.f, 0.f, 0.f),
+			FRotator::ZeroRotator,
+			EAttachLocation::KeepRelativeOffset,
+			true
+		);
+	}
+
+	if (ActiveDustVFXComponent)
+	{
+		// DustVFX 파라미터 설정
+		FVector CurrentDashDirection = (DashEndLocation - DashStartLocation).GetSafeNormal();
+		if (!CurrentDashDirection.IsZero())
+		{
+			ActiveDustVFXComponent->SetVectorParameter(FName("DashDirection"), CurrentDashDirection);
+		}
+		
+		float DashSpeed = DashPower / DashDuration;
+		ActiveDustVFXComponent->SetFloatParameter(FName("DashSpeed"), DashSpeed);
+		ActiveDustVFXComponent->SetFloatParameter(FName("Intensity"), 3.0f);
+		ActiveDustVFXComponent->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
+	}
+}
+
+void AGS_Drakhar::MulticastStopDustVFX_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (ActiveDustVFXComponent && IsValid(ActiveDustVFXComponent))
+	{
+		ActiveDustVFXComponent->Deactivate();
+		
+		FTimerHandle DustVFXCleanupTimer;
+		GetWorld()->GetTimerManager().SetTimer(DustVFXCleanupTimer, [this]()
+		{
+			if (ActiveDustVFXComponent && IsValid(ActiveDustVFXComponent))
+			{
+				ActiveDustVFXComponent->DestroyComponent();
+			}
+			ActiveDustVFXComponent = nullptr;
+		}, 1.5f, false);
+	}
+}
+
+void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
+{
+	if (GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
+	{
+		return; 
+	}
+
+	GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+
+	FTimerHandle DraconicFuryEndTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		DraconicFuryEndTimer,
+		this,
+		&AGS_Drakhar::EndDraconicFury,
+		DraconicAttackPersistenceTime,
+		false);
+}
+
+void AGS_Drakhar::EndDraconicFury()
+{
+	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+	GuardianState = EGuardianState::ForceLanded;
+	
+	MoveSpeed = NormalMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+
+	PlayFlyEndSound();
+}
+
+// === 어스퀘이크 지면 균열 VFX 제어 함수 ===
+
+void AGS_Drakhar::StartGroundCrackVFX()
+{
+	if (HasAuthority())
+	{
+		MulticastStartGroundCrackVFX();
+	}
+}
+
+void AGS_Drakhar::StopGroundCrackVFX()
+{
+	if (HasAuthority())
+	{
+		MulticastStopGroundCrackVFX();
+	}
+}
+
+void AGS_Drakhar::MulticastStartGroundCrackVFX_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	// 이미 활성화된 VFX가 있다면 정리
+	if (ActiveGroundCrackVFXComponent && IsValid(ActiveGroundCrackVFXComponent))
+	{
+		ActiveGroundCrackVFXComponent->DestroyComponent();
+		ActiveGroundCrackVFXComponent = nullptr;
+	}
+
+	if (!GroundCrackVFX)
+	{
+		return;
+	}
+
+	// 어스퀘이크 스폰 포인트를 사용한 스폰
+	if (EarthquakeVFXSpawnPoint && IsValid(EarthquakeVFXSpawnPoint))
+	{
+		ActiveGroundCrackVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			GroundCrackVFX,
+			EarthquakeVFXSpawnPoint,
+			NAME_None,
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,
+			EAttachLocation::KeepRelativeOffset,
+			true
+		);
+	}
+
+	// 폴백: 캐릭터 발 아래에 직접 스폰
+	if (!ActiveGroundCrackVFXComponent)
+	{
+		FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, -90.f);
+		ActiveGroundCrackVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			GroundCrackVFX,
+			SpawnLocation,
+			GetActorRotation(),
+			FVector(1.0f, 1.0f, 1.0f),
+			true
+		);
+	}
+
+	if (ActiveGroundCrackVFXComponent)
+	{
+		// 지면 균열 VFX 파라미터 설정
+		ActiveGroundCrackVFXComponent->SetFloatParameter(FName("CrackIntensity"), EarthquakeShakeInfo.Intensity);
+		ActiveGroundCrackVFXComponent->SetFloatParameter(FName("CrackRadius"), EarthquakeShakeInfo.MaxDistance * 0.5f);
+		ActiveGroundCrackVFXComponent->SetWorldScale3D(FVector(2.0f, 2.0f, 1.0f));
+	}
+}
+
+void AGS_Drakhar::MulticastStopGroundCrackVFX_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (ActiveGroundCrackVFXComponent && IsValid(ActiveGroundCrackVFXComponent))
+	{
+		ActiveGroundCrackVFXComponent->Deactivate();
+		
+		FTimerHandle GroundCrackVFXCleanupTimer;
+		GetWorld()->GetTimerManager().SetTimer(GroundCrackVFXCleanupTimer, [this]()
+		{
+			if (ActiveGroundCrackVFXComponent && IsValid(ActiveGroundCrackVFXComponent))
+			{
+				ActiveGroundCrackVFXComponent->DestroyComponent();
+			}
+			ActiveGroundCrackVFXComponent = nullptr;
+		}, 3.0f, false); // 3초 후 정리 (균열이 천천히 사라지도록)
+	}
+}
+
+// === 어스퀘이크 먼지 구름 VFX 제어 함수 ===
+
+void AGS_Drakhar::StartDustCloudVFX()
+{
+	if (HasAuthority())
+	{
+		MulticastStartDustCloudVFX();
+	}
+}
+
+void AGS_Drakhar::StopDustCloudVFX()
+{
+	if (HasAuthority())
+	{
+		MulticastStopDustCloudVFX();
+	}
+}
+
+void AGS_Drakhar::MulticastStartDustCloudVFX_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	// 이미 활성화된 VFX가 있다면 정리
+	if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
+	{
+		ActiveDustCloudVFXComponent->DestroyComponent();
+		ActiveDustCloudVFXComponent = nullptr;
+	}
+
+	if (!DustCloudVFX)
+	{
+		return;
+	}
+
+	// 어스퀘이크 스폰 포인트를 사용한 스폰
+	if (EarthquakeVFXSpawnPoint && IsValid(EarthquakeVFXSpawnPoint))
+	{
+		ActiveDustCloudVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			DustCloudVFX,
+			EarthquakeVFXSpawnPoint,
+			NAME_None,
+			FVector(0.f, 0.f, 50.f), // 지면에서 약간 위로
+			FRotator::ZeroRotator,
+			EAttachLocation::KeepRelativeOffset,
+			true
+		);
+	}
+
+	// 폴백: 캐릭터 주변에 직접 스폰
+	if (!ActiveDustCloudVFXComponent)
+	{
+		FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, -40.f);
+		ActiveDustCloudVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			DustCloudVFX,
+			SpawnLocation,
+			GetActorRotation(),
+			FVector(1.5f, 1.5f, 1.5f),
+			true
+		);
+	}
+
+	if (ActiveDustCloudVFXComponent)
+	{
+		// 먼지 구름 VFX 파라미터 설정
+		ActiveDustCloudVFXComponent->SetFloatParameter(FName("DustIntensity"), EarthquakeShakeInfo.Intensity * 1.5f);
+		ActiveDustCloudVFXComponent->SetFloatParameter(FName("DustRadius"), EarthquakeShakeInfo.MaxDistance * 0.3f);
+		ActiveDustCloudVFXComponent->SetFloatParameter(FName("WindStrength"), 5.0f);
+		ActiveDustCloudVFXComponent->SetWorldScale3D(FVector(3.0f, 3.0f, 2.0f));
+		
+		// 먼지 구름은 2초 후 자동으로 종료
+		FTimerHandle DustCloudAutoStopTimer;
+		GetWorld()->GetTimerManager().SetTimer(DustCloudAutoStopTimer, [this]()
+		{
+			StopDustCloudVFX();
+		}, 2.0f, false);
+	}
+}
+
+void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
+	{
+		ActiveDustCloudVFXComponent->Deactivate();
+		
+		FTimerHandle DustCloudVFXCleanupTimer;
+		GetWorld()->GetTimerManager().SetTimer(DustCloudVFXCleanupTimer, [this]()
+		{
+			if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
+			{
+				ActiveDustCloudVFXComponent->DestroyComponent();
+			}
+			ActiveDustCloudVFXComponent = nullptr;
+		}, 1.5f, false); // 1.5초 후 정리
 	}
 }
