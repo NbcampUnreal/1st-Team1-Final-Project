@@ -76,24 +76,31 @@ void UGS_Timer::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	}
 
 	if (RemainingTime >= 0.0f)
-	{
-		const int32 Min = FMath::FloorToInt(RemainingTime / 60.0f);
-		const int32 Sec = FMath::FloorToInt(FMath::Fmod(RemainingTime, 60.0f));
-		
-		// 시간이 변경된 경우만 텍스트 업데이트
-		if (Min != LastDisplayedMinutes || Sec != LastDisplayedSeconds)
-		{
-			LastDisplayedMinutes = Min;
-			LastDisplayedSeconds = Sec;
-			FormattedTime = FText::FromString(FString::Printf(TEXT("%02d:%02d"), Min, Sec));
-			TimerText->SetText(FormattedTime);
-		}
-		
-		if (RemainingTime >= 0.0f)
-		{
+    {
+        const int32 TotalSeconds = FMath::FloorToInt(RemainingTime);
+
+        // 마지막으로 표시한 시간과 다를 때만 텍스트 업데이트
+        if (LastDisplayedSeconds != TotalSeconds)
+        {
+            LastDisplayedSeconds = TotalSeconds;
+
+            const int32 Min = TotalSeconds / 60;
+            const int32 Sec = TotalSeconds % 60;
+            FormattedTime = FText::FromString(FString::Printf(TEXT("%02d:%02d"), Min, Sec));
+
+            TimerText->SetText(FormattedTime);
 			UpdateTextColor(RemainingTime);
-		}
-	}
+        }
+    }
+    else 
+    {
+        // 타이머가 끝났을 때 기본 텍스트로 한 번만 설정
+        if (LastDisplayedSeconds != -1)
+        {
+            LastDisplayedSeconds = -1;
+            TimerText->SetText(FText::FromString(TEXT("--:--")));
+        }
+    }
 }
 
 void UGS_Timer::UpdateTextColor(float RemainingTimeInSeconds)

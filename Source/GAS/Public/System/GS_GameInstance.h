@@ -96,23 +96,6 @@ protected:
     void LeaveCurrentSessionAndJoin(APlayerController* RequestingPlayer, const FOnlineSessionSearchResult& SearchResultToJoin);
     virtual void OnDestroySessionCompleteForInvite(FName SessionName, bool bWasSuccessful);
 
-//    //초대
-//public:
-//    UFUNCTION(BlueprintCallable, Category = "Network|Friends")
-//    void ReadSteamFriendsList(APlayerController* RequestingPlayer);
-//
-//    UFUNCTION(BlueprintCallable, Category = "Network|Friends")
-//    void SendSteamSessionInvite(APlayerController* RequestingPlayer, const FUniqueNetId& FriendToInviteId);
-//
-//protected:
-//    FOnSteamFriendsListUpdated OnSteamFriendsListUpdatedDelegate;
-//    IOnlineFriendsPtr FriendsInterface;
-//    TWeakObjectPtr<APlayerController> PlayerReadingFriendsList;
-//
-//    FOnReadFriendsListCompleteDelegate ReadFriendsCompleteDelegate;
-//    FDelegateHandle ReadFriendsCompleteDelegateHandle;
-//    virtual void OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
-//
     FOnSessionUserInviteAcceptedDelegate OnSessionUserInviteAcceptedDelegate;
     FDelegateHandle OnSessionUserInviteAcceptedDelegateHandle;
     virtual void OnSessionUserInviteAccepted_Impl(const bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);

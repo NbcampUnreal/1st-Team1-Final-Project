@@ -247,7 +247,7 @@ void UGS_GameInstance::GSHostSession(int32 MaxPlayers, FName SessionCustomName, 
     }
 
     HostSessionSettings = MakeShareable(new FOnlineSessionSettings());
-    HostSessionSettings->NumPublicConnections = 5; //이거 나중에 1로 바꾸기
+    HostSessionSettings->NumPublicConnections = 1; //이거 나중에 1로 바꾸기
     HostSessionSettings->NumPrivateConnections = MaxPlayers - HostSessionSettings->NumPublicConnections;
     HostSessionSettings->bShouldAdvertise = true;
     HostSessionSettings->bIsLANMatch = false;
@@ -503,7 +503,20 @@ void UGS_GameInstance::GSJoinSession(APlayerController* RequestingPlayer, const 
 
 void UGS_GameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
 {
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnJoinSessionComplete() CALLED - SessionName: %s"), *SessionName.ToString());
+    UE_LOG(LogTemp, Log, TEXT("================ OnJoinSessionComplete CALLED ================"));
+    UE_LOG(LogTemp, Log, TEXT("SessionName: %s"), *SessionName.ToString());
+
+    FString ResultStr;
+    switch (Result)
+    {
+    case EOnJoinSessionCompleteResult::Success: ResultStr = TEXT("Success"); break;
+    case EOnJoinSessionCompleteResult::SessionIsFull: ResultStr = TEXT("SessionIsFull"); break;
+    case EOnJoinSessionCompleteResult::SessionDoesNotExist: ResultStr = TEXT("SessionDoesNotExist"); break;
+    case EOnJoinSessionCompleteResult::CouldNotRetrieveAddress: ResultStr = TEXT("CouldNotRetrieveAddress"); break;
+    case EOnJoinSessionCompleteResult::AlreadyInSession: ResultStr = TEXT("AlreadyInSession"); break;
+    case EOnJoinSessionCompleteResult::UnknownError: default: ResultStr = TEXT("UnknownError"); break;
+    }
+    UE_LOG(LogTemp, Log, TEXT("Join Result: %s"), *ResultStr);
 
     APlayerController* PC = PlayerSearchingSession.Get();
     PlayerSearchingSession = nullptr;
@@ -512,69 +525,30 @@ void UGS_GameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCo
     {
         SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
         JoinSessionCompleteDelegateHandle.Reset();
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnJoinSessionComplete - Delegate handle CLEARED."));
+        UE_LOG(LogTemp, Log, TEXT("OnJoinSessionComplete - Delegate handle CLEARED."));
     }
 
     if (Result == EOnJoinSessionCompleteResult::Success && PC)
     {
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnJoinSessionComplete - Join successful for PC: %s! Attempting to get connect string for session: %s."), *PC->GetName(), *SessionName.ToString());
+        UE_LOG(LogTemp, Log, TEXT("Join successful! Attempting to get connect string..."));
         FString ConnectString;
+
         if (SessionInterface->GetResolvedConnectString(SessionName, ConnectString))
         {
-            UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnJoinSessionComplete - Resolved ConnectString: %s"), *ConnectString);
-            FString MapToTravel = DefaultLobbyMapName; // 기본값
-            FString GameModeToTravel = DefaultLobbyGameModePath; // 기본값
-
-            if (SessionToJoin.IsValid()) // 저장된 세션 정보 사용
-            {
-                FString MapNameFromSession;
-                if (SessionToJoin.Session.SessionSettings.Get(SETTING_MAPNAME, MapNameFromSession) && !MapNameFromSession.IsEmpty())
-                {
-                    MapToTravel = MapNameFromSession;
-                }
-                FString GameModeFromSession;
-                if (SessionToJoin.Session.SessionSettings.Get(SETTING_GAMEMODE, GameModeFromSession) && !GameModeFromSession.IsEmpty())
-                {
-                    GameModeToTravel = GameModeFromSession;
-                }
-                UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnJoinSessionComplete - Using Map: %s, GameMode: %s from actual joined session settings."), *MapToTravel, *GameModeToTravel);
-            }
-            else
-            {
-                UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnJoinSessionComplete - SessionToJoin was not valid, using default Map/GameMode for travel."));
-            }
-
-            FString TravelURL;
-            if (!ConnectString.Contains(TEXT("/Game/Maps"))) {
-                TravelURL = ConnectString + MapToTravel + TEXT("?game=") + GameModeToTravel;
-            }
-            else {
-                TravelURL = ConnectString + TEXT("?game=") + GameModeToTravel;
-            }
-
-            UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnJoinSessionComplete - Traveling PC %s to: %s"), *PC->GetName(), *TravelURL);
-            PC->ClientTravel(TravelURL, ETravelType::TRAVEL_Absolute);
+            UE_LOG(LogTemp, Log, TEXT(">>>>>>>>> Resolved ConnectString: [ %s ] <<<<<<<<<"), *ConnectString);
+            PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
         }
         else
         {
-            UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnJoinSessionComplete - Could not get resolved connect string for session: %s"), *SessionName.ToString());
+            UE_LOG(LogTemp, Error, TEXT("!!!!!!!! GetResolvedConnectString FAILED. Cannot travel. !!!!!!!!"));
         }
     }
     else
     {
-        FString ResultStr;
-        switch (Result)
-        {
-        case EOnJoinSessionCompleteResult::Success: ResultStr = TEXT("Success (but PC was invalid or became invalid)"); break;
-        case EOnJoinSessionCompleteResult::SessionIsFull: ResultStr = TEXT("SessionIsFull"); break;
-        case EOnJoinSessionCompleteResult::SessionDoesNotExist: ResultStr = TEXT("SessionDoesNotExist"); break;
-        case EOnJoinSessionCompleteResult::CouldNotRetrieveAddress: ResultStr = TEXT("CouldNotRetrieveAddress"); break;
-        case EOnJoinSessionCompleteResult::AlreadyInSession: ResultStr = TEXT("AlreadyInSession"); break;
-        default: ResultStr = TEXT("UnknownError"); break;
-        }
-        UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnJoinSessionComplete - JoinSession for '%s' failed. Result: %s. PC Valid: %s"),
-            *SessionName.ToString(), *ResultStr, PC ? TEXT("true") : TEXT("false"));
+        UE_LOG(LogTemp, Error, TEXT("!!!!!!!! JoinSession FAILED or PlayerController is invalid. Result: %s"), *ResultStr);
     }
+
+    UE_LOG(LogTemp, Log, TEXT("================ OnJoinSessionComplete END ================"));
 }
 
 void UGS_GameInstance::GSLeaveSession(APlayerController* RequestingPlayer)

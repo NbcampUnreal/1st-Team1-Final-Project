@@ -4,6 +4,8 @@
 #include "CommonUI/Public/CommonButtonBase.h"
 #include "UI/Common/CustomCommonButton.h"
 #include "UI/Common/GS_CommonTwoBtnPopup.h"
+#include "UI/Popup/GS_FriendListWidget.h"
+#include "Components/Overlay.h"
 #include "System/GS_GameInstance.h"
 
 
@@ -48,6 +50,14 @@ void UGS_CustomLobbyUI::NativeConstruct()
 		if (UCommonButtonBase* BackButtonBase = Cast<UCommonButtonBase>(BackButton))
 		{
 			BackButtonBase->OnClicked().AddUObject(this, &UGS_CustomLobbyUI::OnBackButtonClicked);
+		}
+	}
+
+	if (FriendListButton)
+	{
+		if (UCommonButtonBase* FriendListButtonBase = Cast<UCommonButtonBase>(FriendListButton))
+		{
+			FriendListButtonBase->OnClicked().AddUObject(this, &UGS_CustomLobbyUI::OnFriendListButtonClicked);
 		}
 	}
 
@@ -124,6 +134,32 @@ void UGS_CustomLobbyUI::OnBackButtonClicked()
 	CommonPopUpUI->SetDescription(FText::FromString(TEXT("세션을 나가시겠습니까?")));
 	CommonPopUpUI->OnYesClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupYesButtonClicked);
 	CommonPopUpUI->OnNoClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupNoButtonClicked);
+}
+
+void UGS_CustomLobbyUI::OnFriendListButtonClicked()
+{
+	if (!FriendListOverlay) return;
+
+	if (!FriendListWidgetInstance)
+	{
+		if (FriendListWidgetClass)
+		{
+			FriendListWidgetInstance = CreateWidget<UGS_FriendListWidget>(GetOwningPlayer(), FriendListWidgetClass);
+			if (FriendListWidgetInstance)
+			{
+				FriendListOverlay->AddChild(FriendListWidgetInstance);
+			}
+		}
+	}
+
+	if (FriendListOverlay->GetVisibility() == ESlateVisibility::Collapsed)
+	{
+		FriendListOverlay->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		FriendListOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
 void UGS_CustomLobbyUI::UpdateRoleSpecificText(EPlayerRole NewRole)
