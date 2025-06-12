@@ -7,7 +7,7 @@
 #include "Weapon/Projectile/Seeker/GS_ArrowVisualActor.h"
 #include "GS_ArrowTrapProjectile.generated.h"
 
-
+class UGS_ProjectilePoolComp;
 UCLASS()
 class GAS_API AGS_ArrowTrapProjectile : public AGS_WeaponProjectile
 {
@@ -22,6 +22,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
 	AGS_NonTrigTrapBase* OwningTrap;
 
+	UPROPERTY()
+	TObjectPtr<UGS_ProjectilePoolComp> OwningPool;
+
 
 	UFUNCTION(BlueprintCallable, Category = "Trap")
 	void Init(AGS_NonTrigTrapBase* InTrap);
@@ -32,8 +35,20 @@ public:
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult);
 
-	void StickWithVisualOnly(const FHitResult& Hit);
+	UFUNCTION(BlueprintCallable)
+	void ActivateProjectile(const FVector& SpawnLocation, const FRotator& Rotation, float Speed);
+	UFUNCTION(BlueprintCallable)
+	void DeactivateProjectile();
+	UFUNCTION(BlueprintNativeEvent)
+	void OnActivateEffect();
+	void OnActivateEffect_Implementation();
 
+
+	bool IsReady() const;
+
+
+	void StickWithVisualOnly(const FHitResult& Hit);
+	
 
 protected:
 	virtual void BeginPlay() override;
