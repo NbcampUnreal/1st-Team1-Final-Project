@@ -75,7 +75,7 @@ protected:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+    // virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     // ==========
     // 사운드 설정
@@ -137,6 +137,7 @@ private:
 
     FTimerHandle IdleSoundTimer;
     FTimerHandle CombatSoundTimer;
+    FTimerHandle DistanceCheckTimerHandle;
     
     // 마지막 사운드 재생 시간
     float LastSoundPlayTime;
@@ -162,6 +163,9 @@ private:
     void StartSoundTimer();
     void StopSoundTimer();
     void UpdateSoundTimer();
+
+    /** 거리 및 상태 체크 (타이머 콜백) */
+    void UpdateDistanceRTPC();
 
     /** Wwise 이벤트 실제 재생 (Wwise가 거리 감쇠 자동 처리) */
     UAkAudioEvent* GetSoundEvent(EMonsterAudioState SoundType) const;

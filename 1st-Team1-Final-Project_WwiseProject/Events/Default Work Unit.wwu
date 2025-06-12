@@ -690,7 +690,7 @@
 										<Action Name="" ID="{890E04E4-7D04-4311-979E-1DA8C7163563}" ShortID="791205490">
 											<ReferenceList>
 												<Reference Name="Target">
-													<ObjectRef Name="EV_DrakharAttackSound" ID="{9893D0EF-472B-4BC4-BDF2-3496C0A2DCFE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+													<ObjectRef Name="EV_DrakharWingDash" ID="{11D83AAD-84CF-4B79-873F-74A7527CDAFA}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>
@@ -701,7 +701,7 @@
 										<Action Name="" ID="{E481A784-9F0D-457F-9712-F7785FA81724}" ShortID="467327154">
 											<ReferenceList>
 												<Reference Name="Target">
-													<ObjectRef Name="EV_DrakharAttackSound" ID="{9893D0EF-472B-4BC4-BDF2-3496C0A2DCFE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+													<ObjectRef Name="EV_DrakharEarthquake" ID="{EDA2E6F6-0518-41EB-9EAD-32588CB43F96}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>
@@ -712,7 +712,7 @@
 										<Action Name="" ID="{D23EB9CA-4BFC-435E-8FD6-2110B3E91284}" ShortID="637351887">
 											<ReferenceList>
 												<Reference Name="Target">
-													<ObjectRef Name="EV_DrakharAttackSound" ID="{9893D0EF-472B-4BC4-BDF2-3496C0A2DCFE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+													<ObjectRef Name="EV_Drakhar_DraconicFury" ID="{F25BD797-0D2C-4695-A3EC-EC9FA3B46FC5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>
@@ -723,7 +723,32 @@
 										<Action Name="" ID="{25762AC7-CB0E-4842-9EF1-DF8F08C681E9}" ShortID="832708919">
 											<ReferenceList>
 												<Reference Name="Target">
-													<ObjectRef Name="EV_DrakharAttackSound" ID="{9893D0EF-472B-4BC4-BDF2-3496C0A2DCFE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+													<ObjectRef Name="EV_Drakhar_Projectile" ID="{2D4168A1-D90A-4466-BED4-CDB3F3E562A9}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Drakhar_Flying_Play" ID="{C62A4302-E43E-469D-9D88-EE6CC3EFC83E}">
+									<ChildrenList>
+										<Action Name="" ID="{E762D161-D07B-41EF-B9F4-0763A6F603B2}" ShortID="652129395">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_Drakhar_Flying" ID="{915CC522-5FE6-424B-8556-43C6C0B49D82}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Drakhar_Flying_Stop" ID="{526C5CE2-A699-4A40-B2A1-F663563E7805}">
+									<ChildrenList>
+										<Action Name="" ID="{BFF942BB-AA27-4AA5-9F2A-A609DFE91F52}" ShortID="97610829">
+											<PropertyList>
+												<Property Name="ActionType" Type="int16" Value="2"/>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_Drakhar_Flying" ID="{915CC522-5FE6-424B-8556-43C6C0B49D82}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>
