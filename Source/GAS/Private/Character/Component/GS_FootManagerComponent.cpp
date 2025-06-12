@@ -105,7 +105,6 @@ void UGS_FootManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// Cache the skeletal mesh component for performance
 	CachedSkeletalMesh = GetOwnerSkeletalMesh();
 	
 	if (!CachedSkeletalMesh)
@@ -120,7 +119,6 @@ void UGS_FootManagerComponent::HandleFootstep(EFootStep Foot)
 	// Early return if no valid skeletal mesh
 	if (!CachedSkeletalMesh)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GS_FootManagerComponent: No valid SkeletalMeshComponent for footstep"));
 		return;
 	}
 
@@ -181,17 +179,14 @@ void UGS_FootManagerComponent::HandleFoleyEvent()
 	// Early return if no valid skeletal mesh
 	if (!CachedSkeletalMesh)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GS_FootManagerComponent: No valid SkeletalMeshComponent for foley event"));
 		return;
 	}
 
 	// Check if character is moving fast enough to trigger footsteps
 	if (AActor* Owner = GetOwner())
 	{
-		// Get character velocity
 		FVector CharacterVelocity;
 		
-		// Try to get velocity from Character or Pawn
 		if (ACharacter* Character = Cast<ACharacter>(Owner))
 		{
 			CharacterVelocity = Character->GetVelocity();
@@ -202,7 +197,6 @@ void UGS_FootManagerComponent::HandleFoleyEvent()
 		}
 		else
 		{
-			// Fallback: calculate velocity from position change
 			static FVector PreviousLocation = Owner->GetActorLocation();
 			const FVector CurrentLocation = Owner->GetActorLocation();
 			const float DeltaTime = GetWorld()->GetDeltaSeconds();
@@ -219,20 +213,16 @@ void UGS_FootManagerComponent::HandleFoleyEvent()
 			PreviousLocation = CurrentLocation;
 		}
 
-		// Calculate horizontal speed (ignore Z component for footsteps)
 		const float HorizontalSpeed = FVector(CharacterVelocity.X, CharacterVelocity.Y, 0.0f).Size();
 		
-		// Don't trigger footsteps if moving too slowly
 		if (HorizontalSpeed < MinimumMovementSpeed)
 		{
 			return;
 		}
 	}
 
-	// Detect which foot should trigger the footstep effect
 	EFootStep DetectedFoot = DetectActiveFootstep();
 	
-	// Trigger footstep for the detected foot
 	HandleFootstep(DetectedFoot);
 }
 
@@ -240,7 +230,7 @@ EFootStep UGS_FootManagerComponent::DetectActiveFootstep()
 {
 	if (!CachedSkeletalMesh)
 	{
-		return EFootStep::LeftFoot; // Default fallback
+		return EFootStep::LeftFoot;
 	}
 
 	// Get foot socket locations
@@ -298,33 +288,40 @@ bool UGS_FootManagerComponent::PerformFootTrace(EFootStep Foot, FHitResult& OutH
 	// Get foot socket name based on foot type
 	const FName SocketName = GetFootSocketName(Foot);
 	
-	// Check if socket exists
+	// Check if socket exists (cache this check for better performance)
 	if (!CachedSkeletalMesh->DoesSocketExist(SocketName))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GS_FootManagerComponent: Socket %s does not exist on skeletal mesh"), 
-			*SocketName.ToString());
 		return false;
 	}
 
-	// Get socket world location and rotation
+	// Get socket world location
 	const FVector SocketLocation = CachedSkeletalMesh->GetSocketLocation(SocketName);
 	const FVector TraceStart = SocketLocation;
 	const FVector TraceEnd = SocketLocation + FVector(0.0f, 0.0f, -TraceDistance);
 
-	// Setup trace parameters
+	// Setup optimized trace parameters
 	FCollisionQueryParams TraceParams(FName("FootTrace"), false, GetOwner());
 	TraceParams.bReturnPhysicalMaterial = true;
+	TraceParams.bTraceComplex = false;  // 성능 최적화: Simple collision 사용
+	
+	// 성능 최적화: 불필요한 오브젝트 제외
+	TraceParams.AddIgnoredActor(GetOwner());  // 자기 자신 제외
+	
+	// 추가 최적화: ResponseParams 설정으로 특정 오브젝트 타입만 체크
+	FCollisionResponseParams ResponseParams;
+	ResponseParams.CollisionResponse.SetResponse(ECC_Pawn, ECR_Ignore);
+	ResponseParams.CollisionResponse.SetResponse(ECC_Vehicle, ECR_Ignore);
 
-	// Perform line trace
+	// Perform optimized line trace
 	const bool bHit = GetWorld()->LineTraceSingleByChannel(
 		OutHitResult,
 		TraceStart,
 		TraceEnd,
 		TraceChannel,
-		TraceParams
+		TraceParams,
+		ResponseParams
 	);
 
-	// Draw debug visualization only if console variable is enabled
 	#if WITH_EDITOR
 	if (CVarShowFootstepDebug.GetValueOnGameThread() > 0)
 	{
@@ -334,7 +331,6 @@ bool UGS_FootManagerComponent::PerformFootTrace(EFootStep Foot, FHitResult& OutH
 		if (bHit)
 		{
 			DrawDebugPoint(GetWorld(), OutHitResult.Location, 8.0f, FColor::Yellow, false, 2.0f);
-			// Add surface normal visualization
 			DrawDebugLine(GetWorld(), OutHitResult.Location, OutHitResult.Location + (OutHitResult.Normal * 20.0f), FColor::Blue, false, 2.0f, 0, 1.0f);
 		}
 	}
@@ -354,9 +350,7 @@ void UGS_FootManagerComponent::SpawnFootstepDecal(EPhysicalSurface /*Surface*/, 
 	// Normal 방향으로 1.0f만큼 올려서 Z파이팅 방지
 	const FVector DecalSpawnLocation = Location + Normal * 1.0f;
 
-	// 발 소켓 이름 가져오기
 	const FName SocketName = GetFootSocketName(Foot);
-	// 소켓의 회전값 가져오기
 	const FRotator SocketRotation = CachedSkeletalMesh->GetSocketRotation(SocketName);
 
 	// Normal 대신 고정된 Up 벡터를 사용하여 일관된 방향 계산
@@ -393,14 +387,12 @@ void UGS_FootManagerComponent::PlayFootstepSound(EPhysicalSurface Surface, const
 {
 	if (!FAkAudioDevice::IsInitialized())
 	{
-		UE_LOG(LogTemp, Error, TEXT("GS_FootManagerComponent: PlayFootstepSound - Wwise Audio Device is NOT initialized!"));
-		return; // Wwise가 준비되지 않았으므로 아무것도 하지 않음
+		return;
 	}
 
 	FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get();
-	if (!AkAudioDevice) // 이중 확인
+	if (!AkAudioDevice)
 	{
-		UE_LOG(LogTemp, Error, TEXT("GS_FootManagerComponent: PlayFootstepSound - FAkAudioDevice::Get() returned NULL even after IsInitialized() check!"));
 		return;
 	}
 
@@ -424,42 +416,32 @@ void UGS_FootManagerComponent::PlayFootstepSound(EPhysicalSurface Surface, const
 		GetOwner()
 	);
 
-	// Play sound using the AkComponent (same Game Object that has the Switch set)
 	UAkComponent* AkComp = GetOwner()->FindComponentByClass<UAkComponent>();
 	if (!AkComp)
 	{
-		UE_LOG(LogTemp, Error, TEXT("GS_FootManagerComponent: No AkComponent found on owner %s. Please add an AkComponent to the character."), 
-			*GetOwner()->GetName());
 		return;
 	}
 
-	// Set the AkComponent's location to the footstep location for 3D positioning
 	AkComp->SetWorldLocation(Location);
 
-	// Play sound using the AkComponent
 	const int32 PlayingID = AkComp->PostAkEvent(FootstepSoundEvent);
 
 	if (PlayingID != AK_INVALID_PLAYING_ID)
 	{
-		// Call blueprint delegate
 		OnFootSoundPlayed.Broadcast(Surface, Location);
 	}
 }
 
 void UGS_FootManagerComponent::SpawnFootDustEffect(EPhysicalSurface Surface, const FVector& Location, const FVector& Normal)
 {
-	// Find VFX system for this surface
 	UNiagaraSystem* const* VFXSystem = FootDustEffects.Find(Surface);
 	if (!VFXSystem || !*VFXSystem)
 	{
-		// No VFX configured for this surface type
 		return;
 	}
 
-	// Calculate effect rotation to align with surface normal
 	const FRotator EffectRotation = FRotationMatrix::MakeFromZ(Normal).Rotator();
 
-	// Spawn Niagara effect at location
 	UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
 		*VFXSystem,
@@ -469,7 +451,6 @@ void UGS_FootManagerComponent::SpawnFootDustEffect(EPhysicalSurface Surface, con
 
 	if (SpawnedEffect)
 	{
-		// Call blueprint event
 		OnFootDustSpawned(Surface, Location);
 	}
 }
@@ -483,7 +464,6 @@ FName UGS_FootManagerComponent::GetFootSocketName(EFootStep Foot) const
 	case EFootStep::RightFoot:
 		return RightFootSocketName;
 	default:
-		UE_LOG(LogTemp, Error, TEXT("GS_FootManagerComponent: Invalid foot type"));
 		return NAME_None;
 	}
 }
@@ -495,12 +475,10 @@ USkeletalMeshComponent* UGS_FootManagerComponent::GetOwnerSkeletalMesh() const
 		return nullptr;
 	}
 
-	// Try to get from Character first (most common case)
 	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
 	{
 		return Character->GetMesh();
 	}
 
-	// Fallback: search for any SkeletalMeshComponent
 	return GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
 } 

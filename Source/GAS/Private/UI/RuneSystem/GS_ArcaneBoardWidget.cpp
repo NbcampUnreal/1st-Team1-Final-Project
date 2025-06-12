@@ -262,25 +262,47 @@ void UGS_ArcaneBoardWidget::UpdateGridPreview(uint8 RuneID, const FIntPoint& Gri
 
 	ClearPreview();
 
-	TArray<FIntPoint> AffectedCells;
-	bool bCanPlace = BoardManager->PreviewRunePlacement(RuneID, GridPos, AffectedCells);
-
-	for (const FIntPoint& CellPos : AffectedCells)
+	FIntPoint OptimalPos;
+	if (BoardManager->FindOptimalPlacementPos(RuneID, GridPos, OptimalPos))
 	{
-		if (GridCells.Contains(CellPos))
-		{
-			UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
-			if (IsValid(CellWidget))
-			{
-				EGridCellVisualState PreviewState = bCanPlace ?
-					EGridCellVisualState::Valid : EGridCellVisualState::Invalid;
+		TArray<FIntPoint> AffectedCells;
+		bool bCanPlace = BoardManager->PreviewRunePlacement(RuneID, OptimalPos, AffectedCells);
 
-				CellWidget->SetPreviewVisualState(PreviewState);
+		for (const FIntPoint& CellPos : AffectedCells)
+		{
+			if (GridCells.Contains(CellPos))
+			{
+				UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
+				if (IsValid(CellWidget))
+				{
+					EGridCellVisualState PreviewState = bCanPlace ?
+						EGridCellVisualState::Valid : EGridCellVisualState::Invalid;
+
+					CellWidget->SetPreviewVisualState(PreviewState);
+				}
 			}
 		}
-	}
 
-	PreviewCells = AffectedCells;
+		PreviewCells = AffectedCells;
+	}
+	else
+	{
+		TArray<FIntPoint> AffectedCells;
+		bool bCanPlace = BoardManager->PreviewRunePlacement(RuneID, GridPos, AffectedCells);
+
+		for (const FIntPoint& CellPos : AffectedCells)
+		{
+			if (GridCells.Contains(CellPos))
+			{
+				UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
+				if (IsValid(CellWidget))
+				{
+					CellWidget->SetPreviewVisualState(EGridCellVisualState::Invalid);
+				}
+			}
+		}
+		PreviewCells = AffectedCells;
+	}
 }
 
 void UGS_ArcaneBoardWidget::ApplyChanges()
@@ -365,19 +387,26 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 
 			if (IsValid(TargetCell))
 			{
-				FIntPoint CellPos = TargetCell->GetCellPos();
+				FIntPoint ClickedCellPos = TargetCell->GetCellPos();
+				FIntPoint OptimalPos;
 
-				bool bPlaceSuccess = BoardManager->PlaceRune(SelectedRuneID, CellPos);
-
-				if (bPlaceSuccess)
+				if (BoardManager->FindOptimalPlacementPos(SelectedRuneID, ClickedCellPos, OptimalPos))
 				{
-					UE_LOG(LogTemp, Display, TEXT("룬 배치 성공: ID=%d, Pos=(%d,%d)"), SelectedRuneID, CellPos.X, CellPos.Y);
-					UpdateGridVisuals();
-					RuneInven->UpdatePlacedStateOfRune(SelectedRuneID, true);
+					bool bPlaceSuccess = BoardManager->PlaceRune(SelectedRuneID, OptimalPos);
+
+					if (bPlaceSuccess)
+					{
+						UpdateGridVisuals();
+						RuneInven->UpdatePlacedStateOfRune(SelectedRuneID, true);
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("룬 배치 실패: ID=%d"), SelectedRuneID);
+					}
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("룬 배치 실패: ID=%d"), SelectedRuneID);
+					UE_LOG(LogTemp, Warning, TEXT("배치 위치를 찾을 수 없음: ID=%d"), SelectedRuneID);
 				}
 			}
 

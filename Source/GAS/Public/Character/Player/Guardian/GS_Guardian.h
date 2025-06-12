@@ -12,6 +12,7 @@ enum class EGuardianState : uint8
 	None,
 	CtrlUp,
 	CtrlSkillEnd,
+	ForceLanded,
 };
 
 UCLASS()
@@ -47,13 +48,6 @@ public:
 	UFUNCTION()
 	void MeleeAttackCheck();
 
-	//[skill check]
-	UFUNCTION(Server, Reliable)
-	void ServerRPCStartCtrl();
-
-	UFUNCTION(Server, Reliable)
-	void ServerRPCStopCtrl();
-	
 	UFUNCTION()
 	void OnRep_GuardianState();
 

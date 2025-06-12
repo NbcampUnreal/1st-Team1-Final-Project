@@ -63,6 +63,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Settings", meta = (ClampMin = "0.1", ClampMax = "2.0"))
 	float ShakeSpeed = 0.8f; // 흔들림 속도
 
+	// 최적화 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Optimization Settings", meta = (ClampMin = "0.05", ClampMax = "1.0"))
+	float TextUpdateInterval = 0.1f; // 텍스트 업데이트 간격 (초)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Optimization Settings", meta = (ClampMin = "0.01", ClampMax = "0.1"))
+	float ShakeUpdateInterval = 0.016f; // 떨림 효과 업데이트 간격 (약 60FPS)
+
 private:
 	UPROPERTY()
 	TWeakObjectPtr<AGS_InGameGS> CachedInGameGS;
@@ -89,4 +96,9 @@ private:
 
 	// 타이머 핸들
 	FTimerHandle ShakeTimerHandle;
+
+	// 성능 최적화를 위한 캐싱 변수들
+	float LastUpdateTime = 0.0f;
+	int32 LastDisplayedMinutes = -1;
+	int32 LastDisplayedSeconds = -1;
 };

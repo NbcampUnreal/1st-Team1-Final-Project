@@ -17,4 +17,24 @@ class GAS_API UGS_MerciUltimateSkill : public UGS_SeekerSkillBase
 public:
 	UGS_MerciUltimateSkill();
 	
+	virtual void ActiveSkill() override;
+	virtual void ExecuteSkillEffect() override;
+	virtual bool IsActive() const override;
+
+private:
+	// 스탠스 관리
+	bool bIsAutoAimingState;
+	FTimerHandle AutoAimingHandle;
+	FTimerHandle AutoAimTickHandle;
+	float AutoAimTickInterval = 0.2f;
+
+	void DeActiveAutoAimingState();
+	float AutoAimingStateTime = 20.0f;
+
+	AActor* FindCloseTarget();
+	UPROPERTY()
+	TArray<AActor*> AllMonsterActors;
+
+	void TickAutoAimTarget();
+	void UpdateMonsterList();
 };
