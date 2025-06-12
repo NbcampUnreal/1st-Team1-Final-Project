@@ -10,6 +10,7 @@ class UButton;
 class UTextBlock;
 class UCanvasPanel;
 class UOverlay;
+class UGS_FriendListWidget;
 
 UCLASS()
 class GAS_API UGS_CustomLobbyUI : public UUserWidget
@@ -32,11 +33,20 @@ public:
 	UTextBlock* PerkDungeonText;
 	UPROPERTY(meta = (BindWidget))
 	UUserWidget* BackButton;
-	UPROPERTY(meta = (BindWidgetOptional))
+	UPROPERTY(meta = (BindWidget))
+	UUserWidget* FriendListButton;
+	UPROPERTY(meta = (BindWidget))
 	UOverlay* ModalOverlay;
+	UPROPERTY(meta = (BindWidget))
+	UOverlay* FriendListOverlay;
 
 	UPROPERTY(meta = (BindWidget))
 	UGS_CommonTwoBtnPopup* CommonPopUpUI;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Friend")
+	TSubclassOf<UGS_FriendListWidget> FriendListWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UGS_FriendListWidget> FriendListWidgetInstance;
 
 	UFUNCTION()
 	void OnJobSelectionButtonClicked();
@@ -48,6 +58,8 @@ public:
 	void OnRoleChangeButtonClicked();
 	UFUNCTION()
 	void OnBackButtonClicked();
+	UFUNCTION()
+	void OnFriendListButtonClicked();
 
 	void UpdateRoleSpecificText(EPlayerRole NewRole);
 	void UpdateReadyButtonText(bool bIsReady);
