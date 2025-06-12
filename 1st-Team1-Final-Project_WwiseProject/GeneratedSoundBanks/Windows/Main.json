@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{F6957D58-341A-435A-8702-0E80DC6A3EBB}",
+    "Hash": "{05859649-8D9A-FE42-EA1D-BB4D311778E2}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -86,6 +86,14 @@
       "Location": "Memory",
       "ShortName": "FootSteps_Lava (1).wav",
       "CachePath": "D4/{D468E696-B651-282D-0B5D-16825AE1B90F}.wem"
+     },
+     {
+      "Id": "64058932",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FF_HFFX_foley_footstep_creature_loss.wav",
+      "CachePath": "16/{164F1ED7-F3EA-41A7-CC76-1DC028D1962E}.wem"
      },
      {
       "Id": "65595387",
@@ -245,7 +253,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Dragon_Vocal_Pain_Death_Monster_Creature_Voice.wav",
-      "CachePath": "3C/{3C8837C8-F655-49FE-AA69-3AA829513F1A}.wem"
+      "CachePath": "BD/{BDF57CB6-218C-852B-81B2-2CBCDE9ECA97}.wem"
      },
      {
       "Id": "172591083",
@@ -254,6 +262,14 @@
       "Location": "Memory",
       "ShortName": "GasCombat_Demo.wav",
       "CachePath": "25/{257D320C-FE85-DF02-6220-A68EB09AB4FF}.wem"
+     },
+     {
+      "Id": "176067616",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_creature_beast_bear_lion_vicious_monster_death_01.wav",
+      "CachePath": "CC/{CC98806A-8EBA-F5DC-C957-23F38432A7B3}.wem"
      },
      {
       "Id": "177115164",
@@ -333,7 +349,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Dragon_Vocal_Pain_Dying_Short_Monster_Creature_Voice.wav",
-      "CachePath": "5D/{5D71DE58-4E7C-F9AE-2ABA-5975793BFADD}.wem"
+      "CachePath": "3F/{3FDBDDB0-2787-73B5-7029-D6618B34C33A}.wem"
      },
      {
       "Id": "245240366",
@@ -416,6 +432,14 @@
       "CachePath": "21/{21C67689-04D5-F3F7-308B-096E8B07158C}.wem"
      },
      {
+      "Id": "285196517",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_creature_beast_bear_lion_vicious_monster_death_01.wav",
+      "CachePath": "2F/{2FB8746D-BACB-30A2-DB57-325A4ABA44AA}.wem"
+     },
+     {
       "Id": "289001169",
       "Language": "SFX",
       "Streaming": "false",
@@ -432,12 +456,20 @@
       "CachePath": "75/{75146B4D-D3B8-FE8C-826A-F925D569090E}.wem"
      },
      {
+      "Id": "303740880",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MARS_FOUND_FX_one_shot_fire_woosh_tube.wav",
+      "CachePath": "05/{057E2C2F-546D-BB9A-B76C-4B66CDB36AFE}.wem"
+     },
+     {
       "Id": "304594696",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Dragon_Vocal_Pain_Wounded_Monster_Creature_Voice.wav",
-      "CachePath": "C6/{C6D9E7DD-E990-5C81-9033-9CD1D209FEE3}.wem"
+      "CachePath": "17/{17CB4EFB-009C-FE93-B62C-2FB6EDA18804}.wem"
      },
      {
       "Id": "307021949",
@@ -453,7 +485,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Dragon_Vocal_Pain_Dying_Monster_Creature_Voice.wav",
-      "CachePath": "C9/{C9A08BFB-39F0-6DC9-4A17-DA90D4BF0E5F}.wem"
+      "CachePath": "D0/{D0B270ED-DC05-3EBA-DADD-035F29DFC710}.wem"
      },
      {
       "Id": "313983704",
@@ -606,6 +638,14 @@
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_In0.wav",
       "CachePath": "8B/{8B729338-3276-28E8-2FE5-3B0A7DCE0D62}.wem"
+     },
+     {
+      "Id": "437072955",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Dragon_Vocal_Dialogue_I_Am_Fire_I_Am_Death_Monster_Creature_Voice.wav",
+      "CachePath": "11/{11431339-AA19-BB0A-BCFF-855C46A4BD71}.wem"
      },
      {
       "Id": "444842476",
@@ -832,6 +872,14 @@
       "CachePath": "62/{62B0B2BE-46A4-E6EA-AABA-1C3934FDF197}.wem"
      },
      {
+      "Id": "586361417",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "MonsterWingsFlap_SFXB.1452.wav",
+      "CachePath": "99/{99CB2744-DB22-6C52-7F43-0B637A618615}.wem"
+     },
+     {
       "Id": "587485477",
       "Language": "SFX",
       "Streaming": "false",
@@ -901,7 +949,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "PE-Whoosh_BW.43364.wav",
-      "CachePath": "58/{58EF5385-2A20-DC28-DC3E-48050FA7E55A}.wem"
+      "CachePath": "2B/{2BC1B7F3-EBC8-2288-87A2-954F2A010074}.wem"
      },
      {
       "Id": "631777347",
@@ -952,12 +1000,28 @@
       "CachePath": "A5/{A55D50B9-5113-5242-B660-FFF08CB4D348}.wem"
      },
      {
+      "Id": "659322826",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "TS_MAMMOTH_cinema_tom_one_shot_monster_tom_1_impact.wav",
+      "CachePath": "6D/{6D3FDFE5-8AF9-C481-9870-10E3A5FFE0EB}.wem"
+     },
+     {
       "Id": "660206576",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootstepsDirt1.wav",
       "CachePath": "63/{63659564-69FE-255F-0AE4-D8433FFF1F78}.wem"
+     },
+     {
+      "Id": "665252404",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "EarthquakeTremorRocks_HV.21.wav",
+      "CachePath": "0A/{0AACDD87-184F-FE60-4048-4F946DED4771}.wem"
      },
      {
       "Id": "674316476",
@@ -1006,6 +1070,14 @@
       "Location": "Memory",
       "ShortName": "ArrowBy_BW.54273.wav",
       "CachePath": "8E/{8E0CD796-7256-E655-71DD-DE424054F802}.wem"
+     },
+     {
+      "Id": "712535045",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_MVG_fx_movement_one_shot_giant_wings_rise_heavy_slow_big.wav",
+      "CachePath": "23/{2332E624-E46D-8D0B-3B4D-29258514080E}.wem"
      },
      {
       "Id": "721567443",
@@ -1093,7 +1165,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Dragon_Vocal_Jumping_Jump_Short_Monster_Creature_Voice.wav",
-      "CachePath": "88/{8873C9CA-9F98-4988-6CA6-2D2DB41FA533}.wem"
+      "CachePath": "E6/{E64AECED-BB04-A7BE-043C-1E66BA96AB9F}.wem"
      },
      {
       "Id": "790427616",
@@ -1110,6 +1182,14 @@
       "Location": "Memory",
       "ShortName": "BowSnap_BW.54387.wav",
       "CachePath": "CE/{CE3C29A7-F253-129E-015E-D6A12C1CCE9F}.wem"
+     },
+     {
+      "Id": "802689926",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "PE-Whoosh_BW.43660.wav",
+      "CachePath": "29/{29AB9534-93D4-C2AB-0191-3C755313AFD3}.wem"
      },
      {
       "Id": "809366429",
@@ -1285,7 +1365,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MARS_FOUND_FX_one_shot_fire_woosh_tube.wav",
-      "CachePath": "74/{74A19939-BC75-8882-9F89-F0E3EC4DEE83}.wem"
+      "CachePath": "ED/{ED41AEEF-915A-D33A-AF44-5CD286CC914C}.wem"
      },
      {
       "Id": "928428161",
@@ -1302,6 +1382,14 @@
       "Location": "Memory",
       "ShortName": "PFS2_Stone_Scrape.wav",
       "CachePath": "B4/{B48631C6-A6A5-6710-584B-9CBB7210EE26}.wem"
+     },
+     {
+      "Id": "938965371",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "PE-Whoosh_BW.42793.wav",
+      "CachePath": "9E/{9EB60194-5E59-8471-4039-3D8240AC6372}.wem"
      },
      {
       "Id": "941890073",
@@ -1392,12 +1480,28 @@
       "CachePath": "C5/{C5596968-8328-1FDC-F370-7A8151C9DCC6}.wem"
      },
      {
+      "Id": "995721661",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "PE-Whoosh_BW.42777.wav",
+      "CachePath": "5E/{5E7B8FFD-4444-4A26-E8EF-069927B7BCC9}.wem"
+     },
+     {
       "Id": "997628724",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "LighterIgniteFlame_BW.9029.wav",
       "CachePath": "F3/{F3C57AEE-16EF-BD32-FCC5-306214E504A9}.wem"
+     },
+     {
+      "Id": "1002490439",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "PE-Whoosh_BW.43364.wav",
+      "CachePath": "23/{234255F3-66FE-4795-6F21-147FE9E0B7BF}.wem"
      },
      {
       "Id": "1006289215",
@@ -1429,7 +1533,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "WhipWhoosh_SFXB.1075.wav",
-      "CachePath": "45/{451CA0A4-2935-7775-8849-55F47AC9FEB8}.wem"
+      "CachePath": "C5/{C5CF316D-1B11-96F1-B8D7-FBCAAA15C6BD}.wem"
      },
      {
       "Id": "1038282182",
@@ -1456,12 +1560,20 @@
       "CachePath": "6C/{6C255338-F597-3C27-CA16-E75965EA8A51}.wem"
      },
      {
+      "Id": "1052175375",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "PE-Whoosh_BW.43601.wav",
+      "CachePath": "02/{026C78E6-154B-BB16-B1AB-7EB675E50B08}.wem"
+     },
+     {
       "Id": "1053226406",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Dragon_Vocal_Fight_Grunt_Ah_Monster_Creature_Voice.wav",
-      "CachePath": "93/{93DD1EFB-6675-A64C-9FAA-694840984C62}.wem"
+      "CachePath": "33/{33745F0A-01A3-7D56-37A1-EC0B47EFA82C}.wem"
      },
      {
       "Id": "1053975739",
@@ -1513,6 +1625,14 @@
        "GUID": "{AFAA64B4-BCA6-414C-AB98-3F33A17A2102}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
+      },
+      {
+       "Id": "132011161",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Guardian\\EV_Drakhar_Flying\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{623D22AC-0B23-4AEF-B841-A40FA7E520AC}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
       },
       {
        "Id": "145320127",
@@ -1583,6 +1703,14 @@
        "Name": "Octave_Up (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_SmallClaw_RTS\\[Effect Slot [2]: (Pitch Shifter)]\\Octave_Up (Custom)",
        "GUID": "{2575F4DA-A728-43DF-93F3-2F1F2CBA5484}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
+      },
+      {
+       "Id": "391986448",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Guardian\\EV_Drakhar_Projectile\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{F17832F5-ECD4-4305-A6AA-C3254B47881A}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
       },
@@ -2189,7 +2317,7 @@
       "GUID": "{C5EA2935-D101-4891-A1B0-F14D558AFD0F}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
-      "DurationMin": "0.36722988",
+      "DurationMin": "0.36033952",
       "DurationMax": "0.5843531",
       "MediaRefs": [
        {
@@ -2223,63 +2351,127 @@
       "Name": "EV_Drakhar_DraconicFury",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_DraconicFury",
       "GUID": "{329C4613-CE8B-4CB3-9316-AD3F12A67659}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "960.00006",
       "DurationType": "OneShot",
-      "DurationMin": "0.36722988",
-      "DurationMax": "0.5843531",
+      "DurationMin": "2.6238482",
+      "DurationMax": "2.6238482",
       "MediaRefs": [
        {
-        "Id": "622179163"
+        "Id": "64058932"
        },
        {
-        "Id": "921567406"
+        "Id": "176067616"
        },
        {
-        "Id": "1038004403"
+        "Id": "303740880"
+       },
+       {
+        "Id": "437072955"
+       },
+       {
+        "Id": "1002490439"
        }
-      ]
+      ],
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "1990128658"
+        }
+       ]
+      }
      },
      {
       "Id": "2576613661",
       "Name": "EV_Drakhar_DraconicFuryProjectile",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_DraconicFuryProjectile",
       "GUID": "{387683CC-2A65-47BA-9BD8-6BBE6541B8F1}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "880",
       "DurationType": "OneShot",
-      "DurationMin": "0.36722988",
-      "DurationMax": "0.5843531",
+      "DurationMin": "1.5866909",
+      "DurationMax": "3.9440281",
       "MediaRefs": [
        {
-        "Id": "622179163"
+        "Id": "802689926"
        },
        {
-        "Id": "921567406"
+        "Id": "938965371"
        },
        {
-        "Id": "1038004403"
+        "Id": "995721661"
+       },
+       {
+        "Id": "1052175375"
        }
-      ]
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "391986448"
+        }
+       ]
+      }
      },
      {
       "Id": "2787204358",
       "Name": "EV_Drakhar_Earthquake",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_Earthquake",
       "GUID": "{AF899EF7-54F5-4BCD-82AE-21FF69AE91CD}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "960.00006",
       "DurationType": "OneShot",
-      "DurationMin": "0.36722988",
-      "DurationMax": "0.5843531",
+      "DurationMin": "2.8312225",
+      "DurationMax": "2.8312225",
       "MediaRefs": [
        {
-        "Id": "622179163"
+        "Id": "64058932"
        },
        {
-        "Id": "921567406"
+        "Id": "285196517"
        },
        {
-        "Id": "1038004403"
+        "Id": "303740880"
+       },
+       {
+        "Id": "659322826"
+       },
+       {
+        "Id": "665252404"
+       },
+       {
+        "Id": "1002490439"
        }
       ]
+     },
+     {
+      "Id": "3019564245",
+      "Name": "EV_Drakhar_Flying_Play",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_Flying_Play",
+      "GUID": "{C62A4302-E43E-469D-9D88-EE6CC3EFC83E}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "5.5857706",
+      "DurationMax": "5.5857706",
+      "MediaRefs": [
+       {
+        "Id": "586361417"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "132011161"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "1186560435",
+      "Name": "EV_Drakhar_Flying_Stop",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_Flying_Stop",
+      "GUID": "{526C5CE2-A699-4A40-B2A1-F663563E7805}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "418352776",
@@ -2320,19 +2512,15 @@
       "Name": "EV_Drakhar_WingRush",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_WingRush",
       "GUID": "{148D1E7F-E352-4E1C-A1EB-4F703B63F0EE}",
-      "MaxAttenuation": "800",
       "DurationType": "OneShot",
-      "DurationMin": "0.36722988",
-      "DurationMax": "0.5843531",
+      "DurationMin": "1.5259677",
+      "DurationMax": "1.5259677",
       "MediaRefs": [
        {
-        "Id": "622179163"
+        "Id": "712535045"
        },
        {
-        "Id": "921567406"
-       },
-       {
-        "Id": "1038004403"
+        "Id": "1002490439"
        }
       ]
      },
@@ -2341,7 +2529,7 @@
       "Name": "EV_Fire_Burn",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Burn",
       "GUID": "{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "640",
       "DurationType": "OneShot",
       "DurationMin": "1.3835624",
       "DurationMax": "1.3835624",
@@ -2356,7 +2544,7 @@
       "Name": "EV_Fire_Extinguish",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Fire_Extinguish",
       "GUID": "{1261AE45-6B7B-489A-93E1-50AC8218A43C}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "640",
       "DurationType": "OneShot",
       "DurationMin": "1.3630031",
       "DurationMax": "1.3630031",
@@ -3759,6 +3947,6 @@
     ]
    }
   ],
-  "FileHash": "{4B5C6549-9054-68EB-0B7A-5AFC78EDA3C4}"
+  "FileHash": "{CD8589F6-3E4D-4416-6D50-6661587CDC17}"
  }
 }

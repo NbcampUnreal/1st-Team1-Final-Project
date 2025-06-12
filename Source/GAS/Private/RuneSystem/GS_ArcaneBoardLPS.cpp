@@ -14,8 +14,6 @@
 void UGS_ArcaneBoardLPS::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
-
-    BindPlayerStateEvents();
 }
 
 ECharacterClass UGS_ArcaneBoardLPS::GetPlayerCharacterClass() const
@@ -35,23 +33,18 @@ ECharacterClass UGS_ArcaneBoardLPS::GetPlayerCharacterClass() const
     return ECharacterClass::Ares;
 }
 
-void UGS_ArcaneBoardLPS::OnPlayerJobChanged(EPlayerRole CurrentRole)
+void UGS_ArcaneBoardLPS::OnPlayerJobChanged(ESeekerJob SeekerJob)
 {
-    UE_LOG(LogTemp, Error, TEXT("=== 델리게이트 콜백 호출됨! Role: %d ==="), (int32)CurrentRole);
-
-    ECharacterClass NewClass = GetPlayerCharacterClass();
-
     if (!IsValid(BoardManager))
     {
         GetOrCreateBoardManager();
     }
 
-    if (IsValid(BoardManager) && BoardManager->GetCurrClass() != NewClass)
-    {
-        UE_LOG(LogTemp, Error, TEXT("즉시 BoardManager 업데이트: %d → %d"),
-            (int32)BoardManager->GetCurrClass(), (int32)NewClass);
+    ECharacterClass NewCharacterClass = MapSeekerJobToCharacterClass(SeekerJob);
 
-        BoardManager->SetCurrClass(NewClass);
+    if (IsValid(BoardManager) && BoardManager->GetCurrClass() != NewCharacterClass)
+    {
+        BoardManager->SetCurrClass(NewCharacterClass);
         LoadBoardConfig();
     }
 }
@@ -246,29 +239,6 @@ void UGS_ArcaneBoardLPS::ForceApplyChanges()
 
 void UGS_ArcaneBoardLPS::RequestServerStatsUpdate()
 {
-}
-
-void UGS_ArcaneBoardLPS::BindPlayerStateEvents()
-{
-    if (APlayerController* PC = GetLocalPlayer()->GetPlayerController(GetWorld()))
-    {
-        if (AGS_PlayerState* GSPlayerState = PC->GetPlayerState<AGS_PlayerState>())
-        {
-            UnbindPlayerStateEvents();
-            GSPlayerState->OnJobChangedDelegate.AddDynamic(this, &UGS_ArcaneBoardLPS::OnPlayerJobChanged);
-            BoundPlayerState = GSPlayerState;
-            UE_LOG(LogTemp, Log, TEXT("PlayerState 델리게이트 바인딩 완료"));
-        }
-    }
-}
-
-void UGS_ArcaneBoardLPS::UnbindPlayerStateEvents()
-{
-    if (BoundPlayerState.IsValid())
-    {
-        BoundPlayerState->OnJobChangedDelegate.RemoveDynamic(this, &UGS_ArcaneBoardLPS::OnPlayerJobChanged);
-        BoundPlayerState.Reset();
-    }
 }
 
 ECharacterClass UGS_ArcaneBoardLPS::MapSeekerJobToCharacterClass(ESeekerJob SeekerJob) const

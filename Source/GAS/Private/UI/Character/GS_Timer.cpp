@@ -49,12 +49,20 @@ void UGS_Timer::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 		return;
 	}
 
+	// 성능 최적화: 0.1초마다만 업데이트
+	const float CurrentTime = GetWorld()->GetTimeSeconds();
+	if ((CurrentTime - LastUpdateTime) < 0.1f)
+	{
+		return;
+	}
+	LastUpdateTime = CurrentTime;
+
 	float RemainingTime = -1.0f;
 	FText FormattedTime = FText::FromString(TEXT("--:--"));
 
 	if (CachedInGameGS.IsValid())
 	{
-		const float TimeSinceUpdate = GetWorld()->GetTimeSeconds() - CachedInGameGS->LastServerTimeUpdate;
+		const float TimeSinceUpdate = CurrentTime - CachedInGameGS->LastServerTimeUpdate;
 		// 서버의 현재 시간을 로컬에서 추정
 		const float EstimatedServerCurrentTime = CachedInGameGS->CurrentTime + TimeSinceUpdate;
 		// 추정된 남은 시간
@@ -62,7 +70,7 @@ void UGS_Timer::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	}
 	else if (CachedBossLevelGS.IsValid())
 	{
-		const float TimeSinceUpdate = GetWorld()->GetTimeSeconds() - CachedBossLevelGS->LastServerTimeUpdate;
+		const float TimeSinceUpdate = CurrentTime - CachedBossLevelGS->LastServerTimeUpdate;
 		const float EstimatedServerCurrentTime = CachedBossLevelGS->BossCurrentTime + TimeSinceUpdate;
 		RemainingTime = FMath::Max(0.0f, CachedBossLevelGS->BossTotalTime - EstimatedServerCurrentTime);
 	}
@@ -140,7 +148,8 @@ void UGS_Timer::StartShakeEffect()
 		}
 	}
 
-	GetWorld()->GetTimerManager().SetTimer(ShakeTimerHandle, this, &UGS_Timer::UpdateShakeEffect, 1.0f / 60.0f, true);
+	// 떨림 효과를 30FPS로 최적화 (기존 60FPS에서 변경)
+	GetWorld()->GetTimerManager().SetTimer(ShakeTimerHandle, this, &UGS_Timer::UpdateShakeEffect, 1.0f / 30.0f, true);
 }
 
 void UGS_Timer::StopShakeEffect()
@@ -163,9 +172,9 @@ void UGS_Timer::UpdateShakeEffect()
 {
 	if (!bIsShaking || !TimerText) return;
 
-	ShakeTimer += GetWorld()->GetDeltaSeconds();
+	ShakeTimer += 1.0f / 30.0f; // 30FPS에 맞춘 델타 타임
 
-	const float ShakeOffsetX = FMath::Sin(ShakeTimer * ShakeSpeed * 10.0f) * ShakeIntensity; // 헤더의 속도 변수 사용
+	const float ShakeOffsetX = FMath::Sin(ShakeTimer * ShakeSpeed * 10.0f) * ShakeIntensity;
 	const float ShakeOffsetY = FMath::Cos(ShakeTimer * ShakeSpeed * 10.0f) * ShakeIntensity;
 
 	if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(TimerText->Slot))

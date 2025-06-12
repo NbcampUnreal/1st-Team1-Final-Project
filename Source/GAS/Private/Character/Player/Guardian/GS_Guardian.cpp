@@ -1,7 +1,5 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
-
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
-
 #include "Animation/AnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Skill/GS_SkillComp.h"
@@ -111,21 +109,9 @@ void AGS_Guardian::MeleeAttackCheck()
 	}
 }
 
-void AGS_Guardian::ServerRPCStartCtrl_Implementation()
-{
-	GuardianState = EGuardianState::CtrlUp;
-	
-	MoveSpeed = SpeedUpMoveSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
-}
 
-void AGS_Guardian::ServerRPCStopCtrl_Implementation()
-{
-	GuardianState = EGuardianState::CtrlSkillEnd;
-	
-	MoveSpeed = NormalMoveSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
-}
+
+
 
 void AGS_Guardian::OnRep_GuardianState()
 {

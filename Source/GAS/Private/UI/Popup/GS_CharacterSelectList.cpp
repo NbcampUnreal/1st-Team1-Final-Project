@@ -5,6 +5,7 @@
 #include "Components/ScrollBox.h"
 #include "Components/Spacer.h"
 #include "RuneSystem/GS_EnumUtils.h"
+#include "RuneSystem/GS_ArcaneBoardLPS.h"
 #include "System/GS_PlayerState.h"
 #include "System/PlayerController/GS_CustomLobbyPC.h"
 #include "UI/Common/CustomCommonButton.h"
@@ -141,6 +142,15 @@ void UGS_CharacterSelectList::OnCharacterSelectClicked(int32 CharacterID, EPlaye
 		if (const FGS_UICharacterInfoRow* RowPtr = CharacterInfoDataTable->FindRow<FGS_UICharacterInfoRow>(RowName, TEXT("Lookup Character Info Row")))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Seeker Job %d"), CharacterID);
+			
+			if (ULocalPlayer* LocalPlayer = GetOwningLocalPlayer())
+			{
+				if (UGS_ArcaneBoardLPS* LPS = LocalPlayer->GetSubsystem<UGS_ArcaneBoardLPS>())
+				{
+					LPS->OnPlayerJobChanged((ESeekerJob)CharacterID);
+				}
+			}
+			
 			GSPlayerState->Server_SetSeekerJob((ESeekerJob)CharacterID);
 		}
 		else
