@@ -441,62 +441,62 @@ void AGS_RTSController::SelectOnCtrlClick()
 	int32 ViewportX, ViewportY;
 	GetViewportSize(ViewportX, ViewportY);
 	
-	FHitResult Hit;		
+	FHitResult Hit;
 	bool bHit = GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, Hit);
-	if (bHit && Hit.GetActor())
+	if (!bHit || !Hit.GetActor())
 	{
-		if (AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor()))
+		return;
+	}
+
+	AGS_Monster* Monster = Cast<AGS_Monster>(Hit.GetActor());
+	if (!Monster || !IsSelectable(Monster))
+	{
+		return;
+	}
+	
+	ECharacterType MonsterType = Monster->GetCharacterType();
+	TArray<AGS_Monster*> SameTypeUnits;
+	
+	// 월드에 있는 모든 몬스터를 순회 
+	for (TActorIterator<AGS_Monster> It(GetWorld()); It; ++It)
+	{
+		AGS_Monster* CurrentMonster = *It;
+		if (CurrentMonster->GetCharacterType() != MonsterType)
 		{
-			if (!IsSelectable(Monster))
-			{
-				return;
-			}
-			
-			ECharacterType MonsterType = Monster->GetCharacterType();
-			TArray<AGS_Monster*> SameTypeUnits;
-				
-			// 월드에 있는 모든 몬스터를 순회 
-			for (TActorIterator<AGS_Monster> It(GetWorld()); It; ++It)
-			{
-				AGS_Monster* CurrentMonster = *It;
-				if (CurrentMonster->GetCharacterType() != MonsterType)
-				{
-					continue;
-				}
+			continue;
+		}
 
-				// 월드 좌표를 스크린 좌표로 투영
-				FVector WorldLoc = CurrentMonster->GetActorLocation();
-				FVector2D ScreenPos;
-				bool bProjected = ProjectWorldLocationToScreen(WorldLoc, ScreenPos, true);
-				
-				// HUD 제외 카메라 뷰에서만 보이는 몬스터만 선택되도록 
-				if (bProjected && ScreenPos.X >= 0.0f && ScreenPos.X <= ViewportX && ScreenPos.Y >= 0.0f && ScreenPos.Y <= ViewportY*0.77)
-				{
-					SameTypeUnits.Add(CurrentMonster);
-				}
-			}
+		// 월드 좌표를 스크린 좌표로 투영
+		FVector WorldLoc = CurrentMonster->GetActorLocation();
+		FVector2D ScreenPos;
+		bool bProjected = ProjectWorldLocationToScreen(WorldLoc, ScreenPos, true);
 
-			// 유닛으로부터의 거리를 기준으로 정렬
-			SameTypeUnits.Sort([Monster](const AGS_Monster& A, const AGS_Monster& B)
-			{
-				return Monster->GetDistanceTo(&A) < Monster->GetDistanceTo(&B);
-			});
-
-			// 클릭된 유닛 포함하여 가까이에 있는 12개만 선택되도록 
-			TArray<AGS_Monster*> Selection;
-			for (int32 i = 0; i < SameTypeUnits.Num() && Selection.Num() < MaxSelectableUnits; ++i)
-			{
-				AGS_Monster* UnitToAdd = SameTypeUnits[i];
-				if (!Selection.Contains(UnitToAdd)) 
-				{
-					Selection.Add(UnitToAdd);
-				}
-			}
-
-			// 한 번에 선택하여 첫 번째 유닛만 소리 재생
-			AddMultipleUnitsToSelection(Selection);
+		// HUD 제외 카메라 뷰에서만 보이는 몬스터만 선택되도록 
+		if (bProjected && ScreenPos.X >= 0.0f && ScreenPos.X <= ViewportX && ScreenPos.Y >= 0.0f && ScreenPos.Y <= ViewportY*0.77)
+		{
+			SameTypeUnits.Add(CurrentMonster);
 		}
 	}
+
+	// 유닛으로부터의 거리를 기준으로 정렬
+	SameTypeUnits.Sort([Monster](const AGS_Monster& A, const AGS_Monster& B)
+	{
+		return Monster->GetDistanceTo(&A) < Monster->GetDistanceTo(&B);
+	});
+
+	// 클릭된 유닛 포함하여 가까이에 있는 12개만 선택되도록 
+	TArray<AGS_Monster*> Selection;
+	for (int32 i = 0; i < SameTypeUnits.Num() && Selection.Num() < MaxSelectableUnits; ++i)
+	{
+		AGS_Monster* UnitToAdd = SameTypeUnits[i];
+		if (!Selection.Contains(UnitToAdd)) 
+		{
+			Selection.Add(UnitToAdd);
+		}
+	}
+
+	// 한 번에 선택하여 첫 번째 유닛만 소리 재생
+	AddMultipleUnitsToSelection(Selection);
 }
 
 void AGS_RTSController::ToggleOnShiftClick()

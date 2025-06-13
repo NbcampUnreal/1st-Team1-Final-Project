@@ -24,14 +24,11 @@ void UGS_BTS_SenseEnemy::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	}
 
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
-
-	// 디버프 락 체크 (최우선)
 	if (Blackboard->GetValueAsBool(AGS_AIController::DebuffLockedKey))
 	{
 		return;
 	}
-
-	// RTS 락 체크
+	
 	if (Blackboard->GetValueAsBool(AGS_AIController::TargetLockedKey))
 	{
 		return;
