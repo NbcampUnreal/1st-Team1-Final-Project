@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{05859649-8D9A-FE42-EA1D-BB4D311778E2}",
+    "Hash": "{8D5462BB-8B82-6A46-13DC-7D4781FC1BC9}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -93,7 +93,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FF_HFFX_foley_footstep_creature_loss.wav",
-      "CachePath": "16/{164F1ED7-F3EA-41A7-CC76-1DC028D1962E}.wem"
+      "CachePath": "B9/{B9EF7987-7DE7-12A1-E686-BF8FA7B9F611}.wem"
      },
      {
       "Id": "65595387",
@@ -126,14 +126,6 @@
       "Location": "Memory",
       "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
       "CachePath": "86/{86BCC787-7896-A5DC-34C9-11CB3C5F7B34}.wem"
-     },
-     {
-      "Id": "108068136",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
-      "CachePath": "B1/{B1E68324-48AE-99E6-139E-FB8406ACAEF4}.wem"
      },
      {
       "Id": "112081368",
@@ -232,14 +224,6 @@
       "CachePath": "8F/{8F23005F-52A2-B1C3-CAA4-6D41D8E3C465}.wem"
      },
      {
-      "Id": "151148536",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_04b.wav",
-      "CachePath": "3E/{3EAD4D0E-1342-4EE7-B379-B24E88DAC1C5}.wem"
-     },
-     {
       "Id": "157399992",
       "Language": "SFX",
       "Streaming": "false",
@@ -269,7 +253,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_PG_cinematic_fx_creature_beast_bear_lion_vicious_monster_death_01.wav",
-      "CachePath": "CC/{CC98806A-8EBA-F5DC-C957-23F38432A7B3}.wem"
+      "CachePath": "CC/{CC42908F-D795-D8B8-AB8B-10151BEF517C}.wem"
      },
      {
       "Id": "177115164",
@@ -334,6 +318,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Empire_Game_Settlement_UI_Wall_Crumbling_3_Stone_Hit_Rock_Fall_Debris_Light_1.wav",
       "CachePath": "B3/{B3524936-4133-8CDB-B086-99CDD9927869}.wem"
+     },
+     {
+      "Id": "232330686",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_4_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact.wav",
+      "CachePath": "36/{36ED34D5-0277-E70A-0410-45976BB7C40E}.wem"
      },
      {
       "Id": "234128836",
@@ -437,7 +429,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_PG_cinematic_fx_creature_beast_bear_lion_vicious_monster_death_01.wav",
-      "CachePath": "2F/{2FB8746D-BACB-30A2-DB57-325A4ABA44AA}.wem"
+      "CachePath": "FB/{FB18001C-49A5-9BE4-8BC0-615A914A9F1B}.wem"
      },
      {
       "Id": "289001169",
@@ -461,7 +453,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MARS_FOUND_FX_one_shot_fire_woosh_tube.wav",
-      "CachePath": "05/{057E2C2F-546D-BB9A-B76C-4B66CDB36AFE}.wem"
+      "CachePath": "9D/{9D592BC7-6226-7CC6-8DE3-F16A210A4DE5}.wem"
      },
      {
       "Id": "304594696",
@@ -592,6 +584,14 @@
       "CachePath": "EC/{ECFB2205-FD33-AB77-4A1A-BEEA07C9ADE0}.wem"
      },
      {
+      "Id": "396828417",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FF_IE_fx_impact_explode.wav",
+      "CachePath": "88/{88BE8F63-F150-855A-745B-AE33266811AE}.wem"
+     },
+     {
       "Id": "399735935",
       "Language": "SFX",
       "Streaming": "false",
@@ -645,7 +645,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Dragon_Vocal_Dialogue_I_Am_Fire_I_Am_Death_Monster_Creature_Voice.wav",
-      "CachePath": "11/{11431339-AA19-BB0A-BCFF-855C46A4BD71}.wem"
+      "CachePath": "A7/{A7E46528-6F2F-094D-9E06-66ECD63E7A61}.wem"
      },
      {
       "Id": "444842476",
@@ -686,6 +686,14 @@
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_Hit.wav",
       "CachePath": "23/{232D6D9B-9268-76DD-D046-4AA2F28796A5}.wem"
+     },
+     {
+      "Id": "457760460",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Battle_Game_Explosion_Grenade_Close_1_Bomb_Explode_Fiery_Loud_One_Shot.wav",
+      "CachePath": "6D/{6D5E6ADD-2781-750E-765B-6D75EBF18F46}.wem"
      },
      {
       "Id": "457873650",
@@ -877,7 +885,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterWingsFlap_SFXB.1452.wav",
-      "CachePath": "99/{99CB2744-DB22-6C52-7F43-0B637A618615}.wem"
+      "CachePath": "1D/{1D22E250-A8F3-9541-14B2-9D706254E3B1}.wem"
      },
      {
       "Id": "587485477",
@@ -1005,7 +1013,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "TS_MAMMOTH_cinema_tom_one_shot_monster_tom_1_impact.wav",
-      "CachePath": "6D/{6D3FDFE5-8AF9-C481-9870-10E3A5FFE0EB}.wem"
+      "CachePath": "B9/{B95D1ADD-D4FC-B3FB-55D5-8C81968182D1}.wem"
      },
      {
       "Id": "660206576",
@@ -1021,7 +1029,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "EarthquakeTremorRocks_HV.21.wav",
-      "CachePath": "0A/{0AACDD87-184F-FE60-4048-4F946DED4771}.wem"
+      "CachePath": "32/{32796D3A-8F1C-5320-5441-768D926FD74B}.wem"
      },
      {
       "Id": "674316476",
@@ -1069,7 +1077,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ArrowBy_BW.54273.wav",
-      "CachePath": "8E/{8E0CD796-7256-E655-71DD-DE424054F802}.wem"
+      "CachePath": "93/{938EAB4F-10DB-5C33-A4D5-73AC0EEDFD2E}.wem"
      },
      {
       "Id": "712535045",
@@ -1118,14 +1126,6 @@
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
       "CachePath": "7E/{7EB919C7-63E1-6412-2BA9-C0698C689D18}.wem"
-     },
-     {
-      "Id": "750724736",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "waves.wav",
-      "CachePath": "49/{49C18DBC-AF3F-807D-9B0B-61EC467CB250}.wem"
      },
      {
       "Id": "755959048",
@@ -1312,6 +1312,14 @@
       "CachePath": "9D/{9D395BDC-EEF5-F0BB-E6D4-665839F4E6CE}.wem"
      },
      {
+      "Id": "880356437",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_cannon_explosion_blast_stone_gravel_debris_02.wav",
+      "CachePath": "89/{89765167-5EAE-8BD1-E626-1AC69868E53B}.wem"
+     },
+     {
       "Id": "880975709",
       "Language": "SFX",
       "Streaming": "false",
@@ -1389,7 +1397,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "PE-Whoosh_BW.42793.wav",
-      "CachePath": "9E/{9EB60194-5E59-8471-4039-3D8240AC6372}.wem"
+      "CachePath": "7C/{7C542388-6B15-B655-7281-2128A63D3FB9}.wem"
      },
      {
       "Id": "941890073",
@@ -1485,7 +1493,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "PE-Whoosh_BW.42777.wav",
-      "CachePath": "5E/{5E7B8FFD-4444-4A26-E8EF-069927B7BCC9}.wem"
+      "CachePath": "07/{07B05EE4-9776-F290-A478-D6A786C83927}.wem"
      },
      {
       "Id": "997628724",
@@ -1544,14 +1552,6 @@
       "CachePath": "FD/{FD535CEA-A554-2814-1899-60A335860B6D}.wem"
      },
      {
-      "Id": "1039019029",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_Stone_Building_Destroy_4_Mobile_App_Game_FX_Sound_Magic_Fantasy_Touch_Accent_Stab_Transition_Movement_Whoosh.wav",
-      "CachePath": "7B/{7B8BE549-A8CE-D8A8-B198-48B2C2D90103}.wem"
-     },
-     {
       "Id": "1040176000",
       "Language": "SFX",
       "Streaming": "false",
@@ -1565,7 +1565,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "PE-Whoosh_BW.43601.wav",
-      "CachePath": "02/{026C78E6-154B-BB16-B1AB-7EB675E50B08}.wem"
+      "CachePath": "60/{6029D1F2-A022-AD76-DFBD-3F7F26416E45}.wem"
      },
      {
       "Id": "1053226406",
@@ -2025,10 +2025,10 @@
       "Name": "EV_ArrowBy",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowBy",
       "GUID": "{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}",
-      "MaxAttenuation": "640",
+      "MaxAttenuation": "600",
       "DurationType": "OneShot",
-      "DurationMin": "0.75643444",
-      "DurationMax": "0.75643444",
+      "DurationMin": "0.6343975",
+      "DurationMax": "0.6343975",
       "MediaRefs": [
        {
         "Id": "710539305"
@@ -2052,7 +2052,7 @@
       "Name": "EV_ArrowImpact_Body",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Body",
       "GUID": "{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}",
-      "MaxAttenuation": "1800.0001",
+      "MaxAttenuation": "1000",
       "DurationType": "OneShot",
       "DurationMin": "0.30958745",
       "DurationMax": "0.32799646",
@@ -2067,7 +2067,7 @@
       "Name": "EV_ArrowImpact_Stone",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Stone",
       "GUID": "{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "1000",
       "DurationType": "OneShot",
       "DurationMin": "0.54591566",
       "DurationMax": "0.7596884",
@@ -2088,7 +2088,7 @@
       "Name": "EV_ArrowImpact_Wood",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Wood",
       "GUID": "{5AF6D827-D199-47C8-9BED-CC9DB12DEE69}",
-      "MaxAttenuation": "1500",
+      "MaxAttenuation": "1000",
       "DurationType": "OneShot",
       "DurationMin": "0.85634214",
       "DurationMax": "0.9072629",
@@ -2410,6 +2410,63 @@
         }
        ]
       }
+     },
+     {
+      "Id": "3205749567",
+      "Name": "EV_Drakhar_DraconicFuryProjectile_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_DraconicFuryProjectile_Hit",
+      "GUID": "{3F91B356-9681-4E2A-8026-856DB43E3FF9}",
+      "MaxAttenuation": "1200",
+      "DurationType": "OneShot",
+      "DurationMin": "2.3133645",
+      "DurationMax": "2.4774885",
+      "MediaRefs": [
+       {
+        "Id": "140776273"
+       },
+       {
+        "Id": "141516163"
+       },
+       {
+        "Id": "232330686"
+       },
+       {
+        "Id": "457760460"
+       },
+       {
+        "Id": "756075964"
+       },
+       {
+        "Id": "880356437"
+       }
+      ]
+     },
+     {
+      "Id": "808887422",
+      "Name": "EV_Drakhar_DraconicFuryProjectile_Impact",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_DraconicFuryProjectile_Impact",
+      "GUID": "{6CC63D62-1048-46DC-B03B-560D5B86DEF7}",
+      "MaxAttenuation": "1200",
+      "DurationType": "OneShot",
+      "DurationMin": "2.3133645",
+      "DurationMax": "2.4774885",
+      "MediaRefs": [
+       {
+        "Id": "140776273"
+       },
+       {
+        "Id": "232330686"
+       },
+       {
+        "Id": "396828417"
+       },
+       {
+        "Id": "756075964"
+       },
+       {
+        "Id": "880356437"
+       }
+      ]
      },
      {
       "Id": "2787204358",
@@ -3159,19 +3216,6 @@
       ]
      },
      {
-      "Id": "374167564",
-      "Name": "Play_waves",
-      "ObjectPath": "\\Events\\Default Work Unit\\Play_waves",
-      "GUID": "{D4D99DFE-1AFF-4742-A8A6-B7C19192CD0A}",
-      "MaxAttenuation": "640",
-      "DurationType": "Infinite",
-      "MediaRefs": [
-       {
-        "Id": "750724736"
-       }
-      ]
-     },
-     {
       "Id": "2600979968",
       "Name": "Props_Axe",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_Axe",
@@ -3278,13 +3322,7 @@
         "Id": "15081757"
        },
        {
-        "Id": "108068136"
-       },
-       {
         "Id": "141938875"
-       },
-       {
-        "Id": "151148536"
        },
        {
         "Id": "418165151"
@@ -3492,13 +3530,7 @@
         "Id": "15081757"
        },
        {
-        "Id": "108068136"
-       },
-       {
         "Id": "141938875"
-       },
-       {
-        "Id": "151148536"
        },
        {
         "Id": "418165151"
@@ -3519,9 +3551,6 @@
         "Id": "140100063"
        },
        {
-        "Id": "140776273"
-       },
-       {
         "Id": "141516163"
        },
        {
@@ -3531,16 +3560,10 @@
         "Id": "721567443"
        },
        {
-        "Id": "756075964"
-       },
-       {
         "Id": "933149701"
        },
        {
         "Id": "966061855"
-       },
-       {
-        "Id": "1039019029"
        }
       ]
      },
@@ -3607,16 +3630,6 @@
         "Id": "369007659"
        }
       ]
-     },
-     {
-      "Id": "153945882",
-      "Name": "Stop_waves",
-      "ObjectPath": "\\Events\\Default Work Unit\\Stop_waves",
-      "GUID": "{CEB75CC5-195D-480A-8494-6222F467BB05}",
-      "MaxAttenuation": "0",
-      "DurationType": "OneShot",
-      "DurationMin": "0",
-      "DurationMax": "0"
      },
      {
       "Id": "4033375466",
@@ -3947,6 +3960,6 @@
     ]
    }
   ],
-  "FileHash": "{CD8589F6-3E4D-4416-6D50-6661587CDC17}"
+  "FileHash": "{64E5481C-5277-7948-FEB1-61D9F2DF32AC}"
  }
 }
