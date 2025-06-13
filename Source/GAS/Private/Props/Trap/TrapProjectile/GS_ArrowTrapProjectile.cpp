@@ -16,7 +16,6 @@ AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
 void AGS_ArrowTrapProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	SetLifeSpan(4.0f);
 	ProjectileMesh->SetSimulatePhysics(false);
 	CollisionComponent->SetSimulatePhysics(false);
 }
@@ -107,19 +106,29 @@ bool AGS_ArrowTrapProjectile::IsReady() const
 
 void AGS_ArrowTrapProjectile::ActivateProjectile(const FVector& SpawnLocation, const FRotator& Rotation, float Speed)
 {
-	
+	if (IsPendingKillPending() || !IsValid(this))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ActivateProjectile not valid"));
+		return;
+	}
+
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(false);
+	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
+	SetActorTransform(FTransform(Rotation, SpawnLocation), false, nullptr, ETeleportType::None);
+
+
 	if (ProjectileMovementComponent)
 	{
 		ProjectileMovementComponent->StopMovementImmediately();
 		ProjectileMovementComponent->Velocity = FVector::ZeroVector;
+		ProjectileMovementComponent->Deactivate();
 		ProjectileMovementComponent->UpdateComponentVelocity();
 	}
 
-	SetActorLocation(SpawnLocation, false, nullptr, ETeleportType::TeleportPhysics);
-	SetActorRotation(Rotation);
+	
+	//SetActorRotation(Rotation);
 	
 	if (ProjectileMovementComponent)
 	{
@@ -127,9 +136,12 @@ void AGS_ArrowTrapProjectile::ActivateProjectile(const FVector& SpawnLocation, c
 		ProjectileMovementComponent->Velocity = Direction * Speed;
 		ProjectileMovementComponent->Activate();
 	}
+	
+	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	SetActorEnableCollision(true);
-	SetLifeSpan(4.0f);
+	GetWorld()->GetTimerManager().SetTimer(LifeSpanHandle, this, &AGS_ArrowTrapProjectile::OnLifeSpanExpired, 2.0f, false);
+
 	//화살 효과 관련 blueprint native event
 	OnActivateEffect();
 }
@@ -137,6 +149,8 @@ void AGS_ArrowTrapProjectile::ActivateProjectile(const FVector& SpawnLocation, c
 
 void AGS_ArrowTrapProjectile::DeactivateProjectile()
 {
+	GetWorld()->GetTimerManager().ClearTimer(LifeSpanHandle);
+
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 
@@ -149,6 +163,8 @@ void AGS_ArrowTrapProjectile::DeactivateProjectile()
 		ProjectileMovementComponent->UpdateComponentVelocity();
 		
 	}
+
+	
 }
 
 
@@ -156,4 +172,13 @@ void AGS_ArrowTrapProjectile::DeactivateProjectile()
 void AGS_ArrowTrapProjectile::OnActivateEffect_Implementation()
 {
 
+}
+
+
+void AGS_ArrowTrapProjectile::OnLifeSpanExpired()
+{
+	if (OwningPool)
+	{
+		OwningPool->ReturnProjectile(this);
+	}
 }

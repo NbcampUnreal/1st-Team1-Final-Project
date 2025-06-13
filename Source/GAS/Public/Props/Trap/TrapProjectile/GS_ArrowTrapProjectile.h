@@ -25,6 +25,7 @@ public:
 	UPROPERTY()
 	TObjectPtr<UGS_ProjectilePoolComp> OwningPool;
 
+	FTimerHandle LifeSpanHandle;
 
 	UFUNCTION(BlueprintCallable, Category = "Trap")
 	void Init(AGS_NonTrigTrapBase* InTrap);
@@ -43,12 +44,11 @@ public:
 	void OnActivateEffect();
 	void OnActivateEffect_Implementation();
 
-
 	bool IsReady() const;
-
 
 	void StickWithVisualOnly(const FHitResult& Hit);
 	
+	void OnLifeSpanExpired();
 
 protected:
 	virtual void BeginPlay() override;

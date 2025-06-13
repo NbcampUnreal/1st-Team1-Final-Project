@@ -49,18 +49,25 @@ void UGS_ProjectilePoolComp::Initialize(TSubclassOf<AGS_ArrowTrapProjectile> InP
 //풀에 있던 Projectile 꺼냄
 AGS_ArrowTrapProjectile* UGS_ProjectilePoolComp::GetProjectile()
 {
+
+	AGS_ArrowTrapProjectile* SelectedProjectile = nullptr;
+
 	for (AGS_ArrowTrapProjectile* Projectile : ProjectilePool)
 	{
 		if (Projectile && Projectile->IsReady())
 		{
-			ProjectilePool.Remove(Projectile);
-			Projectile->OwningPool = this;
-			return Projectile;
+			SelectedProjectile = Projectile;
+			break;
 		}
 	}
-	return nullptr;
 
+	if (SelectedProjectile)
+	{
+		ProjectilePool.Remove(SelectedProjectile);
+		SelectedProjectile->OwningPool = this;
+	}
 
+	return SelectedProjectile;
 }
 
 //다시 풀에 저장
@@ -80,7 +87,3 @@ void UGS_ProjectilePoolComp::ReturnProjectile(AGS_ArrowTrapProjectile* Projectil
 	ProjectilePool.Add(Projectile);
 
 }
-
-
-
-
