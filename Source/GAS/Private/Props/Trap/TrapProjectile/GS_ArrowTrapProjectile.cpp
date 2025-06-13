@@ -246,50 +246,118 @@ bool AGS_ArrowTrapProjectile::IsReady() const
 
 void AGS_ArrowTrapProjectile::ActivateProjectile(const FVector& SpawnLocation, const FRotator& Rotation, float Speed)
 {
-	
+	// 기본 null 체크 (IsValid 사용하지 않음)
+	if (!this)
+	{
+		return;
+	}
+
+	// 컴포넌트 null 체크 먼저 수행
+	if (!ProjectileMovementComponent)
+	{
+		return;
+	}
+
+	if (!CollisionComponent)
+	{
+		return;
+	}
+
+	// 월드 유효성 체크
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	// 액터 상태 초기화
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(false);
 	
-	if (ProjectileMovementComponent)
-	{
-		ProjectileMovementComponent->StopMovementImmediately();
-		ProjectileMovementComponent->Velocity = FVector::ZeroVector;
-		ProjectileMovementComponent->UpdateComponentVelocity();
-	}
+	// 프로젝타일 무브먼트 컴포넌트 초기화
+	ProjectileMovementComponent->StopMovementImmediately();
+	ProjectileMovementComponent->Velocity = FVector::ZeroVector;
+	ProjectileMovementComponent->UpdateComponentVelocity();
 
+	// 위치와 회전 설정
 	SetActorLocation(SpawnLocation, false, nullptr, ETeleportType::TeleportPhysics);
 	SetActorRotation(Rotation);
 	
-	if (ProjectileMovementComponent)
-	{
-		const FVector Direction = Rotation.Vector();
-		ProjectileMovementComponent->Velocity = Direction * Speed;
-		ProjectileMovementComponent->Activate();
-	}
+	// 속도 설정 및 활성화
+	const FVector Direction = Rotation.Vector();
+	ProjectileMovementComponent->Velocity = Direction * Speed;
+	ProjectileMovementComponent->Activate();
 
+	// 콜리전 활성화
 	SetActorEnableCollision(true);
 	SetLifeSpan(4.0f);
-	//화살 효과 관련 blueprint native event
+	
+	// 화살 효과 관련 blueprint native event
 	OnActivateEffect();
 }
 
 void AGS_ArrowTrapProjectile::DeactivateProjectile()
 {
+	// 기본 null 체크
+	if (!this || !ProjectileMovementComponent)
+	{
+		return;
+	}
+
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 
-	if (ProjectileMovementComponent)
-	{
-		ProjectileMovementComponent->Deactivate();
-		
-		ProjectileMovementComponent->StopMovementImmediately();
-		ProjectileMovementComponent->Velocity = FVector::ZeroVector;
-		ProjectileMovementComponent->UpdateComponentVelocity();
-		
-	}
+	// 프로젝타일 무브먼트 컴포넌트 비활성화
+	ProjectileMovementComponent->Deactivate();
+	ProjectileMovementComponent->StopMovementImmediately();
+	ProjectileMovementComponent->Velocity = FVector::ZeroVector;
+	ProjectileMovementComponent->UpdateComponentVelocity();
 }
 
 void AGS_ArrowTrapProjectile::OnActivateEffect_Implementation()
 {
 
+}
+
+void AGS_ArrowTrapProjectile::ReturnToPoolOptimized()
+{
+	// 최적화된 풀 반환 로직
+	if (OwningPool)
+	{
+		// 즉시 비활성화
+		DeactivateProjectile();
+		
+		// 풀로 반환
+		OwningPool->ReturnProjectile(this);
+	}
+	else
+	{
+		// 풀이 없으면 일반적인 소멸 처리
+		SetLifeSpan(0.1f);
+	}
+}
+
+void AGS_ArrowTrapProjectile::OnActivateEffect_Implementation()
+{
+	// 거리 컬링이 비활성화되어 있으면 항상 재생
+	if (!bUseDistanceCulling)
+	{
+		return true;
+	}
+	
+	// 플레이어와의 거리 체크
+	if (UWorld* World = GetWorld())
+	{
+		if (APlayerController* PC = World->GetFirstPlayerController())
+		{
+			if (APawn* PlayerPawn = PC->GetPawn())
+			{
+				float Distance = FVector::Dist(PlayerPawn->GetActorLocation(), ImpactPoint);
+				return Distance <= MaxEffectDistance;
+			}
+		}
+	}
+	
+	// 플레이어를 찾을 수 없으면 기본적으로 재생
+	return true;
 }

@@ -75,6 +75,14 @@ public:
 
 	void StickWithVisualOnly(const FHitResult& Hit);
 
+	// 최적화된 풀 반환
+	UFUNCTION(BlueprintCallable, Category = "Pool")
+	void ReturnToPoolOptimized();
+
+	// 거리 기반 효과 컬링
+	UFUNCTION(BlueprintCallable, Category = "Optimization")
+	bool ShouldPlayEffectsForDistance(const FVector& ImpactPoint) const;
+
 protected:
 	virtual void BeginPlay() override;
 
