@@ -46,9 +46,6 @@ protected:
 	void HandleRoleChanged(EPlayerRole NewRole);
 	UFUNCTION()
 	void HandleReadyStatusChanged(bool bNewReadyStatus);
-	
-	UFUNCTION()
-	void InitPerkWidget(UGS_ArcaneBoardWidget* Widget);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Lobby Actions")

@@ -239,34 +239,6 @@ void AGS_CustomLobbyPC::HandleReadyStatusChanged(bool bNewReadyStatus)
 	}
 }
 
-void AGS_CustomLobbyPC::InitPerkWidget(UGS_ArcaneBoardWidget* Widget)
-{
-	if (!Widget)
-	{
-		UE_LOG(LogTemp, Error, TEXT("InitPerkWidget: Widget is null"));
-		return;
-	}
-
-	UGS_ArcaneBoardLPS* LPS = GetLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>();
-	if (!LPS)
-	{
-		UE_LOG(LogTemp, Error, TEXT("InitPerkWidget: LPS를 찾을 수 없습니다"));
-		return;
-	}
-
-	UGS_ArcaneBoardManager* BoardManager = LPS->GetOrCreateBoardManager();
-	if (!BoardManager)
-	{
-		UE_LOG(LogTemp, Error, TEXT("InitPerkWidget: BoardManager 생성 실패"));
-		return;
-	}
-
-	Widget->SetBoardManager(BoardManager);
-	LPS->LoadBoardConfig();
-	Widget->UpdateGridVisuals();
-	Widget->InitInventory();
-}
-
 void AGS_CustomLobbyPC::RequestToggleRole()
 {
 	AGS_PlayerState* PS = GetCachedPlayerState();
@@ -360,11 +332,6 @@ void AGS_CustomLobbyPC::RequestOpenPerkOrDungeonPopup()
 		CurrentModalWidget = CreateWidget<UUserWidget>(this, WidgetToOpen);
 		if (CurrentModalWidget)
 		{
-			if (UGS_ArcaneBoardWidget* ArcaneBoardWidget = Cast<UGS_ArcaneBoardWidget>(CurrentModalWidget))
-			{
-				InitPerkWidget(ArcaneBoardWidget);
-			}
-
 			UOverlaySlot* OS = ModalOverlay->AddChildToOverlay(CurrentModalWidget);
 			if (OS)
 			{
