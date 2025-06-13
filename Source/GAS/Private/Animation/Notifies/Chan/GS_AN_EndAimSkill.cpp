@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Animation/Character/Seeker/Chan/GS_AN_EndAimSkill.h"
+#include "Animation/Notifies/Chan/GS_AN_EndAimSkill.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Skill/GS_SkillComp.h"

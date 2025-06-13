@@ -17,17 +17,11 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	// Chan Combo Attack
-	/*UFUNCTION()
-	void AnimNotify_ComboInputOpen();
+	// Combo Attack
 	UFUNCTION()
-	void AnimNotify_CheckToNext();
+	void AnimNotify_ComboInput();
 	UFUNCTION()
-	void AnimNotify_ComboEnd();*/
-	
-	/*UPROPERTY(BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
-	bool IsPlayingUpperBodyMontage = false;
-
-	UPROPERTY(BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
-	bool IsPlayingFullBodyMontage = false;*/
+	void AnimNotify_CanProceed();
+	UFUNCTION()
+	void AnimNotify_ComboEnd();
 };

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Animation/Character/Seeker/Chan/GS_ANS_JumpAttack.h"
+#include "Animation/Notifies/Chan/GS_ANS_JumpAttack.h"
 
 void UGS_ANS_JumpAttack::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	float TotalDuration, const FAnimNotifyEventReference& EventReference)
