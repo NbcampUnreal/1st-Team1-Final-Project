@@ -24,8 +24,46 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	}
 	
 	OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+
+	// 돌진 시작
+	FTimerHandle DelayHandle;
+	GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UGS_ChanUltimateSkill::StartCharge, 0.5f, false);
 }
 
 void UGS_ChanUltimateSkill::ExecuteSkillEffect()
+{
+
+}
+
+void UGS_ChanUltimateSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
+{
+}
+
+void UGS_ChanUltimateSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
+{
+}
+
+void UGS_ChanUltimateSkill::StartCharge()
+{
+}
+
+void UGS_ChanUltimateSkill::UpdateCharge()
+{
+}
+
+void UGS_ChanUltimateSkill::EndCharge()
+{
+}
+
+void UGS_ChanUltimateSkill::CheckAndApplyDamage()
+{
+}
+
+bool UGS_ChanUltimateSkill::IsEnemyTeam(AGS_Player* Player1, AGS_Player* Player2)
+{
+	return false;
+}
+
+void UGS_ChanUltimateSkill::ApplyDamageToTarget(AGS_Player* Target, float DamageAmount)
 {
 }
