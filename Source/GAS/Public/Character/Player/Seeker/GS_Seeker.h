@@ -102,8 +102,7 @@ public:
 	// 몬스터 감지용 컴포넌트 추가
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	class USphereComponent* CombatTrigger;
-
-public:
+	
 	// 몬스터가 전투 음악 시작/중지를 요청할 때 호출
 	UFUNCTION(BlueprintCallable)
 	void AddCombatMonster(class AGS_Monster* Monster);

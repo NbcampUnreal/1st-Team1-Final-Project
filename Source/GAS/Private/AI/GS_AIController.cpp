@@ -67,7 +67,6 @@ FGenericTeamId AGS_AIController::GetGenericTeamId() const
 	return FGenericTeamId::NoTeam;
 }
 
-//TODO: 캐릭터들로 나중에 테스트하기
 void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	if (Blackboard->GetValueAsBool(TargetLockedKey))
