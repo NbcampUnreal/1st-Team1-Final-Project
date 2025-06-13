@@ -62,7 +62,7 @@ void AGS_Character::BeginPlay()
 	{
 		HPTextWidgetComp->SetVisibility(true);
 	}
-
+	
 	DefaultCharacterSpeed = this->GetCharacterMovement()->MaxWalkSpeed;
 	//CharacterSpeed = DefaultCharacterSpeed;
 

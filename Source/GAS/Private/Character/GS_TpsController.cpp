@@ -16,6 +16,8 @@
 #include "UI/Character/GS_HPBoardWidget.h"
 #include "System/GS_GameInstance.h"
 #include "UI/Character/GS_BossHP.h"
+#include "UI/Character/GS_DrakharFeverGauge.h"
+#include "UI/Character/GS_FeverGaugeBoard.h"
 
 
 AGS_TpsController::AGS_TpsController()
@@ -212,22 +214,28 @@ void AGS_TpsController::TestFunction()
 			if (IsValid(PlayerWidgetInstance))
 			{
 				UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(PlayerWidgetInstance->GetWidgetFromName(TEXT("WBP_HPBoard")));
-				UGS_BossHP* BossWidget = Cast<UGS_BossHP>(PlayerWidgetInstance->GetWidgetFromName(TEXT("BossHP")));
+				UGS_BossHP* BossWidget = Cast<UGS_BossHP>(PlayerWidgetInstance->GetWidgetFromName(TEXT("WBP_BossHPBoard")));
+				UGS_FeverGaugeBoard* FeverWidget = Cast<UGS_FeverGaugeBoard>(PlayerWidgetInstance->GetWidgetFromName(TEXT("WBP_FeverBoard")));
 				
 				if (BossWidget)
 				{
+					//HP
+					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Boss HP Init ")),true, true, FLinearColor::Red,5.f);
 					BossWidget->SetOwningActor(GS_Character);
-					BossWidget->InitBossHPWidget();
-					BossWidget->SetVisibility(ESlateVisibility::Hidden);
-					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- FIND ")),true, true, FLinearColor::Blue,5.f);
+					BossWidget->InitGuardianHPWidget();
 				}
 
+				if (FeverWidget)
+				{
+					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Fever Gauge Init ")),true, true, FLinearColor::Red,5.f);
+					FeverWidget->InitDrakharFeverWidget();
+				}
+				
 				if (HPBoardWidget)
 				{
 					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Valid HP Board Widget ")),true, true, FLinearColor::Red,5.f);
 					HPBoardWidget->InitBoardWidget();
 				}
-				
 				PlayerWidgetInstance->AddToViewport(0);
 			}
 		}

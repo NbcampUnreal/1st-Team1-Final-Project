@@ -1,9 +1,7 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Animation/Notifies/GS_ANS_DrakharCombo.h"
+﻿#include "Animation/Notifies/GS_ANS_DrakharCombo.h"
 
 #include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 void UGS_ANS_DrakharCombo::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                        float TotalDuration, const FAnimNotifyEventReference& EventReference)
@@ -14,6 +12,9 @@ void UGS_ANS_DrakharCombo::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSe
 	if (IsValid(Drakhar))
 	{
 		Drakhar->SetNextComboAttackSection(SectionName);
+		//Drakhar->IsAttacking = true;
+		//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("@@@@@Is Attacking %d"),Drakhar->IsAttacking));
+		//UE_LOG(LogTemp, Warning, TEXT("[SERVER] IS Attacking %d"), Drakhar->IsAttacking);
 	}
 }
 
@@ -26,5 +27,8 @@ void UGS_ANS_DrakharCombo::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequ
 	if (IsValid(Drakhar))
 	{
 		Drakhar->ResetComboAttackSection();
+		//Drakhar->IsAttacking = false;
+		//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("@@@@@Is Attacking %d"),Drakhar->IsAttacking));
+		//UE_LOG(LogTemp, Warning, TEXT("[SERVER] IS Attacking %d"), Drakhar->IsAttacking);
 	}
 }
