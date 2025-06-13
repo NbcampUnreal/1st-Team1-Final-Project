@@ -102,6 +102,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX|Earthquake", meta = (DisplayName = "Earthquake VFX Spawn Point"))
 	UArrowComponent* EarthquakeVFXSpawnPoint;
 
+	// === DraconicFury 충돌 이펙트 시스템 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Projectile Impact VFX"))
+	UNiagaraSystem* DraconicProjectileImpactVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Projectile Explosion VFX"))
+	UNiagaraSystem* DraconicProjectileExplosionVFX;
+
+	// === DraconicFury 충돌 사운드 이벤트 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|DraconicFury", meta = (DisplayName = "Projectile Impact Sound"))
+	UAkAudioEvent* DraconicProjectileImpactSoundEvent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|DraconicFury", meta = (DisplayName = "Projectile Explosion Sound"))
+	UAkAudioEvent* DraconicProjectileExplosionSoundEvent;
+
 	//[Input Binding Function]
 	virtual void Ctrl() override;
 
@@ -161,6 +175,13 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_BeginDraconicFury();
+
+	// === DraconicFury 투사체 충돌 처리 ===
+	UFUNCTION(BlueprintCallable, Category = "DraconicFury")
+	void HandleDraconicProjectileImpact(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayDraconicProjectileImpactEffects(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter);
 
 	//[Fly Skill]
 	UFUNCTION(Server, Reliable)
