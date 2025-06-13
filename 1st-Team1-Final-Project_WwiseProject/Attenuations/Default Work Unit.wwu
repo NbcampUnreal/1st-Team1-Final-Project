@@ -22,8 +22,8 @@
 											<SegmentShape>Exp3</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>665.9099</XPos>
-											<YPos>-0.74251</YPos>
+											<XPos>695.81644</XPos>
+											<YPos>-0.56712</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
@@ -94,7 +94,7 @@
 				</Attenuation>
 				<Attenuation Name="ArrowAttenuation" ID="{E8C3AD10-3E92-476B-BCB9-940E50098DC5}" ShortID="627917666">
 					<PropertyList>
-						<Property Name="RadiusMax" Type="Real64" Value="1500"/>
+						<Property Name="RadiusMax" Type="Real64" Value="1000"/>
 					</PropertyList>
 					<CurveUsageInfoList>
 						<VolumeDryUsage>
@@ -111,13 +111,13 @@
 											<SegmentShape>Exp3</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>1244.20822</XPos>
-											<YPos>-1.15536</YPos>
+											<XPos>765.06537</XPos>
+											<YPos>-1.0998</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>1500</XPos>
+											<XPos>1000</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>

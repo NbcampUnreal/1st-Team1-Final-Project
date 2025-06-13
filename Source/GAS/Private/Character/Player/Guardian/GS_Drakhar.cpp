@@ -64,6 +64,10 @@ AGS_Drakhar::AGS_Drakhar()
 	DraconicFurySkillSoundEvent = nullptr;
 	DraconicProjectileSoundEvent = nullptr;
 	
+	// === DraconicFury 충돌 사운드 이벤트 초기화 ===
+	DraconicProjectileImpactSoundEvent = nullptr;
+	DraconicProjectileExplosionSoundEvent = nullptr;
+	
 	// 사운드 중복 재생 방지 초기화
 	bDraconicFurySoundPlayed = false;
 
@@ -91,6 +95,10 @@ AGS_Drakhar::AGS_Drakhar()
 	ActiveGroundCrackVFXComponent = nullptr;
 	DustCloudVFX = nullptr;
 	ActiveDustCloudVFXComponent = nullptr;
+
+	// === DraconicFury 충돌 VFX 초기화 ===
+	DraconicProjectileImpactVFX = nullptr;
+	DraconicProjectileExplosionVFX = nullptr;
 
 	// === VFX 위치 제어용 화살표 컴포넌트 생성 ===
 	WingRushVFXSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("WingRushVFXSpawnPoint"));
@@ -1062,6 +1070,79 @@ void AGS_Drakhar::MulticastStartDustCloudVFX_Implementation()
 		{
 			StopDustCloudVFX();
 		}, 2.0f, false);
+	}
+}
+
+// === DraconicFury 투사체 충돌 처리 함수 구현 ===
+
+void AGS_Drakhar::HandleDraconicProjectileImpact(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
+{
+	if (HasAuthority())
+	{
+		MulticastPlayDraconicProjectileImpactEffects(ImpactLocation, ImpactNormal, bHitCharacter);
+	}
+}
+
+void AGS_Drakhar::MulticastPlayDraconicProjectileImpactEffects_Implementation(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	// === 사운드 이펙트 재생 ===
+	UAkAudioEvent* SoundToPlay = bHitCharacter ? DraconicProjectileExplosionSoundEvent : DraconicProjectileImpactSoundEvent;
+	if (SoundToPlay)
+	{
+		PlaySoundEvent(SoundToPlay, ImpactLocation);
+	}
+
+	// === 시각 이펙트 재생 ===
+	UNiagaraSystem* VFXToPlay = bHitCharacter ? DraconicProjectileExplosionVFX : DraconicProjectileImpactVFX;
+	if (VFXToPlay && GetWorld())
+	{
+		// 충돌 지점에서 VFX 재생
+		UNiagaraComponent* ImpactVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			VFXToPlay,
+			ImpactLocation,
+			FRotationMatrix::MakeFromZ(ImpactNormal).Rotator(), // 충돌면 법선 방향으로 회전
+			FVector(1.0f, 1.0f, 1.0f),
+			true,
+			true,
+			ENCPoolMethod::None,
+			true
+		);
+
+		if (ImpactVFXComponent)
+		{
+			// VFX 파라미터 설정
+			ImpactVFXComponent->SetVectorParameter(FName("ImpactNormal"), ImpactNormal);
+			ImpactVFXComponent->SetFloatParameter(FName("ImpactIntensity"), bHitCharacter ? 2.0f : 1.0f);
+			
+			// 캐릭터 타격 시 더 큰 스케일
+			float VFXScale = bHitCharacter ? 1.5f : 1.0f;
+			ImpactVFXComponent->SetWorldScale3D(FVector(VFXScale, VFXScale, VFXScale));
+			
+			// VFX 색상 설정 (캐릭터 타격 시 빨간색, 지형 타격 시 주황색)
+			FLinearColor ImpactColor = bHitCharacter ? FLinearColor::Red : FLinearColor(1.0f, 0.5f, 0.0f, 1.0f);
+			ImpactVFXComponent->SetColorParameter(FName("ImpactColor"), ImpactColor);
+		}
+	}
+
+	// === 카메라 쉐이크 (가까운 플레이어만) ===
+	if (bHitCharacter && CameraShakeComponent)
+	{
+		// 강한 충격 카메라 쉐이크 설정
+		FGS_CameraShakeInfo ImpactShakeInfo;
+		ImpactShakeInfo.Intensity = 4.0f;
+		ImpactShakeInfo.MaxDistance = 1000.0f;
+		ImpactShakeInfo.MinDistance = 100.0f;
+		ImpactShakeInfo.PropagationSpeed = 500000.0f;
+		ImpactShakeInfo.bUseFalloff = true;
+		
+		// 충돌 지점을 중심으로 카메라 쉐이크 재생
+		CameraShakeComponent->PlayCameraShakeAtLocation(ImpactShakeInfo, ImpactLocation);
 	}
 }
 

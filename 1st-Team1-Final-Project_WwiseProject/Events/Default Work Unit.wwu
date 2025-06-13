@@ -3,31 +3,6 @@
 	<Events>
 		<WorkUnit Name="Default Work Unit" ID="{8F441750-37AA-4CA2-9723-168A80C284C9}" PersistMode="Standalone">
 			<ChildrenList>
-				<Event Name="Play_waves" ID="{D4D99DFE-1AFF-4742-A8A6-B7C19192CD0A}">
-					<ChildrenList>
-						<Action Name="" ID="{C4813173-6457-4203-BDB1-595480746FD8}" ShortID="331683376">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="waves" ID="{B4424FFC-C163-4A4B-9906-F144DCBF5E84}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
-				<Event Name="Stop_waves" ID="{CEB75CC5-195D-480A-8494-6222F467BB05}">
-					<ChildrenList>
-						<Action Name="" ID="{ECB2039B-E37A-4270-BE18-2604E82CE5EE}" ShortID="953075213">
-							<PropertyList>
-								<Property Name="ActionType" Type="int16" Value="2"/>
-							</PropertyList>
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="waves" ID="{B4424FFC-C163-4A4B-9906-F144DCBF5E84}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
 				<Event Name="FootSteps" ID="{ACB43239-CB8C-41BC-9AC2-2E9257233BFE}">
 					<ChildrenList>
 						<Action Name="" ID="{91427B88-7F96-43AA-88D6-17E3A5D51E28}" ShortID="429641729">
@@ -749,6 +724,28 @@
 											<ReferenceList>
 												<Reference Name="Target">
 													<ObjectRef Name="EV_Drakhar_Flying" ID="{915CC522-5FE6-424B-8556-43C6C0B49D82}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Drakhar_DraconicFuryProjectile_Impact" ID="{6CC63D62-1048-46DC-B03B-560D5B86DEF7}">
+									<ChildrenList>
+										<Action Name="" ID="{075ECED8-EBD5-44D7-93DD-18DE1EE9CAE4}" ShortID="14399628">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_DraconicFury_Impact" ID="{C4E516D7-AB2B-42F1-ADC3-40F447A381F8}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Drakhar_DraconicFuryProjectile_Hit" ID="{3F91B356-9681-4E2A-8026-856DB43E3FF9}">
+									<ChildrenList>
+										<Action Name="" ID="{302E924E-4D67-44E0-B6D9-9CC61C5104B6}" ShortID="977711839">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_DraconicFury_Hit" ID="{D4962418-6632-4C36-AFC2-8FB7E785B824}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>
