@@ -7,6 +7,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 AGS_Guardian::AGS_Guardian()
@@ -36,12 +37,6 @@ void AGS_Guardian::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 	DOREPLIFETIME(ThisClass, MoveSpeed);
 }
 
-
-void AGS_Guardian::OnRep_MoveSpeed()
-{
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
-}
-
 void AGS_Guardian::LeftMouse()
 {
 }
@@ -56,6 +51,11 @@ void AGS_Guardian::CtrlStop()
 
 void AGS_Guardian::RightMouse()
 {
+}
+
+void AGS_Guardian::OnRep_MoveSpeed()
+{
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
 void AGS_Guardian::MeleeAttackCheck()
@@ -104,22 +104,35 @@ void AGS_Guardian::MeleeAttackCheck()
 					AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
 					if (!Drakhar->GetIsFeverMode())
 					{
-						//UE_LOG(LogTemp,Warning, TEXT("@@@@@@@@@@@Not Fever Mode"));
-						
 						Drakhar->MulticastRPCSetFeverGauge(10.f);
 					}
-					//UE_LOG(LogTemp,Warning, TEXT("@@@@@@@@@@@@@@@Fever Mode"));
 				}
 			}
 		}
-
 		//MulticastRPCDrawDebugLine(Start, End, MeleeAttackRange, MeleeAttackRadius, Forward, bIsHitDetected);
 	}
 }
 
+void AGS_Guardian::CheckAttackRange(float AttackRange, float AttackRadius)
+{
+	TArray<FHitResult> OutHitResults;
+	TSet<AGS_Character*> DamagedCharacters;
+	FCollisionQueryParams Params(NAME_None, false, this);
 
+	const float MeleeAttackRange = 200.f;
+	const float MeleeAttackRadius = 150.f;
 
+	const FVector Forward = GetActorForwardVector();
+	const FVector Start = GetActorLocation() + Forward * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const FVector End = Start + GetActorForwardVector() * MeleeAttackRange;
 
+	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(MeleeAttackRadius), Params);
+}
+
+void AGS_Guardian::AttackCheck()
+{
+	
+}
 
 void AGS_Guardian::OnRep_GuardianState()
 {
@@ -152,4 +165,21 @@ void AGS_Guardian::MulticastRPCDrawDebugLine_Implementation(const FVector& Start
 	const FVector Origin = Start + (End - Start) * 0.5f;
 	DrawDebugCapsule(GetWorld(), Origin, CapsuleRange * 0.5f, Radius, FRotationMatrix::MakeFromZ(Forward).ToQuat(),
 		Color, false, 5.f);
+}
+
+void AGS_Guardian::MulticastRPCDrawDebugCapsule_Implementation(bool bIsOverlap, const FVector& PillarLocation, float PillarHalfHeight, float PillarRadius)
+{
+	FColor DebugColor = bIsOverlap ? FColor::Green : FColor::Red;
+	DrawDebugCapsule(
+		GetWorld(),
+		PillarLocation,       // 캡슐의 중심 위치
+		PillarHalfHeight,     // 캡슐의 절반 높이
+		PillarRadius,         // 캡슐의 반지름
+		FQuat::Identity,      // 회전 (수직 캡슐이므로 기본값)
+		DebugColor,           // 표시할 색상
+		false,                // 영구적으로 표시할지 여부
+		2.0f,                 // 표시될 시간 (초)
+		0,                    // 우선순위 (보통 0)
+		1.0f                  // 선 두께
+	);
 }

@@ -25,10 +25,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	//[combo attack variables]
-	UPROPERTY(ReplicatedUsing=OnRep_CanCombo)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing=OnRep_CanCombo)
 	bool bCanCombo;
-	
 	bool bClientCanCombo;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool IsAttacking;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> Projectile;
@@ -37,6 +38,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> DraconicProjectile;
 
+	
 	// === Wwise 사운드 이벤트들 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "NormalAttack"))
 	UAkAudioEvent* ComboAttackSoundEvent;
@@ -147,6 +149,12 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCSetFeverGauge(float InValue);
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCFeverMontagePlay();
+	
+	//new skill
+	void FeverComoLastAttack();
+	
 	//max fever gage
 	void StartFeverMode();
 	//when fever gage > 0
@@ -220,6 +228,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
 	TObjectPtr<UAnimMontage> ComboAttackMontage;
 	
+	
 	//[dash skill]
 	UPROPERTY()
 	TSet<AGS_Character*> DamagedCharacters;
@@ -247,12 +256,18 @@ private:
 	//[Fever Mode]
 	float MaxFeverGage;
 	float CurrentFeverGage;
-	
-	//UPROPERTY(ReplicatedUsing=OnRep_FeverMode)
+	float DefaultAttackPower;
 	bool IsFeverMode;
-	
 	FTimerHandle FeverTimer;
+
+	float PillarForwardOffset = 300.f;
+	float PillarSideSpacing = 150.f;
+	float PillarRadius = 50.f;
+	float PillarHalfHeight = 150.f;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
+	TObjectPtr<UAnimMontage> FeverOnMontage;
+
 	//[draconic fury]
 	void GetRandomDraconicFuryTarget();
 	
