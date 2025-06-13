@@ -103,8 +103,8 @@ void AGS_SeekerMerciArrow::InitHomingTarget(AActor* Target)
 
 		ProjectileMovementComponent->HomingTargetComponent = RootPrim;
 		ProjectileMovementComponent->bIsHomingProjectile = true;
-		ProjectileMovementComponent->InitialSpeed = 1500.f;
-		ProjectileMovementComponent->MaxSpeed = 2000.f;
+		ProjectileMovementComponent->InitialSpeed = 3000.f;
+		ProjectileMovementComponent->MaxSpeed = 3000.f;
 		ProjectileMovementComponent->HomingAccelerationMagnitude = 20000.f;
 		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 		ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileMovementComponent->InitialSpeed;

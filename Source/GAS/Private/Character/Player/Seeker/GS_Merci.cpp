@@ -58,7 +58,10 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		// 활 당기는 사운드 재생
 		PlaySound(BowPullSound);
 		
-		Client_StartZoom(); // 줌인
+		if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
+		{
+			Client_StartZoom(); // 줌인
+		}
 	}
 	else
 	{
@@ -91,7 +94,10 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 
 	}
 
-	Client_StopZoom();
+	if(!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
+	{
+		Client_StopZoom();
+	}
 	//Client_SetWidgetVisibility(false);
 }
 
