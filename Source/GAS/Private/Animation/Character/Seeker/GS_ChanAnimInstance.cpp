@@ -3,10 +3,14 @@
 
 #include "Animation/Character/Seeker/GS_ChanAnimInstance.h"
 #include "Character/Player/Seeker/GS_Chan.h"
+#include "Animation/Character/Seeker/GS_ChooserInputObj.h"
+#include "Character/E_Character.h"
 
 void UGS_ChanAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
+	
+	ChooserInputObj->CharacterType = ECharacterType::Chan;
 }
 
 void UGS_ChanAnimInstance::NativeUpdateAnimation(float DeltaSeconds)

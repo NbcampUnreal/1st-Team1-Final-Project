@@ -7,9 +7,10 @@
 #include "E_SeekerAnim.h"
 #include "GS_SeekerAnimInstance.generated.h"
 
-/**
- * 
- */
+class UChooserTable;
+class UGS_ChooserInputObj;
+struct UPoseSearchDatabase;
+
 UCLASS()
 class GAS_API UGS_SeekerAnimInstance : public UGS_CharacterAnimInstance
 {
@@ -28,31 +29,22 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Update")
 	void UpdateState();
 
-	// Movement control Flags 
-	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"),Category = "Movement")
-	bool IsMoving();
-
-	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
-	bool ShouldTurnInPlace();
-
 	UFUNCTION()
 	bool GetMustTurnInPlace();
 
 	UFUNCTION()
 	void SetMustTurnInPlace(bool MustTurn);
 
-	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
-	bool ShouldSpinTransition();
-
-	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
-	bool IsPivoting();
-
-	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
-	bool IsStarting();
-
 	// Offset Root Bone
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "OffsetRootBone")
 	float GetOffsetRootTranslationHalfLife();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Motion Matching")
+	UPoseSearchDatabase* PoseSearchDatabase;
+
+	// Chooser
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Motion Matching")
+	TObjectPtr<UGS_ChooserInputObj> ChooserInputObj;
 
 	// Lean
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Lean")
@@ -60,6 +52,10 @@ public:
 	
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Lean")
 	float Get_LeanAmount();
+
+	// Steering
+	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Steering")
+	bool EnableSteering();
 
 	// Slot Change Control Value
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
@@ -69,45 +65,26 @@ public:
 	bool IsPlayingFullBodyMontage = false;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
-	FTransform CharacterTransform;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
-	FTransform RootTransform;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
 	FVector Acceleration;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
-	FVector Velocity;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
 	FVector VelocityLastFrame;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
-	float Speed2D;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
 	FVector VelocityAcceleration;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
 	FVector LastNonZeroVelocity;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
-	FVector FutureVelocity;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateValue")
-	ERotationMode RotationMode;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateValue")
-	EMovementState MovementState;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateValue")
-	EGait Gait;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateValue")
 	ERotationMode LastRotationMode;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateValue")
-	EMovementState LastMovementState;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateValue")
 	EGait LastGait;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Database")
-	TArray<FName> CurrentDatabasesTags;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Control")
-	bool bMustTurnInPlace = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OffsetRootBone")
 	bool bUseOffsetRootBone = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bIsMoving = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trajectory")
+	float PreviousDesiredController;
 };
