@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
+#include "Character/E_Character.h"
 #include "GS_Character.generated.h"
 
 class UGS_StatComp;
@@ -14,21 +15,6 @@ class UGS_HPText;
 class UGS_HPWidget;
 class AGS_Weapon;
 class UAkAudioEvent;
-
-UENUM(BlueprintType)
-enum class ECharacterType : uint8
-{
-	Ares,
-	Chan,
-	Merci,
-	Reina,
-	Drakhar,
-	SmallClaw,
-	NeedleFang,
-	IronFang,
-	ShadowFang,
-	StoneClaw
-};
 
 USTRUCT(BlueprintType)
 struct FWeaponSlot

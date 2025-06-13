@@ -11,8 +11,9 @@ class UUniformGridPanel;
 class UGS_RuneInventoryWidget;
 class UGS_StatPanelWidget;
 class UGS_RuneGridCellWidget;
-class UGS_ArcaneBoardManager;
 class UGS_DragVisualWidget;
+class UGS_ArcaneBoardManager;
+class UGS_ArcaneBoardLPS;
 
 /**
  * 아케인 보드 메인 위젯
@@ -59,12 +60,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void UpdateGridVisuals();
-
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void ApplyChanges();
-
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void ResetBoard();
 
 	//룬 선택 관련 함수
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -143,6 +138,9 @@ protected:
 	UGS_DragVisualWidget* SelectionVisualWidget;
 
 private:
-	void BindManagerEvents();
-	void UnbindManagerEvents();
+	void BindToLPS();
+	void UnbindFromLPS();
+
+	UPROPERTY()
+	UGS_ArcaneBoardLPS* ArcaneBoardLPS;
 };

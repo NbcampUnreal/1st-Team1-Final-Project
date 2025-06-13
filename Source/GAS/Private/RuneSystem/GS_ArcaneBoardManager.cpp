@@ -203,7 +203,7 @@ bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
 bool UGS_ArcaneBoardManager::RemoveRune(uint8 RuneID)
 {
 	//배치된 룬 목록에서 해당 룬 찾기
-	uint8 RuneIndex = INDEX_NONE;
+	int8 RuneIndex = INDEX_NONE;
 	for (uint8 i = 0; i < PlacedRunes.Num(); ++i)
 	{
 		if (PlacedRunes[i].RuneID == RuneID)
