@@ -24,6 +24,7 @@ public:
 	static const FName TargetActorKey;
 	static const FName CommandKey;
 	static const FName TargetLockedKey;
+	static const FName DebuffLockedKey;
 	static const FName CanAttackKey;
 	static const FName LastAttackTimeKey;
 
