@@ -65,12 +65,20 @@ public:
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void ForceApplyChanges();
 
+    // 위젯 등록/해제 함수 추가
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void SetCurrUIWidget(UGS_ArcaneBoardWidget* Widget);
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void ClearCurrUIWidget();
+
     //ENUM 통일 전 임시
     ECharacterClass MapSeekerJobToCharacterClass(ESeekerJob SeekerJob) const;
 
 private:
-    void RequestServerStatsUpdate();
-
     UPROPERTY()
     TWeakObjectPtr<AGS_PlayerState> BoundPlayerState;
+
+    UPROPERTY()
+    TWeakObjectPtr<UGS_ArcaneBoardWidget> CurrentUIWidget;
 };
