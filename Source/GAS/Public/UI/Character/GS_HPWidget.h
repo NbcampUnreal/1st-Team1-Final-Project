@@ -8,6 +8,7 @@
 class UGS_StatComp;
 class AGS_Character;
 class UProgressBar;
+class UImage;
 
 UCLASS()
 class GAS_API UGS_HPWidget : public UUserWidget
@@ -32,10 +33,10 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
-	TObjectPtr<UProgressBar> HPBarWidget;
+	TObjectPtr <UProgressBar> HPBarWidget;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<AGS_Character> OwningCharacter;
-	
+
 	float MaxHealth;
 };

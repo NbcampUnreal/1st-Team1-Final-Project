@@ -89,6 +89,7 @@ public:
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
 	void SetHPBarWidget(UGS_HPWidget* InHPBarWidget);
 	virtual FGenericTeamId GetGenericTeamId() const override;
+	//void SetClassImage(UGS_HPText* InHPTextWidget);
 	
 	UFUNCTION(BlueprintPure, Category = "Team")
 	bool IsEnemy(const AGS_Character* Other) const;

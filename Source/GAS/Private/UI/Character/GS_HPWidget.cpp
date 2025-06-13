@@ -14,10 +14,6 @@ void UGS_HPWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	//if (OwningCharacter)
-	
-
-	//SetOwningActor()
 	if (!IsValid(OwningCharacter))
 	{
 		OwningCharacter = Cast<AGS_Character>(GetOwningPlayer()->GetPawn());

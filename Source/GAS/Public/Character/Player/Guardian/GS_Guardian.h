@@ -26,7 +26,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
+	
 	UPROPERTY()
 	TObjectPtr<UGS_DrakharAnimInstance> GuardianAnim;
 
@@ -35,19 +35,25 @@ public:
 
 	UPROPERTY(ReplicatedUsing=OnRep_MoveSpeed)
 	float MoveSpeed;
-
-	UFUNCTION()
-	void OnRep_MoveSpeed();
 	
 	virtual void LeftMouse();
 	virtual void Ctrl();
 	virtual void CtrlStop();
 	virtual void RightMouse();
 	
+	UFUNCTION()
+	void OnRep_MoveSpeed();
+	
 	//[attck check function]
 	UFUNCTION()
 	void MeleeAttackCheck();
 
+	UFUNCTION()
+	void CheckAttackRange(float AttackRange, float AttackRadius);
+
+	UFUNCTION()
+	void AttackCheck();
+	
 	UFUNCTION()
 	void OnRep_GuardianState();
 
@@ -55,22 +61,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void QuitGuardianSkill();
 	
-	
 	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCDrawDebugLine(const FVector& Start, const FVector& End, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit);
+	void MulticastRPCDrawDebugLine(const FVector& Start, const FVector& End,
+		float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit);
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCDrawDebug(const FVector& Start, float Radius, bool bHit);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCDrawDebugCapsule(bool bIsOverlap, const FVector& PillarLocation, float PillarHalfHeight, float PillarRadius);
+	
 protected:
 	UPROPERTY()
 	EGuardianState ClientGuardianState;
 	
 	float NormalMoveSpeed;
 	float SpeedUpMoveSpeed;
-
-private:
-	//for fever mode
-	float FeverTime;
-	float FeverGage;
-	
 };

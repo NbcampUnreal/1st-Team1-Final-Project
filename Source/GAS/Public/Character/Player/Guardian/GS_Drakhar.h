@@ -5,6 +5,7 @@
 #include "Character/Component/GS_CameraShakeTypes.h"
 #include "GS_Drakhar.generated.h"
 
+class UGS_DrakharFeverGauge;
 class AGS_DrakharProjectile;
 class UAkAudioEvent;
 class UAkComponent;
@@ -13,6 +14,8 @@ class UNiagaraComponent;
 class UArrowComponent;
 class UGS_CameraShakeComponent;
 struct FGS_CameraShakeInfo;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFeverGageChangedDelegate, float);
 
 UCLASS()
 class GAS_API AGS_Drakhar : public AGS_Guardian
@@ -32,10 +35,11 @@ public:
 	FGS_CameraShakeInfo EarthquakeShakeInfo;
 
 	//[combo attack variables]
-	UPROPERTY(ReplicatedUsing=OnRep_CanCombo)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing=OnRep_CanCombo)
 	bool bCanCombo;
-	
 	bool bClientCanCombo;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool IsAttacking;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> Projectile;
@@ -44,6 +48,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> DraconicProjectile;
 
+	
 	// === Wwise 사운드 이벤트들 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "NormalAttack"))
 	UAkAudioEvent* ComboAttackSoundEvent;
@@ -85,6 +90,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX|Drakhar", meta = (DisplayName = "WingRush VFX Spawn Point"))
 	UArrowComponent* WingRushVFXSpawnPoint;
 
+	FOnCurrentFeverGageChangedDelegate OnCurrentFeverGageChanged;
+	
 	// === 어스퀘이크 VFX 시스템 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Earthquake", meta = (DisplayName = "Ground Crack VFX"))
 	UNiagaraSystem* GroundCrackVFX;
@@ -189,7 +196,30 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPCStopCtrl();
+	
+	//[Fever Mode]
+	FORCEINLINE float GetCurrentFeverGage() const { return CurrentFeverGage; }
+	FORCEINLINE float GetMaxFeverGage() const { return MaxFeverGage; }
+	FORCEINLINE bool GetIsFeverMode() const {return IsFeverMode; }
+	
+	void SetFeverGageWidget(UGS_DrakharFeverGauge* InDrakharFeverGageWidget);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCSetFeverGauge(float InValue);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCFeverMontagePlay();
+	
+	//new skill
+	void FeverComoLastAttack();
+	
+	//max fever gage
+	void StartFeverMode();
+	//when fever gage > 0
+	void DecreaseFeverGauge();
+	//minus 1 values per one seconds
+	void MinusFeverGaugeValue();
+	
 	// === Wwise 사운드 재생 함수 ===
 	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Normal Attack"))
 	void PlayComboAttackSound();
@@ -294,6 +324,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
 	TObjectPtr<UAnimMontage> ComboAttackMontage;
 	
+	
 	//[dash skill]
 	UPROPERTY()
 	TSet<AGS_Character*> DamagedCharacters;
@@ -317,12 +348,30 @@ private:
 
 	//[Draconic Fury]
 	TArray<FTransform> DraconicFuryTargetArray;
+
+	//[Fever Mode]
+	float MaxFeverGage;
+	float CurrentFeverGage;
+	float DefaultAttackPower;
+	bool IsFeverMode;
+	FTimerHandle FeverTimer;
+
+	float PillarForwardOffset = 300.f;
+	float PillarSideSpacing = 150.f;
+	float PillarRadius = 50.f;
+	float PillarHalfHeight = 150.f;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
+	TObjectPtr<UAnimMontage> FeverOnMontage;
+
+	//[draconic fury]
 	void GetRandomDraconicFuryTarget();
 	void EndDraconicFury();
 	
 	// 사운드 중복 재생 방지
 	bool bDraconicFurySoundPlayed;
 
+	
 	// === Wwise 관련 헬퍼 함수 ===
 	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);
 	UAkComponent* GetOrCreateAkComponent();
