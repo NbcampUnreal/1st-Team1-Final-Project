@@ -38,6 +38,10 @@ public:
 	UPROPERTY()
 	TObjectPtr<UGS_ProjectilePoolComp> OwningPool;
 
+	FTimerHandle LifeSpanHandle;
+
+
+
 	// Audio Events - Wwise
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
 	UAkAudioEvent* ImpactSoundEvent;
@@ -74,6 +78,8 @@ public:
 	bool IsReady() const;
 
 	void StickWithVisualOnly(const FHitResult& Hit);
+	
+	void OnLifeSpanExpired();
 
 protected:
 	virtual void BeginPlay() override;
