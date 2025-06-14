@@ -41,7 +41,7 @@ public:
 	UGS_ArcaneBoardManager* GetBoardManager() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void RefreshForCurrentCharacter();
+	void RefreshForCurrCharacter();
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void GenerateGridLayout();

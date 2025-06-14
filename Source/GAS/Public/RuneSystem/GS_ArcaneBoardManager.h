@@ -99,9 +99,6 @@ public:
 	bool PreviewRunePlacement(uint8 RuneID, const FIntPoint& Pos, TArray<FIntPoint>& OutAffectedCells);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void GetGridDimensions(int32& OutRows, int32& OutColumns);
-
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	bool GetCellData(const FIntPoint& Pos, FGridCellData& OutCellData);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
