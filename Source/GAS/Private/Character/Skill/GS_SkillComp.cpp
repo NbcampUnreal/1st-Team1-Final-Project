@@ -114,6 +114,15 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 	Skill->Damage = Info.Damage;
 	Skill->SkillAnimMontages = Info.Montages;
 	Skill->SkillImage = Info.Image;
+	
+	// VFX 정보 설정
+	Skill->SkillCastVFX = Info.SkillCastVFX;
+	Skill->SkillRangeVFX = Info.SkillRangeVFX;
+	Skill->SkillImpactVFX = Info.SkillImpactVFX;
+	Skill->SkillEndVFX = Info.SkillEndVFX;
+	Skill->SkillVFXScale = Info.SkillVFXScale;
+	Skill->SkillVFXDuration = Info.SkillVFXDuration;
+	
 	SkillMap.Add(Slot, Skill);
 }
 

@@ -14,6 +14,7 @@ class UPostProcessComponent;
 class UMaterialInterface;
 class UGS_StatComp;
 class AGS_PlayerState;
+class UGS_DebuffVFXComponent;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -83,6 +84,12 @@ public:
 	
 	UFUNCTION()
 	void HandleLowHealthEffect(UGS_StatComp* InStatComp);
+
+	// =======================
+	// 디버프 VFX 컴포넌트
+	// =======================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
+	UGS_DebuffVFXComponent* DebuffVFXComponent;
 
 	// ================
 	// 함정 VFX 컴포넌트

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GS_SkillComp.h"
+#include "NiagaraSystem.h"
 #include "GS_SkillBase.generated.h"
 
 class AGS_Character;
@@ -22,6 +23,25 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	UTexture2D* SkillImage;
+
+	// VFX 관련 속성들 (데이터 테이블에서 설정됨)
+	UPROPERTY(BlueprintReadOnly, Category = "VFX")
+	TObjectPtr<UNiagaraSystem> SkillCastVFX;
+
+	UPROPERTY(BlueprintReadOnly, Category = "VFX")
+	TObjectPtr<UNiagaraSystem> SkillRangeVFX;
+
+	UPROPERTY(BlueprintReadOnly, Category = "VFX")
+	TObjectPtr<UNiagaraSystem> SkillImpactVFX;
+
+	UPROPERTY(BlueprintReadOnly, Category = "VFX")
+	TObjectPtr<UNiagaraSystem> SkillEndVFX;
+
+	UPROPERTY(BlueprintReadOnly, Category = "VFX")
+	FVector SkillVFXScale = FVector(1.0f, 1.0f, 1.0f);
+
+	UPROPERTY(BlueprintReadOnly, Category = "VFX")
+	float SkillVFXDuration = 3.0f;
 
 	UTexture2D* GetSkillImage();
 	

@@ -6,6 +6,9 @@
 #include "Character/GS_Character.h"
 #include "Character/Debuff/GS_DebuffBase.h"
 #include "Net/UnrealNetwork.h"
+#include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
+#include "Character/Component/GS_DebuffVFXComponent.h"
 
 
 UGS_DebuffComp::UGS_DebuffComp()
@@ -38,6 +41,12 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AActor* Attacker)
 		RefreshDebuffTimer(Existing, Row->Duration);
 		UpdateReplicatedDebuffList(); // 복제 정보 갱신
 		UE_LOG(LogTemp, Error, TEXT("Debuff Existing: %s"), *UEnum::GetValueAsString(Type));
+		
+		// ===============================
+		// VFX 트리거 (기존 디버프 갱신 시에도)
+		// ===============================
+		TriggerDebuffVFX(Type);
+		
 		return;
 	}
 
@@ -56,6 +65,11 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AActor* Attacker)
 		AddDebuffToQueue(NewDebuff);
 	}
 	UpdateReplicatedDebuffList(); // 복제 정보 갱신
+	
+	// ===============================
+	// VFX 트리거 (새로운 디버프 적용 시)
+	// ===============================
+	TriggerDebuffVFX(Type);
 }
 
 void UGS_DebuffComp::RemoveDebuff(EDebuffType Type)
@@ -406,4 +420,28 @@ void UGS_DebuffComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UGS_DebuffComp, ReplicatedDebuffs);
+}
+
+void UGS_DebuffComp::TriggerDebuffVFX(EDebuffType Type)
+{
+	// 서버에서만 실행
+	if (!GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	// =======================
+	// DebuffVFX 컴포넌트
+	// =======================
+	if (UGS_DebuffVFXComponent* VFXComponent = GetOwner()->FindComponentByClass<UGS_DebuffVFXComponent>())
+	{
+		VFXComponent->PlayDebuffVFX(Type);
+		UE_LOG(LogTemp, Log, TEXT("%s: %s 디버프 VFX 트리거 (컴포넌트 사용)"), 
+			*GetOwner()->GetName(), 
+			*UEnum::GetValueAsString(Type));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s: DebuffVFX 컴포넌트를 찾을 수 없음"), *GetOwner()->GetName());
+	}
 }

@@ -14,6 +14,7 @@
 #include "GS_Monster.generated.h"
 
 class UGS_MonsterAnimInstance;
+class UGS_DebuffVFXComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMonsterDead, AGS_Monster*, DeadUnit);
 
@@ -70,6 +71,12 @@ public:
 	// ===================
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	class UGS_MonsterAudioComponent* MonsterAudioComponent;
+
+	// =======================
+	// 디버프 VFX 컴포넌트
+	// =======================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
+	UGS_DebuffVFXComponent* DebuffVFXComponent;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();

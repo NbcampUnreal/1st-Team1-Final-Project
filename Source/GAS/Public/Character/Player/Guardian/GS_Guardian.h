@@ -5,6 +5,7 @@
 #include "GS_Guardian.generated.h"
 
 class UGS_DrakharAnimInstance;
+class UGS_DebuffVFXComponent;
 
 UENUM(BlueprintType)
 enum class EGuardianState : uint8
@@ -70,6 +71,12 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCDrawDebugCapsule(bool bIsOverlap, const FVector& PillarLocation, float PillarHalfHeight, float PillarRadius);
+
+	// ==================
+	// 디버프 VFX 컴포넌트
+	// ==================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
+	UGS_DebuffVFXComponent* DebuffVFXComponent;
 	
 protected:
 	UPROPERTY()
