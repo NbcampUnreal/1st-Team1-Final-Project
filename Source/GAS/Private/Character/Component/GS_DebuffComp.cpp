@@ -19,6 +19,7 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AActor* Attacker)
 {
 	if (!GetOwner()->HasAuthority())
 	{
+		Server_ApplyDebuff(Type, Attacker);
 		return;
 	}
 
@@ -61,6 +62,7 @@ void UGS_DebuffComp::RemoveDebuff(EDebuffType Type)
 {
 	if (!GetOwner()->HasAuthority())
 	{
+		Server_RemoveDebuff(Type);
 		return;
 	}
 
@@ -382,6 +384,16 @@ void UGS_DebuffComp::UpdateReplicatedDebuffList()
 		Info.RemainingTime = Debuff->GetRemainingTime(Now);
 		ReplicatedDebuffs.Add(Info);
 	}
+}
+
+void UGS_DebuffComp::Server_ApplyDebuff_Implementation(EDebuffType Type, AActor* Attacker)
+{
+	ApplyDebuff(Type, Attacker);
+}
+
+void UGS_DebuffComp::Server_RemoveDebuff_Implementation(EDebuffType Type)
+{
+	RemoveDebuff(Type);
 }
 
 void UGS_DebuffComp::Server_ClearAllDebuffs_Implementation()

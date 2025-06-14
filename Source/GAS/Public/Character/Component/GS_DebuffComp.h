@@ -67,6 +67,12 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_ClearAllDebuffs();
 
+	UFUNCTION(Server, Reliable)
+	void Server_ApplyDebuff(EDebuffType Type, AActor* Attacker);
+
+	UFUNCTION(Server, Reliable)
+	void Server_RemoveDebuff(EDebuffType Type);
+
 	UPROPERTY(EditDefaultsOnly)
 	UDataTable* DebuffDataTable;
 
