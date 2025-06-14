@@ -171,6 +171,28 @@ bool UGS_SeekerAnimInstance::EnableSteering()
 	return ChooserInputObj->MovementState == EMovementState::Moving;
 }
 
+FVector2D UGS_SeekerAnimInstance::Get_AOValue()
+{
+	FVector2D AO = FVector2D::ZeroVector;
+	
+	if (OwnerCharacter && OwnerCharacter->GetController())
+	{	const FRotator ControllerRot = OwnerCharacter->GetController()->GetControlRotation();
+		const FRotator RootRot = ChooserInputObj->RootTransform.Rotator();
+		
+		FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(ControllerRot, RootRot);
+
+		AO.X = DeltaRot.Pitch;
+		AO.Y = DeltaRot.Yaw;
+	}
+	
+	return AO;
+}
+
+bool UGS_SeekerAnimInstance::Enable_AO()
+{
+	return FMath::Abs(Get_AOValue().X) < 90.0f && ChooserInputObj->RotationMode == ERotationMode::Strafe;
+}
+
 void UGS_SeekerAnimInstance::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
