@@ -7,6 +7,7 @@
 #include "Character/Interface/GS_AttackInterface.h"
 #include "AkGameplayTypes.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrowNormal.h"
+#include "Animation/Character/E_SeekerAnim.h"
 #include "GS_Merci.generated.h"
 
 class AGS_SeekerMerciArrow;
