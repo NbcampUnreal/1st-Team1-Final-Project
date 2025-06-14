@@ -92,7 +92,7 @@ void UGS_ArcaneBoardLPS::ApplyBoardChanges()
     }
 }
 
-void UGS_ArcaneBoardLPS::OnBoardStatsChanged(const FGS_StatRow& NewStats)
+void UGS_ArcaneBoardLPS::OnBoardStatsChanged(const FArcaneBoardStats& NewStats)
 {
     RuneSystemStats = NewStats;
     UpdateStatsUI();
@@ -157,7 +157,7 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
 
     BoardManager->PlacedRunes.Empty();
     BoardManager->InitGridState();
-    BoardManager->CurrStatEffects = FGS_StatRow();
+    BoardManager->CurrBoardStats = FArcaneBoardStats();
     BoardManager->bHasUnsavedChanges = false;
 
     const FString SaveSlotName = TEXT("ArcaneBoardSave");

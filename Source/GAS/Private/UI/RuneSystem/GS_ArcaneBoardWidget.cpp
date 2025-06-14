@@ -218,11 +218,11 @@ void UGS_ArcaneBoardWidget::InitStatPanel()
 	{
 		StatPanel->InitStatList(BoardManager);
 
-		OnStatsChanged(BoardManager->CurrStatEffects);
+		OnStatsChanged(BoardManager->CurrBoardStats);
 	}
 }
 
-void UGS_ArcaneBoardWidget::OnStatsChanged(const FGS_StatRow& NewStats)
+void UGS_ArcaneBoardWidget::OnStatsChanged(const FArcaneBoardStats& NewStats)
 {
 	if (IsValid(StatPanel))
 	{

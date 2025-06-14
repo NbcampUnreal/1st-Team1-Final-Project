@@ -42,7 +42,8 @@ void UGS_StatComp::BeginPlay()
 		{
 			if (UGS_ArcaneBoardManager* Manager = LPS->GetOrCreateBoardManager())
 			{
-				FGS_StatRow RuneStats = Manager->AppliedStatEffects;
+				FArcaneBoardStats AppliedStats = Manager->AppliedBoardStats;
+				FGS_StatRow RuneStats = AppliedStats.RuneStats+ AppliedStats.BonusStats;
 				UpdateStat(RuneStats);
 
 				UE_LOG(LogTemp, Warning, TEXT("StatComp BeginPlay: 룬 스탯 적용 완료"));
