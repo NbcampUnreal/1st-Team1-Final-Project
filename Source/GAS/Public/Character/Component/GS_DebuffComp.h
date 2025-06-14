@@ -41,7 +41,7 @@ public:
 	UGS_DebuffComp();
 
 	// 디버프 적용
-	void ApplyDebuff(EDebuffType Type, AGS_Character* Attacker);
+	void ApplyDebuff(EDebuffType Type, AActor* Attacker);
 	void RemoveDebuff(EDebuffType Type);
 
 	// Type 디버프가 있는지 확인

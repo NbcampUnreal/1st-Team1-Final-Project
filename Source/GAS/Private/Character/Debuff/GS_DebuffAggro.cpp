@@ -17,7 +17,8 @@ void UGS_DebuffAggro::OnApply()
 		AGS_AIController* AIController = Cast<AGS_AIController>(TargetCharacter->GetController());
 		if (AIController)
 		{
-			AIController->LockTarget(OwnerCharacter);
+			AGS_Character* Cuaser = Cast<AGS_Character>(OwnerCharacter);
+			AIController->LockTarget(Cuaser);
 		}
 
 		// rts 조종 불가
