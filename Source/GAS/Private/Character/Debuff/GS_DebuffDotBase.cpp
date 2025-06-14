@@ -37,18 +37,18 @@ void UGS_DebuffDotBase::ApplyDotDamage()
     AController* InstigatorController = nullptr;
     AActor* DamageCauser = nullptr;
 
-    if (!OwnerCharacter)
+    if (!CauserActor)
     {
         UE_LOG(LogTemp, Error, TEXT("DOT: OwnerCharacter is nullptr"));
     }
 
-    if (IsValid(OwnerCharacter))
+    if (IsValid(CauserActor))
     {
-        if (AGS_Character* Cuaser = Cast<AGS_Character>(OwnerCharacter))
+        if (AGS_Character* CuaserCharacter = Cast<AGS_Character>(CauserActor))
         {
-            InstigatorController = Cuaser->GetController();
+            InstigatorController = CuaserCharacter->GetController();
         }
-        DamageCauser = OwnerCharacter;
+        DamageCauser = CauserActor;
        
     }
 

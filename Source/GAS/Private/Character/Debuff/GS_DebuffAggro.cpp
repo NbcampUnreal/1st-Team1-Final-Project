@@ -17,7 +17,7 @@ void UGS_DebuffAggro::OnApply()
 		AGS_AIController* AIController = Cast<AGS_AIController>(TargetCharacter->GetController());
 		if (AIController)
 		{
-			AGS_Character* Cuaser = Cast<AGS_Character>(OwnerCharacter);
+			AGS_Character* Cuaser = Cast<AGS_Character>(CauserActor);
 			AIController->LockTarget(Cuaser);
 		}
 
