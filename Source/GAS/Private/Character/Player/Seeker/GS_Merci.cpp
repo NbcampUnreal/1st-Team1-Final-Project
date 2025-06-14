@@ -73,7 +73,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 {
 	if (!HasAuthority())
 	{
-		Server_ReleaseArrow(ArrowClass);
+		Server_ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 		return;
 	}
 
@@ -108,7 +108,7 @@ void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)
 
 void AGS_Merci::Server_ReleaseArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
-	ReleaseArrow(ArrowClass);
+	ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 }
 
 void AGS_Merci::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
