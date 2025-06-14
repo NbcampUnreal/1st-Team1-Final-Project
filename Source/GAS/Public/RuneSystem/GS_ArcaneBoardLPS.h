@@ -27,7 +27,7 @@ public:
     UGS_ArcaneBoardManager* BoardManager;
 
     UPROPERTY()
-    FGS_StatRow RuneSystemStats;
+    FArcaneBoardStats RuneSystemStats;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     ECharacterClass GetPlayerCharacterClass() const;
@@ -48,7 +48,7 @@ public:
     void ApplyBoardChanges();
 
     UFUNCTION()
-    void OnBoardStatsChanged(const FGS_StatRow& NewStats);
+    void OnBoardStatsChanged(const FArcaneBoardStats& NewStats);
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void SaveBoardConfig();
