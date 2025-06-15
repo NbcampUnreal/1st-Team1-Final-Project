@@ -9,6 +9,8 @@
 /**
  * 
  */
+class AGS_NeedleFangProjectile;
+
 UCLASS()
 class GAS_API AGS_NeedleFang : public AGS_Monster
 {
@@ -16,7 +18,13 @@ class GAS_API AGS_NeedleFang : public AGS_Monster
 
 public:
 	AGS_NeedleFang();
+	
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnProjectile();
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<AGS_NeedleFangProjectile> ProjectileClass;
 };

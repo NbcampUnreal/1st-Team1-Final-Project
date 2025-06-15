@@ -15,11 +15,7 @@ class GAS_API AGS_WeaponEquipable : public AGS_Weapon
 public:
 	AGS_WeaponEquipable();
 
-	virtual void SetOwningCharacter(AGS_Seeker* Character);
-
 protected:
 	virtual void PostInitializeComponents() override;
-	
-	UPROPERTY()
-	AGS_Seeker* OwnerCharacter;
+
 };

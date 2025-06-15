@@ -8,11 +8,12 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
-const FName AGS_AIController::HomePosKey(TEXT("HomePos"));
+const FName AGS_AIController::HomePosKey(TEXT("HomePosition"));
 const FName AGS_AIController::MoveLocationKey(TEXT("MoveLocation"));
-const FName AGS_AIController::TargetActorKey(TEXT("Target"));
-const FName AGS_AIController::CommandKey(TEXT("Command"));
+const FName AGS_AIController::TargetActorKey(TEXT("TargetActor"));
+const FName AGS_AIController::CommandKey(TEXT("RTSCommand"));
 const FName AGS_AIController::TargetLockedKey(TEXT("bTargetLocked"));
+const FName AGS_AIController::DebuffLockedKey(TEXT("bDebuffLocked"));
 const FName AGS_AIController::CanAttackKey(TEXT("bCanAttack"));
 const FName AGS_AIController::LastAttackTimeKey(TEXT("LastAttackTime"));
 
@@ -67,9 +68,13 @@ FGenericTeamId AGS_AIController::GetGenericTeamId() const
 	return FGenericTeamId::NoTeam;
 }
 
-//TODO: 캐릭터들로 나중에 테스트하기
 void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
+	if (Blackboard->GetValueAsBool(DebuffLockedKey))
+	{
+		return;
+	}
+	
 	if (Blackboard->GetValueAsBool(TargetLockedKey))
 	{
 		return;
@@ -121,15 +126,15 @@ void AGS_AIController::EnterConfuseState()
 {
 	PrevTargetActor = Cast<AActor>(Blackboard->GetValueAsObject(TargetActorKey));
 	Blackboard->ClearValue(TargetActorKey);
-	Blackboard->SetValueAsBool(TargetLockedKey, true);
+	Blackboard->SetValueAsBool(DebuffLockedKey, true);
 	PerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), false);
 }
 
 void AGS_AIController::ExitConfuseState()
 {
 	PerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), true);
-	Blackboard->SetValueAsBool(TargetLockedKey, false);
-	
+	Blackboard->SetValueAsBool(DebuffLockedKey, false);
+
 	if (PrevTargetActor.IsValid())
 	{
 		Blackboard->SetValueAsObject(TargetActorKey, PrevTargetActor.Get());
@@ -138,5 +143,5 @@ void AGS_AIController::ExitConfuseState()
 	{
 		PerceptionComponent->RequestStimuliListenerUpdate();
 	}
-	PrevTargetActor.Reset();     
+	PrevTargetActor.Reset();
 }

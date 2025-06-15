@@ -69,6 +69,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* ShiftAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* DoubleClickAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	TArray<UInputAction*> GroupKeyActions;
@@ -82,6 +85,13 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="Command")
 	FOnRTSCommandChanged OnRTSCommandChanged;
+
+	// UI 반응 사운드
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	UAkAudioEvent* CommandButtonSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound")
+	UAkAudioEvent* CommandCancelSound;
 
 	// 현재 선택된 유닛들
 	UFUNCTION(BlueprintCallable)
@@ -180,13 +190,6 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_RTSSkill(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc);
-
-	// UI 반응 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandButtonSound;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandCancelSound;
 
 	// UI 버튼 클릭 함수
 	UFUNCTION(BlueprintCallable, Category="RTS")
