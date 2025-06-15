@@ -9,6 +9,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "Character/Component/GS_DebuffVFXComponent.h"
 
 AGS_Guardian::AGS_Guardian()
 {
@@ -16,6 +20,11 @@ AGS_Guardian::AGS_Guardian()
 	
 	NormalMoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	SpeedUpMoveSpeed = 1200.f;
+
+	// ====================
+	// 디버프 VFX 컴포넌트 생성
+	// ====================
+	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
 }
 
 void AGS_Guardian::BeginPlay()

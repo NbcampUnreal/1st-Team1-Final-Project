@@ -6,6 +6,9 @@
 #include "Character/GS_Character.h"
 #include "Character/Debuff/GS_DebuffBase.h"
 #include "Net/UnrealNetwork.h"
+#include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
+#include "Character/Component/GS_DebuffVFXComponent.h"
 
 
 UGS_DebuffComp::UGS_DebuffComp()
@@ -23,7 +26,7 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AActor* Attacker)
 		return;
 	}
 
-	UE_LOG(LogTemp, Error, TEXT("Apply Debuff: %s"), *UEnum::GetValueAsString(Type));
+
 
 	// 해당 디버프 타입의 데이터 가져오기
 	const FDebuffData* Row = GetDebuffData(Type);
@@ -37,7 +40,13 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AActor* Attacker)
 		Existing->StartTime = GetWorld()->GetTimeSeconds(); // 시작 시간 재저장
 		RefreshDebuffTimer(Existing, Row->Duration);
 		UpdateReplicatedDebuffList(); // 복제 정보 갱신
-		UE_LOG(LogTemp, Error, TEXT("Debuff Existing: %s"), *UEnum::GetValueAsString(Type));
+
+		
+		// ===============================
+		// VFX 트리거 (기존 디버프 갱신 시에도)
+		// ===============================
+		TriggerDebuffVFX(Type);
+		
 		return;
 	}
 
@@ -56,6 +65,11 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AActor* Attacker)
 		AddDebuffToQueue(NewDebuff);
 	}
 	UpdateReplicatedDebuffList(); // 복제 정보 갱신
+	
+	// ===============================
+	// VFX 트리거 (새로운 디버프 적용 시)
+	// ===============================
+	TriggerDebuffVFX(Type);
 }
 
 void UGS_DebuffComp::RemoveDebuff(EDebuffType Type)
@@ -66,7 +80,7 @@ void UGS_DebuffComp::RemoveDebuff(EDebuffType Type)
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Remove Debuff: %s"), *UEnum::GetValueAsString(Type));
+
 
 	UGS_DebuffBase* Debuff = GetActiveDebuff(Type);
 	if (!Debuff)
@@ -118,7 +132,7 @@ void UGS_DebuffComp::ClearAllDebuffs()
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("ClearAllDebuffs"));
+
 
 	// 타이머 먼저 제거
 	for (auto& Elem : DebuffTimers)
@@ -197,6 +211,12 @@ void UGS_DebuffComp::RefreshDebuffTimer(UGS_DebuffBase* Debuff, float Duration)
 			{
 				if (!IsValid(WeakDebuff.Get())) return;
 				UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+				
+				// ===============================
+				// 디버프 만료 VFX 재생
+				// ===============================
+				TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+				
 				ValidDebuff->OnExpire();
 				DebuffTimers.Remove(ValidDebuff);
 				if (ConcurrentDebuffs.Contains(ValidDebuff))
@@ -229,6 +249,12 @@ void UGS_DebuffComp::CreateAndApplyConcurrentDebuff(UGS_DebuffBase* Debuff)
 		{
 			if (!IsValid(WeakDebuff.Get())) return;
 			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+			
+			// ===============================
+			// 디버프 만료 VFX 재생 (Concurrent 디버프용)
+			// ===============================
+			TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+			
 			ValidDebuff->OnExpire();
 			ConcurrentDebuffs.Remove(ValidDebuff);
 			DebuffTimers.Remove(ValidDebuff);
@@ -245,7 +271,7 @@ void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
 	{
 		if (Debuff->GetPriority() > CurrentDebuff->GetPriority())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Current Debuff Change by Priority"));
+	
 			// 현재 디버프의 타이머 제거
 			if (FTimerHandle* FoundHandle = DebuffTimers.Find(CurrentDebuff))
 			{
@@ -294,6 +320,12 @@ void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
 		{
 			if (!IsValid(WeakDebuff.Get())) return;
 			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+			
+			// ===============================
+			// 디버프 만료 VFX 재생 (Queue 디버프용)
+			// ===============================
+			TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+			
 			DebuffQueue.Remove(ValidDebuff);
 			DebuffTimers.Remove(ValidDebuff);
 			UpdateReplicatedDebuffList();
@@ -338,6 +370,12 @@ void UGS_DebuffComp::ApplyNextDebuff()
 		{
 			if (!IsValid(WeakDebuff.Get())) return;
 			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+			
+			// ===============================
+			// 디버프 만료 VFX 재생 (Current 디버프용)
+			// ===============================
+			TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+			
 			ValidDebuff->OnExpire();
 			DebuffTimers.Remove(ValidDebuff);
 			if (CurrentDebuff == ValidDebuff)
@@ -406,4 +444,38 @@ void UGS_DebuffComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UGS_DebuffComp, ReplicatedDebuffs);
+}
+
+void UGS_DebuffComp::TriggerDebuffVFX(EDebuffType Type)
+{
+	// 서버에서만 실행
+	if (!GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	// =======================
+	// DebuffVFX 컴포넌트
+	// =======================
+	if (UGS_DebuffVFXComponent* VFXComponent = GetOwner()->FindComponentByClass<UGS_DebuffVFXComponent>())
+	{
+		VFXComponent->PlayDebuffVFX(Type);
+	}
+}
+
+void UGS_DebuffComp::TriggerDebuffExpireVFX(EDebuffType Type)
+{
+	// 서버에서만 실행
+	if (!GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	// =======================
+	// DebuffVFX 컴포넌트 - 만료 VFX
+	// =======================
+	if (UGS_DebuffVFXComponent* VFXComponent = GetOwner()->FindComponentByClass<UGS_DebuffVFXComponent>())
+	{
+		VFXComponent->PlayDebuffExpireVFX(Type);
+	}
 }

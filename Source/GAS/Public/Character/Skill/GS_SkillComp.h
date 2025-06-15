@@ -88,6 +88,19 @@ public:
 
 	UFUNCTION()
 	UGS_SkillBase* GetSkillFromSkillMap(ESkillSlot Slot);
+
+	// VFX 재생 RPC
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayCastVFX(ESkillSlot Slot, FVector Location, FRotator Rotation);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayRangeVFX(ESkillSlot Slot, FVector Location, float Radius);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayImpactVFX(ESkillSlot Slot, FVector Location);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayEndVFX(ESkillSlot Slot, FVector Location, FRotator Rotation);
 	
 protected:
 	// Called when the game starts
