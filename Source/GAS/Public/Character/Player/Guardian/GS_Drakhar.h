@@ -327,7 +327,7 @@ private:
 	
 	//[dash skill]
 	UPROPERTY()
-	TSet<AGS_Character*> DamagedCharacters;
+	TSet<AGS_Character*> DamagedCharactersFromDash;
 	FVector DashStartLocation;
 	FVector DashEndLocation;
 	FVector DashDirection;

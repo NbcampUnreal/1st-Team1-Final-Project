@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/GS_Player.h"
+#include "CollisionShape.h"
 #include "GS_Guardian.generated.h"
 
 class UGS_DrakharAnimInstance;
@@ -47,12 +48,10 @@ public:
 	//[attck check function]
 	UFUNCTION()
 	void MeleeAttackCheck();
-
-	UFUNCTION()
-	void CheckAttackRange(float AttackRange, float AttackRadius);
-
-	UFUNCTION()
-	void AttackCheck();
+	
+	//[REFACTORING]
+	TSet<AGS_Character*> DetectPlayerInRange(const FVector& Start, float SkillRange, float Radius);
+	void ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& DamagedCharacters, float PlusDamge);
 	
 	UFUNCTION()
 	void OnRep_GuardianState();
@@ -69,7 +68,7 @@ public:
 	void MulticastRPCDrawDebug(const FVector& Start, float Radius, bool bHit);
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCDrawDebugCapsule(bool bIsOverlap, const FVector& PillarLocation, float PillarHalfHeight, float PillarRadius);
+	void MulticastRPCDrawDebugCapsule(bool bIsOverlap, const FVector& Location, float CapsuleHalfHeight, float CapsuleRadius);
 	
 protected:
 	UPROPERTY()
