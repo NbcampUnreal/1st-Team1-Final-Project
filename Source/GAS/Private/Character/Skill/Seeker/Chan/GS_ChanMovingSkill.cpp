@@ -36,16 +36,19 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			OwnerPlayer->SetSkillInputControl(false, false);
 
 			// =======================
-			// VFX 재생 - 데이터 테이블 기반
+			// VFX 재생 - 컴포넌트 RPC 사용
 			// =======================
-			FVector SkillLocation = OwnerCharacter->GetActorLocation();
-			FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+			if (OwningComp)
+			{
+				FVector SkillLocation = OwnerCharacter->GetActorLocation();
+				FRotator SkillRotation = OwnerCharacter->GetActorRotation();
 			
-			// 스킬 시전 VFX 재생
-			Multicast_PlaySkillVFX(SkillLocation, SkillRotation);
+				// 스킬 시전 VFX 재생
+				OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
 			
-			// 스킬 범위 표시 VFX 재생
-			Multicast_PlaySkillRangeVFX(SkillLocation, 800.0f);
+				// 스킬 범위 표시 VFX 재생
+				OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, 800.0f);
+			}
 		}
 		// 무빙 스킬 사운드 재생
 		if (OwnerPlayer->MovingSkillSound)
@@ -70,6 +73,18 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 		//OwnerPlayer->Multicast_SetUseControllerRotationYaw(false);
 		OwnerPlayer->SetSkillInputControl(true, true);
+
+		// =======================
+		// 스킬 종료 VFX 재생
+		// =======================
+		if (OwningComp)
+		{
+			FVector SkillLocation = OwnerCharacter->GetActorLocation();
+			FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+			
+			// 스킬 종료 VFX 재생
+			OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
+		}
 	}
 }
 
@@ -112,10 +127,14 @@ void UGS_ChanMovingSkill::ExecuteSkillEffect()
 			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
 			{
 				ApplyEffectToDungeonMonster(TargetMonster);
+				// Impact VFX 재생 (오프셋은 추후 함수 시그니처 변경 시 적용)
+				TargetMonster->Multicast_PlayImpactVFX(SkillImpactVFX, SkillVFXScale);
 			}
 			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
 			{
 				ApplyEffectToGuardian(TargetGuardian);
+				// Impact VFX 재생 (오프셋은 추후 함수 시그니처 변경 시 적용)
+				TargetGuardian->Multicast_PlayImpactVFX(SkillImpactVFX, SkillVFXScale);
 			}
 		}
 	}
@@ -136,58 +155,6 @@ void UGS_ChanMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
 	{
 		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Mute, OwnerCharacter);
-	}
-}
-
-// ===============================
-// VFX 재생 함수들 구현 (멀티캐스트) - 데이터 테이블 기반
-// ===============================
-
-void UGS_ChanMovingSkill::Multicast_PlaySkillVFX_Implementation(FVector SpawnLocation, FRotator SpawnRotation)
-{
-	// 데이터 테이블에서 VFX 정보 가져오기
-	if (SkillCastVFX)
-	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			SkillCastVFX,
-			SpawnLocation,
-			SpawnRotation,
-			SkillVFXScale,
-			true, // Auto Destroy
-			true, // Auto Activate
-			ENCPoolMethod::None
-		);
-	}
-}
-
-void UGS_ChanMovingSkill::Multicast_PlaySkillRangeVFX_Implementation(FVector SpawnLocation, float Radius)
-{
-	// 데이터 테이블에서 범위 VFX 정보 가져오기
-	if (SkillRangeVFX)
-	{
-		UNiagaraComponent* SpawnedVFX = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			SkillRangeVFX,
-			SpawnLocation,
-			FRotator::ZeroRotator,
-			SkillVFXScale,
-			true, // Auto Destroy
-			true, // Auto Activate
-			ENCPoolMethod::None
-		);
-		
-		// 나이아가라 시스템에 반지름 파라미터 설정
-		if (SpawnedVFX)
-		{
-			SpawnedVFX->SetFloatParameter(FName("Radius"), Radius);
-			
-			// VFX 지속시간 설정
-			if (SkillVFXDuration > 0.0f)
-			{
-				SpawnedVFX->SetFloatParameter(FName("Duration"), SkillVFXDuration);
-			}
-		}
 	}
 }
 

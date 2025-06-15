@@ -6,6 +6,7 @@
 #include "GS_SkillBase.generated.h"
 
 class AGS_Character;
+class UGS_SkillComp;
 
 UCLASS()
 class GAS_API UGS_SkillBase : public UObject
@@ -43,13 +44,33 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "VFX")
 	float SkillVFXDuration = 3.0f;
 
+	// VFX 위치 오프셋
+	UPROPERTY(BlueprintReadOnly, Category = "VFX")
+	FVector CastVFXOffset = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "VFX")
+	FVector RangeVFXOffset = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "VFX")
+	FVector ImpactVFXOffset = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "VFX")
+	FVector EndVFXOffset = FVector::ZeroVector;
+
 	UTexture2D* GetSkillImage();
 	
 	// 쿨타임 관리
 	float GetCoolTime();
 
 	// 스킬 초기화
-	void InitSkill(AGS_Character* InOwner);
+	void InitSkill(AGS_Character* InOwner, UGS_SkillComp* InOwningComp);
+
+	// 로컬 VFX 재생 함수들
+	void PlayCastVFX(FVector Location, FRotator Rotation);
+	void PlayRangeVFX(FVector Location, float Radius);
+	void PlayImpactVFX(FVector Location); // 월드 위치에 생성
+	void PlayImpactVFXOnTarget(AActor* Target); // 타겟에 부착
+	void PlayEndVFX(FVector Location, FRotator Rotation);
 
 	// 스킬 작동
 	virtual void ActiveSkill(); // 서버 권한에서만 호출
@@ -76,4 +97,5 @@ protected:
 	
 	// 스킬 소유자
 	AGS_Character* OwnerCharacter;
+	UGS_SkillComp* OwningComp;
 };

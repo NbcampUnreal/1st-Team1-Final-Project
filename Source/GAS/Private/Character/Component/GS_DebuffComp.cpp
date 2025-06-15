@@ -26,7 +26,7 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AActor* Attacker)
 		return;
 	}
 
-	UE_LOG(LogTemp, Error, TEXT("Apply Debuff: %s"), *UEnum::GetValueAsString(Type));
+
 
 	// 해당 디버프 타입의 데이터 가져오기
 	const FDebuffData* Row = GetDebuffData(Type);
@@ -40,7 +40,7 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AActor* Attacker)
 		Existing->StartTime = GetWorld()->GetTimeSeconds(); // 시작 시간 재저장
 		RefreshDebuffTimer(Existing, Row->Duration);
 		UpdateReplicatedDebuffList(); // 복제 정보 갱신
-		UE_LOG(LogTemp, Error, TEXT("Debuff Existing: %s"), *UEnum::GetValueAsString(Type));
+
 		
 		// ===============================
 		// VFX 트리거 (기존 디버프 갱신 시에도)
@@ -80,7 +80,7 @@ void UGS_DebuffComp::RemoveDebuff(EDebuffType Type)
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Remove Debuff: %s"), *UEnum::GetValueAsString(Type));
+
 
 	UGS_DebuffBase* Debuff = GetActiveDebuff(Type);
 	if (!Debuff)
@@ -132,7 +132,7 @@ void UGS_DebuffComp::ClearAllDebuffs()
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("ClearAllDebuffs"));
+
 
 	// 타이머 먼저 제거
 	for (auto& Elem : DebuffTimers)
@@ -211,6 +211,12 @@ void UGS_DebuffComp::RefreshDebuffTimer(UGS_DebuffBase* Debuff, float Duration)
 			{
 				if (!IsValid(WeakDebuff.Get())) return;
 				UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+				
+				// ===============================
+				// 디버프 만료 VFX 재생
+				// ===============================
+				TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+				
 				ValidDebuff->OnExpire();
 				DebuffTimers.Remove(ValidDebuff);
 				if (ConcurrentDebuffs.Contains(ValidDebuff))
@@ -243,6 +249,12 @@ void UGS_DebuffComp::CreateAndApplyConcurrentDebuff(UGS_DebuffBase* Debuff)
 		{
 			if (!IsValid(WeakDebuff.Get())) return;
 			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+			
+			// ===============================
+			// 디버프 만료 VFX 재생 (Concurrent 디버프용)
+			// ===============================
+			TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+			
 			ValidDebuff->OnExpire();
 			ConcurrentDebuffs.Remove(ValidDebuff);
 			DebuffTimers.Remove(ValidDebuff);
@@ -259,7 +271,7 @@ void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
 	{
 		if (Debuff->GetPriority() > CurrentDebuff->GetPriority())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Current Debuff Change by Priority"));
+	
 			// 현재 디버프의 타이머 제거
 			if (FTimerHandle* FoundHandle = DebuffTimers.Find(CurrentDebuff))
 			{
@@ -308,6 +320,12 @@ void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
 		{
 			if (!IsValid(WeakDebuff.Get())) return;
 			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+			
+			// ===============================
+			// 디버프 만료 VFX 재생 (Queue 디버프용)
+			// ===============================
+			TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+			
 			DebuffQueue.Remove(ValidDebuff);
 			DebuffTimers.Remove(ValidDebuff);
 			UpdateReplicatedDebuffList();
@@ -352,6 +370,12 @@ void UGS_DebuffComp::ApplyNextDebuff()
 		{
 			if (!IsValid(WeakDebuff.Get())) return;
 			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
+			
+			// ===============================
+			// 디버프 만료 VFX 재생 (Current 디버프용)
+			// ===============================
+			TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+			
 			ValidDebuff->OnExpire();
 			DebuffTimers.Remove(ValidDebuff);
 			if (CurrentDebuff == ValidDebuff)
@@ -436,12 +460,22 @@ void UGS_DebuffComp::TriggerDebuffVFX(EDebuffType Type)
 	if (UGS_DebuffVFXComponent* VFXComponent = GetOwner()->FindComponentByClass<UGS_DebuffVFXComponent>())
 	{
 		VFXComponent->PlayDebuffVFX(Type);
-		UE_LOG(LogTemp, Log, TEXT("%s: %s 디버프 VFX 트리거 (컴포넌트 사용)"), 
-			*GetOwner()->GetName(), 
-			*UEnum::GetValueAsString(Type));
 	}
-	else
+}
+
+void UGS_DebuffComp::TriggerDebuffExpireVFX(EDebuffType Type)
+{
+	// 서버에서만 실행
+	if (!GetOwner()->HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s: DebuffVFX 컴포넌트를 찾을 수 없음"), *GetOwner()->GetName());
+		return;
+	}
+
+	// =======================
+	// DebuffVFX 컴포넌트 - 만료 VFX
+	// =======================
+	if (UGS_DebuffVFXComponent* VFXComponent = GetOwner()->FindComponentByClass<UGS_DebuffVFXComponent>())
+	{
+		VFXComponent->PlayDebuffExpireVFX(Type);
 	}
 }

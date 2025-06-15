@@ -31,71 +31,55 @@ void UGS_DebuffVFXComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UGS_DebuffVFXComponent::PlayDebuffVFX(EDebuffType DebuffType)
 {
-	// 서버에서만 멀티캐스트 호출
-	if (!GetOwner()->HasAuthority())
+	if (!GetOwner() || !GetOwner()->HasAuthority())
 	{
 		return;
 	}
 
-	// 이미 해당 디버프 VFX가 재생 중이면 갱신
-	if (IsDebuffVFXActive(DebuffType))
-	{
-		RemoveDebuffVFX(DebuffType);
-	}
-
-	// VFX 재생 위치와 스케일 설정
 	FVector SpawnLocation = GetOwner()->GetActorLocation();
 	FVector VFXScale = GetVFXScale(DebuffType);
 	
-	// 멀티캐스트로 모든 클라이언트에서 VFX 재생
 	Multicast_PlayDebuffVFX(DebuffType, SpawnLocation, VFXScale);
 	
-	UE_LOG(LogTemp, Log, TEXT("%s: %s 디버프 VFX 재생"), 
-		*GetOwner()->GetName(), 
-		*UEnum::GetValueAsString(DebuffType));
 }
 
 void UGS_DebuffVFXComponent::RemoveDebuffVFX(EDebuffType DebuffType)
 {
-	// 서버에서만 멀티캐스트 호출
-	if (!GetOwner()->HasAuthority())
+	if (!GetOwner() || !GetOwner()->HasAuthority())
+	{
+		return;
+	}
+	
+	Multicast_RemoveDebuffVFX(DebuffType);
+	
+}
+
+void UGS_DebuffVFXComponent::PlayDebuffExpireVFX(EDebuffType DebuffType)
+{
+	if (!GetOwner() || !GetOwner()->HasAuthority())
 	{
 		return;
 	}
 
-	Multicast_RemoveDebuffVFX(DebuffType);
+	FVector SpawnLocation = GetOwner()->GetActorLocation();
+	FVector VFXScale = GetVFXScale(DebuffType);
 	
-	UE_LOG(LogTemp, Log, TEXT("%s: %s 디버프 VFX 제거"), 
-		*GetOwner()->GetName(), 
-		*UEnum::GetValueAsString(DebuffType));
+	Multicast_PlayDebuffExpireVFX(DebuffType, SpawnLocation, VFXScale);
+	
 }
 
 void UGS_DebuffVFXComponent::RemoveAllDebuffVFX()
 {
-	// 모든 활성 VFX 제거
-	TArray<EDebuffType> ActiveTypes;
-	ActiveVFXComponents.GetKeys(ActiveTypes);
-	
-	for (EDebuffType Type : ActiveTypes)
+	// 서버에서만 멀티캐스트 호출
+	if (GetOwner() && GetOwner()->HasAuthority())
 	{
-		if (GetOwner()->HasAuthority())
+		// 모든 활성 VFX 제거
+		TArray<EDebuffType> ActiveTypes;
+		ActiveVFXComponents.GetKeys(ActiveTypes);
+		
+		for (EDebuffType Type : ActiveTypes)
 		{
 			Multicast_RemoveDebuffVFX(Type);
-		}
-		else
-		{
-			// 로컬에서 직접 제거 (서버가 아닌 경우)
-			if (UNiagaraComponent* VFXComp = ActiveVFXComponents.FindRef(Type))
-			{
-				VFXComp->DestroyComponent();
-			}
-			ActiveVFXComponents.Remove(Type);
-			
-			if (FTimerHandle* TimerHandle = VFXTimerHandles.Find(Type))
-			{
-				GetWorld()->GetTimerManager().ClearTimer(*TimerHandle);
-				VFXTimerHandles.Remove(Type);
-			}
 		}
 	}
 }
@@ -106,74 +90,105 @@ bool UGS_DebuffVFXComponent::IsDebuffVFXActive(EDebuffType DebuffType) const
 	return VFXComp && IsValid(VFXComp);
 }
 
+UNiagaraSystem* UGS_DebuffVFXComponent::GetDebuffVFX(EDebuffType DebuffType) const
+{
+	// 1. 먼저 개별 오버라이드 확인
+	if (UNiagaraSystem* const* OverrideVFX = OverrideDebuffVFXMap.Find(DebuffType))
+	{
+		if (*OverrideVFX)
+		{
+			return *OverrideVFX;
+		}
+	}
+	
+	// 2. 공통 설정에서 확인
+	if (CommonVFXSettings)
+	{
+		if (UNiagaraSystem* const* CommonVFX = CommonVFXSettings->DebuffVFXMap.Find(DebuffType))
+		{
+			return *CommonVFX;
+		}
+	}
+	
+	return nullptr;
+}
+
+UNiagaraSystem* UGS_DebuffVFXComponent::GetDebuffExpireVFX(EDebuffType DebuffType) const
+{
+	// 1. 먼저 개별 오버라이드 확인
+	if (UNiagaraSystem* const* OverrideVFX = OverrideDebuffExpireVFXMap.Find(DebuffType))
+	{
+		if (*OverrideVFX)
+		{
+			return *OverrideVFX;
+		}
+	}
+	
+	// 2. 공통 설정에서 확인
+	if (CommonVFXSettings)
+	{
+		if (UNiagaraSystem* const* CommonVFX = CommonVFXSettings->DebuffExpireVFXMap.Find(DebuffType))
+		{
+			return *CommonVFX;
+		}
+	}
+	
+	return nullptr;
+}
+
 void UGS_DebuffVFXComponent::Multicast_PlayDebuffVFX_Implementation(EDebuffType DebuffType, FVector SpawnLocation, FVector Scale)
 {
-	// 해당 타입의 VFX 시스템 가져오기
-	UNiagaraSystem* VFXSystem = DebuffVFXMap.FindRef(DebuffType);
+	UNiagaraSystem* VFXSystem = GetDebuffVFX(DebuffType);
+	
 	if (!VFXSystem)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s: %s 디버프 VFX가 설정되지 않음"), 
-			*GetOwner()->GetName(), 
-			*UEnum::GetValueAsString(DebuffType));
+		
 		return;
 	}
 
-	// 이전 VFX가 있다면 제거
-	if (UNiagaraComponent* ExistingVFX = ActiveVFXComponents.FindRef(DebuffType))
+	// 기존 VFX가 있다면 제거
+	if (UNiagaraComponent** ExistingComponent = ActiveVFXComponents.Find(DebuffType))
 	{
-		ExistingVFX->DestroyComponent();
+		if (*ExistingComponent && IsValid(*ExistingComponent))
+		{
+			(*ExistingComponent)->DestroyComponent();
+		}
 		ActiveVFXComponents.Remove(DebuffType);
 	}
 
-	// 기존 타이머 클리어
-	if (FTimerHandle* ExistingTimer = VFXTimerHandles.Find(DebuffType))
-	{
-		GetWorld()->GetTimerManager().ClearTimer(*ExistingTimer);
-		VFXTimerHandles.Remove(DebuffType);
-	}
-
-	// 새로운 VFX 컴포넌트 생성 (오너에 부착)
-	UNiagaraComponent* NewVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+	// 새 VFX 생성
+	UNiagaraComponent* VFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
 		VFXSystem,
 		GetOwner()->GetRootComponent(),
 		NAME_None,
 		FVector::ZeroVector,
 		FRotator::ZeroRotator,
-		EAttachLocation::SnapToTarget,
-		true, // Auto Destroy
-		true, // Auto Activate
-		ENCPoolMethod::None
+		Scale,
+		EAttachLocation::KeepRelativeOffset,
+		true,                // bAutoDestroy
+		ENCPoolMethod::None, // PoolingMethod
+		true,                // bAutoActivate
+		true                 // bPreCullCheck
 	);
 
-	if (NewVFXComponent)
+	if (VFXComponent)
 	{
-		// 스케일 적용
-		if (Scale != FVector::ZeroVector)
-		{
-			NewVFXComponent->SetWorldScale3D(Scale);
-		}
+		ActiveVFXComponents.Add(DebuffType, VFXComponent);
 
-		// 활성 VFX 목록에 추가
-		ActiveVFXComponents.Add(DebuffType, NewVFXComponent);
-
-		// 지속 시간 후 자동 제거 타이머 설정
+		// 자동 제거 타이머 설정
 		float Duration = GetVFXDuration(DebuffType);
-		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(
-			TimerHandle,
-			[this, DebuffType]()
-			{
-				RemoveVFXTimerCallback(DebuffType);
-			},
-			Duration,
-			false
-		);
-		VFXTimerHandles.Add(DebuffType, TimerHandle);
-
-		UE_LOG(LogTemp, Log, TEXT("%s: %s 디버프 VFX 생성됨, %f초 후 자동 제거"), 
-			*GetOwner()->GetName(), 
-			*UEnum::GetValueAsString(DebuffType), 
-			Duration);
+		if (Duration > 0.0f)
+		{
+			FTimerHandle TimerHandle;
+			GetOwner()->GetWorldTimerManager().SetTimer(
+				TimerHandle,
+				FTimerDelegate::CreateUObject(this, &UGS_DebuffVFXComponent::RemoveVFXTimerCallback, DebuffType),
+				Duration,
+				false
+			);
+			VFXTimerHandles.Add(DebuffType, TimerHandle);
+		}
+		
 	}
 }
 
@@ -186,43 +201,95 @@ void UGS_DebuffVFXComponent::Multicast_RemoveDebuffVFX_Implementation(EDebuffTyp
 		ActiveVFXComponents.Remove(DebuffType);
 	}
 
-	// 타이머 제거
+	// 타이머 제거 (각 클라이언트에서 로컬 타이머 정리)
 	if (FTimerHandle* TimerHandle = VFXTimerHandles.Find(DebuffType))
 	{
-		GetWorld()->GetTimerManager().ClearTimer(*TimerHandle);
+		if (GetOwner() && GetOwner()->GetWorldTimerManager().IsTimerActive(*TimerHandle))
+		{
+			GetOwner()->GetWorldTimerManager().ClearTimer(*TimerHandle);
+		}
 		VFXTimerHandles.Remove(DebuffType);
 	}
 }
 
+void UGS_DebuffVFXComponent::Multicast_PlayDebuffExpireVFX_Implementation(EDebuffType DebuffType, FVector SpawnLocation, FVector Scale)
+{
+	UNiagaraSystem* ExpireVFXSystem = GetDebuffExpireVFX(DebuffType);
+	
+	if (!ExpireVFXSystem)
+	{
+		
+		return;
+	}
+
+	// 만료 VFX는 일회성이므로 월드에 스폰
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		GetWorld(),
+		ExpireVFXSystem,
+		SpawnLocation,
+		FRotator::ZeroRotator,
+		Scale,
+		true,                // bAutoDestroy
+		true,                // bAutoActivate
+		ENCPoolMethod::None, // PoolingMethod
+		true                 // bPreCullCheck
+	);
+
+	
+}
+
 void UGS_DebuffVFXComponent::RemoveVFXTimerCallback(EDebuffType DebuffType)
 {
-	// 타이머에 의한 자동 제거
+	// 타이머에 의한 자동 제거 (로컬에서만 실행)
 	if (UNiagaraComponent* VFXComp = ActiveVFXComponents.FindRef(DebuffType))
 	{
-		VFXComp->DestroyComponent();
+		if (IsValid(VFXComp))
+		{
+			VFXComp->DestroyComponent();
+		}
 		ActiveVFXComponents.Remove(DebuffType);
 	}
 	VFXTimerHandles.Remove(DebuffType);
-	
-	UE_LOG(LogTemp, Log, TEXT("%s: %s 디버프 VFX 타이머에 의해 제거됨"), 
-		*GetOwner()->GetName(), 
-		*UEnum::GetValueAsString(DebuffType));
 }
 
 float UGS_DebuffVFXComponent::GetVFXDuration(EDebuffType DebuffType) const
 {
-	if (const float* Duration = DebuffVFXDurationMap.Find(DebuffType))
+	// 1. 먼저 개별 오버라이드 확인
+	if (const float* OverrideDuration = OverrideDebuffVFXDurationMap.Find(DebuffType))
 	{
-		return *Duration;
+		return *OverrideDuration;
 	}
+	
+	// 2. 공통 설정에서 확인
+	if (CommonVFXSettings)
+	{
+		if (const float* CommonDuration = CommonVFXSettings->DebuffVFXDurationMap.Find(DebuffType))
+		{
+			return *CommonDuration;
+		}
+	}
+	
+	// 3. 기본값 반환
 	return DefaultVFXDuration;
 }
 
 FVector UGS_DebuffVFXComponent::GetVFXScale(EDebuffType DebuffType) const
 {
-	if (const FVector* Scale = DebuffVFXScaleMap.Find(DebuffType))
+	// 1. 먼저 개별 오버라이드 확인
+	if (const FVector* OverrideScale = OverrideDebuffVFXScaleMap.Find(DebuffType))
 	{
-		return *Scale;
+		return *OverrideScale;
 	}
-	return FVector(1.0f, 1.0f, 1.0f); // 기본 스케일
+	
+	// 2. 공통 설정에서 확인
+	if (CommonVFXSettings)
+	{
+		if (const FVector* CommonScale = CommonVFXSettings->DebuffVFXScaleMap.Find(DebuffType))
+		{
+			return *CommonScale;
+		}
+	}
+	
+	// 3. 기본값 반환 (1, 1, 1)
+	return FVector::OneVector;
 } 

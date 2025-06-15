@@ -109,7 +109,7 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 		return;
 	}
 
-	Skill->InitSkill(Cast<AGS_Character>(GetOwner()));
+	Skill->InitSkill(Cast<AGS_Character>(GetOwner()), this);
 	Skill->Cooltime = Info.Cooltime;
 	Skill->Damage = Info.Damage;
 	Skill->SkillAnimMontages = Info.Montages;
@@ -122,6 +122,12 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 	Skill->SkillEndVFX = Info.SkillEndVFX;
 	Skill->SkillVFXScale = Info.SkillVFXScale;
 	Skill->SkillVFXDuration = Info.SkillVFXDuration;
+	
+	// VFX 오프셋 정보 설정
+	Skill->CastVFXOffset = Info.CastVFXOffset;
+	Skill->RangeVFXOffset = Info.RangeVFXOffset;
+	Skill->ImpactVFXOffset = Info.ImpactVFXOffset;
+	Skill->EndVFXOffset = Info.EndVFXOffset;
 	
 	SkillMap.Add(Slot, Skill);
 }
@@ -267,6 +273,38 @@ void UGS_SkillComp::InitSkills()
 		SetSkill(ESkillSlot::Aiming, SkillSet->AimingSkill);
 		SetSkill(ESkillSlot::Moving, SkillSet->MovingSkill);
 		SetSkill(ESkillSlot::Ultimate, SkillSet->UltimateSkill);
+	}
+}
+
+void UGS_SkillComp::Multicast_PlayCastVFX_Implementation(ESkillSlot Slot, FVector Location, FRotator Rotation)
+{
+	if (UGS_SkillBase* Skill = GetSkillFromSkillMap(Slot))
+	{
+		Skill->PlayCastVFX(Location, Rotation);
+	}
+}
+
+void UGS_SkillComp::Multicast_PlayRangeVFX_Implementation(ESkillSlot Slot, FVector Location, float Radius)
+{
+	if (UGS_SkillBase* Skill = GetSkillFromSkillMap(Slot))
+	{
+		Skill->PlayRangeVFX(Location, Radius);
+	}
+}
+
+void UGS_SkillComp::Multicast_PlayImpactVFX_Implementation(ESkillSlot Slot, FVector Location)
+{
+	if (UGS_SkillBase* Skill = GetSkillFromSkillMap(Slot))
+	{
+		Skill->PlayImpactVFX(Location);
+	}
+}
+
+void UGS_SkillComp::Multicast_PlayEndVFX_Implementation(ESkillSlot Slot, FVector Location, FRotator Rotation)
+{
+	if (UGS_SkillBase* Skill = GetSkillFromSkillMap(Slot))
+	{
+		Skill->PlayEndVFX(Location, Rotation);
 	}
 }
 

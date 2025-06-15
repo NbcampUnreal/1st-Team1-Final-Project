@@ -62,6 +62,19 @@ struct GAS_API FSkillInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
 	float SkillVFXDuration = 3.0f;
+
+	// VFX 위치 오프셋
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Offset")
+	FVector CastVFXOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Offset")
+	FVector RangeVFXOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Offset")
+	FVector ImpactVFXOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Offset")
+	FVector EndVFXOffset = FVector::ZeroVector;
 };
 
 USTRUCT(BlueprintType)

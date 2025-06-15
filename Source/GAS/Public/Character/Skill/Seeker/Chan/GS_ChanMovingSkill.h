@@ -6,9 +6,6 @@
 #include "Character/Skill/Seeker/GS_SeekerSkillBase.h"
 #include "GS_ChanMovingSkill.generated.h"
 
-class UNiagaraSystem;
-class UNiagaraComponent;
-
 /**
  * 
  */
@@ -29,16 +26,4 @@ protected:
 	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target) override;
 	virtual void ApplyEffectToGuardian(AGS_Guardian* Target) override;
 
-private:
-	// ===============================
-	// VFX 재생 함수들 (멀티캐스트) - 데이터 테이블 기반
-	// ===============================
-	
-	// 스킬 시전 VFX 재생
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlaySkillVFX(FVector SpawnLocation, FRotator SpawnRotation);
-
-	// 스킬 범위 VFX 재생
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlaySkillRangeVFX(FVector SpawnLocation, float Radius);
 };

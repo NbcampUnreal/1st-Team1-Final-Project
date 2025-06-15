@@ -70,6 +70,7 @@ protected:
 	// VFX 트리거 함수 (서버에서 호출)
 	// ===============================
 	void TriggerDebuffVFX(EDebuffType Type);
+	void TriggerDebuffExpireVFX(EDebuffType Type);
 
 	UFUNCTION(Server, Reliable)
 	void Server_ApplyDebuff(EDebuffType Type, AActor* Attacker);
