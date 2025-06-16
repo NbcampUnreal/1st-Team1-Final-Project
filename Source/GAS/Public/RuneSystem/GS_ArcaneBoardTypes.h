@@ -55,6 +55,27 @@ struct FStatEffect
 };
 
 USTRUCT(Atomic, BlueprintType)
+struct FArcaneBoardStats
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FGS_StatRow RuneStats;
+
+	UPROPERTY(BlueprintReadWrite)
+	FGS_StatRow BonusStats;
+
+	TMap<uint8, TArray<FIntPoint>> ConnectedRuneCells;
+
+	FArcaneBoardStats()
+	{
+		RuneStats = FGS_StatRow();
+		BonusStats = FGS_StatRow();
+		ConnectedRuneCells.Empty();
+	}
+};
+
+USTRUCT(Atomic, BlueprintType)
 struct FPlacedRuneInfo
 {
 	GENERATED_BODY()

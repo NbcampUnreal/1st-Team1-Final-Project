@@ -5,6 +5,7 @@
 #include "Character/Player/Seeker/GS_Merci.h"
 #include "DrawDebugHelpers.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
 #include "Kismet/GameplayStatics.h"
 
 UGS_MerciUltimateSkill::UGS_MerciUltimateSkill()
@@ -25,6 +26,12 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 		{
 			bIsAutoAimingState = true;
 			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, true);
+		}
+
+		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+		if (MerciCharacter)
+		{
+			MerciCharacter->Client_StartZoom();
 		}
 
 		OwnerCharacter->GetWorldTimerManager().SetTimer(AutoAimingHandle, this, &UGS_MerciUltimateSkill::DeActiveAutoAimingState, AutoAimingStateTime, false);
@@ -68,6 +75,12 @@ void UGS_MerciUltimateSkill::DeActiveAutoAimingState()
 			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
 		}
 
+		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+		if (MerciCharacter)
+		{
+			MerciCharacter->Client_StopZoom();
+		}
+
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimTickHandle);
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimingHandle);
 	}
@@ -94,6 +107,26 @@ AActor* UGS_MerciUltimateSkill::FindCloseTarget()
 
 		if (Dot > CloseDot)
 		{
+			// LineTrace로 시야 확인
+			FHitResult Hit;
+			FCollisionQueryParams Params;
+			Params.AddIgnoredActor(OwnerCharacter);
+
+			bool bHit = OwnerCharacter->GetWorld()->LineTraceSingleByChannel(
+				Hit,
+				CamLoc,
+				Target->GetActorLocation(),
+				ECC_Visibility,
+				Params
+			);
+
+			// 벽에 가려져 있다면 무시
+			if (bHit && Hit.GetActor() != Target)
+			{
+				continue;
+			}
+
+			// 타겟 선택
 			CloseDot = Dot;
 			BestTarget = Target;
 		}
@@ -136,8 +169,19 @@ void UGS_MerciUltimateSkill::UpdateMonsterList()
 	AllMonsterActors.Empty();
 
 	TArray<AActor*> FoundActors;
+
+	// AGS_Monster 찾기
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGS_Monster::StaticClass(), FoundActors);
 
+	for (AActor* Actor : FoundActors)
+	{
+		if (IsValid(Actor)) AllMonsterActors.Add(Actor);
+	}
+
+	FoundActors.Empty(); // 배열 재사용
+
+	// AGS_Guardian 찾기
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGS_Guardian::StaticClass(), FoundActors);
 	for (AActor* Actor : FoundActors)
 	{
 		if (IsValid(Actor)) AllMonsterActors.Add(Actor);

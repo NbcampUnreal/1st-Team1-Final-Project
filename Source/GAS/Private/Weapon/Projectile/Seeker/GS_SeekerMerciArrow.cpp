@@ -101,10 +101,11 @@ void AGS_SeekerMerciArrow::InitHomingTarget(AActor* Target)
 			return;
 		}
 
+		ProjectileMovementComponent->bRotationFollowsVelocity = true;
 		ProjectileMovementComponent->HomingTargetComponent = RootPrim;
 		ProjectileMovementComponent->bIsHomingProjectile = true;
-		ProjectileMovementComponent->InitialSpeed = 1500.f;
-		ProjectileMovementComponent->MaxSpeed = 2000.f;
+		ProjectileMovementComponent->InitialSpeed = 3000.f;
+		ProjectileMovementComponent->MaxSpeed = 3000.f;
 		ProjectileMovementComponent->HomingAccelerationMagnitude = 20000.f;
 		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 		ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileMovementComponent->InitialSpeed;
@@ -115,10 +116,11 @@ void AGS_SeekerMerciArrow::InitHomingTarget(AActor* Target)
 	else
 	{
 		// 유도 해제 : 일반 직선 화살로 설정
+		ProjectileMovementComponent->bRotationFollowsVelocity = true;
 		ProjectileMovementComponent->HomingTargetComponent = nullptr;
 		ProjectileMovementComponent->bIsHomingProjectile = false;
-		ProjectileMovementComponent->InitialSpeed = 6000.0f;
-		ProjectileMovementComponent->MaxSpeed = 6000.0f;
+		ProjectileMovementComponent->InitialSpeed = 5000.f;
+		ProjectileMovementComponent->MaxSpeed = 5000.0f;
 		ProjectileMovementComponent->ProjectileGravityScale = 1.0f;
 
 		HomingTarget = nullptr;

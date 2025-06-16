@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "E_SeekerAnim.generated.h"
 
 UENUM(BlueprintType)
 enum class EMovementState : uint8

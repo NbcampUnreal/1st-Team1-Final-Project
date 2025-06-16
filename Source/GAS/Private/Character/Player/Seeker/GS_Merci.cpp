@@ -58,7 +58,10 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		// 활 당기는 사운드 재생
 		PlaySound(BowPullSound);
 		
-		Client_StartZoom(); // 줌인
+		if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
+		{
+			Client_StartZoom(); // 줌인
+		}
 	}
 	else
 	{
@@ -70,7 +73,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 {
 	if (!HasAuthority())
 	{
-		Server_ReleaseArrow(ArrowClass);
+		Server_ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 		return;
 	}
 
@@ -91,7 +94,10 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 
 	}
 
-	Client_StopZoom();
+	if(!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
+	{
+		Client_StopZoom();
+	}
 	//Client_SetWidgetVisibility(false);
 }
 
@@ -102,7 +108,7 @@ void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)
 
 void AGS_Merci::Server_ReleaseArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
-	ReleaseArrow(ArrowClass);
+	ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 }
 
 void AGS_Merci::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -3,13 +3,10 @@
 
 #include "RuneSystem/GS_ArcaneBoardLPS.h"
 #include "RuneSystem/GS_ArcaneBoardManager.h"
+#include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
 #include "RuneSystem/GS_ArcaneBoardSaveGame.h"
 #include "Character/GS_Character.h"
-#include "System/GS_PlayerState.h"
-#include "System/GS_PlayerRole.h"
-#include "Character/Component/GS_StatComp.h"
 #include "Kismet/GameplayStatics.h"
-#include "Components/PanelWidget.h"
 
 void UGS_ArcaneBoardLPS::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -80,6 +77,10 @@ void UGS_ArcaneBoardLPS::RefreshBoardForCurrentCharacter()
 
 void UGS_ArcaneBoardLPS::UpdateStatsUI()
 {
+    if (CurrentUIWidget.IsValid())
+    {
+        CurrentUIWidget->OnStatsChanged(RuneSystemStats);
+    }
 }
 
 void UGS_ArcaneBoardLPS::ApplyBoardChanges()
@@ -91,7 +92,7 @@ void UGS_ArcaneBoardLPS::ApplyBoardChanges()
     }
 }
 
-void UGS_ArcaneBoardLPS::OnBoardStatsChanged(const FGS_StatRow& NewStats)
+void UGS_ArcaneBoardLPS::OnBoardStatsChanged(const FArcaneBoardStats& NewStats)
 {
     RuneSystemStats = NewStats;
     UpdateStatsUI();
@@ -156,7 +157,7 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
 
     BoardManager->PlacedRunes.Empty();
     BoardManager->InitGridState();
-    BoardManager->CurrStatEffects = FGS_StatRow();
+    BoardManager->CurrBoardStats = FArcaneBoardStats();
     BoardManager->bHasUnsavedChanges = false;
 
     const FString SaveSlotName = TEXT("ArcaneBoardSave");
@@ -237,8 +238,19 @@ void UGS_ArcaneBoardLPS::ForceApplyChanges()
     }
 }
 
-void UGS_ArcaneBoardLPS::RequestServerStatsUpdate()
+void UGS_ArcaneBoardLPS::SetCurrUIWidget(UGS_ArcaneBoardWidget* Widget)
 {
+    CurrentUIWidget = Widget;
+
+    if (Widget)
+    {
+        Widget->OnStatsChanged(RuneSystemStats);
+    }
+}
+
+void UGS_ArcaneBoardLPS::ClearCurrUIWidget()
+{
+    CurrentUIWidget = nullptr;
 }
 
 ECharacterClass UGS_ArcaneBoardLPS::MapSeekerJobToCharacterClass(ESeekerJob SeekerJob) const

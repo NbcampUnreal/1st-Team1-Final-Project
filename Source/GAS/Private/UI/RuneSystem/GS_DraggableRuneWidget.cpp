@@ -4,8 +4,6 @@
 #include "UI/RuneSystem/GS_DraggableRuneWidget.h"
 #include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
 #include "UI/RuneSystem/GS_DragVisualWidget.h"
-#include "UI/RuneSystem/GS_RuneDragOperation.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
 
 UGS_DraggableRuneWidget::UGS_DraggableRuneWidget(const FObjectInitializer& ObjectInitializer)

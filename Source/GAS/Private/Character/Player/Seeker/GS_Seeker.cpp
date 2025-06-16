@@ -24,6 +24,7 @@
 #include "Camera/PlayerCameraManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "Character/Component/GS_DebuffVFXComponent.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -39,6 +40,11 @@ AGS_Seeker::AGS_Seeker()
 	LowHealthPostProcessComp->SetupAttachment(CameraComp);
 	LowHealthPostProcessComp->bEnabled = false;
 	LowHealthPostProcessComp->Priority = 10;
+
+	// =======================
+	// 디버프 VFX 컴포넌트 생성
+	// =======================
+	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
 
 	// Fire Effect 생성 및 설정
 	FeetLavaVFX_L = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_L"));

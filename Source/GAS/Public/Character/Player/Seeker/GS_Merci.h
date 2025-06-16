@@ -7,6 +7,7 @@
 #include "Character/Interface/GS_AttackInterface.h"
 #include "AkGameplayTypes.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrowNormal.h"
+#include "Animation/Character/E_SeekerAnim.h"
 #include "GS_Merci.generated.h"
 
 class AGS_SeekerMerciArrow;
@@ -93,6 +94,12 @@ public:
 	// Auto Aiming
 	void SetAutoAimTarget(AActor* Target);
 
+	// Camera Control
+	UFUNCTION(Client, Reliable)
+	void Client_StartZoom();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StopZoom();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -158,13 +165,7 @@ private:
 	void Multicast_PlayDrawMontage(UAnimMontage* Montage);
 
 	UFUNCTION(Client, Reliable)
-	void Client_SetWidgetVisibility(bool bVisible);
-
-	UFUNCTION(Client, Reliable)
-	void Client_StartZoom();
-
-	UFUNCTION(Client, Reliable)
-	void Client_StopZoom();
+	void Client_SetWidgetVisibility(bool bVisible);	
 
 	UFUNCTION(Client, Reliable)
 	void Client_PlaySound(UAkComponent* SoundComp);

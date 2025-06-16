@@ -59,12 +59,12 @@ void UGS_ArcaneBoardWidget::NativeConstruct()
 		ResetButton->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnResetButtonClicked);
 	}
 
-	RefreshForCurrentCharacter();
+	BindToLPS();
 }
 
 void UGS_ArcaneBoardWidget::NativeDestruct()
 {
-	UnbindManagerEvents();
+	UnbindFromLPS();
 
 	if (IsValid(SelectionVisualWidget))
 	{
@@ -73,23 +73,6 @@ void UGS_ArcaneBoardWidget::NativeDestruct()
 	}
 
 	Super::NativeDestruct();
-}
-
-void UGS_ArcaneBoardWidget::BindManagerEvents()
-{
-	if (IsValid(BoardManager))
-	{
-		UnbindManagerEvents();
-		BoardManager->OnStatsChanged.AddDynamic(this, &UGS_ArcaneBoardWidget::OnStatsChanged);
-	}
-}
-
-void UGS_ArcaneBoardWidget::UnbindManagerEvents()
-{
-	if (IsValid(BoardManager))
-	{
-		BoardManager->OnStatsChanged.RemoveDynamic(this, &UGS_ArcaneBoardWidget::OnStatsChanged);
-	}
 }
 
 FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -184,18 +167,12 @@ UGS_ArcaneBoardManager* UGS_ArcaneBoardWidget::GetBoardManager() const
 
 void UGS_ArcaneBoardWidget::RefreshForCurrentCharacter()
 {
-	if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+	if (IsValid(BoardManager))
 	{
-		BoardManager = LPS->GetOrCreateBoardManager();
-
-		if (IsValid(BoardManager))
-		{
-			BindManagerEvents();
-			GenerateGridLayout();
-			UpdateGridVisuals();
-			InitInventory();
-			InitStatPanel();
-		}
+		GenerateGridLayout();
+		UpdateGridVisuals();
+		InitInventory();
+		InitStatPanel();
 	}
 }
 
@@ -241,11 +218,11 @@ void UGS_ArcaneBoardWidget::InitStatPanel()
 	{
 		StatPanel->InitStatList(BoardManager);
 
-		OnStatsChanged(BoardManager->CurrStatEffects);
+		OnStatsChanged(BoardManager->CurrBoardStats);
 	}
 }
 
-void UGS_ArcaneBoardWidget::OnStatsChanged(const FGS_StatRow& NewStats)
+void UGS_ArcaneBoardWidget::OnStatsChanged(const FArcaneBoardStats& NewStats)
 {
 	if (IsValid(StatPanel))
 	{
@@ -303,14 +280,6 @@ void UGS_ArcaneBoardWidget::UpdateGridPreview(uint8 RuneID, const FIntPoint& Gri
 		}
 		PreviewCells = AffectedCells;
 	}
-}
-
-void UGS_ArcaneBoardWidget::ApplyChanges()
-{
-}
-
-void UGS_ArcaneBoardWidget::ResetBoard()
-{
 }
 
 void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
@@ -569,6 +538,30 @@ FVector2D UGS_ArcaneBoardWidget::CalculateDragVisualScale(uint8 RuneID) const
 	float ScaleY = TargetSize.Y / BaseSize;
 
 	return FVector2D(ScaleX * 0.8f, ScaleY * 0.8f);
+}
+
+void UGS_ArcaneBoardWidget::BindToLPS()
+{
+	ArcaneBoardLPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>();
+	if (IsValid(ArcaneBoardLPS))
+	{
+		ArcaneBoardLPS->SetCurrUIWidget(this);
+
+		BoardManager = ArcaneBoardLPS->GetOrCreateBoardManager();
+		if (IsValid(BoardManager))
+		{
+			ArcaneBoardLPS->LoadBoardConfig();
+			RefreshForCurrentCharacter();
+		}
+	}
+}
+
+void UGS_ArcaneBoardWidget::UnbindFromLPS()
+{
+	if (IsValid(ArcaneBoardLPS))
+	{
+		ArcaneBoardLPS->ClearCurrUIWidget();
+	}
 }
 
 void UGS_ArcaneBoardWidget::UpdateGridVisuals()

@@ -27,7 +27,9 @@ public class GAS : ModuleRules
             "Niagara",
             "PhysicsCore",
             "CommonUI",
-            "CommonInput"
+            "CommonInput",
+            "Chooser",
+            "PoseSearch"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

@@ -2,21 +2,18 @@
 
 
 #include "Animation/Character/GS_SeekerAnimInstance.h"
-
 #include "Character/GS_Character.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Elements/Framework/TypedElementQueryBuilder.h"
 #include "Gameframework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
-#include "Character/Player/Seeker/GS_Chan.h"
 #include "Net/UnrealNetwork.h"
+#include "Animation/Character/Seeker/GS_ChooserInputObj.h"
+
 
 UGS_SeekerAnimInstance::UGS_SeekerAnimInstance()
 {
-	MovementState = EMovementState::Idle;
-	RotationMode = ERotationMode::OrientToMovement;
-	Gait = EGait::Run;
+	ChooserInputObj = nullptr;
 }
 
 void UGS_SeekerAnimInstance::NativeInitializeAnimation()
@@ -33,6 +30,11 @@ void UGS_SeekerAnimInstance::NativeInitializeAnimation()
 			bUseOffsetRootBone = true;
 		}
 	}
+	
+	ChooserInputObj = NewObject<UGS_ChooserInputObj>(this);
+	ChooserInputObj->MovementState = EMovementState::Idle;
+	ChooserInputObj->RotationMode = ERotationMode::OrientToMovement;
+	ChooserInputObj->Gait = EGait::Run;
 }
 
 void UGS_SeekerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -49,151 +51,80 @@ void UGS_SeekerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 void UGS_SeekerAnimInstance::UpdateEssentialValue_Implementation()
 {	
 	// Set Character Transform
-	CharacterTransform = OwnerCharacter->GetActorTransform();
-
+	ChooserInputObj->CharacterTransform = OwnerCharacter->GetActorTransform();
+	
 	// Set Character Acceleration
 	Acceleration = OwnerCharacterMovement->GetCurrentAcceleration();
 
 	// Set Character Velocity
-	VelocityLastFrame = Velocity;
-	Velocity = OwnerCharacterMovement->Velocity;
-	Speed2D = UKismetMathLibrary::VSizeXY(Velocity);
+	VelocityLastFrame = ChooserInputObj->Velocity;
+	ChooserInputObj->Velocity = OwnerCharacterMovement->Velocity;
+	ChooserInputObj->Speed2D = UKismetMathLibrary::VSizeXY(ChooserInputObj->Velocity);
 
 	const float WorldDT = UGameplayStatics::GetWorldDeltaSeconds(OwnerCharacter->GetWorld());
 	const float SafeDT = FMath::Max(WorldDT, 0.001f);
 
-	VelocityAcceleration = (Velocity - VelocityLastFrame) / SafeDT;
+	VelocityAcceleration = (ChooserInputObj->Velocity - VelocityLastFrame) / SafeDT;
 
-	if (Speed2D > 5)
+	if (ChooserInputObj->Speed2D > 5)
 	{
-		LastNonZeroVelocity = Velocity;
+		LastNonZeroVelocity = ChooserInputObj->Velocity;
 	}
+
+	bIsMoving = ChooserInputObj->IsMoving();
 }
 
 void UGS_SeekerAnimInstance::UpdateState_Implementation()
 {	
 	// Set Rotation Mode
-	LastRotationMode = RotationMode;
+	LastRotationMode = ChooserInputObj->RotationMode;
 	if (OwnerCharacterMovement->bOrientRotationToMovement)
 	{
-		RotationMode = ERotationMode::OrientToMovement;
+		ChooserInputObj->RotationMode = ERotationMode::OrientToMovement;
 	}
 	else
 	{
-		RotationMode = ERotationMode::Strafe;
+		ChooserInputObj->RotationMode = ERotationMode::Strafe;
 	}
 
 	// Set Movement State
-	LastMovementState = MovementState;
-	if (IsMoving())
+	ChooserInputObj->LastMovementState = ChooserInputObj->MovementState;
+	if (ChooserInputObj->IsMoving())
 	{
 		OwnerCharacter->bUseControllerRotationYaw = true;
-		MovementState = EMovementState::Moving;
+		ChooserInputObj->MovementState = EMovementState::Moving;
+		if (ChooserInputObj)
+		{
+			ChooserInputObj->MovementState = EMovementState::Moving;
+		}
 	}
 	else
 	{
 		OwnerCharacter->bUseControllerRotationYaw = false;
-		MovementState = EMovementState::Idle;
+		ChooserInputObj->MovementState = EMovementState::Idle;
+		if (ChooserInputObj)
+		{
+			ChooserInputObj->MovementState = EMovementState::Idle;
+		}
 	}
 
 	// Set Gait State
-	LastGait = Gait;
-}
-
-bool UGS_SeekerAnimInstance::IsMoving()
-{
-	bool bVelocityNotZero       = !Velocity.Equals(FVector::ZeroVector, 0.1f);
-	bool bFutureVelocityNotZero = !FutureVelocity.Equals(FVector::ZeroVector, 0.1f);
-	
-	return bVelocityNotZero && bFutureVelocityNotZero;
-}
-
-bool UGS_SeekerAnimInstance::ShouldTurnInPlace()
-{
-	if ((MovementState == EMovementState::Idle && LastMovementState == EMovementState::Moving) || bMustTurnInPlace)
-	{
-		const FRotator CharacterRot = CharacterTransform.GetRotation().Rotator();
-		const FRotator RootRot = RootTransform.GetRotation().Rotator();
-		
-		FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRot, RootRot);
-		DeltaRot.Yaw = FMath::Abs(DeltaRot.Yaw);
-		if (DeltaRot.Yaw >= 50)
-		{
-			return true;
-		}
-	}
-	return false;
+	LastGait = ChooserInputObj->Gait;
 }
 
 bool UGS_SeekerAnimInstance::GetMustTurnInPlace()
 {
-	return bMustTurnInPlace;
+	return ChooserInputObj->bMustTurnInPlace;
 }
 
 void UGS_SeekerAnimInstance::SetMustTurnInPlace(bool MustTurn)
 {
-	bMustTurnInPlace = MustTurn;
-}
-
-bool UGS_SeekerAnimInstance::ShouldSpinTransition()
-{
-	bool bContains = CurrentDatabasesTags.Contains(TEXT("Pivots"));
-
-	const FRotator CharacterRot = CharacterTransform.GetRotation().Rotator();
-	const FRotator RootRot = RootTransform.GetRotation().Rotator();
-	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRot, RootRot);
-	DeltaRot.Yaw = FMath::Abs(DeltaRot.Yaw);
-	
-	if (bContains && DeltaRot.Yaw >= 130.0f && Speed2D >= 150.0f)
-	{
-		return true;
-	}
-	
-	return false;
-}
-
-bool UGS_SeekerAnimInstance::IsPivoting()
-{
-	const FRotator CurrentRot = Velocity.Rotation();
-	const FRotator FutureRot = FutureVelocity.Rotation();
-
-	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(CurrentRot, FutureRot);
-	DeltaRot.Yaw = FMath::Abs(DeltaRot.Yaw);
-
-	float Threshold = 0.f;
-	switch (RotationMode)
-	{
-	case ERotationMode::OrientToMovement :
-		Threshold = 60.0f;
-		break;
-	case ERotationMode::Strafe :
-		Threshold = 40.0f;
-	}
-
-	if (DeltaRot.Yaw > Threshold)
-	{
-		return true;
-	}
-	return false;
-}
-
-bool UGS_SeekerAnimInstance::IsStarting()
-{
-	bool bContains = CurrentDatabasesTags.Contains(TEXT("Pivots"));
-	
-	if (FutureVelocity.Size2D() > Velocity.Size2D() + 100.0f)
-	{
-		if (!bContains && IsMoving())
-		{
-			return true;
-		}
-	}
-	return false;
+	ChooserInputObj->bMustTurnInPlace = MustTurn;
 }
 
 float UGS_SeekerAnimInstance::GetOffsetRootTranslationHalfLife()
 {
-	switch (MovementState)
+	switch (ChooserInputObj->MovementState)
 	{
 		case EMovementState::Idle :
 			return 0.15;
@@ -214,15 +145,15 @@ FVector UGS_SeekerAnimInstance::CalculateRelativeAccelerationAmount()
 	float MaxBrakingDeceleration = OwnerCharacterMovement->GetMaxBrakingDeceleration();
 	if (MaxAcceration > 0 && MaxBrakingDeceleration > 0)
 	{
-		if (FVector::DotProduct(Acceleration, Velocity) > 0)
+		if (FVector::DotProduct(Acceleration, ChooserInputObj->Velocity) > 0)
 		{
 			FVector ClampedMaxVector = VelocityAcceleration.GetClampedToMaxSize(MaxAcceration);
-			return CharacterTransform.GetRotation().UnrotateVector(ClampedMaxVector/MaxAcceration);
+			return ChooserInputObj->CharacterTransform.GetRotation().UnrotateVector(ClampedMaxVector/MaxAcceration);
 		}
 		else
 		{
 			FVector ClampedMaxVector = VelocityAcceleration.GetClampedToMaxSize(MaxBrakingDeceleration);
-			return CharacterTransform.GetRotation().UnrotateVector(ClampedMaxVector/MaxBrakingDeceleration);
+			return ChooserInputObj->CharacterTransform.GetRotation().UnrotateVector(ClampedMaxVector/MaxBrakingDeceleration);
 		}
 	}
 	
@@ -231,41 +162,35 @@ FVector UGS_SeekerAnimInstance::CalculateRelativeAccelerationAmount()
 
 float UGS_SeekerAnimInstance::Get_LeanAmount()
 {
-	float ClampedLeanAmount = FMath::GetMappedRangeValueClamped(FVector2D(200.0, 500.0), FVector2D(0.5, 1.0), Speed2D);
+	float ClampedLeanAmount = FMath::GetMappedRangeValueClamped(FVector2D(200.0, 500.0), FVector2D(0.5, 1.0), ChooserInputObj->Speed2D);
 	return CalculateRelativeAccelerationAmount().Y * ClampedLeanAmount;
 }
 
-void UGS_SeekerAnimInstance::AnimNotify_ComboInput()
+bool UGS_SeekerAnimInstance::EnableSteering()
 {
-	if (APawn* OwnerPawn = TryGetPawnOwner())
-	{
-		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
-		{
-			Chan->ComboInputOpen();
-		}
-	}
+	return ChooserInputObj->MovementState == EMovementState::Moving;
 }
 
-void UGS_SeekerAnimInstance::AnimNotify_CanProceed()
+FVector2D UGS_SeekerAnimInstance::Get_AOValue()
 {
-	if (APawn* OwnerPawn = TryGetPawnOwner())
-	{
-		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
-		{
-			//Chan->CheckToNext();
-		}
+	FVector2D AO = FVector2D::ZeroVector;
+	
+	if (OwnerCharacter && OwnerCharacter->GetController())
+	{	const FRotator ControllerRot = OwnerCharacter->GetController()->GetControlRotation();
+		const FRotator RootRot = ChooserInputObj->RootTransform.Rotator();
+		
+		FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(ControllerRot, RootRot);
+
+		AO.X = DeltaRot.Pitch;
+		AO.Y = DeltaRot.Yaw;
 	}
+	
+	return AO;
 }
 
-void UGS_SeekerAnimInstance::AnimNotify_ComboEnd()
+bool UGS_SeekerAnimInstance::Enable_AO()
 {
-	if (APawn* OwnerPawn = TryGetPawnOwner())
-	{
-		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
-		{
-			//Chan->ComboEnd();
-		}
-	}
+	return FMath::Abs(Get_AOValue().X) < 90.0f && ChooserInputObj->RotationMode == ERotationMode::Strafe;
 }
 
 void UGS_SeekerAnimInstance::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

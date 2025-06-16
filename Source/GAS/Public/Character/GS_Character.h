@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
+#include "Character/E_Character.h"
 #include "GS_Character.generated.h"
 
 class UGS_StatComp;
@@ -14,21 +15,6 @@ class UGS_HPText;
 class UGS_HPWidget;
 class AGS_Weapon;
 class UAkAudioEvent;
-
-UENUM(BlueprintType)
-enum class ECharacterType : uint8
-{
-	Ares,
-	Chan,
-	Merci,
-	Reina,
-	Drakhar,
-	SmallClaw,
-	NeedleFang,
-	IronFang,
-	ShadowFang,
-	StoneClaw
-};
 
 USTRUCT(BlueprintType)
 struct FWeaponSlot
@@ -103,6 +89,7 @@ public:
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
 	void SetHPBarWidget(UGS_HPWidget* InHPBarWidget);
 	virtual FGenericTeamId GetGenericTeamId() const override;
+	//void SetClassImage(UGS_HPText* InHPTextWidget);
 	
 	UFUNCTION(BlueprintPure, Category = "Team")
 	bool IsEnemy(const AGS_Character* Other) const;
@@ -113,6 +100,10 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulicastRPCStopCurrentSkillMontage(UAnimMontage* CurrentSkillMontage);
+
+	// Impact VFX 재생
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayImpactVFX(UNiagaraSystem* VFXAsset, FVector Scale);
 
 	UFUNCTION(BlueprintCallable)
 	AGS_Weapon* GetWeaponByIndex(int32 Index) const;

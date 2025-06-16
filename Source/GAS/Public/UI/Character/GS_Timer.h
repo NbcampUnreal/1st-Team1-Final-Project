@@ -78,8 +78,6 @@ private:
 
 	FTimerHandle InitTimerHandle;
 
-	int32 LastDisplayedSeconds = -1;
-
 	void TryInitialize();
 
 	// 남은 시간에 따라 텍스트 색상을 업데이트

@@ -9,16 +9,17 @@
 #include "AkGameplayStatics.h"
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
-#include "Sound/GS_AudioManager.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "NiagaraSystem.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Components/ArrowComponent.h"
 #include "Character/Component/GS_CameraShakeComponent.h"
+#include "Character/Component/GS_DebuffComp.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "UI/Character/GS_DrakharFeverGauge.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
@@ -38,14 +39,14 @@ AGS_Drakhar::AGS_Drakhar()
 	ComboAttackSectionName = DefaultComboAttackSectionName;
 	bCanCombo = true;
 	bClientCanCombo = true;
-	
+
 	//dash skill variables
 	DashPower = 1500.f;
 	DashInterpAlpha = 0.f;
 	DashDuration = 1.f;
 
 	//earthquake skill variables
-	EarthquakePower = 3000.f;
+	EarthquakePower = 150.f;
 	EarthquakeRadius = 500.f;
 
 	//DraconicFury
@@ -57,12 +58,20 @@ AGS_Drakhar::AGS_Drakhar()
 	//boss monster tag for user widget
 	Tags.Add("Guardian");
 
+	//fever mode
+	MaxFeverGage = 100.f;
+	CurrentFeverGage = 0.f;
+
 	// === Wwise 사운드 이벤트 초기화 ===
 	ComboAttackSoundEvent = nullptr;
 	DashSkillSoundEvent = nullptr;
 	EarthquakeSkillSoundEvent = nullptr;
 	DraconicFurySkillSoundEvent = nullptr;
 	DraconicProjectileSoundEvent = nullptr;
+	
+	// === DraconicFury 충돌 사운드 이벤트 초기화 ===
+	DraconicProjectileImpactSoundEvent = nullptr;
+	DraconicProjectileExplosionSoundEvent = nullptr;
 	
 	// 사운드 중복 재생 방지 초기화
 	bDraconicFurySoundPlayed = false;
@@ -92,6 +101,10 @@ AGS_Drakhar::AGS_Drakhar()
 	DustCloudVFX = nullptr;
 	ActiveDustCloudVFXComponent = nullptr;
 
+	// === DraconicFury 충돌 VFX 초기화 ===
+	DraconicProjectileImpactVFX = nullptr;
+	DraconicProjectileExplosionVFX = nullptr;
+
 	// === VFX 위치 제어용 화살표 컴포넌트 생성 ===
 	WingRushVFXSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("WingRushVFXSpawnPoint"));
 	if (WingRushVFXSpawnPoint)
@@ -101,7 +114,7 @@ AGS_Drakhar::AGS_Drakhar()
 		WingRushVFXSpawnPoint->SetRelativeRotation(FRotator(0.f, 180.f, 0.f));
 		WingRushVFXSpawnPoint->SetArrowSize(2.0f);
 		WingRushVFXSpawnPoint->SetArrowColor(FLinearColor::Blue);
-		
+
 #if WITH_EDITOR
 		WingRushVFXSpawnPoint->bIsEditorOnly = false;
 #endif
@@ -126,7 +139,7 @@ AGS_Drakhar::AGS_Drakhar()
 void AGS_Drakhar::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	GuardianState = EGuardianState::CtrlSkillEnd;
 
 	UGS_DrakharAnimInstance* Anim = Cast<UGS_DrakharAnimInstance>(GetMesh()->GetAnimInstance());
@@ -145,22 +158,27 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 
 void AGS_Drakhar::Ctrl()
 {
-	if (IsLocallyControlled())
+	if (!HasAuthority() && IsLocallyControlled())
 	{
 		if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
 		{
 			GetSkillComp()->TryActivateSkill(ESkillSlot::Ready);
-			this->ServerRPCStartCtrl();
+			ServerRPCStartCtrl();
+		}
+		//for fix input bugs...
+		else
+		{
+			ClientGuardianState = EGuardianState::CtrlSkillEnd;
 		}
 	}
 }
 
 void AGS_Drakhar::CtrlStop()
 {
-	if (IsLocallyControlled())
-	{		
+	if (!HasAuthority() && IsLocallyControlled())
+	{
 		GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
-		this->ServerRPCStopCtrl();
+		ServerRPCStopCtrl();
 	}
 }
 
@@ -186,6 +204,11 @@ void AGS_Drakhar::LeftMouse()
 				bClientCanCombo = false;
 			}
 		}
+		//for fix input bugs...
+		else
+		{
+			ClientGuardianState = EGuardianState::CtrlSkillEnd;
+		}
 	}
 }
 
@@ -203,7 +226,6 @@ void AGS_Drakhar::RightMouse()
 		{
 			GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 		}
-		
 	}
 }
 
@@ -219,8 +241,7 @@ void AGS_Drakhar::ResetComboAttackSection()
 
 void AGS_Drakhar::PlayComboAttackMontage()
 {
-	PlayAnimMontage(ComboAttackMontage,1.f, ComboAttackSectionName);
-	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%s  %s"),*ComboAttackMontage.GetName(), *ComboAttackSectionName.ToString()), true, true, FLinearColor::Blue, 5.f);
+	PlayAnimMontage(ComboAttackMontage, 1.f, ComboAttackSectionName);
 }
 
 void AGS_Drakhar::OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNotifyPayload& PayLoad)
@@ -239,8 +260,20 @@ void AGS_Drakhar::OnRep_CanCombo()
 
 void AGS_Drakhar::ComboLastAttack()
 {
-	// 콤보 마지막 공격 로직 구현
-	// TODO: 필요시 특별한 콤보 마지막 공격 로직을 여기에 추가
+	if (HasAuthority())
+	{
+		const FVector Start = GetActorLocation();
+		const float Radius = 300.f;
+		const float PlusDamage = 20.f;
+		
+		TSet<AGS_Character*> DamagedPlayers = DetectPlayerInRange(Start, 200.f, Radius);
+		ApplyDamageToDetectedPlayer(DamagedPlayers, PlusDamage);
+		
+		if (IsFeverMode)
+		{
+			FeverComoLastAttack();
+		}
+	}
 }
 
 void AGS_Drakhar::ServerRPCResetValue_Implementation()
@@ -254,7 +287,7 @@ void AGS_Drakhar::ServerRPCNewComboAttack_Implementation()
 	MulticastRPCComboAttack();
 	GetCharacterMovement()->SetMovementMode(MOVE_None);
 	bCanCombo = false;
-	
+
 	// 콤보 공격 사운드 재생
 	PlayComboAttackSound();
 }
@@ -274,7 +307,7 @@ void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 	DashInterpAlpha += DeltaTime / DashDuration;
 
 	DashAttackCheck();
-	
+
 	if (DashInterpAlpha >= 1.f)
 	{
 		SetActorLocation(DashEndLocation);
@@ -285,26 +318,40 @@ void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 		SetActorLocation(NewLocation, true);
 		DashStartLocation = NewLocation;
 	}
+
+	DashDirection = GetActorForwardVector().GetSafeNormal();
 }
 
 void AGS_Drakhar::ServerRPCEndDash_Implementation()
 {
-	if (DamagedCharacters.IsEmpty())
+	if (DamagedCharactersFromDash.IsEmpty())
 	{
 		return;
 	}
-	
-	for (auto const& DamagedCharacter : DamagedCharacters)
+
+	for (auto const& DamagedCharacter : DamagedCharactersFromDash)
 	{
 		float SkillCoefficient = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Moving)->Damage;
-		float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter,SkillCoefficient);
-		
+		float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter, SkillCoefficient);
+
 		FDamageEvent DamageEvent;
 		DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+
+		if (IsFeverMode)
+		{
+			DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
+		}
+
+		FVector DrakharPos = GetActorLocation();
+		FVector DamagedPos = DamagedCharacter->GetActorLocation();
+		FVector OutVector = (DamagedPos - DrakharPos);
+		FVector TempVector = -OutVector.Dot(DashDirection) * DashDirection;
+		FVector ResultVector = TempVector + OutVector;
+
+		DamagedCharacter->LaunchCharacter(ResultVector.GetSafeNormal() * 10000.f, true, true);
 	}
 
-	DamagedCharacters.Empty();
-	GuardianState = EGuardianState::CtrlSkillEnd;
+	DamagedCharactersFromDash.Empty();
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	bCanCombo = true;
 	
@@ -318,10 +365,10 @@ void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
 	DashInterpAlpha = 0.f;
 	DashStartLocation = GetActorLocation();
 	DashEndLocation = DashStartLocation + GetActorForwardVector() * DashPower;
-	
+
 	// 대시 스킬 사운드 재생
 	PlayDashSkillSound();
-	
+
 	// 대시 VFX 시작
 	StartWingRushVFX();
 	StartDustVFX();
@@ -329,31 +376,12 @@ void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
 
 void AGS_Drakhar::DashAttackCheck()
 {
-	TArray<FHitResult> OutHitResults;	
-	const FVector Start = GetActorLocation();
-	const FVector End = Start + GetActorForwardVector() * 10.f;
-	FCollisionQueryParams Params(NAME_None, false, this);
-
-	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity,
-		ECC_Pawn, FCollisionShape::MakeCapsule(100.f, 100.f), Params);
-	
-	if (bIsHitDetected)
+	//server
+	if (HasAuthority())
 	{
-		for (auto const& OutHitResult : OutHitResults)
-		{
-			if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
-			{
-				continue;
-			}
-
-			AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
-			if (IsValid(DamagedCharacter))
-			{
-				DamagedCharacters.Add(DamagedCharacter);
-			}
-		}		
+		const FVector Start = GetActorLocation();
+		DamagedCharactersFromDash.Append(DetectPlayerInRange(Start, 10.f,100.f));
 	}
-	//MulticastRPCDrawDebugLine(Start,End, 100.f, 100.f, GetActorForwardVector(), bIsHitDetected);
 }
 
 void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
@@ -370,45 +398,34 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 	// === 어스퀘이크 VFX 재생 ===
 	StartGroundCrackVFX();
 	StartDustCloudVFX();
+
 	
-	TSet<AGS_Character*> EarthquakeDamagedCharacters;
-	TArray<FHitResult> OutHitResults;
 	const FVector Start = GetActorLocation() + 100.f;
-	const FVector End = Start + GetActorForwardVector() * 100.f;
-	FCollisionQueryParams Params(NAME_None, false, this);
-	Params.AddIgnoredActor(this);
-
-	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(EarthquakeRadius), Params);
-
-	if (bIsHitDetected)
+	TSet<AGS_Character*> EarthquakeDamagedCharacters = DetectPlayerInRange(Start, 200.f, EarthquakeRadius);
+	
+	for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)
 	{
-		for (auto const& OutHitResult : OutHitResults)
-		{
-			if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
-			{
-				continue;
-			}
+		float SkillCoefficient = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)->Damage;
+		float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter, SkillCoefficient);
 
-			AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
-			if (IsValid(DamagedCharacter))
-			{
-				EarthquakeDamagedCharacters.Add(DamagedCharacter);
-			}
-		}
-		for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)
+		FDamageEvent DamageEvent;
+		if (IsValid(DamagedCharacter))
 		{
-			float SkillCoefficient = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)->Damage;
-			float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter,SkillCoefficient);
-
-			FDamageEvent DamageEvent;
-			if (IsValid(DamagedCharacter))
+			if (IsFeverMode)
 			{
-				DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
-				DamagedCharacter->LaunchCharacter(GetActorForwardVector() * EarthquakePower, false, false);
+				DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
+				//DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Slow, this);
 			}
+			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+			FVector DrakharLocation = GetActorLocation();
+			FVector DamagedLocation = DamagedCharacter->GetActorLocation();
+
+			FVector LaunchVector = (DamagedLocation - DrakharLocation).GetSafeNormal();
+			
+			//Guardian 쪽으로 당겨오기
+			DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f, 0.f, 500.f), false,false);
 		}
 	}
-	//MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
 }
 
 void AGS_Drakhar::ServerRPCStartCtrl_Implementation()
@@ -424,7 +441,7 @@ void AGS_Drakhar::ServerRPCStartCtrl_Implementation()
 void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
 {
 	GuardianState = EGuardianState::CtrlSkillEnd;
-	
+
 	MoveSpeed = NormalMoveSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 
@@ -449,9 +466,7 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 	GetRandomDraconicFuryTarget();
 
 	int32 Index = FMath::RandRange(0, DraconicFuryTargetArray.Num() - 1);
-
-	UE_LOG(LogTemp, Warning, TEXT("Spawn"));
-
+	
 	//spawn meteor
 	AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[Index].GetLocation(), DraconicFuryTargetArray[Index].Rotator());
 	if (DrakharProjectile)
@@ -463,6 +478,120 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 	}
 }
 
+void AGS_Drakhar::SetFeverGageWidget(UGS_DrakharFeverGauge* InDrakharFeverGageWidget)
+{
+	UGS_DrakharFeverGauge* DrakharFeverGaugeWidget = Cast<UGS_DrakharFeverGauge>(InDrakharFeverGageWidget);
+	if (IsValid(DrakharFeverGaugeWidget))
+	{
+		//client
+		DrakharFeverGaugeWidget->InitializeGage(GetCurrentFeverGage());
+		OnCurrentFeverGageChanged.AddUObject(DrakharFeverGaugeWidget, &UGS_DrakharFeverGauge::OnCurrentFeverGageChanged);
+	}
+}
+
+void AGS_Drakhar::MulticastRPCSetFeverGauge_Implementation(float InValue)
+{
+	//client & server
+	CurrentFeverGage += InValue;
+
+	//Stop Fever Mode
+	if (CurrentFeverGage < KINDA_SMALL_NUMBER)
+	{
+		CurrentFeverGage = 0.f;
+
+		if (HasAuthority())
+		{
+			GetWorldTimerManager().ClearTimer(FeverTimer);
+			if (IsFeverMode)
+			{
+				GetStatComp()->SetAttackPower(DefaultAttackPower);
+			}
+			
+			IsFeverMode = false;
+		}
+	}
+
+	//Start Fever Mode
+	if (CurrentFeverGage >= MaxFeverGage)
+	{
+		CurrentFeverGage = MaxFeverGage;
+
+		//server
+		if (HasAuthority())
+		{
+			IsFeverMode = true;
+			StartFeverMode();
+		}
+	}
+	if (CurrentFeverGage > 0.f)
+	{
+		if (HasAuthority())
+		{
+			DecreaseFeverGauge();
+		}
+	}
+	OnCurrentFeverGageChanged.Broadcast(CurrentFeverGage);
+}
+
+void AGS_Drakhar::MulticastRPCFeverMontagePlay_Implementation()
+{
+	PlayAnimMontage(FeverOnMontage, 1.f);
+}
+
+void AGS_Drakhar::FeverComoLastAttack()
+{
+	//server
+	if (HasAuthority())
+	{
+		const FVector ActorLocation = GetActorLocation() + FVector(0.f,0.f,20.f);
+		const FVector ForwardVector = GetActorForwardVector();
+		const FVector RightVector = GetActorRightVector();
+		
+		const FVector CenterPillarLocation = ActorLocation + (ForwardVector * PillarForwardOffset);
+		const FVector LeftPillarLocation = CenterPillarLocation - (RightVector * PillarSideSpacing);
+		const FVector RightPillarLocation = CenterPillarLocation + (RightVector * PillarSideSpacing);
+		
+		TArray<FVector> PillarLocations;
+		PillarLocations.Add(LeftPillarLocation);
+		PillarLocations.Add(CenterPillarLocation);
+		PillarLocations.Add(RightPillarLocation);
+		
+		TSet<AGS_Character*> DamagedSeekers;
+		FCollisionQueryParams Params(NAME_None, false, this);
+
+		TArray<FHitResult> OutHitResults;
+
+		for (const FVector& PillarLocation : PillarLocations)
+		{
+			DamagedSeekers.Append(DetectPlayerInRange(PillarLocation, 0.f, PillarRadius));
+			
+		}
+		ApplyDamageToDetectedPlayer(DamagedSeekers, 20.f);
+		for (const auto& DamagedSeeker : DamagedSeekers)
+		{
+			DamagedSeeker->LaunchCharacter(FVector(0.f,0.f,500.f), true, true);
+		}
+	}
+}
+
+void AGS_Drakhar::StartFeverMode()
+{
+	//server
+	DefaultAttackPower = GetStatComp()->GetAttackPower();
+	GetStatComp()->SetAttackPower(DefaultAttackPower + 50.f);
+	MulticastRPCFeverMontagePlay();
+}
+
+void AGS_Drakhar::DecreaseFeverGauge()
+{
+	GetWorldTimerManager().SetTimer(FeverTimer, this, &AGS_Drakhar::MinusFeverGaugeValue, true, 1.f);
+}
+
+void AGS_Drakhar::MinusFeverGaugeValue()
+{
+	MulticastRPCSetFeverGauge(-1.f);
+}
+
 void AGS_Drakhar::GetRandomDraconicFuryTarget()
 {
 	DraconicFuryTargetArray.Empty();
@@ -470,7 +599,9 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 	for (int32 i = 0; i < 5; ++i)
 	{
 		FVector StartLocation = GetActorLocation();
-		FVector Offset = GetActorForwardVector() * 200.f + FVector(FMath::FRandRange(-300.f, 300.f), FMath::FRandRange(-300.f, 300.f), FMath::FRandRange(500.f, 600.f));
+		FVector Offset = GetActorForwardVector() * 200.f + FVector(FMath::FRandRange(-300.f, 300.f),
+		                                                           FMath::FRandRange(-300.f, 300.f),
+		                                                           FMath::FRandRange(500.f, 600.f));
 
 		StartLocation += Offset;
 
@@ -484,6 +615,7 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 }
 
 // === Wwise 사운드 재생 함수 구현 ===
+
 
 void AGS_Drakhar::PlayComboAttackSound()
 {
@@ -599,7 +731,7 @@ void AGS_Drakhar::PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Locat
 UAkComponent* AGS_Drakhar::GetOrCreateAkComponent()
 {
 	UAkComponent* AkComp = FindComponentByClass<UAkComponent>();
-	
+
 	if (!AkComp)
 	{
 		// 런타임에 AkComponent 생성 (생성자에서 실패한 경우를 대비)
@@ -611,7 +743,7 @@ UAkComponent* AGS_Drakhar::GetOrCreateAkComponent()
 			UE_LOG(LogTemp, Log, TEXT("GS_Drakhar: AkComponent created at runtime"));
 		}
 	}
-	
+
 	return AkComp;
 }
 
@@ -723,7 +855,7 @@ void AGS_Drakhar::MulticastStartWingRushVFX_Implementation()
 		{
 			ActiveWingRushVFXComponent->SetVectorParameter(FName("DashDirection"), CurrentDashDirection);
 		}
-		
+
 		float DashSpeed = DashPower / DashDuration;
 		ActiveWingRushVFXComponent->SetFloatParameter(FName("DashSpeed"), DashSpeed);
 		ActiveWingRushVFXComponent->SetFloatParameter(FName("Scale"), 2.0f);
@@ -741,7 +873,7 @@ void AGS_Drakhar::MulticastStopWingRushVFX_Implementation()
 	if (ActiveWingRushVFXComponent && IsValid(ActiveWingRushVFXComponent))
 	{
 		ActiveWingRushVFXComponent->Deactivate();
-		
+
 		FTimerHandle VFXCleanupTimer;
 		GetWorld()->GetTimerManager().SetTimer(VFXCleanupTimer, [this]()
 		{
@@ -1062,6 +1194,79 @@ void AGS_Drakhar::MulticastStartDustCloudVFX_Implementation()
 		{
 			StopDustCloudVFX();
 		}, 2.0f, false);
+	}
+}
+
+// === DraconicFury 투사체 충돌 처리 함수 구현 ===
+
+void AGS_Drakhar::HandleDraconicProjectileImpact(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
+{
+	if (HasAuthority())
+	{
+		MulticastPlayDraconicProjectileImpactEffects(ImpactLocation, ImpactNormal, bHitCharacter);
+	}
+}
+
+void AGS_Drakhar::MulticastPlayDraconicProjectileImpactEffects_Implementation(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	// === 사운드 이펙트 재생 ===
+	UAkAudioEvent* SoundToPlay = bHitCharacter ? DraconicProjectileExplosionSoundEvent : DraconicProjectileImpactSoundEvent;
+	if (SoundToPlay)
+	{
+		PlaySoundEvent(SoundToPlay, ImpactLocation);
+	}
+
+	// === 시각 이펙트 재생 ===
+	UNiagaraSystem* VFXToPlay = bHitCharacter ? DraconicProjectileExplosionVFX : DraconicProjectileImpactVFX;
+	if (VFXToPlay && GetWorld())
+	{
+		// 충돌 지점에서 VFX 재생
+		UNiagaraComponent* ImpactVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			VFXToPlay,
+			ImpactLocation,
+			FRotationMatrix::MakeFromZ(ImpactNormal).Rotator(), // 충돌면 법선 방향으로 회전
+			FVector(1.0f, 1.0f, 1.0f),
+			true,
+			true,
+			ENCPoolMethod::None,
+			true
+		);
+
+		if (ImpactVFXComponent)
+		{
+			// VFX 파라미터 설정
+			ImpactVFXComponent->SetVectorParameter(FName("ImpactNormal"), ImpactNormal);
+			ImpactVFXComponent->SetFloatParameter(FName("ImpactIntensity"), bHitCharacter ? 2.0f : 1.0f);
+			
+			// 캐릭터 타격 시 더 큰 스케일
+			float VFXScale = bHitCharacter ? 1.5f : 1.0f;
+			ImpactVFXComponent->SetWorldScale3D(FVector(VFXScale, VFXScale, VFXScale));
+			
+			// VFX 색상 설정 (캐릭터 타격 시 빨간색, 지형 타격 시 주황색)
+			FLinearColor ImpactColor = bHitCharacter ? FLinearColor::Red : FLinearColor(1.0f, 0.5f, 0.0f, 1.0f);
+			ImpactVFXComponent->SetColorParameter(FName("ImpactColor"), ImpactColor);
+		}
+	}
+
+	// === 카메라 쉐이크 (가까운 플레이어만) ===
+	if (bHitCharacter && CameraShakeComponent)
+	{
+		// 강한 충격 카메라 쉐이크 설정
+		FGS_CameraShakeInfo ImpactShakeInfo;
+		ImpactShakeInfo.Intensity = 4.0f;
+		ImpactShakeInfo.MaxDistance = 1000.0f;
+		ImpactShakeInfo.MinDistance = 100.0f;
+		ImpactShakeInfo.PropagationSpeed = 500000.0f;
+		ImpactShakeInfo.bUseFalloff = true;
+		
+		// 충돌 지점을 중심으로 카메라 쉐이크 재생
+		CameraShakeComponent->PlayCameraShakeAtLocation(ImpactShakeInfo, ImpactLocation);
 	}
 }
 
