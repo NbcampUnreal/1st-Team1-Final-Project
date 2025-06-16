@@ -5,7 +5,7 @@
 #include "NiagaraSystem.h"
 #include "GS_SkillBase.generated.h"
 
-class AGS_Character;
+class AGS_Player;
 class UGS_SkillComp;
 
 UCLASS()
@@ -63,7 +63,7 @@ public:
 	float GetCoolTime();
 
 	// 스킬 초기화
-	void InitSkill(AGS_Character* InOwner, UGS_SkillComp* InOwningComp);
+	void InitSkill(AGS_Player* InOwner, UGS_SkillComp* InOwningComp);
 
 	// 로컬 VFX 재생 함수들
 	void PlayCastVFX(FVector Location, FRotator Rotation);
@@ -81,21 +81,21 @@ public:
 	virtual bool IsActive() const;
 	
 protected:
-	
-
 	bool bIsActive = false;
+	
 	// 쿨타임 관리
 	FTimerHandle CooldownHandle;
 	FTimerHandle LogTimerHandle;
 
 	float LeftCoolTime;
-	
 	bool bIsCoolingDown;
+
+	// 스킬 소유자
+	AGS_Player* OwnerCharacter;
+	UGS_SkillComp* OwningComp;
+	
 	void StartCoolDown();
 	void LogRemainingTime();
 	void SetCoolTime(float InCoolTime);
 	
-	// 스킬 소유자
-	AGS_Character* OwnerCharacter;
-	UGS_SkillComp* OwningComp;
 };

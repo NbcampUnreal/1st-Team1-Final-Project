@@ -1,5 +1,4 @@
 #include "Character/Player/GS_Player.h"
-
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Character/Player/Seeker/GS_Chan.h"
@@ -7,18 +6,18 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Character/Component/GS_StatComp.h"
+#include "Character/Skill/GS_SkillComp.h"
 #include "GameFramework/Controller.h"
 #include "System/GS_PlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/GameStateBase.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "System/GS_PlayerState.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
 AGS_Player::AGS_Player()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	SkillComp = CreateDefaultSubobject<UGS_SkillComp>(TEXT("SkillComp"));
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArmComp->TargetArmLength = 400.f;
@@ -51,6 +50,8 @@ AGS_Player::AGS_Player()
 	// AkComponent 생성
 	AkComponent = CreateDefaultSubobject<UAkComponent>(TEXT("AkComponent"));
 	AkComponent->SetupAttachment(GetRootComponent());
+
+	bIsObscuring = false;
 }
 
 void AGS_Player::BeginPlay()
@@ -230,6 +231,13 @@ void AGS_Player::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Out
 	DOREPLIFETIME(AGS_Player, SkillInputControl);
 }
 
+void AGS_Player::SetCanUseSkill(bool bCanUse)
+{
+	if (SkillComp)
+	{
+		SkillComp->SetCanUseSkill(bCanUse);
+	}
+}
 
 void AGS_Player::Multicast_StopSkillMontage_Implementation(UAnimMontage* Montage)
 {

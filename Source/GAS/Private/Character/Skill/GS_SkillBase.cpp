@@ -1,9 +1,6 @@
 #include "Character/Skill/GS_SkillBase.h"
-#include "Character/GS_Character.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Skill/GS_SkillComp.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Logging/StructuredLogFormat.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 
@@ -21,7 +18,7 @@ float UGS_SkillBase::GetCoolTime()
 	return Cooltime;
 }
 
-void UGS_SkillBase::InitSkill(AGS_Character* InOwner, UGS_SkillComp* InOwningComp)
+void UGS_SkillBase::InitSkill(AGS_Player* InOwner, UGS_SkillComp* InOwningComp)
 {
 	OwnerCharacter = InOwner;
 	OwningComp = InOwningComp;

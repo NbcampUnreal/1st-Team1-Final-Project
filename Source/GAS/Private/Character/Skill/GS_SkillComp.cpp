@@ -3,6 +3,7 @@
 
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/GS_Character.h"
+#include "Character/Player/GS_Player.h"
 #include "Character/Skill/GS_SkillBase.h"
 #include "Character/Skill/GS_SkillSet.h"
 #include "UI/Character/GS_SkillWidget.h"
@@ -109,7 +110,7 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 		return;
 	}
 
-	Skill->InitSkill(Cast<AGS_Character>(GetOwner()), this);
+	Skill->InitSkill(Cast<AGS_Player>(GetOwner()), this);
 	Skill->Cooltime = Info.Cooltime;
 	Skill->Damage = Info.Damage;
 	Skill->SkillAnimMontages = Info.Montages;

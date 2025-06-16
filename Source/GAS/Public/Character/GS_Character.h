@@ -67,7 +67,6 @@ public:
 	
 	//getter
 	FORCEINLINE UGS_StatComp* GetStatComp() const { return StatComp; }
-	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }
 	FORCEINLINE UGS_DebuffComp* GetDebuffComp() const { return DebuffComp; }
 	FORCEINLINE ECharacterType GetCharacterType() const { return CharacterType; }
 	
@@ -88,8 +87,9 @@ public:
 	//HP widget
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
 	void SetHPBarWidget(UGS_HPWidget* InHPBarWidget);
-	virtual FGenericTeamId GetGenericTeamId() const override;
 	//void SetClassImage(UGS_HPText* InHPTextWidget);
+
+	virtual FGenericTeamId GetGenericTeamId() const override;
 	
 	UFUNCTION(BlueprintPure, Category = "Team")
 	bool IsEnemy(const AGS_Character* Other) const;
@@ -110,12 +110,12 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetCharacterSpeed(float InRatio);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetCanUseSkill(bool bCanUse) {}
 	
 protected:
 	//component
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UGS_SkillComp> SkillComp;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_DebuffComp> DebuffComp;
 
@@ -127,15 +127,17 @@ protected:
 	
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TArray<FWeaponSlot> WeaponSlots;
+	
 private:
-	void SpawnAndAttachWeapons();
-	void DestroyAllWeapons();
-
 	UPROPERTY(ReplicatedUsing = OnRep_CharacterSpeed)
 	float CharacterSpeed;
 	float DefaultCharacterSpeed;
 
 	UFUNCTION()
 	void OnRep_CharacterSpeed();
+
+	void SpawnAndAttachWeapons();
+	void DestroyAllWeapons();
+
 };
 

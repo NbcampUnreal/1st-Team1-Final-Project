@@ -1,6 +1,5 @@
 ﻿#include "UI/Character/GS_SkillWidget.h"
-
-#include "Character/GS_Character.h"
+#include "Character/Player/GS_Player.h"
 #include "Character/Skill/GS_SkillBase.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Components/Image.h"
@@ -17,7 +16,7 @@ void UGS_SkillWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
-	AGS_Character* OwningCharacter = Cast<AGS_Character>(GetOwningPlayer()->GetPawn());
+	AGS_Player* OwningCharacter = Cast<AGS_Player>(GetOwningPlayer()->GetPawn());
 	SetOwningActor(OwningCharacter);
 
 	if (IsValid(OwningCharacter))
