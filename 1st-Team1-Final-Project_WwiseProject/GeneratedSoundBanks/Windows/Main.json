@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{8D5462BB-8B82-6A46-13DC-7D4781FC1BC9}",
+    "Hash": "{9F950C58-E5CF-8084-634C-FF49CC92ADED}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -22,14 +22,6 @@
       "Location": "Memory",
       "ShortName": "MA_BLO_Bass_Guitar_Drone_One_Shot_Ooze_Am.wav",
       "CachePath": "F1/{F1E035C6-61E2-C3A3-4C4D-A89F9536D196}.wem"
-     },
-     {
-      "Id": "5171484",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ArrowImpactWood_BW.54281.wav",
-      "CachePath": "F9/{F9FCC43A-5747-5C17-1EE4-2403694EE12D}.wem"
      },
      {
       "Id": "7846130",
@@ -325,7 +317,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_4_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact.wav",
-      "CachePath": "36/{36ED34D5-0277-E70A-0410-45976BB7C40E}.wem"
+      "CachePath": "8F/{8FA2708F-3217-65DD-82E4-55EE7EABBF32}.wem"
      },
      {
       "Id": "234128836",
@@ -589,7 +581,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FF_IE_fx_impact_explode.wav",
-      "CachePath": "88/{88BE8F63-F150-855A-745B-AE33266811AE}.wem"
+      "CachePath": "71/{71BAFE20-75B5-8803-BC90-A608589E5800}.wem"
      },
      {
       "Id": "399735935",
@@ -693,7 +685,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Battle_Game_Explosion_Grenade_Close_1_Bomb_Explode_Fiery_Loud_One_Shot.wav",
-      "CachePath": "6D/{6D5E6ADD-2781-750E-765B-6D75EBF18F46}.wem"
+      "CachePath": "F9/{F916F059-DBCE-BF67-C98B-627AB29CEFFA}.wem"
      },
      {
       "Id": "457873650",
@@ -894,6 +886,14 @@
       "Location": "Memory",
       "ShortName": "PortalSFX.wav",
       "CachePath": "46/{462133C6-E584-21AF-E4CB-1A99D480874B}.wem"
+     },
+     {
+      "Id": "588618539",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Dragon_Vocal_Dialogue_I_Am_Fire_I_Am_Death_Monster_Creature_Voice.wav",
+      "CachePath": "8C/{8C58F10D-6133-1A09-6673-E04CE5746850}.wem"
      },
      {
       "Id": "591081456",
@@ -1317,7 +1317,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_cannon_explosion_blast_stone_gravel_debris_02.wav",
-      "CachePath": "89/{89765167-5EAE-8BD1-E626-1AC69868E53B}.wem"
+      "CachePath": "0D/{0DB905BE-AEB7-764E-6116-29CB47AEEB5B}.wem"
      },
      {
       "Id": "880975709",
@@ -2084,21 +2084,6 @@
       ]
      },
      {
-      "Id": "2999099924",
-      "Name": "EV_ArrowImpact_Wood",
-      "ObjectPath": "\\Events\\Default Work Unit\\EV_ArrowImpact_Wood",
-      "GUID": "{5AF6D827-D199-47C8-9BED-CC9DB12DEE69}",
-      "MaxAttenuation": "1000",
-      "DurationType": "OneShot",
-      "DurationMin": "0.85634214",
-      "DurationMax": "0.9072629",
-      "MediaRefs": [
-       {
-        "Id": "5171484"
-       }
-      ]
-     },
-     {
       "Id": "1852963041",
       "Name": "EV_Bow_Pull",
       "ObjectPath": "\\Events\\Default Work Unit\\EV_Bow_Pull",
@@ -2353,8 +2338,8 @@
       "GUID": "{329C4613-CE8B-4CB3-9316-AD3F12A67659}",
       "MaxAttenuation": "960.00006",
       "DurationType": "OneShot",
-      "DurationMin": "2.6238482",
-      "DurationMax": "2.6238482",
+      "DurationMin": "2.6937282",
+      "DurationMax": "2.6937282",
       "MediaRefs": [
        {
         "Id": "64058932"
@@ -2366,7 +2351,7 @@
         "Id": "303740880"
        },
        {
-        "Id": "437072955"
+        "Id": "588618539"
        },
        {
         "Id": "1002490439"
@@ -2497,6 +2482,34 @@
         "Id": "1002490439"
        }
       ]
+     },
+     {
+      "Id": "603832892",
+      "Name": "EV_Drakhar_FeverMode",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_FeverMode",
+      "GUID": "{C93E5944-6465-4E0C-842D-D15DBFAF2833}",
+      "MaxAttenuation": "1440",
+      "DurationType": "OneShot",
+      "DurationMin": "2.6238482",
+      "DurationMax": "2.6238482",
+      "MediaRefs": [
+       {
+        "Id": "64058932"
+       },
+       {
+        "Id": "176067616"
+       },
+       {
+        "Id": "437072955"
+       }
+      ],
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "1990128658"
+        }
+       ]
+      }
      },
      {
       "Id": "3019564245",
@@ -3960,6 +3973,6 @@
     ]
    }
   ],
-  "FileHash": "{64E5481C-5277-7948-FEB1-61D9F2DF32AC}"
+  "FileHash": "{70020C1F-9EF3-7509-EC16-0D97E824487A}"
  }
 }

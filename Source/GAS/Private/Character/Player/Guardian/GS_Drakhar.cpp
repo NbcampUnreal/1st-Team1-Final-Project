@@ -80,6 +80,12 @@ AGS_Drakhar::AGS_Drakhar()
 	FlyStartSoundEvent = nullptr;
 	FlyEndSoundEvent = nullptr;
 
+	// === 히트 사운드 이벤트 초기화 ===
+	AttackHitSoundEvent = nullptr;
+
+	// === 피버모드 사운드 이벤트 초기화 ===
+	FeverModeStartSoundEvent = nullptr;
+
 	// AkComponent 추가
 	if (!FindComponentByClass<UAkComponent>())
 	{
@@ -263,6 +269,49 @@ void AGS_Drakhar::ComboLastAttack()
 	if (HasAuthority())
 	{
 		const FVector Start = GetActorLocation();
+		FCollisionQueryParams Params(NAME_None, false, this);
+		Params.AddIgnoredActor(this);
+
+		bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, Start, FQuat::Identity,ECC_Pawn, FCollisionShape::MakeSphere(300.f), Params);
+
+		if (bIsHitDetected)
+		{
+			TSet<AGS_Character*> DamagedCharacterArray;
+			for (auto const& OutHitResult : OutHitResults)
+			{
+				if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
+				{
+					continue;
+				}
+
+				AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
+				if (IsValid(DamagedCharacter))
+				{
+					DamagedCharacterArray.Add(DamagedCharacter);
+				}
+			}
+
+			for (auto const& DamagedCharacter : DamagedCharacterArray)
+			{
+				//ServerRPCMeleeAttack(DamagedCharacter);
+				UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
+				if (IsValid(DamagedCharacterStat))
+				{
+					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
+					FDamageEvent DamageEvent;
+					DamagedCharacter->TakeDamage(Damage + 20.f, DamageEvent, GetController(), this);
+
+					// === 히트 사운드 재생 ===
+					PlayAttackHitSound();
+
+					if (!IsFeverMode)
+					{
+						MulticastRPCSetFeverGauge(10.f);
+					}
+				}
+			}
+			DamagedCharacterArray.Empty();
+		}
 		const float Radius = 300.f;
 		const float PlusDamage = 20.f;
 		
@@ -341,6 +390,9 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		{
 			DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
 		}
+
+		// === 대시 스킬 히트 사운드 재생 ===
+		PlayAttackHitSound();
 
 		FVector DrakharPos = GetActorLocation();
 		FVector DamagedPos = DamagedCharacter->GetActorLocation();
@@ -424,6 +476,27 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			
 			//Guardian 쪽으로 당겨오기
 			DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f, 0.f, 500.f), false,false);
+		}
+		for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)
+		{
+			float SkillCoefficient = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)->Damage;
+			float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter, SkillCoefficient);
+
+			FDamageEvent DamageEvent;
+			if (IsValid(DamagedCharacter))
+			{
+				DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+
+				// === 어스퀘이크 스킬 히트 사운드 재생 ===
+				PlayAttackHitSound();
+
+				FVector DrakharLocation = GetActorLocation();
+				FVector DamagedLocation = DamagedCharacter->GetActorLocation();
+
+				FVector LaunchVector = (DamagedLocation - DrakharLocation).GetSafeNormal();
+				//Guardian 쪽으로 당겨오기
+				DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f, 0.f, 500.f), false,false);
+			}
 		}
 	}
 }
@@ -570,6 +643,16 @@ void AGS_Drakhar::FeverComoLastAttack()
 		for (const auto& DamagedSeeker : DamagedSeekers)
 		{
 			DamagedSeeker->LaunchCharacter(FVector(0.f,0.f,500.f), true, true);
+			UGS_StatComp* DamagedCharacterStat = DamagedSeeker->GetStatComp();
+			if (IsValid(DamagedCharacterStat))
+			{
+				float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedSeeker);
+				FDamageEvent DamageEvent;
+				DamagedSeeker->TakeDamage(Damage + 20.f, DamageEvent, GetController(), this);
+
+				// === 피버 모드 콤보 히트 사운드 재생 ===
+				PlayAttackHitSound();
+			}
 		}
 	}
 }
@@ -580,6 +663,9 @@ void AGS_Drakhar::StartFeverMode()
 	DefaultAttackPower = GetStatComp()->GetAttackPower();
 	GetStatComp()->SetAttackPower(DefaultAttackPower + 50.f);
 	MulticastRPCFeverMontagePlay();
+	
+	// === 피버모드 시작 사운드 재생 ===
+	PlayFeverModeStartSound();
 }
 
 void AGS_Drakhar::DecreaseFeverGauge()
@@ -765,6 +851,22 @@ void AGS_Drakhar::PlayFlyEndSound()
 	}
 }
 
+void AGS_Drakhar::PlayAttackHitSound()
+{
+	if (HasAuthority())
+	{
+		MulticastPlayAttackHitSound();
+	}
+}
+
+void AGS_Drakhar::PlayFeverModeStartSound()
+{
+	if (HasAuthority())
+	{
+		MulticastPlayFeverModeStartSound();
+	}
+}
+
 // === 날기 사운드 Multicast RPC 함수들 구현 ===
 
 void AGS_Drakhar::MulticastPlayFlyStartSound_Implementation()
@@ -775,6 +877,16 @@ void AGS_Drakhar::MulticastPlayFlyStartSound_Implementation()
 void AGS_Drakhar::MulticastPlayFlyEndSound_Implementation()
 {
 	PlaySoundEvent(FlyEndSoundEvent);
+}
+
+void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
+{
+	PlaySoundEvent(AttackHitSoundEvent);
+}
+
+void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
+{
+	PlaySoundEvent(FeverModeStartSoundEvent);
 }
 
 void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
