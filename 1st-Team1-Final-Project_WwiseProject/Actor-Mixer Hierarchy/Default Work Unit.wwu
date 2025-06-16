@@ -19301,6 +19301,7 @@
 						<RandomSequenceContainer Name="EV_Drakhar_Flying" ID="{915CC522-5FE6-424B-8556-43C6C0B49D82}" ShortID="41813610">
 							<PropertyList>
 								<Property Name="3DSpatialization" Type="int16" Value="2"/>
+								<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.2"/>
 								<Property Name="GlobalOrPerObject" Type="int16" Value="0"/>
 								<Property Name="MaxSoundPerInstance" Type="int16">
 									<ValueList>

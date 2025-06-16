@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{9F950C58-E5CF-8084-634C-FF49CC92ADED}",
+    "Hash": "{45205E31-E2F4-BE7D-D7B2-1FAC51E78CD7}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -893,7 +893,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Dragon_Vocal_Dialogue_I_Am_Fire_I_Am_Death_Monster_Creature_Voice.wav",
-      "CachePath": "8C/{8C58F10D-6133-1A09-6673-E04CE5746850}.wem"
+      "CachePath": "60/{609E8860-35DF-020B-4A9C-6857350771B1}.wem"
      },
      {
       "Id": "591081456",
@@ -2516,7 +2516,7 @@
       "Name": "EV_Drakhar_Flying_Play",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_Flying_Play",
       "GUID": "{C62A4302-E43E-469D-9D88-EE6CC3EFC83E}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "960.00006",
       "DurationType": "OneShot",
       "DurationMin": "5.5857706",
       "DurationMax": "5.5857706",
@@ -3973,6 +3973,6 @@
     ]
    }
   ],
-  "FileHash": "{70020C1F-9EF3-7509-EC16-0D97E824487A}"
+  "FileHash": "{7C7B5337-21F5-4273-F406-76309DDE6853}"
  }
 }
