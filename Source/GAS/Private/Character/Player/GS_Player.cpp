@@ -212,7 +212,7 @@ void AGS_Player::OnDeath()
 		GS_PS->bIsAlive = false;
 	}
 	AGS_TpsController* GS_PC = Cast<AGS_TpsController>(GetController());
-	if (IsValid(GS_PC))
+	if (IsValid(GS_PC) && GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
 	{
 		GS_PC->ServerRPCSpectatePlayer();
 	}
