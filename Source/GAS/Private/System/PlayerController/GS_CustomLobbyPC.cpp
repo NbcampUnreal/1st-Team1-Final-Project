@@ -22,6 +22,7 @@
 AGS_CustomLobbyPC::AGS_CustomLobbyPC()
 	: CachedPlayerState(nullptr)
 	, CurrentModalWidget(nullptr)
+	, PendingWork(EPendingWork::None)
 {
 }
 
@@ -241,16 +242,24 @@ void AGS_CustomLobbyPC::HandleReadyStatusChanged(bool bNewReadyStatus)
 
 void AGS_CustomLobbyPC::RequestToggleRole()
 {
+	if (HasCurrentModalWidget())
+	{
+		if (CheckAndShowUnsavedChangesConfirm())
+		{
+			PendingWork = EPendingWork::ChangeRole;
+			return;
+		}
+		else
+		{
+			ClearCurrentModalWidget();
+		}
+	}
+
 	AGS_PlayerState* PS = GetCachedPlayerState();
 	if (PS)
 	{
 		EPlayerRole NewRole = (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker) ? EPlayerRole::PR_Guardian : EPlayerRole::PR_Seeker;
 		PS->Server_SetPlayerRole(NewRole);
-	}
-
-	if (HasCurrentModalWidget())
-	{
-		ClearCurrentModalWidget();
 	}
 }
 
@@ -266,15 +275,21 @@ void AGS_CustomLobbyPC::RequestOpenJobSelectionPopup()
 	
 	if (CurrentModalWidget) //&& CurrentModalWidget->IsInViewport())
 	{
-		// 나중에 하나로 기능을 묶는게 나을 것 같음.
 		if (Cast<UGS_CharacterSelectList>(CurrentModalWidget))
 		{
-			CurrentModalWidget->RemoveFromParent();
-			CurrentModalWidget = nullptr;
+			ClearCurrentModalWidget();
 			return;
 		}
-		CurrentModalWidget->RemoveFromParent();
-		CurrentModalWidget = nullptr;
+
+		if (CheckAndShowUnsavedChangesConfirm())
+		{
+			PendingWork = EPendingWork::JobSelection;
+			return;
+		}
+		else
+		{
+			ClearCurrentModalWidget();
+		}
 	}
 
 	CurrentModalWidget = CreateWidget<UUserWidget>(this, JobSelectionWidgetClass);
@@ -297,15 +312,18 @@ void AGS_CustomLobbyPC::RequestOpenPerkOrDungeonPopup()
 
 	if (CurrentModalWidget)// && CurrentModalWidget->GetParent())
 	{
-		// 나중에 하나로 기능을 묶는게 나을 것 같음.
-		if (Cast<UGS_ArcaneBoardWidget>(CurrentModalWidget))
+		if (Cast<UGS_CharacterSelectList>(CurrentModalWidget))
 		{
-			CurrentModalWidget->RemoveFromParent();
-			CurrentModalWidget = nullptr;
+			ClearCurrentModalWidget();
+		}
+		else
+		{
+			if (!CheckAndShowUnsavedChangesConfirm())
+			{
+				ClearCurrentModalWidget();
+			}
 			return;
 		}
-		CurrentModalWidget->RemoveFromParent();
-		CurrentModalWidget = nullptr;
 	}
 
 	TSubclassOf<UUserWidget> WidgetToOpen = nullptr;
@@ -481,4 +499,77 @@ void AGS_CustomLobbyPC::ClearCurrentModalWidget()
 		CurrentModalWidget->RemoveFromParent();
 	}
 	CurrentModalWidget = nullptr;
+}
+
+void AGS_CustomLobbyPC::ShowPerkSaveConfirmPopup()
+{
+	if (UGS_CustomLobbyUI* LobbyUI = Cast<UGS_CustomLobbyUI>(CustomLobbyWidgetInstance))
+	{
+		LobbyUI->ShowPerkSaveConfirmPopup();
+	}
+}
+
+bool AGS_CustomLobbyPC::CheckAndShowUnsavedChangesConfirm()
+{
+	if (CurrentModalWidget)
+	{
+		if (Cast<UGS_ArcaneBoardWidget>(CurrentModalWidget))
+		{
+			if (UGS_ArcaneBoardLPS* ArcaneBoardLPS = GetLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+			{
+				if (ArcaneBoardLPS->HasUnsavedChanges())
+				{
+					ShowPerkSaveConfirmPopup();
+					return true;
+				}
+			}
+		}
+
+		// 던전에디터 체크 (나중에 추가)
+		
+	}
+	return false;
+}
+
+void AGS_CustomLobbyPC::OnPerkSaveYes()
+{
+	if (UGS_ArcaneBoardLPS* ArcaneBoardLPS = GetLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+	{
+		ArcaneBoardLPS->ApplyBoardChanges();
+	}
+
+	ClearCurrentModalWidget();
+
+	switch (PendingWork)
+	{
+	case EPendingWork::JobSelection:
+		RequestOpenJobSelectionPopup();
+		break;
+	case EPendingWork::ChangeRole:
+		RequestToggleRole();
+		break;
+	default:
+		break;
+	}
+
+	PendingWork = EPendingWork::None;
+}
+
+void AGS_CustomLobbyPC::OnPerkSaveNo()
+{
+	ClearCurrentModalWidget();
+
+	switch (PendingWork)
+	{
+	case EPendingWork::JobSelection:
+		RequestOpenJobSelectionPopup();
+		break;
+	case EPendingWork::ChangeRole:
+		RequestToggleRole();
+		break;
+	default:
+		break;
+	}
+
+	PendingWork = EPendingWork::None;
 }

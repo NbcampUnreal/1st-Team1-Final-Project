@@ -13,6 +13,13 @@ class UUserWidget;
 class UGS_CustomLobbyUI;
 class UGS_ArcaneBoardWidget;
 
+enum class EPendingWork : uint8
+{
+	None,
+	JobSelection,
+	ChangeRole
+};
+
 UCLASS()
 class GAS_API AGS_CustomLobbyPC : public APlayerController
 {
@@ -90,4 +97,13 @@ public:
 private:
 	bool bHasInitializedUI = false;
 	void TryBindToPlayerStateDelegates();
+
+public:
+	//아케인보드 저장확인 관련
+	void OnPerkSaveYes();
+	void OnPerkSaveNo();
+	bool CheckAndShowUnsavedChangesConfirm();
+private:
+	EPendingWork PendingWork;
+	void ShowPerkSaveConfirmPopup();
 };

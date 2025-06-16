@@ -39,10 +39,7 @@ public:
     void InitializeRunes();
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void RefreshBoardForCurrentCharacter();
-
-    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void UpdateStatsUI();
+    void RefreshBoardForCurrCharacter();
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void ApplyBoardChanges();
@@ -62,9 +59,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     UGS_ArcaneBoardManager* GetOrCreateBoardManager();
 
-    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void ForceApplyChanges();
-
     // 위젯 등록/해제 함수 추가
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void SetCurrUIWidget(UGS_ArcaneBoardWidget* Widget);
@@ -76,9 +70,6 @@ public:
     ECharacterClass MapSeekerJobToCharacterClass(ESeekerJob SeekerJob) const;
 
 private:
-    UPROPERTY()
-    TWeakObjectPtr<AGS_PlayerState> BoundPlayerState;
-
     UPROPERTY()
     TWeakObjectPtr<UGS_ArcaneBoardWidget> CurrentUIWidget;
 };
