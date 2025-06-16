@@ -352,14 +352,17 @@ private:
 	//[Fever Mode]
 	float MaxFeverGage;
 	float CurrentFeverGage;
+
+	UPROPERTY(Replicated)
 	float DefaultAttackPower;
+	//float ClientDefaultAttackPower;
+	
 	bool IsFeverMode;
 	FTimerHandle FeverTimer;
 
 	float PillarForwardOffset = 300.f;
-	float PillarSideSpacing = 150.f;
-	float PillarRadius = 50.f;
-	float PillarHalfHeight = 150.f;
+	float PillarSideSpacing = 400.f;
+	float PillarRadius = 200.f;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
 	TObjectPtr<UAnimMontage> FeverOnMontage;

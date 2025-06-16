@@ -266,7 +266,7 @@ void AGS_Drakhar::ComboLastAttack()
 		const float Radius = 300.f;
 		const float PlusDamage = 20.f;
 		
-		TSet<AGS_Character*> DamagedPlayers = DetectPlayerInRange(Start, 0.f, Radius);
+		TSet<AGS_Character*> DamagedPlayers = DetectPlayerInRange(Start, 200.f, Radius);
 		ApplyDamageToDetectedPlayer(DamagedPlayers, PlusDamage);
 		
 		if (IsFeverMode)
@@ -303,7 +303,6 @@ void AGS_Drakhar::MulticastRPCComboAttack_Implementation()
 void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 {
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	//GuardianState = EGuardianState::CtrlSkillEnd;
 
 	DashInterpAlpha += DeltaTime / DashDuration;
 
@@ -337,6 +336,11 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 
 		FDamageEvent DamageEvent;
 		DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+
+		if (IsFeverMode)
+		{
+			DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Slow, this);
+		}
 
 		FVector DrakharPos = GetActorLocation();
 		FVector DamagedPos = DamagedCharacter->GetActorLocation();
@@ -395,11 +399,9 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 	StartGroundCrackVFX();
 	StartDustCloudVFX();
 
-	//
-	//GuardianState = EGuardianState::CtrlSkillEnd;
-
+	
 	const FVector Start = GetActorLocation() + 100.f;
-	TSet<AGS_Character*> EarthquakeDamagedCharacters = DetectPlayerInRange(Start, 100.f, EarthquakeRadius);
+	TSet<AGS_Character*> EarthquakeDamagedCharacters = DetectPlayerInRange(Start, 200.f, EarthquakeRadius);
 	
 	for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)
 	{
@@ -411,8 +413,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 		{
 			if (IsFeverMode)
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("[SERVER] debuff slow to seeker"));
-				DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Slow, this);
+				//DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Slow, this);
 			}
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
 			FVector DrakharLocation = GetActorLocation();
@@ -424,7 +425,6 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f, 0.f, 500.f), false,false);
 		}
 	}
-	//MulticastRPCDrawDebugLine(Start, End, 100.f, EarthquakeRadius, GetActorForwardVector(),bIsHitDetected);
 }
 
 void AGS_Drakhar::ServerRPCStartCtrl_Implementation()
@@ -500,9 +500,13 @@ void AGS_Drakhar::MulticastRPCSetFeverGauge_Implementation(float InValue)
 
 		if (HasAuthority())
 		{
-			IsFeverMode = false;
 			GetWorldTimerManager().ClearTimer(FeverTimer);
-			GetStatComp()->SetAttackPower(DefaultAttackPower);
+			if (IsFeverMode)
+			{
+				GetStatComp()->SetAttackPower(DefaultAttackPower);
+			}
+			
+			IsFeverMode = false;
 		}
 	}
 
@@ -538,7 +542,7 @@ void AGS_Drakhar::FeverComoLastAttack()
 	//server
 	if (HasAuthority())
 	{
-		const FVector ActorLocation = GetActorLocation();
+		const FVector ActorLocation = GetActorLocation() + FVector(0.f,0.f,20.f);
 		const FVector ForwardVector = GetActorForwardVector();
 		const FVector RightVector = GetActorRightVector();
 		
@@ -548,46 +552,24 @@ void AGS_Drakhar::FeverComoLastAttack()
 		
 		TArray<FVector> PillarLocations;
 		PillarLocations.Add(LeftPillarLocation);
-		PillarLocations.Add(RightPillarLocation);
 		PillarLocations.Add(CenterPillarLocation);
+		PillarLocations.Add(RightPillarLocation);
 		
 		TSet<AGS_Character*> DamagedSeekers;
-		const FCollisionShape CapsuleShape = FCollisionShape::MakeCapsule(PillarRadius, PillarHalfHeight);
 		FCollisionQueryParams Params(NAME_None, false, this);
 
 		TArray<FHitResult> OutHitResults;
 
 		for (const FVector& PillarLocation : PillarLocations)
 		{
-			bool bIsOverlap = GetWorld()->SweepMultiByChannel(OutHitResults, PillarLocation,PillarLocation, FQuat::Identity,ECC_Pawn, CapsuleShape, Params);
+			DamagedSeekers.Append(DetectPlayerInRange(PillarLocation, 0.f, PillarRadius));
 			
-			if (bIsOverlap)
-			{
-				for (const auto& OverlapResult : OutHitResults)
-				{
-					if (OverlapResult.GetComponent() && OverlapResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
-					{
-						continue;
-					}
-					AGS_Character* DamagedCharacter = Cast<AGS_Character>(OverlapResult.GetActor());
-					if (IsValid(DamagedCharacter))
-					{
-						DamagedSeekers.Add(DamagedCharacter);
-					}
-				}
-			}
 		}
 		ApplyDamageToDetectedPlayer(DamagedSeekers, 20.f);
-		// for (auto const& DamagedSeeker : DamagedSeekers)
-		// {
-		// 	UGS_StatComp* DamagedCharacterStat = DamagedSeeker->GetStatComp();
-		// 	if (IsValid(DamagedCharacterStat))
-		// 	{
-		// 		float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedSeeker);
-		// 		FDamageEvent DamageEvent;
-		// 		DamagedSeeker->TakeDamage(Damage + 20.f, DamageEvent, GetController(), this);
-		// 	}
-		// }
+		for (const auto& DamagedSeeker : DamagedSeekers)
+		{
+			DamagedSeeker->LaunchCharacter(FVector(0.f,0.f,1000.f), true, true);
+		}
 	}
 }
 

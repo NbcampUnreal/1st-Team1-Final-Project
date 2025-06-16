@@ -66,7 +66,7 @@ void AGS_Guardian::MeleeAttackCheck()
 
 		const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 		const float MeleeAttackRange = 200.f;
-		const float MeleeAttackRadius = 150.f;
+		const float MeleeAttackRadius = 200.f;
 		
 		TSet<AGS_Character*> DamagedCharacters = DetectPlayerInRange(Start, MeleeAttackRange, MeleeAttackRadius);
 		ApplyDamageToDetectedPlayer(DamagedCharacters, 0.f);
@@ -82,8 +82,11 @@ TSet<AGS_Character*> AGS_Guardian::DetectPlayerInRange(const FVector& Start, flo
 
 	FVector End = Start + GetActorForwardVector() * SkillRange;
 	
-	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(Radius), Params);
+	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, End, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(Radius), Params);
 
+	//FOR DEBUGGING
+	//MulticastRPCDrawDebugSphere(bIsHitDetected, End, Radius);
+	
 	if (bIsHitDetected)
 	{
 		for (auto const& OutHitResult : OutHitResults)
@@ -148,26 +151,8 @@ void AGS_Guardian::QuitGuardianSkill()
 	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
 }
 
-void AGS_Guardian::MulticastRPCDrawDebug_Implementation(const FVector& Start,float Radius, bool bHit )
-{
-	DrawDebugSphere(
-	   GetWorld(), Start, Radius, 16,
-	   bHit ? FColor::Red : FColor::Green,
-	   false, 3.f, 0, 1.f);
-	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 3.f);
-}
-
-void AGS_Guardian::MulticastRPCDrawDebugLine_Implementation(const FVector& Start, const FVector& End, float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit)
-{
-	FColor Color = bIsHit ? FColor::Green : FColor::Red;
-	const FVector Origin = Start + (End - Start) * 0.5f;
-	DrawDebugCapsule(GetWorld(), Origin, CapsuleRange * 0.5f, Radius, FRotationMatrix::MakeFromZ(Forward).ToQuat(),
-		Color, false, 5.f);
-}
-
-void AGS_Guardian::MulticastRPCDrawDebugCapsule_Implementation(bool bIsOverlap, const FVector& Location, float CapsuleHalfHeight, float CapsuleRadius)
+void AGS_Guardian::MulticastRPCDrawDebugSphere_Implementation(bool bIsOverlap, const FVector& Location, float CapsuleRadius)
 {
 	FColor DebugColor = bIsOverlap ? FColor::Green : FColor::Red;
-	DrawDebugCapsule(GetWorld(), Location, CapsuleHalfHeight, CapsuleRadius,
-		FQuat::Identity,DebugColor, false, 2.0f, 0,1.0f);
+	DrawDebugSphere(GetWorld(), Location,  CapsuleRadius, 16,DebugColor, false, 2.0f, 0, 1.0f);
 }

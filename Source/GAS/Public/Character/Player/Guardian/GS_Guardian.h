@@ -59,16 +59,9 @@ public:
 	//[quit skill - server logic]
 	UFUNCTION(BlueprintCallable)
 	void QuitGuardianSkill();
-	
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCDrawDebugLine(const FVector& Start, const FVector& End,
-		float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit);
 
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCDrawDebug(const FVector& Start, float Radius, bool bHit);
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCDrawDebugCapsule(bool bIsOverlap, const FVector& Location, float CapsuleHalfHeight, float CapsuleRadius);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCDrawDebugSphere(bool bIsOverlap, const FVector& Location, float CapsuleRadius);
 	
 protected:
 	UPROPERTY()
