@@ -290,6 +290,9 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayFeverModeStartSound();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCSetFeverGauge(float InValue);
+
 	// === 나이아가라 VFX 관련 ===
 	UFUNCTION(BlueprintCallable, Category = "VFX", meta = (DisplayName = "WingRush VFX Start"))
 	void StartWingRushVFX();

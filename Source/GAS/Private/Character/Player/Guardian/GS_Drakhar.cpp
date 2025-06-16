@@ -545,47 +545,47 @@ void AGS_Drakhar::SetFeverGageWidget(UGS_DrakharFeverGauge* InDrakharFeverGageWi
 }
 
 void AGS_Drakhar::SetFeverGauge(float InValue)
-{
+{	
 	//client & server
-	CurrentFeverGauge += InValue;
-
-	//Stop Fever Mode
-	if (CurrentFeverGauge < KINDA_SMALL_NUMBER)
+	if (HasAuthority())
 	{
-		CurrentFeverGauge = 0.f;
+		CurrentFeverGauge += InValue;
 
-		if (HasAuthority())
+		//Stop Fever Mode
+		if (CurrentFeverGauge < KINDA_SMALL_NUMBER)
 		{
+			CurrentFeverGauge = 0.f;
+
 			GetWorldTimerManager().ClearTimer(FeverTimer);
 			if (IsFeverMode)
 			{
 				GetStatComp()->SetAttackPower(DefaultAttackPower);
 			}
-			
+
 			IsFeverMode = false;
 		}
-	}
 
-	//Start Fever Mode
-	if (CurrentFeverGauge >= MaxFeverGage)
-	{
-		CurrentFeverGauge = MaxFeverGage;
-
-		//server
-		if (HasAuthority())
+		//Start Fever Mode
+		if (CurrentFeverGauge >= MaxFeverGage)
 		{
+			CurrentFeverGauge = MaxFeverGage;
+
+			//server
 			IsFeverMode = true;
 			StartFeverMode();
 		}
-	}
-	if (CurrentFeverGauge > 0.f)
-	{
-		if (HasAuthority())
+		if (CurrentFeverGauge > 0.f)
 		{
 			DecreaseFeverGauge();
 		}
+		
+		OnRep_FeverGauge();
 	}
-	OnCurrentFeverGageChanged.Broadcast(CurrentFeverGauge);
+}
+
+void AGS_Drakhar::MulticastRPCSetFeverGauge_Implementation(float InValue)
+{
+	SetFeverGauge(InValue);
 }
 
 void AGS_Drakhar::MulticastRPCFeverMontagePlay_Implementation()
