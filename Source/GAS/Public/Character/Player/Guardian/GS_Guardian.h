@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/GS_Player.h"
+#include "CollisionShape.h"
 #include "GS_Guardian.generated.h"
 
 class UGS_DrakharAnimInstance;
@@ -48,12 +49,10 @@ public:
 	//[attck check function]
 	UFUNCTION()
 	void MeleeAttackCheck();
-
-	UFUNCTION()
-	void CheckAttackRange(float AttackRange, float AttackRadius);
-
-	UFUNCTION()
-	void AttackCheck();
+	
+	//[REFACTORING]
+	TSet<AGS_Character*> DetectPlayerInRange(const FVector& Start, float SkillRange, float Radius);
+	void ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& DamagedCharacters, float PlusDamge);
 	
 	UFUNCTION()
 	void OnRep_GuardianState();
@@ -61,22 +60,14 @@ public:
 	//[quit skill - server logic]
 	UFUNCTION(BlueprintCallable)
 	void QuitGuardianSkill();
-	
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCDrawDebugLine(const FVector& Start, const FVector& End,
-		float CapsuleRange, float Radius, const FVector& Forward, bool bIsHit);
 
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCDrawDebug(const FVector& Start, float Radius, bool bHit);
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastRPCDrawDebugCapsule(bool bIsOverlap, const FVector& PillarLocation, float PillarHalfHeight, float PillarRadius);
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
+	UGS_DebuffVFXComponent* DebuffVFXComponent;
 	// ==================
 	// 디버프 VFX 컴포넌트
 	// ==================
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
-	UGS_DebuffVFXComponent* DebuffVFXComponent;
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCDrawDebugSphere(bool bIsOverlap, const FVector& Location, float CapsuleRadius);
 	
 protected:
 	UPROPERTY()
