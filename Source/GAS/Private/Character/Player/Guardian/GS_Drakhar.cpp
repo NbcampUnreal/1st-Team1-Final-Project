@@ -339,7 +339,7 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 
 		if (IsFeverMode)
 		{
-			DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Slow, this);
+			DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
 		}
 
 		FVector DrakharPos = GetActorLocation();
@@ -413,6 +413,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 		{
 			if (IsFeverMode)
 			{
+				DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
 				//DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Slow, this);
 			}
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
@@ -568,7 +569,7 @@ void AGS_Drakhar::FeverComoLastAttack()
 		ApplyDamageToDetectedPlayer(DamagedSeekers, 20.f);
 		for (const auto& DamagedSeeker : DamagedSeekers)
 		{
-			DamagedSeeker->LaunchCharacter(FVector(0.f,0.f,1000.f), true, true);
+			DamagedSeeker->LaunchCharacter(FVector(0.f,0.f,500.f), true, true);
 		}
 	}
 }
