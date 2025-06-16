@@ -198,14 +198,14 @@ public:
 	void ServerRPCStopCtrl();
 	
 	//[Fever Mode]
-	FORCEINLINE float GetCurrentFeverGage() const { return CurrentFeverGage; }
+	FORCEINLINE float GetCurrentFeverGage() const { return CurrentFeverGauge; }
 	FORCEINLINE float GetMaxFeverGage() const { return MaxFeverGage; }
 	FORCEINLINE bool GetIsFeverMode() const {return IsFeverMode; }
 	
 	void SetFeverGageWidget(UGS_DrakharFeverGauge* InDrakharFeverGageWidget);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPCSetFeverGauge(float InValue);
+	//UFUNCTION(NetMulticast, Reliable)
+	void SetFeverGauge(float InValue);
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCFeverMontagePlay();
@@ -351,7 +351,8 @@ private:
 
 	//[Fever Mode]
 	float MaxFeverGage;
-	float CurrentFeverGage;
+	UPROPERTY(ReplicatedUsing=OnRep_FeverGauge)
+	float CurrentFeverGauge;
 
 	UPROPERTY(Replicated)
 	float DefaultAttackPower;
@@ -378,4 +379,7 @@ private:
 	// === Wwise 관련 헬퍼 함수 ===
 	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);
 	UAkComponent* GetOrCreateAkComponent();
+
+	UFUNCTION()
+	void OnRep_FeverGauge();
 };
