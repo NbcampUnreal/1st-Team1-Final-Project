@@ -132,7 +132,7 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 			AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
 			if (!Drakhar->GetIsFeverMode())
 			{
-				Drakhar->MulticastRPCSetFeverGauge(10.f);
+				Drakhar->SetFeverGauge(10.f);
 			}
 		}
 	}

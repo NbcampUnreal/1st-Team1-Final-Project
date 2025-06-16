@@ -30,8 +30,6 @@ void UGS_DrakharFeverGauge::InitializeGage(float InCurrentGage)
 
 void UGS_DrakharFeverGauge::OnCurrentFeverGageChanged(float InCurrentGage)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!!!!Changed"));
-	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("!!!![CLIENT] Changed")));
 	DrakharFeverGauge->SetPercent(InCurrentGage/Drakhar->GetMaxFeverGage());
 }
 

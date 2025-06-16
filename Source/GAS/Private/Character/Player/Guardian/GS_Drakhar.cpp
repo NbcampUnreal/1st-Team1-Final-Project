@@ -60,7 +60,7 @@ AGS_Drakhar::AGS_Drakhar()
 
 	//fever mode
 	MaxFeverGage = 100.f;
-	CurrentFeverGage = 0.f;
+	CurrentFeverGauge = 0.f;
 
 	// === Wwise 사운드 이벤트 초기화 ===
 	ComboAttackSoundEvent = nullptr;
@@ -154,6 +154,7 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, bCanCombo);
+	DOREPLIFETIME(ThisClass, CurrentFeverGauge);
 }
 
 void AGS_Drakhar::Ctrl()
@@ -489,15 +490,15 @@ void AGS_Drakhar::SetFeverGageWidget(UGS_DrakharFeverGauge* InDrakharFeverGageWi
 	}
 }
 
-void AGS_Drakhar::MulticastRPCSetFeverGauge_Implementation(float InValue)
+void AGS_Drakhar::SetFeverGauge(float InValue)
 {
 	//client & server
-	CurrentFeverGage += InValue;
+	CurrentFeverGauge += InValue;
 
 	//Stop Fever Mode
-	if (CurrentFeverGage < KINDA_SMALL_NUMBER)
+	if (CurrentFeverGauge < KINDA_SMALL_NUMBER)
 	{
-		CurrentFeverGage = 0.f;
+		CurrentFeverGauge = 0.f;
 
 		if (HasAuthority())
 		{
@@ -512,9 +513,9 @@ void AGS_Drakhar::MulticastRPCSetFeverGauge_Implementation(float InValue)
 	}
 
 	//Start Fever Mode
-	if (CurrentFeverGage >= MaxFeverGage)
+	if (CurrentFeverGauge >= MaxFeverGage)
 	{
-		CurrentFeverGage = MaxFeverGage;
+		CurrentFeverGauge = MaxFeverGage;
 
 		//server
 		if (HasAuthority())
@@ -523,14 +524,14 @@ void AGS_Drakhar::MulticastRPCSetFeverGauge_Implementation(float InValue)
 			StartFeverMode();
 		}
 	}
-	if (CurrentFeverGage > 0.f)
+	if (CurrentFeverGauge > 0.f)
 	{
 		if (HasAuthority())
 		{
 			DecreaseFeverGauge();
 		}
 	}
-	OnCurrentFeverGageChanged.Broadcast(CurrentFeverGage);
+	OnCurrentFeverGageChanged.Broadcast(CurrentFeverGauge);
 }
 
 void AGS_Drakhar::MulticastRPCFeverMontagePlay_Implementation()
@@ -589,7 +590,7 @@ void AGS_Drakhar::DecreaseFeverGauge()
 
 void AGS_Drakhar::MinusFeverGaugeValue()
 {
-	MulticastRPCSetFeverGauge(-1.f);
+	SetFeverGauge(-1.f);
 }
 
 void AGS_Drakhar::GetRandomDraconicFuryTarget()
@@ -745,6 +746,11 @@ UAkComponent* AGS_Drakhar::GetOrCreateAkComponent()
 	}
 
 	return AkComp;
+}
+
+void AGS_Drakhar::OnRep_FeverGauge()
+{
+	OnCurrentFeverGageChanged.Broadcast(CurrentFeverGauge);
 }
 
 // === 날기 사운드 재생 함수들 구현 ===
