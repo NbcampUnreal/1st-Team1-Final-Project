@@ -24,7 +24,7 @@ void UGS_GameResultUI::NativeConstruct()
 	}
 
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UGS_GameResultUI::AddResultBoards, 0.3f, false);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UGS_GameResultUI::AddResultBoards, 1.f, false);
 }
 
 void UGS_GameResultUI::OnContinueButtonClicked()

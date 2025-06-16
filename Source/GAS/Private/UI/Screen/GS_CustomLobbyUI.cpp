@@ -1,6 +1,7 @@
 #include "UI/Screen/GS_CustomLobbyUI.h"
 #include "Components/TextBlock.h"
 #include "System/PlayerController/GS_CustomLobbyPC.h"
+#include "RuneSystem/GS_ArcaneBoardLPS.h"
 #include "CommonUI/Public/CommonButtonBase.h"
 #include "UI/Common/CustomCommonButton.h"
 #include "UI/Common/GS_CommonTwoBtnPopup.h"
@@ -126,7 +127,10 @@ void UGS_CustomLobbyUI::OnBackButtonClicked()
 	{
 		if (PC->HasCurrentModalWidget())
 		{
-			PC->ClearCurrentModalWidget();
+			if (!PC->CheckAndShowUnsavedChangesConfirm())
+			{
+				PC->ClearCurrentModalWidget();
+			}
 			return;
 		}
 	}
@@ -267,3 +271,18 @@ void UGS_CustomLobbyUI::OnBackPopupNoButtonClicked()
 	CommonPopUpUI->SetVisibility(ESlateVisibility::Hidden);
 }
 
+void UGS_CustomLobbyUI::ShowPerkSaveConfirmPopup()
+{
+	if (CommonPopUpUI)
+	{
+		CommonPopUpUI->SetVisibility(ESlateVisibility::Visible);
+		CommonPopUpUI->SetDescription(FText::FromString(TEXT("변경사항을\n저장하시겠습니까?")));
+
+		AGS_CustomLobbyPC* PC = GetOwningPlayer<AGS_CustomLobbyPC>();
+		if (PC)
+		{
+			CommonPopUpUI->OnYesClicked.BindUObject(PC, &AGS_CustomLobbyPC::OnPerkSaveYes);
+			CommonPopUpUI->OnNoClicked.BindUObject(PC, &AGS_CustomLobbyPC::OnPerkSaveNo);
+		}
+	}
+}

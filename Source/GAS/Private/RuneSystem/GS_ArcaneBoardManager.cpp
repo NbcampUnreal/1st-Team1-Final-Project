@@ -74,15 +74,19 @@ bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
 		}
 	}
 
+	bool bNeedGridReset = (CurrClass != NewClass);
+
 	CurrClass = NewClass;
 	CurrGridLayout = GridLayoutCache[NewClass];
 
-	InitGridState();
-
+	if (bNeedGridReset)
+	{
+		InitGridState();
+		CalculateStatEffects();
+		AppliedBoardStats = CurrBoardStats;
+	}
+	
 	bHasUnsavedChanges = false;
-
-	CalculateStatEffects();
-	AppliedBoardStats = CurrBoardStats;
 
 	return true;
 }
@@ -326,6 +330,7 @@ void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<F
 {
 	PlacedRunes.Empty();
 	InitGridState();
+	CurrBoardStats = FArcaneBoardStats();
 
 	for (const FPlacedRuneInfo& RuneInfo : Runes)
 	{
@@ -454,20 +459,6 @@ bool UGS_ArcaneBoardManager::PreviewRunePlacement(uint8 RuneID, const FIntPoint&
 	}
 
 	return bCanPlace;
-}
-
-void UGS_ArcaneBoardManager::GetGridDimensions(int32& OutRows, int32& OutColumns)
-{
-	if (IsValid(CurrGridLayout))
-	{
-		OutRows = CurrGridLayout->GridSize.X;
-		OutColumns = CurrGridLayout->GridSize.Y;
-	}
-	else
-	{
-		OutRows = 0;
-		OutColumns = 0;
-	}
 }
 
 bool UGS_ArcaneBoardManager::GetCellData(const FIntPoint& Pos, FGridCellData& OutCellData)

@@ -14,6 +14,7 @@ class FOnlineSessionSearchResult;
 class FUniqueNetId;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSteamFriendsListUpdated, const TArray<TSharedRef<FOnlineFriend>>& /* FriendsList */);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerCountChangedDelegate);
 
 UCLASS()
 class GAS_API UGS_GameInstance : public UGameInstance
@@ -86,6 +87,8 @@ protected:
 public:
     FString GetAndClearPendingConnectString();
 
+    bool bJoiningFromInvite = false;
+
 protected:
     FOnDestroySessionCompleteDelegate DestroySessionCompleteDelegateForInvite;
     FDelegateHandle DestroySessionCompleteDelegateForInviteHandle;
@@ -100,7 +103,20 @@ protected:
     FDelegateHandle OnSessionUserInviteAcceptedDelegateHandle;
     virtual void OnSessionUserInviteAccepted_Impl(const bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
 
+    virtual void HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
 
+    FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegateForCleanup;
+    FDelegateHandle OnDestroySessionCompleteDelegateHandleForCleanup;
+    void OnDestroySessionCompleteForCleanup(FName SessionName, bool bWasSuccessful);
+
+    //세션 생명주기 관리
+public:
+    UPROPERTY(BlueprintAssignable, Category = "Session")
+    FOnPlayerCountChangedDelegate OnPlayerCountChanged;
+
+private:
+    UFUNCTION()
+    void HandlePlayerCountChanged();
 
     //타이머 넘기기
 public:

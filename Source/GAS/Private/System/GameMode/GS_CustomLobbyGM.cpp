@@ -18,6 +18,25 @@ AGS_CustomLobbyGM::AGS_CustomLobbyGM()
     bUseSeamlessTravel = true;
 }
 
+void AGS_CustomLobbyGM::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+{
+    Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
+    if (!ErrorMessage.IsEmpty()) return;
+
+    if (GameState)
+    {
+        const bool bIsFromInvite = Options.Contains(TEXT("bIsFromInvite=true"));
+        if (GameState->PlayerArray.Num() >= 1 && !bIsFromInvite)
+        {
+            ErrorMessage = TEXT("Server is full.");
+        }
+	}
+    else
+    {
+        ErrorMessage = TEXT("Server is not ready.");
+    }
+}
+
 void AGS_CustomLobbyGM::BeginPlay()
 {
     Super::BeginPlay();

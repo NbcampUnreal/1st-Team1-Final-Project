@@ -33,7 +33,8 @@ public:
 	UPROPERTY()
 	TSet<AActor*> HitActors;
 
-	void InitHomingTarget(AActor* Target);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_InitHomingTarget(AActor* Target);
 	//AGS_Player* OwnerPlayer;
 protected:
 	virtual void BeginPlay() override;
