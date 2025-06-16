@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
+#include "System/GS_BaseGM.h"
 #include "GS_CustomLobbyGM.generated.h"
 
 class AGS_SpawnSlot;
@@ -10,12 +10,13 @@ class APawn;
 class UGS_PawnMappingDataAsset;
 
 UCLASS()
-class GAS_API AGS_CustomLobbyGM : public AGameMode
+class GAS_API AGS_CustomLobbyGM : public AGS_BaseGM
 {
 	GENERATED_BODY()
 	
 public:
 	AGS_CustomLobbyGM();
+	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void RestartPlayer(AController* NewPlayer) override;
