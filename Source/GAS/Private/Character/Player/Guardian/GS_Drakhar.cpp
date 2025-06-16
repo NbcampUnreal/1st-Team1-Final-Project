@@ -169,12 +169,8 @@ void AGS_Drakhar::Ctrl()
 		if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
 		{
 			GetSkillComp()->TryActivateSkill(ESkillSlot::Ready);
+			ClientGuardianState = EGuardianState::CtrlUp; // 클라이언트 상태 즉시 업데이트
 			ServerRPCStartCtrl();
-		}
-		//for fix input bugs...
-		else
-		{
-			ClientGuardianState = EGuardianState::CtrlSkillEnd;
 		}
 	}
 }
@@ -184,6 +180,7 @@ void AGS_Drakhar::CtrlStop()
 	if (!HasAuthority() && IsLocallyControlled())
 	{
 		GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+		ClientGuardianState = EGuardianState::CtrlSkillEnd; // 클라이언트 상태 즉시 업데이트
 		ServerRPCStopCtrl();
 	}
 }
@@ -272,12 +269,13 @@ void AGS_Drakhar::ComboLastAttack()
 		FCollisionQueryParams Params(NAME_None, false, this);
 		Params.AddIgnoredActor(this);
 
+		TArray<FHitResult> OutHitResults;
 		bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, Start, FQuat::Identity,ECC_Pawn, FCollisionShape::MakeSphere(300.f), Params);
 
 		if (bIsHitDetected)
 		{
 			TSet<AGS_Character*> DamagedCharacterArray;
-			for (auto const& OutHitResult : OutHitResults)
+			for (const auto& OutHitResult : OutHitResults)
 			{
 				if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
 				{
@@ -291,7 +289,7 @@ void AGS_Drakhar::ComboLastAttack()
 				}
 			}
 
-			for (auto const& DamagedCharacter : DamagedCharacterArray)
+			for (const auto& DamagedCharacter : DamagedCharacterArray)
 			{
 				//ServerRPCMeleeAttack(DamagedCharacter);
 				UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
@@ -455,7 +453,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 	const FVector Start = GetActorLocation() + 100.f;
 	TSet<AGS_Character*> EarthquakeDamagedCharacters = DetectPlayerInRange(Start, 200.f, EarthquakeRadius);
 	
-	for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)
+	for (const auto& DamagedCharacter : EarthquakeDamagedCharacters)
 	{
 		float SkillCoefficient = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)->Damage;
 		float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter, SkillCoefficient);
@@ -469,34 +467,17 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 				//DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Slow, this);
 			}
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+
+			// === 어스퀘이크 스킬 히트 사운드 재생 ===
+			PlayAttackHitSound();
+
 			FVector DrakharLocation = GetActorLocation();
 			FVector DamagedLocation = DamagedCharacter->GetActorLocation();
 
 			FVector LaunchVector = (DamagedLocation - DrakharLocation).GetSafeNormal();
 			
 			//Guardian 쪽으로 당겨오기
-			DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f, 0.f, 500.f), false,false);
-		}
-		for (auto const& DamagedCharacter : EarthquakeDamagedCharacters)
-		{
-			float SkillCoefficient = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)->Damage;
-			float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter, SkillCoefficient);
-
-			FDamageEvent DamageEvent;
-			if (IsValid(DamagedCharacter))
-			{
-				DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
-
-				// === 어스퀘이크 스킬 히트 사운드 재생 ===
-				PlayAttackHitSound();
-
-				FVector DrakharLocation = GetActorLocation();
-				FVector DamagedLocation = DamagedCharacter->GetActorLocation();
-
-				FVector LaunchVector = (DamagedLocation - DrakharLocation).GetSafeNormal();
-				//Guardian 쪽으로 당겨오기
-				DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f, 0.f, 500.f), false,false);
-			}
+			DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f, 0.f, 500.f), false, false);
 		}
 	}
 }
@@ -799,8 +780,6 @@ void AGS_Drakhar::PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Locat
 		UE_LOG(LogTemp, Warning, TEXT("GS_Drakhar::PlaySoundEvent - Failed to get AkComponent"));
 		return;
 	}
-
-
 
 	// 특정 위치에서 재생하는 경우 (투사체 등)
 	if (Location != FVector::ZeroVector)
