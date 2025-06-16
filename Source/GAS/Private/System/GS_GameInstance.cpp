@@ -9,6 +9,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Engine/LocalPlayer.h"
 #include "System/Save/GS_OptionSettinsSaveGame.h"
+#include "GameFramework/GameStateBase.h"
 
 UGS_GameInstance::UGS_GameInstance()
     : DefaultLobbyMapName(TEXT("/Game/Maps/CustomLobbyLevel"))
@@ -27,6 +28,11 @@ void UGS_GameInstance::Init()
 {
     Super::Init();
     UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Init() CALLED."));
+
+    if (GEngine)
+    {
+        GEngine->OnNetworkFailure().AddUObject(this, &UGS_GameInstance::HandleNetworkFailure);
+    }
 
     IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
     if (Subsystem)
@@ -59,7 +65,9 @@ void UGS_GameInstance::Init()
             JoinSessionCompleteDelegate = FOnJoinSessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnJoinSessionComplete);
             DestroySessionCompleteDelegateForInvite = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnDestroySessionCompleteForInvite);
             OnSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UGS_GameInstance::OnSessionUserInviteAccepted_Impl);
+            OnDestroySessionCompleteDelegateForCleanup = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnDestroySessionCompleteForCleanup);
             LeaveSessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnLeaveSessionComplete);
+            OnPlayerCountChanged.AddDynamic(this, &UGS_GameInstance::HandlePlayerCountChanged);
             if (OnSessionUserInviteAcceptedDelegate.IsBound()) //FOnSessionUserInviteAcceptedDelegate는 게임 인스턴스 초기화 시점부터 계속 리스닝해야 하므로 Init()에서 핸들까지 등록
             {
                 OnSessionUserInviteAcceptedDelegateHandle = SessionInterface->AddOnSessionUserInviteAcceptedDelegate_Handle(OnSessionUserInviteAcceptedDelegate);
@@ -185,6 +193,7 @@ void UGS_GameInstance::OnSessionUserInviteAccepted_Impl(const bool bWasSuccessfu
 
     if (bWasSuccessful && InviteResult.IsValid())
     {
+        bJoiningFromInvite = true;
         APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), ControllerId); // ControllerId 사용
         if (PC)
         {
@@ -199,6 +208,73 @@ void UGS_GameInstance::OnSessionUserInviteAccepted_Impl(const bool bWasSuccessfu
     else
     {
         // ... (실패 로그) ...
+    }
+}
+
+void UGS_GameInstance::HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
+{
+    UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance::HandleNetworkFailure - Type: %s, Error: %s"), ENetworkFailure::ToString(FailureType), *ErrorString);
+
+    IOnlineSessionPtr SessionInterfacePtr = Online::GetSessionInterface(GetWorld());
+    if (SessionInterfacePtr.IsValid())
+    {
+        // 현재 참여 중인 것으로 '착각'하고 있는 세션이 있는지 확인
+        FNamedOnlineSession* CurrentSession = SessionInterfacePtr->GetNamedSession(NAME_GameSession);
+        if (CurrentSession)
+        {
+            UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::HandleNetworkFailure - Found a lingering session. Destroying it to clean up."));
+
+            // 델리게이트 핸들이 유효한지 확인하고, 필요하다면 새로 바인딩합니다.
+            if (!OnDestroySessionCompleteDelegateHandleForCleanup.IsValid())
+            {
+                OnDestroySessionCompleteDelegateHandleForCleanup = SessionInterfacePtr->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegateForCleanup);
+            }
+
+            // 로컬에 남아있는 세션 파괴
+            SessionInterfacePtr->DestroySession(NAME_GameSession);
+        }
+    }
+}
+
+void UGS_GameInstance::OnDestroySessionCompleteForCleanup(FName SessionName, bool bWasSuccessful)
+{
+    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnDestroySessionCompleteForCleanup - Session '%s' destroyed for cleanup: %s"), *SessionName.ToString(), bWasSuccessful ? TEXT("Success") : TEXT("Failed"));
+
+    IOnlineSessionPtr SessionInterfacePtr = Online::GetSessionInterface(GetWorld());
+    if (SessionInterfacePtr.IsValid() && OnDestroySessionCompleteDelegateHandleForCleanup.IsValid())
+    {
+        SessionInterfacePtr->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegateHandleForCleanup);
+        OnDestroySessionCompleteDelegateHandleForCleanup.Reset();
+    }
+}
+
+void UGS_GameInstance::HandlePlayerCountChanged()
+{
+    UWorld* World = GetWorld();
+    
+    if (World && (World->GetNetMode() == NM_DedicatedServer))
+    {
+        AGameStateBase* GS = World->GetGameState();
+        if (!GS) return;
+
+        const int32 NumPlayers = GS->PlayerArray.Num();
+
+        IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+        if (Subsystem)
+        {
+            IOnlineSessionPtr SI = Subsystem->GetSessionInterface();
+            if (SI.IsValid())
+            {
+                FNamedOnlineSession* CurrentSession = SI->GetNamedSession(NAME_GameSession);
+                if (CurrentSession)
+                {
+                    if (NumPlayers == 0 && CurrentSession->SessionSettings.NumPublicConnections == 0)
+                    {
+                        GetWorld()->ServerTravel(DefaultLobbyMapName + "?listen", true);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -248,7 +324,7 @@ void UGS_GameInstance::GSHostSession(int32 MaxPlayers, FName SessionCustomName, 
 
     HostSessionSettings = MakeShareable(new FOnlineSessionSettings());
     HostSessionSettings->NumPublicConnections = 1; //이거 나중에 1로 바꾸기
-    HostSessionSettings->NumPrivateConnections = MaxPlayers - HostSessionSettings->NumPublicConnections;
+    HostSessionSettings->NumPrivateConnections = 0;//MaxPlayers - HostSessionSettings->NumPublicConnections;
     HostSessionSettings->bShouldAdvertise = true;
     HostSessionSettings->bIsLANMatch = false;
     HostSessionSettings->bUsesPresence = false; // 스팀데디에서 이거 반드시 꺼야됨
@@ -257,10 +333,8 @@ void UGS_GameInstance::GSHostSession(int32 MaxPlayers, FName SessionCustomName, 
     HostSessionSettings->bAllowJoinInProgress = true;
     HostSessionSettings->bAllowInvites = true;
     HostSessionSettings->bIsDedicated = IsDedicatedServerInstance();
-    HostSessionSettings->bAllowInvites = true;
     HostSessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
     HostSessionSettings->Set(SETTING_GAMEMODE, GameModePath, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-    //HostSessionSettings->Set(FName(TEXT("IINGS")), FString(TEXT("SpartaFinal")), EOnlineDataAdvertisementType::ViaOnlineService);
 	HostSessionSettings->Set(SEARCH_KEYWORDS, FString("IINGSSpartaFinal"), EOnlineDataAdvertisementType::ViaOnlineService);
 
     UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::HostSession - SessionSettings: PublicSlots=%d, PrivateSlots=%d, bIsDedicated=%s"),
@@ -336,7 +410,6 @@ void UGS_GameInstance::GSFindSession(APlayerController* RequestingPlayer)
     SessionSearchSettings->MaxSearchResults = 7777;
     SessionSearchSettings->bIsLanQuery = false;
     SessionSearchSettings->QuerySettings.SearchParams.Remove(SEARCH_PRESENCE);
-	//SessionSearchSettings->QuerySettings.Set(FName(TEXT("IINGS")), FString(TEXT("SpartaFinal")), EOnlineComparisonOp::Equals);
 	SessionSearchSettings->QuerySettings.Set(SEARCH_KEYWORDS, FString("IINGSSpartaFinal"), EOnlineComparisonOp::Equals);
     UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::FindSession - SearchSettings: MaxResults=%d, LANQuery=%s, PresenceQuery=%s"),
         SessionSearchSettings->MaxSearchResults, SessionSearchSettings->bIsLanQuery ? TEXT("true") : TEXT("false"), TEXT("true"));
@@ -535,16 +608,24 @@ void UGS_GameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCo
 
         if (SessionInterface->GetResolvedConnectString(SessionName, ConnectString))
         {
+            if (bJoiningFromInvite)
+            {
+                ConnectString += TEXT("?bIsFromInvite=true");
+                bJoiningFromInvite = false; // 플래그 사용 후 반드시 초기화
+                UE_LOG(LogTemp, Log, TEXT("OnJoinSessionComplete - Appended invite flag. New ConnectString: %s"), *ConnectString);
+            }
             UE_LOG(LogTemp, Log, TEXT(">>>>>>>>> Resolved ConnectString: [ %s ] <<<<<<<<<"), *ConnectString);
             PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
         }
         else
         {
+            HandleNetworkFailure(GetWorld(), nullptr, ENetworkFailure::ConnectionLost, TEXT("GetResolvedConnectString failed."));
             UE_LOG(LogTemp, Error, TEXT("!!!!!!!! GetResolvedConnectString FAILED. Cannot travel. !!!!!!!!"));
         }
     }
     else
     {
+        HandleNetworkFailure(GetWorld(), nullptr, ENetworkFailure::ConnectionLost, TEXT("JoinSession failed with result: ") + ResultStr);
         UE_LOG(LogTemp, Error, TEXT("!!!!!!!! JoinSession FAILED or PlayerController is invalid. Result: %s"), *ResultStr);
     }
 
