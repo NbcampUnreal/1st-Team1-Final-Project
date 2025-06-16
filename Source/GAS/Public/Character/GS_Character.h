@@ -101,6 +101,10 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulicastRPCStopCurrentSkillMontage(UAnimMontage* CurrentSkillMontage);
 
+	// Impact VFX 재생
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayImpactVFX(UNiagaraSystem* VFXAsset, FVector Scale);
+
 	UFUNCTION(BlueprintCallable)
 	AGS_Weapon* GetWeaponByIndex(int32 Index) const;
 

@@ -9,6 +9,9 @@
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Player/GS_Player.h"
 #include "AkAudioEvent.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 UGS_ChanMovingSkill::UGS_ChanMovingSkill()
 {
@@ -31,6 +34,21 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->SetSkillInputControl(false, false);
+
+			// =======================
+			// VFX 재생 - 컴포넌트 RPC 사용
+			// =======================
+			if (OwningComp)
+			{
+				FVector SkillLocation = OwnerCharacter->GetActorLocation();
+				FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+			
+				// 스킬 시전 VFX 재생
+				OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
+			
+				// 스킬 범위 표시 VFX 재생
+				OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, 800.0f);
+			}
 		}
 		// 무빙 스킬 사운드 재생
 		if (OwnerPlayer->MovingSkillSound)
@@ -55,6 +73,18 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 		//OwnerPlayer->Multicast_SetUseControllerRotationYaw(false);
 		OwnerPlayer->SetSkillInputControl(true, true);
+
+		// =======================
+		// 스킬 종료 VFX 재생
+		// =======================
+		if (OwningComp)
+		{
+			FVector SkillLocation = OwnerCharacter->GetActorLocation();
+			FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+			
+			// 스킬 종료 VFX 재생
+			OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
+		}
 	}
 }
 
@@ -96,12 +126,15 @@ void UGS_ChanMovingSkill::ExecuteSkillEffect()
 
 			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
 			{
-				
 				ApplyEffectToDungeonMonster(TargetMonster);
+				// Impact VFX 재생 (오프셋은 추후 함수 시그니처 변경 시 적용)
+				TargetMonster->Multicast_PlayImpactVFX(SkillImpactVFX, SkillVFXScale);
 			}
 			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
 			{
 				ApplyEffectToGuardian(TargetGuardian);
+				// Impact VFX 재생 (오프셋은 추후 함수 시그니처 변경 시 적용)
+				TargetGuardian->Multicast_PlayImpactVFX(SkillImpactVFX, SkillVFXScale);
 			}
 		}
 	}
@@ -124,3 +157,4 @@ void UGS_ChanMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Mute, OwnerCharacter);
 	}
 }
+

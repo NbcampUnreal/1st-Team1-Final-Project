@@ -15,6 +15,8 @@
 #include "AkGameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/Component/GS_HitReactComp.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 AGS_Character::AGS_Character()
 {
@@ -108,7 +110,7 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f by %s"), *GetName(), ActualDamage, *DamageCauser->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f by %s"), *GetName(), ActualDamage, DamageCauser ? *DamageCauser->GetName() : TEXT("Unknown"));
 
 	float NewHealth = CurrentHealth - ActualDamage;
 	StatComp->SetCurrentHealth(NewHealth, false);
@@ -218,6 +220,27 @@ void AGS_Character::MulicastRPCStopCurrentSkillMontage_Implementation(UAnimMonta
 	if (!HasAuthority())
 	{
 		StopAnimMontage(CurrentSkillMontage);
+	}
+}
+
+void AGS_Character::Multicast_PlayImpactVFX_Implementation(UNiagaraSystem* VFXAsset, FVector Scale)
+{
+	if (VFXAsset)
+	{
+		UNiagaraComponent* SpawnedVFX = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			VFXAsset,
+			GetRootComponent(),
+			NAME_None,
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,
+			EAttachLocation::SnapToTarget,
+			true
+		);
+
+		if(SpawnedVFX)
+		{
+			SpawnedVFX->SetWorldScale3D(Scale);
+		}
 	}
 }
 
