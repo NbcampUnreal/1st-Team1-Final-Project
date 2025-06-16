@@ -9,4 +9,7 @@ class GAS_API AGS_BaseGM : public AGameMode
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void Logout(AController* Exiting) override;
 };
