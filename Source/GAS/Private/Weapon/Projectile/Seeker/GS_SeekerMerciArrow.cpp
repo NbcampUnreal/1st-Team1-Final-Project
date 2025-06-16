@@ -85,7 +85,7 @@ void AGS_SeekerMerciArrow::StickWithVisualOnly(const FHitResult& Hit)
 	Destroy();
 }
 
-void AGS_SeekerMerciArrow::InitHomingTarget(AActor* Target)
+void AGS_SeekerMerciArrow::Multicast_InitHomingTarget_Implementation(AActor* Target)
 {
 	if (!ProjectileMovementComponent)
 	{

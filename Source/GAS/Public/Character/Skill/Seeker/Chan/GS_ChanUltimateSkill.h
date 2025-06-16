@@ -67,12 +67,8 @@ private:
 	void StartCharge();
 	void UpdateCharge();
 	void EndCharge();
-	void CheckAndApplyDamage();
 
 	// 가디언용 넉백 설정
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
 	float GuardianKnockbackForce = 300.0f; // 가디언 넉백 힘
-
-	bool IsEnemyTeam(class AGS_Player* Player1, class AGS_Player* Player2);
-	void ApplyDamageToTarget(class AGS_Player* Target, float DamageAmount);
 };

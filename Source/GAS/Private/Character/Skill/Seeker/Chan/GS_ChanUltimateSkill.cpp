@@ -218,9 +218,6 @@ void UGS_ChanUltimateSkill::UpdateCharge()
 		FRotator NewRotation = FMath::RInterpTo(OwnerPlayer->GetActorRotation(), TargetRotation, ChargeTickInterval, 3.0f);
 		OwnerPlayer->SetActorRotation(NewRotation);
 	}
-
-	// 추가 효과 적용 가능
-	CheckAndApplyDamage();
 }
 
 
@@ -241,17 +238,4 @@ void UGS_ChanUltimateSkill::EndCharge()
 	GetWorld()->GetTimerManager().ClearTimer(ChargeTimerHandle);
 
 	UE_LOG(LogTemp, Warning, TEXT("Shield Charge Ended!"));
-}
-
-void UGS_ChanUltimateSkill::CheckAndApplyDamage()
-{
-}
-
-bool UGS_ChanUltimateSkill::IsEnemyTeam(AGS_Player* Player1, AGS_Player* Player2)
-{
-	return false;
-}
-
-void UGS_ChanUltimateSkill::ApplyDamageToTarget(AGS_Player* Target, float DamageAmount)
-{
 }

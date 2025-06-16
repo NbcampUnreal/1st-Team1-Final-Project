@@ -290,7 +290,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 			{
 				if (AutoAimTarget)
 				{
-					HomingArrow->InitHomingTarget(AutoAimTarget);
+					HomingArrow->Multicast_InitHomingTarget(AutoAimTarget);
 				}
 			}
 		}
@@ -298,7 +298,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		{
 			if (AGS_SeekerMerciArrow* HomingArrow = Cast<AGS_SeekerMerciArrow>(SpawnedArrow))
 			{
-				HomingArrow->InitHomingTarget(nullptr);
+				HomingArrow->Multicast_InitHomingTarget(nullptr);
 			}
 		}
 		//Multicast_DrawDebugLine(SpawnLocation, TargetLocation, FColor::Red);
