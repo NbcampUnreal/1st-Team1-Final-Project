@@ -32,10 +32,16 @@ private:
 	float ChargeSpeed = 1500.0f; // 돌진 속도
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
+	float LateralControlStrength = 0.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
 	float KnockbackRadius = 300.0f; // 넉백 반경
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
-	float KnockbackForce = 800.0f; // 넉백 힘
+	float KnockbackForce = 8000.f; // 넉백 힘
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
+	float MaxLateralSpeed = 300.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
 	float Damage = 100.0f; // 스킬 데미지
@@ -45,6 +51,15 @@ private:
 	FVector ChargeStartLocation;
 	FVector ChargeDirection;
 	FTimerHandle ChargeTimerHandle;
+
+	// 캐릭터가 움직일 틱 간격 (예: 60FPS)
+	static constexpr float ChargeTickInterval = 0.016f;
+
+	// 좌우 방향 (시작 시 기준)
+	FVector CurrentLateralDirection;
+
+	// 현재 입력된 좌우 입력값 (-1.0 ~ 1.0)
+	float CurrentLateralInput = 0.0f;
 
 	// 이미 맞은 적들 추적 (중복 피해 방지)
 	TSet<AActor*> HitActors;
