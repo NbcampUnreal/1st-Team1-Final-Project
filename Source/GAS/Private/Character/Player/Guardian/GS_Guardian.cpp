@@ -108,33 +108,37 @@ TSet<AGS_Character*> AGS_Guardian::DetectPlayerInRange(const FVector& Start, flo
 			{
 				continue;
 			}
-
 			AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
 			if (IsValid(DamagedCharacter))
 			{
 				DamagedPlayers.Add(DamagedCharacter);
-				//ServerRPCMeleeAttack(DamagedCharacter);
-				UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
-				if (IsValid(DamagedCharacterStat))
-				{
-					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
-					FDamageEvent DamageEvent;
-					DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(),this);
-
-					// === 히트 사운드 재생 (Drakhar인 경우) ===
-					AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
-					if (Drakhar)
-					{
-						Drakhar->PlayAttackHitSound();
-
-						//server
-						if (!Drakhar->GetIsFeverMode())
-						{
-							Drakhar->MulticastRPCSetFeverGauge(10.f);
-						}
-					}
-				}
 			}
+			// AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
+			// if (IsValid(DamagedCharacter))
+			// {
+			// 	DamagedPlayers.Add(DamagedCharacter);
+			// 	//ServerRPCMeleeAttack(DamagedCharacter);
+			// 	UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
+			// 	if (IsValid(DamagedCharacterStat))
+			// 	{
+			// 		float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
+			// 		FDamageEvent DamageEvent;
+			// 		DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(),this);
+			//
+			// 		// === 히트 사운드 재생 (Drakhar인 경우) ===
+			// 		AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
+			// 		if (Drakhar)
+			// 		{
+			// 			Drakhar->PlayAttackHitSound();
+			//
+			// 			//server
+			// 			if (!Drakhar->GetIsFeverMode())
+			// 			{
+			// 				Drakhar->MulticastRPCSetFeverGauge(10.f);
+			// 			}
+			// 		}
+			// 	}
+			// }
 		}
 	}
 
@@ -163,6 +167,12 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 			if (!Drakhar->GetIsFeverMode())
 			{
 				Drakhar->SetFeverGauge(10.f);
+			}
+			
+			// === 히트 사운드 재생 (Drakhar인 경우) ===
+			if (Drakhar)
+			{
+				Drakhar->PlayAttackHitSound();
 			}
 		}
 	}
