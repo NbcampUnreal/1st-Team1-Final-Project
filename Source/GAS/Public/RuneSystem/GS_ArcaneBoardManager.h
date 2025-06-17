@@ -110,8 +110,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	bool GetFragmentedRuneTexture(uint8 RuneID, TMap<FIntPoint, UTexture2D*>& OutShape);
 
-private:
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	bool GetConnectedFragmentedRuneTexture(uint8 RuneID, TMap<FIntPoint, UTexture2D*>& OutShape);
 
+private:
 	TMap<uint8, FRuneTableRow> RuneDataCache;
 	TMap<ECharacterClass, UGS_GridLayoutDataAsset*> GridLayoutCache;
 	
@@ -122,9 +124,11 @@ private:
 	//현재 그리드의 셀 상태
 	TMap<FIntPoint, FGridCellData> CurrGridState;
 
+	int32 ConnectedRuneCnt;
+
 	void ApplyRuneToGrid(uint8 RuneID, const FIntPoint& Pos, EGridCellState NewState, bool bApplyTexture = true);
 
-	void UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID=0, UTexture2D* RuneTextureFrag=nullptr);
+	void UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID = 0, UTexture2D* RuneTextureFrag = nullptr, UTexture2D* ConnectedRuneTextureFrag = nullptr);
 
 	FIntPoint SpecialCellPos;
 
@@ -133,4 +137,6 @@ private:
 
 	//시작점 룬에서부터 연결된 모든 룬을 재귀적으로 탐색
 	void FindConnectedCells(const FIntPoint CellPos, TSet<FIntPoint>& VisitedCells);
+
+	bool IsRuneConnected(uint8 RuneID);
 };
