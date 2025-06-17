@@ -22,11 +22,16 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(
+		float DeltaTime,
+		ELevelTick TickType,
+		FActorComponentTickFunction* ThisTickFunction
+	) override;
 
 	//FTimerHandle LoopTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TrapMotion")
-	float MotionInterval = 0.1f;
+	float MotionInterval = 0.01f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TrapMotion")
 	float RotationSpeed = 30.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TrapMotion")
@@ -69,4 +74,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_UpdateTransform(FVector Loc, FRotator Rot);
 	void Multicast_UpdateTransform_Implementation(FVector Loc, FRotator Rot);
+
+
+
 };

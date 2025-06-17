@@ -5,6 +5,7 @@
 UGS_LoopingTrapMotionComp::UGS_LoopingTrapMotionComp()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.TickInterval = 0.016f;
 	SetIsReplicatedByDefault(true);
 }
 
@@ -21,6 +22,8 @@ void UGS_LoopingTrapMotionComp::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("[LoopingTrapMotionComp] TargetComponent is NULL in %s"), *GetOwner()->GetName());
 	}
 }
+
+
 
 
 
@@ -112,32 +115,59 @@ void UGS_LoopingTrapMotionComp::Multicast_UpdateTransform_Implementation(FVector
 	{
 		return;
 	}
-	CurrentLoc = TargetComponent->GetRelativeLocation();
-	TargetLoc = Loc;
+	if (GetOwnerRole() == ROLE_SimulatedProxy)
+	{
+		CurrentLoc = TargetComponent->GetRelativeLocation();
+		TargetLoc = Loc;
 
-	CurrentRot = TargetComponent->GetRelativeRotation();
-	TargetRot = Rot;
+		CurrentRot = TargetComponent->GetRelativeRotation();
+		TargetRot = Rot;
 
-	InterpAlpha = 0.f;
-
+		InterpAlpha = 0.f;
+	}
 }
 
 
-
-void UGS_LoopingTrapMotionComp::ClientLerpUpdate()
+void UGS_LoopingTrapMotionComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	UE_LOG(LogTemp, Warning, TEXT("Tick Component called"));
 	if (!TargetComponent)
 	{
 		return;
 	}
 
-	InterpAlpha += (MotionInterval / InterpStep);
-	InterpAlpha = FMath::Clamp(InterpAlpha, 0.f, 1.f);
+	if (GetOwnerRole() == ROLE_SimulatedProxy)
+	{
+		InterpAlpha += DeltaTime / InterpStep;
+		InterpAlpha = FMath::Clamp(InterpAlpha, 0.f, 1.f);
 
-	FVector NewLoc = FMath::Lerp(CurrentLoc, TargetLoc, InterpAlpha);
-	FRotator NewRot = FMath::Lerp(CurrentRot, TargetRot, InterpAlpha);
+		FVector NewLoc = FMath::Lerp(CurrentLoc, TargetLoc, InterpAlpha);
+		FRotator NewRot = FMath::Lerp(CurrentRot, TargetRot, InterpAlpha);
 
-	TargetComponent->SetRelativeLocation(NewLoc);
-	TargetComponent->SetRelativeRotation(NewRot);
-	//UE_LOG(LogTemp, Warning, TEXT("[LerpUpdate] CurrentLoc: %s, TargetLoc: %s, Alpha: %f"), *CurrentLoc.ToString(), *TargetLoc.ToString(), InterpAlpha);
+		TargetComponent->SetRelativeLocation(NewLoc);
+		TargetComponent->SetRelativeRotation(NewRot);
+	}
+
+}
+
+
+
+
+void UGS_LoopingTrapMotionComp::ClientLerpUpdate()
+{
+	//if (!TargetComponent)
+	//{
+	//	return;
+	//}
+
+	//InterpAlpha += (MotionInterval / InterpStep);
+	//InterpAlpha = FMath::Clamp(InterpAlpha, 0.f, 1.f);
+
+	//FVector NewLoc = FMath::Lerp(CurrentLoc, TargetLoc, InterpAlpha);
+	//FRotator NewRot = FMath::Lerp(CurrentRot, TargetRot, InterpAlpha);
+
+	//TargetComponent->SetRelativeLocation(NewLoc);
+	//TargetComponent->SetRelativeRotation(NewRot);
+	////UE_LOG(LogTemp, Warning, TEXT("[LerpUpdate] CurrentLoc: %s, TargetLoc: %s, Alpha: %f"), *CurrentLoc.ToString(), *TargetLoc.ToString(), InterpAlpha);
 }

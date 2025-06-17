@@ -22,6 +22,35 @@ AGS_InGameGM::AGS_InGameGM()
     bUseSeamlessTravel = true;
 }
 
+//Trap
+void AGS_InGameGM::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (HasAuthority())
+    {
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+        TrapManager = GetWorld()->SpawnActor<AGS_TrapManager>(
+            AGS_TrapManager::StaticClass(),
+            FVector::ZeroVector,
+            FRotator::ZeroRotator,
+            SpawnParams
+        );
+    }
+    if (TrapManager)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[InGameGM] Spawned TrapManager on Server."));
+    }
+   
+}
+
+AGS_TrapManager* AGS_InGameGM::GetTrapManager() const
+{
+    return TrapManager;
+}
+
 TSubclassOf<APlayerController> AGS_InGameGM::GetPlayerControllerClassToSpawnForSeamlessTravel(APlayerController* PreviousPC)
 {
     if (const auto* PS = PreviousPC ? PreviousPC->GetPlayerState<AGS_PlayerState>() : nullptr)
@@ -170,6 +199,7 @@ void AGS_InGameGM::StartPlay()
             GetWorldTimerManager().SetTimer(MatchStartTimerHandle, this, &AGS_InGameGM::StartMatchCheck, 2.0f, false);
         }
     }, 0.2f, false);
+
 }
 
 void AGS_InGameGM::Logout(AController* Exiting)

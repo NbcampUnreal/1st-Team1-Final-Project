@@ -67,11 +67,11 @@ void AGS_TrapManager::TimerTrapManager()
 					//UE_LOG(LogTemp, Warning, TEXT("[TrapManager] Do All Trap Motion succeeded"));
 					MotionComp->StartMotion();
 				}
-				else
-				{
-					//UE_LOG(LogTemp, Warning, TEXT("[client]ClientLerpUpdate called"));
-					MotionComp->ClientLerpUpdate();
-				}
+				//else
+				//{
+				//	//UE_LOG(LogTemp, Warning, TEXT("[client]ClientLerpUpdate called"));
+				//	MotionComp->ClientLerpUpdate();
+				//}
 			}
 
 		}
