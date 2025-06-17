@@ -29,18 +29,26 @@ public:
 
 	UFUNCTION()
 	void OnComboAttack();
+
+	
 	
 	// Combo Attack Montage
 	void ComboInputOpen();
 	void ComboInputClose();
-	void ComboEnd();
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ComboEnd();
 
 	// Aim Skill
 	/*void OnReadyAimSkill();*/
 	void OnJumpAttackSkill();
 	void OffJumpAttackSkill();
 	void ToIdle();
-	
+
+	UPROPERTY(Replicated)
+	bool bComboEnded = true;
+
+	UFUNCTION(Server, Reliable)
+	void Server_ComboEnd(bool bComboEnd);
 	
 	UPROPERTY(EditAnywhere, Category="Animation")
 	UAnimMontage* ComboAnimMontage;

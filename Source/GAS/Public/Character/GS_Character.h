@@ -110,6 +110,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetCharacterSpeed(float InRatio);
+
+	UFUNCTION()
+	void SetCharacterSpeed(float InRatio);
 	
 protected:
 	//component
