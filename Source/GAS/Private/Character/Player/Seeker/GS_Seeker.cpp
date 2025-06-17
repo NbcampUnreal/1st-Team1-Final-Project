@@ -25,11 +25,14 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Animation/Character/Seeker/GS_ChooserInputObj.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	bReplicates = true;
 
 	GetMesh()->bEnableUpdateRateOptimizations = false;
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
@@ -76,7 +79,10 @@ AGS_Seeker::AGS_Seeker()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel4, ECR_Overlap);
 	GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel4, ECR_Ignore);
 
-
+	// State
+	SeekerGait = EGait::Run;
+	LastSeekerGait = SeekerGait;
+	CanChangeSeekerGait = true;
 }
 
 void AGS_Seeker::SetAimState(bool IsAim)
@@ -99,15 +105,63 @@ bool AGS_Seeker::GetDrawState()
 	return SeekerState.IsDraw;
 }
 
-void AGS_Seeker::Multicast_SetNewPlayRate_Implementation(float PlayRate)
+void AGS_Seeker::Server_SetSeekerGait_Implementation(EGait Gait)
 {
-	NewPlayRate = PlayRate;
+	LastSeekerGait = SeekerGait;
+	SeekerGait = Gait;
+
+	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		SeekerAnim->ChooserInputObj->Gait = SeekerGait;
+	}
+	
+	switch (Gait)
+	{
+	case EGait::Walk :
+		SetCharacterSpeed(0.45f);	
+		break;
+	case EGait::Run :
+		SetCharacterSpeed(0.8f);
+		break;
+	case EGait::Sprint :
+		SetCharacterSpeed(1.0f);
+		break;
+	}
 }
 
-/*EGait AGS_Seeker::GetGait()
+void AGS_Seeker::SetSeekerGait(EGait Gait)
 {
-	return Gait;
-}*/
+	LastSeekerGait = SeekerGait;
+	SeekerGait = Gait;
+	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		SeekerAnim->ChooserInputObj->Gait = SeekerGait;
+	}
+	
+	switch (Gait)
+	{
+	case EGait::Walk :
+		SetCharacterSpeed(0.45f);	
+		break;
+	case EGait::Run :
+		SetCharacterSpeed(0.8f);
+		break;
+	case EGait::Sprint :
+		SetCharacterSpeed(1.0f);
+		break;
+	}
+}
+
+EGait AGS_Seeker::GetSeekerGait()
+{
+	return SeekerGait;
+}
+
+EGait AGS_Seeker::GetLastSeekerGait()
+{
+	return LastSeekerGait;
+}
+
 
 void AGS_Seeker::BeginPlay()
 {
@@ -283,6 +337,20 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	
 	DOREPLIFETIME(AGS_Seeker, bIsLowHealthEffectActive);
 	DOREPLIFETIME(AGS_Seeker, CurrentEffectStrength);
+	DOREPLIFETIME(AGS_Seeker, LastSeekerGait);
+	DOREPLIFETIME(AGS_Seeker, SeekerGait);
+	DOREPLIFETIME(AGS_Seeker, CanChangeSeekerGait);
+}
+
+void AGS_Seeker::OnRep_SeekerGait()
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		if (UGS_ChooserInputObj* InputObj = AnimInstance->ChooserInputObj)
+		{
+			InputObj->Gait = SeekerGait;
+		}
+	}
 }
 
 void AGS_Seeker::OnRep_IsLowHealthEffectActive()
@@ -390,14 +458,14 @@ void AGS_Seeker::StartCombatMusic()
 void AGS_Seeker::ClientRPCStopCombatMusic_Implementation()
 {
 	// 죽었을 때는 IsLocallyControlled() 체크를 하지 않음
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() called for %s"), *GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() called for %s"), *GetName());
 
 	// AudioManager 가져오기
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() - Calling EndCombatSequence"));
+			//UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() - Calling EndCombatSequence"));
 			
 			// 현재 재생 중인 전투 BGM 이벤트 가져오기 (가장 마지막에 추가된 몬스터 기준 또는 다른 로직)
 			UAkAudioEvent* CombatStopEventToUse = nullptr;

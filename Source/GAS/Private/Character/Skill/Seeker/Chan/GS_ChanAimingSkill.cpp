@@ -23,13 +23,14 @@ UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 }
 
 void UGS_ChanAimingSkill::ActiveSkill()
-{
+{	
 	if (!CanActive()) return;
 	Super::ActiveSkill();
+	
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{
+	{		
 		if (OwnerPlayer->HasAuthority())
-		{
+		{			
 			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
 			// Combo Control Value
 			OwnerPlayer->ComboInputClose();
@@ -81,9 +82,9 @@ void UGS_ChanAimingSkill::ActiveSkill()
 void UGS_ChanAimingSkill::DeactiveSkill()
 {
 	Super::DeactiveSkill();
-
+	
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{
+	{		
 		if (OwnerPlayer->HasAuthority())
 		{
 			OwnerPlayer->ComboInputOpen();
@@ -96,6 +97,8 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 			OwnerPlayer->SetLookControlValue(true, true);
 			OwnerPlayer->SetSkillInputControl(true, true);
+			
+			OwnerPlayer->CanChangeSeekerGait = true;
 
 			if (OwnerCharacter->GetSkillComp())
 			{

@@ -13,6 +13,7 @@
 #include "Character/Skill/GS_SkillComp.h"
 #include "AkComponent.h"
 #include "AkAudioEvent.h"
+#include "Animation/Character/Seeker/GS_ChooserInputObj.h"
 
 
 // Sets default values
@@ -22,7 +23,6 @@ AGS_Chan::AGS_Chan()
 	PrimaryActorTick.bCanEverTick = true;
 	CharacterType = ECharacterType::Chan;
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_ChanSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
-	bReplicates = true;
 }
 
 void AGS_Chan::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
@@ -39,6 +39,7 @@ void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 
 	DOREPLIFETIME(AGS_Chan, CanAcceptComboInput);
 	DOREPLIFETIME(AGS_Chan, CurrentComboIndex);
+	DOREPLIFETIME(AGS_Chan, bComboEnded);
 }
 
 // Called when the game starts or when spawned
@@ -65,19 +66,26 @@ void AGS_Chan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AGS_Chan::OnComboAttack()
 {
 	float ControlYaw = GetControlRotation().Yaw;
-	AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController());
-	float YawDiff = FMath::Abs(FMath::FindDeltaAngleDegrees(ControlYaw, TpsController->LastRotatorInMoving.Yaw));
-	
-	if (YawDiff > 50)
+	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController()))
 	{
-		return;
+		float YawDiff = FMath::Abs(FMath::FindDeltaAngleDegrees(ControlYaw, TpsController->LastRotatorInMoving.Yaw));
+	
+		if (YawDiff > 50)
+		{
+			return;
+		}
 	}
+	
+	Server_ComboEnd(false);
+	CanChangeSeekerGait = false;
 	
 	if (CanAcceptComboInput)
 	{
 		if (CurrentComboIndex == 0)
 		{
 			ServerAttackMontage();
+			Server_SetSeekerGait(EGait::Walk);
+			
 		}
 		else
 		{
@@ -103,20 +111,32 @@ void AGS_Chan::ComboInputClose()
 	}
 }
 
-void AGS_Chan::ComboEnd()
+void AGS_Chan::Multicast_ComboEnd_Implementation()
 {
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
-		StopAnimMontage();
-		//AnimInstance->Montage_Stop(0.1f);
+		StopAnimMontage(ComboAnimMontage);
 		AnimInstance->IsPlayingUpperBodyMontage = false;
 		CurrentComboIndex = 0;
 		CanAcceptComboInput = true;
+		
 
 		AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
 		if (IsValid(TPSController))
 		{
 			TPSController->SetLookControlValue(true, true);
+		}
+
+		if (HasAuthority())
+		{
+			if (LastSeekerGait == EGait::Run)
+			{			
+				SetSeekerGait(EGait::Run);
+			}
+			else if (LastSeekerGait == EGait::Walk)
+			{
+				SetSeekerGait(EGait::Walk);
+			}
 		}
 	}
 }
@@ -145,6 +165,11 @@ void AGS_Chan::ToIdle()
 	Multicast_SetIsFullBodySlot(false);
 	SetMoveControlValue(true, true);
 	SetLookControlValue(true, true);
+}
+
+void AGS_Chan::Server_ComboEnd_Implementation(bool bComboEnd)
+{
+	bComboEnded = bComboEnd;
 }
 
 void AGS_Chan::SetMoveControlValue(bool bMoveForward, bool bMoveRight)
