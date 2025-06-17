@@ -35,8 +35,22 @@ UGS_ArcaneBoardManager::UGS_ArcaneBoardManager()
 
 bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
 {
+	UE_LOG(LogTemp, Warning, TEXT("=== SetCurrClass 시작 ==="));
+	UE_LOG(LogTemp, Warning, TEXT("이전 클래스: %s, 새 클래스: %s"),
+		*UGS_EnumUtils::GetEnumAsString(CurrClass),
+		*UGS_EnumUtils::GetEnumAsString(NewClass));
+
+	// 현재 배치된 룬 상태 로그
+	UE_LOG(LogTemp, Warning, TEXT("클래스 변경 전 배치된 룬 개수: %d"), PlacedRunes.Num());
+	for (int32 i = 0; i < PlacedRunes.Num(); i++)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("  룬 %d: ID=%d, Pos=(%d,%d)"),
+			i, PlacedRunes[i].RuneID, PlacedRunes[i].Pos.X, PlacedRunes[i].Pos.Y);
+	}
+
 	if (CurrClass == NewClass && IsValid(CurrGridLayout))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("동일한 클래스이므로 early return"));
 		return true;
 	}
 
@@ -75,18 +89,29 @@ bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
 	}
 
 	bool bNeedGridReset = (CurrClass != NewClass);
+	UE_LOG(LogTemp, Warning, TEXT("그리드 리셋 필요: %s"), bNeedGridReset ? TEXT("예") : TEXT("아니오"));
 
 	CurrClass = NewClass;
 	CurrGridLayout = GridLayoutCache[NewClass];
 
 	if (bNeedGridReset)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("그리드 상태 초기화 시작"));
 		InitGridState();
+
+		UE_LOG(LogTemp, Warning, TEXT("초기화 후 배치된 룬 개수: %d"), PlacedRunes.Num());
+		for (int32 i = 0; i < PlacedRunes.Num(); i++)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("  초기화 후 룬 %d: ID=%d, Pos=(%d,%d)"),
+				i, PlacedRunes[i].RuneID, PlacedRunes[i].Pos.X, PlacedRunes[i].Pos.Y);
+		}
+
 		CalculateStatEffects();
 		AppliedBoardStats = CurrBoardStats;
 	}
 	
 	bHasUnsavedChanges = false;
+	UE_LOG(LogTemp, Warning, TEXT("=== SetCurrClass 완료 ==="));
 
 	return true;
 }
@@ -329,15 +354,34 @@ void UGS_ArcaneBoardManager::ResetAllRune()
 
 void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes)
 {
+	UE_LOG(LogTemp, Warning, TEXT("=== LoadSavedData 시작 ==="));
+	UE_LOG(LogTemp, Warning, TEXT("로드할 클래스: %s"), *UGS_EnumUtils::GetEnumAsString(Class));
+	UE_LOG(LogTemp, Warning, TEXT("현재 클래스: %s"), *UGS_EnumUtils::GetEnumAsString(CurrClass));
+	UE_LOG(LogTemp, Warning, TEXT("로드할 룬 개수: %d"), Runes.Num());
+
+	for (int32 i = 0; i < Runes.Num(); i++)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("  로드할 룬 %d: ID=%d, Pos=(%d,%d)"),
+			i, Runes[i].RuneID, Runes[i].Pos.X, Runes[i].Pos.Y);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("기존 PlacedRunes 비우기 전 개수: %d"), PlacedRunes.Num());
+
 	PlacedRunes.Empty();
 	InitGridState();
 	CurrBoardStats = FArcaneBoardStats();
 
+	UE_LOG(LogTemp, Warning, TEXT("초기화 후 PlacedRunes 개수: %d"), PlacedRunes.Num());
+
 	for (const FPlacedRuneInfo& RuneInfo : Runes)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("룬 추가 중: ID=%d, Pos=(%d,%d)"),
+			RuneInfo.RuneID, RuneInfo.Pos.X, RuneInfo.Pos.Y);
 		PlacedRunes.Add(RuneInfo);
 		ApplyRuneToGrid(RuneInfo.RuneID, RuneInfo.Pos, EGridCellState::Occupied, true);
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("최종 PlacedRunes 개수: %d"), PlacedRunes.Num());
 
 	CalculateStatEffects();
 	AppliedBoardStats = CurrBoardStats;
@@ -345,6 +389,7 @@ void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<F
 	OnStatsChanged.Broadcast(CurrBoardStats);
 
 	bHasUnsavedChanges = false;
+	UE_LOG(LogTemp, Warning, TEXT("=== LoadSavedData 완료 ==="));
 }
 
 bool UGS_ArcaneBoardManager::GetRuneData(uint8 RuneID, FRuneTableRow& OutData)
