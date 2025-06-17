@@ -5,6 +5,9 @@ AGS_NonTrigTrapBase::AGS_NonTrigTrapBase()
 {
 	ActivateSphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("ActivateSphereComp"));
 	ActivateSphereComp->SetupAttachment(MeshParentSceneComp);
+	ActivateSphereComp->PrimaryComponentTick.bCanEverTick = false;
+	ActivateSphereComp->PrimaryComponentTick.bStartWithTickEnabled = false;
+	ActivateSphereComp->PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
 
 	ActivateSphereComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	ActivateSphereComp->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -84,3 +87,16 @@ void AGS_NonTrigTrapBase::DeActivateTrap_Implementation()
 {
 
 }
+
+
+
+bool AGS_NonTrigTrapBase::CanStartMotion() const
+{
+	//UE_LOG(LogTemp, Warning, TEXT("[CanStartMotion] bIsActivated: %s"), bIsActivated ? TEXT("true") : TEXT("false"));
+	return bIsActivated;
+}
+
+//bool AGS_NonTrigTrapBase::CanStopMotion() const
+//{//false가 되면 제거 
+//	return !bIsActivated;
+//}

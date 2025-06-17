@@ -46,4 +46,9 @@ public:
 	void StartDeactivateTrapCheck();
 
 	void CheckOverlappingSeeker();
+
+	//TrapMotion
+	virtual bool CanStartMotion() const override;
+	//virtual bool CanStopMotion() const override;
+
 };

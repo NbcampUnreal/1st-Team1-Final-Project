@@ -6,6 +6,7 @@
 #include "GS_TrapData.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_DebuffComp.h"
+#include "Props/Trap/GS_TrapManager.h"
 #include "GS_TrapBase.generated.h"
 
 class UBoxComponent;
@@ -21,13 +22,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trap")
 	FName TrapID;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
 	USceneComponent* RootSceneComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
 	USceneComponent* RotationSceneComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
 	USceneComponent* MeshParentSceneComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
@@ -88,8 +89,10 @@ public:
 	virtual void HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors);
 	
 
-
-
+	//Trap Motion
+	class UGS_TrapMotionCompBase* GetValidMotionComponent() const;
+	virtual bool CanStartMotion() const;
+	AGS_TrapManager* GetTrapManager() const;
 
 
 	void LoadTrapData();
@@ -103,7 +106,6 @@ protected:
 	TMap<AActor*, FTimerHandle> ActiveDoTTimers;
 
 	virtual void BeginPlay() override;
-	
 	
 
 };
