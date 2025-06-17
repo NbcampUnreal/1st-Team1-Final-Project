@@ -65,13 +65,10 @@ struct FArcaneBoardStats
 	UPROPERTY(BlueprintReadWrite)
 	FGS_StatRow BonusStats;
 
-	TMap<uint8, TArray<FIntPoint>> ConnectedRuneCells;
-
 	FArcaneBoardStats()
 	{
 		RuneStats = FGS_StatRow();
 		BonusStats = FGS_StatRow();
-		ConnectedRuneCells.Empty();
 	}
 };
 
@@ -114,27 +111,37 @@ struct FGridCellData
 	bool bIsSpecialCell;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsConnected;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 PlacedRuneID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* RuneTextureFrag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* ConnectedRuneTextureFrag;
 
 	FGridCellData()
 	{
 		Pos = { 0, 0 };
 		State = EGridCellState::Empty;
 		bIsSpecialCell = false;
+		bIsConnected = false;
 		PlacedRuneID = 0;
 		RuneTextureFrag = nullptr;
+		ConnectedRuneTextureFrag = nullptr;
 	}
 
-	FGridCellData(const FIntPoint& InPos, EGridCellState InState, bool InIsSpecialCell = false)
+	FGridCellData(const FIntPoint& InPos, EGridCellState InState, bool InIsSpecialCell = false, bool InIsConnected = false)
 	{
 		Pos = InPos;
 		State = InState;
 		bIsSpecialCell = InIsSpecialCell;
+		bIsConnected = InIsConnected;
 		PlacedRuneID = 0;
 		RuneTextureFrag = nullptr;
+		ConnectedRuneTextureFrag = nullptr;
 	}
 };
 
