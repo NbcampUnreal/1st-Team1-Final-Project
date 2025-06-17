@@ -3,10 +3,12 @@
 #include "CoreMinimal.h"
 #include "Character/Player/GS_Player.h"
 #include "CollisionShape.h"
+#include "Character/Component/GS_CameraShakeTypes.h"
 #include "GS_Guardian.generated.h"
 
 class UGS_DrakharAnimInstance;
 class UGS_DebuffVFXComponent;
+class UGS_CameraShakeComponent;
 
 UENUM(BlueprintType)
 enum class EGuardianState : uint8
@@ -38,6 +40,16 @@ public:
 	UPROPERTY(ReplicatedUsing=OnRep_MoveSpeed)
 	float MoveSpeed;
 	
+	// 디버프 VFX 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
+	UGS_DebuffVFXComponent* DebuffVFXComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UGS_CameraShakeComponent> CameraShakeComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (DisplayName = "HitStop Camera Shake Info"))
+	FGS_CameraShakeInfo HitStopShakeInfo;
+	
 	virtual void LeftMouse();
 	virtual void Ctrl();
 	virtual void CtrlStop();
@@ -50,8 +62,10 @@ public:
 	UFUNCTION()
 	void MeleeAttackCheck();
 	
-	//[REFACTORING]
+	//check player in attack range
 	TSet<AGS_Character*> DetectPlayerInRange(const FVector& Start, float SkillRange, float Radius);
+	
+	//damage player in TSet
 	void ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& DamagedCharacters, float PlusDamge);
 	
 	UFUNCTION()
@@ -61,11 +75,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void QuitGuardianSkill();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
-	UGS_DebuffVFXComponent* DebuffVFXComponent;
-	// ==================
-	// 디버프 VFX 컴포넌트
-	// ==================
+	//for debugging
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCDrawDebugSphere(bool bIsOverlap, const FVector& Location, float CapsuleRadius);
 	
@@ -75,4 +85,23 @@ protected:
 	
 	float NormalMoveSpeed;
 	float SpeedUpMoveSpeed;
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void ApplyHitStop(AGS_Character* InDamagedCharacter);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void EndHitStop();
+
+
+private:
+	//hit stop duration
+	UPROPERTY()
+	float HitStopDurtaion = 0.2f;
+
+	//set world time (default -> 1.f)
+	UPROPERTY()
+	float HitStopTimeDilation = 0.1f;
+	
+	UPROPERTY()
+	TArray<AGS_Character*> EndHitStopDamagedCharacters;
 };
