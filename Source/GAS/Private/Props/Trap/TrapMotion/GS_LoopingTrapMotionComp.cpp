@@ -4,7 +4,7 @@
 
 UGS_LoopingTrapMotionComp::UGS_LoopingTrapMotionComp()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicatedByDefault(true);
 }
 
