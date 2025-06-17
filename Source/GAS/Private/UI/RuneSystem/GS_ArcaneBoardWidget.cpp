@@ -167,13 +167,28 @@ UGS_ArcaneBoardManager* UGS_ArcaneBoardWidget::GetBoardManager() const
 
 void UGS_ArcaneBoardWidget::RefreshForCurrCharacter()
 {
+	UE_LOG(LogTemp, Warning, TEXT("=== RefreshForCurrCharacter 시작 ==="));
+	
 	if (IsValid(BoardManager))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("BoardManager 현재 클래스: %s"),
+			*UGS_EnumUtils::GetEnumAsString(BoardManager->GetCurrClass()));
+		UE_LOG(LogTemp, Warning, TEXT("BoardManager PlacedRunes 개수: %d"),
+			BoardManager->PlacedRunes.Num());
+
 		GenerateGridLayout();
 		UpdateGridVisuals();
 		InitInventory();
 		InitStatPanel();
+
+		UE_LOG(LogTemp, Warning, TEXT("UI 초기화 완료"));
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BoardManager가 유효하지 않음"));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("=== RefreshForCurrCharacter 완료 ==="));
 }
 
 void UGS_ArcaneBoardWidget::GenerateGridLayout()
@@ -206,10 +221,26 @@ void UGS_ArcaneBoardWidget::GenerateGridLayout()
 
 void UGS_ArcaneBoardWidget::InitInventory()
 {
+	UE_LOG(LogTemp, Warning, TEXT("=== InitInventory 시작 ==="));
+
 	if (IsValid(RuneInven) && IsValid(BoardManager))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("인벤토리 초기화 - 현재 배치된 룬:"));
+		for (const FPlacedRuneInfo& Rune : BoardManager->PlacedRunes)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("  배치된 룬: ID=%d, Pos=(%d,%d)"),
+				Rune.RuneID, Rune.Pos.X, Rune.Pos.Y);
+		}
+
 		RuneInven->InitInven(BoardManager, this);
+		UE_LOG(LogTemp, Warning, TEXT("인벤토리 초기화 완료"));
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("RuneInven 또는 BoardManager가 유효하지 않음"));
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("=== InitInventory 완료 ==="));
 }
 
 void UGS_ArcaneBoardWidget::InitStatPanel()
