@@ -25,10 +25,8 @@ class GAS_API AGS_Drakhar : public AGS_Guardian
 public:
 	AGS_Drakhar();
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UGS_CameraShakeComponent> CameraShakeComponent;
 	
 	// === 어스퀘이크 카메라 쉐이크 정보 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|Earthquake", meta = (DisplayName = "Earthquake Camera Shake Info"))
@@ -41,12 +39,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool IsAttacking;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TSubclassOf<AGS_DrakharProjectile> Projectile;
 
 	//[Draconic Fury Variables]
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> DraconicProjectile;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSubclassOf<AGS_DrakharProjectile> FeverDraconicProjectile;
 
 	
 	// === Wwise 사운드 이벤트들 ===
@@ -318,12 +317,16 @@ public:
 	void MulticastStopDustCloudVFX();
 
 private:
+	//move spring arm for flying
+	float DefaultSpringArmLength;
+	float TargetSpringArmLength;
+	bool bIsFlying;
+	
 	//[NEW COMBO ATTACK]
 	FName ComboAttackSectionName;
 	FName DefaultComboAttackSectionName;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess))
 	TObjectPtr<UAnimMontage> ComboAttackMontage;
-	
 	
 	//[dash skill]
 	UPROPERTY()
@@ -346,17 +349,16 @@ private:
 	float FlyingPersistenceTime;
 	float DraconicAttackPersistenceTime;
 
-	//[Draconic Fury]
 	TArray<FTransform> DraconicFuryTargetArray;
+	FVector FeverModeDraconicFurySpawnLocation;
 
 	//[Fever Mode]
 	float MaxFeverGage;
-	UPROPERTY(ReplicatedUsing=OnRep_FeverGauge)
+	UPROPERTY(ReplicatedUsing = OnRep_FeverGauge)
 	float CurrentFeverGauge;
 
 	UPROPERTY(Replicated)
 	float DefaultAttackPower;
-	//float ClientDefaultAttackPower;
 	
 	bool IsFeverMode;
 	FTimerHandle FeverTimer;
@@ -374,7 +376,6 @@ private:
 	
 	// 사운드 중복 재생 방지
 	bool bDraconicFurySoundPlayed;
-
 	
 	// === Wwise 관련 헬퍼 함수 ===
 	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);
