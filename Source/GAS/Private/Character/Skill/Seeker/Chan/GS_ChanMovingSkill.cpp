@@ -31,6 +31,7 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->SetSkillInputControl(false, false);
+
 		}
 		// 무빙 스킬 사운드 재생
 		if (OwnerPlayer->MovingSkillSound)
@@ -53,8 +54,9 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-		//OwnerPlayer->Multicast_SetUseControllerRotationYaw(false);
 		OwnerPlayer->SetSkillInputControl(true, true);
+		
+		OwnerPlayer->CanChangeSeekerGait = true;
 	}
 }
 

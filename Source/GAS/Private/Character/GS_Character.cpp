@@ -186,6 +186,15 @@ AGS_Weapon* AGS_Character::GetWeaponByIndex(int32 Index) const
 	return WeaponSlots.IsValidIndex(Index) ? WeaponSlots[Index].WeaponInstance : nullptr;
 }
 
+void AGS_Character::SetCharacterSpeed(float InRatio)
+{
+	if (InRatio >= 0 && InRatio <= 1)
+	{
+		CharacterSpeed = DefaultCharacterSpeed * InRatio;
+		GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
+	}
+}
+
 void AGS_Character::Server_SetCharacterSpeed_Implementation(float InRatio)
 {
 	if (InRatio >= 0 && InRatio <= 1)
@@ -273,5 +282,4 @@ void AGS_Character::DestroyAllWeapons()
 void AGS_Character::OnRep_CharacterSpeed()
 {
 	GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
-	UE_LOG(LogTemp, Warning, TEXT("CharacterSpeedChange : %f"), CharacterSpeed);
 }

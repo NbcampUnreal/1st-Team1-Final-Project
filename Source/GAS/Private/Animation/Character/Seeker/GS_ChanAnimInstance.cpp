@@ -28,25 +28,3 @@ void UGS_ChanAnimInstance::AnimNotify_ComboInput()
 		}
 	}
 }
-
-void UGS_ChanAnimInstance::AnimNotify_CanProceed()
-{
-	if (APawn* OwnerPawn = TryGetPawnOwner())
-	{
-		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
-		{
-			//Chan->CheckToNext();
-		}
-	}
-}
-
-void UGS_ChanAnimInstance::AnimNotify_ComboEnd()
-{
-	if (APawn* OwnerPawn = TryGetPawnOwner())
-	{
-		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerPawn))
-		{
-			//Chan->ComboEnd();
-		}
-	}
-}

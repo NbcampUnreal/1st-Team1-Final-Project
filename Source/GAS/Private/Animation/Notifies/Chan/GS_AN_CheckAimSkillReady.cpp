@@ -20,6 +20,5 @@ void UGS_AN_CheckAimSkillReady::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 			Character->SetLookControlValue(true, true);
 			Character->SetMoveControlValue(false, false);
 		}
-		
 	}
 }

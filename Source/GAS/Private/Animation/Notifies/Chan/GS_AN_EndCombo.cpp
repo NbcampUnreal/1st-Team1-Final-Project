@@ -11,8 +11,19 @@ void UGS_AN_EndCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	Super::Notify(MeshComp, Animation, EventReference);
 	
 	if (AGS_Chan* Character = Cast<AGS_Chan>(MeshComp->GetOwner()))
-	{
-		Character->ComboEnd();
+	{		
+		if (Character->bComboEnded) // 이미 끝난 상태
+		{
+			Character->CanChangeSeekerGait = false;
+			return;
+		};
+		
+		if (Character->HasAuthority())
+		{
+			Character->bComboEnded = true;
+			Character->Multicast_ComboEnd();
+		}
+
+		Character->CanChangeSeekerGait = true;
 	}
-	
 }
