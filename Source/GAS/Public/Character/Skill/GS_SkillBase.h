@@ -16,8 +16,8 @@ class GAS_API UGS_SkillBase : public UObject
 public:
 	ESkillSlot CurrentSkillType;
 	
-	float Cooltime = 30.0f;
-	float Damage = 0.f;
+	float Cooltime;
+	float Damage;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TArray<UAnimMontage*> SkillAnimMontages;
@@ -63,7 +63,7 @@ public:
 	float GetCoolTime();
 
 	// 스킬 초기화
-	void InitSkill(AGS_Player* InOwner, UGS_SkillComp* InOwningComp);
+	void InitSkill(AGS_Player* InOwner, UGS_SkillComp* InOwningComp, ESkillSlot InSlot);
 
 	// 로컬 VFX 재생 함수들
 	void PlayCastVFX(FVector Location, FRotator Rotation);
@@ -79,15 +79,13 @@ public:
 	virtual void OnSkillCommand();
 	virtual bool CanActive() const;
 	virtual bool IsActive() const;
+
+	// 쿨타임 
+	void SetCoolingDown(bool bInCoolingDown) { bIsCoolingDown = bInCoolingDown; }
+	bool IsCoolingDown() const { return bIsCoolingDown; }
 	
 protected:
 	bool bIsActive = false;
-	
-	// 쿨타임 관리
-	FTimerHandle CooldownHandle;
-	FTimerHandle LogTimerHandle;
-
-	float LeftCoolTime;
 	bool bIsCoolingDown;
 
 	// 스킬 소유자
@@ -95,7 +93,5 @@ protected:
 	UGS_SkillComp* OwningComp;
 	
 	void StartCoolDown();
-	void LogRemainingTime();
-	void SetCoolTime(float InCoolTime);
 	
 };

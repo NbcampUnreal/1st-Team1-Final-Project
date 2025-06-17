@@ -7,9 +7,6 @@
 #include "GS_SkillSet.h"
 #include "GS_SkillComp.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkill1CoolTimeChangedDelegate, float);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkill2CoolTimeChangedDelegate, float);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSkill3CoolTimeChangedDelegate, float);
 
 UENUM(BlueprintType)
 enum class ESkillSlot : uint8
@@ -18,6 +15,24 @@ enum class ESkillSlot : uint8
 	Moving,
 	Aiming,
 	Ultimate
+};
+
+USTRUCT()
+struct FSkillCooldownState
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	ESkillSlot Slot;
+
+	UPROPERTY()
+	float CooldownRemaining; 
+
+	UPROPERTY() 
+	bool bIsOnCooldown;
+
+	FTimerHandle CooldownTimer;
+	FTimerHandle UIUpdateTimer;
 };
 
 USTRUCT()
@@ -32,55 +47,37 @@ struct FSkillRuntimeState
 	bool bIsActive = false;
 };
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSkillCooldownChanged, ESkillSlot, float);
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class GAS_API UGS_SkillComp : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	//skill cooltime delegates
-	FOnSkill1CoolTimeChangedDelegate Skill1CoolTimeChanged;
-	FOnSkill2CoolTimeChangedDelegate Skill2CoolTimeChanged;
-	FOnSkill3CoolTimeChangedDelegate Skill3CoolTimeChanged;
-	
-	UPROPERTY(ReplicatedUsing=OnRep_Skill1)
-	float Skill1LeftCoolTime = 0.0f;
-	
-	UPROPERTY(ReplicatedUsing=OnRep_Skill2)
-	float Skill2LeftCoolTime = 0.0f;
-	
-	UPROPERTY(ReplicatedUsing=OnRep_Skill3)
-	float Skill3LeftCoolTime = 0.0f;
-
-	UFUNCTION()
-	void OnRep_Skill1();
-	UFUNCTION()
-	void OnRep_Skill2();
-	UFUNCTION()
-	void OnRep_Skill3();
-	
-	// Sets default values for this component's properties
 	UGS_SkillComp();
+	
+	FOnSkillCooldownChanged OnSkillCooldownChanged;
 
 	UFUNCTION()
 	void TryActivateSkill(ESkillSlot Slot);
 
 	UFUNCTION()
 	void TryDeactiveSkill(ESkillSlot Slot);
-
-	UFUNCTION(Server, Reliable)
-	void Server_TryDeactiveSkill(ESkillSlot Slot);
-
+	
 	UFUNCTION()
 	void TrySkillCommand(ESkillSlot Slot);
 
+	UFUNCTION(Server, Reliable)
+	void Server_TryDeactiveSkill(ESkillSlot Slot);
+	
 	void SetSkill(ESkillSlot Slot, const FSkillInfo& Info);
-
 	void SetCanUseSkill(bool InCanUseSkill);
 
 	void SetSkillActiveState(ESkillSlot Slot, bool InIsActive);
-
 	bool IsSkillActive(ESkillSlot Slot) const;
+	
+	void StartCooldownForSkill(ESkillSlot Slot);
 
 	//for skill widget
 	UFUNCTION()
@@ -103,34 +100,51 @@ public:
 	void Multicast_PlayEndVFX(ESkillSlot Slot, FVector Location, FRotator Rotation);
 	
 protected:
-	// Called when the game starts
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	// skill 
 	UPROPERTY()
 	TMap<ESkillSlot, UGS_SkillBase*> SkillMap;
+
+	UPROPERTY()
+	TMap<ESkillSlot, FSkillRuntimeState> SkillStates;
 	
 	UPROPERTY(ReplicatedUsing = OnRep_SkillStates)
 	TArray<FSkillRuntimeState> ReplicatedSkillStates;
 
-	TMap<ESkillSlot, FSkillRuntimeState> SkillStates;
-	
-	UFUNCTION()
-	void OnRep_SkillStates();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
+	UDataTable* SkillDataTable;
 
+	UPROPERTY(Replicated)
+	bool bCanUseSkill = true;
+
+	// cooldown 
+	UPROPERTY()
+	TMap<ESkillSlot, FSkillCooldownState> CooldownStates; 
+    
+	UPROPERTY(ReplicatedUsing = OnRep_CooldownStates)
+	TArray<FSkillCooldownState> ReplicatedCooldownStates;
+	
 	UFUNCTION(Server, Reliable)
 	void Server_TryActiveSkill(ESkillSlot Slot);
 
 	UFUNCTION(Server, Reliable)
 	void Server_TrySkillCommand(ESkillSlot Slot);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill")
-	UDataTable* SkillDataTable;
-
 	UFUNCTION()
 	void InitSkills();
 
-	UPROPERTY(Replicated)
-	bool bCanUseSkill = true;
+private:
+	UFUNCTION()
+	void OnRep_SkillStates();
+	
+	UFUNCTION()
+	void OnRep_CooldownStates();
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	void HandleCooldownComplete(ESkillSlot Slot);
+	void HandleCooldownProgress(ESkillSlot Slot);
+	void UpdateReplicatedCooldownStates();
+	
 };
+

@@ -18,10 +18,11 @@ float UGS_SkillBase::GetCoolTime()
 	return Cooltime;
 }
 
-void UGS_SkillBase::InitSkill(AGS_Player* InOwner, UGS_SkillComp* InOwningComp)
+void UGS_SkillBase::InitSkill(AGS_Player* InOwner, UGS_SkillComp* InOwningComp, ESkillSlot InSlot)
 {
 	OwnerCharacter = InOwner;
 	OwningComp = InOwningComp;
+	CurrentSkillType = InSlot;
 }
 
 void UGS_SkillBase::ActiveSkill()
@@ -55,80 +56,12 @@ bool UGS_SkillBase::IsActive() const
 
 void UGS_SkillBase::StartCoolDown()
 {
-	//server logic
-
-	if (Cooltime <= 0.f)
+	if (OwningComp)
 	{
-		bIsCoolingDown = false;
-		return;
-	}
-
-	bIsCoolingDown = true;
-	
-	TWeakObjectPtr<UGS_SkillBase> WeakThis(this);
-	if (OwnerCharacter)
-	{
-		OwnerCharacter->GetWorldTimerManager().SetTimer(CooldownHandle, [WeakThis]()
-			{
-				if (!WeakThis.IsValid())
-				{
-					return;
-				}
-
-				WeakThis->bIsCoolingDown = false;
-				UE_LOG(LogTemp, Warning, TEXT("Cool Down Complete"));
-
-			}, Cooltime, false);
-	}
-
-	if (UWorld* World = GetWorld())
-	{
-		World->GetTimerManager().SetTimer(LogTimerHandle, [WeakThis]()
-			{
-				if (!WeakThis.IsValid())
-				{
-					return;
-				}
-
-				WeakThis->LogRemainingTime();
-
-			}, 0.07f, true);
+		OwningComp->StartCooldownForSkill(CurrentSkillType);
 	}
 }
 
-void UGS_SkillBase::LogRemainingTime()
-{
-	if (!GetWorld()) return;
-	//server logic
-	
-	LeftCoolTime = GetWorld()->GetTimerManager().GetTimerRemaining(CooldownHandle);
-	
-	SetCoolTime(LeftCoolTime);
-
-	//end cool time
-	if (LeftCoolTime <= 0.f)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(LogTimerHandle);
-
-		SetCoolTime(Cooltime);
-	}
-}
-
-void UGS_SkillBase::SetCoolTime(float InCoolTime)
-{
-	if (CurrentSkillType==ESkillSlot::Moving)
-	{
-		OwnerCharacter->GetSkillComp()->Skill1LeftCoolTime = InCoolTime;
-	}
-	if (CurrentSkillType==ESkillSlot::Aiming)
-	{
-		OwnerCharacter->GetSkillComp()->Skill2LeftCoolTime = InCoolTime;
-	}
-	if (CurrentSkillType==ESkillSlot::Ultimate)
-	{
-		OwnerCharacter->GetSkillComp()->Skill3LeftCoolTime = InCoolTime;
-	}
-}
 
 void UGS_SkillBase::PlayCastVFX(FVector Location, FRotator Rotation)
 {
