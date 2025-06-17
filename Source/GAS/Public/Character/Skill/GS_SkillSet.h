@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Character/GS_Character.h"
 //#include "Character/Skill/GS_SkillBase.h"
+#include "NiagaraSystem.h"
 #include "GS_SkillSet.generated.h"
 
 class UGS_SkillBase;
@@ -41,6 +42,39 @@ struct GAS_API FSkillInfo
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	UAkAudioEvent* SkillEndSound;
+
+	// 스킬 VFX 이벤트들
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	TObjectPtr<UNiagaraSystem> SkillCastVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	TObjectPtr<UNiagaraSystem> SkillRangeVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	TObjectPtr<UNiagaraSystem> SkillImpactVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	TObjectPtr<UNiagaraSystem> SkillEndVFX;
+
+	// VFX 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	FVector SkillVFXScale = FVector(1.0f, 1.0f, 1.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	float SkillVFXDuration = 3.0f;
+
+	// VFX 위치 오프셋
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Offset")
+	FVector CastVFXOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Offset")
+	FVector RangeVFXOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Offset")
+	FVector ImpactVFXOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Offset")
+	FVector EndVFXOffset = FVector::ZeroVector;
 };
 
 USTRUCT(BlueprintType)

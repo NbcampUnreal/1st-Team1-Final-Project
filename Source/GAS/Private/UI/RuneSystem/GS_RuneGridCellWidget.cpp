@@ -3,6 +3,7 @@
 
 #include "UI/RuneSystem/GS_RuneGridCellWidget.h"
 #include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
+#include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "Components/Image.h"
 #include "Components/Border.h"
 
@@ -27,7 +28,11 @@ void UGS_RuneGridCellWidget::InitCell(const FGridCellData& InCellData, UGS_Arcan
 void UGS_RuneGridCellWidget::SetCellData(const FGridCellData& InCellData)
 {
 	CellData = InCellData;
-	SetRuneTexture(CellData.RuneTextureFrag);
+
+	UTexture2D* TextureToUse = CellData.bIsConnected && CellData.ConnectedRuneTextureFrag ?
+		CellData.ConnectedRuneTextureFrag : CellData.RuneTextureFrag;
+
+	SetRuneTexture(TextureToUse);
 
 	if (CellData.bIsSpecialCell)
 	{

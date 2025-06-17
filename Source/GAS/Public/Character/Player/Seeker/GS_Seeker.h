@@ -7,6 +7,7 @@
 #include "Character/Player/GS_Player.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "NiagaraComponent.h"
+#include "Animation/Character/E_SeekerAnim.h"
 #include "GS_Seeker.generated.h"
 
 class UGS_SkillInputHandlerComp;
@@ -14,6 +15,7 @@ class UPostProcessComponent;
 class UMaterialInterface;
 class UGS_StatComp;
 class AGS_PlayerState;
+class UGS_DebuffVFXComponent;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -65,13 +67,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	UChildActorComponent* Weapon;
 
-	// Montage Set
-	UPROPERTY()
-	float NewPlayRate = 0.5f;
+	UFUNCTION(Server, Reliable, Category = "State")
+	void Server_SetSeekerGait(EGait Gait);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetNewPlayRate(float PlayRate);
+	UFUNCTION()
+	void SetSeekerGait(EGait Gait);
+
+	UPROPERTY(Replicated)
+	bool CanChangeSeekerGait;
+
+	UFUNCTION(BlueprintCallable, Category = "State")
+	EGait GetSeekerGait();
+
+	UFUNCTION(BlueprintCallable, Category = "State")
+	EGait GetLastSeekerGait();
 	
+
 	// ================
 	// LowHP 스크린 효과
 	// ================
@@ -83,6 +94,12 @@ public:
 	
 	UFUNCTION()
 	void HandleLowHealthEffect(UGS_StatComp* InStatComp);
+
+	// =======================
+	// 디버프 VFX 컴포넌트
+	// =======================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
+	UGS_DebuffVFXComponent* DebuffVFXComponent;
 
 	// ================
 	// 함정 VFX 컴포넌트
@@ -102,8 +119,7 @@ public:
 	// 몬스터 감지용 컴포넌트 추가
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	class USphereComponent* CombatTrigger;
-
-public:
+	
 	// 몬스터가 전투 음악 시작/중지를 요청할 때 호출
 	UFUNCTION(BlueprintCallable)
 	void AddCombatMonster(class AGS_Monster* Monster);
@@ -117,7 +133,7 @@ public:
 	
 	UFUNCTION()
 	void OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
+	
 private:
 	UPROPERTY()
 	TArray<class AGS_Monster*> NearbyMonsters;
@@ -187,9 +203,20 @@ protected:
 	static const FName HPRatioParamName;
 	static const FName EffectIntensityParamName;
 
+	UPROPERTY(ReplicatedUsing = OnRep_SeekerGait)
+	EGait SeekerGait;
+
+	UPROPERTY(Replicated)
+	EGait LastSeekerGait;
+
+	UFUNCTION()
+	void OnRep_SeekerGait();
+
 private :
 	UPROPERTY(VisibleAnywhere, Category="State")
 	FSeekerState SeekerState;
+
+
 
 	// ================
 	// LowHP 스크린 효과

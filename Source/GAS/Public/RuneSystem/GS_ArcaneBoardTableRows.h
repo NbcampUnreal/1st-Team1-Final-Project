@@ -24,6 +24,9 @@ struct FRuneTableRow : public FTableRowBase
 	TMap<FIntPoint, UTexture2D*> RuneShape;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FIntPoint, UTexture2D*> ConnectedRuneShape;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FIntPoint RuneSize;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

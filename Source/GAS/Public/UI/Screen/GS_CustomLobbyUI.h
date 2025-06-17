@@ -68,6 +68,9 @@ public:
 
 	void OnBackPopupYesButtonClicked();
 	void OnBackPopupNoButtonClicked();
+
+	//아케인보드 저장 관련 함수
+	void ShowPerkSaveConfirmPopup();
 	
 private:
 	void ChangeRoleBtnIcon(EPlayerRole NewRole);

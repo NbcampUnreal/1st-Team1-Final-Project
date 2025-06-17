@@ -41,7 +41,7 @@ public:
 	UGS_ArcaneBoardManager* GetBoardManager() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void RefreshForCurrentCharacter();
+	void RefreshForCurrCharacter();
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void GenerateGridLayout();
@@ -53,7 +53,7 @@ public:
 	void InitStatPanel();
 
 	UFUNCTION()
-	void OnStatsChanged(const FGS_StatRow& NewStats);
+	void OnStatsChanged(const FArcaneBoardStats& NewStats);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void UpdateGridPreview(uint8 RuneID, const FIntPoint& GridPos);

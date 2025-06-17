@@ -39,9 +39,6 @@ public:
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "OffsetRootBone")
 	float GetOffsetRootTranslationHalfLife();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Motion Matching")
-	UPoseSearchDatabase* PoseSearchDatabase;
-
 	// Chooser
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Motion Matching")
 	TObjectPtr<UGS_ChooserInputObj> ChooserInputObj;
@@ -63,6 +60,12 @@ public:
 
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingFullBodyMontage = false;
+
+	UFUNCTION(BlueprintPure, meta=(NotBlueprintThreadSafe="ture"), Category = "AimOffset")
+	FVector2D Get_AOValue();
+
+	UFUNCTION(BlueprintPure, meta=(NotBlueprintThreadSafe="ture"), Category = "AimOffset")
+	bool Enable_AO();
 
 protected:
 

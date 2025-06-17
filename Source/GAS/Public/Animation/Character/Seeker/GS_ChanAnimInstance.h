@@ -20,8 +20,4 @@ public:
 	// Combo Attack
 	UFUNCTION()
 	void AnimNotify_ComboInput();
-	UFUNCTION()
-	void AnimNotify_CanProceed();
-	UFUNCTION()
-	void AnimNotify_ComboEnd();
 };

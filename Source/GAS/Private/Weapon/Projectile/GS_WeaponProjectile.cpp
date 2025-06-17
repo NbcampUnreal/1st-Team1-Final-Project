@@ -21,9 +21,6 @@ AGS_WeaponProjectile::AGS_WeaponProjectile()
 	ProjectileMesh->SetupAttachment(CollisionComponent);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile Movement Component"));
-	ProjectileMovementComponent->bShouldBounce = true;
-	ProjectileMovementComponent->Bounciness = 0.3f; 
-
 	
 }
 

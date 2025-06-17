@@ -56,7 +56,7 @@ void UGS_ArcaneBoardLPS::InitializeRunes()
     LoadBoardConfig();
 }
 
-void UGS_ArcaneBoardLPS::RefreshBoardForCurrentCharacter()
+void UGS_ArcaneBoardLPS::RefreshBoardForCurrCharacter()
 {
     ECharacterClass CurrentClass = GetPlayerCharacterClass();
 
@@ -74,15 +74,6 @@ void UGS_ArcaneBoardLPS::RefreshBoardForCurrentCharacter()
         }
     }
 }
-
-void UGS_ArcaneBoardLPS::UpdateStatsUI()
-{
-    if (CurrentUIWidget.IsValid())
-    {
-        CurrentUIWidget->OnStatsChanged(RuneSystemStats);
-    }
-}
-
 void UGS_ArcaneBoardLPS::ApplyBoardChanges()
 {
     if (BoardManager)
@@ -92,10 +83,14 @@ void UGS_ArcaneBoardLPS::ApplyBoardChanges()
     }
 }
 
-void UGS_ArcaneBoardLPS::OnBoardStatsChanged(const FGS_StatRow& NewStats)
+void UGS_ArcaneBoardLPS::OnBoardStatsChanged(const FArcaneBoardStats& NewStats)
 {
     RuneSystemStats = NewStats;
-    UpdateStatsUI();
+    
+    if (CurrentUIWidget.IsValid())
+    {
+        CurrentUIWidget->OnStatsChanged(RuneSystemStats);
+    }
 }
 
 void UGS_ArcaneBoardLPS::SaveBoardConfig()
@@ -154,13 +149,8 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
     {
         return;
     }
-
-    BoardManager->PlacedRunes.Empty();
-    BoardManager->InitGridState();
-    BoardManager->CurrStatEffects = FGS_StatRow();
-    BoardManager->bHasUnsavedChanges = false;
-
-    const FString SaveSlotName = TEXT("ArcaneBoardSave");
+    
+    FString SaveSlotName = TEXT("ArcaneBoardSave");
     const int32 UserIndex = 0;
 
     if (!UGameplayStatics::DoesSaveGameExist(SaveSlotName, UserIndex))
@@ -188,14 +178,7 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
     }
 
     const FRunePlacementData& SavedPlacementData = LoadedSaveGame->SavedRunesByClass[CurrentClass];
-
-    // 데이터 유효성 검증
-    if (SavedPlacementData.PlacedRunes.Num() == 0)
-    {
-        UE_LOG(LogTemp, Log, TEXT("LoadBoardConfig: 저장된 룬 배치 데이터가 비어있습니다."));
-        return;
-    }
-
+    
     BoardManager->LoadSavedData(CurrentClass, SavedPlacementData.PlacedRunes);
 
     UE_LOG(LogTemp, Log, TEXT("LoadBoardConfig: 로드 성공 - 직업: %s, 룬 개수: %d"),
@@ -227,15 +210,6 @@ UGS_ArcaneBoardManager* UGS_ArcaneBoardLPS::GetOrCreateBoardManager()
     }
 
     return BoardManager;
-}
-
-void UGS_ArcaneBoardLPS::ForceApplyChanges()
-{
-    if (IsValid(BoardManager))
-    {
-        BoardManager->ApplyChanges();
-        SaveBoardConfig();
-    }
 }
 
 void UGS_ArcaneBoardLPS::SetCurrUIWidget(UGS_ArcaneBoardWidget* Widget)

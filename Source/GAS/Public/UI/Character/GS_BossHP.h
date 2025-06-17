@@ -10,6 +10,7 @@ class UVerticalBox;
 class UGS_HPWidget;
 class AGS_Guardian;
 class AGS_Character;
+class UGS_DrakharFeverGauge;
 
 UCLASS()
 class GAS_API UGS_BossHP : public UUserWidget
@@ -19,8 +20,8 @@ class GAS_API UGS_BossHP : public UUserWidget
 public:
 	virtual void NativeConstruct() override;
 	
-	UFUNCTION(BlueprintCallable)
-	void InitBossHPWidget();
+	UFUNCTION()
+	void InitGuardianHPWidget();
 	
 	void SetOwningActor(AGS_Character* InOwningCharacter) { WidgetOwner = InOwningCharacter; }
 
@@ -30,15 +31,14 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UVerticalBox> HPWidgetList;
 	
+	//Guardian HP
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UGS_HPWidget> HPWidgetClass;
-
 	UPROPERTY()
 	TObjectPtr<UGS_HPWidget> HPWidgetInstance;
 	
 	UPROPERTY()
 	TObjectPtr<AGS_Guardian> Guardian;
-	
 	UPROPERTY()
 	TObjectPtr<AGS_Character> WidgetOwner;
 };

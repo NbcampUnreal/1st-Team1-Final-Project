@@ -157,7 +157,7 @@ void UGS_ArcaneBoardWidget::SetBoardManager(UGS_ArcaneBoardManager* InBoardManag
 		return;
 	}
 
-	RefreshForCurrentCharacter();
+	RefreshForCurrCharacter();
 }
 
 UGS_ArcaneBoardManager* UGS_ArcaneBoardWidget::GetBoardManager() const
@@ -165,7 +165,7 @@ UGS_ArcaneBoardManager* UGS_ArcaneBoardWidget::GetBoardManager() const
 	return BoardManager;
 }
 
-void UGS_ArcaneBoardWidget::RefreshForCurrentCharacter()
+void UGS_ArcaneBoardWidget::RefreshForCurrCharacter()
 {
 	if (IsValid(BoardManager))
 	{
@@ -218,11 +218,11 @@ void UGS_ArcaneBoardWidget::InitStatPanel()
 	{
 		StatPanel->InitStatList(BoardManager);
 
-		OnStatsChanged(BoardManager->CurrStatEffects);
+		OnStatsChanged(BoardManager->CurrBoardStats);
 	}
 }
 
-void UGS_ArcaneBoardWidget::OnStatsChanged(const FGS_StatRow& NewStats)
+void UGS_ArcaneBoardWidget::OnStatsChanged(const FArcaneBoardStats& NewStats)
 {
 	if (IsValid(StatPanel))
 	{
@@ -551,7 +551,7 @@ void UGS_ArcaneBoardWidget::BindToLPS()
 		if (IsValid(BoardManager))
 		{
 			ArcaneBoardLPS->LoadBoardConfig();
-			RefreshForCurrentCharacter();
+			RefreshForCurrCharacter();
 		}
 	}
 }

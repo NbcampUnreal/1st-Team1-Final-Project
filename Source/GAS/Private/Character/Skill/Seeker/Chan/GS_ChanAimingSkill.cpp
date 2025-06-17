@@ -23,13 +23,14 @@ UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 }
 
 void UGS_ChanAimingSkill::ActiveSkill()
-{
+{	
 	if (!CanActive()) return;
 	Super::ActiveSkill();
+	
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{
+	{		
 		if (OwnerPlayer->HasAuthority())
-		{
+		{			
 			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
 			// Combo Control Value
 			OwnerPlayer->ComboInputClose();
@@ -52,6 +53,18 @@ void UGS_ChanAimingSkill::ActiveSkill()
 			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillStartSound);
 		}
 
+		// =======================
+		// VFX 재생 - 컴포넌트 RPC 사용
+		// =======================
+		if (OwningComp)
+		{
+			FVector SkillLocation = OwnerCharacter->GetActorLocation();
+			FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+		
+			// 스킬 시전 VFX 재생
+			OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
+		}
+
 		// Skill Stat
 		CurrentStamina = MaxStamina;
 		// UI
@@ -69,9 +82,9 @@ void UGS_ChanAimingSkill::ActiveSkill()
 void UGS_ChanAimingSkill::DeactiveSkill()
 {
 	Super::DeactiveSkill();
-
+	
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{
+	{		
 		if (OwnerPlayer->HasAuthority())
 		{
 			OwnerPlayer->ComboInputOpen();
@@ -84,10 +97,24 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 			OwnerPlayer->SetLookControlValue(true, true);
 			OwnerPlayer->SetSkillInputControl(true, true);
+			
+			OwnerPlayer->CanChangeSeekerGait = true;
 
 			if (OwnerCharacter->GetSkillComp())
 			{
 				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
+			}
+
+			// =======================
+			// 스킬 종료 VFX 재생
+			// =======================
+			if (OwningComp)
+			{
+				FVector SkillLocation = OwnerCharacter->GetActorLocation();
+				FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+				
+				// 스킬 종료 VFX 재생
+				OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
 			}
 		}
 	}
@@ -121,6 +148,20 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		if (OwnerPlayer->AimingSkillSlamSound)
 		{
 			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillSlamSound);
+		}
+
+		// =======================
+		// 스킬 범위 VFX 재생
+		// =======================
+		if (OwningComp)
+		{
+			const FVector Start = OwnerCharacter->GetActorLocation();
+			const FVector Forward = OwnerCharacter->GetActorForwardVector();
+			FVector SkillLocation = Start + Forward * 150.0f;
+			const float Radius = 200.f;
+			
+			// 스킬 범위 표시 VFX 재생
+			OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, Radius);
 		}
 
 		// End Skill
@@ -177,10 +218,14 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
 			{
 				ApplyEffectToDungeonMonster(TargetMonster);
+				// Impact VFX 재생
+				TargetMonster->Multicast_PlayImpactVFX(SkillImpactVFX, SkillVFXScale);
 			}
 			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
 			{
 				ApplyEffectToGuardian(TargetGuardian);
+				// Impact VFX 재생
+				TargetGuardian->Multicast_PlayImpactVFX(SkillImpactVFX, SkillVFXScale);
 			}
 			else if(AGS_Character* Target = Cast<AGS_Character>(HitActor))
 			{

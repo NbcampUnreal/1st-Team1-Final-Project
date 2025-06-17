@@ -18,6 +18,7 @@
 #include "TimerManager.h"
 #include "DrawDebugHelpers.h"
 #include "Sound/GS_MonsterAudioComponent.h"
+#include "Character/Component/GS_DebuffVFXComponent.h"
 
 
 AGS_Monster::AGS_Monster()
@@ -34,6 +35,9 @@ AGS_Monster::AGS_Monster()
 	
 	// 몬스터 오디오 컴포넌트 생성
 	MonsterAudioComponent = CreateDefaultSubobject<UGS_MonsterAudioComponent>("MonsterAudioComponent");
+	
+	// 디버프 VFX 컴포넌트 생성
+	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
 	
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	if (MovementComponent)

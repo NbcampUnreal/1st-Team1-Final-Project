@@ -162,13 +162,39 @@ FVector UGS_SeekerAnimInstance::CalculateRelativeAccelerationAmount()
 
 float UGS_SeekerAnimInstance::Get_LeanAmount()
 {
-	float ClampedLeanAmount = FMath::GetMappedRangeValueClamped(FVector2D(200.0, 500.0), FVector2D(0.5, 1.0), ChooserInputObj->Speed2D);
-	return CalculateRelativeAccelerationAmount().Y * ClampedLeanAmount;
+	if (ChooserInputObj)
+	{
+		float ClampedLeanAmount = FMath::GetMappedRangeValueClamped(FVector2D(200.0, 500.0), FVector2D(0.5, 1.0), ChooserInputObj->Speed2D);
+		return CalculateRelativeAccelerationAmount().Y * ClampedLeanAmount;
+	}
+	return 0.0f;
 }
 
 bool UGS_SeekerAnimInstance::EnableSteering()
 {
 	return ChooserInputObj->MovementState == EMovementState::Moving;
+}
+
+FVector2D UGS_SeekerAnimInstance::Get_AOValue()
+{
+	FVector2D AO = FVector2D::ZeroVector;
+	
+	if (OwnerCharacter && OwnerCharacter->GetController())
+	{	const FRotator ControllerRot = OwnerCharacter->GetController()->GetControlRotation();
+		const FRotator RootRot = ChooserInputObj->RootTransform.Rotator();
+		
+		FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(ControllerRot, RootRot);
+
+		AO.X = DeltaRot.Pitch;
+		AO.Y = DeltaRot.Yaw;
+	}
+	
+	return AO;
+}
+
+bool UGS_SeekerAnimInstance::Enable_AO()
+{
+	return FMath::Abs(Get_AOValue().X) < 90.0f && ChooserInputObj->RotationMode == ERotationMode::Strafe;
 }
 
 void UGS_SeekerAnimInstance::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

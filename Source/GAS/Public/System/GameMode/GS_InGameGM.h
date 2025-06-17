@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
+#include "System/GS_BaseGM.h"
 #include "System/GS_PlayerRole.h"
 #include "Character/Player/GS_PawnMappingDataAsset.h"
 #include "Props/Trap/GS_TrapManager.h"
@@ -10,7 +10,7 @@
 class AGS_PlayerState;
 
 UCLASS()
-class GAS_API AGS_InGameGM : public AGameMode
+class GAS_API AGS_InGameGM : public AGS_BaseGM
 {
 	GENERATED_BODY()
 	

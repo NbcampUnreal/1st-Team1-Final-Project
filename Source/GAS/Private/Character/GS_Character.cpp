@@ -15,6 +15,8 @@
 #include "AkGameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/Component/GS_HitReactComp.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 AGS_Character::AGS_Character()
 {
@@ -62,7 +64,7 @@ void AGS_Character::BeginPlay()
 	{
 		HPTextWidgetComp->SetVisibility(true);
 	}
-
+	
 	DefaultCharacterSpeed = this->GetCharacterMovement()->MaxWalkSpeed;
 	//CharacterSpeed = DefaultCharacterSpeed;
 
@@ -108,7 +110,7 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f by %s"), *GetName(), ActualDamage, *DamageCauser->GetName());
+	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f by %s"), *GetName(), ActualDamage, DamageCauser ? *DamageCauser->GetName() : TEXT("Unknown"));
 
 	float NewHealth = CurrentHealth - ActualDamage;
 	StatComp->SetCurrentHealth(NewHealth, false);
@@ -186,6 +188,15 @@ AGS_Weapon* AGS_Character::GetWeaponByIndex(int32 Index) const
 	return WeaponSlots.IsValidIndex(Index) ? WeaponSlots[Index].WeaponInstance : nullptr;
 }
 
+void AGS_Character::SetCharacterSpeed(float InRatio)
+{
+	if (InRatio >= 0 && InRatio <= 1)
+	{
+		CharacterSpeed = DefaultCharacterSpeed * InRatio;
+		GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
+	}
+}
+
 void AGS_Character::Server_SetCharacterSpeed_Implementation(float InRatio)
 {
 	if (InRatio >= 0 && InRatio <= 1)
@@ -218,6 +229,27 @@ void AGS_Character::MulicastRPCStopCurrentSkillMontage_Implementation(UAnimMonta
 	if (!HasAuthority())
 	{
 		StopAnimMontage(CurrentSkillMontage);
+	}
+}
+
+void AGS_Character::Multicast_PlayImpactVFX_Implementation(UNiagaraSystem* VFXAsset, FVector Scale)
+{
+	if (VFXAsset)
+	{
+		UNiagaraComponent* SpawnedVFX = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			VFXAsset,
+			GetRootComponent(),
+			NAME_None,
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,
+			EAttachLocation::SnapToTarget,
+			true
+		);
+
+		if(SpawnedVFX)
+		{
+			SpawnedVFX->SetWorldScale3D(Scale);
+		}
 	}
 }
 
@@ -273,5 +305,4 @@ void AGS_Character::DestroyAllWeapons()
 void AGS_Character::OnRep_CharacterSpeed()
 {
 	GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
-	UE_LOG(LogTemp, Warning, TEXT("CharacterSpeedChange : %f"), CharacterSpeed);
 }

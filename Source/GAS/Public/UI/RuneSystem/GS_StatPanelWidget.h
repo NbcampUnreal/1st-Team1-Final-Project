@@ -27,7 +27,7 @@ public:
 	void InitStatList(UGS_ArcaneBoardManager* InBoardManager);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void UpdateStats(const FGS_StatRow& RuneStats);
+	void UpdateStats(const FArcaneBoardStats& RuneStats);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	float GetStatValueByName(const FGS_StatRow& StatRow, FName StatName);

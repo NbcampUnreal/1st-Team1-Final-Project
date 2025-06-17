@@ -17,27 +17,25 @@ class GAS_API AGS_WeaponProjectile : public AGS_Weapon
 
 public:
 	AGS_WeaponProjectile();
+
+	UPROPERTY(EditAnywhere)
+	USkeletalMeshComponent* ProjectileMesh;
 	
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
 		const FHitResult& Hit);
-	
-	UPROPERTY(EditAnywhere)
-	USkeletalMeshComponent* ProjectileMesh;
 
 	UProjectileMovementComponent* GetProjectileMovement() { return ProjectileMovementComponent; }
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* CollisionComponent;
-
-
+	
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovementComponent;
-
-	UPROPERTY(EditAnywhere, Category = "Projectile")
-	float Damage;
+	
 };

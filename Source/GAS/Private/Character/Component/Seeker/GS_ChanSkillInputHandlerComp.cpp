@@ -10,7 +10,9 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 {
 	Super::OnRightClick(Instance);
 
-	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputRC)
+	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
+
+	if (!ChanCharacter->GetSkillInputControl().CanInputRC)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Right Click Lock"));
 		return;
@@ -18,14 +20,14 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	
 	if (!bCtrlHeld)
 	{
-		if (!OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
+		if (!ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
-			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+			ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 		}
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+		ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
 	}
 }
 
@@ -33,7 +35,7 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 {
 	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
 
-	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputLC)
+	if (!ChanCharacter->GetSkillInputControl().CanInputLC)
 	{
 		return;
 	}
@@ -42,9 +44,9 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	{
 		if (ChanCharacter)
 		{
-			if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
+			if (ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 			{
-				OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+				ChanCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
 			}
 			else
 			{
@@ -63,7 +65,7 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	{
 		if (ChanCharacter)
 		{
-			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+			ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 		}
 	}
 }

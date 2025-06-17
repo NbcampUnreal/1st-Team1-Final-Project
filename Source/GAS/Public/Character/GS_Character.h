@@ -89,6 +89,7 @@ public:
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
 	void SetHPBarWidget(UGS_HPWidget* InHPBarWidget);
 	virtual FGenericTeamId GetGenericTeamId() const override;
+	//void SetClassImage(UGS_HPText* InHPTextWidget);
 	
 	UFUNCTION(BlueprintPure, Category = "Team")
 	bool IsEnemy(const AGS_Character* Other) const;
@@ -100,11 +101,18 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulicastRPCStopCurrentSkillMontage(UAnimMontage* CurrentSkillMontage);
 
+	// Impact VFX 재생
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayImpactVFX(UNiagaraSystem* VFXAsset, FVector Scale);
+
 	UFUNCTION(BlueprintCallable)
 	AGS_Weapon* GetWeaponByIndex(int32 Index) const;
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetCharacterSpeed(float InRatio);
+
+	UFUNCTION()
+	void SetCharacterSpeed(float InRatio);
 	
 protected:
 	//component

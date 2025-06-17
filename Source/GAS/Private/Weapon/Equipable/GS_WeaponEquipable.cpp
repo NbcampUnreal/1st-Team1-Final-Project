@@ -5,12 +5,6 @@
 
 AGS_WeaponEquipable::AGS_WeaponEquipable()
 {
-	OwnerCharacter = nullptr;
-}
-
-void AGS_WeaponEquipable::SetOwningCharacter(AGS_Seeker* Character)
-{
-	OwnerCharacter = Character;
 }
 
 void AGS_WeaponEquipable::PostInitializeComponents()
