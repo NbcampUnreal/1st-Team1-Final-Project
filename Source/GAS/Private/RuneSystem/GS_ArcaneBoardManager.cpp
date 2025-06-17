@@ -567,6 +567,7 @@ bool UGS_ArcaneBoardManager::GetConnectedFragmentedRuneTexture(uint8 RuneID, TMa
 void UGS_ArcaneBoardManager::InitGridState()
 {
 	CurrGridState.Empty();
+	PlacedRunes.Empty();
 
 	if (IsValid(CurrGridLayout))
 	{
