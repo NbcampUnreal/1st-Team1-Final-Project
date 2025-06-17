@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{9406AB9B-B8C8-711D-8C44-C751F3F15553}",
+    "Hash": "{88EE1D1E-24B6-5CC0-489A-A346CB90F193}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -2516,7 +2516,7 @@
       "Name": "EV_Drakhar_Flying_Play",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_Flying_Play",
       "GUID": "{C62A4302-E43E-469D-9D88-EE6CC3EFC83E}",
-      "MaxAttenuation": "1020.00006",
+      "MaxAttenuation": "1200",
       "DurationType": "OneShot",
       "DurationMin": "5.5857706",
       "DurationMax": "5.5857706",
@@ -3973,6 +3973,6 @@
     ]
    }
   ],
-  "FileHash": "{287F7E2C-3C84-F9F3-94C1-DC135EC6EB52}"
+  "FileHash": "{F08FF6EB-1167-050E-686F-27D9F4583B53}"
  }
 }
