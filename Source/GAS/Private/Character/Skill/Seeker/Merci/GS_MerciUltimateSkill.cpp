@@ -90,9 +90,12 @@ AActor* UGS_MerciUltimateSkill::FindCloseTarget()
 {
 	if (!OwnerCharacter) return nullptr;
 	
+	AController* Controller = OwnerCharacter->GetController();
+	if (!Controller) return nullptr;
+
 	FVector CamLoc;
 	FRotator CamRot;
-	OwnerCharacter->GetController()->GetPlayerViewPoint(CamLoc, CamRot);
+	Controller->GetPlayerViewPoint(CamLoc, CamRot);
 	FVector ViewDir = CamRot.Vector();
 
 	float CloseDot = 0.8f; // 최소 허용 Dot

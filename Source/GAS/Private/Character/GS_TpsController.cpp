@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/Controller.h"
 #include "Character/GS_Character.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Interface/GS_AttackInterface.h"
 #include "GameFramework/GameStateBase.h"
@@ -74,7 +75,22 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 
 void AGS_TpsController::WalkToggle(const FInputActionValue& InputValue)
 {
-	
+	if (AGS_Seeker* ControlledPawn = Cast<AGS_Seeker>(GetPawn()))
+	{
+		if (ControlledPawn->CanChangeSeekerGait)
+		{
+			EGait CurGait = ControlledPawn->GetSeekerGait();
+		
+			if (CurGait == EGait::Walk)
+			{
+				ControlledPawn->Server_SetSeekerGait(EGait::Run);
+			}
+			else if (CurGait == EGait::Run)
+			{
+				ControlledPawn->Server_SetSeekerGait(EGait::Walk);
+			}
+		}
+	}
 }
 
 FControlValue AGS_TpsController::GetControlValue() const
@@ -248,7 +264,7 @@ void AGS_TpsController::BeginPlay()
 	
 	if (IsLocalController())
 	{
-		//TestFunction();
+		TestFunction();
 	}
 
 	GameInstance = Cast<UGS_GameInstance>(GetGameInstance());
@@ -299,6 +315,10 @@ void AGS_TpsController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(PageDownAction, ETriggerEvent::Started, this, &AGS_TpsController::PageDown);
 	}
+	if (WalkToggleAction)
+	{
+		EnhancedInputComponent->BindAction(WalkToggleAction, ETriggerEvent::Started, this, &AGS_TpsController::WalkToggle);
+	}
 }
 
 void AGS_TpsController::PostSeamlessTravel()
@@ -316,7 +336,7 @@ void AGS_TpsController::BeginPlayingState()
 	if (IsLocalController())
 	{
 		//ServerRPCTestFunction();
-		//AddWidget();
+		AddWidget();
 		TestFunction();
 	}
 }

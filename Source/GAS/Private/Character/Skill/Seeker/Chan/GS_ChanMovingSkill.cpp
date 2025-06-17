@@ -71,7 +71,6 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-		//OwnerPlayer->Multicast_SetUseControllerRotationYaw(false);
 		OwnerPlayer->SetSkillInputControl(true, true);
 
 		// =======================
@@ -85,6 +84,8 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 			// 스킬 종료 VFX 재생
 			OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
 		}
+		
+		OwnerPlayer->CanChangeSeekerGait = true;
 	}
 }
 

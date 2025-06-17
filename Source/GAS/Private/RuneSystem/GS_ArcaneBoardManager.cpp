@@ -243,19 +243,20 @@ void UGS_ArcaneBoardManager::CalculateStatEffects()
 	UpdateConnections();
 
 	FGS_StatRow BaseResult, BonusResult;
-	TMap<uint8, TArray<FIntPoint>> ConnectedRunes = CurrBoardStats.ConnectedRuneCells;
-	float BonusValue = ConnectedRunes.Num();
+	float BonusValue = ConnectedRuneCnt;
 
 	for (const FPlacedRuneInfo& Rune : PlacedRunes)
 	{
 		FRuneTableRow RuneData;
 		if (GetRuneData(Rune.RuneID, RuneData))
 		{
+			bool bIsRuneConnected = IsRuneConnected(Rune.RuneID);
+
 			if (RuneData.StatEffect.StatName == FName("HP"))
 			{
 				BaseResult.HP += RuneData.StatEffect.Value;
 
-				if (ConnectedRunes.Contains(Rune.RuneID) && BonusResult.HP == 0)
+				if (bIsRuneConnected && BonusResult.HP == 0)
 				{
 					BonusResult.HP = BonusValue;
 				}
@@ -264,7 +265,7 @@ void UGS_ArcaneBoardManager::CalculateStatEffects()
 			{
 				BaseResult.ATK += RuneData.StatEffect.Value;
 
-				if (ConnectedRunes.Contains(Rune.RuneID) && BonusResult.ATK == 0)
+				if (bIsRuneConnected && BonusResult.ATK == 0)
 				{
 					BonusResult.ATK = BonusValue;
 				}
@@ -273,7 +274,7 @@ void UGS_ArcaneBoardManager::CalculateStatEffects()
 			{
 				BaseResult.DEF += RuneData.StatEffect.Value;
 				
-				if (ConnectedRunes.Contains(Rune.RuneID) && BonusResult.DEF == 0)
+				if (bIsRuneConnected && BonusResult.DEF == 0)
 				{
 					BonusResult.DEF = BonusValue;
 				}
@@ -282,7 +283,7 @@ void UGS_ArcaneBoardManager::CalculateStatEffects()
 			{
 				BaseResult.AGL += RuneData.StatEffect.Value;
 
-				if (ConnectedRunes.Contains(Rune.RuneID) && BonusResult.AGL == 0)
+				if (bIsRuneConnected && BonusResult.AGL == 0)
 				{
 					BonusResult.AGL = BonusValue;
 				}
@@ -291,7 +292,7 @@ void UGS_ArcaneBoardManager::CalculateStatEffects()
 			{
 				BaseResult.ATS += RuneData.StatEffect.Value;
 
-				if (ConnectedRunes.Contains(Rune.RuneID) && BonusResult.ATS == 0)
+				if (bIsRuneConnected && BonusResult.ATS == 0)
 				{
 					BonusResult.ATS = BonusValue;
 				}
@@ -507,6 +508,17 @@ bool UGS_ArcaneBoardManager::GetFragmentedRuneTexture(uint8 RuneID, TMap<FIntPoi
 	return false;
 }
 
+bool UGS_ArcaneBoardManager::GetConnectedFragmentedRuneTexture(uint8 RuneID, TMap<FIntPoint, UTexture2D*>& OutShape)
+{
+	FRuneTableRow RuneData;
+	if (GetRuneData(RuneID, RuneData))
+	{
+		OutShape = RuneData.ConnectedRuneShape;
+		return true;
+	}
+	return false;
+}
+
 void UGS_ArcaneBoardManager::InitGridState()
 {
 	CurrGridState.Empty();
@@ -537,7 +549,14 @@ void UGS_ArcaneBoardManager::InitGridState()
 void UGS_ArcaneBoardManager::ApplyRuneToGrid(uint8 RuneID, const FIntPoint& Position, EGridCellState NewState, bool bApplyTexture)
 {
 	TMap<FIntPoint, UTexture2D*> RuneShape;
+	TMap<FIntPoint, UTexture2D*> ConnectedRuneShape;
+
 	if (!GetFragmentedRuneTexture(RuneID, RuneShape))
+	{
+		return;
+	}
+
+	if (!GetConnectedFragmentedRuneTexture(RuneID, ConnectedRuneShape))
 	{
 		return;
 	}
@@ -546,37 +565,57 @@ void UGS_ArcaneBoardManager::ApplyRuneToGrid(uint8 RuneID, const FIntPoint& Posi
 	{
 		FIntPoint CellPos(Position.X + ShapePair.Key.X, Position.Y + ShapePair.Key.Y);
 
-		UTexture2D* TextureToApply = nullptr;
+		UTexture2D* NormalTexture = nullptr;
+		UTexture2D* ConnectedTexture = nullptr;
 		uint8 RuneIDToApply = 0;
 
 		if (NewState == EGridCellState::Occupied && bApplyTexture)
 		{
-			TextureToApply = ShapePair.Value;
+			NormalTexture = ShapePair.Value;
 			RuneIDToApply = RuneID;
+
+			// 연결 상태 텍스처도 설정
+			if (ConnectedRuneShape.Contains(ShapePair.Key))
+			{
+				ConnectedTexture = ConnectedRuneShape[ShapePair.Key];
+			}
 		}
 
-		UpdateCellState(CellPos, NewState, RuneIDToApply, TextureToApply);
+		UpdateCellState(CellPos, NewState, RuneIDToApply, NormalTexture, ConnectedTexture);
 	}
 }
 
-void UGS_ArcaneBoardManager::UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID, UTexture2D* RuneTextureFrag)
+void UGS_ArcaneBoardManager::UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID, UTexture2D* RuneTextureFrag, UTexture2D* ConnectedRuneTextureFrag)
 {
 	if (CurrGridState.Contains(Pos))
 	{
 		CurrGridState[Pos].State = NewState;
 		CurrGridState[Pos].PlacedRuneID = RuneID;
 		CurrGridState[Pos].RuneTextureFrag = RuneTextureFrag;
+		CurrGridState[Pos].ConnectedRuneTextureFrag = ConnectedRuneTextureFrag;
 	}
 }
 
 void UGS_ArcaneBoardManager::UpdateConnections()
 {
-	CurrBoardStats.ConnectedRuneCells.Empty();
+	for (auto& CellPair : CurrGridState)
+	{
+		CellPair.Value.bIsConnected = false;
+	}
 
 	TSet<FIntPoint> VisitedCells;
 	FindConnectedCells(SpecialCellPos, VisitedCells);
 
-	UE_LOG(LogTemp, Warning, TEXT("연결된 룬 개수 : %d"), CurrBoardStats.ConnectedRuneCells.Num());
+	TSet<uint8> ConnectedRuneIDs;
+	for (const auto& CellPair : CurrGridState)
+	{
+		if (CellPair.Value.bIsConnected && CellPair.Value.PlacedRuneID > 0)
+		{
+			ConnectedRuneIDs.Add(CellPair.Value.PlacedRuneID);
+		}
+	}
+
+	ConnectedRuneCnt = ConnectedRuneIDs.Num();
 }
 
 void UGS_ArcaneBoardManager::FindConnectedCells(const FIntPoint CellPos, TSet<FIntPoint>& VisitedCell)
@@ -593,12 +632,10 @@ void UGS_ArcaneBoardManager::FindConnectedCells(const FIntPoint CellPos, TSet<FI
 	}
 
 	VisitedCell.Add(CellPos);
-	uint8 RuneID = CellData.PlacedRuneID;
-	if(!CurrBoardStats.ConnectedRuneCells.Contains(RuneID))
+	if (CurrGridState.Contains(CellPos))
 	{
-		CurrBoardStats.ConnectedRuneCells.Add(RuneID, TArray<FIntPoint>());
+		CurrGridState[CellPos].bIsConnected = true;
 	}
-	CurrBoardStats.ConnectedRuneCells[RuneID].Add(CellPos);
 
 	TArray<FIntPoint> Directions = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
 	for (const FIntPoint& Dir : Directions)
@@ -606,4 +643,16 @@ void UGS_ArcaneBoardManager::FindConnectedCells(const FIntPoint CellPos, TSet<FI
 		FIntPoint NextPos = CellPos + Dir;
 		FindConnectedCells(NextPos, VisitedCell);
 	}
+}
+
+bool UGS_ArcaneBoardManager::IsRuneConnected(uint8 RuneID)
+{
+	for (const auto& CellPair : CurrGridState)
+	{
+		if (CellPair.Value.PlacedRuneID == RuneID && CellPair.Value.bIsConnected)
+		{
+			return true;
+		}
+	}
+	return false;
 }

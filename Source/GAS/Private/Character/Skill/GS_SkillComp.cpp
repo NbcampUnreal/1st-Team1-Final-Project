@@ -3,6 +3,8 @@
 
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/GS_Character.h"
+#include "Character/Player/Seeker/GS_Chan.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Skill/GS_SkillBase.h"
 #include "Character/Skill/GS_SkillSet.h"
 #include "UI/Character/GS_SkillWidget.h"
@@ -39,7 +41,7 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 	}
 
 	if (!GetOwner()->HasAuthority())
-	{
+	{		
 		Server_TryActiveSkill(Slot);
 		return;
 	}

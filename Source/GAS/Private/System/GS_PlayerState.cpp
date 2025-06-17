@@ -284,3 +284,9 @@ void AGS_PlayerState::Server_SetReadyStatus_Implementation(bool bNewReadyStatus)
         }
     }
 }
+
+void AGS_PlayerState::SetPlayerRole(EPlayerRole NewRole)
+{
+// ... existing code ...
+
+}

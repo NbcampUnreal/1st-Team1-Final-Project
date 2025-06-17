@@ -22,6 +22,10 @@ void UGS_ANS_HitWeaponForChan::NotifyBegin(USkeletalMeshComponent* MeshComp, UAn
 		if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Attacker->GetWeaponByIndex(0)))
 		{
 			Weapon->ServerEnableHit();
+			/*if (Attacker->HasAuthority())
+			{
+				Weapon->ServerEnableHit();
+			}*/
 		}
 	}
 }
@@ -41,6 +45,10 @@ void UGS_ANS_HitWeaponForChan::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnim
 		if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Attacker->GetWeaponByIndex(0)))
 		{
 			Weapon->ServerDisableHit();
+			/*if (Attacker->HasAuthority())
+			{
+				Weapon->ServerDisableHit();
+			}*/
 		}
 	}
 }

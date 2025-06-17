@@ -16,7 +16,7 @@ class GAS_API UGS_ChooserInputObj : public UObject
 {
 	GENERATED_BODY()
 
-public:
+public:	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
 	FVector Velocity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
@@ -33,7 +33,7 @@ public:
 	EMovementState MovementState;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateValue")
 	EMovementState LastMovementState;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateValue")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, CAtegory = "StateValue")
 	EGait Gait;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "StateValue")
 	ERotationMode RotationMode;
@@ -62,4 +62,6 @@ public:
 
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
 	bool ShouldSpinTransition();
+
+	
 };
