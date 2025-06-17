@@ -12,12 +12,16 @@
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Character/Component/GS_CameraShakeComponent.h"
+#include "Kismet/GamePlayStatics.h"
 #include "Character/Component/GS_DebuffVFXComponent.h"
 
 AGS_Guardian::AGS_Guardian()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	
+	CameraShakeComponent = CreateDefaultSubobject<UGS_CameraShakeComponent>(TEXT("CameraShakeComponent"));
+
 	NormalMoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
 	SpeedUpMoveSpeed = 1200.f;
 
@@ -141,7 +145,9 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 {
 	for (auto const& DamagedCharacter : DamagedCharacters)
 	{
+		//[TODO] only damage logic in server 
 		//ServerRPCMeleeAttack(DamagedCharacter);
+		
 		UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
 		if (IsValid(DamagedCharacterStat))
 		{
@@ -149,6 +155,9 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 			FDamageEvent DamageEvent;
 			DamagedCharacter->TakeDamage(Damage + PlusDamge, DamageEvent, GetController(),this);
 
+			//hit stop test
+			ApplyHitStop(DamagedCharacter);
+			
 			//server
 			AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
 			if (!Drakhar->GetIsFeverMode())
@@ -167,8 +176,6 @@ void AGS_Guardian::OnRep_GuardianState()
 
 void AGS_Guardian::QuitGuardianSkill()
 {
-	UE_LOG(LogTemp, Warning, TEXT("quit skill"));
-
 	//reset skill state
 	GuardianState = EGuardianState::CtrlSkillEnd;
 
@@ -179,6 +186,39 @@ void AGS_Guardian::QuitGuardianSkill()
 	}
 	//fly end
 	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+}
+
+void AGS_Guardian::ApplyHitStop_Implementation(AGS_Character* InDamagedCharacter)
+{
+	if (HasAuthority())
+	{
+		if (CameraShakeComponent)
+		{
+			CameraShakeComponent->PlayCameraShake(HitStopShakeInfo);
+		}
+	}
+	if (!HasAuthority())
+	{
+		CustomTimeDilation = 0.1f;
+		InDamagedCharacter->CustomTimeDilation = 0.1f;
+		EndHitStopDamagedCharacters.Add(InDamagedCharacter);
+
+		FTimerHandle HitStopTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(HitStopTimerHandle, this, &ThisClass::EndHitStop, HitStopDurtaion, false);
+	}
+}
+
+void AGS_Guardian::EndHitStop_Implementation()
+{
+	if (!HasAuthority())
+	{
+		for (const auto& InDamagedCharacter : EndHitStopDamagedCharacters)
+		{
+			CustomTimeDilation = 1.f;
+			InDamagedCharacter->CustomTimeDilation = 1.f;
+		}
+		EndHitStopDamagedCharacters.Empty();
+	}
 }
 
 void AGS_Guardian::MulticastRPCDrawDebugSphere_Implementation(bool bIsOverlap, const FVector& Location, float CapsuleRadius)

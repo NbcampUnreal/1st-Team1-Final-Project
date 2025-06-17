@@ -38,7 +38,7 @@ private:
 	float KnockbackRadius = 300.0f; // 넉백 반경
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
-	float KnockbackForce = 8000.f; // 넉백 힘
+	float KnockbackForce = 1000.0f; // 넉백 힘
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
 	float MaxLateralSpeed = 300.0f;
