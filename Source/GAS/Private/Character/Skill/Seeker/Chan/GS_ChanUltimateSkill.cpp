@@ -11,6 +11,8 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Engine/StaticMeshActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/Debuff/EDebuffType.h"
+#include "Character/Component/GS_DebuffComp.h"
 
 
 UGS_ChanUltimateSkill::UGS_ChanUltimateSkill()
@@ -50,6 +52,12 @@ void UGS_ChanUltimateSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	if (!OwnerPlayer) return;
 
+	// 경직 디버프
+	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
+	{
+		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Stun, OwnerCharacter);
+	}
+
 	// 플레이어에서 몬스터로의 벡터
 	FVector PlayerToMonster = Target->GetActorLocation() - OwnerPlayer->GetActorLocation();
 
@@ -74,11 +82,12 @@ void UGS_ChanUltimateSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 
 	// 넉백 속도 계산
 	FVector KnockbackVelocity = KnockbackDirection * KnockbackForce;
+	KnockbackVelocity.Z += 300.0f;
 
 	// 몬스터 넉백 적용
 	if (Target->GetCharacterMovement())
 	{
-		Target->LaunchCharacter(KnockbackVelocity, true, false);
+		Target->LaunchCharacter(KnockbackVelocity, true, true);
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Monster %s knocked back to %s!"),
