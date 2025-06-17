@@ -301,50 +301,6 @@ void AGS_Drakhar::ComboLastAttack()
 	if (HasAuthority())
 	{
 		const FVector Start = GetActorLocation();
-		FCollisionQueryParams Params(NAME_None, false, this);
-		Params.AddIgnoredActor(this);
-
-		TArray<FHitResult> OutHitResults;
-		bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, Start, FQuat::Identity,ECC_Pawn, FCollisionShape::MakeSphere(300.f), Params);
-
-		if (bIsHitDetected)
-		{
-			TSet<AGS_Character*> DamagedCharacterArray;
-			for (const auto& OutHitResult : OutHitResults)
-			{
-				if (OutHitResult.GetComponent() && OutHitResult.GetComponent()->GetCollisionProfileName() == FName("SoundTrigger"))
-				{
-					continue;
-				}
-
-				AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
-				if (IsValid(DamagedCharacter))
-				{
-					DamagedCharacterArray.Add(DamagedCharacter);
-				}
-			}
-
-			for (const auto& DamagedCharacter : DamagedCharacterArray)
-			{
-				//ServerRPCMeleeAttack(DamagedCharacter);
-				UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
-				if (IsValid(DamagedCharacterStat))
-				{
-					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
-					FDamageEvent DamageEvent;
-					DamagedCharacter->TakeDamage(Damage + 20.f, DamageEvent, GetController(), this);
-
-					// === 히트 사운드 재생 ===
-					PlayAttackHitSound();
-
-					if (!IsFeverMode)
-					{
-						MulticastRPCSetFeverGauge(10.f);
-					}
-				}
-			}
-			DamagedCharacterArray.Empty();
-		}
 		const float Radius = 300.f;
 		const float PlusDamage = 20.f;
 
@@ -355,7 +311,7 @@ void AGS_Drakhar::ComboLastAttack()
 		{
 			FeverComoLastAttack();
 		}
-	}
+	}	
 }
 
 void AGS_Drakhar::ServerRPCResetValue_Implementation()
@@ -622,12 +578,10 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 		if (CurrentFeverGauge >= MaxFeverGage)
 		{
 			CurrentFeverGauge = MaxFeverGage;
-
-		if (HasAuthority())
-		{
 			IsFeverMode = true;
 			StartFeverMode();
 		}
+				
 		if (CurrentFeverGauge > 0.f)
 		{
 			DecreaseFeverGauge();
@@ -635,11 +589,6 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 		
 		OnRep_FeverGauge();
 	}
-}
-
-void AGS_Drakhar::MulticastRPCSetFeverGauge_Implementation(float InValue)
-{
-	SetFeverGauge(InValue);
 }
 
 void AGS_Drakhar::MulticastRPCFeverMontagePlay_Implementation()
@@ -678,8 +627,6 @@ void AGS_Drakhar::FeverComoLastAttack()
 		for (const auto& DamagedSeeker : DamagedSeekers)
 		{
 			DamagedSeeker->LaunchCharacter(FVector(0.f, 0.f, 500.f), true, true);
-				// === 피버 모드 콤보 히트 사운드 재생 ===
-				PlayAttackHitSound();
 		}
 	}
 }
