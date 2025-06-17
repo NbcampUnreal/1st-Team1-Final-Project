@@ -1371,7 +1371,6 @@
 				<Sound Name="SFX_Fire_Burn" ID="{FEB4D4C7-8CE2-48DA-B308-EAA571DC9D18}" ShortID="296267272">
 					<PropertyList>
 						<Property Name="3DSpatialization" Type="int16" Value="1"/>
-						<Property Name="AttenuationDistanceScaling" Type="Real32" Value="0.8"/>
 						<Property Name="GameAuxSendVolume" Type="Real64">
 							<ValueList>
 								<Value>1</Value>
