@@ -10,6 +10,11 @@ void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 {
 	Super::OnRightClick(Instance);
 
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
 	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputRC)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Right Click Lock"));
@@ -31,6 +36,13 @@ void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 
 void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
+	Super::OnLeftClick(Instance);
+
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
 	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
 
 	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputLC)

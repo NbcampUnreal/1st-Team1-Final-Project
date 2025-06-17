@@ -113,6 +113,8 @@ public:
 
 	UFUNCTION()
 	void SetCharacterSpeed(float InRatio);
+
+	bool IsDead() const;
 	
 protected:
 	//component
@@ -140,5 +142,8 @@ private:
 
 	UFUNCTION()
 	void OnRep_CharacterSpeed();
+
+	UPROPERTY(Replicated)
+	bool bIsDead = false;
 };
 

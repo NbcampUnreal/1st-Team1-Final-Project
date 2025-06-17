@@ -92,6 +92,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
+	DOREPLIFETIME(AGS_Character, bIsDead);
 }
 
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -125,6 +126,7 @@ void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 void AGS_Character::OnDeath()
 {
+	bIsDead = true;
 	// 죽음 사운드 재생
 	if (DeathSoundEvent)
 	{
@@ -195,6 +197,11 @@ void AGS_Character::SetCharacterSpeed(float InRatio)
 		CharacterSpeed = DefaultCharacterSpeed * InRatio;
 		GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
 	}
+}
+
+bool AGS_Character::IsDead() const
+{
+	return bIsDead;
 }
 
 void AGS_Character::Server_SetCharacterSpeed_Implementation(float InRatio)

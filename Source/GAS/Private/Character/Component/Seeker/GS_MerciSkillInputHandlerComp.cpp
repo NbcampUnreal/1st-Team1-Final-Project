@@ -18,6 +18,11 @@ void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& In
 {
 	Super::OnRightClick(Instance);
 
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
 	if (!bCtrlHeld)
 	{
 		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
@@ -31,6 +36,11 @@ void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& In
 void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	Super::OnLeftClick(Instance);
+
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
 
 	if (!bCtrlHeld)
 	{
@@ -49,6 +59,12 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
 {
 	Super::OnRightClickRelease(Instance);
+	
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{
 		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
@@ -62,6 +78,12 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
 {
 	Super::OnLeftClickRelease(Instance);
+
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
@@ -78,6 +100,11 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 
 void UGS_MerciSkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
 {
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
 	float ScrollValue = Instance.GetValue().Get<float>();
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (ScrollValue > 0.f)

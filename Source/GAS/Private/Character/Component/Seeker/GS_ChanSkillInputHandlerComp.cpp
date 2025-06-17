@@ -10,6 +10,11 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 {
 	Super::OnRightClick(Instance);
 
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
 	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
 
 	if (!ChanCharacter->GetSkillInputControl().CanInputRC)
@@ -33,6 +38,13 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 
 void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
+	Super::OnLeftClick(Instance);
+
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
 	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
 
 	if (!ChanCharacter->GetSkillInputControl().CanInputLC)
