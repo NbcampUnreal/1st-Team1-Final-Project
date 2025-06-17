@@ -147,13 +147,8 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
 {
     if (!IsValid(BoardManager))
     {
-        UE_LOG(LogTemp, Error, TEXT("LoadBoardConfig: BoardManager가 유효하지 않음"));
         return;
     }
-
-    UE_LOG(LogTemp, Warning, TEXT("=== LoadBoardConfig 시작 ==="));
-    UE_LOG(LogTemp, Warning, TEXT("현재 BoardManager 클래스: %s"),
-        *UGS_EnumUtils::GetEnumAsString(BoardManager->CurrClass));
     
     FString SaveSlotName = TEXT("ArcaneBoardSave");
     const int32 UserIndex = 0;
@@ -173,14 +168,6 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
         return;
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("세이브 파일에 저장된 클래스들:"));
-    for (const auto& SavedClassPair : LoadedSaveGame->SavedRunesByClass)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("  클래스: %s, 룬 개수: %d"),
-            *UGS_EnumUtils::GetEnumAsString(SavedClassPair.Key),
-            SavedClassPair.Value.PlacedRunes.Num());
-    }
-
     ECharacterClass CurrentClass = BoardManager->CurrClass;
 
     if (!LoadedSaveGame->SavedRunesByClass.Contains(CurrentClass))
@@ -192,14 +179,13 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
 
     const FRunePlacementData& SavedPlacementData = LoadedSaveGame->SavedRunesByClass[CurrentClass];
     
-    UE_LOG(LogTemp, Warning, TEXT("로드할 데이터 - 클래스: %s, 룬 개수: %d"),
+    BoardManager->LoadSavedData(CurrentClass, SavedPlacementData.PlacedRunes);
+
+    UE_LOG(LogTemp, Log, TEXT("LoadBoardConfig: 로드 성공 - 직업: %s, 룬 개수: %d"),
         *UGS_EnumUtils::GetEnumAsString(CurrentClass),
         SavedPlacementData.PlacedRunes.Num());
 
-    BoardManager->LoadSavedData(CurrentClass, SavedPlacementData.PlacedRunes);
-
     BoardManager->bHasUnsavedChanges = false;
-    UE_LOG(LogTemp, Warning, TEXT("=== LoadBoardConfig 완료 ==="));
 }
 
 bool UGS_ArcaneBoardLPS::HasUnsavedChanges() const
