@@ -162,8 +162,12 @@ FVector UGS_SeekerAnimInstance::CalculateRelativeAccelerationAmount()
 
 float UGS_SeekerAnimInstance::Get_LeanAmount()
 {
-	float ClampedLeanAmount = FMath::GetMappedRangeValueClamped(FVector2D(200.0, 500.0), FVector2D(0.5, 1.0), ChooserInputObj->Speed2D);
-	return CalculateRelativeAccelerationAmount().Y * ClampedLeanAmount;
+	if (ChooserInputObj)
+	{
+		float ClampedLeanAmount = FMath::GetMappedRangeValueClamped(FVector2D(200.0, 500.0), FVector2D(0.5, 1.0), ChooserInputObj->Speed2D);
+		return CalculateRelativeAccelerationAmount().Y * ClampedLeanAmount;
+	}
+	return 0.0f;
 }
 
 bool UGS_SeekerAnimInstance::EnableSteering()
