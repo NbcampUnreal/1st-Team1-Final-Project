@@ -74,6 +74,10 @@ void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instanc
 {
 	bWasCtrlHeldWhenLeftClicked = bCtrlHeld;
 
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
 	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
 	{
 		return;
@@ -92,6 +96,10 @@ void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instanc
 void UGS_SkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	bWasCtrlHeldWhenLeftClicked = bCtrlHeld;
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
 
 	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
 	{
@@ -122,16 +130,28 @@ void UGS_SkillInputHandlerComp::OnCtrlModifierEnded()
 
 void UGS_SkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
 {
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
 	//UE_LOG(LogTemp, Warning, TEXT("Right Click Release"));
 }
 
 void UGS_SkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
 {
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
 	//UE_LOG(LogTemp, Warning, TEXT("Left Click Release"));
 }
 
 void UGS_SkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
 {
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
 	//UE_LOG(LogTemp, Warning, TEXT("Scroll Mouse"));
 }
 
