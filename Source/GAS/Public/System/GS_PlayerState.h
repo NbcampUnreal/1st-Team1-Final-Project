@@ -69,7 +69,7 @@ public:
 
     //상태
     float CurrentHealth;
-    UPROPERTY(ReplicatedUsing = OnRep_IsAlive)
+    UPROPERTY(ReplicatedUsing = OnRep_IsAlive, EditAnywhere, BlueprintReadWrite, Category = "PlayerStatus")
     bool bIsAlive = true;
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Game Result")
     EGameResult CurrentGameResult;
@@ -81,6 +81,9 @@ public:
     void SetIsAlive(bool bNewIsAlive);
     void SetupStatCompBinding(UGS_StatComp* InStatComp);
     void OnPawnStatInitialized();
+
+    UFUNCTION(BlueprintCallable, Category = "PlayerState")
+    void SetPlayerRole(EPlayerRole NewRole);
 
 protected:
     UFUNCTION()

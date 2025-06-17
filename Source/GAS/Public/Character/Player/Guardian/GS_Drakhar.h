@@ -72,6 +72,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "FlyEnd"))
 	UAkAudioEvent* FlyEndSoundEvent;
 
+	// === 히트 사운드 이벤트 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "AttackHit"))
+	UAkAudioEvent* AttackHitSoundEvent;
+
+	// === 피버모드 사운드 이벤트 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "FeverModeStart"))
+	UAkAudioEvent* FeverModeStartSoundEvent;
+
 	// === 나이아가라 VFX 시스템 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "WingRush Ribbon VFX"))
 	UNiagaraSystem* WingRushRibbonVFX;
@@ -243,6 +251,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Flying End"))
 	void PlayFlyEndSound();
 
+	// === 히트 사운드 재생 함수 ===
+	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Attack Hit"))
+	void PlayAttackHitSound();
+
+	// === 피버모드 사운드 재생 함수 ===
+	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Fever Mode Start"))
+	void PlayFeverModeStartSound();
+
 	// === Multicast 사운드 RPC 함수 ===
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayComboAttackSound();
@@ -265,6 +281,17 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayFlyEndSound();
+
+	// === 히트 사운드 Multicast RPC 함수 ===
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayAttackHitSound();
+
+	// === 피버모드 사운드 Multicast RPC 함수 ===
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayFeverModeStartSound();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCSetFeverGauge(float InValue);
 
 	// === 나이아가라 VFX 관련 ===
 	UFUNCTION(BlueprintCallable, Category = "VFX", meta = (DisplayName = "WingRush VFX Start"))

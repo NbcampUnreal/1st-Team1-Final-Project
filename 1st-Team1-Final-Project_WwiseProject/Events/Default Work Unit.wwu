@@ -36,17 +36,6 @@
 						</Action>
 					</ChildrenList>
 				</Event>
-				<Event Name="EV_ArrowImpact_Wood" ID="{5AF6D827-D199-47C8-9BED-CC9DB12DEE69}">
-					<ChildrenList>
-						<Action Name="" ID="{20F02EDD-C9E9-49BA-AA52-451CD2487311}" ShortID="277860454">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="SFX_ArrowImpact_Wood" ID="{2D5A0BBF-EF0F-46C3-ABCE-A07D1D0AF082}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
 				<Event Name="EV_ArrowImpact_Body" ID="{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}">
 					<ChildrenList>
 						<Action Name="" ID="{CE09FBC0-9B03-435A-9514-1053E61903DE}" ShortID="245893075">
@@ -746,6 +735,17 @@
 											<ReferenceList>
 												<Reference Name="Target">
 													<ObjectRef Name="EV_DraconicFury_Hit" ID="{D4962418-6632-4C36-AFC2-8FB7E785B824}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Drakhar_FeverMode" ID="{C93E5944-6465-4E0C-842D-D15DBFAF2833}">
+									<ChildrenList>
+										<Action Name="" ID="{D061CCDD-22FE-4CFD-ADB3-6AD2A7D206E0}" ShortID="398538405">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_Drakhar_FeverMode" ID="{E1093C78-6DF9-4901-8F15-D3B98BFC6EE5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>
