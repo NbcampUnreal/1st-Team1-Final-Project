@@ -19,4 +19,6 @@ void AGS_BearTrap::OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActo
 		FVector NewLocation = FVector(TrapLocation.X, TrapLocation.Y, SeekerLocation.Z);
 		Seeker->SetActorLocation(NewLocation);
 	}
+
+
 }

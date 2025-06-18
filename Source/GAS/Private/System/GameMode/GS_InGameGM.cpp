@@ -170,6 +170,7 @@ void AGS_InGameGM::StartPlay()
             GetWorldTimerManager().SetTimer(MatchStartTimerHandle, this, &AGS_InGameGM::StartMatchCheck, 2.0f, false);
         }
     }, 0.2f, false);
+
 }
 
 void AGS_InGameGM::Logout(AController* Exiting)
