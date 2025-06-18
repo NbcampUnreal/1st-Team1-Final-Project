@@ -65,6 +65,7 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 				
 				if (ChanCharacter->CanAcceptComboInput)
 				{
+					UE_LOG(LogTemp, Warning, TEXT("Right Click Lock : %d"), ChanCharacter->CanAcceptComboInput);
 					ChanCharacter->OnComboAttack();
 				}
 				else
