@@ -17,22 +17,19 @@ struct FAssetToSpawn
     TSubclassOf<APawn> PawnClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+    TSubclassOf<AActor> DisplayActorClass; // SKM 레플리케이션 용
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
     USkeletalMesh* SkeletalMeshClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    UPhysicsAsset* PhysicsAsset;
+    TSubclassOf<UAnimInstance> Lobby_AnimBlueprintClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    TSubclassOf<UAnimInstance> AnimBlueprintClass;
+    TObjectPtr<UAnimationAsset> WinPose;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    TObjectPtr<UAnimMontage> ReadyPose;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    TObjectPtr<UAnimMontage> WinPose;
-
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    TObjectPtr<UAnimMontage> LosePose;
+    TObjectPtr<UAnimationAsset> LosePose;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
     TObjectPtr<UTexture2D> AvatarTexture;

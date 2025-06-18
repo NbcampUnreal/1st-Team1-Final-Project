@@ -10,6 +10,7 @@
 #include "Engine/LocalPlayer.h"
 #include "System/Save/GS_OptionSettinsSaveGame.h"
 #include "GameFramework/GameStateBase.h"
+#include "System/PlayerController/GS_MainMenuPC.h"
 
 UGS_GameInstance::UGS_GameInstance()
     : DefaultLobbyMapName(TEXT("/Game/Maps/CustomLobbyLevel"))
@@ -198,7 +199,11 @@ void UGS_GameInstance::OnSessionUserInviteAccepted_Impl(const bool bWasSuccessfu
         if (PC)
         {
             UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnSessionUserInviteAccepted_Impl - Player %s accepting invite. Attempting to leave current session (if any) and join."), *PC->GetName());
-            LeaveCurrentSessionAndJoin(PC, InviteResult); // JoinSession 대신 이 함수 호출
+            if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(PC))
+            {
+                MPC->ShowLoadingScreen();
+            }
+            LeaveCurrentSessionAndJoin(PC, InviteResult);
         }
         else
         {
@@ -215,6 +220,11 @@ void UGS_GameInstance::HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver
 {
     UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance::HandleNetworkFailure - Type: %s, Error: %s"), ENetworkFailure::ToString(FailureType), *ErrorString);
 
+    if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController()))
+    {
+        MPC->HideLoadingScreen();
+    }
+
     IOnlineSessionPtr SessionInterfacePtr = Online::GetSessionInterface(GetWorld());
     if (SessionInterfacePtr.IsValid())
     {
@@ -224,12 +234,10 @@ void UGS_GameInstance::HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver
         {
             UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::HandleNetworkFailure - Found a lingering session. Destroying it to clean up."));
 
-            // 델리게이트 핸들이 유효한지 확인하고, 필요하다면 새로 바인딩합니다.
             if (!OnDestroySessionCompleteDelegateHandleForCleanup.IsValid())
             {
                 OnDestroySessionCompleteDelegateHandleForCleanup = SessionInterfacePtr->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegateForCleanup);
             }
-
             // 로컬에 남아있는 세션 파괴
             SessionInterfacePtr->DestroySession(NAME_GameSession);
         }
