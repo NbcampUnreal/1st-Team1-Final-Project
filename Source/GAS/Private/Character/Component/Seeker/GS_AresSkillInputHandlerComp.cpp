@@ -9,7 +9,7 @@
 void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
 	Super::OnRightClick(Instance);
-
+	UE_LOG(LogTemp, Warning, TEXT("Right Click Ares"));
 	if (OwnerCharacter->IsDead())
 	{
 		return;
@@ -37,7 +37,7 @@ void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	Super::OnLeftClick(Instance);
-
+	UE_LOG(LogTemp, Warning, TEXT("Left Click Ares"));
 	if (OwnerCharacter->IsDead())
 	{
 		return;
