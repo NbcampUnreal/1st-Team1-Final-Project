@@ -10,6 +10,7 @@
 #include "Sound/GS_MonsterAudioComponent.h"
 #include "GS_Monster.generated.h"
 
+class UGS_MonsterSkillComp;
 class UGS_MonsterAnimInstance;
 class UGS_DebuffVFXComponent;
 
@@ -95,11 +96,17 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Data")
 	FText GetTypeName() const { return MonsterData ? MonsterData->TypeName : FText::GetEmpty(); }
+
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	virtual void UseSkill(); 
 	
 protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
+	TObjectPtr<UGS_MonsterSkillComp> MonsterSkillComp;
 	
 	UPROPERTY()
 	TObjectPtr<UGS_MonsterAnimInstance> MonsterAnim;

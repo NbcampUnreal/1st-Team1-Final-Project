@@ -16,6 +16,7 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "DrawDebugHelpers.h"
+#include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "Sound/GS_MonsterAudioComponent.h"
 #include "Character/Component/GS_DebuffVFXComponent.h"
 
@@ -24,6 +25,8 @@ AGS_Monster::AGS_Monster()
 {
 	AIControllerClass = AGS_AIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	MonsterSkillComp = CreateDefaultSubobject<UGS_MonsterSkillComp>(TEXT("MonsterSkillComp"));
 
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>("SelectionDecal");
 	SelectionDecal->SetupAttachment(RootComponent);
@@ -164,4 +167,8 @@ void AGS_Monster::Attack()
 void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 {
 	MonsterAnim->Montage_Play(AttackMontage);
+}
+
+void AGS_Monster::UseSkill()
+{	
 }

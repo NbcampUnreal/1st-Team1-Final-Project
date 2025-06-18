@@ -82,7 +82,6 @@ public:
 
 	// 쿨타임 
 	void SetCoolingDown(bool bInCoolingDown) { bIsCoolingDown = bInCoolingDown; }
-	bool IsCoolingDown() const { return bIsCoolingDown; }
 	
 protected:
 	bool bIsActive = false;
