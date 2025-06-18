@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Character/Component/GS_FootManagerComponent.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/DecalComponent.h"
 #include "Engine/World.h"
@@ -166,6 +167,16 @@ void UGS_FootManagerComponent::HandleFootstep(EFootStep Foot)
 	SpawnFootstepDecal(SurfaceType, HitLocation, HitNormal, Foot);
 	PlayFootstepSound(SurfaceType, HitLocation);
 	SpawnFootDustEffect(SurfaceType, HitLocation, HitNormal);
+}
+
+void UGS_FootManagerComponent::OverrideFootDustEffect(UNiagaraSystem* VFXSystem)
+{
+	OverriddenFootDustEffect = VFXSystem;
+}
+
+void UGS_FootManagerComponent::ClearFootDustEffectOverride()
+{
+	OverriddenFootDustEffect = nullptr;
 }
 
 void UGS_FootManagerComponent::HandleFoleyEvent()
@@ -434,8 +445,22 @@ void UGS_FootManagerComponent::PlayFootstepSound(EPhysicalSurface Surface, const
 
 void UGS_FootManagerComponent::SpawnFootDustEffect(EPhysicalSurface Surface, const FVector& Location, const FVector& Normal)
 {
-	UNiagaraSystem* const* VFXSystem = FootDustEffects.Find(Surface);
-	if (!VFXSystem || !*VFXSystem)
+	UNiagaraSystem* VFXToSpawn = nullptr;
+
+	if (OverriddenFootDustEffect)
+	{
+		VFXToSpawn = OverriddenFootDustEffect;
+	}
+	else
+	{
+		UNiagaraSystem* const* FoundVFX = FootDustEffects.Find(Surface);
+		if (FoundVFX && *FoundVFX)
+		{
+			VFXToSpawn = *FoundVFX;
+		}
+	}
+
+	if (!VFXToSpawn)
 	{
 		return;
 	}
@@ -444,7 +469,7 @@ void UGS_FootManagerComponent::SpawnFootDustEffect(EPhysicalSurface Surface, con
 
 	UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
-		*VFXSystem,
+		VFXToSpawn,
 		Location,
 		EffectRotation
 	);

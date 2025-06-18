@@ -13,6 +13,7 @@ class UNiagaraSystem;
 class UNiagaraComponent;
 class UArrowComponent;
 class UGS_CameraShakeComponent;
+class UGS_FootManagerComponent;
 struct FGS_CameraShakeInfo;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFeverGageChangedDelegate, float);
@@ -64,13 +65,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "DraconicFury Projectile"))
 	UAkAudioEvent* DraconicProjectileSoundEvent;
 
-	// === 날기 관련 사운드 이벤트들 ===
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "FlyStart"))
-	UAkAudioEvent* FlyStartSoundEvent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "FlyEnd"))
-	UAkAudioEvent* FlyEndSoundEvent;
-
 	// === 히트 사운드 이벤트 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "AttackHit"))
 	UAkAudioEvent* AttackHitSoundEvent;
@@ -83,12 +77,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "WingRush Ribbon VFX"))
 	UNiagaraSystem* WingRushRibbonVFX;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever WingRush Ribbon VFX"))
+	UNiagaraSystem* FeverWingRushRibbonVFX;
+
 	UPROPERTY(BlueprintReadOnly, Category = "VFX|Drakhar")
 	UNiagaraComponent* ActiveWingRushVFXComponent;
 
 	// === DustVFX 시스템 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Dust VFX"))
 	UNiagaraSystem* DustVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever Dust VFX"))
+	UNiagaraSystem* FeverDustVFX;
 
 	UPROPERTY(BlueprintReadOnly, Category = "VFX|Drakhar")
 	UNiagaraComponent* ActiveDustVFXComponent;
@@ -112,6 +112,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "VFX|Earthquake")
 	UNiagaraComponent* ActiveDustCloudVFXComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Earthquake", meta = (DisplayName = "Fever Earthquake Impact VFX"))
+	UNiagaraSystem* FeverEarthquakeImpactVFX;
+
 	// === 어스퀘이크 VFX 위치 제어용 화살표 컴포넌트 ===
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX|Earthquake", meta = (DisplayName = "Earthquake VFX Spawn Point"))
 	UArrowComponent* EarthquakeVFXSpawnPoint;
@@ -129,6 +132,26 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|DraconicFury", meta = (DisplayName = "Projectile Explosion Sound"))
 	UAkAudioEvent* DraconicProjectileExplosionSoundEvent;
+
+	// === 피버모드 발자국 VFX ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever Footstep VFX"))
+	UNiagaraSystem* FeverFootstepVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Flying Dust VFX"))
+	UNiagaraSystem* FlyingDustVFX;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "VFX|Drakhar")
+	UNiagaraComponent* ActiveFlyingDustVFXComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Flying Dust VFX Trace Distance"))
+	float FlyingDustTraceDistance;
+
+	// === 공격 히트 VFX ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Normal Attack Hit VFX"))
+	UNiagaraSystem* NormalAttackHitVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever Attack Hit VFX"))
+	UNiagaraSystem* FeverAttackHitVFX;
 
 	//[Input Binding Function]
 	virtual void Ctrl() override;
@@ -226,7 +249,7 @@ public:
 	void DecreaseFeverGauge();
 	//minus 1 values per one seconds
 	void MinusFeverGaugeValue();
-	
+
 	// === Wwise 사운드 재생 함수 ===
 	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Normal Attack"))
 	void PlayComboAttackSound();
@@ -242,13 +265,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Draconic Fury Projectile"))
 	void PlayDraconicProjectileSound(const FVector& Location);
-
-	// === 날기 사운드 재생 함수 ===
-	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Flying Start"))
-	void PlayFlyStartSound();
-
-	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Flying End"))
-	void PlayFlyEndSound();
 
 	// === 히트 사운드 재생 함수 ===
 	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Attack Hit"))
@@ -273,13 +289,6 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayDraconicProjectileSound(const FVector& Location);
-
-	// === 날기 사운드 Multicast RPC 함수 ===
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastPlayFlyStartSound();
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastPlayFlyEndSound();
 
 	// === 히트 사운드 Multicast RPC 함수 ===
 	UFUNCTION(NetMulticast, Unreliable)
@@ -340,6 +349,57 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastStopDustCloudVFX();
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayFeverEarthquakeImpactVFX(const FVector& ImpactLocation);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_PlayAttackHitVFX(FVector ImpactPoint);
+
+	// === 날기 이벤트 ===
+	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Fly", meta = (DisplayName = "On Fly Start"))
+	void BP_OnFlyStart();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Fly", meta = (DisplayName = "On Fly End"))
+	void BP_OnFlyEnd();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_OnFlyStart();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_OnFlyEnd();
+
+	// === 궁극기 이벤트 ===
+	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Ultimate", meta = (DisplayName = "On Ultimate Start"))
+	void BP_OnUltimateStart();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_OnUltimateStart();
+
+	// === 어스퀘이크 이벤트 ===
+	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Earthquake", meta = (DisplayName = "On Earthquake Start"))
+	void BP_OnEarthquakeStart();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_OnEarthquakeStart();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	UGS_FootManagerComponent* FootManagerComponent;
+
+	// === 피버모드 오버레이 머티리얼 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|FeverMode")
+	UMaterialInterface* FeverModeOverlayMaterial;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* FeverModeOverlayMID;
+
+	// === 피버모드 오버레이 파라미터 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|FeverMode")
+	float FeverOverlayIntensity = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|FeverMode")
+	FLinearColor FeverOverlayColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
 private:
 	//move spring arm for flying
 	float DefaultSpringArmLength;
@@ -384,7 +444,9 @@ private:
 	UPROPERTY(Replicated)
 	float DefaultAttackPower;
 	
+	UPROPERTY(ReplicatedUsing = OnRep_IsFeverMode)
 	bool IsFeverMode;
+
 	FTimerHandle FeverTimer;
 
 	float PillarForwardOffset = 300.f;
@@ -405,6 +467,18 @@ private:
 	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);
 	UAkComponent* GetOrCreateAkComponent();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_ApplyFeverModeOverlay();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_RemoveFeverModeOverlay();
+	
 	UFUNCTION()
 	void OnRep_FeverGauge();
+
+	void ApplyFeverModeOverlay();
+	void RemoveFeverModeOverlay();
+
+	UFUNCTION()
+	void OnRep_IsFeverMode();
 };
