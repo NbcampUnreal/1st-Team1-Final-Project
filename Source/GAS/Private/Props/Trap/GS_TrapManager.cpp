@@ -41,13 +41,13 @@ void AGS_TrapManager::BeginPlay()
 	//	UE_LOG(LogTemp, Warning, TEXT("[TrapManager] NetMode: DedicatedServer"));
 	//	break;
 	//}
-	GetWorld()->GetTimerManager().SetTimer(
-		MotionLoopTimerHandle,
-		this,
-		&AGS_TrapManager::TimerTrapManager,
-		MotionInterval,
-		true
-	);
+	//GetWorld()->GetTimerManager().SetTimer(
+	//	MotionLoopTimerHandle,
+	//	this,
+	//	&AGS_TrapManager::TimerTrapManager,
+	//	MotionInterval,
+	//	true
+	//);
 }
 
 void AGS_TrapManager::TimerTrapManager()

@@ -53,7 +53,7 @@ AGS_TrapBase::AGS_TrapBase()
 void AGS_TrapBase::BeginPlay()
 {
 	Super::BeginPlay();
-	if (HasAuthority())
+	/*if (HasAuthority())
 	{
 		AGS_TrapManager* TrapManager = GetTrapManager();
 		if(TrapManager)
@@ -66,7 +66,7 @@ void AGS_TrapBase::BeginPlay()
 			UE_LOG(LogTemp, Warning, TEXT("[TrapBase] TrapManager is not in BeginPlay"));
 		}
 		
-	}
+	}*/
 
 	LoadTrapData();
 	DamageBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrapBase::OnDamageBoxOverlap);
@@ -134,22 +134,8 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 	if (!OtherActor) return;
 	AGS_Seeker* DamagedSeeker = Cast<AGS_Seeker>(OtherActor);
 	if (!DamagedSeeker) return;
-	if (TrapData.Effect.Damage <= 0.f) return;
- 	//기본 데미지 부여
-	FDamageEvent DamageEvent;
 
-	
-	if (TrapData.Effect.bDoT)
-	{
-		ApplyDotDamage(OtherActor);
-	}
-	else
-	{
-		DamagedSeeker->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
-	}
-
-
-	//디버프 추가
+	//디버프 연결
 	if (UGS_DebuffComp* DebuffComp = DamagedSeeker->FindComponentByClass<UGS_DebuffComp>())
 	{
 
@@ -167,8 +153,36 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 			DebuffComp->ApplyDebuff(EDebuffType::Slow, nullptr);
 
 		}
+
+		//Burn
+		if (Effect.bBurn)
+		{
+			DebuffComp->ApplyDebuff(EDebuffType::Burn, nullptr);
+
+		}
+
+		//Lava
+		if (Effect.bLava)
+		{
+			DebuffComp->ApplyDebuff(EDebuffType::Lava, nullptr);
+
+		}
 	}
 
+	//기본 데미지 부여
+	if (TrapData.Effect.Damage <= 0.f) return;
+	
+	FDamageEvent DamageEvent;
+
+
+	/*if (TrapData.Effect.bDoT)
+	{
+		ApplyDotDamage(OtherActor);
+	}*/
+	//else
+	//{
+	DamagedSeeker->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
+	//}
 
 }
 
@@ -176,89 +190,7 @@ void AGS_TrapBase::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors)
 {
 }
 
-void AGS_TrapBase::ClearDotTimerForActor(AActor* Actor)
-{
-	if (!Actor)
-	{
-		return;
-	}
-	FTimerHandle TimerHandle;
-	if (ActiveDoTTimers.RemoveAndCopyValue(Actor, TimerHandle))
-	{
-		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
-		UE_LOG(LogTemp, Warning, TEXT("DoT Timer Successfully ended - Actor: %s"), *GetNameSafe(Actor));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("DoT Timer failed to end - Actor: %s (no timer)"), *GetNameSafe(Actor));
-	}
 
-}
-
-
-
-
-
-void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
-{
-	if (!DamagedActor || !HasAuthority() || !TrapData.Effect.bDoT)
-	{
-		return;
-	}
-
-	if (ActiveDoTTimers.Contains(DamagedActor))
-	{
-		ClearDotTimerForActor(DamagedActor);
-	}
-
-	int32 CurrentTick = 0;
-	FTimerHandle TimerHandle;
-
-	TWeakObjectPtr<AActor> WeakActor = DamagedActor;
-
-	FTimerDelegate Delegate;
-	//타이머가 끝나면 실행되는 람다
-	Delegate.BindLambda([=, this]() mutable
-		{
-			if (!WeakActor.IsValid() || !TrapData.Effect.bDoT)
-			{
-				ClearDotTimerForActor(WeakActor.Get());
-				return;
-			}
-			
-			AActor* ValidActor = WeakActor.Get();
-
-			if (!ValidActor || !IsValid(ValidActor))
-			{
-				ClearDotTimerForActor(ValidActor);
-				return;
-			}
-			FDamageEvent DamageEvent;
-			ValidActor->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
-			UE_LOG(LogTemp, Warning, TEXT("CurrentTick : %d"), CurrentTick);
-			CurrentTick++;
-
-
-
-			if (CurrentTick >= TrapData.Effect.DamageCount)
-			{
-				////current tick이 damage count보다 같거나 크다면 타이머 초기화 후 ActiveDoTTimers 맵에서 제거
-				//if (ActiveDoTTimers.Contains(ValidActor))
-				//{
-				//	GetWorld()->GetTimerManager().ClearTimer(ActiveDoTTimers[ValidActor]);
-				//	
-				//	//크래시 지점
-				//	ActiveDoTTimers.Remove(ValidActor);
-				//	//
-				//}
-
-				ClearDotTimerForActor(ValidActor);
-			}
-		});
-
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, Delegate, TrapData.Effect.DamageInterval, true);
-	ActiveDoTTimers.Add(DamagedActor, TimerHandle);
-}
 
 
 
@@ -389,3 +321,89 @@ bool AGS_TrapBase::CanStartMotion() const
 {
 	return true;
 }
+
+
+
+//void AGS_TrapBase::ClearDotTimerForActor(AActor* Actor)
+//{
+//	if (!Actor)
+//	{
+//		return;
+//	}
+//	FTimerHandle TimerHandle;
+//	if (ActiveDoTTimers.RemoveAndCopyValue(Actor, TimerHandle))
+//	{
+//		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+//		UE_LOG(LogTemp, Warning, TEXT("DoT Timer Successfully ended - Actor: %s"), *GetNameSafe(Actor));
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("DoT Timer failed to end - Actor: %s (no timer)"), *GetNameSafe(Actor));
+//	}
+//
+//}
+
+
+
+
+
+//void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
+//{
+//	if (!DamagedActor || !HasAuthority() || !TrapData.Effect.bDoT)
+//	{
+//		return;
+//	}
+//
+//	if (ActiveDoTTimers.Contains(DamagedActor))
+//	{
+//		ClearDotTimerForActor(DamagedActor);
+//	}
+//
+//	int32 CurrentTick = 0;
+//	FTimerHandle TimerHandle;
+//
+//	TWeakObjectPtr<AActor> WeakActor = DamagedActor;
+//
+//	FTimerDelegate Delegate;
+//	//타이머가 끝나면 실행되는 람다
+//	Delegate.BindLambda([=, this]() mutable
+//		{
+//			if (!WeakActor.IsValid() || !TrapData.Effect.bDoT)
+//			{
+//				ClearDotTimerForActor(WeakActor.Get());
+//				return;
+//			}
+//			
+//			AActor* ValidActor = WeakActor.Get();
+//
+//			if (!ValidActor || !IsValid(ValidActor))
+//			{
+//				ClearDotTimerForActor(ValidActor);
+//				return;
+//			}
+//			FDamageEvent DamageEvent;
+//			ValidActor->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
+//			UE_LOG(LogTemp, Warning, TEXT("CurrentTick : %d"), CurrentTick);
+//			CurrentTick++;
+//
+//
+//
+//			if (CurrentTick >= TrapData.Effect.DamageCount)
+//			{
+//				////current tick이 damage count보다 같거나 크다면 타이머 초기화 후 ActiveDoTTimers 맵에서 제거
+//				//if (ActiveDoTTimers.Contains(ValidActor))
+//				//{
+//				//	GetWorld()->GetTimerManager().ClearTimer(ActiveDoTTimers[ValidActor]);
+//				//	
+//				//	//크래시 지점
+//				//	ActiveDoTTimers.Remove(ValidActor);
+//				//	//
+//				//}
+//
+//				ClearDotTimerForActor(ValidActor);
+//			}
+//		});
+//
+//	GetWorld()->GetTimerManager().SetTimer(TimerHandle, Delegate, TrapData.Effect.DamageInterval, true);
+//	ActiveDoTTimers.Add(DamagedActor, TimerHandle);
+//}
