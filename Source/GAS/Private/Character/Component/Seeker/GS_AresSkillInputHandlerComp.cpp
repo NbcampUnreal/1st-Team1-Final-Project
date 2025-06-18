@@ -72,3 +72,18 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 		}
 	}
 }
+
+void UGS_AresSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
+{
+	Super::OnLeftClickRelease(Instance);
+
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
+	if (bWasCtrlHeldWhenLeftClicked)
+	{
+		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Moving);
+	}
+}
