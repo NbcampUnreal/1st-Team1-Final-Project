@@ -14,4 +14,12 @@ class GAS_API UGS_AresUltimateSkill : public UGS_SeekerSkillBase
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void ActiveSkill() override;
+	virtual void DeactiveSkill() override;
+	virtual void ExecuteSkillEffect() override;
+	virtual bool IsActive() const override;
+
+private:
+	bool bIsBerserker;
 };

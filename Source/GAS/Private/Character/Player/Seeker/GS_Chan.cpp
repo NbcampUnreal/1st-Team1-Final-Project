@@ -9,8 +9,6 @@
 #include "UI/Character/GS_ChanAimingSkillBar.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/GS_TpsController.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Character/Skill/GS_SkillComp.h"
 #include "AkComponent.h"
 #include "AkAudioEvent.h"
 #include "Animation/Character/Seeker/GS_ChooserInputObj.h"
@@ -36,10 +34,6 @@ void AGS_Chan::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPla
 void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AGS_Chan, CanAcceptComboInput);
-	DOREPLIFETIME(AGS_Chan, CurrentComboIndex);
-	DOREPLIFETIME(AGS_Chan, bComboEnded);
 }
 
 // Called when the game starts or when spawned
@@ -65,7 +59,9 @@ void AGS_Chan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AGS_Chan::OnComboAttack()
 {
-	float ControlYaw = GetControlRotation().Yaw;
+	Super::OnComboAttack();
+	
+	/*float ControlYaw = GetControlRotation().Yaw;
 	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController()))
 	{
 		float YawDiff = FMath::Abs(FMath::FindDeltaAngleDegrees(ControlYaw, TpsController->LastRotatorInMoving.Yaw));
@@ -74,7 +70,7 @@ void AGS_Chan::OnComboAttack()
 		{
 			return;
 		}
-	}
+	}*/
 	
 	Server_ComboEnd(false);
 	CanChangeSeekerGait = false;
@@ -84,59 +80,12 @@ void AGS_Chan::OnComboAttack()
 		if (CurrentComboIndex == 0)
 		{
 			ServerAttackMontage();
-			Server_SetSeekerGait(EGait::Walk);
-			
+			//Server_SetSeekerGait(EGait::Walk);
 		}
 		else
 		{
 			bNextCombo = true;
 			CanAcceptComboInput = false;
-		}
-	}
-}
-
-void AGS_Chan::ComboInputOpen()
-{
-	CanAcceptComboInput = true;
-}
-
-void AGS_Chan::ComboInputClose()
-{
-	CanAcceptComboInput = false;
-	if (bNextCombo)
-	{
-		ServerAttackMontage();
-		CanAcceptComboInput = false;
-		bNextCombo = false;
-	}
-}
-
-void AGS_Chan::Multicast_ComboEnd_Implementation()
-{
-	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		StopAnimMontage(ComboAnimMontage);
-		AnimInstance->IsPlayingUpperBodyMontage = false;
-		CurrentComboIndex = 0;
-		CanAcceptComboInput = true;
-		
-
-		AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
-		if (IsValid(TPSController))
-		{
-			TPSController->SetLookControlValue(true, true);
-		}
-
-		if (HasAuthority())
-		{
-			if (LastSeekerGait == EGait::Run)
-			{			
-				SetSeekerGait(EGait::Run);
-			}
-			else if (LastSeekerGait == EGait::Walk)
-			{
-				SetSeekerGait(EGait::Walk);
-			}
 		}
 	}
 }
@@ -165,11 +114,6 @@ void AGS_Chan::ToIdle()
 	Multicast_SetIsFullBodySlot(false);
 	SetMoveControlValue(true, true);
 	SetLookControlValue(true, true);
-}
-
-void AGS_Chan::Server_ComboEnd_Implementation(bool bComboEnd)
-{
-	bComboEnded = bComboEnd;
 }
 
 void AGS_Chan::SetMoveControlValue(bool bMoveForward, bool bMoveRight)
@@ -235,42 +179,6 @@ void AGS_Chan::Client_ChanAimingSkillBar_Implementation(bool bShow)
 	{
 		ChanAimingSkillBarWidget->ShowSkillBar(bShow);
 	}
-}
-void AGS_Chan::MulticastPlayComboSection_Implementation()
-{
-	AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
-	if (IsValid(TPSController))
-	{
-		TPSController->SetLookControlValue(false, true);
-	}
-	
-	FName SectionName = FName(*FString::Printf(TEXT("Attack%d"), CurrentComboIndex + 1));
-	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
-	
-	CurrentComboIndex++;
-	if (AnimInstance && ComboAnimMontage)
-	{
-		AnimInstance->Montage_Play(ComboAnimMontage);
-		AnimInstance->IsPlayingUpperBodyMontage = true;
-		AnimInstance->Montage_JumpToSection(SectionName, ComboAnimMontage);
-
-		// 콤보 공격 사운드와 공격 목소리 재생
-		if (AxeSwingSound)
-		{
-			Multicast_PlaySkillSound(AxeSwingSound);
-		}
-		if (AttackVoiceSound)
-		{
-			Multicast_PlaySkillSound(AttackVoiceSound);
-		}
-	}
-	CanAcceptComboInput = false;
-	bNextCombo = false;
-}
-
-void AGS_Chan::ServerAttackMontage_Implementation()
-{
-	MulticastPlayComboSection();
 }
 
 void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float InRadius, FColor InColor, float InLifetime)

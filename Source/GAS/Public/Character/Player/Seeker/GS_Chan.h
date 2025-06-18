@@ -27,16 +27,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UFUNCTION()
-	void OnComboAttack();
-
-	
-	
-	// Combo Attack Montage
-	void ComboInputOpen();
-	void ComboInputClose();
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_ComboEnd();
+	virtual void OnComboAttack() override;
 
 	// Aim Skill
 	/*void OnReadyAimSkill();*/
@@ -44,31 +35,8 @@ public:
 	void OffJumpAttackSkill();
 	void ToIdle();
 
-	UPROPERTY(Replicated)
-	bool bComboEnded = true;
-
-	UFUNCTION(Server, Reliable)
-	void Server_ComboEnd(bool bComboEnd);
-	
-	UPROPERTY(EditAnywhere, Category="Animation")
-	UAnimMontage* ComboAnimMontage;
-
-	UPROPERTY(Replicated)
-	int32 CurrentComboIndex;
-	
-	UPROPERTY(Replicated)
-	bool CanAcceptComboInput = true;
-	
-	bool bNextCombo = false;
-
-	UFUNCTION(Server, Reliable)
-	void ServerAttackMontage();
-
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DrawSkillRange(FVector InLocation, float InRadius, FColor InColor, float InLifetime);
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastPlayComboSection();
 
 	// AnimInstnace Slot State Value 
 	UFUNCTION(NetMulticast, Reliable)

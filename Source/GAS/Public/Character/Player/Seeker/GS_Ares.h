@@ -6,6 +6,8 @@
 #include "GS_Seeker.h"
 #include "GS_Ares.generated.h"
 
+class AGS_SwordAuraProjectile;
+
 UCLASS()
 class GAS_API AGS_Ares : public AGS_Seeker
 {
@@ -20,6 +22,16 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	// Projectile
+	UPROPERTY(EditDefaultsOnly, Category = "Skill|Projectile")
+	TSubclassOf<AGS_SwordAuraProjectile> AresProjectileClass;
+
+	virtual void OnComboAttack() override;
+
+	virtual void ServerAttackMontage() override;
+
+	virtual void MulticastPlayComboSection() override;
 
 protected:
 	// Called when the game starts or when spawned
