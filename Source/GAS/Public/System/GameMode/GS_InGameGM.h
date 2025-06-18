@@ -4,6 +4,7 @@
 #include "System/GS_BaseGM.h"
 #include "System/GS_PlayerRole.h"
 #include "Character/Player/GS_PawnMappingDataAsset.h"
+#include "Props/Trap/GS_TrapManager.h"
 #include "GS_InGameGM.generated.h"
 
 class AGS_PlayerState;
@@ -49,6 +50,8 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "HUD Classes")
 	TSubclassOf<AHUD> RTSHUDClass;
+
+
 
 public:
 	void HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, bool bIsAlive);
