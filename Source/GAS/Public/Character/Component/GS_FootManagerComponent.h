@@ -58,6 +58,19 @@ public:
 	void HandleFootstep(EFootStep Foot);
 
 	/**
+	 * 특정 Niagara 시스템으로 발자국 먼지 효과를 강제.
+	 * @param VFXSystem 오버라이드할 Niagara 시스템. nullptr을 전달하면 오버라이드가 해제.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep")
+	void OverrideFootDustEffect(UNiagaraSystem* VFXSystem);
+
+	/**
+	 * 발자국 먼지 효과 오버라이드를 해제하고 원래 로직으로 되돌림림.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep")
+	void ClearFootDustEffectOverride();
+
+	/**
 	 * FoleyEvent와 호환되는 자동 발걸음 처리 함수
 	 * 발의 위치와 속도를 분석하여 자동으로 발걸음 감지
 	 */
@@ -219,6 +232,10 @@ private:
 	/** 캐시된 스켈레탈 메시 컴포넌트 */
 	UPROPERTY()
 	USkeletalMeshComponent* CachedSkeletalMesh;
+
+	/** 오버라이드된 발자국 먼지 VFX */
+	UPROPERTY()
+	UNiagaraSystem* OverriddenFootDustEffect;
 
 	// ======== Socket Names ========
 
