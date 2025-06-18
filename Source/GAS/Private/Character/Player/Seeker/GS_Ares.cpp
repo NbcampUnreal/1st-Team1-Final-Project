@@ -2,6 +2,7 @@
 
 
 #include "Character/Player/Seeker/GS_Ares.h"
+#include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
 
 
 // Sets default values
@@ -9,6 +10,8 @@ AGS_Ares::AGS_Ares()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	CharacterType = ECharacterType::Ares;
+	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_AresSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 }
 
 // Called when the game starts or when spawned
