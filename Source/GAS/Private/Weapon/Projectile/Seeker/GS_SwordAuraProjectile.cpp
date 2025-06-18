@@ -11,6 +11,9 @@ AGS_SwordAuraProjectile::AGS_SwordAuraProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	bReplicates = true;
+	SetReplicateMovement(true);
+
 	// ↘ 방향
 	SlashBoxA = CreateDefaultSubobject<UBoxComponent>(TEXT("SlashBoxA"));
 	SlashBoxA->SetupAttachment(RootComponent);
@@ -31,8 +34,8 @@ AGS_SwordAuraProjectile::AGS_SwordAuraProjectile()
 	CenterSphere->SetSphereRadius(75.f);
 	CenterSphere->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 
-	ProjectileMovementComponent->InitialSpeed = 500.0f;
-	ProjectileMovementComponent->MaxSpeed = 500.0f;
+	ProjectileMovementComponent->InitialSpeed = 4000.0f;
+	ProjectileMovementComponent->MaxSpeed = 4000.0f;
 	ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 }
 
@@ -44,6 +47,8 @@ void AGS_SwordAuraProjectile::BeginPlay()
 	SlashBoxA->OnComponentBeginOverlap.AddDynamic(this, &AGS_SwordAuraProjectile::OnSlashBoxOverlap);
 	SlashBoxB->OnComponentBeginOverlap.AddDynamic(this, &AGS_SwordAuraProjectile::OnSlashBoxOverlap);
 	CenterSphere->OnComponentBeginOverlap.AddDynamic(this, &AGS_SwordAuraProjectile::OnCenterSphereOverlap);
+
+	GetWorld()->GetTimerManager().SetTimer(DestorySwordAuraHandle, this, &AGS_SwordAuraProjectile::DestroySwordAura, SwordAuraLifetime, false);
 }
 
 void AGS_SwordAuraProjectile::OnSlashBoxOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -62,4 +67,9 @@ void AGS_SwordAuraProjectile::OnCenterSphereOverlap(UPrimitiveComponent* Overlap
 		HitActors.Add(OtherActor);
 		UGameplayStatics::ApplyDamage(OtherActor, BaseDamage, GetInstigatorController(), this, nullptr);
 	}
+}
+
+void AGS_SwordAuraProjectile::DestroySwordAura()
+{
+	Destroy();
 }

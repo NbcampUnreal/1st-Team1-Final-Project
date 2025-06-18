@@ -80,8 +80,8 @@ public:
 	void Server_HandleTrapDamage(AActor* TargetActor);
 	void Server_HandleTrapDamage_Implementation(AActor* TargetActor);
 
-	UFUNCTION()
-	void ApplyDotDamage(AActor* DamagedActor);
+	//UFUNCTION()
+	//void ApplyDotDamage(AActor* DamagedActor);
 
 	//데미지 박스에 오버랩된 플레이어에게 데미지 주는 함수
 	virtual void HandleTrapDamage(AActor* OtherActor);
@@ -100,10 +100,10 @@ public:
 
 	bool IsBlockedInDirection(const FVector& Start, const FVector& Direction, float Distance, AGS_Character* CharacterToIgnore);
 
-	void ClearDotTimerForActor(AActor* Actor);
+	//void ClearDotTimerForActor(AActor* Actor);
 
 protected:
-	TMap<AActor*, FTimerHandle> ActiveDoTTimers;
+	//TMap<AActor*, FTimerHandle> ActiveDoTTimers;
 
 	virtual void BeginPlay() override;
 	

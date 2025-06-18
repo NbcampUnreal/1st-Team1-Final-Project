@@ -23,7 +23,7 @@ protected:
 
 public:
     UFUNCTION(NetMulticast, Reliable)
-    void SetupDisplay(USkeletalMesh* NewMesh, TSubclassOf<UAnimInstance> NewAnimClass);
+    void SetupDisplay(USkeletalMesh* NewMesh, TSubclassOf<UAnimInstance> NewAnimClass, const TArray<FWeaponMeshPair>& WeaponMeshList);
 
     UFUNCTION(NetMulticast, Reliable)
     void SetReadyState(bool bIsReady);
