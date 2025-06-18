@@ -7,7 +7,11 @@
 #include "System/GameState/GS_InGameGS.h"
 #include "System/GS_SpawnSlot.h"
 #include "Character/Player/GS_PawnMappingDataAsset.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Animation/SkeletalMeshActor.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/Character/GS_LobbyAnimInstance.h"
+#include "Character/Player/GS_LobbyDisplayActor.h"
 
 AGS_CustomLobbyGM::AGS_CustomLobbyGM()
 {
@@ -86,17 +90,7 @@ void AGS_CustomLobbyGM::Logout(AController* Exiting)
 		CheckAllPlayersReady();
 	}
 
-    if (PS && SpawnedLobbyPawns.Contains(PS))
-    {
-        APawn* PawnToDestroy = SpawnedLobbyPawns[PS];
-        if (PawnToDestroy)
-        {
-            PawnToDestroy->Destroy();
-        }
-        SpawnedLobbyPawns.Remove(PS);
-    }
-
-    /*if (PS && SpawnedLobbyActors.Contains(PS))
+    if (PS && SpawnedLobbyActors.Contains(PS))
     {
         AActor* PawnToDestroy = SpawnedLobbyActors[PS];
         if (PawnToDestroy)
@@ -104,7 +98,7 @@ void AGS_CustomLobbyGM::Logout(AController* Exiting)
             PawnToDestroy->Destroy();
         }
         SpawnedLobbyActors.Remove(PS);
-    }*/
+    }
 
     Super::Logout(Exiting);
 
@@ -120,16 +114,20 @@ void AGS_CustomLobbyGM::UpdatePlayerReadyStatus(APlayerState* Player, bool bIsRe
 		{
 			*FoundStatus = bIsReady;
 			UE_LOG(LogTemp, Log, TEXT("LobbyGM: Player %s is now %s"), *Player->GetPlayerName(), bIsReady ? TEXT("Ready") : TEXT("Not Ready"));
+            AGS_PlayerState* GSPlayer = Cast<AGS_PlayerState>(Player);
+            if (SpawnedLobbyActors.Contains(GSPlayer))
+            {
+                if (AGS_LobbyDisplayActor* DisplayActor = Cast<AGS_LobbyDisplayActor>(SpawnedLobbyActors[GSPlayer]))
+                {
+                    DisplayActor->SetReadyState(bIsReady);
+                }
+            }
 			CheckAllPlayersReady();
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("LobbyGM: Player %s not found in PlayerReadyStates"), *Player->GetPlayerName());
 		}
 	}
 }
 
-void AGS_CustomLobbyGM::CheckAllPlayersReady() //가디언 1명 아니면 시작 안 되는 로직 추가해야함
+void AGS_CustomLobbyGM::CheckAllPlayersReady()
 {
     AGS_CustomLobbyGS* LGS = GetGameState<AGS_CustomLobbyGS>();
     if (!LGS)
@@ -139,10 +137,6 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //가디언 1명 아니면 시작
     }
 
     const int32 CurrentPlayerCount = LGS->PlayerArray.Num();
-    UE_LOG(LogTemp, Verbose, TEXT("LobbyGM: Checking ready status for %d players in GameState. Min players: %d. Players in local map: %d"),
-        CurrentPlayerCount, MinPlayersToStart, PlayerReadyStates.Num());
-
-
 
     // 최소 시작 인원 확인
     if (CurrentPlayerCount < MinPlayersToStart)
@@ -152,6 +146,7 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //가디언 1명 아니면 시작
     }
 
     bool bAllReady = true;
+    int32 GuardianCount = 0;
     for (APlayerState* Player : LGS->PlayerArray)
     {
         if (!Player)
@@ -160,19 +155,26 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //가디언 1명 아니면 시작
             break;
         }
 
-        const bool* PlayerStatusInMap = PlayerReadyStates.Find(Player);
-        if (PlayerStatusInMap == nullptr)
+        AGS_PlayerState* GSPlayerState = Cast<AGS_PlayerState>(Player);
+        if (GSPlayerState)
         {
-            bAllReady = false;
-            break;
+            if (GSPlayerState->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+            {
+                GuardianCount++;
+            }
         }
 
-        if (*PlayerStatusInMap == false)
+        const bool* PlayerStatusInMap = PlayerReadyStates.Find(Player);
+        if (PlayerStatusInMap == nullptr || *PlayerStatusInMap == false)
         {
             bAllReady = false;
-            UE_LOG(LogTemp, Log, TEXT("LobbyGM: Some Player 'Not Ready'."));
             break;
         }
+    }
+
+    if (!bAllReady || GuardianCount != 1)
+    {
+        return;
     }
 
     if (bAllReady && CurrentPlayerCount > 0)
@@ -184,17 +186,6 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady() //가디언 1명 아니면 시작
             UE_LOG(LogTemp, Warning, TEXT("LobbyGM: ServerTravel Start ***"));
             bUseSeamlessTravel = true;
             World->ServerTravel(NextLevelName.ToString() + "?listen", true);
-        }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("LobbyGM: World is null, cannot ServerTravel."));
-        }
-    }
-    else
-    {
-        if (CurrentPlayerCount > 0) // 플레이어가 있을 때만 "아직 준비 안됨" 로그 출력
-        {
-            UE_LOG(LogTemp, Log, TEXT("LobbyGM: Not all players are ready yet or no players connected."));
         }
     }
 }
@@ -242,21 +233,19 @@ void AGS_CustomLobbyGM::CollectSpawnSlots()
 void AGS_CustomLobbyGM::UpdateLobbyPawns()
 {
     AGS_CustomLobbyGS* GS = GetGameState<AGS_CustomLobbyGS>();
-    if (!PawnMappingData)
+    if (!PawnMappingData || !GS)
     {
-        UE_LOG(LogTemp, Error, TEXT("AGS_CustomLobbyGM::UpdateLobbyPawns - PawnMappingData is not set!"));
         return;
     }
-    if (!GS) return;
 
-    for (auto& Pair : SpawnedLobbyPawns)
+    for (auto& Pair : SpawnedLobbyActors)
     {
         if (Pair.Value)
         {
             Pair.Value->Destroy();
         }
     }
-    SpawnedLobbyPawns.Empty();
+    SpawnedLobbyActors.Empty();
 
     TArray<AGS_PlayerState*> Guardians;
     TArray<AGS_PlayerState*> Seekers;
@@ -266,6 +255,7 @@ void AGS_CustomLobbyGM::UpdateLobbyPawns()
         AGS_PlayerState* Player = Cast<AGS_PlayerState>(PS);
         if (Player)
         {
+            UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyGM::UpdateLobbyPawns - Player: %s, Role: %s"), *Player->GetPlayerName(), *UEnum::GetValueAsString(Player->CurrentPlayerRole));
             if (Player->CurrentPlayerRole == EPlayerRole::PR_Guardian) Guardians.Add(Player);
             else if (Player->CurrentPlayerRole == EPlayerRole::PR_Seeker) Seekers.Add(Player);
         }
@@ -280,14 +270,18 @@ void AGS_CustomLobbyGM::UpdateLobbyPawns()
         AGS_SpawnSlot* Slot = GuardianSlots[i];
 
         const FAssetToSpawn* SpawnInfo = PawnMappingData->GuardianPawnClasses.Find(GuardianPS->CurrentGuardianJob);
-        if (SpawnInfo && SpawnInfo->PawnClass)
+        if (SpawnInfo && SpawnInfo->SkeletalMeshClass)
         {
             FTransform SpawnTransform = Slot->GetActorTransform();
-            SpawnTransform.AddToTranslation(FVector(0, 0, -90.0f));
+            SpawnTransform.SetScale3D(FVector(3.0f));
+            AGS_LobbyDisplayActor* NewDisplayActor = GetWorld()->SpawnActor<AGS_LobbyDisplayActor>(SpawnInfo->DisplayActorClass, SpawnTransform, SpawnParams);
+            if (NewDisplayActor)
+            {
+                NewDisplayActor->SetupDisplay(SpawnInfo->SkeletalMeshClass, SpawnInfo->Lobby_AnimBlueprintClass);
+                NewDisplayActor->SetReadyState(GuardianPS->bIsReady);
 
-            TSubclassOf<APawn> PawnToSpawn = SpawnInfo->PawnClass;
-            APawn* NewPawn = GetWorld()->SpawnActor<APawn>(PawnToSpawn, SpawnTransform, SpawnParams);
-            SpawnedLobbyPawns.Add(GuardianPS, NewPawn);
+                SpawnedLobbyActors.Add(GuardianPS, NewDisplayActor);
+            }
         }
     }
 
@@ -297,104 +291,16 @@ void AGS_CustomLobbyGM::UpdateLobbyPawns()
         AGS_SpawnSlot* Slot = SeekerSlots[i];
 
         const FAssetToSpawn* SpawnInfo = PawnMappingData->SeekerPawnClasses.Find(SeekerPS->CurrentSeekerJob);
-        if (SpawnInfo && SpawnInfo->PawnClass)
+        if (SpawnInfo && SpawnInfo->SkeletalMeshClass)
         {
             FTransform SpawnTransform = Slot->GetActorTransform();
-            SpawnTransform.AddToTranslation(FVector(0, 0, -90.0f));
-
-            TSubclassOf<APawn> PawnToSpawn = SpawnInfo->PawnClass;
-            APawn* NewPawn = GetWorld()->SpawnActor<APawn>(PawnToSpawn, SpawnTransform, SpawnParams);
-            SpawnedLobbyPawns.Add(SeekerPS, NewPawn);
+            AGS_LobbyDisplayActor* NewDisplayActor = GetWorld()->SpawnActor<AGS_LobbyDisplayActor>(SpawnInfo->DisplayActorClass, SpawnTransform, SpawnParams);
+            if (NewDisplayActor)
+            {
+                NewDisplayActor->SetupDisplay(SpawnInfo->SkeletalMeshClass, SpawnInfo->Lobby_AnimBlueprintClass);
+                NewDisplayActor->SetReadyState(SeekerPS->bIsReady);
+                SpawnedLobbyActors.Add(SeekerPS, NewDisplayActor);
+            }
         }
     }
 }
-
-//void AGS_CustomLobbyGM::UpdateLobbyPawns()
-//{
-//    AGS_CustomLobbyGS* GS = GetGameState<AGS_CustomLobbyGS>();
-//    if (!PawnMappingData)
-//    {
-//        UE_LOG(LogTemp, Error, TEXT("AGS_CustomLobbyGM::UpdateLobbyActors - PawnMappingData is not set!"));
-//        return;
-//    }
-//    if (!GS) return;
-//
-//    for (auto& Pair : SpawnedLobbyActors)
-//    {
-//        if (Pair.Value)
-//        {
-//            Pair.Value->Destroy();
-//        }
-//    }
-//    SpawnedLobbyActors.Empty();
-//
-//    TArray<AGS_PlayerState*> Guardians;
-//    TArray<AGS_PlayerState*> Seekers;
-//
-//    for (APlayerState* PS : GS->PlayerArray)
-//    {
-//        AGS_PlayerState* Player = Cast<AGS_PlayerState>(PS);
-//        if (Player)
-//        {
-//            if (Player->CurrentPlayerRole == EPlayerRole::PR_Guardian) Guardians.Add(Player);
-//            else if (Player->CurrentPlayerRole == EPlayerRole::PR_Seeker) Seekers.Add(Player);
-//        }
-//    }
-//
-//    FActorSpawnParameters SpawnParams;
-//	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-//
-//    for (int32 i = 0; i < Guardians.Num() && i < GuardianSlots.Num(); ++i)
-//    {
-//        AGS_PlayerState* GuardianPS = Guardians[i];
-//        AGS_SpawnSlot* Slot = GuardianSlots[i];
-//
-//        const FAssetToSpawn* SpawnInfo = PawnMappingData->GuardianPawnClasses.Find(GuardianPS->CurrentGuardianJob);
-//        if (SpawnInfo && SpawnInfo->SkeletalMeshClass && SpawnInfo->ReadyPose)
-//        {
-//            FTransform SpawnTransform = Slot->GetActorTransform();
-//            SpawnTransform.AddToTranslation(FVector(0, 0, -90.0f));
-//
-//            ASkeletalMeshActor* NewActor = GetWorld()->SpawnActor<ASkeletalMeshActor>(ASkeletalMeshActor::StaticClass(), SpawnTransform, SpawnParams);
-//            if (NewActor)
-//            {
-//                USkeletalMeshComponent* MeshComponent = NewActor->GetSkeletalMeshComponent();
-//                MeshComponent->SetSkeletalMesh(SpawnInfo->SkeletalMeshClass);
-//                MeshComponent->SetAnimInstanceClass(SpawnInfo->AnimBlueprintClass);
-//
-//                if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
-//                {
-//                    AnimInstance->Montage_Play(SpawnInfo->ReadyPose);
-//                }
-//                SpawnedLobbyActors.Emplace(GuardianPS, NewActor);
-//            }
-//        }
-//    }
-//
-//    for (int32 i = 0; i < Seekers.Num() && i < SeekerSlots.Num(); ++i)
-//    {
-//        AGS_PlayerState* SeekerPS = Seekers[i];
-//        AGS_SpawnSlot* Slot = SeekerSlots[i];
-//
-//        const FAssetToSpawn* SpawnInfo = PawnMappingData->SeekerPawnClasses.Find(SeekerPS->CurrentSeekerJob);
-//        if (SpawnInfo && SpawnInfo->SkeletalMeshClass && SpawnInfo->ReadyPose)
-//        {
-//            FTransform SpawnTransform = Slot->GetActorTransform();
-//            SpawnTransform.AddToTranslation(FVector(0, 0, -90.0f));
-//
-//            ASkeletalMeshActor* NewActor = GetWorld()->SpawnActor<ASkeletalMeshActor>(ASkeletalMeshActor::StaticClass(), SpawnTransform, SpawnParams);
-//            if (NewActor)
-//            {
-//                USkeletalMeshComponent* MeshComponent = NewActor->GetSkeletalMeshComponent();
-//                MeshComponent->SetSkeletalMesh(SpawnInfo->SkeletalMeshClass);
-//                MeshComponent->SetAnimInstanceClass(SpawnInfo->AnimBlueprintClass);
-//
-//                if (UAnimInstance* AnimInstance = MeshComponent->GetAnimInstance())
-//                {
-//                    AnimInstance->Montage_Play(SpawnInfo->ReadyPose);
-//                }
-//                SpawnedLobbyActors.Emplace(SeekerPS, NewActor);
-//            }
-//        }
-//    }
-//}
