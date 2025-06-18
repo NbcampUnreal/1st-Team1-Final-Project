@@ -216,6 +216,11 @@ void AGS_TpsController::TestFunction()
 	AGS_Character* GS_Character = Cast<AGS_Character>(GetPawn());
 	if (IsValid(GS_Character))
 	{
+	    if(GS_Character->GetCharacterType() == ECharacterType::Ares)
+	    {
+	        return;
+	    }
+		
 		TSubclassOf<UUserWidget> Widget = PlayerWidgetClasses[GS_Character->GetCharacterType()];
 		if (IsValid(Widget))
 		{
