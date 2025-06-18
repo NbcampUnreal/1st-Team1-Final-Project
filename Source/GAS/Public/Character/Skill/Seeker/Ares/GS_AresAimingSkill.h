@@ -17,8 +17,7 @@ public:
 	UGS_AresAimingSkill();
 
 	virtual void ActiveSkill() override;
-	virtual void DeactiveSkill() override;
-	virtual void OnSkillCommand() override;
+	virtual void DeactiveSkill() override;	
 	virtual void ExecuteSkillEffect() override;
 	virtual bool IsActive() const override;
 	

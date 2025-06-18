@@ -48,5 +48,11 @@ protected:
 	void OnCenterSphereOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 		const FHitResult& SweepResult);
+
+	FTimerHandle DestorySwordAuraHandle;
+	float SwordAuraLifetime = 1.0f;
+
+	UFUNCTION()
+	void DestroySwordAura();
 	
 };
