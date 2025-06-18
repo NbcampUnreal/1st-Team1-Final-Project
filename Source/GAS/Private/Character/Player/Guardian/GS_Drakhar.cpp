@@ -81,11 +81,7 @@ AGS_Drakhar::AGS_Drakhar()
 
 	// 사운드 중복 재생 방지 초기화
 	bDraconicFurySoundPlayed = false;
-
-	// === 날기 사운드 이벤트 초기화 ===
-	FlyStartSoundEvent = nullptr;
-	FlyEndSoundEvent = nullptr;
-
+	
 	// === 히트 사운드 이벤트 초기화 ===
 	AttackHitSoundEvent = nullptr;
 
@@ -205,6 +201,11 @@ void AGS_Drakhar::Ctrl()
 		TargetSpringArmLength = 700.f;
 		bIsFlying = true;
 	}
+
+	DraconicAttackPersistenceTime = 5.f;
+
+	//Guardian State Setting
+	ClientGuardianState = EGuardianState::CtrlSkillEnd;
 }
 
 void AGS_Drakhar::CtrlStop()
@@ -427,6 +428,11 @@ void AGS_Drakhar::DashAttackCheck()
 
 void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 {
+	MulticastRPC_OnEarthquakeStart();
+
+	TSet<AGS_Character*> DamagedPlayer; // 데미지를 입은 플레이어들
+	FCollisionQueryParams Params(NAME_None, false, this); // 충돌 체크 파라미터
+
 	// 지진 스킬 사운드 재생
 	PlayEarthquakeSkillSound();
 
@@ -479,8 +485,6 @@ void AGS_Drakhar::ServerRPCStartCtrl_Implementation()
 
 	MoveSpeed = SpeedUpMoveSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
-
-	PlayFlyStartSound();
 }
 
 void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
@@ -489,8 +493,6 @@ void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
 
 	MoveSpeed = NormalMoveSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
-
-	PlayFlyEndSound();
 }
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
@@ -811,24 +813,6 @@ void AGS_Drakhar::OnRep_FeverGauge()
 	OnCurrentFeverGageChanged.Broadcast(CurrentFeverGauge);
 }
 
-// === 날기 사운드 재생 함수들 구현 ===
-
-void AGS_Drakhar::PlayFlyStartSound()
-{
-	if (HasAuthority())
-	{
-		MulticastPlayFlyStartSound();
-	}
-}
-
-void AGS_Drakhar::PlayFlyEndSound()
-{
-	if (HasAuthority())
-	{
-		MulticastPlayFlyEndSound();
-	}
-}
-
 void AGS_Drakhar::PlayAttackHitSound()
 {
 	if (HasAuthority())
@@ -836,6 +820,13 @@ void AGS_Drakhar::PlayAttackHitSound()
 		MulticastPlayAttackHitSound();
 	}
 }
+
+void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
+{
+	PlaySoundEvent(AttackHitSoundEvent);
+}
+
+// === 날기 사운드 재생 함수들 구현 ===
 
 void AGS_Drakhar::PlayFeverModeStartSound()
 {
@@ -846,21 +837,6 @@ void AGS_Drakhar::PlayFeverModeStartSound()
 }
 
 // === 날기 사운드 Multicast RPC 함수들 구현 ===
-
-void AGS_Drakhar::MulticastPlayFlyStartSound_Implementation()
-{
-	PlaySoundEvent(FlyStartSoundEvent);
-}
-
-void AGS_Drakhar::MulticastPlayFlyEndSound_Implementation()
-{
-	PlaySoundEvent(FlyEndSoundEvent);
-}
-
-void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
-{
-	PlaySoundEvent(AttackHitSoundEvent);
-}
 
 void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
 {
@@ -1087,6 +1063,7 @@ void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
 	}
 
 	GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+	MulticastRPC_OnUltimateStart();
 
 	FTimerHandle DraconicFuryEndTimer;
 	GetWorld()->GetTimerManager().SetTimer(
@@ -1104,8 +1081,6 @@ void AGS_Drakhar::EndDraconicFury()
 
 	MoveSpeed = NormalMoveSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
-
-	PlayFlyEndSound();
 }
 
 // === 어스퀘이크 지면 균열 VFX 제어 함수 ===
@@ -1386,3 +1361,23 @@ void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
 		}, 1.5f, false); // 1.5초 후 정리
 	}
 }
+
+void AGS_Drakhar::MulticastRPC_OnFlyStart_Implementation()
+{
+	BP_OnFlyStart();
+}
+
+void AGS_Drakhar::MulticastRPC_OnFlyEnd_Implementation()
+{
+	BP_OnFlyEnd();
+}
+
+void AGS_Drakhar::MulticastRPC_OnUltimateStart_Implementation()
+{
+	BP_OnUltimateStart();
+}
+void AGS_Drakhar::MulticastRPC_OnEarthquakeStart_Implementation()
+{
+	BP_OnEarthquakeStart();
+}
+

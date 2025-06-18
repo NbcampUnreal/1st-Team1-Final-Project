@@ -64,13 +64,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "DraconicFury Projectile"))
 	UAkAudioEvent* DraconicProjectileSoundEvent;
 
-	// === 날기 관련 사운드 이벤트들 ===
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "FlyStart"))
-	UAkAudioEvent* FlyStartSoundEvent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "FlyEnd"))
-	UAkAudioEvent* FlyEndSoundEvent;
-
 	// === 히트 사운드 이벤트 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Drakhar", meta = (DisplayName = "AttackHit"))
 	UAkAudioEvent* AttackHitSoundEvent;
@@ -243,13 +236,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Draconic Fury Projectile"))
 	void PlayDraconicProjectileSound(const FVector& Location);
 
-	// === 날기 사운드 재생 함수 ===
-	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Flying Start"))
-	void PlayFlyStartSound();
-
-	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Flying End"))
-	void PlayFlyEndSound();
-
 	// === 히트 사운드 재생 함수 ===
 	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Attack Hit"))
 	void PlayAttackHitSound();
@@ -273,13 +259,6 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayDraconicProjectileSound(const FVector& Location);
-
-	// === 날기 사운드 Multicast RPC 함수 ===
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastPlayFlyStartSound();
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastPlayFlyEndSound();
 
 	// === 히트 사운드 Multicast RPC 함수 ===
 	UFUNCTION(NetMulticast, Unreliable)
@@ -339,6 +318,33 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastStopDustCloudVFX();
+
+	// === 날기 이벤트 ===
+	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Fly", meta = (DisplayName = "On Fly Start"))
+	void BP_OnFlyStart();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Fly", meta = (DisplayName = "On Fly End"))
+	void BP_OnFlyEnd();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_OnFlyStart();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_OnFlyEnd();
+
+	// === 궁극기 이벤트 ===
+	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Ultimate", meta = (DisplayName = "On Ultimate Start"))
+	void BP_OnUltimateStart();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_OnUltimateStart();
+
+	// === 어스퀘이크 이벤트 ===
+	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Earthquake", meta = (DisplayName = "On Earthquake Start"))
+	void BP_OnEarthquakeStart();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_OnEarthquakeStart();
 
 private:
 	//move spring arm for flying
