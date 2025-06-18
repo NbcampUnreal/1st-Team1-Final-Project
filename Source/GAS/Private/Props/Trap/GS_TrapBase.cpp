@@ -1,22 +1,40 @@
 #include "Props/Trap/GS_TrapBase.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Engine/DamageEvents.h"
+#include "Props/Trap/TrapMotion/GS_TrapMotionCompBase.h"
+#include "EngineUtils.h"
+#include "System/GameMode/GS_InGameGM.h"
+
 
 AGS_TrapBase::AGS_TrapBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+	PrimaryActorTick.bAllowTickOnDedicatedServer = false;
 
 	bReplicates = true;
 	SetReplicateMovement(true);
 
 	RootSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComp"));
 	RootComponent = RootSceneComp;
+	RootSceneComp->PrimaryComponentTick.bCanEverTick = false;
+	RootSceneComp->PrimaryComponentTick.bStartWithTickEnabled = false;
+	RootSceneComp->PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
 
 	RotationSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("RotationScene"));
 	RotationSceneComp->SetupAttachment(RootComponent);
+	RotationSceneComp->PrimaryComponentTick.bCanEverTick = false;
+	RotationSceneComp->PrimaryComponentTick.bStartWithTickEnabled = false;
+	RotationSceneComp->PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
+
 
 	MeshParentSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("MeshParentSceneComp"));
 	MeshParentSceneComp->SetupAttachment(RotationSceneComp);
+	MeshParentSceneComp->PrimaryComponentTick.bCanEverTick = false;
+	MeshParentSceneComp->PrimaryComponentTick.bStartWithTickEnabled = false;
+	MeshParentSceneComp->PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
+
+
 
 	DamageBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("DamageBox"));
 	DamageBoxComp->SetupAttachment(MeshParentSceneComp);
@@ -35,10 +53,25 @@ AGS_TrapBase::AGS_TrapBase()
 void AGS_TrapBase::BeginPlay()
 {
 	Super::BeginPlay();
+	if (HasAuthority())
+	{
+		AGS_TrapManager* TrapManager = GetTrapManager();
+		if(TrapManager)
+		{
+			TrapManager->RegisterTrap(this);
+			UE_LOG(LogTemp, Warning, TEXT("[TrapBase] TrapManager in BeginPlay"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[TrapBase] TrapManager is not in BeginPlay"));
+		}
+		
+	}
 
 	LoadTrapData();
 	DamageBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrapBase::OnDamageBoxOverlap);
 }
+
 
 void AGS_TrapBase::LoadTrapData()
 {
@@ -205,6 +238,8 @@ void AGS_TrapBase::ApplyDotDamage(AActor* DamagedActor)
 			UE_LOG(LogTemp, Warning, TEXT("CurrentTick : %d"), CurrentTick);
 			CurrentTick++;
 
+
+
 			if (CurrentTick >= TrapData.Effect.DamageCount)
 			{
 				////current tick이 damage count보다 같거나 크다면 타이머 초기화 후 ActiveDoTTimers 맵에서 제거
@@ -306,4 +341,51 @@ bool AGS_TrapBase::IsBlockedInDirection(const FVector& Start, const FVector& Dir
 	}
 
 	return GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, Params);
+}
+
+
+
+//Trap Motion
+AGS_TrapManager* AGS_TrapBase::GetTrapManager() const
+{
+	/*if (UWorld* World = GetWorld())
+	{
+		if (AGS_InGameGM* GM = Cast<AGS_InGameGM>(World->GetAuthGameMode()))
+		{
+			return GM->GetTrapManager();
+		}
+	}
+	return nullptr;*/
+
+	for (TActorIterator<AGS_TrapManager> It(GetWorld()); It; ++It)
+	{
+		return *It;
+	}
+	return nullptr;
+}
+
+
+UGS_TrapMotionCompBase* AGS_TrapBase::GetValidMotionComponent() const
+{
+	TArray<UActorComponent*> Components;
+	GetComponents(Components);
+
+	bool bFoundAnyMotionComp = false;
+
+	for (UActorComponent* Comp : Components)
+	{
+		if (UGS_TrapMotionCompBase* MotionComp = Cast<UGS_TrapMotionCompBase>(Comp))
+		{
+			/*UE_LOG(LogTemp, Warning, TEXT("[Trap: %s] MotionComp exists : %s / Active: %s"),
+				*GetName(), *MotionComp->GetName(), MotionComp->IsActive() ? TEXT("True") : TEXT("False"));*/
+				return MotionComp;
+		}
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("[Trap: %s] MotionComp does not exist at all"), *GetName());
+	return nullptr;
+}
+
+bool AGS_TrapBase::CanStartMotion() const
+{
+	return true;
 }

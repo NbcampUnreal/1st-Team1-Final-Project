@@ -3,14 +3,21 @@
 
 #include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
 #include "Character/Skill/GS_SkillComp.h"
-#include "Character/GS_Character.h"
+//#include "Character/GS_Character.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 
 void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
 	Super::OnRightClick(Instance);
+	UE_LOG(LogTemp, Warning, TEXT("Right Click Ares"));
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
 
-	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputRC)
+	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
+
+	if (!(Ares->GetSkillInputControl().CanInputRC))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Right Click Lock"));
 		return;
@@ -18,29 +25,36 @@ void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 
 	if (!bCtrlHeld)
 	{
-		if (!OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
+		if (!Ares->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
-			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+			Ares->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 		}
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+		Ares->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
 	}
 }
 
 void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
-	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	Super::OnLeftClick(Instance);
+	UE_LOG(LogTemp, Warning, TEXT("Left Click Ares"));
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
 
-	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputLC)
+	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
+
+	if (!(Ares->GetSkillInputControl().CanInputLC))
 	{
 		return;
 	}
 
 	if (!bCtrlHeld)
 	{
-		if (AresCharacter)
+		if (Ares)
 		{
 			if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 			{
@@ -48,13 +62,13 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 			}
 			else
 			{
-
+				Ares->OnComboAttack();
 			}
 		}
 	}
 	else
 	{
-		if (AresCharacter)
+		if (Ares)
 		{
 			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 		}

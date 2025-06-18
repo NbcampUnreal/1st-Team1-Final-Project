@@ -10,7 +10,7 @@ void UGS_AN_EndCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 {
 	Super::Notify(MeshComp, Animation, EventReference);
 	
-	if (AGS_Chan* Character = Cast<AGS_Chan>(MeshComp->GetOwner()))
+	if (AGS_Seeker* Character = Cast<AGS_Seeker>(MeshComp->GetOwner()))
 	{		
 		if (Character->bComboEnded) // 이미 끝난 상태
 		{
