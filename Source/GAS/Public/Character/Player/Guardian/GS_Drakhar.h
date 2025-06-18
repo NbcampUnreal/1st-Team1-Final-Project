@@ -13,6 +13,7 @@ class UNiagaraSystem;
 class UNiagaraComponent;
 class UArrowComponent;
 class UGS_CameraShakeComponent;
+class UGS_FootManagerComponent;
 struct FGS_CameraShakeInfo;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFeverGageChangedDelegate, float);
@@ -76,12 +77,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "WingRush Ribbon VFX"))
 	UNiagaraSystem* WingRushRibbonVFX;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever WingRush Ribbon VFX"))
+	UNiagaraSystem* FeverWingRushRibbonVFX;
+
 	UPROPERTY(BlueprintReadOnly, Category = "VFX|Drakhar")
 	UNiagaraComponent* ActiveWingRushVFXComponent;
 
 	// === DustVFX 시스템 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Dust VFX"))
 	UNiagaraSystem* DustVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever Dust VFX"))
+	UNiagaraSystem* FeverDustVFX;
 
 	UPROPERTY(BlueprintReadOnly, Category = "VFX|Drakhar")
 	UNiagaraComponent* ActiveDustVFXComponent;
@@ -122,6 +129,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|DraconicFury", meta = (DisplayName = "Projectile Explosion Sound"))
 	UAkAudioEvent* DraconicProjectileExplosionSoundEvent;
+
+	// === 피버모드 발자국 VFX ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever Footstep VFX"))
+	UNiagaraSystem* FeverFootstepVFX;
 
 	//[Input Binding Function]
 	virtual void Ctrl() override;
@@ -346,6 +357,24 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPC_OnEarthquakeStart();
 
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
+	UGS_FootManagerComponent* FootManagerComponent;
+
+	// === 피버모드 오버레이 머티리얼 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|FeverMode")
+	UMaterialInterface* FeverModeOverlayMaterial;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* FeverModeOverlayMID;
+
+	// === 피버모드 오버레이 파라미터 ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|FeverMode")
+	float FeverOverlayIntensity = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|FeverMode")
+	FLinearColor FeverOverlayColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
+
 private:
 	//move spring arm for flying
 	float DefaultSpringArmLength;
@@ -390,7 +419,9 @@ private:
 	UPROPERTY(Replicated)
 	float DefaultAttackPower;
 	
+	UPROPERTY(ReplicatedUsing = OnRep_IsFeverMode)
 	bool IsFeverMode;
+
 	FTimerHandle FeverTimer;
 
 	float PillarForwardOffset = 300.f;
@@ -411,6 +442,18 @@ private:
 	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);
 	UAkComponent* GetOrCreateAkComponent();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_ApplyFeverModeOverlay();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_RemoveFeverModeOverlay();
+	
 	UFUNCTION()
 	void OnRep_FeverGauge();
+
+	void ApplyFeverModeOverlay();
+	void RemoveFeverModeOverlay();
+
+	UFUNCTION()
+	void OnRep_IsFeverMode();
 };

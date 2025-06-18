@@ -18,6 +18,7 @@
 #include "Components/ArrowComponent.h"
 #include "Character/Component/GS_CameraShakeComponent.h"
 #include "Character/Component/GS_DebuffComp.h"
+#include "Character/Component/GS_FootManagerComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_DrakharFeverGauge.h"
@@ -25,6 +26,8 @@
 AGS_Drakhar::AGS_Drakhar()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
+	FootManagerComponent = CreateDefaultSubobject<UGS_FootManagerComponent>(TEXT("FootManagerComponent"));
 	
 	// === 어스퀘이크 카메라 쉐이크 기본값 설정 ===
 	EarthquakeShakeInfo.Intensity = 8.0f;
@@ -180,6 +183,8 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 
 	DOREPLIFETIME(ThisClass, bCanCombo);
 	DOREPLIFETIME(ThisClass, CurrentFeverGauge);
+	DOREPLIFETIME(ThisClass, IsFeverMode);
+
 }
 
 void AGS_Drakhar::Ctrl()
@@ -642,16 +647,33 @@ void AGS_Drakhar::StartFeverMode()
 	
 	// === 피버모드 시작 사운드 재생 ===
 	PlayFeverModeStartSound();
+
+	// === 서버(리슨서버)에서 오버레이 적용 ===
+	ApplyFeverModeOverlay();
 }
 
 void AGS_Drakhar::DecreaseFeverGauge()
 {
-	GetWorldTimerManager().SetTimer(FeverTimer, this, &AGS_Drakhar::MinusFeverGaugeValue, true, 1.f);
+	GetWorldTimerManager().SetTimer(FeverTimer, this, &AGS_Drakhar::MinusFeverGaugeValue, 1.f, true);
 }
 
 void AGS_Drakhar::MinusFeverGaugeValue()
 {
+	const bool bWasInFever = IsFeverMode;
 	SetFeverGauge(-1.f);
+	const bool bIsInFever = IsFeverMode;
+
+	// 서버에서 피버모드가 방금 종료되었는지 확인
+	if (HasAuthority() && bWasInFever && !bIsInFever)
+	{
+		RemoveFeverModeOverlay();
+
+		// 피버모드 상태에서 재생되던 대시 먼지 이펙트가 있다면 즉시 종료
+		if (IsValid(ActiveDustVFXComponent) && ActiveDustVFXComponent->GetAsset() == FeverDustVFX)
+		{
+			StopDustVFX();
+		}
+	}
 }
 
 void AGS_Drakhar::GetRandomDraconicFuryTarget()
@@ -880,7 +902,9 @@ void AGS_Drakhar::MulticastStartWingRushVFX_Implementation()
 		ActiveWingRushVFXComponent = nullptr;
 	}
 
-	if (!WingRushRibbonVFX)
+	UNiagaraSystem* VFXToSpawn = IsFeverMode ? FeverWingRushRibbonVFX : WingRushRibbonVFX;
+
+	if (!VFXToSpawn)
 	{
 		return;
 	}
@@ -889,7 +913,7 @@ void AGS_Drakhar::MulticastStartWingRushVFX_Implementation()
 	if (WingRushVFXSpawnPoint && IsValid(WingRushVFXSpawnPoint))
 	{
 		ActiveWingRushVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			WingRushRibbonVFX,
+			VFXToSpawn,
 			WingRushVFXSpawnPoint,
 			NAME_None,
 			FVector::ZeroVector,
@@ -903,7 +927,7 @@ void AGS_Drakhar::MulticastStartWingRushVFX_Implementation()
 	if (!ActiveWingRushVFXComponent)
 	{
 		ActiveWingRushVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			WingRushRibbonVFX,
+			VFXToSpawn,
 			GetMesh(),
 			FName("foot_l"),
 			FVector(-20.f, 0.f, 0.f),
@@ -984,7 +1008,9 @@ void AGS_Drakhar::MulticastStartDustVFX_Implementation()
 		ActiveDustVFXComponent = nullptr;
 	}
 
-	if (!DustVFX)
+	UNiagaraSystem* VFXToSpawn = IsFeverMode ? FeverDustVFX : DustVFX;
+
+	if (!VFXToSpawn)
 	{
 		return;
 	}
@@ -992,7 +1018,7 @@ void AGS_Drakhar::MulticastStartDustVFX_Implementation()
 	if (WingRushVFXSpawnPoint && IsValid(WingRushVFXSpawnPoint))
 	{
 		ActiveDustVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			DustVFX,
+			VFXToSpawn,
 			WingRushVFXSpawnPoint,
 			NAME_None,
 			FVector::ZeroVector,
@@ -1006,7 +1032,7 @@ void AGS_Drakhar::MulticastStartDustVFX_Implementation()
 	if (!ActiveDustVFXComponent)
 	{
 		ActiveDustVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			DustVFX,
+			VFXToSpawn,
 			GetMesh(),
 			FName("foot_l"),
 			FVector(-20.f, 0.f, 0.f),
@@ -1379,5 +1405,109 @@ void AGS_Drakhar::MulticastRPC_OnUltimateStart_Implementation()
 void AGS_Drakhar::MulticastRPC_OnEarthquakeStart_Implementation()
 {
 	BP_OnEarthquakeStart();
+}
+
+void AGS_Drakhar::MulticastRPC_ApplyFeverModeOverlay_Implementation()
+{
+	if (!FeverModeOverlayMaterial)
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	if (!MeshComp)
+	{
+		return;
+	}
+
+	if (!FeverModeOverlayMID)
+	{
+		FeverModeOverlayMID = UMaterialInstanceDynamic::Create(FeverModeOverlayMaterial, this);
+	}
+
+	if (FeverModeOverlayMID)
+	{
+		FeverModeOverlayMID->SetScalarParameterValue(FName("Intensity"), FeverOverlayIntensity);
+		FeverModeOverlayMID->SetVectorParameterValue(FName("OverlayColor"), FeverOverlayColor);
+		MeshComp->SetOverlayMaterial(FeverModeOverlayMID);
+	}
+}
+
+void AGS_Drakhar::MulticastRPC_RemoveFeverModeOverlay_Implementation()
+{
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		MeshComp->SetOverlayMaterial(nullptr);
+	}
+	FeverModeOverlayMID = nullptr;
+}
+
+void AGS_Drakhar::OnRep_IsFeverMode()
+{
+	if (FootManagerComponent)
+	{
+		if (IsFeverMode)
+		{
+			FootManagerComponent->OverrideFootDustEffect(FeverFootstepVFX);
+		}
+		else
+		{
+			FootManagerComponent->ClearFootDustEffectOverride();
+		}
+	}
+
+	if (IsFeverMode)
+	{
+		ApplyFeverModeOverlay();
+	}
+	else
+	{
+		RemoveFeverModeOverlay();
+	}
+}
+
+void AGS_Drakhar::ApplyFeverModeOverlay()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+	
+	if (!FeverModeOverlayMaterial)
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	if (!MeshComp)
+	{
+		return;
+	}
+
+	if (!FeverModeOverlayMID)
+	{
+		FeverModeOverlayMID = UMaterialInstanceDynamic::Create(FeverModeOverlayMaterial, this);
+	}
+
+	if (FeverModeOverlayMID)
+	{
+		FeverModeOverlayMID->SetScalarParameterValue(FName("Intensity"), FeverOverlayIntensity);
+		FeverModeOverlayMID->SetVectorParameterValue(FName("OverlayColor"), FeverOverlayColor);
+		MeshComp->SetOverlayMaterial(FeverModeOverlayMID);
+	}
+}
+
+void AGS_Drakhar::RemoveFeverModeOverlay()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+	
+	if (USkeletalMeshComponent* MeshComp = GetMesh())
+	{
+		MeshComp->SetOverlayMaterial(nullptr);
+	}
+	FeverModeOverlayMID = nullptr;
 }
 
