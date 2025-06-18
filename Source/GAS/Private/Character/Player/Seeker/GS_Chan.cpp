@@ -61,7 +61,7 @@ void AGS_Chan::OnComboAttack()
 {
 	Super::OnComboAttack();
 	
-	float ControlYaw = GetControlRotation().Yaw;
+	/*float ControlYaw = GetControlRotation().Yaw;
 	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController()))
 	{
 		float YawDiff = FMath::Abs(FMath::FindDeltaAngleDegrees(ControlYaw, TpsController->LastRotatorInMoving.Yaw));
@@ -70,7 +70,7 @@ void AGS_Chan::OnComboAttack()
 		{
 			return;
 		}
-	}
+	}*/
 	
 	Server_ComboEnd(false);
 	CanChangeSeekerGait = false;
@@ -80,8 +80,7 @@ void AGS_Chan::OnComboAttack()
 		if (CurrentComboIndex == 0)
 		{
 			ServerAttackMontage();
-			Server_SetSeekerGait(EGait::Walk);
-			
+			//Server_SetSeekerGait(EGait::Walk);
 		}
 		else
 		{
