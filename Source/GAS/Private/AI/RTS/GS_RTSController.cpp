@@ -42,6 +42,7 @@ void AGS_RTSController::BeginPlay()
 	if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
 	{
 		ViewportClient->SetMouseCaptureMode(EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown);
+		ViewportClient->SetHideCursorDuringCapture(false);
 	}
 	if (!HasAuthority() && IsLocalController())
 	{

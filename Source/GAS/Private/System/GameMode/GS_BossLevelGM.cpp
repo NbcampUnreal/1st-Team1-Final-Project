@@ -33,7 +33,7 @@ UClass* AGS_BossLevelGM::GetDefaultPawnClassForController_Implementation(AContro
         return Super::GetDefaultPawnClassForController_Implementation(InController);
     }
 
-    if (!PS->bIsAlive)
+    if (!(PS->bIsAlive))
     {
         return nullptr;
     }
