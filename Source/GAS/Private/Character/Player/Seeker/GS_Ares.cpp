@@ -38,11 +38,6 @@ void AGS_Ares::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AGS_Ares::OnComboAttack()
 {
-	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(Controller))
-	{
-		// 여기에서 Move Control flag 를 설정해야 하나? // SJE
-	}
-
 	Server_ComboEnd(false);
 	CanChangeSeekerGait = false;
 

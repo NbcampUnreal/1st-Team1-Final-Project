@@ -290,16 +290,12 @@ void AGS_Seeker::ServerAttackMontage_Implementation()
 
 void AGS_Seeker::MulticastPlayComboSection_Implementation()
 {
-	// SJE
-	UE_LOG(LogTemp, Warning, TEXT("%s Multicat Play Combo Section"), *GetName());
 	FName SectionName = FName(*FString::Printf(TEXT("Attack%d"), CurrentComboIndex + 1));
 	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
 	
 	CurrentComboIndex++;
 	if (AnimInstance && ComboAnimMontage)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("LocalRole: %s"), *UEnum::GetValueAsString(GetLocalRole()));
-
 		AnimInstance->Montage_Play(ComboAnimMontage);
 		AnimInstance->IsPlayingUpperBodyMontage = true;
 		AnimInstance->Montage_JumpToSection(SectionName, ComboAnimMontage);
