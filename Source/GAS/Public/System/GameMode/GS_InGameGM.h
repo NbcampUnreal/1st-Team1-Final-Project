@@ -23,7 +23,6 @@ public:
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
 	virtual void StartPlay() override;
-	virtual void BeginPlay() override;
 
 	virtual void Logout(AController* Exiting) override;
 
@@ -52,14 +51,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "HUD Classes")
 	TSubclassOf<AHUD> RTSHUDClass;
 
-	//Trap
-	UPROPERTY()
-	AGS_TrapManager* TrapManager;
 
-	UPROPERTY(EditDefaultsOnly, Category="Trap")
-	TSubclassOf<class AGS_TrapManager>TrapManagerClass;
-	
-	AGS_TrapManager* GetTrapManager() const;
 
 public:
 	void HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, bool bIsAlive);

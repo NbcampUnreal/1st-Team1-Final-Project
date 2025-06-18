@@ -17,14 +17,14 @@ AGS_TrapManager::AGS_TrapManager()
 void AGS_TrapManager::BeginPlay()
 {
 	Super::BeginPlay();
-	if (HasAuthority())
+	/*if (HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[SERVER] TrapManager BeginPlay"));
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[CLIENT] TrapManager BeginPlay"));
-	}
+	}*/
 
 	//switch (GetNetMode())
 	//{
@@ -86,10 +86,10 @@ void AGS_TrapManager::RegisterTrap(AGS_TrapBase* Trap)
 		RegisteredTraps.Add(Trap);
 		//UE_LOG(LogTemp, Warning, TEXT("[TrapManager] Registered Trap: %s"), *Trap->GetName());
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[TrapManager] Tried to register null Trap!"));
-	}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Error, TEXT("[TrapManager] Tried to register null Trap!"));
+	//}
 }
 
 void AGS_TrapManager::UnregisterTrap(AGS_TrapBase* Trap)

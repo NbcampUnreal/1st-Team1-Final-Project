@@ -19,7 +19,7 @@ void UGS_LoopingTrapMotionComp::BeginPlay()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("[LoopingTrapMotionComp] TargetComponent is NULL in %s"), *GetOwner()->GetName());
+		//UE_LOG(LogTemp, Error, TEXT("[LoopingTrapMotionComp] TargetComponent is NULL in %s"), *GetOwner()->GetName());
 	}
 }
 
@@ -31,7 +31,7 @@ void UGS_LoopingTrapMotionComp::BeginTrapMotion()
 {
 	if (!TargetComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Timer_NoTargetComponent"));
+		//UE_LOG(LogTemp, Warning, TEXT("Timer_NoTargetComponent"));
 		return;
 	}
 
@@ -75,7 +75,7 @@ void UGS_LoopingTrapMotionComp::DoSawMotion()
 	FRotator CurrentRotation = TargetComponent->GetRelativeRotation();
 	if (!TargetComponent)
 	{
-		UE_LOG(LogTemp, Error, TEXT("TargetComponent is NULL!"));
+		//UE_LOG(LogTemp, Error, TEXT("TargetComponent is NULL!"));
 	}
 	
 
@@ -110,7 +110,7 @@ void UGS_LoopingTrapMotionComp::DoSawMotion()
 
 void UGS_LoopingTrapMotionComp::Multicast_UpdateTransform_Implementation(FVector Loc, FRotator Rot)
 {
-	UE_LOG(LogTemp, Warning, TEXT("[Multicast] Loc: %s, Rot: %s"), *Loc.ToString(), *Rot.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("[Multicast] Loc: %s, Rot: %s"), *Loc.ToString(), *Rot.ToString());
 	if (!TargetComponent)
 	{
 		return;
@@ -131,7 +131,7 @@ void UGS_LoopingTrapMotionComp::Multicast_UpdateTransform_Implementation(FVector
 void UGS_LoopingTrapMotionComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	UE_LOG(LogTemp, Warning, TEXT("Tick Component called"));
+	//UE_LOG(LogTemp, Warning, TEXT("Tick Component called"));
 	if (!TargetComponent)
 	{
 		return;
