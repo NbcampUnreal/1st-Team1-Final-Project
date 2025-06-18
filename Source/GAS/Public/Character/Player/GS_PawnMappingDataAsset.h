@@ -9,6 +9,18 @@
 #include "GS_PawnMappingDataAsset.generated.h"
 
 USTRUCT(BlueprintType)
+struct FWeaponMeshPair
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName SocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	USkeletalMesh* WeaponSkeletalMeshClass;
+};
+
+USTRUCT(BlueprintType)
 struct FAssetToSpawn
 {
     GENERATED_BODY()
@@ -21,7 +33,7 @@ struct FAssetToSpawn
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
     USkeletalMesh* SkeletalMeshClass;
-
+	
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
     TSubclassOf<UAnimInstance> Lobby_AnimBlueprintClass;
 
@@ -33,6 +45,9 @@ struct FAssetToSpawn
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
     TObjectPtr<UTexture2D> AvatarTexture;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+	TArray<FWeaponMeshPair> WeaponMeshList;
 };
 
 UCLASS(BlueprintType)

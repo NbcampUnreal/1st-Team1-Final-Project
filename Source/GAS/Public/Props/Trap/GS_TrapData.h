@@ -31,37 +31,25 @@ struct FTrapEffect
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bSlow = false;
 
-
-
-    ////knockback
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    //bool bKnockback = false;
-
-    ////push
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    //bool bPush = false;
-
-    //Obscure
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    //bool bObscure = false;
-
-    ////Confuse
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    //bool bConfuse = false;
-    ////Mute
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    //bool bMute = false;
-
-
-    //dot damage
+    //Burn
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    bool bDoT = false;
+    bool bBurn = false;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="bDoT"))
-    int32 DamageCount = 3;
+    //Lava
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bLava = false;
 
-    UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="bDoT"))
-    float DamageInterval = 1.0f;
+
+
+    ////dot damage
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    //bool bDoT = false;
+
+    //UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="bDoT"))
+    //int32 DamageCount = 3;
+
+    //UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="bDoT"))
+    //float DamageInterval = 1.0f;
 
 };
 

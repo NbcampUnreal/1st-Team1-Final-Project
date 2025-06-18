@@ -217,11 +217,12 @@ void UGS_SkillComp::BeginPlay()
 	Super::BeginPlay();
 	SetIsReplicated(true);
 
-	if (GetOwner()->HasAuthority())
+	/*if (GetOwner()->HasAuthority())
 	{
 		//ServerRPCInitSkills();
 		InitSkills();
-	}
+	}*/
+	InitSkills();
 }
 
 void UGS_SkillComp::OnRep_SkillStates()
