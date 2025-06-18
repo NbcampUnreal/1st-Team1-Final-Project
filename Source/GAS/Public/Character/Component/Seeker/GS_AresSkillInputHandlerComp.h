@@ -17,4 +17,5 @@ class GAS_API UGS_AresSkillInputHandlerComp : public UGS_SkillInputHandlerComp
 protected:
 	virtual void OnRightClick(const struct FInputActionInstance& Instance) override;
 	virtual void OnLeftClick(const struct FInputActionInstance& Instance) override;
+	virtual void OnLeftClickRelease(const struct FInputActionInstance& Instance) override;
 };
