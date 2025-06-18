@@ -7,14 +7,10 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
-#include "NiagaraSystem.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
 #include "Character/Component/GS_CameraShakeComponent.h"
-#include "Kismet/GamePlayStatics.h"
 #include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Props/Interactables/GS_BridgePiece.h"
 
 AGS_Guardian::AGS_Guardian()
 {
@@ -112,7 +108,16 @@ TSet<AGS_Character*> AGS_Guardian::DetectPlayerInRange(const FVector& Start, flo
 			if (IsValid(DamagedCharacter))
 			{
 				DamagedPlayers.Add(DamagedCharacter);
-			}	
+			}
+			//break bridge
+			if (OutHitResult.GetActor()->IsA<AGS_BridgePiece>())
+			{
+				AGS_BridgePiece* BridgePiece = Cast<AGS_BridgePiece>(OutHitResult.GetActor());
+				if (BridgePiece)
+				{
+					BridgePiece->BrokeBridge(100.f);
+				}
+			}
 		}
 	}
 

@@ -58,7 +58,7 @@ AGS_Drakhar::AGS_Drakhar()
 	Tags.Add("Guardian");
 
 	//fever mode
-	MaxFeverGage = 100.f;
+	MaxFeverGauge = 100.f;
 	CurrentFeverGauge = 0.f;
 
 	//team id
@@ -455,7 +455,6 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			if (IsFeverMode)
 			{
 				DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
-				//DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Slow, this);
 			}
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
 
@@ -541,15 +540,15 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 	}
 }
 
-void AGS_Drakhar::SetFeverGageWidget(UGS_DrakharFeverGauge* InDrakharFeverGageWidget)
+void AGS_Drakhar::SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGaugeWidget)
 {
-	UGS_DrakharFeverGauge* DrakharFeverGaugeWidget = Cast<UGS_DrakharFeverGauge>(InDrakharFeverGageWidget);
+	UGS_DrakharFeverGauge* DrakharFeverGaugeWidget = Cast<UGS_DrakharFeverGauge>(InDrakharFeverGaugeWidget);
 	if (IsValid(DrakharFeverGaugeWidget))
 	{
 		//client
-		DrakharFeverGaugeWidget->InitializeGage(GetCurrentFeverGage());
-		OnCurrentFeverGageChanged.AddUObject(DrakharFeverGaugeWidget,
-		                                     &UGS_DrakharFeverGauge::OnCurrentFeverGageChanged);
+		DrakharFeverGaugeWidget->InitializeGauge(GetCurrentFeverGauge());
+		OnCurrentFeverGaugeChanged.AddUObject(DrakharFeverGaugeWidget,
+		                                     &UGS_DrakharFeverGauge::OnCurrentFeverGaugeChanged);
 	}
 }
 
@@ -568,16 +567,18 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 			GetWorldTimerManager().ClearTimer(FeverTimer);
 			if (IsFeverMode)
 			{
-				GetStatComp()->SetAttackPower(DefaultAttackPower);
+				FGS_StatRow Stat;
+				Stat.ATK = 50.f;
+				GetStatComp()->ResetStat(Stat);
 			}
 
 			IsFeverMode = false;
 		}
 
 		//Start Fever Mode
-		if (CurrentFeverGauge >= MaxFeverGage)
+		if (CurrentFeverGauge >= MaxFeverGauge)
 		{
-			CurrentFeverGauge = MaxFeverGage;
+			CurrentFeverGauge = MaxFeverGauge;
 			IsFeverMode = true;
 			StartFeverMode();
 		}
@@ -634,8 +635,10 @@ void AGS_Drakhar::FeverComoLastAttack()
 void AGS_Drakhar::StartFeverMode()
 {
 	//server
-	DefaultAttackPower = GetStatComp()->GetAttackPower();
-	GetStatComp()->SetAttackPower(DefaultAttackPower + 50.f);
+	FGS_StatRow Stat;
+	Stat.ATK = 50.f;
+		
+	GetStatComp()->ChangeStat(Stat);
 	MulticastRPCFeverMontagePlay();
 	
 	// === 피버모드 시작 사운드 재생 ===
@@ -808,7 +811,7 @@ UAkComponent* AGS_Drakhar::GetOrCreateAkComponent()
 
 void AGS_Drakhar::OnRep_FeverGauge()
 {
-	OnCurrentFeverGageChanged.Broadcast(CurrentFeverGauge);
+	OnCurrentFeverGaugeChanged.Broadcast(CurrentFeverGauge);
 }
 
 // === 날기 사운드 재생 함수들 구현 ===
