@@ -21,6 +21,12 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void OnComboAttack() override;
+
+	virtual void ServerAttackMontage() override;
+
+	virtual void MulticastPlayComboSection() override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

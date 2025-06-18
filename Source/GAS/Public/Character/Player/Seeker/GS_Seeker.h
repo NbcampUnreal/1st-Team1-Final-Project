@@ -81,8 +81,45 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "State")
 	EGait GetLastSeekerGait();
-	
 
+	// Combo
+	UPROPERTY(Replicated)
+	bool bComboEnded = true;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_ComboEnd(bool bComboEnd);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ComboEnd();
+
+	UPROPERTY(EditAnywhere, Category="Animation")
+	UAnimMontage* ComboAnimMontage;
+
+	UPROPERTY(Replicated)
+	int32 CurrentComboIndex;
+	
+	UPROPERTY(Replicated)
+	bool CanAcceptComboInput = true;
+
+	bool bNextCombo = false;
+
+	UFUNCTION(Server, Reliable)
+	virtual void ServerAttackMontage();
+
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void MulticastPlayComboSection();
+
+	/*UFUNCTION()
+	void ComboInputOpen();*/
+	UFUNCTION()
+	void ComboInputOpen();
+	
+	UFUNCTION()
+	void ComboInputClose();
+
+	UFUNCTION()
+	virtual void OnComboAttack();
+	
 	// ================
 	// LowHP 스크린 효과
 	// ================
