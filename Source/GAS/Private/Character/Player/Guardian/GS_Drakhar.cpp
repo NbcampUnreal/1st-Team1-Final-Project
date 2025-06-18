@@ -145,6 +145,15 @@ AGS_Drakhar::AGS_Drakhar()
 		EarthquakeVFXSpawnPoint->bIsEditorOnly = false;
 #endif
 	}
+
+	FeverEarthquakeImpactVFX = nullptr;
+
+	FlyingDustVFX = nullptr;
+	ActiveFlyingDustVFXComponent = nullptr;
+	FlyingDustTraceDistance = 2000.f;
+
+	NormalAttackHitVFX = nullptr;
+	FeverAttackHitVFX = nullptr;
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -159,6 +168,7 @@ void AGS_Drakhar::BeginPlay()
 		Anim->OnPlayMontageNotifyBegin.AddDynamic(this, &ThisClass::OnMontageNotifyBegin);
 	}
 }
+
 void AGS_Drakhar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -173,6 +183,31 @@ void AGS_Drakhar::Tick(float DeltaTime)
 		else
 		{
 			SpringArmComp->TargetArmLength = FMath::FInterpTo(SpringArmComp->TargetArmLength, TargetSpringArmLength, DeltaTime, 5.0f);
+		}
+	}
+
+	if (ActiveFlyingDustVFXComponent && IsValid(ActiveFlyingDustVFXComponent))
+	{
+		FVector Start = GetActorLocation();
+		FVector End = Start - FVector(0, 0, FlyingDustTraceDistance);
+		FHitResult HitResult;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params))
+		{
+			ActiveFlyingDustVFXComponent->SetWorldLocation(HitResult.ImpactPoint);
+			if(!ActiveFlyingDustVFXComponent->IsActive())
+			{
+				ActiveFlyingDustVFXComponent->Activate(true);
+			}
+		}
+		else
+		{
+			if(ActiveFlyingDustVFXComponent->IsActive())
+			{
+				ActiveFlyingDustVFXComponent->Deactivate();
+			}
 		}
 	}
 }
@@ -203,7 +238,7 @@ void AGS_Drakhar::Ctrl()
 			ClientGuardianState = EGuardianState::CtrlSkillEnd;
 		}
 
-		TargetSpringArmLength = 700.f;
+		TargetSpringArmLength = 800.f;
 		bIsFlying = true;
 	}
 
@@ -313,6 +348,14 @@ void AGS_Drakhar::ComboLastAttack()
 		TSet<AGS_Character*> DamagedPlayers = DetectPlayerInRange(Start, 200.f, Radius);
 		ApplyDamageToDetectedPlayer(DamagedPlayers, PlusDamage);
 
+		for(AGS_Character* DamagedPlayer : DamagedPlayers)
+		{
+			if(IsValid(DamagedPlayer))
+			{
+				MulticastRPC_PlayAttackHitVFX(DamagedPlayer->GetActorLocation());
+			}
+		}
+
 		if (IsFeverMode)
 		{
 			FeverComoLastAttack();
@@ -385,6 +428,8 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		{
 			DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
 		}
+
+		MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
 
 		// === 대시 스킬 히트 사운드 재생 ===
 		PlayAttackHitSound();
@@ -467,8 +512,10 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			{
 				DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
 				//DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Slow, this);
+				MulticastPlayFeverEarthquakeImpactVFX(DamagedCharacter->GetActorLocation());
 			}
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
 
 			// === 어스퀘이크 스킬 히트 사운드 재생 ===
 			PlayAttackHitSound();
@@ -633,6 +680,7 @@ void AGS_Drakhar::FeverComoLastAttack()
 		ApplyDamageToDetectedPlayer(DamagedSeekers, 20.f);
 		for (const auto& DamagedSeeker : DamagedSeekers)
 		{
+			MulticastRPC_PlayAttackHitVFX(DamagedSeeker->GetActorLocation());
 			DamagedSeeker->LaunchCharacter(FVector(0.f, 0.f, 500.f), true, true);
 		}
 	}
@@ -1388,13 +1436,57 @@ void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
 	}
 }
 
+void AGS_Drakhar::MulticastPlayFeverEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (FeverEarthquakeImpactVFX && GetWorld())
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			FeverEarthquakeImpactVFX,
+			ImpactLocation,
+			FRotator::ZeroRotator,
+			FVector(1.5f), // Scale up a bit
+			true,
+			true,
+			ENCPoolMethod::None,
+			true
+		);
+	}
+}
+
 void AGS_Drakhar::MulticastRPC_OnFlyStart_Implementation()
 {
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+
+	if (FlyingDustVFX && !IsValid(ActiveFlyingDustVFXComponent))
+	{
+		FVector Location = GetActorLocation() - FVector(0,0,GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+		ActiveFlyingDustVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), FlyingDustVFX, Location);
+		if(ActiveFlyingDustVFXComponent)
+		{
+			ActiveFlyingDustVFXComponent->SetAutoDestroy(false);
+			ActiveFlyingDustVFXComponent->Deactivate(); 
+		}
+	}
+	
 	BP_OnFlyStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnFlyEnd_Implementation()
 {
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+
+	if (ActiveFlyingDustVFXComponent && IsValid(ActiveFlyingDustVFXComponent))
+	{
+		ActiveFlyingDustVFXComponent->DestroyComponent();
+		ActiveFlyingDustVFXComponent = nullptr;
+	}
+	
 	BP_OnFlyEnd();
 }
 
@@ -1402,6 +1494,7 @@ void AGS_Drakhar::MulticastRPC_OnUltimateStart_Implementation()
 {
 	BP_OnUltimateStart();
 }
+
 void AGS_Drakhar::MulticastRPC_OnEarthquakeStart_Implementation()
 {
 	BP_OnEarthquakeStart();
@@ -1509,5 +1602,20 @@ void AGS_Drakhar::RemoveFeverModeOverlay()
 		MeshComp->SetOverlayMaterial(nullptr);
 	}
 	FeverModeOverlayMID = nullptr;
+}
+
+void AGS_Drakhar::MulticastRPC_PlayAttackHitVFX_Implementation(FVector ImpactPoint)
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	UNiagaraSystem* VFXToPlay = IsFeverMode ? FeverAttackHitVFX : NormalAttackHitVFX;
+
+	if (VFXToPlay)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), VFXToPlay, ImpactPoint);
+	}
 }
 

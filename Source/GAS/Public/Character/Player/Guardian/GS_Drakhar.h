@@ -112,6 +112,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "VFX|Earthquake")
 	UNiagaraComponent* ActiveDustCloudVFXComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Earthquake", meta = (DisplayName = "Fever Earthquake Impact VFX"))
+	UNiagaraSystem* FeverEarthquakeImpactVFX;
+
 	// === 어스퀘이크 VFX 위치 제어용 화살표 컴포넌트 ===
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX|Earthquake", meta = (DisplayName = "Earthquake VFX Spawn Point"))
 	UArrowComponent* EarthquakeVFXSpawnPoint;
@@ -133,6 +136,22 @@ public:
 	// === 피버모드 발자국 VFX ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever Footstep VFX"))
 	UNiagaraSystem* FeverFootstepVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Flying Dust VFX"))
+	UNiagaraSystem* FlyingDustVFX;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "VFX|Drakhar")
+	UNiagaraComponent* ActiveFlyingDustVFXComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Flying Dust VFX Trace Distance"))
+	float FlyingDustTraceDistance;
+
+	// === 공격 히트 VFX ===
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Normal Attack Hit VFX"))
+	UNiagaraSystem* NormalAttackHitVFX;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever Attack Hit VFX"))
+	UNiagaraSystem* FeverAttackHitVFX;
 
 	//[Input Binding Function]
 	virtual void Ctrl() override;
@@ -230,7 +249,7 @@ public:
 	void DecreaseFeverGauge();
 	//minus 1 values per one seconds
 	void MinusFeverGaugeValue();
-	
+
 	// === Wwise 사운드 재생 함수 ===
 	UFUNCTION(BlueprintCallable, Category = "Sound", meta = (DisplayName = "Normal Attack"))
 	void PlayComboAttackSound();
@@ -329,6 +348,12 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastStopDustCloudVFX();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayFeverEarthquakeImpactVFX(const FVector& ImpactLocation);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPC_PlayAttackHitVFX(FVector ImpactPoint);
 
 	// === 날기 이벤트 ===
 	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Fly", meta = (DisplayName = "On Fly Start"))
