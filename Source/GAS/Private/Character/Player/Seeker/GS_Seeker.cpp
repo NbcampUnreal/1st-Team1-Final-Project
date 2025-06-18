@@ -16,7 +16,6 @@
 #include "Sound/GS_AudioManager.h"
 #include "System/GS_PlayerState.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/ChildActorComponent.h"
 #include "GameFramework/Character.h"
 #include "Engine/PostProcessVolume.h"
@@ -26,6 +25,7 @@
 #include "Components/SphereComponent.h"
 #include "Character/Component/GS_DebuffVFXComponent.h"
 #include "Animation/Character/Seeker/GS_ChooserInputObj.h"
+#include "Character/GS_TpsController.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -162,6 +162,41 @@ EGait AGS_Seeker::GetLastSeekerGait()
 	return LastSeekerGait;
 }
 
+void AGS_Seeker::Multicast_ComboEnd_Implementation()
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		StopAnimMontage(ComboAnimMontage);
+		AnimInstance->IsPlayingUpperBodyMontage = false;
+		CurrentComboIndex = 0;
+		CanAcceptComboInput = true;
+		
+
+		AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
+		if (IsValid(TPSController))
+		{
+			TPSController->SetLookControlValue(true, true);
+		}
+
+		if (HasAuthority())
+		{
+			if (LastSeekerGait == EGait::Run)
+			{			
+				SetSeekerGait(EGait::Run);
+			}
+			else if (LastSeekerGait == EGait::Walk)
+			{
+				SetSeekerGait(EGait::Walk);
+			}
+		}
+	}
+}
+
+void AGS_Seeker::Server_ComboEnd_Implementation(bool bComboEnd)
+{
+	bComboEnded = bComboEnd;
+}
+
 
 void AGS_Seeker::BeginPlay()
 {
@@ -219,12 +254,58 @@ void AGS_Seeker::InitializeCameraManager()
 	}
 }
 
+void AGS_Seeker::ComboInputOpen()
+{
+	CanAcceptComboInput = true;
+}
+
+void AGS_Seeker::ComboInputClose()
+{
+	CanAcceptComboInput = false;
+	if (bNextCombo)
+	{
+		ServerAttackMontage();  
+		CanAcceptComboInput = false;
+		bNextCombo = false;
+	}
+}
+
+void AGS_Seeker::OnComboAttack()
+{
+	// SJE
+}
+
 void AGS_Seeker::UpdatePostProcessEffect(float EffectStrength)
 {
 	if (LowHealthDynamicMaterial)
 	{
 		LowHealthDynamicMaterial->SetScalarParameterValue(TEXT("HPRatio"), EffectStrength);
 	}
+}
+
+void AGS_Seeker::ServerAttackMontage_Implementation()
+{
+	MulticastPlayComboSection();
+}
+
+void AGS_Seeker::MulticastPlayComboSection_Implementation()
+{
+	// SJE
+	UE_LOG(LogTemp, Warning, TEXT("%s Multicat Play Combo Section"), *GetName());
+	FName SectionName = FName(*FString::Printf(TEXT("Attack%d"), CurrentComboIndex + 1));
+	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
+	
+	CurrentComboIndex++;
+	if (AnimInstance && ComboAnimMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LocalRole: %s"), *UEnum::GetValueAsString(GetLocalRole()));
+
+		AnimInstance->Montage_Play(ComboAnimMontage);
+		AnimInstance->IsPlayingUpperBodyMontage = true;
+		AnimInstance->Montage_JumpToSection(SectionName, ComboAnimMontage);
+	}
+	CanAcceptComboInput = false;
+	bNextCombo = false;
 }
 
 void AGS_Seeker::HandleLowHealthEffect(UGS_StatComp* InStatComp)
@@ -340,6 +421,9 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, LastSeekerGait);
 	DOREPLIFETIME(AGS_Seeker, SeekerGait);
 	DOREPLIFETIME(AGS_Seeker, CanChangeSeekerGait);
+	DOREPLIFETIME(AGS_Seeker, CanAcceptComboInput);
+	DOREPLIFETIME(AGS_Seeker, CurrentComboIndex);
+	DOREPLIFETIME(AGS_Seeker, bComboEnded);
 }
 
 void AGS_Seeker::OnRep_SeekerGait()

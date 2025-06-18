@@ -8,10 +8,14 @@
 
 UGS_AresAimingSkill::UGS_AresAimingSkill()
 {
+	CurrentSkillType = ESkillSlot::Aiming;
 }
 
 void UGS_AresAimingSkill::ActiveSkill()
 {
+	if (!CanActive()) return;
+	Super::ActiveSkill();
+
 	UE_LOG(LogTemp, Warning, TEXT("AresAimingSkill ActiveSkill"));
 	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
 	if (!OwnerCharacter || !AresCharacter->AresProjectileClass) return;
@@ -32,14 +36,23 @@ void UGS_AresAimingSkill::ActiveSkill()
 	);
 
 	bIsActive = CachedProjectile != nullptr;
+
+	
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+	}
 }
 
 void UGS_AresAimingSkill::DeactiveSkill()
 {
+	Super::DeactiveSkill();
 }
 
 void UGS_AresAimingSkill::OnSkillCommand()
 {
+	Super::OnSkillCommand();
+
 	UE_LOG(LogTemp, Warning, TEXT("AresAimingSkill OnSkillCommand"));
 	if (!CachedProjectile || !OwnerCharacter) return;
 
@@ -64,13 +77,19 @@ void UGS_AresAimingSkill::OnSkillCommand()
 	// 더 이상 저장 안 함
 	CachedProjectile = nullptr;
 	bIsActive = false;
+	
 }
 
 void UGS_AresAimingSkill::ExecuteSkillEffect()
 {
+	Super::ExecuteSkillEffect();
 }
 
 bool UGS_AresAimingSkill::IsActive() const
 {
+
+	Super::IsActive();
 	return bIsActive;
 }
+	
+	

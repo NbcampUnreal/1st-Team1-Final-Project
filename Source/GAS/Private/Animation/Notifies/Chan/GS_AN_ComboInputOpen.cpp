@@ -2,13 +2,13 @@
 
 
 #include "Animation/Notifies/Chan/GS_AN_ComboInputOpen.h"
-#include "Character/Player/Seeker/GS_Chan.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 
 void UGS_AN_ComboInputOpen::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	Super::Notify(MeshComp, Animation, EventReference);
 
-	if (AGS_Chan* Character = Cast<AGS_Chan>(MeshComp->GetOwner()))
+	if (AGS_Seeker* Character = Cast<AGS_Seeker>(MeshComp->GetOwner()))
 	{
 		Character->ComboInputOpen();
 	}

@@ -4,6 +4,10 @@
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
 
+#include "Animation/Character/GS_SeekerAnimInstance.h"
+#include "Character/GS_TpsController.h"
+#include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
+
 
 // Sets default values
 AGS_Ares::AGS_Ares()
@@ -18,7 +22,6 @@ AGS_Ares::AGS_Ares()
 void AGS_Ares::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -31,5 +34,41 @@ void AGS_Ares::Tick(float DeltaTime)
 void AGS_Ares::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+void AGS_Ares::OnComboAttack()
+{
+	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(Controller))
+	{
+		// 여기에서 Move Control flag 를 설정해야 하나? // SJE
+	}
+
+	Server_ComboEnd(false);
+	CanChangeSeekerGait = false;
+
+	if (CanAcceptComboInput)
+	{
+		if (CurrentComboIndex == 0)
+		{
+			ServerAttackMontage();
+		}
+		else
+		{
+			bNextCombo = true;
+			CanAcceptComboInput = false;
+		}
+	}
+}
+
+void AGS_Ares::ServerAttackMontage()
+{
+	Super::ServerAttackMontage();
+
+	this->MulticastPlayComboSection();
+}
+
+void AGS_Ares::MulticastPlayComboSection()
+{
+	Super::MulticastPlayComboSection();
 }
 
