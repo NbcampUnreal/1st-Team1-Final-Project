@@ -277,7 +277,7 @@ void AGS_CustomLobbyGM::UpdateLobbyPawns()
             AGS_LobbyDisplayActor* NewDisplayActor = GetWorld()->SpawnActor<AGS_LobbyDisplayActor>(SpawnInfo->DisplayActorClass, SpawnTransform, SpawnParams);
             if (NewDisplayActor)
             {
-                NewDisplayActor->SetupDisplay(SpawnInfo->SkeletalMeshClass, SpawnInfo->Lobby_AnimBlueprintClass);
+                NewDisplayActor->SetupDisplay(SpawnInfo->SkeletalMeshClass, SpawnInfo->Lobby_AnimBlueprintClass, SpawnInfo->WeaponMeshList);
                 NewDisplayActor->SetReadyState(GuardianPS->bIsReady);
 
                 SpawnedLobbyActors.Add(GuardianPS, NewDisplayActor);
@@ -297,7 +297,7 @@ void AGS_CustomLobbyGM::UpdateLobbyPawns()
             AGS_LobbyDisplayActor* NewDisplayActor = GetWorld()->SpawnActor<AGS_LobbyDisplayActor>(SpawnInfo->DisplayActorClass, SpawnTransform, SpawnParams);
             if (NewDisplayActor)
             {
-                NewDisplayActor->SetupDisplay(SpawnInfo->SkeletalMeshClass, SpawnInfo->Lobby_AnimBlueprintClass);
+                NewDisplayActor->SetupDisplay(SpawnInfo->SkeletalMeshClass, SpawnInfo->Lobby_AnimBlueprintClass, SpawnInfo->WeaponMeshList);
                 NewDisplayActor->SetReadyState(SeekerPS->bIsReady);
                 SpawnedLobbyActors.Add(SeekerPS, NewDisplayActor);
             }
