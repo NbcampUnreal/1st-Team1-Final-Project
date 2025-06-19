@@ -28,19 +28,27 @@ protected:
 
 private:
 	void UpdateCharging();
+	void StartDash();
+	void UpdateDash();
+	void StopDash();
 
 	FTimerHandle ChargingTimerHandle;
+	FTimerHandle DashTimerHandle;
 
 	float ChargingTime = 0.0f;
 	float ChargingStartTime = 0.0f;
 	float MaxChargingTime = 2.0f;
 
-	float MinDashDistance = 600.0f;
+	float MinDashDistance = 200.0f;
 	float MaxDashDistance = 2000.0f;
+	float DashDuration = 0.3f;
+	float DashInterpAlpha = 0.0f;
 
 	bool bIsCharging = false;
 
 	FVector DashDirection; // 돌진 방향
 	FVector DashStartLocation;
 	FVector DashEndLocation;
+
+	TSet<AActor*> DamagedActors;
 };
