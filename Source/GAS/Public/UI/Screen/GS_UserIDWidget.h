@@ -23,4 +23,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UImage* SteamAvatar;
 	
+private:
+	FTimerHandle TimerHandle;
+
+	void DelayedUpdateUserID();
 };

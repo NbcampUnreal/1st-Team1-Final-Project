@@ -8,16 +8,46 @@
 void UGS_UserIDWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	if (TEXT_UserID)
+
+	APlayerState* PS = GetOwningPlayerState();
+	if (IsValid(PS))
 	{
-		TEXT_UserID->SetText(FText::FromString(GetOwningPlayerState()->GetPlayerName()));
-	}
-	if (SteamAvatar)
-	{
-		AGS_PlayerState* GPS = Cast<AGS_PlayerState>(GetOwningPlayerState());
-		if (GPS && GPS->MySteamAvatar)
+		if (TEXT_UserID)
 		{
-			SteamAvatar->SetBrushFromTexture(GPS->MySteamAvatar);
+			TEXT_UserID->SetText(FText::FromString(GetOwningPlayerState()->GetPlayerName()));
+		}
+		if (SteamAvatar)
+		{
+			AGS_PlayerState* GPS = Cast<AGS_PlayerState>(GetOwningPlayerState());
+			if (GPS && GPS->MySteamAvatar)
+			{
+				SteamAvatar->SetBrushFromTexture(GPS->MySteamAvatar);
+			}
+		}
+	}
+	else
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &UGS_UserIDWidget::DelayedUpdateUserID, 0.3f, true);
+	}
+}
+
+void UGS_UserIDWidget::DelayedUpdateUserID()
+{
+	APlayerState* PS = GetOwningPlayerState();
+	if (IsValid(PS))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+		if (TEXT_UserID)
+		{
+			TEXT_UserID->SetText(FText::FromString(GetOwningPlayerState()->GetPlayerName()));
+		}
+		if (SteamAvatar)
+		{
+			AGS_PlayerState* GPS = Cast<AGS_PlayerState>(GetOwningPlayerState());
+			if (GPS && GPS->MySteamAvatar)
+			{
+				SteamAvatar->SetBrushFromTexture(GPS->MySteamAvatar);
+			}
 		}
 	}
 }
