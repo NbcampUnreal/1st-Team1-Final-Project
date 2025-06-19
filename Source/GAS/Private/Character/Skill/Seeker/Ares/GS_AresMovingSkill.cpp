@@ -9,6 +9,9 @@
 #include "DrawDebugHelpers.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
+
 
 void UGS_AresMovingSkill::ActiveSkill()
 {
@@ -40,13 +43,20 @@ void UGS_AresMovingSkill::OnSkillCommand()
 	float Ratio = ChargingTime / MaxChargingTime;
 	float DashDistance = FMath::Lerp(MinDashDistance, MaxDashDistance, Ratio);
 
+	UE_LOG(LogTemp, Log, TEXT("[AresDash] ChargingTime: %.2f / %.2f (%.0f%%), DashDistance: %.0f units"),
+		ChargingTime,
+		MaxChargingTime,
+		Ratio * 100.f,
+		DashDistance);
+
 	if (IsValid(OwnerCharacter))
 	{
+		DashDirection = OwnerCharacter->GetActorForwardVector().GetSafeNormal();
 		DashStartLocation = OwnerCharacter->GetActorLocation();
 		DashEndLocation = DashStartLocation + DashDirection * DashDistance;
+		DashInterpAlpha = 0.0f;
+		StartDash();
 	}
-
-	ExecuteSkillEffect();
 }
 
 void UGS_AresMovingSkill::ExecuteSkillEffect()
@@ -85,7 +95,16 @@ void UGS_AresMovingSkill::ExecuteSkillEffect()
 	}
 
 	// 캐릭터를 앞으로 밀어냄
-	OwnerCharacter->LaunchCharacter(DashDirection * 1500.0f, true, true);
+	float Ratio = ChargingTime / MaxChargingTime;
+	float DashDistance = FMath::Lerp(MinDashDistance, MaxDashDistance, Ratio);
+	float DashImpulseStrength = DashDistance * 10.0f; // 튜닝 가능
+
+	UCharacterMovementComponent* MoveComp = OwnerCharacter->GetCharacterMovement();
+	if (MoveComp)
+	{
+		MoveComp->StopMovementImmediately();
+		MoveComp->AddImpulse(DashDirection * DashImpulseStrength, true); // true: mass 고려
+	}
 
 	// 디버그 선 그리기
 	/*DrawDebugCapsule(GetWorld(), DashStartLocation, 100.0f, 100.0f, FQuat::Identity, FColor::Red, false, 2.0f);
@@ -111,14 +130,63 @@ void UGS_AresMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 
 void UGS_AresMovingSkill::UpdateCharging()
 {
-	// 경과 시간 측정
-	float CurrentTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
-	ChargingTime = CurrentTime - ChargingStartTime;
-	ChargingTime = FMath::Min(ChargingTime, MaxChargingTime);
+	if (!IsValid(OwnerCharacter)) return;
 
-	// 현재 바라보는 방향 저장
-	if (IsValid(OwnerCharacter))
+	float CurrentTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
+	ChargingTime = FMath::Min(CurrentTime - ChargingStartTime, MaxChargingTime);
+}
+
+void UGS_AresMovingSkill::StartDash()
+{
+	// 몬스터는 충돌 막지 않도록 설정
+	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(DashTimerHandle, this, &UGS_AresMovingSkill::UpdateDash, 0.01f, true);
+}
+
+void UGS_AresMovingSkill::UpdateDash()
+{
+	if (!IsValid(OwnerCharacter))
 	{
-		DashDirection = OwnerCharacter->GetActorForwardVector();
+		return;
+	}
+
+	float Step = 0.01f / DashDuration;
+	DashInterpAlpha += Step;
+
+	// 공격 판정
+	TArray<FHitResult> HitResults;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(OwnerCharacter);
+	GetWorld()->SweepMultiByChannel(HitResults, DashStartLocation, DashEndLocation,
+		FQuat::Identity, ECC_Pawn, FCollisionShape::MakeCapsule(100.0f, 100.0f), Params);
+
+	for (const FHitResult& Hit : HitResults)
+	{
+		if (AActor* HitActor = Hit.GetActor())
+		{
+			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
+			{
+				ApplyEffectToDungeonMonster(TargetMonster);
+			}
+			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
+			{
+				ApplyEffectToGuardian(TargetGuardian);
+			}
+		}
+	}
+
+	// 위치 보간 이동
+	FVector NewLocation = FMath::Lerp(DashStartLocation, DashEndLocation, DashInterpAlpha);
+	OwnerCharacter->SetActorLocation(NewLocation, true); // Sweep = true로 충돌 적용
+	DashStartLocation = NewLocation;
+
+	if (DashInterpAlpha >= 1.f)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
+
+		// 원래대로 Block으로 되돌리기
+		OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+		OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	}
 }
