@@ -5,50 +5,69 @@
 #include "Character/GS_Character.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Weapon/Equipable/GS_WeaponAxe.h"
+#include "Weapon/Equipable/GS_WeaponSword.h"
 
 void UGS_ANS_HitWeaponForChan::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                            float TotalDuration)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration);
 
-	AActor* Owner = MeshComp->GetOwner();
-	if (!Owner)
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(MeshComp->GetOwner()))
 	{
-		return;
-	}
-
-	if (AGS_Chan* Attacker = Cast<AGS_Chan>(MeshComp->GetOwner()))
-	{
-		if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Attacker->GetWeaponByIndex(0)))
+		ECharacterType CharacterType = Seeker->GetCharacterType();
+		if (CharacterType == ECharacterType::Chan)
 		{
-			Weapon->ServerEnableHit();
-			/*if (Attacker->HasAuthority())
+			if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Seeker->GetWeaponByIndex(0)))
 			{
 				Weapon->ServerEnableHit();
-			}*/
+				/*if (Attacker->HasAuthority())
+				{
+					Weapon->ServerEnableHit();
+				}*/
+			}
 		}
-	}
+		else if (CharacterType == ECharacterType::Ares)
+		{
+			if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Seeker->GetWeaponByIndex(0)))
+			{
+				Weapon->ServerEnableHit();
+				/*if (Attacker->HasAuthority())
+				{
+					Weapon->ServerEnableHit();
+				}*/
+			}
+		}
+	}	
 }
 
 void UGS_ANS_HitWeaponForChan::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	Super::NotifyEnd(MeshComp, Animation);
 
-	AActor* Owner = MeshComp->GetOwner();
-	if (!Owner)
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(MeshComp->GetOwner()))
 	{
-		return;
-	}
-
-	if (AGS_Chan* Attacker = Cast<AGS_Chan>(MeshComp->GetOwner()))
-	{
-		if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Attacker->GetWeaponByIndex(0)))
+		ECharacterType CharacterType = Seeker->GetCharacterType();
+		if (CharacterType == ECharacterType::Chan)
 		{
-			Weapon->ServerDisableHit();
-			/*if (Attacker->HasAuthority())
+			if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Seeker->GetWeaponByIndex(0)))
 			{
 				Weapon->ServerDisableHit();
-			}*/
+				/*if (Attacker->HasAuthority())
+				{
+					Weapon->ServerDisableHit();
+				}*/
+			}
+		}
+		else if (CharacterType == ECharacterType::Ares)
+		{
+			if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Seeker->GetWeaponByIndex(0)))
+			{
+				Weapon->ServerDisableHit();
+				/*if (Attacker->HasAuthority())
+				{
+					Weapon->ServerDisableHit();
+				}*/
+			}
 		}
 	}
 }
