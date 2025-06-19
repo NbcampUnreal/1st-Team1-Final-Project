@@ -26,6 +26,13 @@ public:
     virtual void CopyProperties(APlayerState* OtherPlayerState) override;
     virtual void SeamlessTravelTo(APlayerState* NewPlayerState) override;
 
+	// Steam Avatar
+    UFUNCTION(BlueprintCallable, Category = "Avatar")
+    void FetchMySteamAvatar();
+
+    UPROPERTY(BlueprintReadOnly, Category = "Avatar")
+    UTexture2D* MySteamAvatar;
+
     // 역할
     UPROPERTY(ReplicatedUsing = OnRep_PlayerRole, BlueprintReadOnly, Category = "Lobby")
     EPlayerRole CurrentPlayerRole;
