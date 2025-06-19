@@ -40,11 +40,13 @@ void UGS_ChanAimingSkill::ActiveSkill()
 			OwnerPlayer->SetSkillInputControl(false, false);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			// Change Slot
-			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+			//OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+			/*OwnerPlayer->Multicast_SetIsUpperBodySlot(false);*/
 
 			// Play Montage
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+
+			OwnerPlayer->CanChangeSeekerGait = false;
 		}
 		
 		// 에이밍 스킬 시작 사운드 재생
@@ -88,8 +90,6 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 		if (OwnerPlayer->HasAuthority())
 		{
 			OwnerPlayer->ComboInputOpen();
-			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 			// Control Input Key
 			OwnerPlayer->SetSkillInputControl(true, true);
 			OwnerPlayer->SetMoveControlValue(true, true);
@@ -122,17 +122,17 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 
 void UGS_ChanAimingSkill::OnSkillCommand()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Chan Aiming Skill :: On Skill Command")); // SJE
 	Super::OnSkillCommand();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		if (OwnerPlayer->HasAuthority())
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("Chan Aiming Skill :: On Skill Command")); // SJE
+			
 			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 		
-			// Change Slot
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 
 			// Play Montage
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
@@ -141,9 +141,13 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 			OwnerPlayer->SetLookControlValue(false, false);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->SetSkillInputControl(false, false);
+
+			// Forward Jump
+			const FVector Forward = OwnerPlayer->GetActorForwardVector();
+			const FVector JumpVelocity = Forward * 600.0f + FVector(0.f, 0.f, 420.0f);
+			OwnerPlayer->LaunchCharacter(JumpVelocity, true, true);
 		}
 		
-	
 		// 방패 슬램 사운드 재생
 		if (OwnerPlayer->AimingSkillSlamSound)
 		{
