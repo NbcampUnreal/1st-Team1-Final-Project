@@ -43,6 +43,10 @@ public:
 
 	void InitStat(FName RowName);
 
+	//[Change Stats when use buff skills]
+	void ChangeStat(const FGS_StatRow& InChangeStat);
+	void ResetStat(const FGS_StatRow& InChangeStat);
+	
 	UFUNCTION(Server, Reliable)
 	void UpdateStat(const FGS_StatRow& RuneStats);
 
@@ -51,10 +55,8 @@ public:
 	//getter
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	FORCEINLINE float GetMaxHealth()const { return MaxHealth; }
-	
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	FORCEINLINE float GetCurrentHealth()const { return CurrentHealth; }
-	
 	FORCEINLINE float GetAttackPower()const { return AttackPower; }
 	FORCEINLINE float GetDefense()const { return Defense; }
 	FORCEINLINE float GetAgility()const { return Agility; }
@@ -68,11 +70,9 @@ public:
 	void SetAgility(float InAgility);
 	void SetAttackSpeed(float InAttackSpeed);
 	
-	//rpc
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCPlayTakeDamageMontage();
 
-	//OnRep Function
 	UFUNCTION()
 	void OnRep_CurrentHealth();
 
@@ -84,24 +84,20 @@ protected:
 	float CharacterWalkSpeed;
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Stat", meta = (AllowPrivateAccess))
+	//stat
+	UPROPERTY(VisibleAnywhere)
 	float MaxHealth;
-
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentHealth)
 	float CurrentHealth;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Stat", meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly)
 	float AttackPower;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Stat", meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly)
 	float Defense;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Stat", meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly)
 	float Agility;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Stat", meta = (AllowPrivateAccess))
+	UPROPERTY(EditDefaultsOnly)
 	float AttackSpeed;
-
+	
 	// 마지막 히트 사운드 재생 시간
 	float LastHitSoundTime = 0.0f;
 

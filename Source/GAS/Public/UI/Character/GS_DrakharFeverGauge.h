@@ -20,14 +20,14 @@ public:
 
 	virtual void NativeConstruct() override;
 	
-	void InitializeGage(float InCurrentGage);
+	void InitializeGauge(float InCurrentGauge);
 	
 	AGS_Drakhar* GetOwningActor()const { return Drakhar; }
 
 	void SetOwningActor(AGS_Drakhar* InOwningCharacter) { Drakhar = InOwningCharacter; }
 
 	UFUNCTION()
-	void OnCurrentFeverGageChanged(float InCurrentGage);
+	void OnCurrentFeverGaugeChanged(float InCurrentGauge);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
