@@ -61,7 +61,7 @@ AGS_Drakhar::AGS_Drakhar()
 	Tags.Add("Guardian");
 
 	//fever mode
-	MaxFeverGage = 100.f;
+	MaxFeverGauge = 100.f;
 	CurrentFeverGauge = 0.f;
 
 	//team id
@@ -146,6 +146,7 @@ AGS_Drakhar::AGS_Drakhar()
 #endif
 	}
 
+	EarthquakeImpactVFX = nullptr;
 	FeverEarthquakeImpactVFX = nullptr;
 
 	FlyingDustVFX = nullptr;
@@ -411,6 +412,9 @@ void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 
 void AGS_Drakhar::ServerRPCEndDash_Implementation()
 {
+	//collision setting first
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+
 	if (DamagedCharactersFromDash.IsEmpty())
 	{
 		return;
@@ -444,7 +448,6 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	}
 
 	DamagedCharactersFromDash.Empty();
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	bCanCombo = true;
 
 	// 대시 VFX 종료 (Wing Rush + Dust)
@@ -511,8 +514,11 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			if (IsFeverMode)
 			{
 				DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
-				//DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Slow, this);
 				MulticastPlayFeverEarthquakeImpactVFX(DamagedCharacter->GetActorLocation());
+			}
+			else
+			{
+				MulticastPlayEarthquakeImpactVFX(DamagedCharacter->GetActorLocation());
 			}
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
@@ -595,15 +601,15 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 	}
 }
 
-void AGS_Drakhar::SetFeverGageWidget(UGS_DrakharFeverGauge* InDrakharFeverGageWidget)
+void AGS_Drakhar::SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGaugeWidget)
 {
-	UGS_DrakharFeverGauge* DrakharFeverGaugeWidget = Cast<UGS_DrakharFeverGauge>(InDrakharFeverGageWidget);
+	UGS_DrakharFeverGauge* DrakharFeverGaugeWidget = Cast<UGS_DrakharFeverGauge>(InDrakharFeverGaugeWidget);
 	if (IsValid(DrakharFeverGaugeWidget))
 	{
 		//client
-		DrakharFeverGaugeWidget->InitializeGage(GetCurrentFeverGage());
-		OnCurrentFeverGageChanged.AddUObject(DrakharFeverGaugeWidget,
-		                                     &UGS_DrakharFeverGauge::OnCurrentFeverGageChanged);
+		DrakharFeverGaugeWidget->InitializeGauge(GetCurrentFeverGauge());
+		OnCurrentFeverGaugeChanged.AddUObject(DrakharFeverGaugeWidget,
+		                                     &UGS_DrakharFeverGauge::OnCurrentFeverGaugeChanged);
 	}
 }
 
@@ -622,16 +628,18 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 			GetWorldTimerManager().ClearTimer(FeverTimer);
 			if (IsFeverMode)
 			{
-				GetStatComp()->SetAttackPower(DefaultAttackPower);
+				FGS_StatRow Stat;
+				Stat.ATK = 50.f;
+				GetStatComp()->ResetStat(Stat);
 			}
 
 			IsFeverMode = false;
 		}
 
 		//Start Fever Mode
-		if (CurrentFeverGauge >= MaxFeverGage)
+		if (CurrentFeverGauge >= MaxFeverGauge)
 		{
-			CurrentFeverGauge = MaxFeverGage;
+			CurrentFeverGauge = MaxFeverGauge;
 			IsFeverMode = true;
 			StartFeverMode();
 		}
@@ -689,8 +697,10 @@ void AGS_Drakhar::FeverComoLastAttack()
 void AGS_Drakhar::StartFeverMode()
 {
 	//server
-	DefaultAttackPower = GetStatComp()->GetAttackPower();
-	GetStatComp()->SetAttackPower(DefaultAttackPower + 50.f);
+	FGS_StatRow Stat;
+	Stat.ATK = 50.f;
+		
+	GetStatComp()->ChangeStat(Stat);
 	MulticastRPCFeverMontagePlay();
 	
 	// === 피버모드 시작 사운드 재생 ===
@@ -880,7 +890,7 @@ UAkComponent* AGS_Drakhar::GetOrCreateAkComponent()
 
 void AGS_Drakhar::OnRep_FeverGauge()
 {
-	OnCurrentFeverGageChanged.Broadcast(CurrentFeverGauge);
+	OnCurrentFeverGaugeChanged.Broadcast(CurrentFeverGauge);
 }
 
 void AGS_Drakhar::PlayAttackHitSound()
@@ -1413,29 +1423,6 @@ void AGS_Drakhar::MulticastPlayDraconicProjectileImpactEffects_Implementation(
 	}
 }
 
-void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
-{
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
-	{
-		ActiveDustCloudVFXComponent->Deactivate();
-
-		FTimerHandle DustCloudVFXCleanupTimer;
-		GetWorld()->GetTimerManager().SetTimer(DustCloudVFXCleanupTimer, [this]()
-		{
-			if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
-			{
-				ActiveDustCloudVFXComponent->DestroyComponent();
-			}
-			ActiveDustCloudVFXComponent = nullptr;
-		}, 1.5f, false); // 1.5초 후 정리
-	}
-}
-
 void AGS_Drakhar::MulticastPlayFeverEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
 {
 	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
@@ -1616,6 +1603,52 @@ void AGS_Drakhar::MulticastRPC_PlayAttackHitVFX_Implementation(FVector ImpactPoi
 	if (VFXToPlay)
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), VFXToPlay, ImpactPoint);
+	}
+}
+
+void AGS_Drakhar::MulticastPlayEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (EarthquakeImpactVFX && GetWorld())
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			EarthquakeImpactVFX,
+			ImpactLocation,
+			FRotator::ZeroRotator,
+			FVector(1.0f),
+			true,
+			true,
+			ENCPoolMethod::None,
+			true
+		);
+	}
+}
+
+void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
+	{
+		ActiveDustCloudVFXComponent->Deactivate();
+
+		FTimerHandle DustCloudVFXCleanupTimer;
+		GetWorld()->GetTimerManager().SetTimer(DustCloudVFXCleanupTimer, [this]()
+		{
+			if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
+			{
+				ActiveDustCloudVFXComponent->DestroyComponent();
+			}
+			ActiveDustCloudVFXComponent = nullptr;
+		}, 1.5f, false);
 	}
 }
 

@@ -31,6 +31,9 @@ public:
 
     virtual void NativeConstruct() override;
 
+    virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+    virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void InitCell(const FGridCellData& InCellData, UGS_ArcaneBoardWidget* InParentBoard);
 

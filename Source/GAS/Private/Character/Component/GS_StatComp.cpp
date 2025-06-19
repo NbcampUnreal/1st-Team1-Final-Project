@@ -3,14 +3,12 @@
 #include "AkGameplayStatics.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatRow.h"
-#include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "RuneSystem/GS_EnumUtils.h"
 #include "RuneSystem/GS_ArcaneBoardLPS.h"
 #include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Character/Component/GS_HitReactComp.h"
 
 UGS_StatComp::UGS_StatComp()
 {
@@ -84,6 +82,24 @@ void UGS_StatComp::InitStat(FName RowName)
 	OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed *= Agility;
 }
 
+void UGS_StatComp::ChangeStat(const FGS_StatRow& InChangeStat)
+{
+	MaxHealth += InChangeStat.HP;
+	AttackPower += InChangeStat.ATK;
+	Defense += InChangeStat.DEF;
+	Agility += InChangeStat.AGL;
+	AttackSpeed += InChangeStat.ATS;
+}
+
+void UGS_StatComp::ResetStat(const FGS_StatRow& InChangeStat)
+{
+	MaxHealth -= InChangeStat.HP;
+	AttackPower -= InChangeStat.ATK;
+	Defense -= InChangeStat.DEF;
+	Agility -= InChangeStat.AGL;
+	AttackSpeed -= InChangeStat.ATS;
+}
+
 void UGS_StatComp::UpdateStat_Implementation(const FGS_StatRow& RuneStats)
 {
 	//update stats by rune system
@@ -99,7 +115,6 @@ void UGS_StatComp::UpdateStat_Implementation(const FGS_StatRow& RuneStats)
 		Defense = FoundRow->DEF + RuneStats.DEF;
 		Agility = FoundRow->AGL + RuneStats.AGL;
 		AttackSpeed = FoundRow->ATS + RuneStats.ATS;
-
 		CurrentHealth = MaxHealth;
 
 		UE_LOG(LogTemp, Log, TEXT("캐릭터 스탯 업데이트 - HP: %.1f, ATK: %.1f, DEF: %.1f, AGL: %.1f, ATS: %.1f"),

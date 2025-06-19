@@ -19,17 +19,18 @@ void UGS_DrakharFeverGauge::NativeConstruct()
 	
 	if (IsValid(Drakhar))
 	{
-		Drakhar->SetFeverGageWidget(this);
+		Drakhar->SetFeverGaugeWidget(this);
 	}
 }
 
-void UGS_DrakharFeverGauge::InitializeGage(float InCurrentGage)
+void UGS_DrakharFeverGauge::InitializeGauge(float InCurrentGauge)
 {
-	OnCurrentFeverGageChanged(InCurrentGage);
+	OnCurrentFeverGaugeChanged(InCurrentGauge);
 }
 
-void UGS_DrakharFeverGauge::OnCurrentFeverGageChanged(float InCurrentGage)
+void UGS_DrakharFeverGauge::OnCurrentFeverGaugeChanged(float InCurrentGauge)
 {
-	DrakharFeverGauge->SetPercent(InCurrentGage/Drakhar->GetMaxFeverGage());
+	DrakharFeverGauge->SetPercent(InCurrentGauge/Drakhar->GetMaxFeverGauge());
+	
 }
 

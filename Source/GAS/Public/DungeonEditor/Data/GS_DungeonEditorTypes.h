@@ -45,6 +45,14 @@ enum class ERoomType : uint8
 };
 
 UENUM(BlueprintType)
+enum class EDoorAndWallType : uint8
+{
+	Wall	UMETA(DisplayName = "Wall"),
+	Door UMETA(DisplayName = "Door"),
+	None	UMETA(DisplayName = "None")
+};
+
+UENUM(BlueprintType)
 enum class EPlacerDirectionType : uint8
 {
 	Forward		UMETA(DisplayName = "Forward"),
@@ -63,4 +71,13 @@ public:
 	EDEditorCellType FloorOccupancyData;
 	UPROPERTY()
 	EDEditorCellType CeilingOccupancyData;
+
+	UPROPERTY()
+	TObjectPtr<AActor> RoomOccupancyActor;
+	UPROPERTY()
+	TObjectPtr<AActor> FloorOccupancyActor;
+	UPROPERTY()
+	TObjectPtr<AActor> CeilingOccupancyActor;
+	UPROPERTY()
+	TObjectPtr<AActor> WallAndDoorOccupancyActor;
 };
