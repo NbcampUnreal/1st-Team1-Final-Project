@@ -90,6 +90,53 @@ void AGS_Chan::OnComboAttack()
 	}
 }
 
+void AGS_Chan::MulticastPlayComboSection()
+{
+	// 기존 타이머가 있다면 클리어 (Stop 이벤트는 호출하지 않음)
+	GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
+	
+	// 부모 클래스의 콤보 로직 실행 (CurrentComboIndex++ 포함)
+	Super::MulticastPlayComboSection();
+	
+	// 공격 사운드 재생
+	if (AxeSwingSound)
+	{
+		Multicast_PlaySkillSound(AxeSwingSound);
+	}
+	
+	if (AttackVoiceSound)
+	{
+		Multicast_PlaySkillSound(AttackVoiceSound);
+	}
+	
+	// 공격 후 일정 시간 뒤 사운드 시퀀스 리셋을 위한 타이머 설정
+	GetWorldTimerManager().SetTimer(
+		AttackSoundResetTimerHandle,
+		this,
+		&AGS_Chan::ResetAttackSoundSequence,
+		1.0f,  // 1초로 고정
+		false
+	);
+}
+
+void AGS_Chan::ResetAttackSoundSequence()
+{
+	// 사용자가 만든 Wwise Stop 이벤트 호출
+	if (AxeSwingStopEvent && AkComponent)
+	{
+		AkComponent->PostAkEvent(AxeSwingStopEvent);
+	}
+}
+
+void AGS_Chan::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
+{
+	// 4번째 공격일 때 특별한 사운드 재생
+	if (ComboIndex == 4 && FinalAttackExtraSound)
+	{
+		Multicast_PlaySkillSound(FinalAttackExtraSound);
+	}
+}
+
 void AGS_Chan::OnJumpAttackSkill()
 {
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))

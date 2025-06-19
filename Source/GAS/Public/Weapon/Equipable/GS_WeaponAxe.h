@@ -96,5 +96,8 @@ protected:
 	void Multicast_PlayHitVFX(EAxeHitTargetType TargetType, const FHitResult& SweepResult);
 	bool Multicast_PlayHitVFX_Validate(EAxeHitTargetType TargetType, const FHitResult& SweepResult);
 	void Multicast_PlayHitVFX_Implementation(EAxeHitTargetType TargetType, const FHitResult& SweepResult);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlaySpecialHitVFX(class UNiagaraSystem* VFXToPlay, const FHitResult& HitResult);
 };
 

@@ -612,6 +612,31 @@
 										</Action>
 									</ChildrenList>
 								</Event>
+								<Event Name="EV_Chan_Attack_Stop" ID="{FB36B935-9B69-40E0-8061-EB8614F2CA6A}">
+									<ChildrenList>
+										<Action Name="" ID="{6B8E65BF-114A-42A8-AEBA-BC06BB0BE796}" ShortID="679116181">
+											<PropertyList>
+												<Property Name="ActionType" Type="int16" Value="2"/>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_ChanAttackSound" ID="{0FAC94E7-2F25-48B7-992D-1AEC462E1555}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Chan_FinalAttack" ID="{FE229EF2-B036-48BD-BFB8-FD28A465AC48}">
+									<ChildrenList>
+										<Action Name="" ID="{ADC539F7-084A-4173-ADAC-CAF38501A527}" ShortID="546389573">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_ChanFinalAttackSound" ID="{1BEDD7E4-F077-41ED-AB21-0B21E5482DEF}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
 						</Folder>
 						<Folder Name="Guardian" ID="{7CBF914E-41B2-4CD1-9126-AC8B89994918}" ShortID="893317789">
