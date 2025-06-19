@@ -4,6 +4,7 @@
 #include "System/GameMode/GS_CustomLobbyGM.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Component/GS_StatComp.h"
+#include "System/SteamAvatarHelper.h"
 
 AGS_PlayerState::AGS_PlayerState()
     : CurrentPlayerRole(EPlayerRole::PR_Seeker)
@@ -32,6 +33,12 @@ void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 void AGS_PlayerState::BeginPlay()
 {
     Super::BeginPlay();
+
+    APlayerController* PC = GetPlayerController();
+    if (PC && PC->IsLocalController())
+    {
+        FetchMySteamAvatar();
+    }
 }
 
 void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
@@ -48,6 +55,7 @@ void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
         NewPS->CurrentHealth = CurrentHealth;
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
+        NewPS->MySteamAvatar = MySteamAvatar;
     }
 }
 
@@ -65,6 +73,17 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
         NewPS->CurrentHealth = CurrentHealth;
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
+        NewPS->MySteamAvatar = MySteamAvatar;
+    }
+}
+
+void AGS_PlayerState::FetchMySteamAvatar()
+{
+    FUniqueNetIdRepl MySteamId = USteamAvatarHelper::GetLocalSteamID();
+
+    if (MySteamId.IsValid())
+    {
+        MySteamAvatar = USteamAvatarHelper::GetSteamAvatar(MySteamId, ESteamAvatarSize::SteamAvatar_Large);
     }
 }
 
