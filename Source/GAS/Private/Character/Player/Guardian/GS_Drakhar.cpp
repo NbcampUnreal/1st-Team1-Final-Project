@@ -146,6 +146,7 @@ AGS_Drakhar::AGS_Drakhar()
 #endif
 	}
 
+	EarthquakeImpactVFX = nullptr;
 	FeverEarthquakeImpactVFX = nullptr;
 
 	FlyingDustVFX = nullptr;
@@ -514,6 +515,10 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			{
 				DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
 				MulticastPlayFeverEarthquakeImpactVFX(DamagedCharacter->GetActorLocation());
+			}
+			else
+			{
+				MulticastPlayEarthquakeImpactVFX(DamagedCharacter->GetActorLocation());
 			}
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
@@ -1418,29 +1423,6 @@ void AGS_Drakhar::MulticastPlayDraconicProjectileImpactEffects_Implementation(
 	}
 }
 
-void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
-{
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
-	{
-		ActiveDustCloudVFXComponent->Deactivate();
-
-		FTimerHandle DustCloudVFXCleanupTimer;
-		GetWorld()->GetTimerManager().SetTimer(DustCloudVFXCleanupTimer, [this]()
-		{
-			if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
-			{
-				ActiveDustCloudVFXComponent->DestroyComponent();
-			}
-			ActiveDustCloudVFXComponent = nullptr;
-		}, 1.5f, false); // 1.5초 후 정리
-	}
-}
-
 void AGS_Drakhar::MulticastPlayFeverEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
 {
 	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
@@ -1621,6 +1603,52 @@ void AGS_Drakhar::MulticastRPC_PlayAttackHitVFX_Implementation(FVector ImpactPoi
 	if (VFXToPlay)
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), VFXToPlay, ImpactPoint);
+	}
+}
+
+void AGS_Drakhar::MulticastPlayEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (EarthquakeImpactVFX && GetWorld())
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			EarthquakeImpactVFX,
+			ImpactLocation,
+			FRotator::ZeroRotator,
+			FVector(1.0f),
+			true,
+			true,
+			ENCPoolMethod::None,
+			true
+		);
+	}
+}
+
+void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
+	{
+		ActiveDustCloudVFXComponent->Deactivate();
+
+		FTimerHandle DustCloudVFXCleanupTimer;
+		GetWorld()->GetTimerManager().SetTimer(DustCloudVFXCleanupTimer, [this]()
+		{
+			if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
+			{
+				ActiveDustCloudVFXComponent->DestroyComponent();
+			}
+			ActiveDustCloudVFXComponent = nullptr;
+		}, 1.5f, false);
 	}
 }
 
