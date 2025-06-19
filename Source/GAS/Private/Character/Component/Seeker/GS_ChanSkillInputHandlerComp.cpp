@@ -3,7 +3,6 @@
 
 #include "Character/Component/Seeker/GS_ChanSkillInputHandlerComp.h"
 #include "Character/Skill/GS_SkillComp.h"
-#include "Character/GS_Character.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 
 void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
@@ -52,12 +51,15 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 		return;
 	}
 	
+	UE_LOG(LogTemp, Warning, TEXT("1")); // SJE
 	if (!bCtrlHeld)
 	{
 		if (ChanCharacter)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("2")); // SJE
 			if (ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 			{
+				UE_LOG(LogTemp, Warning, TEXT("3")); // SJE
 				ChanCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
 			}
 			else

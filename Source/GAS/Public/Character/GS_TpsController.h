@@ -89,8 +89,6 @@ public:
 	void PageUp(const FInputActionValue& InputValue);
 	void PageDown(const FInputActionValue& InputValue);
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void AddWidget();
 	void InitControllerPerWorld();
 
 	//[Spectate Other Player]

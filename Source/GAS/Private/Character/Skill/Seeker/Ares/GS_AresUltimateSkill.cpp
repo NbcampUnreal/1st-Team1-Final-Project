@@ -2,25 +2,62 @@
 
 
 #include "Character/Skill/Seeker/Ares/GS_AresUltimateSkill.h"
+#include "Character/Component/GS_StatComp.h"
+#include "Character/Component/GS_StatRow.h"
 
 void UGS_AresUltimateSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
-
+	UE_LOG(LogTemp, Warning, TEXT("Ares Ultimate Skill Active"));
 	bIsBerserker = true;
+	// 만약 일정 시간 후 효과 해제를 원하면, 타이머로 DeactiveSkill 호출
+	GetWorld()->GetTimerManager().SetTimer(UltimateSkillTimerHandle, this, &UGS_AresUltimateSkill::DeactiveSkill, 10.f, false);
 	ExecuteSkillEffect();
 }
 
 void UGS_AresUltimateSkill::DeactiveSkill()
 {
+	bIsBerserker = false;
+
+	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
+	{
+		StatComp->bIsInvincible = false;
+		StatComp->ResetStat(BuffAmount);
+	}
 }
 
 void UGS_AresUltimateSkill::ExecuteSkillEffect()
 {
-	// 데미지 무효화
-	// 공격력 증가
-	// 공격 속도 증가
-	// AresMovingSkill 쿨타임 감소
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	// 1. 데미지 무효화
+	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
+	{
+		StatComp->bIsInvincible = true;
+	}
+
+	// 2~3. 스탯 변경
+	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
+	{
+		FGS_StatRow BuffStat;
+		BuffStat.ATK = 50.f;     // 공격력 +50
+		BuffStat.ATS = 0.5f;     // 공격속도 +0.5 (예시)
+
+		BuffAmount = BuffStat; // 나중에 되돌릴 때 사용할 변수
+		StatComp->ChangeStat(BuffStat);
+	}
+
+	// 4. AresMovingSkill 쿨타임 감소
+	if (UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp())
+	{
+		if (UGS_SkillBase* MovingSkill = SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving))
+		{
+			MovingSkill->Cooltime *= 0.5f; // 쿨타임 절반으로 감소
+		}
+	}
 }
 
 bool UGS_AresUltimateSkill::IsActive() const
