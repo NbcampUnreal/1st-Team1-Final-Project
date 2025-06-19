@@ -8,6 +8,7 @@ class AGS_SpawnSlot;
 class AGS_PlayerState;
 class APawn;
 class UGS_PawnMappingDataAsset;
+class AGS_LobbyDisplayActor;
 
 UCLASS()
 class GAS_API AGS_CustomLobbyGM : public AGS_BaseGM
@@ -48,8 +49,12 @@ private:
 	TArray<AGS_SpawnSlot*> SeekerSlots;
 
 	UPROPERTY()
-	TMap<TObjectPtr<AGS_PlayerState>, TObjectPtr<AActor>> SpawnedLobbyActors;
+	TMap<TObjectPtr<AGS_PlayerState>, TObjectPtr<AGS_LobbyDisplayActor>> SpawnedLobbyActors;
+	UPROPERTY()
+	TMap<TObjectPtr<AGS_PlayerState>, TObjectPtr<AGS_SpawnSlot>> PlayerToSlotMap;
 
 	void CollectSpawnSlots();
-	void UpdateLobbyPawns();
+	void SpawnLobbyActorForPlayer(AGS_PlayerState* PlayerState, AGS_SpawnSlot* SpawnSlot);
+	void DestroyLobbyActorForPlayer(AGS_PlayerState* PlayerState);
+	AGS_SpawnSlot* FindAvailableSlotForPlayer(AGS_PlayerState* PlayerState);
 };
