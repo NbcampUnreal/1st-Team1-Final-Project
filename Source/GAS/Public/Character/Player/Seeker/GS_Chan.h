@@ -29,6 +29,8 @@ public:
 
 	virtual void OnComboAttack() override;
 
+	virtual void MulticastPlayComboSection() override;
+
 	// Aim Skill
 	/*void OnReadyAimSkill();*/
 	void OnJumpAttackSkill();
@@ -59,8 +61,34 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
 	UAkAudioEvent* AxeSwingSound;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
+	UAkAudioEvent* AxeSwingStopEvent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
+	UAkAudioEvent* FinalAttackExtraSound;  // 4번째 공격 추가 사운드
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX|Attack")
+	class UNiagaraSystem* FinalAttackHitVFX; // 4번째 공격 추가 VFX
+
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Voice")
 	UAkAudioEvent* AttackVoiceSound;
+
+	// ===============
+	// 공격 사운드 리셋 관련
+	// ===============
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack", meta = (ClampMin = "0.1", ClampMax = "5.0"))
+	float AttackSoundResetTime = 1.0f;
+
+	FTimerHandle AttackSoundResetTimerHandle;
+
+	UFUNCTION()
+	void ResetAttackSoundSequence();
+
+	// ===============
+	// 타격 처리 관련
+	// ===============
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnAttackHit(int32 ComboIndex);
 
 	// ===============
 	// 스킬 사운드
