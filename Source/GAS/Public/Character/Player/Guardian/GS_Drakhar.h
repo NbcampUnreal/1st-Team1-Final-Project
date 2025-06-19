@@ -112,6 +112,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "VFX|Earthquake")
 	UNiagaraComponent* ActiveDustCloudVFXComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Earthquake", meta = (DisplayName = "Earthquake Impact VFX"))
+	UNiagaraSystem* EarthquakeImpactVFX;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Earthquake", meta = (DisplayName = "Fever Earthquake Impact VFX"))
 	UNiagaraSystem* FeverEarthquakeImpactVFX;
 
@@ -348,6 +351,9 @@ public:
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastStopDustCloudVFX();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayEarthquakeImpactVFX(const FVector& ImpactLocation);
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayFeverEarthquakeImpactVFX(const FVector& ImpactLocation);
