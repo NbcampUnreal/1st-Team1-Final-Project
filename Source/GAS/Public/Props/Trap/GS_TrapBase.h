@@ -7,6 +7,7 @@
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Props/Trap/GS_TrapManager.h"
+#include "Components/SphereComponent.h"
 #include "GS_TrapBase.generated.h"
 
 class UBoxComponent;
@@ -34,12 +35,62 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
 	UBoxComponent* DamageBoxComp;
 
+	//함정 활성화
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Trap")
+	USphereComponent* ActivateSphereComp;
+
+	
+
+	//함정 데이터 테이블
 	UPROPERTY(EditDefaultsOnly, Category = "Trap")
 	UDataTable* TrapDataTable;
 
 	FTrapData TrapData;
 	
-	
+
+	FTimerHandle CheckOverlapTimerHandle;
+
+	bool bIsActivated = false;
+
+	//함정 활성화
+	UFUNCTION()
+	void OnActivSCompBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION(Server, Reliable)
+	void Server_ActivateTrap(AActor* TargetActor);
+	void Server_ActivateTrap_Implementation(AActor* TargetActor);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void ActivateTrap(AActor* TargetActor);
+	void ActivateTrap_Implementation(AActor* TargetActor);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void DeActivateTrap();
+	void DeActivateTrap_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_EnableOptimizedCollision();
+	void Multicast_EnableOptimizedCollision_Implementation();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DisableOptimizedCollision();
+	void Multicast_DisableOptimizedCollision_Implementation();
+
+
+
+	void StartDeactivateTrapCheck();
+
+	void CheckOverlappingSeeker();
+
+
+
+
+
+
+
+
 
 	//Damage Box에 오버랩 되었을 때
 	UFUNCTION()
@@ -101,6 +152,10 @@ public:
 	bool IsBlockedInDirection(const FVector& Start, const FVector& Direction, float Distance, AGS_Character* CharacterToIgnore);
 
 	//void ClearDotTimerForActor(AActor* Actor);
+
+
+
+
 
 protected:
 	//TMap<AActor*, FTimerHandle> ActiveDoTTimers;

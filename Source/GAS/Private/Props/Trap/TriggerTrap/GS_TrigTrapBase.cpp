@@ -13,8 +13,7 @@ AGS_TrigTrapBase::AGS_TrigTrapBase()
 	TriggerBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
 	TriggerBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	TriggerBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-
-
+	TriggerBoxComp->ComponentTags.Add("OptimizedCollision");
 }
 
 void AGS_TrigTrapBase::BeginPlay()
