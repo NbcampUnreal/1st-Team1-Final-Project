@@ -87,10 +87,10 @@ protected:
 	float SpeedUpMoveSpeed;
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void ApplyHitStop(AGS_Character* InDamagedCharacter);
+	void MulticastRPCApplyHitStop(AGS_Character* InDamagedCharacter);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void EndHitStop();
+	void MulticastRPCEndHitStop(AGS_Character* InDamagedCharacter);
 
 
 private:

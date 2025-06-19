@@ -15,11 +15,11 @@ public:
 	AGS_NonTrigTrapBase();
 
 protected:
-	virtual void BeginPlay() override;
+	//virtual void BeginPlay() override;
 
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Trap")
+	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Trap")
 	USphereComponent* ActivateSphereComp;
 
 	FTimerHandle CheckOverlapTimerHandle;
@@ -45,10 +45,10 @@ public:
 
 	void StartDeactivateTrapCheck();
 
-	void CheckOverlappingSeeker();
+	void CheckOverlappingSeeker();*/
 
 	//TrapMotion
-	virtual bool CanStartMotion() const override;
+	//virtual bool CanStartMotion() const override;
 	//virtual bool CanStopMotion() const override;
 
 };

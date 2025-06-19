@@ -35,16 +35,28 @@ AGS_TrapBase::AGS_TrapBase()
 	MeshParentSceneComp->PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
 
 
+	ActivateSphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("ActivateSphereComp"));
+	ActivateSphereComp->SetupAttachment(MeshParentSceneComp);
+	ActivateSphereComp->PrimaryComponentTick.bCanEverTick = false;
+	ActivateSphereComp->PrimaryComponentTick.bStartWithTickEnabled = false;
+	ActivateSphereComp->PrimaryComponentTick.bAllowTickOnDedicatedServer = false;
+
+	ActivateSphereComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	ActivateSphereComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	ActivateSphereComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
+
+
 
 	DamageBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("DamageBox"));
 	DamageBoxComp->SetupAttachment(MeshParentSceneComp);
 	// DamageBox 콜리전 설정
-	DamageBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	DamageBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	//DamageBoxComp->SetCollisionObjectType(ECC_WorldDynamic);
 	DamageBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
 	DamageBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	DamageBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
-
+	DamageBoxComp->ComponentTags.Add("OptimizedCollision");
 
 
 }
@@ -53,6 +65,23 @@ AGS_TrapBase::AGS_TrapBase()
 void AGS_TrapBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	TArray<UActorComponent*> Components;
+	GetComponents(UPrimitiveComponent::StaticClass(), Components);
+	for (UActorComponent* Comp : Components)
+	{
+		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
+		{
+			if (Prim->ComponentHasTag("OptimizedCollision"))
+			{
+				Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			}
+
+
+		}
+	}
+	
+
 	/*if (HasAuthority())
 	{
 		AGS_TrapManager* TrapManager = GetTrapManager();
@@ -70,9 +99,121 @@ void AGS_TrapBase::BeginPlay()
 
 	LoadTrapData();
 	DamageBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrapBase::OnDamageBoxOverlap);
+	ActivateSphereComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrapBase::OnActivSCompBeginOverlap);
+}
+
+//함정 활성화
+
+void AGS_TrapBase::OnActivSCompBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+	bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor != this)
+	{
+
+		AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
+		if (Seeker && !bIsActivated)
+		{
+			bIsActivated = true;
+			if (!HasAuthority())
+			{
+				Server_ActivateTrap(OtherActor);
+			}
+			else
+			{
+				ActivateTrap(OtherActor);
+			}
+
+			if (!GetWorld()->GetTimerManager().IsTimerActive(CheckOverlapTimerHandle))
+			{
+				StartDeactivateTrapCheck();
+			}
+		}
+	}
+}
+
+void AGS_TrapBase::Server_ActivateTrap_Implementation(AActor* TargetActor)
+{
+	ActivateTrap(TargetActor);
 }
 
 
+void AGS_TrapBase::ActivateTrap_Implementation(AActor* TargetActor)
+{
+	Multicast_EnableOptimizedCollision();
+	
+}
+
+
+void AGS_TrapBase::Multicast_EnableOptimizedCollision_Implementation()
+{
+	TArray<UActorComponent*> Components;
+	GetComponents(UPrimitiveComponent::StaticClass(), Components);
+	for (UActorComponent* Comp : Components)
+	{
+		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
+		{
+			if (Prim->ComponentHasTag("OptimizedCollision"))
+			{
+				Prim->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+			}
+			
+		}
+	}
+}
+
+
+
+
+
+
+
+//Sphere Comp에 End Overlap 시,
+
+void AGS_TrapBase::StartDeactivateTrapCheck()
+{
+	GetWorld()->GetTimerManager().SetTimer(CheckOverlapTimerHandle, this, &AGS_TrapBase::CheckOverlappingSeeker, 5.0f, true);
+}
+
+void AGS_TrapBase::CheckOverlappingSeeker()
+{
+	TArray<AActor*> OverlappingActors;
+	ActivateSphereComp->GetOverlappingActors(OverlappingActors, AGS_Seeker::StaticClass());
+
+	if (OverlappingActors.Num() == 0)
+	{
+		DeActivateTrap();
+		GetWorld()->GetTimerManager().ClearTimer(CheckOverlapTimerHandle);
+		bIsActivated = false;
+	}
+}
+
+void AGS_TrapBase::DeActivateTrap_Implementation()
+{
+	Multicast_DisableOptimizedCollision();
+}
+
+
+void AGS_TrapBase::Multicast_DisableOptimizedCollision_Implementation()
+{
+	TArray<UActorComponent*> Components;
+	GetComponents(UPrimitiveComponent::StaticClass(), Components);
+	for (UActorComponent* Comp : Components)
+	{
+		if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
+		{
+			if (Prim->ComponentHasTag("OptimizedCollision"))
+			{
+				Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			}
+			
+		}
+	}
+}
+
+
+
+//함정 데미지 
 void AGS_TrapBase::LoadTrapData()
 {
 	if (!TrapDataTable) return;

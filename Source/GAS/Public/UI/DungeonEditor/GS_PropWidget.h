@@ -29,6 +29,10 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> SwitcherTitle2;
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> SwitcherButton3;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> SwitcherTitle3;
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UWidgetSwitcher> BundleSwitcher;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -40,6 +44,8 @@ public:
 	void PressedSwitcherBtn1();
 	UFUNCTION()
 	void PressedSwitcherBtn2();
+	UFUNCTION()
+	void PressedSwitcherBtn3();
 
 	void SwitchBundle(EObjectType InObjectType);
 

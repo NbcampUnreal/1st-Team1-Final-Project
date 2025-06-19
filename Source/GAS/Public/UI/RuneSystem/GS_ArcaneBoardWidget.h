@@ -12,6 +12,7 @@ class UGS_RuneInventoryWidget;
 class UGS_StatPanelWidget;
 class UGS_RuneGridCellWidget;
 class UGS_DragVisualWidget;
+class UGS_RuneTooltipWidget;
 class UGS_ArcaneBoardManager;
 class UGS_ArcaneBoardLPS;
 
@@ -95,6 +96,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	FVector2D CalculateDragVisualScale(uint8 RuneID) const;
 
+	//툴팁
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void RequestShowTooltip(uint8 RuneID, const FVector2D& MousePos);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void HideTooltip();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void CancelTooltipRequest();
+
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 
@@ -137,10 +148,27 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
 	UGS_DragVisualWidget* SelectionVisualWidget;
 
+	//툴팁
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ArcaneBoard")
+	TSubclassOf<UGS_RuneTooltipWidget> TooltipWidgetClass;
+
+	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
+	UGS_RuneTooltipWidget* RuneTooltipWidget;
+
+	FTimerHandle TooltipDelayTimer;
+
 private:
 	void BindToLPS();
 	void UnbindFromLPS();
 
 	UPROPERTY()
 	UGS_ArcaneBoardLPS* ArcaneBoardLPS;
+
+	//툴팁
+	FVector2D TooltipSize;
+	uint8 CurrTooltipRuneID;
+
+	void ShowTooltip(uint8 RuneID, const FVector2D& MousePos);
+	FVector2D CalculateTooltipPosition(const FVector2D& MousePos);
+	bool ShouldShowTooltip() const;
 };

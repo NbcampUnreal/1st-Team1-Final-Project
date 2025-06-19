@@ -29,6 +29,8 @@ public:
 	UInputAction* ClickLMBAction;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* ClickRMBAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* ClickDeleteAction;
 
 	// Zoom
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")

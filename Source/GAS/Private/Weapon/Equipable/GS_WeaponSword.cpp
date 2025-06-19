@@ -29,13 +29,22 @@ void AGS_WeaponSword::BeginPlay()
 	OwnerChar = Cast<AGS_Character>(GetOwner());
 }
 
-
 void AGS_WeaponSword::EnableHit()
 {
 	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 void AGS_WeaponSword::DisableHit()
+{
+	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AGS_WeaponSword::ServerEnableHit_Implementation()
+{
+	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void AGS_WeaponSword::ServerDisableHit_Implementation()
 {
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

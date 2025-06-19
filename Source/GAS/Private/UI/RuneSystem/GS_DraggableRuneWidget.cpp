@@ -5,6 +5,7 @@
 #include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
 #include "UI/RuneSystem/GS_DragVisualWidget.h"
 #include "Components/Image.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 
 UGS_DraggableRuneWidget::UGS_DraggableRuneWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -33,6 +34,11 @@ void UGS_DraggableRuneWidget::NativeConstruct()
 FReply UGS_DraggableRuneWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	FReply Reply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+
+	if (ParentBoardWidget)
+	{
+		ParentBoardWidget->HideTooltip();
+	}
 
 	if (bIsPlaced || !ParentBoardWidget)
 	{
@@ -75,6 +81,21 @@ void UGS_DraggableRuneWidget::NativeOnMouseEnter(const FGeometry& InGeometry, co
 	{
 		SetRuneVisualState(true, bIsPlaced);
 	}
+
+	if (ParentBoardWidget)
+	{
+		FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
+		if (APlayerController* PC = GetOwningPlayer())
+		{
+			FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
+			MousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
+		}
+
+		if (MousePos.X > 0 || MousePos.Y > 0)
+		{
+			ParentBoardWidget->RequestShowTooltip(RuneID, MousePos);
+		}
+	}
 }
 
 void UGS_DraggableRuneWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
@@ -84,6 +105,11 @@ void UGS_DraggableRuneWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEve
 	if (!bIsPlaced)
 	{
 		SetRuneVisualState(false, bIsPlaced);
+	}
+
+	if (ParentBoardWidget)
+	{
+		ParentBoardWidget->HideTooltip();
 	}
 }
 

@@ -2,7 +2,9 @@
 
 #include "Character/Player/Monster/GS_IronFang.h"
 #include "DungeonEditor/GS_DEController.h"
+#include "DungeonEditor/Component/PlaceInfoComponent.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
+#include "Props/GS_RoomBase.h"
 #include "RuneSystem/GS_EnumUtils.h"
 
 AGS_PlacerBase::AGS_PlacerBase()
@@ -134,16 +136,33 @@ void AGS_PlacerBase::BuildObject()
 		TArray<FIntPoint> IntPointArray;
 		CalCellsInRectArea(IntPointArray);
 
-		EDEditorCellType TargetType = GetTargetCellType();
+		EDEditorCellType TargetType = BuildManagerRef->GetTargetCellType(ObjectData.ObjectType, ObjectData.TrapType);
 		bool IsRoom = false;
 		for (int i = 0; i < IntPointArray.Num(); i++)
 		{
 			if (ObjectData.ObjectType == EObjectType::Room)
 			{
+				if (AGS_RoomBase* RoomBase = Cast<AGS_RoomBase>(NewActor))
+				{
+					RoomBase->HideCeiling();
+				}
 				TargetType = GetRoomCellInfo(i);
 				IsRoom = true;
 			}
-			BuildManagerRef->SetOccupancyData(IntPointArray[i], TargetType, IsRoom);
+			else if (ObjectData.ObjectType == EObjectType::DoorAndWall)
+			{
+				if (ObjectData.DoorAndWallType == EDoorAndWallType::Wall)
+				{
+					TargetType = EDEditorCellType::VerticalPlaceable;
+				}
+			}
+			BuildManagerRef->SetOccupancyData(IntPointArray[i], TargetType, ObjectData.ObjectType, NewActor, IsRoom);
+		}
+
+		// Cell Info를 Component에 전달 및 저장
+		if (UPlaceInfoComponent* PlaceInfoCompo = NewActor->GetComponentByClass<UPlaceInfoComponent>())
+		{
+			PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapType, IntPointArray);
 		}
 	}
 }
@@ -217,7 +236,7 @@ void AGS_PlacerBase::DrawPlacementIndicators()
 			TArray<FIntPoint> IntPointArray;
 		 	CalCellsInRectArea(IntPointArray);
 
-		 	EDEditorCellType TargetType = GetTargetCellType();
+		 	EDEditorCellType TargetType = BuildManagerRef->GetTargetCellType(ObjectData.ObjectType, ObjectData.TrapType);
 		 	for (int i = 0; i < IntPointArray.Num(); i++)
 		 	{
 		 		FVector CellLocation = BuildManagerRef->GetCellLocation(IntPointArray[i]);
@@ -247,38 +266,38 @@ void AGS_PlacerBase::CalCellsInRectArea(TArray<FIntPoint>& InIntPointArray)
 	BuildManagerRef->GetCellsInRectArea(InIntPointArray, BuildManagerRef->GetCellUnderCursor(), ObjectSize, RotateYaw);
 }
 
-EDEditorCellType AGS_PlacerBase::GetTargetCellType()
-{
-	EObjectType ObjectType = ObjectData.ObjectType;
-	if (ObjectType == EObjectType::Room)
-	{
-		return EDEditorCellType::None;
-	}
-	else if (ObjectType == EObjectType::Monster)
-	{
-		return EDEditorCellType::FloorPlace;
-	}
-	else if (ObjectType == EObjectType::Trap)
-	{
-		ETrapPlacement TrapType = ObjectData.TrapType;
-		if (TrapType == ETrapPlacement::Floor)
-			return EDEditorCellType::FloorPlace;
-		else if (TrapType == ETrapPlacement::Ceiling)
-			return EDEditorCellType::CeilingPlace;
-		else if (TrapType == ETrapPlacement::Wall)
-			return EDEditorCellType::WallPlace;
-	}
-	else if (ObjectType == EObjectType::DoorAndWall)
-	{
-		// 나중에 벽과 문을 구분지어주어야 함.
-		return EDEditorCellType::Door;
-	}
-	else
-	{
-		return EDEditorCellType::None;
-	}
-	return EDEditorCellType::None;
-}
+// EDEditorCellType AGS_PlacerBase::GetTargetCellType()
+// {
+// 	EObjectType ObjectType = ObjectData.ObjectType;
+// 	if (ObjectType == EObjectType::Room)
+// 	{
+// 		return EDEditorCellType::None;
+// 	}
+// 	else if (ObjectType == EObjectType::Monster)
+// 	{
+// 		return EDEditorCellType::FloorPlace;
+// 	}
+// 	else if (ObjectType == EObjectType::Trap)
+// 	{
+// 		ETrapPlacement TrapType = ObjectData.TrapType;
+// 		if (TrapType == ETrapPlacement::Floor)
+// 			return EDEditorCellType::FloorPlace;
+// 		else if (TrapType == ETrapPlacement::Ceiling)
+// 			return EDEditorCellType::CeilingPlace;
+// 		else if (TrapType == ETrapPlacement::Wall)
+// 			return EDEditorCellType::WallPlace;
+// 	}
+// 	else if (ObjectType == EObjectType::DoorAndWall)
+// 	{
+// 		// 나중에 벽과 문을 구분지어주어야 함.
+// 		return EDEditorCellType::Door;
+// 	}
+// 	else
+// 	{
+// 		return EDEditorCellType::None;
+// 	}
+// 	return EDEditorCellType::None;
+// }
 
 EDEditorCellType AGS_PlacerBase::GetRoomCellInfo(int InIdx)
 {
