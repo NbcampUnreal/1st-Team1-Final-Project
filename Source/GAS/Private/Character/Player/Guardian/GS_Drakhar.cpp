@@ -362,6 +362,9 @@ void AGS_Drakhar::ServerRPCDoDash_Implementation(float DeltaTime)
 
 void AGS_Drakhar::ServerRPCEndDash_Implementation()
 {
+	//collision setting first
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+
 	if (DamagedCharactersFromDash.IsEmpty())
 	{
 		return;
@@ -393,7 +396,6 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	}
 
 	DamagedCharactersFromDash.Empty();
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	bCanCombo = true;
 
 	// 대시 VFX 종료 (Wing Rush + Dust)

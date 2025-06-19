@@ -36,8 +36,7 @@ void UGS_ANS_DrakharDash::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeque
 	{
 		if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner))
 		{
-			Drakhar->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			//데미지 처리
+			//damage
 			Drakhar->ServerRPCEndDash();
 		}
 	}

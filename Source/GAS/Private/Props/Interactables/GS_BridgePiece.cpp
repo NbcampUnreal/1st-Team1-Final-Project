@@ -33,6 +33,10 @@ void AGS_BridgePiece::BrokeBridge(float InDamage)
 			MeshComponent->SetSimulatePhysics(true);
 			MeshComponent->bApplyImpulseOnDamage = false;
 			MeshComponent->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+			
+			bIsDestroyed = true;
+			FTimerHandle AfterBrokenTimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(AfterBrokenTimerHandle, this, &AGS_BridgePiece::StopSimulate, 5.f);
 		}
 	}
 }
@@ -42,4 +46,14 @@ void AGS_BridgePiece::BeginPlay()
 	Super::BeginPlay();
 	
 	CurrentHealth = MaxHealth;
+}
+
+void AGS_BridgePiece::StopSimulate()
+{
+	if (HasAuthority())
+	{
+		MeshComponent->SetSimulatePhysics(false);
+		MeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
+		SetLifeSpan(2.f);
+	}
 }

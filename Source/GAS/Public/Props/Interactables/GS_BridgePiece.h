@@ -13,10 +13,11 @@ public:
 	AGS_BridgePiece();
 	void SetBridgeMesh(UStaticMesh* InMesh, float InValue);
 	void BrokeBridge(float InDamage);
-
+	
 protected:
 	virtual void BeginPlay() override;
-	
+	void StopSimulate();
+
 private:
 	UPROPERTY()
 	UStaticMeshComponent* MeshComponent;

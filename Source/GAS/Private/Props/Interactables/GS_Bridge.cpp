@@ -38,15 +38,6 @@ void AGS_Bridge::SetUpBridge()
 {
 	if (HasAuthority())
 	{
-		for (UChildActorComponent* Component : BrokenPieces)
-		{
-			if (Component)
-			{
-				Component->DestroyComponent();
-			}
-		}
-		BrokenPieces.Empty();
-		
 		HalfBridgeMeshSize = BridgeMeshAssets.Num() / 2;
 		
 		for (int32 i = 0; i < BridgeMeshAssets.Num(); ++i)
@@ -61,7 +52,7 @@ void AGS_Bridge::SetUpBridge()
 			if (NewPieceComponent)
 			{
 				NewPieceComponent->SetChildActorClass(AGS_BridgePiece::StaticClass());
-				NewPieceComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+				NewPieceComponent->AttachToComponent(RootComponent,FAttachmentTransformRules::KeepRelativeTransform);
 				NewPieceComponent->RegisterComponent();
 
 				AGS_BridgePiece* PieceActor = Cast<AGS_BridgePiece>(NewPieceComponent->GetChildActor());
