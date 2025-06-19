@@ -447,9 +447,6 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_FeverGauge)
 	float CurrentFeverGauge;
 
-	UPROPERTY(Replicated)
-	float DefaultAttackPower;
-	
 	UPROPERTY(ReplicatedUsing = OnRep_IsFeverMode)
 	bool IsFeverMode;
 

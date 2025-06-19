@@ -12,6 +12,9 @@ AGS_LobbyDisplayActor::AGS_LobbyDisplayActor()
     SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComponent"));
     SetRootComponent(SkeletalMeshComponent);
     bReplicates = true;
+
+    bAlwaysRelevant = true;
+    NetUpdateFrequency = 1;
 }
 
 void AGS_LobbyDisplayActor::SetupDisplay_Implementation(USkeletalMesh* NewMesh, TSubclassOf<UAnimInstance> NewAnimClass,
