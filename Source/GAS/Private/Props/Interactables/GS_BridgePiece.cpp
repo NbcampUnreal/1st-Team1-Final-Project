@@ -1,4 +1,4 @@
-﻿#include "Props/Interactables/GS_BridgePiece.h"
+#include "Props/Interactables/GS_BridgePiece.h"
 
 AGS_BridgePiece::AGS_BridgePiece()
 {
@@ -9,8 +9,6 @@ AGS_BridgePiece::AGS_BridgePiece()
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BridgeMesh"));
 	MeshComponent->SetIsReplicated(true);
-	MeshComponent->SetSimulatePhysics(false);
-	MeshComponent->SetMassOverrideInKg(NAME_None, 70000.0f, true);
 }
 
 void AGS_BridgePiece::SetBridgeMesh(UStaticMesh* InMesh, float InValue)
@@ -46,6 +44,9 @@ void AGS_BridgePiece::BeginPlay()
 	Super::BeginPlay();
 	
 	CurrentHealth = MaxHealth;
+
+	MeshComponent->SetSimulatePhysics(false);
+	MeshComponent->SetMassOverrideInKg(NAME_None, 70000.0f, true);
 }
 
 void AGS_BridgePiece::StopSimulate()
