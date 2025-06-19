@@ -18,7 +18,7 @@ void UGS_AresAimingSkill::ActiveSkill()
 
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		//OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 	}
 
 	ExecuteSkillEffect();
