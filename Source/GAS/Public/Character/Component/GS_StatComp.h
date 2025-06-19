@@ -80,6 +80,9 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerRPCHeal(float InHealAmount);
 
+	UPROPERTY(Replicated)
+	bool bIsInvincible = false;
+
 protected:
 	float CharacterWalkSpeed;
 

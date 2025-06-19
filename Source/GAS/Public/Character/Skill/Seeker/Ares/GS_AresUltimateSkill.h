@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Character/Skill/Seeker/GS_SeekerSkillBase.h"
+#include "Character/Component/GS_StatRow.h"
 #include "GS_AresUltimateSkill.generated.h"
 
-/**
- * 
- */
+struct FGS_StatRow;
+
 UCLASS()
 class GAS_API UGS_AresUltimateSkill : public UGS_SeekerSkillBase
 {
@@ -22,4 +22,7 @@ public:
 
 private:
 	bool bIsBerserker;
+
+	FTimerHandle UltimateSkillTimerHandle;
+	FGS_StatRow BuffAmount;
 };
