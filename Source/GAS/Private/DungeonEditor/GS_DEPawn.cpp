@@ -21,6 +21,8 @@ AGS_DEPawn::AGS_DEPawn()
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->SetProjectionMode(ECameraProjectionMode::Type::Orthographic);
 	CameraComp->SetOrthoWidth(5000);
+	CameraComp->SetAutoCalculateOrthoPlanes(false);
+	CameraComp->SetOrthoNearClipPlane(-2000.f);
 
 	MovementComp = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("MovementComp"));
 	MovementComp->UpdatedComponent = RootComponent;
@@ -97,6 +99,14 @@ void AGS_DEPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 					, ETriggerEvent::Completed
 					,this
 					, &AGS_DEPawn::ReleasedRMB);
+			}
+
+			if (PlayerController->ClickDeleteAction)
+			{
+				EnhancedInput->BindAction(PlayerController->ClickDeleteAction
+					, ETriggerEvent::Started
+					,this
+					, &AGS_DEPawn::ClickDelete);
 			}
 		}
 	}
@@ -207,6 +217,21 @@ void AGS_DEPawn::ReleasedRMB(const FInputActionValue& Value)
 		if (!IsClickRBT)
 		{
 			DEController->GetBuildManager()->ReleasedRMB();
+		}
+	}
+}
+
+void AGS_DEPawn::ClickDelete(const FInputActionValue& Value)
+{
+	if (!Controller) return;
+
+	if (AGS_DEController* DEController = Cast<AGS_DEController>(Controller))
+	{
+		const bool IsClickDel = Value.Get<bool>();
+
+		if (IsClickDel)
+		{
+			DEController->GetBuildManager()->PressedDel();
 		}
 	}
 }

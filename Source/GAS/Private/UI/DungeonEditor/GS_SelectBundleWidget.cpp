@@ -33,6 +33,7 @@ void UGS_SelectBundleWidget::CreateSelector(FDataTableRowHandle& InData)
 	ERoomType RoomType = ERoomType::None;
 	ETrapPlacement TrapType = ETrapPlacement::Floor;
 	EMonsterType MonsterType = EMonsterType::None;
+	EDoorAndWallType DoorAndWallType = EDoorAndWallType::None;
 	FText Title;
 	
 	switch (RowPtr->ObjectType)
@@ -53,6 +54,12 @@ void UGS_SelectBundleWidget::CreateSelector(FDataTableRowHandle& InData)
 		MonsterType = RowPtr->MonsterType;
 		WidgetIdx = (int)MonsterType;
 		Title = UGS_EnumUtils::GetEnumAsText<EMonsterType>(MonsterType);
+		break;
+
+	case EObjectType::DoorAndWall:
+		DoorAndWallType = RowPtr->DoorAndWallType;
+		WidgetIdx = (int)DoorAndWallType;
+		Title = UGS_EnumUtils::GetEnumAsText<EDoorAndWallType>(DoorAndWallType);
 		break;
 
 	default:
@@ -84,6 +91,10 @@ void UGS_SelectBundleWidget::InitWidget(EObjectType InObjectType)
 		PropsSelectorWidgets.SetNum(UGS_EnumUtils::GetEnumCount<ERoomType>() - 1);
 		break;
 
+	case EObjectType::DoorAndWall:
+		PropsSelectorWidgets.SetNum(UGS_EnumUtils::GetEnumCount<EDoorAndWallType>() - 1);
+		break;
+		
 	case EObjectType::Trap:
 		PropsSelectorWidgets.SetNum(UGS_EnumUtils::GetEnumCount<ETrapPlacement>() - 1);
 		break;
@@ -91,7 +102,7 @@ void UGS_SelectBundleWidget::InitWidget(EObjectType InObjectType)
 	case EObjectType::Monster:
 		PropsSelectorWidgets.SetNum(UGS_EnumUtils::GetEnumCount<EMonsterType>() - 1);
 		break;
-
+	
 	default:
 		break;
 	}
