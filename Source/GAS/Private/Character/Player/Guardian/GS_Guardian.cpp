@@ -7,14 +7,10 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
-#include "NiagaraSystem.h"
-#include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
 #include "Character/Component/GS_CameraShakeComponent.h"
-#include "Kismet/GamePlayStatics.h"
 #include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Props/Interactables/GS_BridgePiece.h"
 
 AGS_Guardian::AGS_Guardian()
 {
@@ -113,32 +109,15 @@ TSet<AGS_Character*> AGS_Guardian::DetectPlayerInRange(const FVector& Start, flo
 			{
 				DamagedPlayers.Add(DamagedCharacter);
 			}
-			// AGS_Character* DamagedCharacter = Cast<AGS_Character>(OutHitResult.GetActor());
-			// if (IsValid(DamagedCharacter))
-			// {
-			// 	DamagedPlayers.Add(DamagedCharacter);
-			// 	//ServerRPCMeleeAttack(DamagedCharacter);
-			// 	UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
-			// 	if (IsValid(DamagedCharacterStat))
-			// 	{
-			// 		float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
-			// 		FDamageEvent DamageEvent;
-			// 		DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(),this);
-			//
-			// 		// === 히트 사운드 재생 (Drakhar인 경우) ===
-			// 		AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
-			// 		if (Drakhar)
-			// 		{
-			// 			Drakhar->PlayAttackHitSound();
-			//
-			// 			//server
-			// 			if (!Drakhar->GetIsFeverMode())
-			// 			{
-			// 				Drakhar->MulticastRPCSetFeverGauge(10.f);
-			// 			}
-			// 		}
-			// 	}
-			// }
+			//break bridge
+			if (OutHitResult.GetActor()->IsA<AGS_BridgePiece>())
+			{
+				AGS_BridgePiece* BridgePiece = Cast<AGS_BridgePiece>(OutHitResult.GetActor());
+				if (BridgePiece)
+				{
+					BridgePiece->BrokeBridge(100.f);
+				}
+			}
 		}
 	}
 
@@ -159,8 +138,8 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 			FDamageEvent DamageEvent;
 			DamagedCharacter->TakeDamage(Damage + PlusDamge, DamageEvent, GetController(),this);
 
-			//hit stop test
-			ApplyHitStop(DamagedCharacter);
+			//hit stop
+			MulticastRPCApplyHitStop(DamagedCharacter);
 			
 			//server
 			AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
@@ -198,7 +177,7 @@ void AGS_Guardian::QuitGuardianSkill()
 	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
 }
 
-void AGS_Guardian::ApplyHitStop_Implementation(AGS_Character* InDamagedCharacter)
+void AGS_Guardian::MulticastRPCApplyHitStop_Implementation(AGS_Character* InDamagedCharacter)
 {
 	if (HasAuthority())
 	{
@@ -211,23 +190,20 @@ void AGS_Guardian::ApplyHitStop_Implementation(AGS_Character* InDamagedCharacter
 	{
 		CustomTimeDilation = 0.1f;
 		InDamagedCharacter->CustomTimeDilation = 0.1f;
-		EndHitStopDamagedCharacters.Add(InDamagedCharacter);
 
+		FTimerDelegate HitStopTimerDelegate;
 		FTimerHandle HitStopTimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(HitStopTimerHandle, this, &ThisClass::EndHitStop, HitStopDurtaion, false);
+		HitStopTimerDelegate.BindUFunction(this, FName("MulticastRPCEndHitStop"), InDamagedCharacter);
+		GetWorld()->GetTimerManager().SetTimer(HitStopTimerHandle, HitStopTimerDelegate, HitStopDurtaion, false);
 	}
 }
 
-void AGS_Guardian::EndHitStop_Implementation()
+void AGS_Guardian::MulticastRPCEndHitStop_Implementation(AGS_Character* InDamagedCharacter)
 {
 	if (!HasAuthority())
 	{
-		for (const auto& InDamagedCharacter : EndHitStopDamagedCharacters)
-		{
-			CustomTimeDilation = 1.f;
-			InDamagedCharacter->CustomTimeDilation = 1.f;
-		}
-		EndHitStopDamagedCharacters.Empty();
+		CustomTimeDilation = 1.f;
+		InDamagedCharacter->CustomTimeDilation = 1.f;
 	}
 }
 

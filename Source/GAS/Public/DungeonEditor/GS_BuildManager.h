@@ -24,7 +24,12 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
 	TObjectPtr<UStaticMeshComponent> StaticMeshCompo;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
+	TObjectPtr<UDecalComponent> DecalCompo;
 
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> DecalMaterialInstance;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting")
 	TArray<FDataTableRowHandle> BuildingsRows;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting")
@@ -46,7 +51,10 @@ public:
 	FLinearColor GridColor;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting|Grid")
 	float GridOpacity;
-
+	
+	void ChangeDecalType(FDataTableRowHandle* Data);
+	void ClearDecalType();
+	
 	TArray<FDataTableRowHandle>* GetBuildingsRows() { return &BuildingsRows; }
 	
 	float GetGridCellSize() { return CellSize; }
@@ -60,9 +68,10 @@ public:
 	void GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FIntPoint InCenterAreaCell, FIntPoint InAreaSize, float RotateDegree = 0.0f);
 
 	// 나중에 배치한 애들의 타입을 넣어주어야 할 때 이용하면 괜찮을 것 같다.
-	void SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType, bool InIsRoom = false);
+	void SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType, EObjectType InObjectType, AActor* InActor, bool InIsRoom = false, bool InDeleteMode = false);
 	bool CheckOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType);
 	void ConvertFindOccupancyData(EDEditorCellType InTargetType, EDEditorCellType& InOutFindType);
+	EDEditorCellType GetTargetCellType(EObjectType InObjectType, ETrapPlacement InTrapType = ETrapPlacement::Floor);
 	
 	// 나중에 BuildableBoundaryEnabled bool 변수 추가할 경우 함수 구현해야 함.
 	// bool CheckCellInBuildableBoundary(FIntPoint Cell);
@@ -75,6 +84,7 @@ public:
 	void PressedRMB();
 	void ReleasedRMB();
 	void RotateProp();
+	void PressedDel();
 	
 protected:
 	virtual void BeginPlay() override;

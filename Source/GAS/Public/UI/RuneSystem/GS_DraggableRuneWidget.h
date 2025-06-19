@@ -63,4 +63,7 @@ protected:
 
 	UPROPERTY()
 	UGS_ArcaneBoardWidget* ParentBoardWidget;
+
+	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
+	bool bIsCurrentlyHovered;
 };

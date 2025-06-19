@@ -22,6 +22,11 @@ public:
 	
 	UFUNCTION()
 	void DisableHit();
+
+	UFUNCTION(Server, Reliable)
+	void ServerEnableHit();
+	UFUNCTION(Server, Reliable)
+	void ServerDisableHit();
 	
 	UFUNCTION()
 	void OnHit(

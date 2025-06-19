@@ -16,7 +16,7 @@ class UGS_CameraShakeComponent;
 class UGS_FootManagerComponent;
 struct FGS_CameraShakeInfo;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFeverGageChangedDelegate, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFeverGaugeChangedDelegate, float);
 
 UCLASS()
 class GAS_API AGS_Drakhar : public AGS_Guardian
@@ -97,7 +97,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX|Drakhar", meta = (DisplayName = "WingRush VFX Spawn Point"))
 	UArrowComponent* WingRushVFXSpawnPoint;
 
-	FOnCurrentFeverGageChangedDelegate OnCurrentFeverGageChanged;
+	FOnCurrentFeverGaugeChangedDelegate OnCurrentFeverGaugeChanged;
 	
 	// === 어스퀘이크 VFX 시스템 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Earthquake", meta = (DisplayName = "Ground Crack VFX"))
@@ -111,6 +111,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "VFX|Earthquake")
 	UNiagaraComponent* ActiveDustCloudVFXComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Earthquake", meta = (DisplayName = "Earthquake Impact VFX"))
+	UNiagaraSystem* EarthquakeImpactVFX;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Earthquake", meta = (DisplayName = "Fever Earthquake Impact VFX"))
 	UNiagaraSystem* FeverEarthquakeImpactVFX;
@@ -205,7 +208,7 @@ public:
 	//[Earthquake Skill]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCEarthquakeAttackCheck();
-
+	
 	//[DraconicFury Skill]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCSpawnDraconicFury();
@@ -228,11 +231,11 @@ public:
 	void ServerRPCStopCtrl();
 	
 	//[Fever Mode]
-	FORCEINLINE float GetCurrentFeverGage() const { return CurrentFeverGauge; }
-	FORCEINLINE float GetMaxFeverGage() const { return MaxFeverGage; }
+	FORCEINLINE float GetCurrentFeverGauge() const { return CurrentFeverGauge; }
+	FORCEINLINE float GetMaxFeverGauge() const { return MaxFeverGauge; }
 	FORCEINLINE bool GetIsFeverMode() const {return IsFeverMode; }
 	
-	void SetFeverGageWidget(UGS_DrakharFeverGauge* InDrakharFeverGageWidget);
+	void SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGaugeWidget);
 
 	//UFUNCTION(NetMulticast, Reliable)
 	void SetFeverGauge(float InValue);
@@ -243,9 +246,9 @@ public:
 	//new skill
 	void FeverComoLastAttack();
 	
-	//max fever gage
+	//max fever gauge
 	void StartFeverMode();
-	//when fever gage > 0
+	//when fever gauge > 0
 	void DecreaseFeverGauge();
 	//minus 1 values per one seconds
 	void MinusFeverGaugeValue();
@@ -350,6 +353,9 @@ public:
 	void MulticastStopDustCloudVFX();
 
 	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayEarthquakeImpactVFX(const FVector& ImpactLocation);
+
+	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayFeverEarthquakeImpactVFX(const FVector& ImpactLocation);
 
 	UFUNCTION(NetMulticast, Unreliable)
@@ -437,13 +443,10 @@ private:
 	FVector FeverModeDraconicFurySpawnLocation;
 
 	//[Fever Mode]
-	float MaxFeverGage;
+	float MaxFeverGauge;
 	UPROPERTY(ReplicatedUsing = OnRep_FeverGauge)
 	float CurrentFeverGauge;
 
-	UPROPERTY(Replicated)
-	float DefaultAttackPower;
-	
 	UPROPERTY(ReplicatedUsing = OnRep_IsFeverMode)
 	bool IsFeverMode;
 

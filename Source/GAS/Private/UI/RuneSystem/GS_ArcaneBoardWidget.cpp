@@ -11,6 +11,7 @@
 #include "UI/RuneSystem/GS_StatPanelWidget.h"
 #include "UI/RuneSystem/GS_DragVisualWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
+#include "UI/RuneSystem/GS_RuneTooltipWidget.h"
 
 
 UGS_ArcaneBoardWidget::UGS_ArcaneBoardWidget(const FObjectInitializer& ObjectInitializer)
@@ -40,9 +41,24 @@ UGS_ArcaneBoardWidget::UGS_ArcaneBoardWidget(const FObjectInitializer& ObjectIni
 		}
 	}
 
+	//임시
+	if (!IsValid(TooltipWidgetClass))
+	{
+		FSoftClassPath Path(TEXT("/Game/UI/RuneSystem/WBP_RuneTooltip.WBP_RuneTooltip_C"));
+		UClass* LoadedClass = Path.TryLoadClass<UGS_RuneTooltipWidget>();
+
+		if (LoadedClass)
+		{
+			TooltipWidgetClass = LoadedClass;
+		}
+	}
+
 	SelectedRuneID = 0;
 	bIsInSelectionMode = false;
 	SelectionVisualWidget = nullptr;
+	RuneTooltipWidget = nullptr;
+	TooltipSize = FVector2D(100.f, 100.f);
+	CurrTooltipRuneID = 0;
 }
 
 void UGS_ArcaneBoardWidget::NativeConstruct()
@@ -72,6 +88,17 @@ void UGS_ArcaneBoardWidget::NativeDestruct()
 		SelectionVisualWidget = nullptr;
 	}
 
+	if (IsValid(RuneTooltipWidget))
+	{
+		RuneTooltipWidget->RemoveFromParent();
+		RuneTooltipWidget = nullptr;
+	}
+
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TooltipDelayTimer);
+	}
+
 	Super::NativeDestruct();
 }
 
@@ -79,17 +106,23 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 {
 	FReply Reply = Super::NativeOnMouseMove(InGeometry, InMouseEvent);
 
-	if (!bIsInSelectionMode || !SelectionVisualWidget)
-	{
-		return Reply;
-	}
-
 	// 스크린 좌표를 뷰포트 좌표로 변환
 	FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
 	if (APlayerController* PC = GetOwningPlayer())
 	{
 		FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
 		MousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
+	}
+
+	if (RuneTooltipWidget)
+	{
+		FVector2D TooltipPos = CalculateTooltipPosition(MousePos);
+		RuneTooltipWidget->SetPositionInViewport(TooltipPos, false);
+	}
+
+	if (!bIsInSelectionMode || !SelectionVisualWidget)
+	{
+		return Reply;
 	}
 
 	SelectionVisualWidget->SetPositionInViewport(MousePos, false);
@@ -112,6 +145,8 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseButtonDown(const FGeometry& InGeometr
 {
 	FReply Reply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 	
+	HideTooltip();
+
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
 		// 스크린 좌표를 뷰포트 좌표로 변환
@@ -286,6 +321,8 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 {
 	UE_LOG(LogTemp, Display, TEXT("룬 선택 시작: ID=%d"), RuneID);
 
+	HideTooltip();
+
 	if (bIsInSelectionMode)
 	{
 		EndRuneSelection(false);
@@ -333,6 +370,8 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 
 void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 {
+	HideTooltip();
+
 	if (!bPlaceRune)
 	{
 		if (IsValid(SelectionVisualWidget))
@@ -540,6 +579,63 @@ FVector2D UGS_ArcaneBoardWidget::CalculateDragVisualScale(uint8 RuneID) const
 	return FVector2D(ScaleX * 0.8f, ScaleY * 0.8f);
 }
 
+void UGS_ArcaneBoardWidget::RequestShowTooltip(uint8 RuneID, const FVector2D& MousePos)
+{
+	if (!ShouldShowTooltip())
+	{
+		return;
+	}
+
+	if (IsValid(RuneTooltipWidget))
+	{
+		if(CurrTooltipRuneID == RuneID)
+		{
+			FVector2D TooltipPos = CalculateTooltipPosition(MousePos);
+			RuneTooltipWidget->SetPositionInViewport(TooltipPos, false);
+			return;
+		}
+		else
+		{
+			HideTooltip();
+		}
+	}
+
+	CancelTooltipRequest();
+
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			TooltipDelayTimer,
+			[this, RuneID, MousePos]()
+			{
+				ShowTooltip(RuneID, MousePos);
+			},
+			0.5f,
+			false
+		);
+	}
+}
+
+void UGS_ArcaneBoardWidget::HideTooltip()
+{
+	CancelTooltipRequest();
+	CurrTooltipRuneID = 0;
+
+	if (IsValid(RuneTooltipWidget))
+	{
+		RuneTooltipWidget->RemoveFromParent();
+		RuneTooltipWidget = nullptr;
+	}
+}
+
+void UGS_ArcaneBoardWidget::CancelTooltipRequest()
+{
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TooltipDelayTimer);
+	}
+}
+
 void UGS_ArcaneBoardWidget::BindToLPS()
 {
 	ArcaneBoardLPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>();
@@ -562,6 +658,87 @@ void UGS_ArcaneBoardWidget::UnbindFromLPS()
 	{
 		ArcaneBoardLPS->ClearCurrUIWidget();
 	}
+}
+
+void UGS_ArcaneBoardWidget::ShowTooltip(uint8 RuneID, const FVector2D& MousePos)
+{
+	if (!ShouldShowTooltip() || !IsValid(BoardManager) || !IsValid(TooltipWidgetClass))
+	{
+		return;
+	}
+
+	if (MousePos.X <= 0 && MousePos.Y <= 0)
+	{
+		return;
+	}
+
+	FRuneTableRow RuneData;
+	if (!BoardManager->GetRuneData(RuneID, RuneData))
+	{
+		return;
+	}
+
+	HideTooltip();
+
+	RuneTooltipWidget = CreateWidget<UGS_RuneTooltipWidget>(this, TooltipWidgetClass);
+	if (RuneTooltipWidget)
+	{
+		CurrTooltipRuneID = RuneID;
+		RuneTooltipWidget->SetRuneData(RuneData);
+		RuneTooltipWidget->SetVisibility(ESlateVisibility::Hidden);
+		RuneTooltipWidget->AddToViewport(5);
+
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().SetTimerForNextTick([this, MousePos]()
+				{
+					if (IsValid(RuneTooltipWidget))
+					{
+						TooltipSize = RuneTooltipWidget->GetDesiredSize();
+						FVector2D TooltipPos = CalculateTooltipPosition(MousePos);
+						RuneTooltipWidget->SetPositionInViewport(TooltipPos, false);
+						RuneTooltipWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+					}
+				});
+		}
+	}
+}
+
+FVector2D UGS_ArcaneBoardWidget::CalculateTooltipPosition(const FVector2D& MousePos)
+{
+	FVector2D TooltipPos = FVector2D(MousePos.X, MousePos.Y - TooltipSize.Y);
+
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		int32 ViewportWidth, ViewportHeight;
+		PC->GetViewportSize(ViewportWidth, ViewportHeight);
+		FVector2D ViewportSize = FVector2D(ViewportWidth, ViewportHeight);
+
+		if (TooltipPos.X + TooltipSize.X > ViewportSize.X)
+		{
+			TooltipPos.X = MousePos.X - TooltipSize.X;
+		}
+
+		if (TooltipPos.Y < 0)
+		{
+			TooltipPos.Y = MousePos.Y + 20;
+		}
+
+		TooltipPos.X = FMath::Clamp(TooltipPos.X, 0.0f, ViewportSize.X - TooltipSize.X);
+		TooltipPos.Y = FMath::Clamp(TooltipPos.Y, 0.0f, ViewportSize.Y - TooltipSize.Y);
+	}
+
+	return TooltipPos;
+}
+
+bool UGS_ArcaneBoardWidget::ShouldShowTooltip() const
+{
+	if (bIsInSelectionMode && SelectedRuneID > 0)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void UGS_ArcaneBoardWidget::UpdateGridVisuals()

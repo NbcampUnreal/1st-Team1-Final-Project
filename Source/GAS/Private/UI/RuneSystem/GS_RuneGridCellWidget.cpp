@@ -6,6 +6,7 @@
 #include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "Components/Image.h"
 #include "Components/Border.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 
 UGS_RuneGridCellWidget::UGS_RuneGridCellWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -16,6 +17,34 @@ UGS_RuneGridCellWidget::UGS_RuneGridCellWidget(const FObjectInitializer& ObjectI
 void UGS_RuneGridCellWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+}
+
+void UGS_RuneGridCellWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+
+	if (ParentBoardWidget)
+	{
+		if(CellData.PlacedRuneID > 0)
+		{
+			FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
+			if (APlayerController* PC = GetOwningPlayer())
+			{
+				FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
+				MousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
+			}
+			ParentBoardWidget->RequestShowTooltip(CellData.PlacedRuneID, MousePos);
+		}
+		else
+		{
+			ParentBoardWidget->HideTooltip();
+		}
+	}
+}
+
+void UGS_RuneGridCellWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseLeave(InMouseEvent);
 }
 
 void UGS_RuneGridCellWidget::InitCell(const FGridCellData& InCellData, UGS_ArcaneBoardWidget* InParentBoard)

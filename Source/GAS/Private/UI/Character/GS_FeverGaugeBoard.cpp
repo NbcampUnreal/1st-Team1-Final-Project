@@ -31,7 +31,7 @@ void UGS_FeverGaugeBoard::InitDrakharFeverWidget()
 		//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT]------------Drakhar OK???")),true, true, FLinearColor::Red,8.f);
 		DrakharFeverWidgetInstance = CreateWidget<UGS_DrakharFeverGauge>(this,  DrakharFeverWidgetClass);
 		DrakharFeverWidgetInstance->SetOwningActor(Drakhar);
-		DrakharFeverWidgetInstance->InitializeGage(Drakhar->GetCurrentFeverGage());
+		DrakharFeverWidgetInstance->InitializeGauge(Drakhar->GetCurrentFeverGauge());
 		FeverWidgetList->AddChildToVerticalBox(DrakharFeverWidgetInstance);
 	}
 }

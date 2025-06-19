@@ -18,6 +18,9 @@ struct FRuneTableRow : public FTableRowBase
 	uint8 RuneID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText RuneName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
