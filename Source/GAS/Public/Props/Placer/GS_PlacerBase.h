@@ -68,7 +68,7 @@ private:
 
 	void CalCellsInRectArea(TArray<FIntPoint>& InIntPointArray);
 
-	EDEditorCellType GetTargetCellType();
+	// EDEditorCellType GetTargetCellType();
 	EDEditorCellType GetRoomCellInfo(int InIdx);
 
 	int RotateYaw;

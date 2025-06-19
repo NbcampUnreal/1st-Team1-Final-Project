@@ -48,4 +48,6 @@ public:
 	void ClickRMB(const FInputActionValue& Value);
 	UFUNCTION()
 	void ReleasedRMB(const FInputActionValue& Value);
+	UFUNCTION()
+	void ClickDelete(const FInputActionValue& Value);
 };

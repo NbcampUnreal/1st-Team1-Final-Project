@@ -1,6 +1,8 @@
 #include "DungeonEditor/GS_BuildManager.h"
 #include "Components/BillboardComponent.h"
+#include "Components/DecalComponent.h"
 #include "DungeonEditor/GS_DEController.h"
+#include "DungeonEditor/Component/PlaceInfoComponent.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
 #include "Props/Placer/GS_PlacerBase.h"
 
@@ -14,17 +16,8 @@ AGS_BuildManager::AGS_BuildManager()
 #endif
 	StaticMeshCompo = CreateDefaultSubobject<UStaticMeshComponent>("GridMesh");
 	StaticMeshCompo->SetupAttachment(RootComponent);
-	
-	// static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshFinder(
-	// 	TEXT("StaticMesh'/Engine/BasicShapes/Plane.Plane'"));
-	// if (MeshFinder.Succeeded())
-	// {
-	// 	UStaticMesh* PlaneMesh = MeshFinder.Object;
-	// 	if (nullptr != PlaneMesh)
-	// 	{
-	// 		StaticMeshCompo->SetStaticMesh(PlaneMesh);
-	// 	}
-	// }
+	DecalCompo = CreateDefaultSubobject<UDecalComponent>("Decal");
+	DecalCompo->SetupAttachment(RootComponent);
 	
 	bTraceComplex = false;
 	StartTraceHeight = 3000;
@@ -42,7 +35,7 @@ AGS_BuildManager::AGS_BuildManager()
 void AGS_BuildManager::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	
+	InitGrid();
 #if WITH_EDITOR
 	if (nullptr != MIDGrid)
 	{
@@ -54,10 +47,24 @@ void AGS_BuildManager::OnConstruction(const FTransform& Transform)
 void AGS_BuildManager::BeginPlay()
 {
 	Super::BeginPlay();
-
+	InitGrid();
 	if (nullptr != MIDGrid)
 	{
 		StaticMeshCompo->SetMaterial(0, MIDGrid);
+	}
+
+	if (DecalCompo)
+	{
+		UMaterialInterface* OriginalMaterial = DecalCompo->GetMaterial(0);
+		if (OriginalMaterial)
+		{
+			DecalMaterialInstance = UMaterialInstanceDynamic::Create(OriginalMaterial, this);
+			if (DecalMaterialInstance)
+			{
+				DecalCompo->SetMaterial(0, DecalMaterialInstance);
+				DecalMaterialInstance->SetScalarParameterValue("ShowType", 7);
+			}
+		}
 	}
 }
 
@@ -218,17 +225,134 @@ void AGS_BuildManager::GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FI
 	}
 }
 
-void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType, bool InIsRoom)
+void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType, EObjectType InObjectType, AActor* InActor, bool InIsRoom, bool InDeleteMode)
 {
 	FDEOccupancyData& CellInfo = OccupancyData.FindOrAdd(InCellPoint);
 
-	if ((InIsRoom && InTargetType == EDEditorCellType::HorizontalPlaceable) ||
-		InTargetType == EDEditorCellType::CeilingPlace)
+	if ((InIsRoom && InTargetType == EDEditorCellType::HorizontalPlaceable)
+		|| InTargetType == EDEditorCellType::CeilingPlace
+		|| InTargetType == EDEditorCellType::HorizontalPlaceable)
 	{
 		CellInfo.CeilingOccupancyData = InTargetType;
 	}
 
 	CellInfo.FloorOccupancyData = InTargetType;
+
+	if (InDeleteMode)
+	{
+		switch (InObjectType)
+		{
+		case EObjectType::Monster:
+			if (IsValid(CellInfo.FloorOccupancyActor))
+			{
+				CellInfo.FloorOccupancyActor->Destroy();
+			}
+			CellInfo.FloorOccupancyActor = nullptr;
+			break;
+		
+		case EObjectType::Room:
+			if (IsValid(CellInfo.FloorOccupancyActor))
+			{
+				CellInfo.FloorOccupancyActor->Destroy();
+			}
+			if (IsValid(CellInfo.CeilingOccupancyActor))
+			{
+				CellInfo.CeilingOccupancyActor->Destroy();
+			}
+			if (IsValid(CellInfo.RoomOccupancyActor))
+			{
+				CellInfo.RoomOccupancyActor->Destroy();
+			}
+			if (IsValid(CellInfo.WallAndDoorOccupancyActor))
+			{
+				CellInfo.WallAndDoorOccupancyActor->Destroy();
+				TArray<FIntPoint> Coord = CellInfo.WallAndDoorOccupancyActor->GetComponentByClass<UPlaceInfoComponent>()->GetCellCoord();
+				for (int i = 0; i < Coord.Num(); i++)
+				{
+					FDEOccupancyData& WallCellInfo = OccupancyData.FindChecked(Coord[i]);
+					WallCellInfo.FloorOccupancyData = EDEditorCellType::WallAndDoorPlaceable;
+					if (IsValid(WallCellInfo.FloorOccupancyActor)
+						&& WallCellInfo.FloorOccupancyActor->GetComponentByClass<UPlaceInfoComponent>()->GetTrapPlacement() == ETrapPlacement::Wall)
+					{
+						WallCellInfo.FloorOccupancyActor->Destroy();
+					}
+				}
+				CellInfo.FloorOccupancyData = InTargetType;
+			}
+			CellInfo.FloorOccupancyActor = nullptr;
+			CellInfo.CeilingOccupancyActor = nullptr;
+			CellInfo.WallAndDoorOccupancyActor = nullptr;
+			CellInfo.RoomOccupancyActor = nullptr;
+			break;
+		
+		case EObjectType::Trap:
+			if (InTargetType == EDEditorCellType::CeilingPlace)
+			{
+				if (IsValid(CellInfo.CeilingOccupancyActor))
+				{
+					CellInfo.CeilingOccupancyActor->Destroy();
+				}
+				
+				CellInfo.CeilingOccupancyActor = nullptr;
+			}
+			else
+			{
+				if (IsValid(CellInfo.FloorOccupancyActor))
+				{
+					CellInfo.FloorOccupancyActor->Destroy();
+				}
+				CellInfo.FloorOccupancyActor = nullptr;
+			}
+			break;
+		
+		case EObjectType::DoorAndWall:
+			if (IsValid(CellInfo.FloorOccupancyActor))
+			{
+				CellInfo.FloorOccupancyActor->Destroy();
+			}
+			if (IsValid(CellInfo.WallAndDoorOccupancyActor))
+			{
+				CellInfo.WallAndDoorOccupancyActor->Destroy();
+			}
+			CellInfo.FloorOccupancyActor = nullptr;
+			CellInfo.WallAndDoorOccupancyActor = nullptr;
+			break;
+
+		default:
+			break;
+		}
+	}
+	else
+	{
+		switch (InObjectType)
+		{
+		case EObjectType::Monster:
+			CellInfo.FloorOccupancyActor = InActor;
+			break;
+		
+		case EObjectType::Room:
+			CellInfo.RoomOccupancyActor = InActor;
+			break;
+		
+		case EObjectType::Trap:
+			if (InTargetType == EDEditorCellType::CeilingPlace)
+			{
+				CellInfo.CeilingOccupancyActor = InActor;
+			}
+			else
+			{
+				CellInfo.FloorOccupancyActor = InActor;
+			}
+			break;
+		
+		case EObjectType::DoorAndWall:
+			CellInfo.WallAndDoorOccupancyActor = InActor;
+			break;
+
+		default:
+			break;
+		}
+	}
 }
 
 bool AGS_BuildManager::CheckOccupancyData(FIntPoint InCellPoint,EDEditorCellType InTargetType)
@@ -279,6 +403,39 @@ void AGS_BuildManager::ConvertFindOccupancyData(EDEditorCellType InTargetType, E
 	}
 }
 
+EDEditorCellType AGS_BuildManager::GetTargetCellType(EObjectType InObjectType, ETrapPlacement InTrapType)
+{
+	EObjectType ObjectType = InObjectType;
+	if (ObjectType == EObjectType::Room)
+	{
+		return EDEditorCellType::None;
+	}
+	else if (ObjectType == EObjectType::Monster)
+	{
+		return EDEditorCellType::FloorPlace;
+	}
+	else if (ObjectType == EObjectType::Trap)
+	{
+		ETrapPlacement TrapType = InTrapType;
+		if (TrapType == ETrapPlacement::Floor)
+			return EDEditorCellType::FloorPlace;
+		else if (TrapType == ETrapPlacement::Ceiling)
+			return EDEditorCellType::CeilingPlace;
+		else if (TrapType == ETrapPlacement::Wall)
+			return EDEditorCellType::WallPlace;
+	}
+	else if (ObjectType == EObjectType::DoorAndWall)
+	{
+		// 나중에 벽과 문을 구분지어주어야 함.
+		return EDEditorCellType::Door;
+	}
+	else
+	{
+		return EDEditorCellType::None;
+	}
+	return EDEditorCellType::None;
+}
+
 void AGS_BuildManager::EnableBuildingTool(FDataTableRowHandle* Data)
 {
 	// Disable Demolition Tool 추가해야함.
@@ -301,6 +458,11 @@ void AGS_BuildManager::EnableBuildingTool(FDataTableRowHandle* Data)
 		SpawnParams.Name = PlaceableObjectData.Name;
 		ActivePlacer = GetWorld()->SpawnActor<AGS_PlacerBase>(PlaceableObjectData.ObjectPlacerClass,SpawnTransform);
 		ActivePlacer->ActiveObjectPlacer();
+
+		if (DecalMaterialInstance)
+		{
+			ChangeDecalType(Data);
+		}
 	}
 }
 
@@ -418,6 +580,7 @@ void AGS_BuildManager::PressedRMB()
 		}
 		bBuildToolEnabled = false;
 		bIsPlacementSelected = false;
+		ClearDecalType();
 	}
 }
 
@@ -433,5 +596,101 @@ void AGS_BuildManager::RotateProp()
 		{
 			ActivePlacer->RotatePlacer();
 		}
+	}
+}
+
+void AGS_BuildManager::PressedDel()
+{
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		if (AGS_DEController* DEPC = Cast<AGS_DEController>(PC))
+		{
+			FHitResult HitResult;
+			if (DEPC->GetHitResultUnderCursor(ECC_GameTraceChannel6, bTraceComplex, HitResult))
+			{
+				AActor* DelActorUnderCursor = HitResult.GetActor();
+
+				if (UPlaceInfoComponent* PlaceInfoComp = DelActorUnderCursor->GetComponentByClass<UPlaceInfoComponent>())
+				{
+					TArray<FIntPoint> CellCoords = PlaceInfoComp->GetCellCoord();
+					EObjectType ObjectType = PlaceInfoComp->GetObjectType();
+					ETrapPlacement TrapPlacement = PlaceInfoComp->GetTrapPlacement();
+					
+					EDEditorCellType TargetCellType = GetTargetCellType(ObjectType, TrapPlacement);
+					EDEditorCellType ConvertTargetCellType;
+					ConvertFindOccupancyData(TargetCellType, ConvertTargetCellType);
+
+					const bool IsRoom = ObjectType == EObjectType::Room ? true : false;
+					for (int i = 0; i < CellCoords.Num(); ++i)
+					{
+						SetOccupancyData(CellCoords[i], ConvertTargetCellType, ObjectType, nullptr, IsRoom, true);
+					}
+				}
+
+				//DelActorUnderCursor->Destroy();
+			}
+		}
+	}
+}
+
+void AGS_BuildManager::ChangeDecalType(FDataTableRowHandle* Data)
+{
+	if (nullptr == Data)
+		return;
+	
+	ObjectForPlacement = Data;
+	if (ObjectForPlacement->RowName != FName("None"))
+	{
+		const FGS_PlaceableObjectsRow* RowPtr = ObjectForPlacement->GetRow<FGS_PlaceableObjectsRow>(ObjectForPlacement->RowName.ToString());
+		if (RowPtr)
+		{
+			PlaceableObjectData = *RowPtr;
+			EObjectType SelectObjectType = PlaceableObjectData.ObjectType;
+			ETrapPlacement SelectTrapType = PlaceableObjectData.TrapType;
+			
+			switch (SelectObjectType)
+			{
+				case EObjectType::Room:
+					DecalMaterialInstance->SetScalarParameterValue("ShowType", 5);
+					break;
+				case EObjectType::Monster:
+					DecalMaterialInstance->SetScalarParameterValue("ShowType", 6);
+					break;
+				
+				case EObjectType::DoorAndWall:
+					DecalMaterialInstance->SetScalarParameterValue("ShowType", 5);
+					break;
+
+				case EObjectType::Trap:
+					switch (SelectTrapType)
+					{
+						case ETrapPlacement::Floor:
+						case ETrapPlacement::Ceiling:
+						DecalMaterialInstance->SetScalarParameterValue("ShowType", 6);
+							break;
+						
+						case ETrapPlacement::Wall:
+							DecalMaterialInstance->SetScalarParameterValue("ShowType", 5);
+							break;
+
+						default:
+							DecalMaterialInstance->SetScalarParameterValue("ShowType", 7);
+							break;
+					}
+					break;
+
+				default:
+					DecalMaterialInstance->SetScalarParameterValue("ShowType", 7);
+					break;
+			}
+		}
+	}
+}
+
+void AGS_BuildManager::ClearDecalType()
+{
+	if (DecalMaterialInstance)
+	{
+		DecalMaterialInstance->SetScalarParameterValue("ShowType", 7);
 	}
 }
