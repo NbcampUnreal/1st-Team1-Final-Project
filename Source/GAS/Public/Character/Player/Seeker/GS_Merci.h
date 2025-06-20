@@ -14,6 +14,7 @@ class AGS_SeekerMerciArrow;
 class UAkComponent;
 class UGS_ArrowTypeWidget;
 class UNiagaraSystem;
+class UGS_CrossHairImage;
 
 UCLASS()
 class GAS_API AGS_Merci : public AGS_Seeker, public IGS_AttackInterface
@@ -48,7 +49,7 @@ public:
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
-	UUserWidget* WidgetCrosshair;
+	UGS_CrossHairImage* WidgetCrosshair;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess="true"))
 	USkeletalMeshComponent* Quiver;
@@ -100,6 +101,13 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_StopZoom();
+
+	//Crosshair
+	UFUNCTION(BlueprintCallable, Category = "Crosshair")
+	void SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget);
+
+	UFUNCTION(Client, Reliable)
+	void Client_ShowCrosshairHitFeedback();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
