@@ -152,6 +152,8 @@ void UGS_CustomLobbyUI::OnFriendListButtonClicked()
 			if (FriendListWidgetInstance)
 			{
 				FriendListOverlay->AddChild(FriendListWidgetInstance);
+				FriendListOverlay->SetVisibility(ESlateVisibility::Visible);
+				return;
 			}
 		}
 	}
