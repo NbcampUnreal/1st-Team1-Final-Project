@@ -7,6 +7,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/Player/Seeker/GS_Merci.h"
 #include "Character/Skill/Seeker/GS_FieldSkillActor.h"
 #include "AkGameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
@@ -145,6 +146,15 @@ void AGS_SeekerMerciArrow::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, A
 
 	// 맞은 대상 구분
 	ETargetType TargetType = DetermineTargetType(OtherActor);
+
+	//Crosshair Hit Anim
+	if (TargetType == ETargetType::Guardian || TargetType == ETargetType::DungeonMonster)
+	{
+		if (AGS_Merci* MerciPlayer = Cast<AGS_Merci>(GetOwner()))
+		{
+			MerciPlayer->Client_ShowCrosshairHitFeedback();
+		}
+	}
 
 	// 히트 사운드 재생 (멀티캐스트)
 	Multicast_PlayHitSound(TargetType, SweepResult);
