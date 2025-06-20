@@ -246,6 +246,32 @@ void AGS_InGameGM::EndGame(EGameResult Result)
     }
     bGameEnded = true;
 
+    // 명시적으로 bIsAlive를 다시 한번 확실하게 동기화
+    if (GameState)
+    {
+        for (APlayerState* PS : GameState->PlayerArray)
+        {
+            if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
+            {
+                if (GS_PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+                {
+                    GS_PS->SetIsAlive(true);
+                    UE_LOG(LogTemp, Warning, TEXT("EndGame: Guardian (%s) bIsAlive state forced to TRUE before travel."), *GS_PS->GetPlayerName());
+                }
+                else if (GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+                {
+                    if (AGS_Character* SeekerPawn = Cast<AGS_Character>(GS_PS->GetPawn()))
+                    {
+                        if (UGS_StatComp* StatComp = SeekerPawn->GetStatComp())
+                        {
+                            GS_PS->HandleCurrentHPChanged(StatComp);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     FString NextLevelName;
 
     if (Result == EGameResult::GR_SeekersLost)
