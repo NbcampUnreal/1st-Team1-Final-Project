@@ -11,6 +11,7 @@ class UGS_SkillComp;
 class UGS_DebuffComp;
 class UGS_HitReactComp;
 class UGS_HPTextWidgetComp;
+class UGS_PlayerInfoWidget;
 class UGS_HPText;
 class UGS_HPWidget;
 class AGS_Weapon;
@@ -87,8 +88,7 @@ public:
 	//HP widget
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
 	void SetHPBarWidget(UGS_HPWidget* InHPBarWidget);
-	//void SetClassImage(UGS_HPText* InHPTextWidget);
-
+	void SetPlayerInfoWidget(UGS_PlayerInfoWidget* InPlayerInfoWidget);
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	
 	UFUNCTION(BlueprintPure, Category = "Team")
