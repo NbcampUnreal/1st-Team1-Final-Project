@@ -98,6 +98,10 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayEndVFX(ESkillSlot Slot, FVector Location, FRotator Rotation);
+
+	// 쿨타임 변경
+	void ApplyCooldownModifier(ESkillSlot Slot, float Ratio);
+	void ResetCooldownModifier(ESkillSlot Slot);
 	
 protected:
 	virtual void BeginPlay() override;
