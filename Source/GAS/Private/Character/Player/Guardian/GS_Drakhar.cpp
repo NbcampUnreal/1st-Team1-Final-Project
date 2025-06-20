@@ -22,11 +22,15 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_DrakharFeverGauge.h"
+#include "Character/Component/GS_DrakharVFXComponent.h"
+#include "Character/Component/GS_DrakharSFXComponent.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
+	VFXComponent = CreateDefaultSubobject<UGS_DrakharVFXComponent>(TEXT("VFXComponent"));
+	SFXComponent = CreateDefaultSubobject<UGS_DrakharSFXComponent>(TEXT("SFXComponent"));
 	FootManagerComponent = CreateDefaultSubobject<UGS_FootManagerComponent>(TEXT("FootManagerComponent"));
 	
 	// === 어스퀘이크 카메라 쉐이크 기본값 설정 ===
@@ -71,24 +75,15 @@ AGS_Drakhar::AGS_Drakhar()
 	DefaultSpringArmLength = SpringArmComp->TargetArmLength;
 	TargetSpringArmLength = 800.f;
 
-	// === Wwise 사운드 이벤트 초기화 ===
+	// === Wwise 사운드 이벤트 초기화 -> 이제 Drakhar 블루프린트에서 직접 설정.
 	ComboAttackSoundEvent = nullptr;
 	DashSkillSoundEvent = nullptr;
 	EarthquakeSkillSoundEvent = nullptr;
 	DraconicFurySkillSoundEvent = nullptr;
 	DraconicProjectileSoundEvent = nullptr;
-
-	// === DraconicFury 충돌 사운드 이벤트 초기화 ===
 	DraconicProjectileImpactSoundEvent = nullptr;
 	DraconicProjectileExplosionSoundEvent = nullptr;
-
-	// 사운드 중복 재생 방지 초기화
-	bDraconicFurySoundPlayed = false;
-	
-	// === 히트 사운드 이벤트 초기화 ===
 	AttackHitSoundEvent = nullptr;
-
-	// === 피버모드 사운드 이벤트 초기화 ===
 	FeverModeStartSoundEvent = nullptr;
 
 	// AkComponent 추가
@@ -100,21 +95,6 @@ AGS_Drakhar::AGS_Drakhar()
 			AkComp->SetupAttachment(RootComponent);
 		}
 	}
-
-	WingRushRibbonVFX = nullptr;
-	ActiveWingRushVFXComponent = nullptr;
-
-	DustVFX = nullptr;
-	ActiveDustVFXComponent = nullptr;
-
-	GroundCrackVFX = nullptr;
-	ActiveGroundCrackVFXComponent = nullptr;
-	DustCloudVFX = nullptr;
-	ActiveDustCloudVFXComponent = nullptr;
-
-	// === DraconicFury 충돌 VFX 초기화 ===
-	DraconicProjectileImpactVFX = nullptr;
-	DraconicProjectileExplosionVFX = nullptr;
 
 	// === VFX 위치 제어용 화살표 컴포넌트 생성 ===
 	WingRushVFXSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("WingRushVFXSpawnPoint"));
@@ -146,15 +126,7 @@ AGS_Drakhar::AGS_Drakhar()
 #endif
 	}
 
-	EarthquakeImpactVFX = nullptr;
-	FeverEarthquakeImpactVFX = nullptr;
-
-	FlyingDustVFX = nullptr;
-	ActiveFlyingDustVFXComponent = nullptr;
 	FlyingDustTraceDistance = 2000.f;
-
-	NormalAttackHitVFX = nullptr;
-	FeverAttackHitVFX = nullptr;
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -184,31 +156,6 @@ void AGS_Drakhar::Tick(float DeltaTime)
 		else
 		{
 			SpringArmComp->TargetArmLength = FMath::FInterpTo(SpringArmComp->TargetArmLength, TargetSpringArmLength, DeltaTime, 5.0f);
-		}
-	}
-
-	if (ActiveFlyingDustVFXComponent && IsValid(ActiveFlyingDustVFXComponent))
-	{
-		FVector Start = GetActorLocation();
-		FVector End = Start - FVector(0, 0, FlyingDustTraceDistance);
-		FHitResult HitResult;
-		FCollisionQueryParams Params;
-		Params.AddIgnoredActor(this);
-
-		if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, Params))
-		{
-			ActiveFlyingDustVFXComponent->SetWorldLocation(HitResult.ImpactPoint);
-			if(!ActiveFlyingDustVFXComponent->IsActive())
-			{
-				ActiveFlyingDustVFXComponent->Activate(true);
-			}
-		}
-		else
-		{
-			if(ActiveFlyingDustVFXComponent->IsActive())
-			{
-				ActiveFlyingDustVFXComponent->Deactivate();
-			}
 		}
 	}
 }
@@ -376,8 +323,7 @@ void AGS_Drakhar::ServerRPCNewComboAttack_Implementation()
 	//GetCharacterMovement()->SetMovementMode(MOVE_None);
 	bCanCombo = false;
 
-	// 콤보 공격 사운드 재생
-	PlayComboAttackSound();
+	MulticastPlayComboAttackSound();
 }
 
 void AGS_Drakhar::MulticastRPCComboAttack_Implementation()
@@ -434,9 +380,7 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		}
 
 		MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
-
-		// === 대시 스킬 히트 사운드 재생 ===
-		PlayAttackHitSound();
+		MulticastPlayAttackHitSound();
 
 		FVector DrakharPos = GetActorLocation();
 		FVector DamagedPos = DamagedCharacter->GetActorLocation();
@@ -450,9 +394,8 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	DamagedCharactersFromDash.Empty();
 	bCanCombo = true;
 
-	// 대시 VFX 종료 (Wing Rush + Dust)
-	StopWingRushVFX();
-	StopDustVFX();
+	MulticastStopWingRushVFX();
+	MulticastStopDustVFX();
 }
 
 void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
@@ -461,12 +404,9 @@ void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
 	DashStartLocation = GetActorLocation();
 	DashEndLocation = DashStartLocation + GetActorForwardVector() * DashPower;
 
-	// 대시 스킬 사운드 재생
-	PlayDashSkillSound();
-
-	// 대시 VFX 시작
-	StartWingRushVFX();
-	StartDustVFX();
+	MulticastPlayDashSkillSound();
+	MulticastStartWingRushVFX();
+	MulticastStartDustVFX();
 }
 
 void AGS_Drakhar::DashAttackCheck()
@@ -482,23 +422,7 @@ void AGS_Drakhar::DashAttackCheck()
 void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 {
 	MulticastRPC_OnEarthquakeStart();
-
-	TSet<AGS_Character*> DamagedPlayer; // 데미지를 입은 플레이어들
-	FCollisionQueryParams Params(NAME_None, false, this); // 충돌 체크 파라미터
-
-	// 지진 스킬 사운드 재생
-	PlayEarthquakeSkillSound();
-
-	// === 카메라 쉐이크 재생 ===
-	if (CameraShakeComponent)
-	{
-		CameraShakeComponent->PlayCameraShake(EarthquakeShakeInfo);
-	}
-
-	// === 어스퀘이크 VFX 재생 ===
-	StartGroundCrackVFX();
-	StartDustCloudVFX();
-
+	MulticastPlayEarthquakeSkillSound();
 
 	const FVector Start = GetActorLocation() + 100.f;
 	TSet<AGS_Character*> EarthquakeDamagedCharacters = DetectPlayerInRange(Start, 200.f, EarthquakeRadius);
@@ -522,9 +446,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			}
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
-
-			// === 어스퀘이크 스킬 히트 사운드 재생 ===
-			PlayAttackHitSound();
+			MulticastPlayAttackHitSound();
 
 			FVector DrakharLocation = GetActorLocation();
 			FVector DamagedLocation = DamagedCharacter->GetActorLocation();
@@ -555,18 +477,7 @@ void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 {
-	// 스킬 사운드는 첫 번째 투사체 생성 시에만 재생
-	if (!bDraconicFurySoundPlayed)
-	{
-		PlayDraconicFurySkillSound();
-		bDraconicFurySoundPlayed = true;
-
-		FTimerHandle ResetSoundTimer;
-		GetWorld()->GetTimerManager().SetTimer(ResetSoundTimer, [this]()
-		{
-			bDraconicFurySoundPlayed = false;
-		}, 7.0f, false); // 리셋 (스킬 지속시간에 맞게 조정)
-	}
+	MulticastPlayDraconicFurySkillSound();
 
 	if (IsFeverMode)
 	{
@@ -576,7 +487,6 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 		SpawnRotation.Pitch += RandomPitch;
 		
 		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(FeverDraconicProjectile, FeverModeDraconicFurySpawnLocation, SpawnRotation);
-
 		
 		if (DrakharProjectile)
 		{
@@ -594,9 +504,7 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 		if (DrakharProjectile)
 		{
 			DrakharProjectile->SetOwner(this);
-
-			// 투사체 위치에서 사운드 재생 (각 투사체마다 개별 사운드)
-			PlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
+			MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
 		}
 	}
 }
@@ -702,12 +610,7 @@ void AGS_Drakhar::StartFeverMode()
 		
 	GetStatComp()->ChangeStat(Stat);
 	MulticastRPCFeverMontagePlay();
-	
-	// === 피버모드 시작 사운드 재생 ===
-	PlayFeverModeStartSound();
-
-	// === 서버(리슨서버)에서 오버레이 적용 ===
-	ApplyFeverModeOverlay();
+	MulticastPlayFeverModeStartSound();
 }
 
 void AGS_Drakhar::DecreaseFeverGauge()
@@ -717,21 +620,7 @@ void AGS_Drakhar::DecreaseFeverGauge()
 
 void AGS_Drakhar::MinusFeverGaugeValue()
 {
-	const bool bWasInFever = IsFeverMode;
 	SetFeverGauge(-1.f);
-	const bool bIsInFever = IsFeverMode;
-
-	// 서버에서 피버모드가 방금 종료되었는지 확인
-	if (HasAuthority() && bWasInFever && !bIsInFever)
-	{
-		RemoveFeverModeOverlay();
-
-		// 피버모드 상태에서 재생되던 대시 먼지 이펙트가 있다면 즉시 종료
-		if (IsValid(ActiveDustVFXComponent) && ActiveDustVFXComponent->GetAsset() == FeverDustVFX)
-		{
-			StopDustVFX();
-		}
-	}
 }
 
 void AGS_Drakhar::GetRandomDraconicFuryTarget()
@@ -756,136 +645,31 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 	}
 }
 
-// === Wwise 사운드 재생 함수 구현 ===
-
-
-void AGS_Drakhar::PlayComboAttackSound()
-{
-	if (HasAuthority())
-	{
-		MulticastPlayComboAttackSound();
-	}
-}
-
-void AGS_Drakhar::PlayDashSkillSound()
-{
-	if (HasAuthority())
-	{
-		MulticastPlayDashSkillSound();
-	}
-}
-
-void AGS_Drakhar::PlayEarthquakeSkillSound()
-{
-	if (HasAuthority())
-	{
-		MulticastPlayEarthquakeSkillSound();
-	}
-}
-
-void AGS_Drakhar::PlayDraconicFurySkillSound()
-{
-	if (HasAuthority())
-	{
-		MulticastPlayDraconicFurySkillSound();
-	}
-}
-
-void AGS_Drakhar::PlayDraconicProjectileSound(const FVector& Location)
-{
-	if (HasAuthority())
-	{
-		MulticastPlayDraconicProjectileSound(Location);
-	}
-}
-
 // === Multicast 사운드 RPC 함수들 구현 ===
 
 void AGS_Drakhar::MulticastPlayComboAttackSound_Implementation()
 {
-	PlaySoundEvent(ComboAttackSoundEvent);
+	if (SFXComponent) SFXComponent->PlayComboAttackSound();
 }
 
 void AGS_Drakhar::MulticastPlayDashSkillSound_Implementation()
 {
-	PlaySoundEvent(DashSkillSoundEvent);
+	if (SFXComponent) SFXComponent->PlayDashSkillSound();
 }
 
 void AGS_Drakhar::MulticastPlayEarthquakeSkillSound_Implementation()
 {
-	PlaySoundEvent(EarthquakeSkillSoundEvent);
+	if (SFXComponent) SFXComponent->PlayEarthquakeSkillSound();
 }
 
 void AGS_Drakhar::MulticastPlayDraconicFurySkillSound_Implementation()
 {
-	PlaySoundEvent(DraconicFurySkillSoundEvent);
+	if (SFXComponent) SFXComponent->PlayDraconicFurySkillSound();
 }
 
 void AGS_Drakhar::MulticastPlayDraconicProjectileSound_Implementation(const FVector& Location)
 {
-	PlaySoundEvent(DraconicProjectileSoundEvent, Location);
-}
-
-// === Wwise 헬퍼 함수 구현 ===
-
-void AGS_Drakhar::PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location)
-{
-	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (!SoundEvent)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GS_Drakhar::PlaySoundEvent - SoundEvent is null"));
-		return;
-	}
-
-	// Wwise AudioDevice가 초기화되었는지 확인
-	if (!FAkAudioDevice::Get())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GS_Drakhar::PlaySoundEvent - Wwise AudioDevice is not initialized"));
-		return;
-	}
-
-	UAkComponent* AkComp = GetOrCreateAkComponent();
-	if (!AkComp)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("GS_Drakhar::PlaySoundEvent - Failed to get AkComponent"));
-		return;
-	}
-
-
-	// 특정 위치에서 재생하는 경우 (투사체 등)
-	if (Location != FVector::ZeroVector)
-	{
-		FOnAkPostEventCallback DummyCallback;
-		UAkGameplayStatics::PostEventAtLocation(SoundEvent, Location, FRotator::ZeroRotator, GetWorld());
-	}
-	else
-	{
-		AkComp->PostAkEvent(SoundEvent);
-	}
-}
-
-UAkComponent* AGS_Drakhar::GetOrCreateAkComponent()
-{
-	UAkComponent* AkComp = FindComponentByClass<UAkComponent>();
-
-	if (!AkComp)
-	{
-		// 런타임에 AkComponent 생성 (생성자에서 실패한 경우를 대비)
-		AkComp = NewObject<UAkComponent>(this, TEXT("RuntimeAkAudioComponent"));
-		if (AkComp)
-		{
-			AkComp->SetupAttachment(RootComponent);
-			AkComp->RegisterComponent();
-			UE_LOG(LogTemp, Log, TEXT("GS_Drakhar: AkComponent created at runtime"));
-		}
-	}
-
-	return AkComp;
+	if (SFXComponent) SFXComponent->PlayDraconicProjectileSound(Location);
 }
 
 void AGS_Drakhar::OnRep_FeverGauge()
@@ -893,34 +677,20 @@ void AGS_Drakhar::OnRep_FeverGauge()
 	OnCurrentFeverGaugeChanged.Broadcast(CurrentFeverGauge);
 }
 
-void AGS_Drakhar::PlayAttackHitSound()
-{
-	if (HasAuthority())
-	{
-		MulticastPlayAttackHitSound();
-	}
-}
-
 void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
 {
-	PlaySoundEvent(AttackHitSoundEvent);
-}
-
-// === 날기 사운드 재생 함수들 구현 ===
-
-void AGS_Drakhar::PlayFeverModeStartSound()
-{
-	if (HasAuthority())
+	if (!SFXComponent)
 	{
-		MulticastPlayFeverModeStartSound();
+		UE_LOG(LogTemp, Error, TEXT("MulticastPlayAttackHitSound: SFXComponent is null"));
+		return;
 	}
+	
+	SFXComponent->PlayAttackHitSound();
 }
-
-// === 날기 사운드 Multicast RPC 함수들 구현 ===
 
 void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
 {
-	PlaySoundEvent(FeverModeStartSoundEvent);
+	if (SFXComponent) SFXComponent->PlayFeverModeStartSound();
 }
 
 void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
@@ -929,214 +699,24 @@ void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
 }
 
 // === 나이아가라 VFX 함수 구현 ===
-
-void AGS_Drakhar::StartWingRushVFX()
-{
-	if (HasAuthority())
-	{
-		MulticastStartWingRushVFX();
-	}
-}
-
-void AGS_Drakhar::StopWingRushVFX()
-{
-	if (HasAuthority())
-	{
-		MulticastStopWingRushVFX();
-	}
-}
-
 void AGS_Drakhar::MulticastStartWingRushVFX_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	// 이미 활성화된 VFX가 있다면 정리
-	if (ActiveWingRushVFXComponent && IsValid(ActiveWingRushVFXComponent))
-	{
-		ActiveWingRushVFXComponent->DestroyComponent();
-		ActiveWingRushVFXComponent = nullptr;
-	}
-
-	UNiagaraSystem* VFXToSpawn = IsFeverMode ? FeverWingRushRibbonVFX : WingRushRibbonVFX;
-
-	if (!VFXToSpawn)
-	{
-		return;
-	}
-
-	// 화살표 컴포넌트를 사용한 스폰
-	if (WingRushVFXSpawnPoint && IsValid(WingRushVFXSpawnPoint))
-	{
-		ActiveWingRushVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			VFXToSpawn,
-			WingRushVFXSpawnPoint,
-			NAME_None,
-			FVector::ZeroVector,
-			FRotator::ZeroRotator,
-			EAttachLocation::KeepRelativeOffset,
-			true
-		);
-	}
-
-	// 폴백: 발 소켓에 직접 부착
-	if (!ActiveWingRushVFXComponent)
-	{
-		ActiveWingRushVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			VFXToSpawn,
-			GetMesh(),
-			FName("foot_l"),
-			FVector(-20.f, 0.f, 0.f),
-			FRotator::ZeroRotator,
-			EAttachLocation::KeepRelativeOffset,
-			true
-		);
-	}
-
-	if (ActiveWingRushVFXComponent)
-	{
-		// VFX 파라미터 설정
-		FVector CurrentDashDirection = (DashEndLocation - DashStartLocation).GetSafeNormal();
-		if (!CurrentDashDirection.IsZero())
-		{
-			ActiveWingRushVFXComponent->SetVectorParameter(FName("DashDirection"), CurrentDashDirection);
-		}
-
-		float DashSpeed = DashPower / DashDuration;
-		ActiveWingRushVFXComponent->SetFloatParameter(FName("DashSpeed"), DashSpeed);
-		ActiveWingRushVFXComponent->SetFloatParameter(FName("Scale"), 2.0f);
-		ActiveWingRushVFXComponent->SetWorldScale3D(FVector(3.0f, 3.0f, 3.0f));
-	}
+	if (VFXComponent) VFXComponent->StartWingRushVFX();
 }
 
 void AGS_Drakhar::MulticastStopWingRushVFX_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (ActiveWingRushVFXComponent && IsValid(ActiveWingRushVFXComponent))
-	{
-		ActiveWingRushVFXComponent->Deactivate();
-
-		FTimerHandle VFXCleanupTimer;
-		GetWorld()->GetTimerManager().SetTimer(VFXCleanupTimer, [this]()
-		{
-			if (ActiveWingRushVFXComponent && IsValid(ActiveWingRushVFXComponent))
-			{
-				ActiveWingRushVFXComponent->DestroyComponent();
-			}
-			ActiveWingRushVFXComponent = nullptr;
-		}, 2.0f, false);
-	}
+	if (VFXComponent) VFXComponent->StopWingRushVFX();
 }
 
-// === DustVFX 제어 함수 ===
-
-void AGS_Drakhar::StartDustVFX()
-{
-	if (HasAuthority())
-	{
-		MulticastStartDustVFX();
-	}
-}
-
-void AGS_Drakhar::StopDustVFX()
-{
-	if (HasAuthority())
-	{
-		MulticastStopDustVFX();
-	}
-}
-
-// === DustVFX Multicast 구현 함수 ===
 void AGS_Drakhar::MulticastStartDustVFX_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (ActiveDustVFXComponent && IsValid(ActiveDustVFXComponent))
-	{
-		ActiveDustVFXComponent->DestroyComponent();
-		ActiveDustVFXComponent = nullptr;
-	}
-
-	UNiagaraSystem* VFXToSpawn = IsFeverMode ? FeverDustVFX : DustVFX;
-
-	if (!VFXToSpawn)
-	{
-		return;
-	}
-
-	if (WingRushVFXSpawnPoint && IsValid(WingRushVFXSpawnPoint))
-	{
-		ActiveDustVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			VFXToSpawn,
-			WingRushVFXSpawnPoint,
-			NAME_None,
-			FVector::ZeroVector,
-			FRotator::ZeroRotator,
-			EAttachLocation::KeepRelativeOffset,
-			true
-		);
-	}
-
-	// 폴백: 발 소켓에 직접 부착 (WingRush와 동일한 위치)
-	if (!ActiveDustVFXComponent)
-	{
-		ActiveDustVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			VFXToSpawn,
-			GetMesh(),
-			FName("foot_l"),
-			FVector(-20.f, 0.f, 0.f),
-			FRotator::ZeroRotator,
-			EAttachLocation::KeepRelativeOffset,
-			true
-		);
-	}
-
-	if (ActiveDustVFXComponent)
-	{
-		// DustVFX 파라미터 설정
-		FVector CurrentDashDirection = (DashEndLocation - DashStartLocation).GetSafeNormal();
-		if (!CurrentDashDirection.IsZero())
-		{
-			ActiveDustVFXComponent->SetVectorParameter(FName("DashDirection"), CurrentDashDirection);
-		}
-
-		float DashSpeed = DashPower / DashDuration;
-		ActiveDustVFXComponent->SetFloatParameter(FName("DashSpeed"), DashSpeed);
-		ActiveDustVFXComponent->SetFloatParameter(FName("Intensity"), 3.0f);
-		ActiveDustVFXComponent->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
-	}
+	if (VFXComponent) VFXComponent->StartDustVFX();
 }
 
 void AGS_Drakhar::MulticastStopDustVFX_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (ActiveDustVFXComponent && IsValid(ActiveDustVFXComponent))
-	{
-		ActiveDustVFXComponent->Deactivate();
-
-		FTimerHandle DustVFXCleanupTimer;
-		GetWorld()->GetTimerManager().SetTimer(DustVFXCleanupTimer, [this]()
-		{
-			if (ActiveDustVFXComponent && IsValid(ActiveDustVFXComponent))
-			{
-				ActiveDustVFXComponent->DestroyComponent();
-			}
-			ActiveDustVFXComponent = nullptr;
-		}, 1.5f, false);
-	}
+	if (VFXComponent) VFXComponent->StopDustVFX();
 }
 
 void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
@@ -1168,188 +748,25 @@ void AGS_Drakhar::EndDraconicFury()
 }
 
 // === 어스퀘이크 지면 균열 VFX 제어 함수 ===
-
-void AGS_Drakhar::StartGroundCrackVFX()
-{
-	if (HasAuthority())
-	{
-		MulticastStartGroundCrackVFX();
-	}
-}
-
-void AGS_Drakhar::StopGroundCrackVFX()
-{
-	if (HasAuthority())
-	{
-		MulticastStopGroundCrackVFX();
-	}
-}
-
 void AGS_Drakhar::MulticastStartGroundCrackVFX_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	// 이미 활성화된 VFX가 있다면 정리
-	if (ActiveGroundCrackVFXComponent && IsValid(ActiveGroundCrackVFXComponent))
-	{
-		ActiveGroundCrackVFXComponent->DestroyComponent();
-		ActiveGroundCrackVFXComponent = nullptr;
-	}
-
-	if (!GroundCrackVFX)
-	{
-		return;
-	}
-
-	// 어스퀘이크 스폰 포인트를 사용한 스폰
-	if (EarthquakeVFXSpawnPoint && IsValid(EarthquakeVFXSpawnPoint))
-	{
-		ActiveGroundCrackVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			GroundCrackVFX,
-			EarthquakeVFXSpawnPoint,
-			NAME_None,
-			FVector::ZeroVector,
-			FRotator::ZeroRotator,
-			EAttachLocation::KeepRelativeOffset,
-			true
-		);
-	}
-
-	// 폴백: 캐릭터 발 아래에 직접 스폰
-	if (!ActiveGroundCrackVFXComponent)
-	{
-		FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, -90.f);
-		ActiveGroundCrackVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			GroundCrackVFX,
-			SpawnLocation,
-			GetActorRotation(),
-			FVector(1.0f, 1.0f, 1.0f),
-			true
-		);
-	}
-
-	if (ActiveGroundCrackVFXComponent)
-	{
-		// 지면 균열 VFX 파라미터 설정
-		ActiveGroundCrackVFXComponent->SetFloatParameter(FName("CrackIntensity"), EarthquakeShakeInfo.Intensity);
-		ActiveGroundCrackVFXComponent->SetFloatParameter(FName("CrackRadius"), EarthquakeShakeInfo.MaxDistance * 0.5f);
-		ActiveGroundCrackVFXComponent->SetWorldScale3D(FVector(2.0f, 2.0f, 1.0f));
-	}
+	if (VFXComponent) VFXComponent->StartGroundCrackVFX();
 }
 
 void AGS_Drakhar::MulticastStopGroundCrackVFX_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (ActiveGroundCrackVFXComponent && IsValid(ActiveGroundCrackVFXComponent))
-	{
-		ActiveGroundCrackVFXComponent->Deactivate();
-
-		FTimerHandle GroundCrackVFXCleanupTimer;
-		GetWorld()->GetTimerManager().SetTimer(GroundCrackVFXCleanupTimer, [this]()
-		{
-			if (ActiveGroundCrackVFXComponent && IsValid(ActiveGroundCrackVFXComponent))
-			{
-				ActiveGroundCrackVFXComponent->DestroyComponent();
-			}
-			ActiveGroundCrackVFXComponent = nullptr;
-		}, 3.0f, false); // 3초 후 정리 (균열이 천천히 사라지도록)
-	}
+	if (VFXComponent) VFXComponent->StopGroundCrackVFX();
 }
 
 // === 어스퀘이크 먼지 구름 VFX 제어 함수 ===
-
-void AGS_Drakhar::StartDustCloudVFX()
-{
-	if (HasAuthority())
-	{
-		MulticastStartDustCloudVFX();
-	}
-}
-
-void AGS_Drakhar::StopDustCloudVFX()
-{
-	if (HasAuthority())
-	{
-		MulticastStopDustCloudVFX();
-	}
-}
-
 void AGS_Drakhar::MulticastStartDustCloudVFX_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	// 이미 활성화된 VFX가 있다면 정리
-	if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
-	{
-		ActiveDustCloudVFXComponent->DestroyComponent();
-		ActiveDustCloudVFXComponent = nullptr;
-	}
-
-	if (!DustCloudVFX)
-	{
-		return;
-	}
-
-	// 어스퀘이크 스폰 포인트를 사용한 스폰
-	if (EarthquakeVFXSpawnPoint && IsValid(EarthquakeVFXSpawnPoint))
-	{
-		ActiveDustCloudVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			DustCloudVFX,
-			EarthquakeVFXSpawnPoint,
-			NAME_None,
-			FVector(0.f, 0.f, 50.f), // 지면에서 약간 위로
-			FRotator::ZeroRotator,
-			EAttachLocation::KeepRelativeOffset,
-			true
-		);
-	}
-
-	// 폴백: 캐릭터 주변에 직접 스폰
-	if (!ActiveDustCloudVFXComponent)
-	{
-		FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, -40.f);
-		ActiveDustCloudVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			DustCloudVFX,
-			SpawnLocation,
-			GetActorRotation(),
-			FVector(1.5f, 1.5f, 1.5f),
-			true
-		);
-	}
-
-	if (ActiveDustCloudVFXComponent)
-	{
-		// 먼지 구름 VFX 파라미터 설정
-		ActiveDustCloudVFXComponent->SetFloatParameter(FName("DustIntensity"), EarthquakeShakeInfo.Intensity * 1.5f);
-		ActiveDustCloudVFXComponent->SetFloatParameter(FName("DustRadius"), EarthquakeShakeInfo.MaxDistance * 0.3f);
-		ActiveDustCloudVFXComponent->SetFloatParameter(FName("WindStrength"), 5.0f);
-		ActiveDustCloudVFXComponent->SetWorldScale3D(FVector(3.0f, 3.0f, 2.0f));
-
-		// 먼지 구름은 2초 후 자동으로 종료
-		FTimerHandle DustCloudAutoStopTimer;
-		GetWorld()->GetTimerManager().SetTimer(DustCloudAutoStopTimer, [this]()
-		{
-			StopDustCloudVFX();
-		}, 2.0f, false);
-	}
+	if (VFXComponent) VFXComponent->StartDustCloudVFX();
 }
 
 // === DraconicFury 투사체 충돌 처리 함수 구현 ===
 
-void AGS_Drakhar::HandleDraconicProjectileImpact(const FVector& ImpactLocation, const FVector& ImpactNormal,
-                                                 bool bHitCharacter)
+void AGS_Drakhar::HandleDraconicProjectileImpact(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
 {
 	if (HasAuthority())
 	{
@@ -1360,295 +777,51 @@ void AGS_Drakhar::HandleDraconicProjectileImpact(const FVector& ImpactLocation, 
 void AGS_Drakhar::MulticastPlayDraconicProjectileImpactEffects_Implementation(
 	const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	// === 사운드 이펙트 재생 ===
-	UAkAudioEvent* SoundToPlay = bHitCharacter
-		                             ? DraconicProjectileExplosionSoundEvent
-		                             : DraconicProjectileImpactSoundEvent;
-	if (SoundToPlay)
-	{
-		PlaySoundEvent(SoundToPlay, ImpactLocation);
-	}
-
-	// === 시각 이펙트 재생 ===
-	UNiagaraSystem* VFXToPlay = bHitCharacter ? DraconicProjectileExplosionVFX : DraconicProjectileImpactVFX;
-	if (VFXToPlay && GetWorld())
-	{
-		// 충돌 지점에서 VFX 재생
-		UNiagaraComponent* ImpactVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			VFXToPlay,
-			ImpactLocation,
-			FRotationMatrix::MakeFromZ(ImpactNormal).Rotator(), // 충돌면 법선 방향으로 회전
-			FVector(1.0f, 1.0f, 1.0f),
-			true,
-			true,
-			ENCPoolMethod::None,
-			true
-		);
-
-		if (ImpactVFXComponent)
-		{
-			// VFX 파라미터 설정
-			ImpactVFXComponent->SetVectorParameter(FName("ImpactNormal"), ImpactNormal);
-			ImpactVFXComponent->SetFloatParameter(FName("ImpactIntensity"), bHitCharacter ? 2.0f : 1.0f);
-
-			// 캐릭터 타격 시 더 큰 스케일
-			float VFXScale = bHitCharacter ? 1.5f : 1.0f;
-			ImpactVFXComponent->SetWorldScale3D(FVector(VFXScale, VFXScale, VFXScale));
-
-			// VFX 색상 설정 (캐릭터 타격 시 빨간색, 지형 타격 시 주황색)
-			FLinearColor ImpactColor = bHitCharacter ? FLinearColor::Red : FLinearColor(1.0f, 0.5f, 0.0f, 1.0f);
-			ImpactVFXComponent->SetColorParameter(FName("ImpactColor"), ImpactColor);
-		}
-	}
-
-	// === 카메라 쉐이크 (가까운 플레이어만) ===
-	if (bHitCharacter && CameraShakeComponent)
-	{
-		// 강한 충격 카메라 쉐이크 설정
-		FGS_CameraShakeInfo ImpactShakeInfo;
-		ImpactShakeInfo.Intensity = 4.0f;
-		ImpactShakeInfo.MaxDistance = 1000.0f;
-		ImpactShakeInfo.MinDistance = 100.0f;
-		ImpactShakeInfo.PropagationSpeed = 500000.0f;
-		ImpactShakeInfo.bUseFalloff = true;
-
-		// 충돌 지점을 중심으로 카메라 쉐이크 재생
-		CameraShakeComponent->PlayCameraShakeAtLocation(ImpactShakeInfo, ImpactLocation);
-	}
+	if (VFXComponent) VFXComponent->HandleDraconicProjectileImpact(ImpactLocation, ImpactNormal, bHitCharacter);
+	if (SFXComponent) SFXComponent->HandleDraconicProjectileImpact(ImpactLocation, bHitCharacter);
 }
 
 void AGS_Drakhar::MulticastPlayFeverEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (FeverEarthquakeImpactVFX && GetWorld())
-	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			FeverEarthquakeImpactVFX,
-			ImpactLocation,
-			FRotator::ZeroRotator,
-			FVector(1.5f), // Scale up a bit
-			true,
-			true,
-			ENCPoolMethod::None,
-			true
-		);
-	}
+	if (VFXComponent) VFXComponent->PlayFeverEarthquakeImpactVFX(ImpactLocation);
 }
 
 void AGS_Drakhar::MulticastRPC_OnFlyStart_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
-
-	if (FlyingDustVFX && !IsValid(ActiveFlyingDustVFXComponent))
-	{
-		FVector Location = GetActorLocation() - FVector(0,0,GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
-		ActiveFlyingDustVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), FlyingDustVFX, Location);
-		if(ActiveFlyingDustVFXComponent)
-		{
-			ActiveFlyingDustVFXComponent->SetAutoDestroy(false);
-			ActiveFlyingDustVFXComponent->Deactivate(); 
-		}
-	}
-	
-	BP_OnFlyStart();
+	if (VFXComponent) VFXComponent->OnFlyStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnFlyEnd_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
-
-	if (ActiveFlyingDustVFXComponent && IsValid(ActiveFlyingDustVFXComponent))
-	{
-		ActiveFlyingDustVFXComponent->DestroyComponent();
-		ActiveFlyingDustVFXComponent = nullptr;
-	}
-	
-	BP_OnFlyEnd();
+	if (VFXComponent) VFXComponent->OnFlyEnd();
 }
 
 void AGS_Drakhar::MulticastRPC_OnUltimateStart_Implementation()
 {
-	BP_OnUltimateStart();
+	if (VFXComponent) VFXComponent->OnUltimateStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnEarthquakeStart_Implementation()
 {
-	BP_OnEarthquakeStart();
-}
-
-void AGS_Drakhar::MulticastRPC_ApplyFeverModeOverlay_Implementation()
-{
-	if (!FeverModeOverlayMaterial)
-	{
-		return;
-	}
-
-	USkeletalMeshComponent* MeshComp = GetMesh();
-	if (!MeshComp)
-	{
-		return;
-	}
-
-	if (!FeverModeOverlayMID)
-	{
-		FeverModeOverlayMID = UMaterialInstanceDynamic::Create(FeverModeOverlayMaterial, this);
-	}
-
-	if (FeverModeOverlayMID)
-	{
-		FeverModeOverlayMID->SetScalarParameterValue(FName("Intensity"), FeverOverlayIntensity);
-		FeverModeOverlayMID->SetVectorParameterValue(FName("OverlayColor"), FeverOverlayColor);
-		MeshComp->SetOverlayMaterial(FeverModeOverlayMID);
-	}
-}
-
-void AGS_Drakhar::MulticastRPC_RemoveFeverModeOverlay_Implementation()
-{
-	if (USkeletalMeshComponent* MeshComp = GetMesh())
-	{
-		MeshComp->SetOverlayMaterial(nullptr);
-	}
-	FeverModeOverlayMID = nullptr;
+	if (VFXComponent) VFXComponent->OnEarthquakeStart();
 }
 
 void AGS_Drakhar::OnRep_IsFeverMode()
 {
-	if (FootManagerComponent)
-	{
-		if (IsFeverMode)
-		{
-			FootManagerComponent->OverrideFootDustEffect(FeverFootstepVFX);
-		}
-		else
-		{
-			FootManagerComponent->ClearFootDustEffectOverride();
-		}
-	}
-
-	if (IsFeverMode)
-	{
-		ApplyFeverModeOverlay();
-	}
-	else
-	{
-		RemoveFeverModeOverlay();
-	}
-}
-
-void AGS_Drakhar::ApplyFeverModeOverlay()
-{
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-	
-	if (!FeverModeOverlayMaterial)
-	{
-		return;
-	}
-
-	USkeletalMeshComponent* MeshComp = GetMesh();
-	if (!MeshComp)
-	{
-		return;
-	}
-
-	if (!FeverModeOverlayMID)
-	{
-		FeverModeOverlayMID = UMaterialInstanceDynamic::Create(FeverModeOverlayMaterial, this);
-	}
-
-	if (FeverModeOverlayMID)
-	{
-		FeverModeOverlayMID->SetScalarParameterValue(FName("Intensity"), FeverOverlayIntensity);
-		FeverModeOverlayMID->SetVectorParameterValue(FName("OverlayColor"), FeverOverlayColor);
-		MeshComp->SetOverlayMaterial(FeverModeOverlayMID);
-	}
-}
-
-void AGS_Drakhar::RemoveFeverModeOverlay()
-{
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-	
-	if (USkeletalMeshComponent* MeshComp = GetMesh())
-	{
-		MeshComp->SetOverlayMaterial(nullptr);
-	}
-	FeverModeOverlayMID = nullptr;
+	if (VFXComponent) VFXComponent->OnFeverModeChanged(IsFeverMode);
 }
 
 void AGS_Drakhar::MulticastRPC_PlayAttackHitVFX_Implementation(FVector ImpactPoint)
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	UNiagaraSystem* VFXToPlay = IsFeverMode ? FeverAttackHitVFX : NormalAttackHitVFX;
-
-	if (VFXToPlay)
-	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), VFXToPlay, ImpactPoint);
-	}
+	if (VFXComponent) VFXComponent->PlayAttackHitVFX(ImpactPoint);
 }
 
 void AGS_Drakhar::MulticastPlayEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (EarthquakeImpactVFX && GetWorld())
-	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			EarthquakeImpactVFX,
-			ImpactLocation,
-			FRotator::ZeroRotator,
-			FVector(1.0f),
-			true,
-			true,
-			ENCPoolMethod::None,
-			true
-		);
-	}
+	if (VFXComponent) VFXComponent->PlayEarthquakeImpactVFX(ImpactLocation);
 }
 
 void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
-	{
-		ActiveDustCloudVFXComponent->Deactivate();
-
-		FTimerHandle DustCloudVFXCleanupTimer;
-		GetWorld()->GetTimerManager().SetTimer(DustCloudVFXCleanupTimer, [this]()
-		{
-			if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
-			{
-				ActiveDustCloudVFXComponent->DestroyComponent();
-			}
-			ActiveDustCloudVFXComponent = nullptr;
-		}, 1.5f, false);
-	}
+	if(VFXComponent) VFXComponent->StopDustCloudVFX();
 }
-
