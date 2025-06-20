@@ -15,6 +15,93 @@ UGS_SkillComp::UGS_SkillComp()
 	
 }
 
+void UGS_SkillComp::ApplyCooldownModifier(ESkillSlot Slot, float Ratio)
+{
+	if (UGS_SkillBase* Skill = SkillMap.FindRef(Slot))
+	{
+		Skill->Cooltime *= Ratio;
+	}
+
+	// 현재 쿨다운이 있는 상태면 남은 시간도 줄여줌
+	if (FSkillCooldownState* State = CooldownStates.Find(Slot))
+	{
+		if (State->bIsOnCooldown)
+		{
+			// 남은 시간 비례 축소
+			State->CooldownRemaining *= Ratio;
+
+			// 타이머 갱신
+			float NewRemaining = State->CooldownRemaining;
+
+			GetWorld()->GetTimerManager().ClearTimer(State->CooldownTimer);
+			GetWorld()->GetTimerManager().ClearTimer(State->UIUpdateTimer);
+
+			if (NewRemaining > 0.0f)
+			{
+				GetWorld()->GetTimerManager().SetTimer(
+					State->CooldownTimer,
+					[this, Slot]() { HandleCooldownComplete(Slot); },
+					NewRemaining,
+					false
+				);
+
+				GetWorld()->GetTimerManager().SetTimer(
+					State->UIUpdateTimer,
+					[this, Slot]() { HandleCooldownProgress(Slot); },
+					0.1f,
+					true
+				);
+			}
+
+			UpdateReplicatedCooldownStates(); // UI에도 반영
+		}
+	}
+}
+
+void UGS_SkillComp::ResetCooldownModifier(ESkillSlot Slot)
+{
+	if (!SkillDataTable || !GetOwner()) return;
+
+	UGS_SkillBase* Skill = GetSkillFromSkillMap(Slot);
+	if (!Skill) return;
+
+	// 캐릭터 타입을 기반으로 RowName 구하기
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	if (!OwnerCharacter) return;
+
+	FName RowName = FName(*UEnum::GetValueAsString(OwnerCharacter->GetCharacterType()).RightChop(
+		UEnum::GetValueAsString(OwnerCharacter->GetCharacterType()).Find(TEXT("::")) + 2));
+
+	FString Context;
+	const FGS_SkillSet* SkillSet = SkillDataTable->FindRow<FGS_SkillSet>(RowName, Context);
+	if (!SkillSet) return;
+
+	float OriginalCooltime = 0.f;
+
+	switch (Slot)
+	{
+	case ESkillSlot::Ready:
+		OriginalCooltime = SkillSet->ReadySkill.Cooltime;
+		break;
+	case ESkillSlot::Moving:
+		OriginalCooltime = SkillSet->MovingSkill.Cooltime;
+		break;
+	case ESkillSlot::Aiming:
+		OriginalCooltime = SkillSet->AimingSkill.Cooltime;
+		break;
+	case ESkillSlot::Ultimate:
+		OriginalCooltime = SkillSet->UltimateSkill.Cooltime;
+		break;
+	default:
+		break;
+	}
+
+	if (OriginalCooltime > 0.f)
+	{
+		Skill->Cooltime = OriginalCooltime;
+	}
+}
+
 void UGS_SkillComp::BeginPlay()
 {
 	Super::BeginPlay();
