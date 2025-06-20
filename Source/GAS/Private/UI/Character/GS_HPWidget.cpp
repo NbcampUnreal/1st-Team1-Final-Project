@@ -33,38 +33,26 @@ void UGS_HPWidget::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 
 void UGS_HPWidget::InitializeHPWidget(UGS_StatComp* InStatComp)
 {
-	TargetHPPercent = InStatComp->GetCurrentHealth() / InStatComp->GetMaxHealth();
-	CurrentHPPercent = TargetHPPercent;
-	DelayedHPPercent = TargetHPPercent;
-
-	HPBarWidget->SetPercent(TargetHPPercent);
-	HPDelayBarWidget->SetPercent(TargetHPPercent);
-	HPSlider->SetValue(TargetHPPercent);
-	//OnCurrentHPBarChanged(InStatComp);
+	HPBarWidget->SetPercent(CurrentHPPercent);
+	HPDelayBarWidget->SetPercent(CurrentHPPercent);
+	HPSlider->SetValue(CurrentHPPercent);
+	OnCurrentHPBarChanged(InStatComp);
 
 }
 
 void UGS_HPWidget::OnCurrentHPBarChanged(UGS_StatComp* InStatComp)
 {
 	TargetHPPercent = InStatComp->GetCurrentHealth() / InStatComp->GetMaxHealth();
-
 	GetWorld()->GetTimerManager().ClearTimer(InterpTimerHandle);
 	GetWorld()->GetTimerManager().ClearTimer(DelayBeforInterpTimerHandle);
-
+	
 	if (TargetHPPercent < CurrentHPPercent)
 	{
 		//데미지
-		CurrentHPPercent = TargetHPPercent;
-		HPBarWidget->SetPercent(CurrentHPPercent);
-		HPSlider->SetValue(CurrentHPPercent);
-		if (HPDelayBarWidget->GetPercent() < CurrentHPPercent)
-		{
-			DelayedHPPercent = CurrentHPPercent;
-		}
-		else
-		{
-			DelayedHPPercent = HPDelayBarWidget->GetPercent();
-		}
+		CurrentHPPercent = TargetHPPercent; 
+		HPBarWidget->SetPercent(TargetHPPercent); 
+		HPSlider->SetValue(TargetHPPercent); 
+
 	}
 	else
 	{
@@ -80,20 +68,30 @@ void UGS_HPWidget::OnCurrentHPBarChanged(UGS_StatComp* InStatComp)
 
 void UGS_HPWidget::StartDelayBarInterp()
 {
+
+
 	if (DelayedHPPercent > TargetHPPercent)
 	{
 		//데미지
+		const float Duration = 0.05f;
+		float Delta = FMath::Abs(DelayedHPPercent - TargetHPPercent);
+		InterpSpeed = FMath::Max(Delta / Duration, 0.01f);
 		GetWorld()->GetTimerManager().SetTimer(InterpTimerHandle, this, &UGS_HPWidget::UpdateDelayedHP, 0.01f, true);
 	}
 	else
 	{
 		//힐
+		const float Duration = 0.15f;
+		float Delta = FMath::Abs(TargetHPPercent - CurrentHPPercent);
+		InterpSpeed = FMath::Max(Delta / Duration, 0.5f);
 		GetWorld()->GetTimerManager().SetTimer(InterpTimerHandle, this, &UGS_HPWidget::UpdateMainHP, 0.01f, true);
 	}
 }
 
 void UGS_HPWidget::UpdateDelayedHP()
 {
+
+
 	if (DelayedHPPercent > TargetHPPercent)
 	{
 		DelayedHPPercent = FMath::FInterpTo(DelayedHPPercent, TargetHPPercent, 0.01f, InterpSpeed);
@@ -101,6 +99,7 @@ void UGS_HPWidget::UpdateDelayedHP()
 	}
 	else
 	{
+
 		DelayedHPPercent = TargetHPPercent;
 		HPDelayBarWidget->SetPercent(DelayedHPPercent);
 		GetWorld()->GetTimerManager().ClearTimer(InterpTimerHandle);

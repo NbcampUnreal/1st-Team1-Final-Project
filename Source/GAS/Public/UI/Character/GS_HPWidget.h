@@ -52,7 +52,7 @@ protected:
 	float CurrentHPPercent = 1.f;
 	float DelayedHPPercent = 1.f;
 
-	float InterpSpeed = 1.0f;
+	float InterpSpeed = 0.5f;
 
 	FTimerHandle DelayBeforInterpTimerHandle;
 	FTimerHandle InterpTimerHandle;
