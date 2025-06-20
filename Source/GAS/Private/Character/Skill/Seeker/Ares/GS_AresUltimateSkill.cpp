@@ -5,8 +5,14 @@
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_StatRow.h"
 
+UGS_AresUltimateSkill::UGS_AresUltimateSkill()
+{
+	CurrentSkillType = ESkillSlot::Ultimate;
+}
+
 void UGS_AresUltimateSkill::ActiveSkill()
 {
+	if (!CanActive()) return;
 	Super::ActiveSkill();
 	UE_LOG(LogTemp, Warning, TEXT("Ares Ultimate Skill Active"));
 	bIsBerserker = true;
@@ -23,6 +29,16 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 	{
 		StatComp->bIsInvincible = false;
 		StatComp->ResetStat(BuffAmount);
+	}
+
+	// 쿨타임 복원
+	if (UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp())
+	{
+		if (UGS_SkillBase* MovingSkill = SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving))
+		{
+			//SkillComp->ResetCooldown(ESkillSlot::Moving);
+		}
+		OriginalMovingSkillCooltime = -1.f; // 초기화
 	}
 }
 
@@ -55,7 +71,7 @@ void UGS_AresUltimateSkill::ExecuteSkillEffect()
 	{
 		if (UGS_SkillBase* MovingSkill = SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving))
 		{
-			MovingSkill->Cooltime *= 0.5f; // 쿨타임 절반으로 감소
+			//SkillComp->ApplyCooldownReduction(ESkillSlot::Moving, 0.5);
 		}
 	}
 }

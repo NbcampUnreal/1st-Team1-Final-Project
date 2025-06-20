@@ -15,6 +15,8 @@ class GAS_API UGS_AresUltimateSkill : public UGS_SeekerSkillBase
 	GENERATED_BODY()
 	
 public:
+	UGS_AresUltimateSkill();
+
 	virtual void ActiveSkill() override;
 	virtual void DeactiveSkill() override;
 	virtual void ExecuteSkillEffect() override;
@@ -25,4 +27,7 @@ private:
 
 	FTimerHandle UltimateSkillTimerHandle;
 	FGS_StatRow BuffAmount;
+
+	// Cooltime 복원용 변수
+	float OriginalMovingSkillCooltime = -1.f;
 };
