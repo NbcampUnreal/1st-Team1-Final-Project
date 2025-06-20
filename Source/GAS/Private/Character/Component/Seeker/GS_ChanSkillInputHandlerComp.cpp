@@ -51,15 +51,12 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 		return;
 	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("1")); // SJE
 	if (!bCtrlHeld)
 	{
 		if (ChanCharacter)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("2")); // SJE
 			if (ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("3")); // SJE
 				ChanCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
 			}
 			else

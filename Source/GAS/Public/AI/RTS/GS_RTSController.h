@@ -189,7 +189,7 @@ public:
 	void Server_RTSHold(const TArray<AGS_Monster*>& Units);
 
 	UFUNCTION(Server, Reliable)
-	void Server_RTSSkill(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc);
+	void Server_RTSSkill(const TArray<AGS_Monster*>& Units);
 
 	// UI 버튼 클릭 함수
 	UFUNCTION(BlueprintCallable, Category="RTS")

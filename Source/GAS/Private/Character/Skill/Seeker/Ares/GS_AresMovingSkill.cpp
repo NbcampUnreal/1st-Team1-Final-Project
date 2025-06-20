@@ -27,13 +27,6 @@ void UGS_AresMovingSkill::ActiveSkill()
 		return;
 	}
 
-	Super::ActiveSkill();
-
-	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
-	{
-		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-	}
-
 	bPressedDuringCooldown = false;
 
 	// 차징 시작
@@ -55,11 +48,6 @@ void UGS_AresMovingSkill::OnSkillCommand()
 	if (!CanActiveInternally() || bPressedDuringCooldown)
 	{
 		return;
-	}
-
-	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
-	{
-		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
 	}
 
 	Super::OnSkillCommand();
@@ -147,6 +135,11 @@ bool UGS_AresMovingSkill::IsActive() const
 	return bIsCharging;
 }
 
+bool UGS_AresMovingSkill::CanActiveInternally() const
+{
+	return OwnerCharacter && !bIsCoolingDown;
+}
+
 void UGS_AresMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
 	// 데미지
@@ -216,11 +209,6 @@ void UGS_AresMovingSkill::UpdateDash()
 	{
 		StopDash();
 	}
-}
-
-bool UGS_AresMovingSkill::CanActiveInternally() const
-{
-	return OwnerCharacter && !bIsCoolingDown;
 }
 
 void UGS_AresMovingSkill::StopDash()

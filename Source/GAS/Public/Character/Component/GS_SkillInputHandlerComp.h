@@ -9,7 +9,7 @@
 class UInputAction;
 class UInputMappingContext;
 class UGS_SkillComp;
-class AGS_Character;
+class AGS_Player;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAS_API UGS_SkillInputHandlerComp : public UActorComponent
@@ -45,7 +45,7 @@ protected:
 	UFUNCTION()
 	virtual void OnScroll(const struct FInputActionInstance& Instance);
 
-	TObjectPtr<AGS_Character> OwnerCharacter;
+	TObjectPtr<AGS_Player> OwnerCharacter;
 
 	bool bCtrlHeld = false;
 

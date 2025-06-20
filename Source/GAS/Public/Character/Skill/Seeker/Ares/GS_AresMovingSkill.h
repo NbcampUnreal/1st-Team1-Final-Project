@@ -16,7 +16,7 @@ class GAS_API UGS_AresMovingSkill : public UGS_SeekerSkillBase
 	
 public:
 	UGS_AresMovingSkill();
-	
+
 	virtual void ActiveSkill() override;
 	virtual void DeactiveSkill() override;
 	virtual void OnSkillCommand() override;
@@ -48,11 +48,13 @@ private:
 	float DashInterpAlpha = 0.0f;
 
 	bool bIsCharging = false;
-	bool bPressedDuringCooldown = false;
+	//bool bPressedDuringCooldown = false;
 
 	FVector DashDirection; // 돌진 방향
 	FVector DashStartLocation;
 	FVector DashEndLocation;
 
 	TSet<AActor*> DamagedActors;
+
+	bool bPressedDuringCooldown = false;
 };
