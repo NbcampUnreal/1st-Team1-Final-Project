@@ -49,9 +49,10 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// OnDeath 오버라이드 추가
+	// Death
 	virtual void OnDeath() override;
 
+	// State
 	UFUNCTION(BlueprintCallable)
 	void SetAimState(bool IsAim);
 
@@ -64,17 +65,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "State")
 	bool GetDrawState();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
-	UChildActorComponent* Weapon;
-
 	UFUNCTION(Server, Reliable, Category = "State")
 	void Server_SetSeekerGait(EGait Gait);
 
 	UFUNCTION()
 	void SetSeekerGait(EGait Gait);
-
-	UPROPERTY(Replicated)
-	bool CanChangeSeekerGait;
 
 	UFUNCTION(BlueprintCallable, Category = "State")
 	EGait GetSeekerGait();
@@ -82,16 +77,67 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "State")
 	EGait GetLastSeekerGait();
 
+	UFUNCTION(Server, Reliable)
+	void Server_SetMoveControlValue(bool bMoveForward, bool bMoveRight);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetLookControlValue(bool bLookUp, bool bLookRight);
+
+	UFUNCTION()
+	void OnRep_SeekerGait();
+
+	// AnimInstnace Slot State Value 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsUpperBodySlot(bool bUpperBodySlot);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsLeftArmSlot(bool bLeftArmSlot);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetMustTurnInPlace(bool MustTurn);
+
 	// Combo
-	UPROPERTY(Replicated)
-	bool bComboEnded = true;
-	
 	UFUNCTION(Server, Reliable)
 	void Server_ComboEnd(bool bComboEnd);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ComboEnd();
 
+	UFUNCTION(Server, Reliable)
+	virtual void ServerAttackMontage();
+
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void MulticastPlayComboSection();
+
+	UFUNCTION()
+	void ComboInputOpen();
+	
+	UFUNCTION()
+	void ComboInputClose();
+
+	UFUNCTION()
+	virtual void OnComboAttack();
+
+	// Replication Set
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+public:
+	// Weapon
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
+	UChildActorComponent* Weapon;
+
+	// State
+	UPROPERTY(Replicated)
+	bool CanChangeSeekerGait;
+
+	
+	// Combo
+	UPROPERTY(Replicated)
+	bool bComboEnded = true;
+	
 	UPROPERTY(EditAnywhere, Category="Animation")
 	UAnimMontage* ComboAnimMontage;
 
@@ -102,24 +148,35 @@ public:
 	bool CanAcceptComboInput = true;
 
 	bool bNextCombo = false;
+	UPROPERTY(ReplicatedUsing = OnRep_SeekerGait)
+	EGait SeekerGait;
 
-	UFUNCTION(Server, Reliable)
-	virtual void ServerAttackMontage();
+	UPROPERTY(Replicated)
+	EGait LastSeekerGait;
 
-	UFUNCTION(NetMulticast, Reliable)
-	virtual void MulticastPlayComboSection();
+private :
+	UPROPERTY(VisibleAnywhere, Category="State")
+	FSeekerState SeekerState;
 
-	/*UFUNCTION()
-	void ComboInputOpen();*/
-	UFUNCTION()
-	void ComboInputOpen();
+//====================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	
-	UFUNCTION()
-	void ComboInputClose();
-
-	UFUNCTION()
-	virtual void OnComboAttack();
-	
+public:	
 	// ================
 	// LowHP 스크린 효과
 	// ================
@@ -233,25 +290,13 @@ protected:
 	UFUNCTION()
 	void OnRep_CurrentEffectStrength();
 
-	// 리플리케이션 설정
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 
 	// 머티리얼 파라미터 이름 상수
 	static const FName HPRatioParamName;
 	static const FName EffectIntensityParamName;
 
-	UPROPERTY(ReplicatedUsing = OnRep_SeekerGait)
-	EGait SeekerGait;
-
-	UPROPERTY(Replicated)
-	EGait LastSeekerGait;
-
-	UFUNCTION()
-	void OnRep_SeekerGait();
-
-private :
-	UPROPERTY(VisibleAnywhere, Category="State")
-	FSeekerState SeekerState;
+private:
 
 
 
