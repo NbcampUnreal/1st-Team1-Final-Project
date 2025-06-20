@@ -125,7 +125,10 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 		return Reply;
 	}
 
-	SelectionVisualWidget->SetPositionInViewport(MousePos, false);
+	//임시
+	FVector2D AdditionalOffset = GetRuneDragOffset();
+
+	SelectionVisualWidget->SetPositionInViewport(MousePos - AdditionalOffset, false);
 
 	UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
 
@@ -347,19 +350,15 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 			FVector2D ScaleFactors = CalculateDragVisualScale(RuneID);
 			SelectionVisualWidget->SetRenderScale(ScaleFactors);
 
-			FVector2D OriginalSize = SelectionVisualWidget->GetDesiredSize();
-			FVector2D ActualDragVisualSize = FVector2D(
-				OriginalSize.X * ScaleFactors.X,
-				OriginalSize.Y * ScaleFactors.Y
-			);
-
 			if (GetWorld())
 			{
 				FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 				if (MousePos != FVector2D::ZeroVector)
 				{
-					FVector2D CenterOffset = ActualDragVisualSize * 0.5f;
-					SelectionVisualWidget->SetPositionInViewport(MousePos - CenterOffset, false);
+					//임시
+					FVector2D AdditionalOffset = GetRuneDragOffset();
+
+					SelectionVisualWidget->SetPositionInViewport(MousePos - AdditionalOffset, false);
 				}
 			}
 
@@ -658,6 +657,53 @@ void UGS_ArcaneBoardWidget::UnbindFromLPS()
 	{
 		ArcaneBoardLPS->ClearCurrUIWidget();
 	}
+}
+
+FVector2D UGS_ArcaneBoardWidget::GetRuneDragOffset()
+{
+	FVector2D AdditionalOffset = { 0.f, 0.f };
+	FVector2D CellSize = GetGridCellSize();
+
+	if (SelectedRuneID == 1 || SelectedRuneID == 2 || SelectedRuneID == 3
+		|| SelectedRuneID == 4 || SelectedRuneID == 5 || SelectedRuneID == 14)
+	{
+		AdditionalOffset.X = CellSize.X * 0.2f;
+		AdditionalOffset.Y = CellSize.X * 0.2f;
+	}
+	else if (SelectedRuneID == 7)
+	{
+		AdditionalOffset.X = CellSize.X * 0.3f;
+		AdditionalOffset.Y = CellSize.X * 0.3f;
+	}
+	else if (SelectedRuneID == 8)
+	{
+		AdditionalOffset.X = CellSize.X * 0.2f;
+	}
+	else if (SelectedRuneID == 6 || SelectedRuneID == 9)
+	{
+		AdditionalOffset.X = CellSize.X * 0.2f;
+		AdditionalOffset.Y = CellSize.X * 0.3f;
+	}
+	else if (SelectedRuneID == 11)
+	{
+		AdditionalOffset.X = CellSize.X * 0.2f;
+		AdditionalOffset.Y = CellSize.X * 0.5f;
+	}
+	else if (SelectedRuneID == 10 || SelectedRuneID == 12)
+	{
+		AdditionalOffset.X = CellSize.X * 0.3f;
+	}
+	else if (SelectedRuneID == 13)
+	{
+		AdditionalOffset.X = CellSize.X * 0.4f;
+		AdditionalOffset.Y = CellSize.X * 0.4f;
+	}
+	else if (SelectedRuneID == 16)
+	{
+		AdditionalOffset.Y = CellSize.X * 0.3f;
+	}
+
+	return AdditionalOffset;
 }
 
 void UGS_ArcaneBoardWidget::ShowTooltip(uint8 RuneID, const FVector2D& MousePos)

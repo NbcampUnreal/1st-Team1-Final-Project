@@ -11,6 +11,8 @@
 #include "Character/GS_TpsController.h"
 #include "AkComponent.h"
 #include "AkAudioEvent.h"
+#include "AkGameplayStatics.h"
+#include "AkAudioDevice.h"
 #include "Animation/Character/Seeker/GS_ChooserInputObj.h"
 
 
@@ -25,9 +27,33 @@ AGS_Chan::AGS_Chan()
 
 void AGS_Chan::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
 {
-	if (SoundToPlay && AkComponent)
+	// 데디케이티드 서버에서는 사운드 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
 	{
-		AkComponent->PostAkEvent(SoundToPlay);
+		return;
+	}
+
+	if (!SoundToPlay)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Chan::Multicast_PlaySkillSound - SoundEvent is null"));
+		return;
+	}
+
+	if (!FAkAudioDevice::Get())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Chan::Multicast_PlaySkillSound - Wwise AudioDevice is not initialized"));
+		return;
+	}
+
+	// AkComponent가 없거나 유효하지 않으면 새로 생성
+	UAkComponent* AkComp = GetOrCreateAkComponent();
+	if (AkComp)
+	{
+		AkComp->PostAkEvent(SoundToPlay);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGS_Chan::Multicast_PlaySkillSound - Failed to get or create AkComponent"));
 	}
 }
 
@@ -60,6 +86,57 @@ void AGS_Chan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AGS_Chan::OnComboAttack()
 {
 	Super::OnComboAttack();	
+}
+
+void AGS_Chan::MulticastPlayComboSection()
+{
+	// 기존 타이머가 있다면 클리어 (Stop 이벤트는 호출하지 않음)
+	GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
+	
+	// 부모 클래스의 콤보 로직 실행 (CurrentComboIndex++ 포함)
+	Super::MulticastPlayComboSection();
+	
+	// 공격 사운드 재생
+	if (AxeSwingSound)
+	{
+		Multicast_PlaySkillSound(AxeSwingSound);
+	}
+	
+	if (AttackVoiceSound)
+	{
+		Multicast_PlaySkillSound(AttackVoiceSound);
+	}
+	
+	// 공격 후 일정 시간 뒤 사운드 시퀀스 리셋을 위한 타이머 설정
+	GetWorldTimerManager().SetTimer(
+		AttackSoundResetTimerHandle,
+		this,
+		&AGS_Chan::ResetAttackSoundSequence,
+		1.0f,  // 1초로 고정
+		false
+	);
+}
+
+void AGS_Chan::ResetAttackSoundSequence()
+{
+	// 사용자가 만든 Wwise Stop 이벤트 호출
+	if (AxeSwingStopEvent)
+	{
+		UAkComponent* AkComp = GetOrCreateAkComponent();
+		if (AkComp)
+		{
+			AkComp->PostAkEvent(AxeSwingStopEvent);
+		}
+	}
+}
+
+void AGS_Chan::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
+{
+	// 4번째 공격일 때 특별한 사운드 재생
+	if (ComboIndex == 4 && FinalAttackExtraSound)
+	{
+		Multicast_PlaySkillSound(FinalAttackExtraSound);
+	}
 }
 
 void AGS_Chan::OnJumpAttackSkill()
@@ -130,4 +207,25 @@ void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float
 		false,
 		InLifetime
 	);*/
+}
+
+UAkComponent* AGS_Chan::GetOrCreateAkComponent()
+{
+	UAkComponent* AkComp = FindComponentByClass<UAkComponent>();
+	if (!AkComp)
+	{
+		// AkComponent가 없으면 새로 생성
+		AkComp = NewObject<UAkComponent>(this, TEXT("RuntimeAkAudioComponent"));
+		if (AkComp)
+		{
+			AkComp->SetupAttachment(GetRootComponent());
+			AkComp->RegisterComponent();
+			UE_LOG(LogTemp, Log, TEXT("AGS_Chan::GetOrCreateAkComponent - Created new AkComponent"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("AGS_Chan::GetOrCreateAkComponent - Failed to create AkComponent"));
+		}
+	}
+	return AkComp;
 }

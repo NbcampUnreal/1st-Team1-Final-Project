@@ -6,6 +6,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/Player/Seeker/GS_Chan.h"
 #include "Components/BoxComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Character/Component/GS_StatComp.h"
@@ -68,19 +69,38 @@ void AGS_WeaponAxe::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 	}
 
 	Multicast_PlayHitSound(TargetType, CorrectHitResult);
-	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
-
-	// PlayHitSound(TargetType, CorrectHitResult);
-	// PlayHitVFX(TargetType, CorrectHitResult);
 	
 	AGS_Character* Damaged = Cast<AGS_Character>(OtherActor);
 	AGS_Character* Attacker = OwnerChar;
 
 	if (!Damaged || !Attacker || !Damaged->IsEnemy(Attacker))
 	{
+		// 적이 아닌 대상(벽 등)을 타격한 경우, 기본 VFX만 재생하고 종료
+		Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 		return;
 	}
 
+	// --- 여기서부터는 유효한 적을 타격한 경우 ---
+	
+	// 1. 기본 VFX는 항상 재생
+	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
+
+	// 2. '찬'의 4번째 공격일 경우 추가 효과(사운드, VFX) 재생
+	if (AGS_Chan* Chan = Cast<AGS_Chan>(Attacker))
+	{
+		if (Chan->CurrentComboIndex == 4)
+		{
+			// 추가 사운드
+			Chan->Multicast_OnAttackHit(Chan->CurrentComboIndex);
+			
+			// 추가 VFX
+			if (Chan->FinalAttackHitVFX)
+			{
+				Multicast_PlaySpecialHitVFX(Chan->FinalAttackHitVFX, CorrectHitResult);
+			}
+		}
+	}
+	
 	UGS_StatComp* DamagedStat = Damaged->GetStatComp();
 	if (!DamagedStat) 
 	{
@@ -202,6 +222,22 @@ bool AGS_WeaponAxe::Multicast_PlayHitVFX_Validate(EAxeHitTargetType TargetType, 
 void AGS_WeaponAxe::Multicast_PlayHitVFX_Implementation(EAxeHitTargetType TargetType, const FHitResult& SweepResult)
 {
 	PlayHitVFX(TargetType, SweepResult);
+}
+
+void AGS_WeaponAxe::Multicast_PlaySpecialHitVFX_Implementation(UNiagaraSystem* VFXToPlay, const FHitResult& HitResult)
+{
+	if (VFXToPlay && GetWorld())
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			VFXToPlay,
+			HitResult.ImpactPoint,
+			HitResult.ImpactNormal.Rotation(),
+			FVector(1.0f),
+			true,
+			true
+		);
+	}
 }
 
 void AGS_WeaponAxe::EnableHit()

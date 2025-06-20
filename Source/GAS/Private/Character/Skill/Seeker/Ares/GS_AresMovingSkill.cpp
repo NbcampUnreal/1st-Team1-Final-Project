@@ -11,6 +11,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Character/Player/Seeker/GS_Ares.h"
 
 
 UGS_AresMovingSkill::UGS_AresMovingSkill()

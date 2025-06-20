@@ -3,6 +3,7 @@
 #include "Animation/AnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Character/Component/GS_DrakharSFXComponent.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
@@ -151,7 +152,7 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 			// === 히트 사운드 재생 (Drakhar인 경우) ===
 			if (Drakhar)
 			{
-				Drakhar->PlayAttackHitSound();
+				Drakhar->MulticastPlayAttackHitSound();
 			}
 		}
 	}

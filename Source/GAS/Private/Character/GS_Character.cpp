@@ -100,11 +100,11 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	float CurrentHealth = StatComp->GetCurrentHealth();
 
 	// SJE
-	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	if (CanHitReact && DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		const FPointDamageEvent* PointEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		FVector HitDirection = -PointEvent->ShotDirection;
-		if (UGS_HitReactComp* HitReactComponent = GetComponentByClass<UGS_HitReactComp>())
+		if(UGS_HitReactComp* HitReactComponent = GetComponentByClass<UGS_HitReactComp>())
 		{
 			HitReactComponent->PlayHitReact(EHitReactType::Additive, HitDirection);
 		}
@@ -116,6 +116,11 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	StatComp->SetCurrentHealth(NewHealth, false);
 
 	return ActualDamage;
+}
+
+void AGS_Character::Multicast_SetCanHitReact_Implementation(bool CanReact)
+{
+	CanHitReact = CanReact;
 }
 
 void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

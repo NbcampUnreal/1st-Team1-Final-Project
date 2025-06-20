@@ -7,6 +7,7 @@
 					<ObjectInclusionList>
 						<ObjectRef Name="EV_ChanAggroSkill" ID="{28E1990D-73B5-403C-BA53-4DBAE2B3E962}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw_RTS" ID="{23941479-25EC-40A0-81FC-A265BBDEF2B9}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Chan_Attack_Stop" ID="{FB36B935-9B69-40E0-8061-EB8614F2CA6A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Chan_Move" ID="{FA35E9E7-77DD-410B-83DE-BD9F2372CDE5}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Amb_Dungeon" ID="{512023F1-7483-4146-89A7-57F6CFD88495}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Spike" ID="{87EFA3D2-5892-417F-A875-D06CCD556912}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -47,6 +48,7 @@
 						<ObjectRef Name="EV_Drakhar_Attack" ID="{C5EA2935-D101-4891-A1B0-F14D558AFD0F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_StoneDooor_Close" ID="{CAF2368B-2B31-4894-B890-6034FC2E534C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Fire_Extinguish" ID="{1261AE45-6B7B-489A-93E1-50AC8218A43C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Chan_FinalAttack" ID="{FE229EF2-B036-48BD-BFB8-FD28A465AC48}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_ArrowImpact_Stone" ID="{5B4DA841-68C7-48EF-90AB-20E344778912}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Fire_Burn" ID="{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
