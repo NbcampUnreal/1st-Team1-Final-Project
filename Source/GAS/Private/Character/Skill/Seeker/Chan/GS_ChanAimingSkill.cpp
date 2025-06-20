@@ -169,7 +169,8 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		}
 
 		// End Skill
-		ExecuteSkillEffect();
+		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(KnockbackHandle, this, &UGS_ChanAimingSkill::ExecuteSkillEffect, 0.8f, false);
+		//ExecuteSkillEffect();
 		if (OwnerCharacter->GetSkillComp())
 		{
 			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
