@@ -11,6 +11,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Character/Player/Seeker/GS_Ares.h"
 
 
 UGS_AresMovingSkill::UGS_AresMovingSkill()
@@ -24,6 +25,11 @@ void UGS_AresMovingSkill::ActiveSkill()
 	{
 		bPressedDuringCooldown = true;
 		return;
+	}
+
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 	}
 
 	bPressedDuringCooldown = false;
@@ -47,6 +53,11 @@ void UGS_AresMovingSkill::OnSkillCommand()
 	if (!CanActiveInternally() || bPressedDuringCooldown)
 	{
 		return;
+	}
+
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
 	}
 
 	Super::OnSkillCommand();
