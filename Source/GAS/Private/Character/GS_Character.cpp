@@ -1,7 +1,6 @@
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_DebuffComp.h"
-#include "Character/Skill/GS_SkillComp.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "UI/Character/GS_HPText.h"
 #include "Engine/DamageEvents.h"
@@ -10,20 +9,20 @@
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_HPWidget.h"
 #include "System/GS_PlayerState.h"
-#include "Components/CapsuleComponent.h"
 #include "Weapon/GS_Weapon.h"
 #include "AkGameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/Component/GS_HitReactComp.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Character/Player/GS_Player.h"
+#include "UI/Character/GS_PlayerInfoWidget.h"
 
 AGS_Character::AGS_Character()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	StatComp = CreateDefaultSubobject<UGS_StatComp>(TEXT("StatComp"));
-	SkillComp = CreateDefaultSubobject<UGS_SkillComp>(TEXT("SkillComp"));
 	DebuffComp = CreateDefaultSubobject<UGS_DebuffComp>(TEXT("DebuffComp"));
 	HitReactComp = CreateDefaultSubobject<UGS_HitReactComp>(TEXT("HitReactComp"));
 	
@@ -161,6 +160,14 @@ void AGS_Character::SetHPBarWidget(UGS_HPWidget* InHPBarWidget)
 	}
 }
 
+void AGS_Character::SetPlayerInfoWidget(UGS_PlayerInfoWidget* InPlayerInfoWidget)
+{
+	if (IsValid(InPlayerInfoWidget))
+	{
+		InPlayerInfoWidget->InitializePlayerInfoWidget(Cast<AGS_Player>(this));
+		StatComp->OnCurrentHPChanged.AddUObject(InPlayerInfoWidget, &UGS_PlayerInfoWidget::OnCurrentHPBarChanged);
+	}
+}
 void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamagedCharacter)
 {
 	if (IsValid(InDamagedCharacter))

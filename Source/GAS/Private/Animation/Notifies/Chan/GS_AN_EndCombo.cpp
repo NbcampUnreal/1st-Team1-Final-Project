@@ -21,6 +21,8 @@ void UGS_AN_EndCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 		if (Character->HasAuthority())
 		{
 			Character->bComboEnded = true;
+			Character->Multicast_SetIsFullBodySlot(false);
+			Character->Multicast_SetIsUpperBodySlot(false);
 			Character->Multicast_ComboEnd();
 		}
 

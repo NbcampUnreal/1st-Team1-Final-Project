@@ -73,8 +73,6 @@ void AGS_RTSController::BeginPlay()
 	{
 		if (IsValid(Seeker))
 		{
-			//UE_LOG(LogTemp,Warning,TEXT("#######################find seeker"));
-			//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("FIND SEEKER")));
 			Seeker->HPTextWidgetComp->SetVisibility(true);
 		}
 	}
@@ -176,6 +174,7 @@ void AGS_RTSController::MoveSelectedUnits()
 	OnRTSCommandChanged.Broadcast(CurrentCommand);
 }
 
+
 void AGS_RTSController::OnCommandAttack(const FInputActionValue& Value)
 {
 	AttackSelectedUnits();
@@ -191,6 +190,7 @@ void AGS_RTSController::AttackSelectedUnits()
 	OnRTSCommandChanged.Broadcast(CurrentCommand);
 }
 
+
 void AGS_RTSController::OnCommandStop(const FInputActionValue& Value)
 {
 	StopSelectedUnits();
@@ -203,11 +203,12 @@ void AGS_RTSController::OnCommandStop(const FInputActionValue& Value)
 void AGS_RTSController::StopSelectedUnits()
 {
 	CurrentCommand = ERTSCommand::Stop;
+	
 	TArray<AGS_Monster*> Commandables;
 	GatherCommandableUnits(Commandables);
-
 	Server_RTSStop(Commandables);
 }
+
 
 void AGS_RTSController::OnCommandHold(const FInputActionValue& Value)
 {
@@ -221,11 +222,12 @@ void AGS_RTSController::OnCommandHold(const FInputActionValue& Value)
 void AGS_RTSController::HoldSelectedUnits()
 {
 	CurrentCommand = ERTSCommand::Hold;
+	
 	TArray<AGS_Monster*> Commandables;
 	GatherCommandableUnits(Commandables);
-
 	Server_RTSHold(Commandables);
 }
+
 
 void AGS_RTSController::OnCommandSkill(const FInputActionValue& Value)
 {
@@ -239,7 +241,10 @@ void AGS_RTSController::OnCommandSkill(const FInputActionValue& Value)
 void AGS_RTSController::SkillSelectedUnits()
 {
 	CurrentCommand = ERTSCommand::Skill;
-	OnRTSCommandChanged.Broadcast(CurrentCommand);
+
+	TArray<AGS_Monster*> Commandables;
+	GatherCommandableUnits(Commandables);
+	Server_RTSSkill(Commandables);
 }
 
 
@@ -285,12 +290,6 @@ void AGS_RTSController::OnLeftMousePressed()
 			{
 				Server_RTSAttackMove(Units, Hit.Location);
 			}
-		}
-		break;
-	case ERTSCommand::Skill:
-		if (bHit)
-		{
-			Server_RTSSkill(Units, Hit.Location);
 		}
 		break;
 	default:
@@ -869,7 +868,7 @@ void AGS_RTSController::Server_RTSHold_Implementation(const TArray<AGS_Monster*>
 	}
 }
 
-void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc)
+void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*>& Units)
 {
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{

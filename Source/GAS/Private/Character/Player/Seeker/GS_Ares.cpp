@@ -38,6 +38,7 @@ void AGS_Ares::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AGS_Ares::OnComboAttack()
 {
+	Super::OnComboAttack();
 	Server_ComboEnd(false);
 	CanChangeSeekerGait = false;
 
