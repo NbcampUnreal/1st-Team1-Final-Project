@@ -1,5 +1,6 @@
 ﻿#include "UI/Character/GS_SkillWidget.h"
-#include "Character/Player/GS_Player.h"
+
+#include "Character/GS_Character.h"
 #include "Character/Skill/GS_SkillBase.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Components/Image.h"
@@ -16,7 +17,7 @@ void UGS_SkillWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
-	OwningCharacter = Cast<AGS_Player>(GetOwningPlayer()->GetPawn());
+	AGS_Character* OwningCharacter = Cast<AGS_Character>(GetOwningPlayer()->GetPawn());
 	SetOwningActor(OwningCharacter);
 
 	if (IsValid(OwningCharacter))
@@ -29,23 +30,18 @@ void UGS_SkillWidget::Initialize(UGS_SkillBase* Skill)
 {
 	if (Skill)
 	{
-		OnSkillCoolTimeChanged(SkillSlot, 0.f);
+		OnSkillCoolTimeChanged(0.f);
 		CurrentCoolTimeText->SetVisibility(ESlateVisibility::Hidden);
 		SkillImage->SetBrushFromTexture(Skill->GetSkillImage());
 	}
 }
 
-void UGS_SkillWidget::OnSkillCoolTimeChanged(ESkillSlot InSkillSlot, float InCurrentCoolTime) const
+void UGS_SkillWidget::OnSkillCoolTimeChanged(float InCurrentCoolTime) const
 {
-	if (InSkillSlot != SkillSlot)
-	{
-		return;
-	}
-	
-	float CoolTime = OwningCharacter->GetSkillComp()->GetSkillFromSkillMap(SkillSlot)->GetCoolTime();
-	
+	float CoolTime = OwningCharcter->GetSkillComp()->GetSkillFromSkillMap(SkillSlot)->GetCoolTime();
+
 	//finish skill
-	if (InCurrentCoolTime < KINDA_SMALL_NUMBER)
+	if (CoolTime - InCurrentCoolTime < KINDA_SMALL_NUMBER)
 	{
 		CurrentCoolTimeText->SetVisibility(ESlateVisibility::Hidden);
 		CoolTimeBar->SetVisibility(ESlateVisibility::Hidden);

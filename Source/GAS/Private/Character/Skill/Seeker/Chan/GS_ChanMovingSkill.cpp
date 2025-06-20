@@ -9,6 +9,9 @@
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Player/GS_Player.h"
 #include "AkAudioEvent.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 UGS_ChanMovingSkill::UGS_ChanMovingSkill()
 {
@@ -24,11 +27,10 @@ void UGS_ChanMovingSkill::ActiveSkill()
 		if (OwnerPlayer->HasAuthority())
 		{
 			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
-			OwnerPlayer->CanAcceptComboInput = false;
+			//OwnerPlayer->CanAcceptComboInput = false;
 			OwnerPlayer->ComboInputClose();
 			OwnerPlayer->CurrentComboIndex = 0;
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->SetSkillInputControl(false, false);
@@ -67,7 +69,6 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 	{
 		OwnerPlayer->ComboInputOpen();
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 		OwnerPlayer->SetSkillInputControl(true, true);

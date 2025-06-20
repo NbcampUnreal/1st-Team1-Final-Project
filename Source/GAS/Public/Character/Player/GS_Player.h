@@ -46,14 +46,18 @@ class GAS_API AGS_Player : public AGS_Character
 public:
 	AGS_Player();
 
-	// component
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void PossessedBy(AController* NewController) override;
+
+	//component;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Components")
 	TObjectPtr<USpringArmComponent> SpringArmComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Components")
 	TObjectPtr<UCameraComponent> CameraComp;
 
-	// 시야방해
+	// [시야방해]
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Components", meta = (AllowPrivateAccess = "true"))
 	class UPostProcessComponent* PostProcessComponent;
 
@@ -62,24 +66,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Vision")
 	UMaterialInterface* PostProcessMat;
-
-	UPROPERTY()
-	UCurveFloat* ObscureCurve; // 외부에서 세팅할 수 있음
-
-	// variable
-	UPROPERTY()
-	float WalkSpeed;
-
-	UPROPERTY()
-	float RunSpeed;
-
-	// Wants To Move
-	UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	FCharacterWantsToMove WantsToMove;
-
-	// 오디오 컴포넌트
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
-	UAkComponent* AkComponent;
 
 	UFUNCTION(Client, Reliable)
 	void Client_StartVisionObscured();
@@ -90,15 +76,37 @@ public:
 	void Client_StopVisionObscured();
 
 	void StopVisionObscured();
-	
+
+	FTimeline ObscureTimeline;
+
 	UFUNCTION()
 	void HandleTimelineProgress(float Value);
 
 	UFUNCTION()
 	void OnTimelineFinished();
 
+	UPROPERTY()
+	UCurveFloat* ObscureCurve; // 외부에서 세팅할 수 있음
+
+	bool bIsObscuring = false;
+
+	//variable
+	UPROPERTY()
+	float WalkSpeed;
+
+	UPROPERTY()
+	float RunSpeed;
+
+	//Wants To Move
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	FCharacterWantsToMove WantsToMove;
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetUseControllerRotationYaw(bool UseControlRotationYaw);
+
+	// 오디오 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* AkComponent;
 
 	// 사운드 재생 함수들
 	UFUNCTION(BlueprintCallable, Category = "Audio")
@@ -124,29 +132,20 @@ public:
 	
 	// Skll Input Control
 	void SetSkillInputControl(bool CanLeftClick, bool CanRightClick);
+
 	FSkillInputControl GetSkillInputControl();
-	
-	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }
-	virtual void SetCanUseSkill(bool bCanUse) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+
 
 protected:
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
-	virtual void PossessedBy(AController* NewController) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UGS_SkillComp> SkillComp;
-	
+
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	FCharacterWantsToMove GetWantsToMove();
 
 private:
 	UPROPERTY(Replicated)
 	FSkillInputControl SkillInputControl;
-
-	FTimeline ObscureTimeline;
-
-	bool bIsObscuring;
 };

@@ -1,5 +1,6 @@
 ﻿#include "Character/Skill/Guardian/Drakhar/GS_DrakharFly.h"
-#include "Character/Player/GS_Player.h"
+
+#include "Character/GS_Character.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Skill/GS_SkillComp.h"
 

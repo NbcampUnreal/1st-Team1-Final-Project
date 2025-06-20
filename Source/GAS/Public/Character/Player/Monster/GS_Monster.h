@@ -7,10 +7,12 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "AkGameplayStatics.h"
 #include "MonsterDataAsset.h"
+#include "Weapon/GS_Weapon.h"
+#include "Components/SphereComponent.h"
+#include "Character/Player/GS_Player.h"
 #include "Sound/GS_MonsterAudioComponent.h"
 #include "GS_Monster.generated.h"
 
-class UGS_MonsterSkillComp;
 class UGS_MonsterAnimInstance;
 class UGS_DebuffVFXComponent;
 
@@ -25,13 +27,7 @@ public:
 	AGS_Monster();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RVO")
-	float AvoidanceRadius;
-
-	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
-	bool bCommandLocked;
-
-	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
-	bool bSelectionLocked;
+	float AvoidanceRadius = 200.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "AI")
 	UBehaviorTree* BTAsset;
@@ -51,21 +47,34 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Data")
 	UMonsterDataAsset* MonsterData;
 
+	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
+	bool bCommandLocked = false;
+
+	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
+	bool bSelectionLocked = false;
+
 	UPROPERTY(BlueprintAssignable, Category="Dead")
 	FOnMonsterDead OnMonsterDead;
-	
+
+	// ===================
 	// 전투 음악 관련 (BGM 이벤트만 유지, 트리거는 제거)
+	// ===================
+
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAkAudioEvent* CombatMusicEvent;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAkAudioEvent* CombatMusicStopEvent;
-	
+
+	// ===================
 	// 몬스터 오디오 컴포넌트
+	// ===================
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	class UGS_MonsterAudioComponent* MonsterAudioComponent;
-	
+
+	// =======================
 	// 디버프 VFX 컴포넌트
+	// =======================
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
 	UGS_DebuffVFXComponent* DebuffVFXComponent;
 
@@ -76,8 +85,6 @@ public:
 	FORCEINLINE bool IsSelectable() const { return !bSelectionLocked; }
 	
 	void SetSelected(bool bIsSelected, bool bPlaySound = true);
-	
-	virtual void SetCanUseSkill(bool bCanUse) override;
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	virtual void Attack();
@@ -96,17 +103,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Data")
 	FText GetTypeName() const { return MonsterData ? MonsterData->TypeName : FText::GetEmpty(); }
-
-	UFUNCTION(BlueprintCallable, Category = "Skill")
-	virtual void UseSkill(); 
 	
 protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
-	TObjectPtr<UGS_MonsterSkillComp> MonsterSkillComp;
+	void HandleDelayedDestroy();
+	virtual void OnDeath() override;
 	
 	UPROPERTY()
 	TObjectPtr<UGS_MonsterAnimInstance> MonsterAnim;
@@ -116,7 +120,4 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UAkComponent* AkComponent;
-
-	void HandleDelayedDestroy();
-	virtual void OnDeath() override;
 }; 

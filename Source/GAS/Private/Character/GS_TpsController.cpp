@@ -111,6 +111,7 @@ void AGS_TpsController::PageDown(const FInputActionValue& InputValue)
 
 }
 
+
 void AGS_TpsController::SetMoveControlValue(bool CanMoveRight, bool CanMoveForward)
 {
 	ControlValues.bCanMoveForward = CanMoveForward;

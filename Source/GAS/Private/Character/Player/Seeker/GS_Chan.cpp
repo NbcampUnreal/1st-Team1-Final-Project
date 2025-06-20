@@ -85,7 +85,35 @@ void AGS_Chan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void AGS_Chan::OnComboAttack()
 {
-	Super::OnComboAttack();	
+	Super::OnComboAttack();
+	
+	/*float ControlYaw = GetControlRotation().Yaw;
+	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(GetController()))
+	{
+		float YawDiff = FMath::Abs(FMath::FindDeltaAngleDegrees(ControlYaw, TpsController->LastRotatorInMoving.Yaw));
+	
+		if (YawDiff > 50)
+		{
+			return;
+		}
+	}*/
+	
+	Server_ComboEnd(false);
+	CanChangeSeekerGait = false;
+	
+	if (CanAcceptComboInput)
+	{
+		if (CurrentComboIndex == 0)
+		{
+			ServerAttackMontage();
+			//Server_SetSeekerGait(EGait::Walk);
+		}
+		else
+		{
+			bNextCombo = true;
+			CanAcceptComboInput = false;
+		}
+	}
 }
 
 void AGS_Chan::MulticastPlayComboSection()
@@ -177,6 +205,40 @@ void AGS_Chan::SetLookControlValue(bool bLookUp, bool bLookRight)
 	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
 	{
 		TPSController->SetLookControlValue(bLookRight, bLookUp);
+	}
+}
+
+void AGS_Chan::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->SetMustTurnInPlace(MustTurn);
+	}
+}
+
+void AGS_Chan::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
+{
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingFullBodyMontage = bFullBodySlot;
+	}
+}
+
+void AGS_Chan::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
+{
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingUpperBodyMontage = bUpperBodySlot;
 	}
 }
 

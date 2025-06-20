@@ -4,6 +4,7 @@
 #include "Character/Debuff/GS_DebuffStun.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/GS_Character.h"
+#include "Character/Skill/GS_SkillComp.h"
 #include "Character/GS_TpsController.h"
 #include "AI/GS_AIController.h"
 
@@ -29,7 +30,10 @@ void UGS_DebuffStun::OnApply()
 		}
 		// 스킬 못쓰고
 		// 스킬을 끊지는 않음
-		TargetCharacter->SetCanUseSkill(false);
+		if (UGS_SkillComp* SkillComp = TargetCharacter->GetSkillComp())
+		{
+			SkillComp->SetCanUseSkill(false);
+		}
 	}
 	else
 	{
@@ -46,7 +50,7 @@ void UGS_DebuffStun::OnExpire()
 
 	if (TargetCharacter)
 	{
-		// 움직임(가디언)
+		// 움직임(가디언
 		if(AGS_TpsController* Controller = Cast<AGS_TpsController>(TargetCharacter->GetController()))
 		{
 			Controller->SetMoveControlValue(true, true);
@@ -57,7 +61,10 @@ void UGS_DebuffStun::OnExpire()
 		}
 
 		// 스킬 사용 가능
-		TargetCharacter->SetCanUseSkill(false);
+		if (UGS_SkillComp* SkillComp = TargetCharacter->GetSkillComp())
+		{
+			SkillComp->SetCanUseSkill(true);
+		}
 		UE_LOG(LogTemp, Warning, TEXT("Stun expired for %s"), *TargetCharacter->GetName());
 	}
 

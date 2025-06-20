@@ -38,7 +38,11 @@ public:
 	// Offset Root Bone
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "OffsetRootBone")
 	float GetOffsetRootTranslationHalfLife();
-	
+
+	// Chooser
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Motion Matching")
+	TObjectPtr<UGS_ChooserInputObj> ChooserInputObj;
+
 	// Lean
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Lean")
 	FVector CalculateRelativeAccelerationAmount();
@@ -50,12 +54,6 @@ public:
 	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Steering")
 	bool EnableSteering();
 
-	UFUNCTION(BlueprintPure, meta=(NotBlueprintThreadSafe="ture"), Category = "AimOffset")
-	FVector2D Get_AOValue();
-
-	UFUNCTION(BlueprintPure, meta=(NotBlueprintThreadSafe="ture"), Category = "AimOffset")
-	bool Enable_AO();
-
 	// Slot Change Control Value
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingUpperBodyMontage = false;
@@ -63,14 +61,14 @@ public:
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingFullBodyMontage = false;
 
-	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
-	bool IsPlayingLeftArmMontage = false;
-	
-	// Chooser
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Motion Matching")
-	TObjectPtr<UGS_ChooserInputObj> ChooserInputObj;
+	UFUNCTION(BlueprintPure, meta=(NotBlueprintThreadSafe="ture"), Category = "AimOffset")
+	FVector2D Get_AOValue();
+
+	UFUNCTION(BlueprintPure, meta=(NotBlueprintThreadSafe="ture"), Category = "AimOffset")
+	bool Enable_AO();
 
 protected:
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
 	FVector Acceleration;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")

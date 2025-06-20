@@ -1,6 +1,9 @@
 #include "Character/Skill/GS_SkillBase.h"
+#include "Character/GS_Character.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Logging/StructuredLogFormat.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 
@@ -18,11 +21,10 @@ float UGS_SkillBase::GetCoolTime()
 	return Cooltime;
 }
 
-void UGS_SkillBase::InitSkill(AGS_Player* InOwner, UGS_SkillComp* InOwningComp, ESkillSlot InSlot)
+void UGS_SkillBase::InitSkill(AGS_Character* InOwner, UGS_SkillComp* InOwningComp)
 {
 	OwnerCharacter = InOwner;
 	OwningComp = InOwningComp;
-	CurrentSkillType = InSlot;
 }
 
 void UGS_SkillBase::ActiveSkill()
@@ -56,12 +58,80 @@ bool UGS_SkillBase::IsActive() const
 
 void UGS_SkillBase::StartCoolDown()
 {
-	if (OwningComp)
+	//server logic
+
+	if (Cooltime <= 0.f)
 	{
-		OwningComp->StartCooldownForSkill(CurrentSkillType);
+		bIsCoolingDown = false;
+		return;
+	}
+
+	bIsCoolingDown = true;
+	
+	TWeakObjectPtr<UGS_SkillBase> WeakThis(this);
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->GetWorldTimerManager().SetTimer(CooldownHandle, [WeakThis]()
+			{
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+
+				WeakThis->bIsCoolingDown = false;
+				UE_LOG(LogTemp, Warning, TEXT("Cool Down Complete"));
+
+			}, Cooltime, false);
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(LogTimerHandle, [WeakThis]()
+			{
+				if (!WeakThis.IsValid())
+				{
+					return;
+				}
+
+				WeakThis->LogRemainingTime();
+
+			}, 0.07f, true);
 	}
 }
 
+void UGS_SkillBase::LogRemainingTime()
+{
+	if (!GetWorld()) return;
+	//server logic
+	
+	LeftCoolTime = GetWorld()->GetTimerManager().GetTimerRemaining(CooldownHandle);
+	
+	SetCoolTime(LeftCoolTime);
+
+	//end cool time
+	if (LeftCoolTime <= 0.f)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(LogTimerHandle);
+
+		SetCoolTime(Cooltime);
+	}
+}
+
+void UGS_SkillBase::SetCoolTime(float InCoolTime)
+{
+	if (CurrentSkillType==ESkillSlot::Moving)
+	{
+		OwnerCharacter->GetSkillComp()->Skill1LeftCoolTime = InCoolTime;
+	}
+	if (CurrentSkillType==ESkillSlot::Aiming)
+	{
+		OwnerCharacter->GetSkillComp()->Skill2LeftCoolTime = InCoolTime;
+	}
+	if (CurrentSkillType==ESkillSlot::Ultimate)
+	{
+		OwnerCharacter->GetSkillComp()->Skill3LeftCoolTime = InCoolTime;
+	}
+}
 
 void UGS_SkillBase::PlayCastVFX(FVector Location, FRotator Rotation)
 {

@@ -19,6 +19,8 @@ public:
 	UGS_HPWidget(const FObjectInitializer& ObjectInitializer);
 
 	virtual void NativeConstruct() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	void InitializeHPWidget(UGS_StatComp* InStatComp);
 	

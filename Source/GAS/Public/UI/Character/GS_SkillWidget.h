@@ -8,7 +8,6 @@
 class UTextBlock;
 class UProgressBar;
 class UImage;
-class AGS_Player;
 
 UCLASS()
 class GAS_API UGS_SkillWidget : public UUserWidget
@@ -24,14 +23,14 @@ public:
 	void Initialize(UGS_SkillBase* Skill);
 
 	UFUNCTION()
-	void OnSkillCoolTimeChanged(ESkillSlot InSkillSlot, float InCurrentCoolTime) const;
+	void OnSkillCoolTimeChanged(float InCurrentCoolTime) const;
 	
-	FORCEINLINE AGS_Player* GetOwningActor()const { return OwningCharacter; }
+	FORCEINLINE AActor* GetOwningActor()const { return OwningCharcter; }
 	FORCEINLINE ESkillSlot GetSkillSlot() const {return SkillSlot;}
 	
-	void SetOwningActor(AGS_Player* InOwningCharacter)
+	void SetOwningActor(AGS_Character* InOwningCharacter)
 	{
-		OwningCharacter = InOwningCharacter;
+		OwningCharcter = InOwningCharacter;
 	}
 
 protected:
@@ -43,11 +42,11 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UImage> SkillImage;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<AGS_Character> OwningCharcter;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget,AllowPrivateAccess))
 	ESkillSlot SkillSlot;
-
-	UPROPERTY()
-	TObjectPtr<AGS_Player> OwningCharacter;
 };

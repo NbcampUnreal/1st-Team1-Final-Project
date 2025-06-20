@@ -4,7 +4,6 @@
 #include "Animation/Notifies/Chan/GS_AN_CheckAimSkillReady.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
-#include "Animation/Character/Seeker/GS_ChooserInputObj.h"
 
 void UGS_AN_CheckAimSkillReady::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	const FAnimNotifyEventReference& EventReference)
@@ -14,18 +13,12 @@ void UGS_AN_CheckAimSkillReady::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 	{
 		if (Character->HasAuthority())
 		{
-			// State
-			Character->SetSeekerGait(EGait::Walk);
-			
-			// Input Control
+			Character->Multicast_SetIsFullBodySlot(false);
+			Character->Multicast_SetIsUpperBodySlot(true);
 			Character->SetSkillInputControl(true, false);
 			Character->Multicast_SetMustTurnInPlace(true);
 			Character->SetLookControlValue(true, true);
-			Character->Multicast_SetMustTurnInPlace(true);
-		}
-		if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(Character->GetMesh()->GetAnimInstance()))
-		{
-			//SeekerAnim->ChooserInputObj->IsBlock = true;
+			Character->SetMoveControlValue(false, false);
 		}
 	}
 }

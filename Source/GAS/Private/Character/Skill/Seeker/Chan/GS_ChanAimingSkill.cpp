@@ -26,7 +26,7 @@ void UGS_ChanAimingSkill::ActiveSkill()
 {	
 	if (!CanActive()) return;
 	Super::ActiveSkill();
-
+	
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{		
 		if (OwnerPlayer->HasAuthority())
@@ -38,12 +38,14 @@ void UGS_ChanAimingSkill::ActiveSkill()
 			
 			// Control Input Key
 			OwnerPlayer->SetSkillInputControl(false, false);
+			OwnerPlayer->SetMoveControlValue(false, false);
 			// Change Slot
-			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(true);
+			//OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+			/*OwnerPlayer->Multicast_SetIsUpperBodySlot(false);*/
 
 			// Play Montage
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+
 			OwnerPlayer->CanChangeSeekerGait = false;
 		}
 		
@@ -95,11 +97,6 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 			OwnerPlayer->SetLookControlValue(true, true);
 			OwnerPlayer->SetSkillInputControl(true, true);
-
-			// Change Slot
-			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			OwnerPlayer->Multicast_SetIsLeftArmSlot(false);
 			
 			OwnerPlayer->CanChangeSeekerGait = true;
 
@@ -125,11 +122,14 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 
 void UGS_ChanAimingSkill::OnSkillCommand()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Chan Aiming Skill :: On Skill Command")); // SJE
 	Super::OnSkillCommand();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		if (OwnerPlayer->HasAuthority())
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("Chan Aiming Skill :: On Skill Command")); // SJE
+			
 			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 		

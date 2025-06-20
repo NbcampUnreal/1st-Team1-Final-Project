@@ -25,6 +25,12 @@ void UGS_HPWidget::NativeConstruct()
 	}
 }
 
+void UGS_HPWidget::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+}
+
 void UGS_HPWidget::InitializeHPWidget(UGS_StatComp* InStatComp)
 {
 	OnCurrentHPBarChanged(InStatComp);

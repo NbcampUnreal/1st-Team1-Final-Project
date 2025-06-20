@@ -5,7 +5,7 @@
 #include "NiagaraSystem.h"
 #include "GS_SkillBase.generated.h"
 
-class AGS_Player;
+class AGS_Character;
 class UGS_SkillComp;
 
 UCLASS()
@@ -16,8 +16,8 @@ class GAS_API UGS_SkillBase : public UObject
 public:
 	ESkillSlot CurrentSkillType;
 	
-	float Cooltime;
-	float Damage;
+	float Cooltime = 30.0f;
+	float Damage = 0.f;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TArray<UAnimMontage*> SkillAnimMontages;
@@ -63,7 +63,7 @@ public:
 	float GetCoolTime();
 
 	// 스킬 초기화
-	void InitSkill(AGS_Player* InOwner, UGS_SkillComp* InOwningComp, ESkillSlot InSlot);
+	void InitSkill(AGS_Character* InOwner, UGS_SkillComp* InOwningComp);
 
 	// 로컬 VFX 재생 함수들
 	void PlayCastVFX(FVector Location, FRotator Rotation);
@@ -79,18 +79,23 @@ public:
 	virtual void OnSkillCommand();
 	virtual bool CanActive() const;
 	virtual bool IsActive() const;
-
-	// 쿨타임 
-	void SetCoolingDown(bool bInCoolingDown) { bIsCoolingDown = bInCoolingDown; }
 	
 protected:
-	bool bIsActive = false;
-	bool bIsCoolingDown;
+	
 
-	// 스킬 소유자
-	AGS_Player* OwnerCharacter;
-	UGS_SkillComp* OwningComp;
+	bool bIsActive = false;
+	// 쿨타임 관리
+	FTimerHandle CooldownHandle;
+	FTimerHandle LogTimerHandle;
+
+	float LeftCoolTime;
 	
+	bool bIsCoolingDown;
 	void StartCoolDown();
+	void LogRemainingTime();
+	void SetCoolTime(float InCoolTime);
 	
+	// 스킬 소유자
+	AGS_Character* OwnerCharacter;
+	UGS_SkillComp* OwningComp;
 };

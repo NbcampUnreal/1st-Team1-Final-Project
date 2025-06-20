@@ -2,8 +2,7 @@
 
 
 #include "Character/Player/Monster/GS_ShadowFang.h"
-#include "Character/Skill/Monster/GS_MonsterSkillComp.h"
-
+#include "Weapon/Equipable/GS_WeaponSword.h"
 
 AGS_ShadowFang::AGS_ShadowFang()
 {
@@ -25,13 +24,5 @@ void AGS_ShadowFang::BeginPlay()
 		// 사운드 재생 간격 (큰 몬스터이므로 느리게 울음)
 		MonsterAudioComponent->IdleSoundInterval = 8.0f;
 		MonsterAudioComponent->CombatSoundInterval = 5.0f;
-	}
-}
-
-void AGS_ShadowFang::UseSkill()
-{
-	if (MonsterSkillComp)
-	{
-		MonsterSkillComp->TryActivateSkill();
 	}
 }

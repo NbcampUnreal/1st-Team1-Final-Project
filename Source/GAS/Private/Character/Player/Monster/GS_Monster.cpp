@@ -9,6 +9,7 @@
 #include "AkComponent.h"
 #include "Animation/Character/GS_MonsterAnimInstance.h"
 #include "Net/UnrealNetwork.h"
+#include "Components/SphereComponent.h"
 #include "Sound/GS_AudioManager.h"
 #include "Sound/GS_CharacterAudioSystem.h"
 #include "EngineUtils.h"
@@ -16,7 +17,6 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "DrawDebugHelpers.h"
-#include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "Sound/GS_MonsterAudioComponent.h"
 #include "Character/Component/GS_DebuffVFXComponent.h"
 
@@ -25,8 +25,6 @@ AGS_Monster::AGS_Monster()
 {
 	AIControllerClass = AGS_AIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
-	MonsterSkillComp = CreateDefaultSubobject<UGS_MonsterSkillComp>(TEXT("MonsterSkillComp"));
 
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>("SelectionDecal");
 	SelectionDecal->SetupAttachment(RootComponent);
@@ -50,6 +48,7 @@ AGS_Monster::AGS_Monster()
 	}
 
 	TeamId = FGenericTeamId(2);
+
 	Tags.Add("Monster");
 
 	// RTS 선택을 위한 콜리전 설정 (모든 몬스터에 적용)
@@ -57,10 +56,6 @@ AGS_Monster::AGS_Monster()
 	{
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block); // Interactable
 	}
-
-	AvoidanceRadius = 200.0f;
-	bCommandLocked = false;
-	bSelectionLocked = false;
 }
 
 void AGS_Monster::BeginPlay()
@@ -150,12 +145,6 @@ void AGS_Monster::SetSelected(bool bIsSelected, bool bPlaySound)
 	}
 }
 
-void AGS_Monster::SetCanUseSkill(bool bCanUse)
-{
-	// TODO : 몬스터 스킬 컴포넌트 추가되면 수정하기 
-	Super::SetCanUseSkill(bCanUse);
-}
-
 void AGS_Monster::Attack()
 {
 	if (HasAuthority())
@@ -167,8 +156,4 @@ void AGS_Monster::Attack()
 void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 {
 	MonsterAnim->Montage_Play(AttackMontage);
-}
-
-void AGS_Monster::UseSkill()
-{	
 }

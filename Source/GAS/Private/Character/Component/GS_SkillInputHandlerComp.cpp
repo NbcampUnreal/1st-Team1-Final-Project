@@ -2,6 +2,7 @@
 
 
 #include "Character/Component/GS_SkillInputHandlerComp.h"
+#include "Character/GS_Character.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -16,7 +17,7 @@ UGS_SkillInputHandlerComp::UGS_SkillInputHandlerComp()
 
 void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputComponent)
 {
-	if (!OwnerCharacter) OwnerCharacter = Cast<AGS_Player>(GetOwner());
+	if (!OwnerCharacter) OwnerCharacter = Cast<AGS_Character>(GetOwner());
 
 	if (APlayerController* PC = Cast<APlayerController>(OwnerCharacter->GetController()))
 	{
@@ -63,7 +64,7 @@ void UGS_SkillInputHandlerComp::BeginPlay()
 	Super::BeginPlay();
 	if (!OwnerCharacter)
 	{
-		OwnerCharacter = Cast<AGS_Player>(GetOwner());
+		OwnerCharacter = Cast<AGS_Character>(GetOwner());
 	}
 	
 	check(OwnerCharacter);

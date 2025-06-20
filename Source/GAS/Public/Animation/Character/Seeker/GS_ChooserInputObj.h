@@ -16,23 +16,7 @@ class GAS_API UGS_ChooserInputObj : public UObject
 {
 	GENERATED_BODY()
 
-public:
-	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
-	bool ShouldTurnInPlace();
-
-	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"),Category = "Movement")
-	bool IsMoving();
-
-	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
-	bool IsStarting();
-
-	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
-	bool IsPivoting();
-
-	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
-	bool ShouldSpinTransition();
-
-	
+public:	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
 	FVector Velocity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EssentialValue")
@@ -63,7 +47,21 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CharacterClass")
 	ECharacterType CharacterType;
+	
+	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
+	bool ShouldTurnInPlace();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "StateValue")
-	bool IsBlock = false;
+	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"),Category = "Movement")
+	bool IsMoving();
+
+	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
+	bool IsStarting();
+
+	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
+	bool IsPivoting();
+
+	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe="true"), Category = "Movement")
+	bool ShouldSpinTransition();
+
+	
 };

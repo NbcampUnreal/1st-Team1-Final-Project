@@ -271,12 +271,10 @@ void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType 
 				{
 					FDEOccupancyData& WallCellInfo = OccupancyData.FindChecked(Coord[i]);
 					WallCellInfo.FloorOccupancyData = EDEditorCellType::WallAndDoorPlaceable;
-					if (IsValid(WallCellInfo.FloorOccupancyActor))
+					if (IsValid(WallCellInfo.FloorOccupancyActor)
+						&& WallCellInfo.FloorOccupancyActor->GetComponentByClass<UPlaceInfoComponent>()->GetTrapPlacement() == ETrapPlacement::Wall)
 					{
-						if (WallCellInfo.FloorOccupancyActor->GetComponentByClass<UPlaceInfoComponent>()->GetTrapPlacement() == ETrapPlacement::Wall)
-						{
-							WallCellInfo.FloorOccupancyActor->Destroy();
-						}
+						WallCellInfo.FloorOccupancyActor->Destroy();
 					}
 				}
 				CellInfo.FloorOccupancyData = InTargetType;

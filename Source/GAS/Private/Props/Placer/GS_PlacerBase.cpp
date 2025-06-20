@@ -145,7 +145,6 @@ void AGS_PlacerBase::BuildObject()
 				if (AGS_RoomBase* RoomBase = Cast<AGS_RoomBase>(NewActor))
 				{
 					RoomBase->HideCeiling();
-					RoomBase->UseDepthStencil();
 				}
 				TargetType = GetRoomCellInfo(i);
 				IsRoom = true;

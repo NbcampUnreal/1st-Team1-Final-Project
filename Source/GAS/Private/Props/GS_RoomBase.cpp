@@ -42,9 +42,3 @@ void AGS_RoomBase::ShowCeiling()
 		Ceiling->SetVisibility(true);
 	}
 }
-
-void AGS_RoomBase::UseDepthStencil()
-{
-	Floor->SetRenderCustomDepth(true);
-	Wall->SetRenderCustomDepth(true);
-}
