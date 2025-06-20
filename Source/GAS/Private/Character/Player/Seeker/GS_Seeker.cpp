@@ -162,33 +162,23 @@ EGait AGS_Seeker::GetLastSeekerGait()
 	return LastSeekerGait;
 }
 
+void AGS_Seeker::Server_SetMoveControlValue_Implementation(bool bMoveForward, bool bMoveRight)
+{
+	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(this->GetController()))
+	{
+		TpsController->SetMoveControlValue(bMoveRight, bMoveForward);
+	}
+}
+
 void AGS_Seeker::Multicast_ComboEnd_Implementation()
 {
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		StopAnimMontage(ComboAnimMontage);
-		AnimInstance->IsPlayingUpperBodyMontage = false;
 		CurrentComboIndex = 0;
 		CanAcceptComboInput = true;
-		
 
-		AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController());
-		if (IsValid(TPSController))
-		{
-			TPSController->SetLookControlValue(true, true);
-		}
-
-		if (HasAuthority())
-		{
-			if (LastSeekerGait == EGait::Run)
-			{			
-				SetSeekerGait(EGait::Run);
-			}
-			else if (LastSeekerGait == EGait::Walk)
-			{
-				SetSeekerGait(EGait::Walk);
-			}
-		}
+		Server_SetMoveControlValue(true, true);
 	}
 }
 
@@ -196,7 +186,6 @@ void AGS_Seeker::Server_ComboEnd_Implementation(bool bComboEnd)
 {
 	bComboEnded = bComboEnd;
 }
-
 
 void AGS_Seeker::BeginPlay()
 {
@@ -264,15 +253,29 @@ void AGS_Seeker::ComboInputClose()
 	CanAcceptComboInput = false;
 	if (bNextCombo)
 	{
-		ServerAttackMontage();  
-		CanAcceptComboInput = false;
+		ServerAttackMontage();
 		bNextCombo = false;
 	}
 }
 
 void AGS_Seeker::OnComboAttack()
 {
-	// SJE
+	Server_ComboEnd(false);
+	CanChangeSeekerGait = false;
+	
+	if (CanAcceptComboInput)
+	{
+		if (CurrentComboIndex == 0)
+		{
+			ServerAttackMontage();
+			Server_SetMoveControlValue(false, false);
+		}
+		else
+		{
+			bNextCombo = true;
+			CanAcceptComboInput = false;
+		}
+	}
 }
 
 void AGS_Seeker::UpdatePostProcessEffect(float EffectStrength)
@@ -286,6 +289,8 @@ void AGS_Seeker::UpdatePostProcessEffect(float EffectStrength)
 void AGS_Seeker::ServerAttackMontage_Implementation()
 {
 	MulticastPlayComboSection();
+	Multicast_SetIsFullBodySlot(true);
+	Multicast_SetIsUpperBodySlot(false);
 }
 
 void AGS_Seeker::MulticastPlayComboSection_Implementation()
@@ -422,6 +427,14 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, bComboEnded);
 }
 
+void AGS_Seeker::Server_SetLookControlValue_Implementation(bool bLookUp, bool bLookRight)
+{
+	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(this->GetController()))
+	{
+		TpsController->SetLookControlValue(bLookRight, bLookUp);
+	}
+}
+
 void AGS_Seeker::OnRep_SeekerGait()
 {
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
@@ -430,6 +443,54 @@ void AGS_Seeker::OnRep_SeekerGait()
 		{
 			InputObj->Gait = SeekerGait;
 		}
+	}
+}
+
+void AGS_Seeker::Multicast_SetIsLeftArmSlot_Implementation(bool bLeftArmSlot)
+{
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingLeftArmMontage = bLeftArmSlot;
+		UE_LOG(LogTemp, Warning, TEXT("LeftArmSlot : %d"), AnimInstance->IsPlayingLeftArmMontage);
+	}
+}
+
+void AGS_Seeker::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->SetMustTurnInPlace(MustTurn);
+	}
+}
+
+void AGS_Seeker::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
+{
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingFullBodyMontage = bFullBodySlot;
+	}
+}
+
+void AGS_Seeker::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
+{
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingUpperBodyMontage = bUpperBodySlot;
 	}
 }
 

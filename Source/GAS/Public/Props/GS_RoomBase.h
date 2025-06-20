@@ -21,6 +21,8 @@ public:
 	
 	void HideCeiling();
 	void ShowCeiling();
+
+	void UseDepthStencil();
 	
 protected:
 	virtual void BeginPlay() override;
