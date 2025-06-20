@@ -13,9 +13,20 @@
 #include "Components/CapsuleComponent.h"
 
 
+UGS_AresMovingSkill::UGS_AresMovingSkill()
+{
+	CurrentSkillType = ESkillSlot::Moving;
+}
+
 void UGS_AresMovingSkill::ActiveSkill()
 {
-	Super::ActiveSkill();
+	if (!CanActiveInternally())
+	{
+		bPressedDuringCooldown = true;
+		return;
+	}
+
+	bPressedDuringCooldown = false;
 
 	// 차징 시작
 	ChargingStartTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
@@ -33,6 +44,11 @@ void UGS_AresMovingSkill::DeactiveSkill()
 
 void UGS_AresMovingSkill::OnSkillCommand()
 {
+	if (!CanActiveInternally() || bPressedDuringCooldown)
+	{
+		return;
+	}
+
 	Super::OnSkillCommand();
 
 	// 차징 종료
@@ -57,6 +73,8 @@ void UGS_AresMovingSkill::OnSkillCommand()
 		DashInterpAlpha = 0.0f;
 		StartDash();
 	}
+
+	StartCoolDown();
 }
 
 void UGS_AresMovingSkill::ExecuteSkillEffect()
@@ -114,6 +132,11 @@ void UGS_AresMovingSkill::ExecuteSkillEffect()
 bool UGS_AresMovingSkill::IsActive() const
 {
 	return bIsCharging;
+}
+
+bool UGS_AresMovingSkill::CanActiveInternally() const
+{
+	return OwnerCharacter && !bIsCoolingDown;
 }
 
 void UGS_AresMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
@@ -183,10 +206,15 @@ void UGS_AresMovingSkill::UpdateDash()
 
 	if (DashInterpAlpha >= 1.f)
 	{
-		GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
-
-		// 원래대로 Block으로 되돌리기
-		OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-		OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+		StopDash();
 	}
+}
+
+void UGS_AresMovingSkill::StopDash()
+{
+	GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
+
+	// 원래대로 Block으로 되돌리기
+	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 }
