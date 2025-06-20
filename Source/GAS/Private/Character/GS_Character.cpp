@@ -17,6 +17,8 @@
 #include "Character/Component/GS_HitReactComp.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Character/Player/GS_Player.h"
+#include "UI/Character/GS_PlayerInfoWidget.h"
 
 AGS_Character::AGS_Character()
 {
@@ -161,6 +163,14 @@ void AGS_Character::SetHPBarWidget(UGS_HPWidget* InHPBarWidget)
 	}
 }
 
+void AGS_Character::SetPlayerInfoWidget(UGS_PlayerInfoWidget* InPlayerInfoWidget)
+{
+	if (IsValid(InPlayerInfoWidget))
+	{
+		InPlayerInfoWidget->InitializePlayerInfoWidget(Cast<AGS_Player>(this));
+		StatComp->OnCurrentHPChanged.AddUObject(InPlayerInfoWidget, &UGS_PlayerInfoWidget::OnCurrentHPBarChanged);
+	}
+}
 void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamagedCharacter)
 {
 	if (IsValid(InDamagedCharacter))
