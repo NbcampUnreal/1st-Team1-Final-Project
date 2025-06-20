@@ -11,11 +11,19 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Character/Player/Seeker/GS_Ares.h"
 
 
 void UGS_AresMovingSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
+
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+	}
+
+	bPressedDuringCooldown = false;
 
 	// 차징 시작
 	ChargingStartTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
@@ -33,6 +41,16 @@ void UGS_AresMovingSkill::DeactiveSkill()
 
 void UGS_AresMovingSkill::OnSkillCommand()
 {
+	if (!CanActiveInternally() || bPressedDuringCooldown)
+	{
+		return;
+	}
+
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+	}
+
 	Super::OnSkillCommand();
 
 	// 차징 종료
