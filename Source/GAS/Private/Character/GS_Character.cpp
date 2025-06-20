@@ -1,7 +1,6 @@
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_DebuffComp.h"
-#include "Character/Skill/GS_SkillComp.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "UI/Character/GS_HPText.h"
 #include "Engine/DamageEvents.h"
@@ -10,7 +9,6 @@
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_HPWidget.h"
 #include "System/GS_PlayerState.h"
-#include "Components/CapsuleComponent.h"
 #include "Weapon/GS_Weapon.h"
 #include "AkGameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -23,7 +21,6 @@ AGS_Character::AGS_Character()
 	PrimaryActorTick.bCanEverTick = true;
 
 	StatComp = CreateDefaultSubobject<UGS_StatComp>(TEXT("StatComp"));
-	SkillComp = CreateDefaultSubobject<UGS_SkillComp>(TEXT("SkillComp"));
 	DebuffComp = CreateDefaultSubobject<UGS_DebuffComp>(TEXT("DebuffComp"));
 	HitReactComp = CreateDefaultSubobject<UGS_HitReactComp>(TEXT("HitReactComp"));
 	
