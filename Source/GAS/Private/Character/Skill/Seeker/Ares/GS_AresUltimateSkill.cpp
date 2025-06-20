@@ -4,6 +4,7 @@
 #include "Character/Skill/Seeker/Ares/GS_AresUltimateSkill.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_StatRow.h"
+#include "Character/Player/GS_Player.h"
 
 UGS_AresUltimateSkill::UGS_AresUltimateSkill()
 {
@@ -36,7 +37,7 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 	{
 		if (UGS_SkillBase* MovingSkill = SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving))
 		{
-			//SkillComp->ResetCooldown(ESkillSlot::Moving);
+			SkillComp->ResetCooldownModifier(ESkillSlot::Moving);
 		}
 		OriginalMovingSkillCooltime = -1.f; // 초기화
 	}
@@ -71,7 +72,7 @@ void UGS_AresUltimateSkill::ExecuteSkillEffect()
 	{
 		if (UGS_SkillBase* MovingSkill = SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving))
 		{
-			//SkillComp->ApplyCooldownReduction(ESkillSlot::Moving, 0.5);
+			SkillComp->ApplyCooldownModifier(ESkillSlot::Moving, 0.5);
 		}
 	}
 }

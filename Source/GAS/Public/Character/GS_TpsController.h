@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Character/GS_Character.h"
+#include "UI/Character/GS_CrossHairImage.h"
 #include "GS_TpsController.generated.h"
 
 class UGS_GameInstance;
@@ -119,6 +120,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Settings")
 	float GetCurrentMouseSensitivity() const;
 
+	//메르시 크로스헤어 위젯
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	UGS_CrossHairImage* GetCrosshairWidget() const { return CrosshairWidget; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -128,4 +133,8 @@ protected:
 	//게임 인스턴스 참조
 	UPROPERTY(BlueprintReadOnly, Category = "Settings")
 	UGS_GameInstance* GameInstance;
+
+	//메르시 크로스헤어 위젯
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UGS_CrossHairImage* CrosshairWidget;
 };
