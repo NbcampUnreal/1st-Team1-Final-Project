@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Character/Skill/Seeker/GS_SeekerSkillBase.h"
+#include "Character/Component/GS_StatRow.h"
 #include "GS_ChanMovingSkill.generated.h"
 
-/**
- * 
- */
+struct FGS_StatRow;
+
 UCLASS()
 class GAS_API UGS_ChanMovingSkill : public UGS_SeekerSkillBase
 {
@@ -25,5 +25,10 @@ protected:
 	// 공격
 	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target) override;
 	virtual void ApplyEffectToGuardian(AGS_Guardian* Target) override;
+
+private:
+	FTimerHandle DEFBuffHandle;
+	void DeactiveDEFBuff();
+	FGS_StatRow BuffAmount;
 
 };
