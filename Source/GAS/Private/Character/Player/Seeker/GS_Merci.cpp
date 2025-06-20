@@ -17,8 +17,11 @@
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_ArrowTypeWidget.h"
+#include "UI/Character/GS_CrossHairImage.h"
 #include "AkGameplayStatics.h"
 #include "Character/GS_Character.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
+#include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Skill/GS_SkillComp.h"
 //#include "Weapon/Equipable/"
 
@@ -42,6 +45,19 @@ AGS_Merci::AGS_Merci()
 
 void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 {
+	if (IsLocallyControlled() && !GetDrawState())
+	{
+		if (WidgetCrosshair)
+		{
+			WidgetCrosshair->PlayAimAnim(true);
+		}
+
+		if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
+		{
+			Client_StartZoom();
+		}
+	}
+
 	if (!HasAuthority())
 	{
 		// 서버에 요청
@@ -57,11 +73,6 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		
 		// 활 당기는 사운드 재생
 		PlaySound(BowPullSound);
-		
-		if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
-		{
-			Client_StartZoom(); // 줌인
-		}
 	}
 	else
 	{
@@ -71,6 +82,19 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 
 void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
+	if (IsLocallyControlled())
+	{
+		if (WidgetCrosshair)
+		{
+			WidgetCrosshair->PlayAimAnim(false);
+		}
+
+		if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
+		{
+			Client_StopZoom();
+		}
+	}
+
 	if (!HasAuthority())
 	{
 		Server_ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
@@ -92,11 +116,6 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 
 		// 화살 발사 사운드는 Server_FireArrow에서 실제 발사할 때만 재생
 
-	}
-
-	if(!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
-	{
-		Client_StopZoom();
 	}
 	//Client_SetWidgetVisibility(false);
 }
@@ -358,19 +377,6 @@ void AGS_Merci::BeginPlay()
 		GetWorld()->GetTimerManager().SetTimer(ChildArrowRegenTimer, this, &AGS_Merci::RegenChildArrow, RegenInterval, true);
 	}
 
-	if (IsLocallyControlled()) // 꼭 필요!
-	{
-		if (WidgetCrosshairClass)
-		{
-			WidgetCrosshair = CreateWidget<UUserWidget>(GetWorld(), WidgetCrosshairClass);
-			if (WidgetCrosshair)
-			{
-				WidgetCrosshair->AddToViewport();
-				WidgetCrosshair->SetVisibility(ESlateVisibility::Hidden);
-			}
-		}
-	}
-
 	Mesh = this->GetMesh();
 	UE_LOG(LogTemp, Warning, TEXT("AnimInstance: %s"), *GetNameSafe(GetMesh()->GetAnimInstance()));
 	if (ZoomCurve)
@@ -441,6 +447,26 @@ void AGS_Merci::Client_StartZoom_Implementation()
 void AGS_Merci::Client_StopZoom_Implementation()
 {
 	ZoomTimeline.Reverse(); // 줌아웃
+}
+
+void AGS_Merci::SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget)
+{
+	WidgetCrosshair = InCrosshairWidget;
+
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->SetCrosshairVisibility(true);
+	}
+}
+
+void AGS_Merci::Client_ShowCrosshairHitFeedback_Implementation()
+{
+	if (!WidgetCrosshair)
+	{
+		return;
+	}
+
+	WidgetCrosshair->PlayHitFeedback();
 }
 
 void AGS_Merci::Client_PlaySound_Implementation(UAkComponent* SoundComp)

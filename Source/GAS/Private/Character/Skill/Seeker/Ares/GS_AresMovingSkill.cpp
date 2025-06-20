@@ -11,11 +11,30 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Character/Player/Seeker/GS_Ares.h"
 
+
+UGS_AresMovingSkill::UGS_AresMovingSkill()
+{
+	CurrentSkillType = ESkillSlot::Moving;
+}
 
 void UGS_AresMovingSkill::ActiveSkill()
 {
+	if (!CanActiveInternally())
+	{
+		bPressedDuringCooldown = true;
+		return;
+	}
+
 	Super::ActiveSkill();
+
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+	}
+
+	bPressedDuringCooldown = false;
 
 	// 차징 시작
 	ChargingStartTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
@@ -33,6 +52,16 @@ void UGS_AresMovingSkill::DeactiveSkill()
 
 void UGS_AresMovingSkill::OnSkillCommand()
 {
+	if (!CanActiveInternally() || bPressedDuringCooldown)
+	{
+		return;
+	}
+
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+	}
+
 	Super::OnSkillCommand();
 
 	// 차징 종료
@@ -57,6 +86,8 @@ void UGS_AresMovingSkill::OnSkillCommand()
 		DashInterpAlpha = 0.0f;
 		StartDash();
 	}
+
+	StartCoolDown();
 }
 
 void UGS_AresMovingSkill::ExecuteSkillEffect()
@@ -183,10 +214,20 @@ void UGS_AresMovingSkill::UpdateDash()
 
 	if (DashInterpAlpha >= 1.f)
 	{
-		GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
-
-		// 원래대로 Block으로 되돌리기
-		OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-		OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+		StopDash();
 	}
+}
+
+bool UGS_AresMovingSkill::CanActiveInternally() const
+{
+	return OwnerCharacter && !bIsCoolingDown;
+}
+
+void UGS_AresMovingSkill::StopDash()
+{
+	GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
+
+	// 원래대로 Block으로 되돌리기
+	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 }

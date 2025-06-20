@@ -144,6 +144,8 @@ bool UGS_ArcaneBoardManager::FindOptimalPlacementPos(uint8 RuneID, const FIntPoi
 	OutBestPos = ValidPos[0];
 	FIntPoint BestShapeOffset = ClickedCell - ValidPos[0];
 
+	bool bUseRightTopPriority = true;
+
 	for (int32 i = 1; i < ValidPos.Num(); ++i)
 	{
 		FIntPoint Pos = ValidPos[i];
@@ -151,14 +153,30 @@ bool UGS_ArcaneBoardManager::FindOptimalPlacementPos(uint8 RuneID, const FIntPoi
 
 		bool bIsBetter = false;
 
-		if (ShapeOffset.Y < BestShapeOffset.Y)
+		if (bUseRightTopPriority)
 		{
-			bIsBetter = true;
+			// 오른쪽 위 기준: Y가 작을수록 우선, Y가 같으면 X가 클수록 우선
+			if (ShapeOffset.Y > BestShapeOffset.Y)
+			{
+				bIsBetter = true;
+			}
+			else if (ShapeOffset.Y == BestShapeOffset.Y && ShapeOffset.X > BestShapeOffset.X)
+			{
+				bIsBetter = true;
+			}
 		}
-		else if (ShapeOffset.Y == BestShapeOffset.Y && ShapeOffset.X < BestShapeOffset.X)
-		{
-			bIsBetter = true;
-		}
+		//else
+		//{
+		//	// 오른쪽 아래 기준
+		//	if (ShapeOffset.Y < BestShapeOffset.Y)
+		//	{
+		//		bIsBetter = true;
+		//	}
+		//	else if (ShapeOffset.Y == BestShapeOffset.Y && ShapeOffset.X > BestShapeOffset.X)
+		//	{
+		//		bIsBetter = true;
+		//	}
+		//}
 
 		if (bIsBetter)
 		{

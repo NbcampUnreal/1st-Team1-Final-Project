@@ -15,11 +15,14 @@ class GAS_API UGS_AresMovingSkill : public UGS_SeekerSkillBase
 	GENERATED_BODY()
 	
 public:
+	UGS_AresMovingSkill();
+	
 	virtual void ActiveSkill() override;
 	virtual void DeactiveSkill() override;
 	virtual void OnSkillCommand() override;
 	virtual void ExecuteSkillEffect() override;
 	virtual bool IsActive() const override;
+	virtual bool CanActiveInternally() const;
 
 protected:
 	// 공격
@@ -45,6 +48,7 @@ private:
 	float DashInterpAlpha = 0.0f;
 
 	bool bIsCharging = false;
+	bool bPressedDuringCooldown = false;
 
 	FVector DashDirection; // 돌진 방향
 	FVector DashStartLocation;

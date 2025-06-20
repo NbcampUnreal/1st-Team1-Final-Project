@@ -9,6 +9,7 @@
 #include "Character/GS_Character.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Player/Seeker/GS_Merci.h"
 #include "Character/Interface/GS_AttackInterface.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -224,6 +225,7 @@ void AGS_TpsController::TestFunction()
 				//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Remove ")),true, true, FLinearColor::Blue,5.f);
 				PlayerWidgetInstance->RemoveFromParent();
 				PlayerWidgetInstance = nullptr;
+				CrosshairWidget = nullptr;
 			}
 			
 			PlayerWidgetInstance = CreateWidget<UUserWidget>(this, Widget);
@@ -252,6 +254,17 @@ void AGS_TpsController::TestFunction()
 					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Valid HP Board Widget ")),true, true, FLinearColor::Red,5.f);
 					HPBoardWidget->InitBoardWidget();
 				}
+
+				CrosshairWidget = Cast<UGS_CrossHairImage>(PlayerWidgetInstance->GetWidgetFromName(TEXT("WBP_CrossHairImage")));
+				if (CrosshairWidget)
+				{
+					// 메르시 캐릭터에게 크로스헤어 위젯 참조 전달
+					if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(GS_Character))
+					{
+						MerciCharacter->SetCrosshairWidget(CrosshairWidget);
+					}
+				}
+
 				PlayerWidgetInstance->AddToViewport(0);
 			}
 		}

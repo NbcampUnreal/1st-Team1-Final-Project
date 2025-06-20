@@ -11,6 +11,8 @@
 #include "NiagaraSystem.h"
 #include "GS_SeekerMerciArrow.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArrowHitEnemy, AActor*, HitActor);
+
 class AGS_ArrowVisualActor;
 
 UENUM(BlueprintType)
@@ -36,6 +38,10 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_InitHomingTarget(AActor* Target);
 	//AGS_Player* OwnerPlayer;
+
+	//Crosshair
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnArrowHitEnemy OnArrowHitEnemy;
 protected:
 	virtual void BeginPlay() override;
 	void StickWithVisualOnly(const FHitResult& Hit);

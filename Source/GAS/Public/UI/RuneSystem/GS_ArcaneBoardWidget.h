@@ -161,6 +161,8 @@ private:
 	void BindToLPS();
 	void UnbindFromLPS();
 
+	FVector2D GetRuneDragOffset();
+
 	UPROPERTY()
 	UGS_ArcaneBoardLPS* ArcaneBoardLPS;
 
