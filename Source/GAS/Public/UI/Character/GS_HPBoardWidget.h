@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GS_HPBoardWidget.generated.h"
 
+class UGS_PlayerInfoWidget;
 class UGS_HPWidget;
 class UVerticalBox;
 class AGS_Character;
@@ -21,11 +22,17 @@ public:
 
 	
 protected:
+	//[TODO] fix variable name
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UVerticalBox> HPWidgetList;
+	TObjectPtr<UVerticalBox> PlayerInfoWidgetList;
 
+	//[New - 6/19]
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UGS_HPWidget> HPWidgetClass;
+	TSubclassOf<UGS_PlayerInfoWidget> PlayerInfoWidgetClass;
+
+	//[Legacy]
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	// TSubclassOf<UGS_HPWidget> HPWidgetClass;
 
 	UPROPERTY()
 	TObjectPtr<AGS_Character> OwningCharacter;

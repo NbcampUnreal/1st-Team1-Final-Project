@@ -16,7 +16,7 @@ class GAS_API UGS_AresMovingSkill : public UGS_SeekerSkillBase
 	
 public:
 	UGS_AresMovingSkill();
-	
+
 	virtual void ActiveSkill() override;
 	virtual void DeactiveSkill() override;
 	virtual void OnSkillCommand() override;
@@ -55,4 +55,6 @@ private:
 	FVector DashEndLocation;
 
 	TSet<AActor*> DamagedActors;
+
+	bool bPressedDuringCooldown = false;
 };
