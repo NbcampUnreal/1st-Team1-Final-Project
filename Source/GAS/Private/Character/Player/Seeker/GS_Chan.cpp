@@ -11,6 +11,8 @@
 #include "Character/GS_TpsController.h"
 #include "AkComponent.h"
 #include "AkAudioEvent.h"
+#include "AkGameplayStatics.h"
+#include "AkAudioDevice.h"
 #include "Animation/Character/Seeker/GS_ChooserInputObj.h"
 
 
@@ -25,9 +27,33 @@ AGS_Chan::AGS_Chan()
 
 void AGS_Chan::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
 {
-	if (SoundToPlay && AkComponent)
+	// 데디케이티드 서버에서는 사운드 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
 	{
-		AkComponent->PostAkEvent(SoundToPlay);
+		return;
+	}
+
+	if (!SoundToPlay)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Chan::Multicast_PlaySkillSound - SoundEvent is null"));
+		return;
+	}
+
+	if (!FAkAudioDevice::Get())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Chan::Multicast_PlaySkillSound - Wwise AudioDevice is not initialized"));
+		return;
+	}
+
+	// AkComponent가 없거나 유효하지 않으면 새로 생성
+	UAkComponent* AkComp = GetOrCreateAkComponent();
+	if (AkComp)
+	{
+		AkComp->PostAkEvent(SoundToPlay);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGS_Chan::Multicast_PlaySkillSound - Failed to get or create AkComponent"));
 	}
 }
 
@@ -122,9 +148,13 @@ void AGS_Chan::MulticastPlayComboSection()
 void AGS_Chan::ResetAttackSoundSequence()
 {
 	// 사용자가 만든 Wwise Stop 이벤트 호출
-	if (AxeSwingStopEvent && AkComponent)
+	if (AxeSwingStopEvent)
 	{
-		AkComponent->PostAkEvent(AxeSwingStopEvent);
+		UAkComponent* AkComp = GetOrCreateAkComponent();
+		if (AkComp)
+		{
+			AkComp->PostAkEvent(AxeSwingStopEvent);
+		}
 	}
 }
 
@@ -239,4 +269,25 @@ void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float
 		false,
 		InLifetime
 	);*/
+}
+
+UAkComponent* AGS_Chan::GetOrCreateAkComponent()
+{
+	UAkComponent* AkComp = FindComponentByClass<UAkComponent>();
+	if (!AkComp)
+	{
+		// AkComponent가 없으면 새로 생성
+		AkComp = NewObject<UAkComponent>(this, TEXT("RuntimeAkAudioComponent"));
+		if (AkComp)
+		{
+			AkComp->SetupAttachment(GetRootComponent());
+			AkComp->RegisterComponent();
+			UE_LOG(LogTemp, Log, TEXT("AGS_Chan::GetOrCreateAkComponent - Created new AkComponent"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("AGS_Chan::GetOrCreateAkComponent - Failed to create AkComponent"));
+		}
+	}
+	return AkComp;
 }

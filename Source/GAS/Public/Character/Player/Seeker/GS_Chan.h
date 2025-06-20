@@ -126,4 +126,7 @@ protected:
 
 private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;
+
+	// === Wwise 헬퍼 함수 ===
+	UAkComponent* GetOrCreateAkComponent();
 };
