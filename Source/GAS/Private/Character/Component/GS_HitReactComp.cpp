@@ -19,6 +19,7 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 	
 	if (AGS_Player* OwnerCharacter = Cast<AGS_Player>(GetOwner()))
 	{
+		OwnerCharacter->CanHitReact = false;
 		OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[ReactType], Section);
 	}
 }
