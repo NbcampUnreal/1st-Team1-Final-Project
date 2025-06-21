@@ -15,6 +15,8 @@ class UNiagaraSystem;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UAkAudioEvent;
+class AGS_EarthquakeEffect;
+struct FGS_CameraShakeInfo;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFeverGaugeChangedDelegate, float);
 
@@ -28,6 +30,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AGS_EarthquakeEffect> GC_EarthquakeEffect;
 	
 	//[combo attack variables]
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing=OnRep_CanCombo)
