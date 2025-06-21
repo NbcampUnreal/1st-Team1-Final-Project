@@ -3,6 +3,7 @@
 
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
 #include "Weapon/Projectile/Seeker/GS_ArrowVisualActor.h"
+#include "Weapon/Projectile/Component/GS_ArrowFXComponent.h"
 #include "Components/SphereComponent.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Player/Monster/GS_Monster.h"
@@ -17,6 +18,9 @@
 
 AGS_SeekerMerciArrow::AGS_SeekerMerciArrow()
 {
+	// 화살 FX 컴포넌트 생성 (VFX + Sound)
+	ArrowFXComponent = CreateDefaultSubobject<UGS_ArrowFXComponent>(TEXT("ArrowFXComponent"));
+	
 	if (HasAuthority())
 	{
 		// 화살 스폰 직후
@@ -156,11 +160,12 @@ void AGS_SeekerMerciArrow::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, A
 		}
 	}
 
-	// 히트 사운드 재생 (멀티캐스트)
-	Multicast_PlayHitSound(TargetType, SweepResult);
-
-	// 히트 VFX 재생 (멀티캐스트)
-	Multicast_PlayHitVFX(TargetType, SweepResult);
+	// 히트 사운드 & VFX 재생 (컴포넌트로 위임)
+	if (ArrowFXComponent)
+	{
+		ArrowFXComponent->PlayHitSound(TargetType, SweepResult);
+		ArrowFXComponent->PlayHitVFX(TargetType, SweepResult);
+	}
 
 	// 서버에서만 로직 처리
 	if (HasAuthority())
@@ -209,97 +214,10 @@ void AGS_SeekerMerciArrow::HandleTargetTypeGeneric(ETargetType TargetType, const
 	}
 }
 
-void AGS_SeekerMerciArrow::PlayHitSound(ETargetType TargetType, const FHitResult& SweepResult)
-{
-	UAkAudioEvent* SoundEventToPlay = nullptr;
 
-	switch (TargetType)
-	{
-	case ETargetType::Guardian:
-	case ETargetType::DungeonMonster:
-		// 적 캐릭터(가디언, 던전몬스터)에 맞았을 때 Wwise 이벤트
-		SoundEventToPlay = HitPawnSoundEvent;
-		break;
-	case ETargetType::Structure:
-		// 벽이나 구조물에 맞았을 때 Wwise 이벤트
-		SoundEventToPlay = HitStructureSoundEvent;
-		break;
-	case ETargetType::Seeker:
-	case ETargetType::Skill:
-		// 아군 시커나 스킬에 맞았을 때는 사운드 없음
-		break;
-	default:
-		break;
-	}
 
-	// Wwise 사운드 재생
-	if (SoundEventToPlay && GetWorld())
-	{
-		UAkGameplayStatics::PostEventAtLocation(
-			SoundEventToPlay,
-			SweepResult.ImpactPoint,
-			FRotator::ZeroRotator,
-			GetWorld()
-		);
-	}
-}
 
-void AGS_SeekerMerciArrow::PlayHitVFX(ETargetType TargetType, const FHitResult& SweepResult)
-{
-	UNiagaraSystem* VFXToPlay = nullptr;
 
-	switch (TargetType)
-	{
-	case ETargetType::Guardian:
-	case ETargetType::DungeonMonster:
-		// 적 캐릭터(가디언, 던전몬스터)에 맞았을 때 VFX
-		VFXToPlay = HitPawnVFX;
-		break;
-	case ETargetType::Structure:
-		// 벽이나 구조물에 맞았을 때 VFX
-		VFXToPlay = HitStructureVFX;
-		break;
-	case ETargetType::Seeker:
-	case ETargetType::Skill:
-		// 아군 시커나 스킬에 맞았을 때는 VFX 없음
-		break;
-	default:
-		break;
-	}
+// 멀티캐스트 함수 구현은 ArrowFXComponent에서 처리
 
-	// VFX 재생
-	if (VFXToPlay && GetWorld())
-	{
-		// 히트 포인트에서 VFX 재생
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			VFXToPlay,
-			SweepResult.ImpactPoint,
-			SweepResult.ImpactNormal.Rotation(), // 히트 표면의 법선 방향으로 VFX 회전
-			FVector(1.0f), // Scale (float → FVector)
-			true, // Auto Destroy
-			true  // Auto Activate
-		);
-	}
-}
 
-// 멀티캐스트 함수 구현
-bool AGS_SeekerMerciArrow::Multicast_PlayHitSound_Validate(ETargetType TargetType, const FHitResult& SweepResult)
-{
-	return true;
-}
-
-void AGS_SeekerMerciArrow::Multicast_PlayHitSound_Implementation(ETargetType TargetType, const FHitResult& SweepResult)
-{
-	PlayHitSound(TargetType, SweepResult);
-}
-
-bool AGS_SeekerMerciArrow::Multicast_PlayHitVFX_Validate(ETargetType TargetType, const FHitResult& SweepResult)
-{
-	return true;
-}
-
-void AGS_SeekerMerciArrow::Multicast_PlayHitVFX_Implementation(ETargetType TargetType, const FHitResult& SweepResult)
-{
-	PlayHitVFX(TargetType, SweepResult);
-}
