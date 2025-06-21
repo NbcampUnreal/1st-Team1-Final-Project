@@ -9,21 +9,13 @@
 #include "Engine/HitResult.h"
 #include "AkAudioEvent.h"
 #include "NiagaraSystem.h"
+#include "Weapon/Projectile/GS_TargetType.h"
 #include "GS_SeekerMerciArrow.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnArrowHitEnemy, AActor*, HitActor);
 
 class AGS_ArrowVisualActor;
-
-UENUM(BlueprintType)
-enum class ETargetType : uint8
-{
-	Guardian		UMETA(DisplayName = "Guardian"),
-	DungeonMonster	UMETA(DisplayName = "DungeonMonster"),
-	Seeker			UMETA(DisplayName = "Seeker"),
-	Structure		UMETA(DisplayName = "Structure"),
-	Skill			UMETA(DisplayName = "Skill")
-};
+class UGS_ArrowFXComponent;
 
 UCLASS()
 class GAS_API AGS_SeekerMerciArrow : public AGS_WeaponProjectile
@@ -49,19 +41,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AGS_ArrowVisualActor> VisualArrowClass;
 
-	// Wwise 히트 사운드 이벤트
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
-	UAkAudioEvent* HitPawnSoundEvent;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
-	UAkAudioEvent* HitStructureSoundEvent;
-
-	// 히트 VFX 에셋
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
-	UNiagaraSystem* HitPawnVFX;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
-	UNiagaraSystem* HitStructureVFX;
+	// 화살 FX 컴포넌트 (Trail VFX + Hit VFX + Sound 모두 관리)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FX")
+	class UGS_ArrowFXComponent* ArrowFXComponent;
 
 	// 유도 화살
 	UPROPERTY()
@@ -76,17 +58,4 @@ protected:
 		bool bFromSweep, const FHitResult& SweepResult);
 	virtual ETargetType DetermineTargetType(AActor* OtherActor) const;
 	virtual void HandleTargetTypeGeneric(ETargetType TargetType, const FHitResult& SweepResult);
-	virtual void PlayHitSound(ETargetType TargetType, const FHitResult& SweepResult);
-	virtual void PlayHitVFX(ETargetType TargetType, const FHitResult& SweepResult);
-
-	// 멀티캐스트 함수들
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayHitSound(ETargetType TargetType, const FHitResult& SweepResult);
-	bool Multicast_PlayHitSound_Validate(ETargetType TargetType, const FHitResult& SweepResult);
-	void Multicast_PlayHitSound_Implementation(ETargetType TargetType, const FHitResult& SweepResult);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayHitVFX(ETargetType TargetType, const FHitResult& SweepResult);
-	bool Multicast_PlayHitVFX_Validate(ETargetType TargetType, const FHitResult& SweepResult);
-	void Multicast_PlayHitVFX_Implementation(ETargetType TargetType, const FHitResult& SweepResult);
 };

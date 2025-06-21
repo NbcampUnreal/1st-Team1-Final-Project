@@ -4,15 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
+#include "Weapon/Projectile/Seeker/GS_ArrowType.h"
 #include "GS_SeekerMerciArrowNormal.generated.h"
-
-UENUM(BlueprintType)
-enum class EArrowType : uint8
-{
-	Normal	UMETA(DisplayName="Normal"),
-	Axe		UMETA(DisplayName = "Axe"),
-	Child	UMETA(DisplayName = "Child")
-};
 
 UCLASS()
 class GAS_API AGS_SeekerMerciArrowNormal : public AGS_SeekerMerciArrow
