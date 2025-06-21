@@ -57,7 +57,7 @@ void UGS_DebuffStun::OnExpire()
 		}
 
 		// 스킬 사용 가능
-		TargetCharacter->SetCanUseSkill(false);
+		TargetCharacter->SetCanUseSkill(true);
 		UE_LOG(LogTemp, Warning, TEXT("Stun expired for %s"), *TargetCharacter->GetName());
 	}
 
