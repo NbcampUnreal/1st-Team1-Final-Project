@@ -58,6 +58,11 @@ void UGS_AresMovingSkill::OnSkillCommand()
 		return;
 	}
 
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+	}
+
 	Super::OnSkillCommand();
 
 	// 차징 종료
