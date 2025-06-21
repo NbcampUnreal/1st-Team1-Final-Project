@@ -18,7 +18,7 @@ void UGS_AresUltimateSkill::ActiveSkill()
 	UE_LOG(LogTemp, Warning, TEXT("Ares Ultimate Skill Active"));
 	bIsBerserker = true;
 	// 만약 일정 시간 후 효과 해제를 원하면, 타이머로 DeactiveSkill 호출
-	GetWorld()->GetTimerManager().SetTimer(UltimateSkillTimerHandle, this, &UGS_AresUltimateSkill::DeactiveSkill, 10.f, false);
+	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UltimateSkillTimerHandle, this, &UGS_AresUltimateSkill::DeactiveSkill, 10.f, false);
 	ExecuteSkillEffect();
 }
 

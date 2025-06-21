@@ -9,6 +9,8 @@
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Player/GS_Player.h"
 #include "AkAudioEvent.h"
+#include "Character/Component/GS_StatComp.h"
+#include "Character/Component/GS_StatRow.h"
 
 UGS_ChanMovingSkill::UGS_ChanMovingSkill()
 {
@@ -142,6 +144,18 @@ void UGS_ChanMovingSkill::ExecuteSkillEffect()
 
 void UGS_ChanMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
+	// 방어력 증가
+	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
+	{
+		FGS_StatRow BuffStat;
+		BuffStat.DEF = 200.0f;     // 방어력 +50
+
+		BuffAmount = BuffStat; // 나중에 되돌릴 때 사용할 변수
+		StatComp->ChangeStat(BuffStat);
+	}
+
+	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(DEFBuffHandle, this, &UGS_ChanMovingSkill::DeactiveDEFBuff, 20.0f, false);
+
 	// 어그로 디버프
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
 	{
@@ -155,6 +169,15 @@ void UGS_ChanMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
 	{
 		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Mute, OwnerCharacter);
+	}
+}
+
+void UGS_ChanMovingSkill::DeactiveDEFBuff()
+{
+	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
+	{
+		StatComp->bIsInvincible = false;
+		StatComp->ResetStat(BuffAmount);
 	}
 }
 

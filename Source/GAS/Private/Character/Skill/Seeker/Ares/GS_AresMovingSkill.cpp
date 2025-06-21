@@ -12,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/Player/Seeker/GS_Ares.h"
+#include "Character/GS_TpsController.h"
 
 
 UGS_AresMovingSkill::UGS_AresMovingSkill()
@@ -26,7 +27,14 @@ void UGS_AresMovingSkill::ActiveSkill()
 		bPressedDuringCooldown = true;
 		return;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("AresMovingSkill Activated!"));
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+	}
 
+	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
+	Controller->SetMoveControlValue(false, false);
 	bPressedDuringCooldown = false;
 
 	// 차징 시작
@@ -80,54 +88,7 @@ void UGS_AresMovingSkill::OnSkillCommand()
 
 void UGS_AresMovingSkill::ExecuteSkillEffect()
 {
-	Super::ExecuteSkillEffect();
 
-	if (!IsValid(OwnerCharacter)) return;
-
-	// 돌진 경로에 적 감지(캡슐 스윕 사용)
-	TArray<FHitResult> HitResults;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(OwnerCharacter);
-
-	bool bHit = GetWorld()->SweepMultiByChannel(HitResults, DashStartLocation, DashEndLocation,
-		FQuat::Identity, ECC_Pawn, FCollisionShape::MakeCapsule(100.0f, 100.0f), Params);
-
-	if (bHit)
-	{
-		for (const FHitResult& Hit : HitResults)
-		{
-			AActor* HitActor = Hit.GetActor();
-			if (!IsValid(HitActor))
-			{
-				return;
-			}
-
-			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
-			{
-				ApplyEffectToDungeonMonster(TargetMonster);
-			}
-			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
-			{
-				ApplyEffectToGuardian(TargetGuardian);
-			}
-		}
-	}
-
-	// 캐릭터를 앞으로 밀어냄
-	float Ratio = ChargingTime / MaxChargingTime;
-	float DashDistance = FMath::Lerp(MinDashDistance, MaxDashDistance, Ratio);
-	float DashImpulseStrength = DashDistance * 10.0f; // 튜닝 가능
-
-	UCharacterMovementComponent* MoveComp = OwnerCharacter->GetCharacterMovement();
-	if (MoveComp)
-	{
-		MoveComp->StopMovementImmediately();
-		MoveComp->AddImpulse(DashDirection * DashImpulseStrength, true); // true: mass 고려
-	}
-
-	// 디버그 선 그리기
-	/*DrawDebugCapsule(GetWorld(), DashStartLocation, 100.0f, 100.0f, FQuat::Identity, FColor::Red, false, 2.0f);
-	DrawDebugLine(GetWorld(), DashStartLocation, DashEndLocation, FColor::Blue, false, 2.0f, 0, 3.0f);*/
 }
 
 bool UGS_AresMovingSkill::IsActive() const
@@ -162,6 +123,8 @@ void UGS_AresMovingSkill::UpdateCharging()
 
 void UGS_AresMovingSkill::StartDash()
 {
+	DamagedActors.Empty();
+
 	// 몬스터는 충돌 막지 않도록 설정
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
@@ -189,6 +152,13 @@ void UGS_AresMovingSkill::UpdateDash()
 	{
 		if (AActor* HitActor = Hit.GetActor())
 		{
+			if (!HitActor || DamagedActors.Contains(HitActor))
+			{
+				continue;
+			}
+
+			DamagedActors.Add(HitActor);
+
 			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
 			{
 				ApplyEffectToDungeonMonster(TargetMonster);
@@ -214,6 +184,9 @@ void UGS_AresMovingSkill::UpdateDash()
 void UGS_AresMovingSkill::StopDash()
 {
 	GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
+
+	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
+	Controller->SetMoveControlValue(true, true);
 
 	// 원래대로 Block으로 되돌리기
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
