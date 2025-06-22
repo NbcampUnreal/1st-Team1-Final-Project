@@ -13,6 +13,7 @@
 UGS_DrakharVFXComponent::UGS_DrakharVFXComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.TickInterval = 0.1f;
 
 	// Initialize component pointers
 	ActiveWingRushVFXComponent = nullptr;
