@@ -498,13 +498,13 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 		FRotator SpawnRotation = GetActorRotation();
 		float RandomPitch = FMath::FRandRange(-35.f, -30.f);
 		SpawnRotation.Pitch += RandomPitch;
+
+		FActorSpawnParameters Params;
+		Params.Instigator = this;
+		Params.Owner = this;
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		
-		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(FeverDraconicProjectile, FeverModeDraconicFurySpawnLocation, SpawnRotation);
-		
-		if (DrakharProjectile)
-		{
-			DrakharProjectile->SetOwner(this);
-		}
+		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(FeverDraconicProjectile, FeverModeDraconicFurySpawnLocation, SpawnRotation, Params);
 	}
 	else
 	{
@@ -513,10 +513,15 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 		int32 Index = FMath::RandRange(0, DraconicFuryTargetArray.Num() - 1);
 		
 		//spawn meteor
-		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[Index].GetLocation(), DraconicFuryTargetArray[Index].Rotator());
+		FActorSpawnParameters Params;
+		Params.Instigator = this;
+		Params.Owner = this;
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[Index].GetLocation(), DraconicFuryTargetArray[Index].Rotator(), Params);
+		
 		if (DrakharProjectile)
 		{
-			DrakharProjectile->SetOwner(this);
 			MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
 		}
 	}
