@@ -151,7 +151,7 @@ void UGS_ChanUltimateSkill::StartCharge()
 		ChargeTimerHandle,
 		this,
 		&UGS_ChanUltimateSkill::EndCharge,
-		3.0f, 
+		2.0f, 
 		false
 	);
 

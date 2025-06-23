@@ -316,7 +316,7 @@ void AGS_TpsController::AutoMoveTick()
 				Movement->MaxWalkSpeed,
 				ControlledPawn->IsPlayingRootMotion() ? TEXT("true") : TEXT("false"));*/
 		}
-		ControlledPawn->AddMovementInput(ForwardDirection, 3.0f);
+		ControlledPawn->AddMovementInput(ForwardDirection, 10.0f);
 	}
 }
 
