@@ -134,7 +134,6 @@ UAkComponent* UGS_DrakharSFXComponent::GetOrCreateAkComponent()
 		{
 			AkComp->SetupAttachment(OwnerDrakhar->GetRootComponent());
 			AkComp->RegisterComponent();
-			UE_LOG(LogTemp, Log, TEXT("UGS_DrakharSFXComponent: AkComponent created at runtime for GS_Drakhar"));
 		}
 	}
 	return AkComp;
