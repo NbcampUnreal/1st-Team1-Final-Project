@@ -144,9 +144,15 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 			
 			//server
 			AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
+			
 			if (!Drakhar->GetIsFeverMode())
 			{
 				Drakhar->SetFeverGauge(10.f);
+			}
+			if (Drakhar->GetIsFeverMode())
+			{
+				Drakhar->bIsAttckingDuringFever = true;
+				Drakhar->ResetIsAttackingDuringFeverMode();
 			}
 			
 			// === 히트 사운드 재생 (Drakhar인 경우) ===

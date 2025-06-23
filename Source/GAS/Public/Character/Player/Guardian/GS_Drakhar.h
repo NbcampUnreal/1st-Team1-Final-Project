@@ -48,7 +48,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> FeverDraconicProjectile;
 
+	//[fever mode]
 	FOnCurrentFeverGaugeChangedDelegate OnCurrentFeverGaugeChanged;
+	UPROPERTY()
+	bool bIsAttckingDuringFever;
+	FTimerHandle ResetAttackTimer;
 	
 	//[Input Binding Function]
 	virtual void Ctrl() override;
@@ -126,7 +130,9 @@ public:
 	
 	void SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGaugeWidget);
 	void SetFeverGauge(float InValue);
-
+	void ResetIsAttackingDuringFeverMode();
+	void StartIsAttackingTimer();
+	
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCFeverMontagePlay();
 	
@@ -294,12 +300,13 @@ private:
 
 	//[Fever Mode]
 	float MaxFeverGauge;
+
 	UPROPERTY(ReplicatedUsing = OnRep_FeverGauge)
 	float CurrentFeverGauge;
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsFeverMode)
 	bool IsFeverMode;
-
+	
 	FTimerHandle FeverTimer;
 
 	float PillarForwardOffset = 300.f;

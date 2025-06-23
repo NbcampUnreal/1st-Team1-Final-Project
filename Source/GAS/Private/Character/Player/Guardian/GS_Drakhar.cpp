@@ -455,12 +455,10 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			}
 			
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+			// === 어스퀘이크 스킬 히트 사운드 재생 ===
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
 			MulticastPlayAttackHitSound();
 
-			// === 어스퀘이크 스킬 히트 사운드 재생 ===
-			//PlayAttackHitSound();
-			
 			FVector DrakharLocation = GetActorLocation();
 			FVector DamagedLocation = DamagedCharacter->GetActorLocation();
 
@@ -540,7 +538,7 @@ void AGS_Drakhar::SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGauge
 
 void AGS_Drakhar::SetFeverGauge(float InValue)
 {	
-	//client & server
+	//server
 	if (HasAuthority())
 	{
 		CurrentFeverGauge += InValue;
@@ -576,6 +574,19 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 		
 		OnRep_FeverGauge();
 	}
+}
+
+void AGS_Drakhar::ResetIsAttackingDuringFeverMode()
+{
+	UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!!!!!!!!!!!! RESET TIMER??"));
+	GetWorldTimerManager().ClearTimer(ResetAttackTimer);
+	GetWorldTimerManager().SetTimer(ResetAttackTimer, this, &AGS_Drakhar::StartIsAttackingTimer, 3.f, false);
+}
+
+void AGS_Drakhar::StartIsAttackingTimer()
+{
+	bIsAttckingDuringFever = false;
+	UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!!!!!!!!!!!! !!%d"), bIsAttckingDuringFever);
 }
 
 void AGS_Drakhar::MulticastRPCFeverMontagePlay_Implementation()
@@ -637,7 +648,18 @@ void AGS_Drakhar::DecreaseFeverGauge()
 
 void AGS_Drakhar::MinusFeverGaugeValue()
 {
-	SetFeverGauge(-1.f);
+	if (IsFeverMode)
+	{
+		//공격 유지 안된 경우
+		if (!bIsAttckingDuringFever)
+		{
+			SetFeverGauge(-5.f);
+		}
+	}
+	else
+	{
+		SetFeverGauge(-1.f);
+	}
 }
 
 void AGS_Drakhar::GetRandomDraconicFuryTarget()
