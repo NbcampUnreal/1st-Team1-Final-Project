@@ -159,7 +159,6 @@ void UGS_MonsterSkillComp::OnRep_CooldownRemaining()
 	if (!GetOwner()->HasAuthority())
 	{
 		OnMonsterSkillCooldownChanged.Broadcast(CooldownRemaining, SkillCooltime);
-		UE_LOG(LogTemp, Log, TEXT("UGS_MonsterSkillComp::OnRep_CooldownRemaining : %.1f / %.1f"), CooldownRemaining, SkillCooltime);
 	}
 }
 
