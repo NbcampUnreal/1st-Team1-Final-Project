@@ -219,10 +219,11 @@ void AGS_Player::OnDeath()
 	}
 }
 
-void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick)
+void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick)
 {
 	SkillInputControl.CanInputLC = CanLeftClick;
 	SkillInputControl.CanInputRC = CanRightClick;
+	SkillInputControl.CanInputRoll= CanRollClick;
 }
 
 FSkillInputControl AGS_Player::GetSkillInputControl()
@@ -297,6 +298,7 @@ void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage
 	{
 		if (Section == NAME_None)
 		{
+			//UE_LOG(LogTemp, Warning, TEXT("PlaySkillMontage %s"), *UEnum::GetValueAsString(GetLocalRole())); // SJE
 			AnimInstance->Montage_Play(Montage);
 		}
 		else

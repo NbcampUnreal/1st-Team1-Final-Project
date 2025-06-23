@@ -26,7 +26,6 @@ void UGS_ChanAimingSkill::ActiveSkill()
 {	
 	if (!CanActive()) return;
 	Super::ActiveSkill();
-
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{		
 		if (OwnerPlayer->HasAuthority())
@@ -37,7 +36,7 @@ void UGS_ChanAimingSkill::ActiveSkill()
 			OwnerPlayer->CurrentComboIndex = 0;
 			
 			// Control Input Key
-			OwnerPlayer->SetSkillInputControl(false, false);
+			OwnerPlayer->SetSkillInputControl(false, false, false);
 			// Change Slot
 			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(true);
@@ -89,12 +88,11 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 		{
 			OwnerPlayer->ComboInputOpen();
 			// Control Input Key
-			OwnerPlayer->SetSkillInputControl(true, true);
+			OwnerPlayer->SetSkillInputControl(true, true, true);
 			OwnerPlayer->SetMoveControlValue(true, true);
 			// Change Slot
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 			OwnerPlayer->SetLookControlValue(true, true);
-			OwnerPlayer->SetSkillInputControl(true, true);
 
 			// Change Slot
 			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
@@ -133,15 +131,14 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 		
-
-			// Play Montage
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
-
 			// Control Input Value
 			OwnerPlayer->SetLookControlValue(false, false);
 			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->SetSkillInputControl(false, false);
-
+			OwnerPlayer->SetSkillInputControl(false, false, true);
+			
+			// Play Montage
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+			
 			// Forward Jump
 			const FVector Forward = OwnerPlayer->GetActorForwardVector();
 			const FVector JumpVelocity = Forward * 600.0f + FVector(0.f, 0.f, 420.0f);

@@ -165,21 +165,6 @@ void AGS_Chan::ToIdle()
 	SetLookControlValue(true, true);
 }
 
-void AGS_Chan::SetMoveControlValue(bool bMoveForward, bool bMoveRight)
-{
-	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
-	{
-		TPSController->SetMoveControlValue(bMoveRight, bMoveForward);
-	}
-}
-void AGS_Chan::SetLookControlValue(bool bLookUp, bool bLookRight)
-{
-	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
-	{
-		TPSController->SetLookControlValue(bLookRight, bLookUp);
-	}
-}
-
 void AGS_Chan::Client_UpdateChanAimingSkillBar_Implementation(float Stamina)
 {
 	if(ChanAimingSkillBarWidget)

@@ -121,6 +121,12 @@ public:
 	UFUNCTION()
 	virtual void OnComboAttack();
 
+	// Control
+	UFUNCTION()
+	void SetMoveControlValue(bool bMoveForward, bool bMoveRight);
+	UFUNCTION()
+	void SetLookControlValue(bool bLookUp, bool bLookRight);
+
 	// Replication Set
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
