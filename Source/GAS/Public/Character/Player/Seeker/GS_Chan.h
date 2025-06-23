@@ -38,21 +38,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DrawSkillRange(FVector InLocation, float InRadius, FColor InColor, float InLifetime);
 
-	/*// AnimInstnace Slot State Value 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsUpperBodySlot(bool bUpperBodySlot);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);*/
-
-	// Control State Value
-	UFUNCTION()
-	void SetMoveControlValue(bool bMoveForward, bool bMoveRight);
-	UFUNCTION()
-	void SetLookControlValue(bool bLookUp, bool bLookRight);
-	/*UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetMustTurnInPlace(bool MustTurn);*/
-
 	// ===============
 	// 전용 공격 사운드
 	// ===============

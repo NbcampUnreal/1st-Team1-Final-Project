@@ -113,6 +113,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
 	FRotator LastRotatorInMoving;
 
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Control")
+	FVector2D MoveInputValue;
+
+	UFUNCTION(Server, Reliable)
+	void Server_CacheMoveInputValue(FVector2D InputValue);
+
 	UFUNCTION(BlueprintCallable)
 	void TestFunction();
 	

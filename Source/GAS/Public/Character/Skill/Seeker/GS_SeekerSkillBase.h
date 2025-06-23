@@ -22,4 +22,6 @@ protected:
 	virtual void ApplyEffectToGuardian(AGS_Guardian* Target);
 	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target);
 	virtual void ExecuteSkillEffect() override;
+
+	FName CalRollDirection();
 };

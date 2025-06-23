@@ -31,7 +31,7 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->SetSkillInputControl(false, false);
+			OwnerPlayer->SetSkillInputControl(false, false, true);
 
 			// =======================
 			// VFX 재생 - 컴포넌트 RPC 사용
@@ -70,7 +70,7 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-		OwnerPlayer->SetSkillInputControl(true, true);
+		OwnerPlayer->SetSkillInputControl(true, true, true);
 
 		// =======================
 		// 스킬 종료 VFX 재생

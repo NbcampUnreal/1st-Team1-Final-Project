@@ -38,6 +38,7 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 {
 	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
 	LastRotatorInMoving = GetControlRotation();
+	Server_CacheMoveInputValue(InputAxisVector);
 	const FRotator YawRotation(0.f, LastRotatorInMoving.Yaw, 0.0f);
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
@@ -128,6 +129,7 @@ void AGS_TpsController::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AGS_TpsController, ControlValues);
+	DOREPLIFETIME(AGS_TpsController, MoveInputValue);
 }
 
 float AGS_TpsController::GetCurrentMouseSensitivity() const
@@ -209,6 +211,11 @@ void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
 		//Game Over?
 		//all players dead
 	}
+}
+
+void AGS_TpsController::Server_CacheMoveInputValue_Implementation(FVector2D InputValue)
+{
+	MoveInputValue = InputValue;
 }
 
 void AGS_TpsController::TestFunction()
