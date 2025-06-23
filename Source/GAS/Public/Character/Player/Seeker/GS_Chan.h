@@ -40,21 +40,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DrawSkillRange(FVector InLocation, float InRadius, FColor InColor, float InLifetime);
 
-	/*// AnimInstnace Slot State Value 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsUpperBodySlot(bool bUpperBodySlot);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);*/
-
-	// Control State Value
-	UFUNCTION()
-	void SetMoveControlValue(bool bMoveForward, bool bMoveRight);
-	UFUNCTION()
-	void SetLookControlValue(bool bLookUp, bool bLookRight);
-	/*UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetMustTurnInPlace(bool MustTurn);*/
-
 	// ===============
 	// 전용 공격 사운드
 	// ===============
@@ -120,9 +105,20 @@ public:
 	void Client_ChanAimingSkillBar(bool bShow);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	// Knockback Collision (KCY)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UltimateSkill")
+	UCapsuleComponent* UltimateCollision;
+
+	UFUNCTION()
+	void OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	
 
 private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;

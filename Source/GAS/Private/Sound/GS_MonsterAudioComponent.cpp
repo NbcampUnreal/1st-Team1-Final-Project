@@ -36,6 +36,12 @@ UGS_MonsterAudioComponent::UGS_MonsterAudioComponent()
     MonsterSoundVariant = 1;
 
     SetIsReplicatedByDefault(true);
+
+    // 최적화 변수 초기화
+    CurrentAudioLOD = EAudioLOD::Medium;
+    DynamicDistanceCheckInterval = MEDIUM_LOD_INTERVAL;
+    LastPlayerDistance = -1.0f;
+    LastPlayerLocationCheckTime = -1.0f;
 }
 
 void UGS_MonsterAudioComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -75,9 +81,10 @@ void UGS_MonsterAudioComponent::BeginPlay()
     {
         StartSoundTimer();
     }
-    PreviousAudioState = CurrentAudioState; 
-    // 거리 체크 타이머 시작
-    GetWorld()->GetTimerManager().SetTimer(DistanceCheckTimerHandle, this, &UGS_MonsterAudioComponent::UpdateDistanceRTPC, 0.5f, true);
+    PreviousAudioState = CurrentAudioState;
+    
+    // 최적화된 거리 체크 타이머 시작
+    OptimizeUpdateFrequency();
 }
 
 void UGS_MonsterAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -152,20 +159,38 @@ void UGS_MonsterAudioComponent::SetMonsterAudioState(EMonsterAudioState NewState
 
 void UGS_MonsterAudioComponent::UpdateDistanceRTPC()
 {
-    if (!OwnerMonster) return;
+    if (!ShouldUpdateAudio()) return;
 
+    // 플레이어 위치 캐싱 및 거리 계산
     APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     if (LocalPC && LocalPC->GetPawn())
     {
-        float DistanceToLocalPlayer = FVector::Dist(OwnerMonster->GetActorLocation(), LocalPC->GetPawn()->GetActorLocation());
+        CachedPlayerLocation = LocalPC->GetPawn()->GetActorLocation();
+        LastPlayerLocationCheckTime = GetWorld()->GetTimeSeconds();
+    }
+    else
+    {
+        // 플레이어를 찾을 수 없으면 업데이트 중지
+        GetWorld()->GetTimerManager().ClearTimer(DistanceCheckTimerHandle);
+        return;
+    }
+    
+    const float DistanceToPlayer = FVector::Dist(OwnerMonster->GetActorLocation(), CachedPlayerLocation);
 
-        if (DistanceToLocalPlayer <= AudioConfig.MaxAudioDistance)
+    // LOD 업데이트
+    UpdateAudioLOD(DistanceToPlayer);
+
+    // RTPC 업데이트 (거리가 유의미하게 변했을 때만)
+    if (!FMath::IsNearlyEqual(DistanceToPlayer, LastPlayerDistance, 10.0f))
+    {
+        if (DistanceToPlayer <= AudioConfig.MaxAudioDistance)
         {
             if (FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get())
             {
-                AkAudioDevice->SetRTPCValue(*DistanceToPlayerRTPCName.ToString(), DistanceToLocalPlayer, 0, OwnerMonster);
+                AkAudioDevice->SetRTPCValue(*DistanceToPlayerRTPCName.ToString(), DistanceToPlayer, 0, OwnerMonster);
             }
         }
+        LastPlayerDistance = DistanceToPlayer;
     }
 
     // 서버에서만 상태 변경 체크
@@ -205,17 +230,19 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
         return;
     }
 
-    APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (!LocalPC)
-    {
-        return; 
-    }
-    if (!LocalPC->GetPawn())
+    // 매우 먼 거리에서는 사운드 재생 생략
+    if (CurrentAudioLOD == EAudioLOD::Disabled)
     {
         return;
     }
 
-    float DistanceToLocalPlayer = FVector::Dist(OwnerMonster->GetActorLocation(), LocalPC->GetPawn()->GetActorLocation());
+    APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (!LocalPC || !LocalPC->GetPawn())
+    {
+        return; 
+    }
+
+    const float DistanceToLocalPlayer = FVector::Dist(OwnerMonster->GetActorLocation(), LocalPC->GetPawn()->GetActorLocation());
 
     if (DistanceToLocalPlayer > AudioConfig.MaxAudioDistance)
     {
@@ -409,22 +436,17 @@ void UGS_MonsterAudioComponent::CheckForStateChanges()
         return; 
     }
     
+    // 피격 상태에서는 거리 체크로 상태를 바꾸지 않음
     if (CurrentAudioState == EMonsterAudioState::Hurt) return;
     
-    float DistanceToSeeker = CalculateDistanceToNearestSeeker();
-    
-    if (DistanceToSeeker >= 0.0f) 
+    // 마지막으로 계산된 거리 사용
+    if (LastPlayerDistance < 0.0f) return;
+
+    if (LastPlayerDistance <= AudioConfig.AlertDistance && CurrentAudioState == EMonsterAudioState::Idle)
     {
-        if (DistanceToSeeker <= AudioConfig.AlertDistance && CurrentAudioState == EMonsterAudioState::Idle)
-        {
-            SetMonsterAudioState(EMonsterAudioState::Combat);
-        }
-        else if (DistanceToSeeker > AudioConfig.AlertDistance && CurrentAudioState == EMonsterAudioState::Combat)
-        {
-            SetMonsterAudioState(EMonsterAudioState::Idle);
-        }
+        SetMonsterAudioState(EMonsterAudioState::Combat);
     }
-    else if (CurrentAudioState == EMonsterAudioState::Combat)
+    else if (LastPlayerDistance > AudioConfig.AlertDistance && CurrentAudioState == EMonsterAudioState::Combat)
     {
         SetMonsterAudioState(EMonsterAudioState::Idle);
     }
@@ -436,11 +458,80 @@ void UGS_MonsterAudioComponent::DrawDebugInfo() const
         return;
     
     FVector MonsterLocation = OwnerMonster->GetActorLocation();
-    float Duration = PrimaryComponentTick.TickInterval + 0.1f; 
+    float Duration = DynamicDistanceCheckInterval; 
 
     DrawDebugCircle(GetWorld(), MonsterLocation, AudioConfig.AlertDistance, 32, FColor::Red, false, Duration, 0, 3.0f, FVector(0, 1, 0), FVector(1, 0, 0));
     DrawDebugCircle(GetWorld(), MonsterLocation, AudioConfig.MaxAudioDistance, 32, FColor::Yellow, false, Duration, 0, 1.0f, FVector(0, 1, 0), FVector(1, 0, 0));
     
-    FString StateText = FString::Printf(TEXT("Audio State: %s"), *UEnum::GetValueAsString(CurrentAudioState));
+    FString StateText = FString::Printf(TEXT("Audio State: %s | LOD: %d | Interval: %.2f"), 
+        *UEnum::GetValueAsString(CurrentAudioState), (int32)CurrentAudioLOD, DynamicDistanceCheckInterval);
     DrawDebugString(GetWorld(), MonsterLocation + FVector(0, 0, 200), StateText, nullptr, FColor::White, Duration);
+}
+
+
+// === 최적화 함수 구현 ===
+
+void UGS_MonsterAudioComponent::UpdateAudioLOD(float Distance)
+{
+    EAudioLOD NewLOD;
+    if (Distance <= CLOSE_DISTANCE_THRESHOLD)
+    {
+        NewLOD = EAudioLOD::High;
+    }
+    else if (Distance <= MEDIUM_DISTANCE_THRESHOLD)
+    {
+        NewLOD = EAudioLOD::Medium;
+    }
+    else if (Distance <= FAR_DISTANCE_THRESHOLD)
+    {
+        NewLOD = EAudioLOD::Low;
+    }
+    else
+    {
+        NewLOD = EAudioLOD::Disabled;
+    }
+
+    if (NewLOD != CurrentAudioLOD)
+    {
+        CurrentAudioLOD = NewLOD;
+        OptimizeUpdateFrequency();
+    }
+}
+
+void UGS_MonsterAudioComponent::OptimizeUpdateFrequency()
+{
+    switch (CurrentAudioLOD)
+    {
+    case EAudioLOD::High:
+        DynamicDistanceCheckInterval = HIGH_LOD_INTERVAL;
+        break;
+    case EAudioLOD::Medium:
+        DynamicDistanceCheckInterval = MEDIUM_LOD_INTERVAL;
+        break;
+    case EAudioLOD::Low:
+        DynamicDistanceCheckInterval = LOW_LOD_INTERVAL;
+        break;
+    case EAudioLOD::Disabled:
+        GetWorld()->GetTimerManager().ClearTimer(DistanceCheckTimerHandle);
+        return;
+    }
+
+    // 타이머를 새로운 간격으로 재설정
+    GetWorld()->GetTimerManager().SetTimer(DistanceCheckTimerHandle, this, &UGS_MonsterAudioComponent::UpdateDistanceRTPC, DynamicDistanceCheckInterval, true);
+}
+
+bool UGS_MonsterAudioComponent::ShouldUpdateAudio() const
+{
+    if (!OwnerMonster || !GetWorld()) return false;
+    
+    // 전용 서버에서는 거리 기반 로직 불필요
+    if (GetOwner()->HasAuthority() && GetWorld()->IsNetMode(NM_DedicatedServer))
+    {
+        return false;
+    }
+    
+    // 오디오 디바이스가 없으면 업데이트 중지
+    if (!FAkAudioDevice::Get()) return false;
+    
+    return true;
 } 

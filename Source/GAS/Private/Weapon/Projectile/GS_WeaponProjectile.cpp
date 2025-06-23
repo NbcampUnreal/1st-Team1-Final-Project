@@ -7,7 +7,7 @@
 
 AGS_WeaponProjectile::AGS_WeaponProjectile()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	bReplicates = true;
 	SetReplicateMovement(true);

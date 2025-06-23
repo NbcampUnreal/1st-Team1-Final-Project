@@ -81,3 +81,18 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	}
 }
 
+void UGS_ChanSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instance)
+{
+	Super::OnRoll(Instance);
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+	if (AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter))
+	{
+		ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Rolling);
+	}
+
+	return;
+}
+

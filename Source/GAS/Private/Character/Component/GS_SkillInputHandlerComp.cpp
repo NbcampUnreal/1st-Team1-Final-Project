@@ -54,6 +54,10 @@ void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputC
 		{
 			EnhancedInput->BindAction(IA_Scroll, ETriggerEvent::Triggered, this, &UGS_SkillInputHandlerComp::OnScroll);
 		}
+		if (IA_Roll)
+		{
+			EnhancedInput->BindAction(IA_Roll, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnRoll);
+		}
 	}
 }
 
@@ -152,5 +156,10 @@ void UGS_SkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
 		return;
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("Scroll Mouse"));
+}
+
+void UGS_SkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instance)
+{
+	return;
 }
 

@@ -24,4 +24,8 @@ public:
 private:
 	UPROPERTY()
 	AGS_SwordAuraProjectile* CachedProjectile;
+
+	FTimerHandle DelaySecondProjectileHandle;
+	void SpawnSecondProjectile();
+
 };

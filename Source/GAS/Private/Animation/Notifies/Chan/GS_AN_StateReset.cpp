@@ -19,6 +19,7 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 			Character->Multicast_SetMustTurnInPlace(false);
 			Character->Server_SetMoveControlValue(true, true);
 			Character->Server_SetLookControlValue(true, true);
+			Character->SetSkillInputControl(true, true, true);
 			Character->Multicast_ComboEnd();
 			Character->Multicast_SetCanHitReact(true);
 		}

@@ -2,6 +2,8 @@
 
 
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrowNormal.h"
+#include "Weapon/Projectile/Component/GS_ArrowFXComponent.h"
+#include "Weapon/Projectile/GS_TargetType.h"
 
 #include "Character/Component/GS_StatComp.h"
 #include "Kismet/GameplayStatics.h"
@@ -26,6 +28,11 @@ void AGS_SeekerMerciArrowNormal::BeginPlay()
 void AGS_SeekerMerciArrowNormal::ChangeArrowType(EArrowType Type)
 {
 	ArrowType = Type;
+
+	if (ArrowFXComponent)
+	{
+		ArrowFXComponent->StartArrowTrailVFX(ArrowType);
+	}
 }
 
 void AGS_SeekerMerciArrowNormal::OnBeginOverlap(
