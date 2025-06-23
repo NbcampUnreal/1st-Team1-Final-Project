@@ -30,7 +30,8 @@ public class GAS : ModuleRules
             "CommonUI",
             "CommonInput",
             "Chooser",
-            "PoseSearch"
+            "PoseSearch",
+            "GeometryCollectionEngine"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

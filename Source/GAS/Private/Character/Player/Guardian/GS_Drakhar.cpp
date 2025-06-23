@@ -19,6 +19,7 @@
 #include "Character/Component/GS_CameraShakeComponent.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Component/GS_FootManagerComponent.h"
+#include "Character/Skill/Guardian/Drakhar/GS_EarthquakeEffect.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_DrakharFeverGauge.h"
@@ -426,6 +427,14 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 
 	const FVector Start = GetActorLocation() + 100.f;
 	TSet<AGS_Character*> EarthquakeDamagedCharacters = DetectPlayerInRange(Start, 200.f, EarthquakeRadius);
+
+	//[Test Land Destruction]
+	{
+		FVector SpawnLocation = Start + GetActorForwardVector() * 300.f;
+		AGS_EarthquakeEffect* GC_Earthquake = GetWorld()->SpawnActor<AGS_EarthquakeEffect>(GC_EarthquakeEffect, SpawnLocation + FVector(0.f,0.f,-200.f), GetActorRotation());
+		GC_Earthquake->SetOwner(this);
+		GC_Earthquake->MulticastTriggerDestruction(SpawnLocation, EarthquakeRadius, 3000.f);
+	}
 	
 	for (const auto& DamagedCharacter : EarthquakeDamagedCharacters)
 	{
@@ -444,10 +453,14 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			{
 				MulticastPlayEarthquakeImpactVFX(DamagedCharacter->GetActorLocation());
 			}
+			
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
 			MulticastPlayAttackHitSound();
 
+			// === 어스퀘이크 스킬 히트 사운드 재생 ===
+			//PlayAttackHitSound();
+			
 			FVector DrakharLocation = GetActorLocation();
 			FVector DamagedLocation = DamagedCharacter->GetActorLocation();
 
@@ -516,8 +529,7 @@ void AGS_Drakhar::SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGauge
 	{
 		//client
 		DrakharFeverGaugeWidget->InitializeGauge(GetCurrentFeverGauge());
-		OnCurrentFeverGaugeChanged.AddUObject(DrakharFeverGaugeWidget,
-		                                     &UGS_DrakharFeverGauge::OnCurrentFeverGaugeChanged);
+		OnCurrentFeverGaugeChanged.AddUObject(DrakharFeverGaugeWidget ,&UGS_DrakharFeverGauge::OnCurrentFeverGaugeChanged);
 	}
 }
 
