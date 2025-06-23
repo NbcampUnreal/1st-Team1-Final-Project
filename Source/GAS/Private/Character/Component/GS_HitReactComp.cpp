@@ -3,6 +3,7 @@
 
 #include "Character/Component/GS_HitReactComp.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 
 
 // Sets default values for this component's properties
@@ -15,11 +16,23 @@ UGS_HitReactComp::UGS_HitReactComp()
 
 void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirection)
 {
+	
 	FName Section = CalculateHitDirection(HitDirection);
 	
 	if (AGS_Player* OwnerCharacter = Cast<AGS_Player>(GetOwner()))
 	{
-		OwnerCharacter->CanHitReact = false;
+		if (ReactType == EHitReactType::Interrupt)
+		{
+			if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+			{
+				OwnerSeeker->Multicast_SetIsFullBodySlot(true);
+				OwnerSeeker->Multicast_SetIsUpperBodySlot(false);
+				OwnerSeeker->SetMoveControlValue(false, false);
+				OwnerSeeker->SetSkillInputControl(false, false, false);
+			}
+		}
+		OwnerCharacter->Multicast_SetCanHitReact(false);
+		UE_LOG(LogTemp, Warning, TEXT("PlayHitReact")); // SJE
 		OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[ReactType], Section);
 	}
 }
@@ -38,21 +51,21 @@ FName UGS_HitReactComp::CalculateHitDirection(FVector HitDirection)
 	
 	if (AGS_Player* OwnerCharacter = Cast<AGS_Player>(GetOwner()))
 	{
-		FVector Forward = OwnerCharacter->GetActorRotation().Vector();
+		FVector Front = OwnerCharacter->GetActorRotation().Vector();
 		FVector Right = OwnerCharacter->GetActorRightVector();
 
-		float ForwardDot = FVector::DotProduct(Forward, HitDirection);
+		float FrontDot = FVector::DotProduct(Front, HitDirection);
 		float RightDot = FVector::DotProduct(Right, HitDirection);
 		UE_LOG(LogTemp, Warning, TEXT("Hit Direction : %s"), *HitDirection.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("Hit Forward Dot : %f / Right Dot : %f"), ForwardDot, RightDot);
+		UE_LOG(LogTemp, Warning, TEXT("Hit Front Dot : %f / Right Dot : %f"), FrontDot, RightDot);
 
-		if (ForwardDot > 0.7f)
+		if (FrontDot > 0.7f)
 		{
-			Section = FName("Forward");
+			Section = FName("Front");
 		}
-		else if (ForwardDot < -0.7f)
+		else if (FrontDot < -0.7f)
 		{
-			Section = FName("Right");
+			Section = FName("Back");
 		}
 		else if (RightDot > 0.0f)
 		{
@@ -62,9 +75,8 @@ FName UGS_HitReactComp::CalculateHitDirection(FVector HitDirection)
 		{
 			Section = FName("Left");
 		}
-	
 	}
-
+	
 	return Section;
 }
 

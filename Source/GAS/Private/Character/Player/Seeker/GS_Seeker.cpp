@@ -150,6 +150,7 @@ void AGS_Seeker::SetSeekerGait(EGait Gait)
 		SetCharacterSpeed(1.0f);
 		break;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Gait: %d, Last Gait : %d"), SeekerGait, LastSeekerGait);
 }
 
 EGait AGS_Seeker::GetSeekerGait()
@@ -275,6 +276,22 @@ void AGS_Seeker::OnComboAttack()
 			bNextCombo = true;
 			CanAcceptComboInput = false;
 		}
+	}
+}
+
+void AGS_Seeker::SetMoveControlValue(bool bMoveForward, bool bMoveRight)
+{
+	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
+	{
+		TPSController->SetMoveControlValue(bMoveRight, bMoveForward);
+	}
+}
+
+void AGS_Seeker::SetLookControlValue(bool bLookUp, bool bLookRight)
+{
+	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
+	{
+		TPSController->SetLookControlValue(bLookRight, bLookUp);
 	}
 }
 

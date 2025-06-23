@@ -14,7 +14,8 @@ enum class ESkillSlot : uint8
 	Ready,
 	Moving,
 	Aiming,
-	Ultimate
+	Ultimate,
+	Rolling
 };
 
 USTRUCT()

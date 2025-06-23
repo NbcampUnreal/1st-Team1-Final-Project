@@ -62,4 +62,6 @@ private:
 	// UI
 	void UpdateProgressBar(float InStamina);
 	void ShowProgressBar(bool bShow);
+
+	FTimerHandle KnockbackHandle;
 };

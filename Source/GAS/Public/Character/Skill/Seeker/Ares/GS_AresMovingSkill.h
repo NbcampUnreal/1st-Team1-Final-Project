@@ -48,7 +48,6 @@ private:
 	float DashInterpAlpha = 0.0f;
 
 	bool bIsCharging = false;
-	//bool bPressedDuringCooldown = false;
 
 	FVector DashDirection; // 돌진 방향
 	FVector DashStartLocation;

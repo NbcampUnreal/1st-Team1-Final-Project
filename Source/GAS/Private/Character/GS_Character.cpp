@@ -106,7 +106,8 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		FVector HitDirection = -PointEvent->ShotDirection;
 		if(UGS_HitReactComp* HitReactComponent = GetComponentByClass<UGS_HitReactComp>())
 		{
-			HitReactComponent->PlayHitReact(EHitReactType::Additive, HitDirection);
+			//HitReactComponent->PlayHitReact(EHitReactType::Additive, HitDirection); // SJE
+			HitReactComponent->PlayHitReact(EHitReactType::Interrupt, HitDirection);
 		}
 	}
 
@@ -218,14 +219,11 @@ bool AGS_Character::IsDead() const
 
 void AGS_Character::Server_SetCharacterSpeed_Implementation(float InRatio)
 {
-	if (InRatio >= 0 && InRatio <= 1)
-	{
-		CharacterSpeed = DefaultCharacterSpeed * InRatio;
+	CharacterSpeed = DefaultCharacterSpeed * InRatio;
 
-		if (HasAuthority())
-		{
-			OnRep_CharacterSpeed(); // 서버도 직접 반영
-		}
+	if (HasAuthority())
+	{
+		OnRep_CharacterSpeed(); // 서버도 직접 반영
 	}
 }
 

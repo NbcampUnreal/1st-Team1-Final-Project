@@ -1,9 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
 #include "Character/Skill/GS_SkillComp.h"
-//#include "Character/GS_Character.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 
 void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
@@ -39,7 +37,6 @@ void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	Super::OnLeftClick(Instance);
-	UE_LOG(LogTemp, Warning, TEXT("Left Click Ares"));
 	if (OwnerCharacter->IsDead())
 	{
 		return;
@@ -88,4 +85,20 @@ void UGS_AresSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstanc
 	{
 		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Moving);
 	}
+}
+
+void UGS_AresSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instance)
+{
+	Super::OnRoll(Instance);
+
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+	if (AGS_Ares* ChanCharacter = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Rolling);
+	}
+
+	return;
 }

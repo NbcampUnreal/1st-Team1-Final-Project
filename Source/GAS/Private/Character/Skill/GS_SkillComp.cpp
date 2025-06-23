@@ -144,6 +144,7 @@ void UGS_SkillComp::InitSkills()
 		SetSkill(ESkillSlot::Aiming, SkillSet->AimingSkill);
 		SetSkill(ESkillSlot::Moving, SkillSet->MovingSkill);
 		SetSkill(ESkillSlot::Ultimate, SkillSet->UltimateSkill);
+		SetSkill(ESkillSlot::Rolling, SkillSet->RollingSkill);
 	}
 }
 

@@ -97,12 +97,16 @@ struct GAS_API FGS_SkillSet : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FSkillInfo UltimateSkill;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FSkillInfo RollingSkill;
+
 	FGS_SkillSet()
 		: CharacterType(ECharacterType::Chan)
 		, ReadySkill(nullptr)
 		, AimingSkill(nullptr)
 		, MovingSkill(nullptr)
 		, UltimateSkill(nullptr)
+		, RollingSkill(nullptr) 
 	{
 	}
 };
