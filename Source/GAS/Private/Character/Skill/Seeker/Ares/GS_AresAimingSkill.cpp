@@ -51,23 +51,65 @@ void UGS_AresAimingSkill::ExecuteSkillEffect()
 		+ FVector(0, 0, 50)
 		+ LaunchDirection * 100.f;
 
-	FRotator SpawnRotation = LaunchDirection.Rotation();
+	// 첫 번째 발사 (기본 방향)
+	FRotator SpawnRotationA = LaunchDirection.Rotation();
+	SpawnRotationA.Roll = -45.f;
 
-	// Projectile 생성
-	AGS_SwordAuraProjectile* SpawnedProjectile = World->SpawnActor<AGS_SwordAuraProjectile>(
+	AGS_SwordAuraProjectile* ProjectileA = World->SpawnActor<AGS_SwordAuraProjectile>(
 		AresCharacter->AresProjectileClass,
 		SpawnLocation,
-		SpawnRotation
+		SpawnRotationA
 	);
 
-	// 스킬 종료 처리
-	bIsActive = false;
+	// 두 번째 발사 (90도 회전 방향)
+	// 두 번째 Projectile은 0.1초 뒤에 발사
+	World->GetTimerManager().SetTimer(
+		DelaySecondProjectileHandle,
+		this,
+		&UGS_AresAimingSkill::SpawnSecondProjectile,
+		0.3f, // 지연 시간 (초)
+		false
+	);
 }
 
 bool UGS_AresAimingSkill::IsActive() const
 {
 	Super::IsActive();
 	return bIsActive;
+}
+
+void UGS_AresAimingSkill::SpawnSecondProjectile()
+{
+	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	if (!OwnerCharacter || !AresCharacter || !AresCharacter->AresProjectileClass) return;
+
+	UWorld* World = OwnerCharacter->GetWorld();
+	if (!World) return;
+
+	if (!AresCharacter || !World || !AresCharacter->AresProjectileClass) return;
+
+	// 발사 방향: 카메라 정면, 위로 뜨지 않게 Z 제거
+	FVector LaunchDirection = OwnerCharacter->GetControlRotation().Vector();
+	LaunchDirection.Z = 0.f;
+	LaunchDirection = LaunchDirection.GetSafeNormal();
+
+	// 생성 위치: 캐릭터 정면 약간 앞 + 위
+	FVector SpawnLocation = OwnerCharacter->GetActorLocation()
+		+ FVector(0, 0, 50)
+		+ LaunchDirection * 100.f;
+
+	// 첫 번째 발사 (기본 방향)
+	FRotator SpawnRotationB = LaunchDirection.Rotation();
+	SpawnRotationB.Roll = 45.f;
+
+	AGS_SwordAuraProjectile* ProjectileB = World->SpawnActor<AGS_SwordAuraProjectile>(
+		AresCharacter->AresProjectileClass,
+		SpawnLocation,
+		SpawnRotationB
+	);
+
+	// 스킬 종료 처리
+	bIsActive = false;
 }
 	
 	

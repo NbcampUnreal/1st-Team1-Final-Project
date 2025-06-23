@@ -219,14 +219,11 @@ bool AGS_Character::IsDead() const
 
 void AGS_Character::Server_SetCharacterSpeed_Implementation(float InRatio)
 {
-	if (InRatio >= 0 && InRatio <= 1)
-	{
-		CharacterSpeed = DefaultCharacterSpeed * InRatio;
+	CharacterSpeed = DefaultCharacterSpeed * InRatio;
 
-		if (HasAuthority())
-		{
-			OnRep_CharacterSpeed(); // 서버도 직접 반영
-		}
+	if (HasAuthority())
+	{
+		OnRep_CharacterSpeed(); // 서버도 직접 반영
 	}
 }
 

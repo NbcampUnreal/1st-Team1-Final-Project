@@ -14,6 +14,9 @@
 #include "AkGameplayStatics.h"
 #include "AkAudioDevice.h"
 #include "Animation/Character/Seeker/GS_ChooserInputObj.h"
+#include "Components/CapsuleComponent.h"
+#include "Character/Skill/GS_SkillComp.h"
+#include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
 
 
 // Sets default values
@@ -23,6 +26,13 @@ AGS_Chan::AGS_Chan()
 	PrimaryActorTick.bCanEverTick = true;
 	CharacterType = ECharacterType::Chan;
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_ChanSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
+
+	UltimateCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("UltimateCollision"));
+	UltimateCollision->SetupAttachment(GetRootComponent());
+	UltimateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	UltimateCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	UltimateCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	UltimateCollision->SetGenerateOverlapEvents(true);
 }
 
 void AGS_Chan::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
@@ -69,6 +79,19 @@ void AGS_Chan::BeginPlay()
 	
 	SetReplicateMovement(true);
 	GetMesh()->SetIsReplicated(true);
+
+	UltimateCollision->OnComponentBeginOverlap.AddDynamic(this, &AGS_Chan::OnUltimateOverlap);
+
+}
+
+void AGS_Chan::OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (UGS_ChanUltimateSkill* Skill = Cast<UGS_ChanUltimateSkill>(
+		SkillComp->GetSkillFromSkillMap(ESkillSlot::Ultimate)))
+	{
+		Skill->HandleUltimateCollision(OtherActor);
+	
+	}
 }
 
 // Called every frame
@@ -183,7 +206,7 @@ void AGS_Chan::Client_ChanAimingSkillBar_Implementation(bool bShow)
 
 void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float InRadius, FColor InColor, float InLifetime)
 {
-	/*DrawDebugSphere(
+	DrawDebugSphere(
 		GetWorld(),
 		InLocation,
 		InRadius,
@@ -191,7 +214,21 @@ void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float
 		InColor,
 		false,
 		InLifetime
-	);*/
+	);
+}
+
+void AGS_Chan::Multicast_DrawSkillCapsuleRange_Implementation(FVector InLocation, float InHalfRadius, float InRadius, FColor InColor, float InLifetime)
+{
+	DrawDebugCapsule(
+		GetWorld(),
+		InLocation,
+		InHalfRadius,
+		InRadius,
+		this->GetActorQuat(),
+		InColor,
+		false,
+		InLifetime
+	);
 }
 
 UAkComponent* AGS_Chan::GetOrCreateAkComponent()

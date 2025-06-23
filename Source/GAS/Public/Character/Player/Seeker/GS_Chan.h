@@ -105,9 +105,20 @@ public:
 	void Client_ChanAimingSkillBar(bool bShow);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	// Knockback Collision (KCY)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UltimateSkill")
+	UCapsuleComponent* UltimateCollision;
+
+	UFUNCTION()
+	void OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	
 
 private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;

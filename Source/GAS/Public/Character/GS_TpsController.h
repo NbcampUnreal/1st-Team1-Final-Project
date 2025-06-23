@@ -130,6 +130,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	UGS_CrossHairImage* GetCrosshairWidget() const { return CrosshairWidget; }
 
+	// Auto Moving (KCY)
+	void StartAutoMoveForward();
+	void StopAutoMoveForward();
+	
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -143,4 +148,19 @@ protected:
 	//메르시 크로스헤어 위젯
 	UPROPERTY(BlueprintReadOnly, Category = "UI")
 	UGS_CrossHairImage* CrosshairWidget;
+
+private:
+	// Auto Moving (KCY)
+	FTimerHandle AutoMoveTickHandle;
+	UPROPERTY(Replicated)
+	bool bIsAutoMoving = false;
+
+	void AutoMoveTick();
+	
+	UFUNCTION(Client, Reliable)
+	void Client_StartAutoMoveForward();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StopAutoMoveForward();
+
 };
