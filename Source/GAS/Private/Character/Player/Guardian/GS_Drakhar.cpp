@@ -551,6 +551,7 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 				FGS_StatRow Stat;
 				Stat.ATK = 50.f;
 				GetStatComp()->ResetStat(Stat);
+				MulticastRPC_OnFeverModeEnd();
 			}
 
 			IsFeverMode = false;
@@ -623,6 +624,7 @@ void AGS_Drakhar::StartFeverMode()
 	GetStatComp()->ChangeStat(Stat);
 	MulticastRPCFeverMontagePlay();
 	MulticastPlayFeverModeStartSound();
+	MulticastRPC_OnFeverModeStart();
 }
 
 void AGS_Drakhar::DecreaseFeverGauge()
@@ -818,9 +820,31 @@ void AGS_Drakhar::MulticastRPC_OnEarthquakeStart_Implementation()
 	if (VFXComponent) VFXComponent->OnEarthquakeStart();
 }
 
+void AGS_Drakhar::MulticastRPC_OnFeverModeStart_Implementation()
+{
+	if (VFXComponent) VFXComponent->OnFeverModeChanged(true);
+	BP_OnFeverModeStart();
+}
+
+void AGS_Drakhar::MulticastRPC_OnFeverModeEnd_Implementation()
+{
+	if (VFXComponent) VFXComponent->OnFeverModeChanged(false);
+	BP_OnFeverModeEnd();
+}
+
 void AGS_Drakhar::OnRep_IsFeverMode()
 {
 	if (VFXComponent) VFXComponent->OnFeverModeChanged(IsFeverMode);
+	
+	// 클라이언트에서도 블루프린트 이벤트 호출
+	if (IsFeverMode)
+	{
+		BP_OnFeverModeStart();
+	}
+	else
+	{
+		BP_OnFeverModeEnd();
+	}
 }
 
 void AGS_Drakhar::MulticastRPC_PlayAttackHitVFX_Implementation(FVector ImpactPoint)
