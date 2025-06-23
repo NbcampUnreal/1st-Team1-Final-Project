@@ -31,7 +31,6 @@ void UGS_ArrowFXComponent::BeginPlay()
 	
 	OwnerActor = GetOwner();
 	
-	// 화살이 스폰될 때 자동으로 트레일 VFX를 시작하지 않도록 변경
 	// if (OwnerActor && OwnerActor->HasAuthority())
 	// {
 	// 	Multicast_StartArrowTrailVFX(EArrowType::Normal);
