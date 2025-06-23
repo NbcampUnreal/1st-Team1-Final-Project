@@ -26,8 +26,10 @@ struct FUnitGroup
 	TArray<AGS_Monster*> Units;
 };
 
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, const TArray<AGS_Monster*>&, NewSelection);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRTSCommandChanged, ERTSCommand, NewCommand);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedUnitsSkillChanged, bool, bAnyUnitHasSkill);
 
 UCLASS()
 class GAS_API AGS_RTSController : public APlayerController
@@ -86,9 +88,12 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Command")
 	FOnRTSCommandChanged OnRTSCommandChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Selection")
+	FOnSelectedUnitsSkillChanged OnSelectedUnitsSkillChanged;
+
 	// UI 반응 사운드
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandButtonSound;
+	UAkAudioEvent* CommandButtonSound; 
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	UAkAudioEvent* CommandCancelSound;
@@ -194,6 +199,8 @@ public:
 	// UI 버튼 클릭 함수
 	UFUNCTION(BlueprintCallable, Category="RTS")
 	void OnEscapeButtonClicked();
+
+	bool HasAnySelectedUnitSkill() const;
 
 protected:
 	virtual void BeginPlay() override;

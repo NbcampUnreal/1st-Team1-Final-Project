@@ -5,6 +5,7 @@
 #include "AI/RTS/GS_RTSController.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
@@ -67,6 +68,22 @@ void UGS_UnitSelection::HandleSelectionChanged(const TArray<AGS_Monster*>& NewSe
 
 			OnDebuffChanged(DebuffComp->GetDebuffList()); 
 		}
+
+		if (UGS_MonsterSkillComp* SkillComp = Monster->GetMonsterSkillComp())
+		{
+			if (BoundSkillComp != SkillComp)
+			{
+				if (BoundSkillComp.IsValid()) 
+				{
+					BoundSkillComp->OnMonsterSkillCooldownChanged.RemoveAll(this);
+				}
+
+				SkillComp->OnMonsterSkillCooldownChanged.AddDynamic(this, &UGS_UnitSelection::OnSkillCooldownChanged);
+				BoundSkillComp = SkillComp;
+
+				OnSkillCooldownChanged(SkillComp->GetSkillCooldownRemaining(), SkillComp->GetSkillMaxCooltime());
+			}
+		}
 	}
 	else
 	{
@@ -116,4 +133,22 @@ void UGS_UnitSelection::OnDebuffChanged(const TArray<FDebuffRepInfo>& List)
 AGS_RTSController* UGS_UnitSelection::GetRTSController() const
 {
 	return Cast<AGS_RTSController>(GetOwningPlayer());
+}
+
+void UGS_UnitSelection::OnSkillCooldownChanged(float CooldownRemaining, float TotalCooldown)
+{
+	if (!SkillCooldownText)
+	{
+		return;
+	}
+
+	if (CooldownRemaining <= 0.0f)
+	{
+		SkillCooldownText->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		SkillCooldownText->SetText(FText::FromString(FString::Printf(TEXT("%d"), FMath::RoundToInt(CooldownRemaining))));
+		SkillCooldownText->SetVisibility(ESlateVisibility::Visible);
+	}
 }

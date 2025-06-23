@@ -10,6 +10,7 @@
 class UGS_MiniPortrait;
 class UGS_StatComp;
 class UGS_DebuffComp;
+class UGS_MonsterSkillComp;
 /**
  * 
  */
@@ -41,6 +42,9 @@ protected:
 
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* DebuffText;
+
+	UPROPERTY(meta=(BindWidget))
+	UTextBlock* SkillCooldownText;
 	
 	UPROPERTY(meta=(BindWidget))
 	class UUniformGridPanel* MultiIconsGrid;
@@ -51,15 +55,19 @@ protected:
 private:
 	TWeakObjectPtr<UGS_StatComp> BoundStatComp;
 	TWeakObjectPtr<UGS_DebuffComp> BoundDebuffComp;
+	TWeakObjectPtr<UGS_MonsterSkillComp> BoundSkillComp;
 	
 	UFUNCTION()
 	void HandleSelectionChanged(const TArray<AGS_Monster*>& NewSelection);
 
-	UFUNCTION()          
+	UFUNCTION()
 	void OnHPChanged(UGS_StatComp* InStatComp);
 
 	UFUNCTION()          
 	void OnDebuffChanged(const TArray<FDebuffRepInfo>& List);
-	
+
 	class AGS_RTSController* GetRTSController() const;
+
+	UFUNCTION()
+	void OnSkillCooldownChanged(float CooldownRemaining, float TotalCooldown);
 };
