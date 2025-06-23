@@ -78,18 +78,6 @@ void AGS_RTSController::BeginPlay()
 			Seeker->HPTextWidgetComp->SetVisibility(true);
 		}
 	}
-
-	// RTS 모드에서 BGM 시작 (로컬 플레이어에게만)
-	if (IsLocalController())
-	{
-		if (UGameInstance* GameInstance = GetGameInstance())
-		{
-			if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
-			{
-				AudioManager->StartMapBGM(this);
-			}
-		}
-	}
 }
 
 void AGS_RTSController::SetupInputComponent()
