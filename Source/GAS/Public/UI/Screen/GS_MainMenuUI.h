@@ -13,6 +13,8 @@ class UUserWidget;
 class UButton;
 class UTextBlock;
 class UCanvasPanel;
+class UOverlay;
+class UGS_JoinFriendListWidget;
 
 UCLASS()
 class GAS_API UGS_MainMenuUI : public UUserWidget
@@ -34,9 +36,17 @@ public:
 	UUserWidget* GuardianButton;
 	UPROPERTY(meta = (BindWidget))
 	UUserWidget* CustomGameButton;
-
+	UPROPERTY(meta = (BindWidget))
+	UUserWidget* FriendListButton;
+	UPROPERTY(meta = (BindWidget))
+	UOverlay* FriendListOverlay;
 	UPROPERTY(meta = (BindWidget))
 	UGS_CommonTwoBtnPopup* ExitPopUp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Friend")
+	TSubclassOf<UGS_JoinFriendListWidget> FriendListWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UGS_JoinFriendListWidget> FriendListWidgetInstance;
 
 	bool bIsPlayButtonClicked = false;
 
@@ -49,7 +59,9 @@ public:
 	
 	void OnExitPopupYesButtonClicked();
 	void OnExitPopupNoButtonClicked();
-	
+	UFUNCTION()
+	void OnFriendListButtonClicked();
+
 protected:
 	virtual void NativeConstruct() override;
 };

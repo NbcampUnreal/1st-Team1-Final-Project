@@ -139,7 +139,6 @@ void UGS_FriendListWidget::HandleRefreshButtonClicked()
 
 void UGS_FriendListWidget::HandleCloseButtonClicked()
 {
-    UE_LOG(LogTemp, Log, TEXT("FriendListWidget: Close button clicked."));
     if (UOverlay* ParentOverlay = Cast<UOverlay>(GetParent()))
     {
         ParentOverlay->SetVisibility(ESlateVisibility::Collapsed);
@@ -171,7 +170,6 @@ void UGS_FriendListWidget::OnReadFriendsListComplete(int32 LocalUserNum, bool bW
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("Failed to read friends list: %s"), *ErrorStr);
         ClearFriendList();
     }
 }
