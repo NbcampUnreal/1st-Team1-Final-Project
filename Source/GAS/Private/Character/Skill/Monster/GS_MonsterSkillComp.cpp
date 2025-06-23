@@ -25,8 +25,7 @@ void UGS_MonsterSkillComp::BeginPlay()
 void UGS_MonsterSkillComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(UGS_MonsterSkillComp, bIsOnCooldown);
+	
 	DOREPLIFETIME(UGS_MonsterSkillComp, CooldownRemaining);
 	DOREPLIFETIME(UGS_MonsterSkillComp, SkillCooltime);
 	DOREPLIFETIME(UGS_MonsterSkillComp, SkillDamage);
@@ -50,7 +49,7 @@ void UGS_MonsterSkillComp::SetSkill()
 	{
 		SkillInstance->InitSkill(OwnerMonster);
 		
-		SkillCooltime = SkillInstance->Cooltime;
+		SkillCooltime = SkillInstance->Cooltime; 
 		SkillDamage = SkillInstance->Damage;
 	}
 }
@@ -89,6 +88,8 @@ void UGS_MonsterSkillComp::TryActivateSkill()
 
 void UGS_MonsterSkillComp::StartCooldown(float CooldownTime)
 {
+	UE_LOG(LogTemp, Warning, TEXT("MonsterSkillComp: StartCooldown %.1f"), CooldownTime);
+	
 	if (CooldownTime <= 0.0f)
 	{
 		return;
@@ -100,33 +101,43 @@ void UGS_MonsterSkillComp::StartCooldown(float CooldownTime)
 	// 쿨다운 타이머 
 	GetWorld()->GetTimerManager().SetTimer(
 		CooldownTimer,
-		[this]()
-		{
-			bIsOnCooldown = false;
-			CooldownRemaining = 0.0f;
-		},
+		this,
+		&UGS_MonsterSkillComp::CooldownFinished,
 		CooldownTime,
 		false
 	);
 
 	// UI 타이머
-	FTimerHandle UIUpdateTimer;
 	GetWorld()->GetTimerManager().SetTimer(
 		UIUpdateTimer,
-		[this]()
-		{
-			UpdateCooldownRemaining();
-		},
-		0.1f,
+		this,
+	   &UGS_MonsterSkillComp::BroadcastCooldownUpdate,
+		1.0f,
 		true
 	);
+
+	BroadcastCooldownUpdate();
 }
 
-void UGS_MonsterSkillComp::UpdateCooldownRemaining()
+void UGS_MonsterSkillComp::CooldownFinished()
 {
-	if (bIsOnCooldown)
+	bIsOnCooldown = false;
+	CooldownRemaining = 0.0f;
+	GetWorld()->GetTimerManager().ClearTimer(UIUpdateTimer); 
+	BroadcastCooldownUpdate();
+}
+
+void UGS_MonsterSkillComp::BroadcastCooldownUpdate()
+{
+	CooldownRemaining = GetWorld()->GetTimerManager().GetTimerRemaining(CooldownTimer);
+	CooldownRemaining = FMath::Max(0.0f, CooldownRemaining); 
+}
+
+void UGS_MonsterSkillComp::OnRep_CooldownRemaining()
+{
+	if (!GetOwner()->HasAuthority())
 	{
-		CooldownRemaining = GetWorld()->GetTimerManager().GetTimerRemaining(CooldownTimer);
-		CooldownRemaining = FMath::Max(0.0f, CooldownRemaining);
+		OnMonsterSkillCooldownChanged.Broadcast(CooldownRemaining, SkillCooltime);
+		UE_LOG(LogTemp, Log, TEXT("UGS_MonsterSkillComp::OnRep_CooldownRemaining : %.1f / %.1f"), CooldownRemaining, SkillCooltime);
 	}
 }

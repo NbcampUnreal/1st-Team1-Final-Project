@@ -97,6 +97,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Data")
 	FText GetTypeName() const { return MonsterData ? MonsterData->TypeName : FText::GetEmpty(); }
 
+	FORCEINLINE UGS_MonsterSkillComp* GetMonsterSkillComp() const { return MonsterSkillComp; }
+
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	virtual void UseSkill(); 
 	
