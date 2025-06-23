@@ -19,6 +19,7 @@
 #include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "Sound/GS_MonsterAudioComponent.h"
 #include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Components/WidgetComponent.h"
 
 
 AGS_Monster::AGS_Monster()
@@ -31,6 +32,10 @@ AGS_Monster::AGS_Monster()
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>("SelectionDecal");
 	SelectionDecal->SetupAttachment(RootComponent);
 	SelectionDecal->SetVisibility(false);
+
+	SkillCooldownWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SkillCooldownWidgetComp"));
+	SkillCooldownWidgetComp->SetupAttachment(RootComponent);
+	SkillCooldownWidgetComp->SetVisibility(false);
 
 	AkComponent = CreateDefaultSubobject<UAkComponent>("AkComponent");
 	AkComponent->SetupAttachment(RootComponent);
@@ -66,6 +71,11 @@ AGS_Monster::AGS_Monster()
 void AGS_Monster::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	if (IsValid(MonsterSkillComp))
+	{
+		MonsterSkillComp->OnMonsterSkillCooldownChanged.AddDynamic(this, &AGS_Monster::HandleSkillCooldownChanged);
+	}
 }
 
 void AGS_Monster::PostInitializeComponents()
@@ -150,10 +160,31 @@ void AGS_Monster::SetSelected(bool bIsSelected, bool bPlaySound)
 	}
 }
 
+void AGS_Monster::UseSkill()
+{	
+}
+
 void AGS_Monster::SetCanUseSkill(bool bCanUse)
 {
-	// TODO : 몬스터 스킬 컴포넌트 추가되면 수정하기 
-	Super::SetCanUseSkill(bCanUse);
+	if (MonsterSkillComp)
+	{
+		MonsterSkillComp->SetCanUseSkill(bCanUse);
+	}
+}
+
+void AGS_Monster::HandleSkillCooldownChanged(float InCurrentCoolTime, float InMaxCoolTime)
+{
+	if (SkillCooldownWidgetComp)
+	{
+		if (InCurrentCoolTime > 0.0f)
+		{
+			SkillCooldownWidgetComp->SetVisibility(true);
+		}
+		else
+		{
+			SkillCooldownWidgetComp->SetVisibility(false);
+		}
+	}
 }
 
 void AGS_Monster::Attack()
@@ -169,6 +200,3 @@ void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 	MonsterAnim->Montage_Play(AttackMontage);
 }
 
-void AGS_Monster::UseSkill()
-{	
-}

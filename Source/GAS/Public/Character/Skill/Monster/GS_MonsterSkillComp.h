@@ -34,9 +34,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	float GetSkillMaxCooltime() const { return SkillCooltime; }
 
+	void SetCanUseSkill(bool InCanUseSkill);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:    
 	UPROPERTY()
@@ -56,6 +59,9 @@ private:
 
 	UPROPERTY(Replicated)
 	float SkillDamage;
+
+	UPROPERTY(Replicated)
+	bool bCanUseSkill;
 
 	UFUNCTION()
 	void OnRep_CooldownRemaining();

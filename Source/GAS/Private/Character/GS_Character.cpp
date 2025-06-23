@@ -77,9 +77,14 @@ void AGS_Character::Tick(float DeltaTime)
 
 	if (IsValid(HPTextWidgetComp) && !HasAuthority())
 	{
-		FVector WidgetComponentLocation = HPTextWidgetComp->GetComponentLocation();
-		FVector LocalPlayerCameraLocation = UGameplayStatics::GetPlayerCameraManager(this, 0)->GetCameraLocation();
-		HPTextWidgetComp->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(WidgetComponentLocation, LocalPlayerCameraLocation));
+		APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
+		
+		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+        
+		HPTextWidgetComp->SetWorldRotation(WidgetRotation);
 	}
 }
 

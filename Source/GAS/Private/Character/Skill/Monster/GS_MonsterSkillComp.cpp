@@ -7,8 +7,9 @@
 UGS_MonsterSkillComp::UGS_MonsterSkillComp()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-}
 
+	bCanUseSkill = true;
+}
 
 void UGS_MonsterSkillComp::BeginPlay()
 {
@@ -54,7 +55,10 @@ void UGS_MonsterSkillComp::SetSkill()
 	}
 }
 
-
+void UGS_MonsterSkillComp::SetCanUseSkill(bool InCanUseSkill)
+{
+	bCanUseSkill = InCanUseSkill;
+}
 
 void UGS_MonsterSkillComp::TryActivateSkill()
 {
@@ -66,6 +70,12 @@ void UGS_MonsterSkillComp::TryActivateSkill()
 	if (bIsOnCooldown)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("MonsterSkillComp: Skill is on cooldown (%.1f remaining)"), CooldownRemaining);
+		return;
+	}
+
+	if (!bCanUseSkill)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TryActivateSkill failed: bCanUseSkill = false"));
 		return;
 	}
 	
@@ -97,12 +107,18 @@ void UGS_MonsterSkillComp::StartCooldown(float CooldownTime)
 
 	bIsOnCooldown = true;
 	CooldownRemaining = CooldownTime;
-    
+	
 	// 쿨다운 타이머 
+	TWeakObjectPtr<UGS_MonsterSkillComp> WeakThis = this;
 	GetWorld()->GetTimerManager().SetTimer(
 		CooldownTimer,
-		this,
-		&UGS_MonsterSkillComp::CooldownFinished,
+		[WeakThis]()
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->CooldownFinished();
+			}
+		},
 		CooldownTime,
 		false
 	);
@@ -110,8 +126,13 @@ void UGS_MonsterSkillComp::StartCooldown(float CooldownTime)
 	// UI 타이머
 	GetWorld()->GetTimerManager().SetTimer(
 		UIUpdateTimer,
-		this,
-	   &UGS_MonsterSkillComp::BroadcastCooldownUpdate,
+		[WeakThis]()
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->BroadcastCooldownUpdate();
+			}
+		},
 		1.0f,
 		true
 	);
@@ -139,5 +160,16 @@ void UGS_MonsterSkillComp::OnRep_CooldownRemaining()
 	{
 		OnMonsterSkillCooldownChanged.Broadcast(CooldownRemaining, SkillCooltime);
 		UE_LOG(LogTemp, Log, TEXT("UGS_MonsterSkillComp::OnRep_CooldownRemaining : %.1f / %.1f"), CooldownRemaining, SkillCooltime);
+	}
+}
+
+void UGS_MonsterSkillComp::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(CooldownTimer);
+		GetWorld()->GetTimerManager().ClearTimer(UIUpdateTimer);
 	}
 }
