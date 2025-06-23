@@ -24,13 +24,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, Category="Components")
-	UBoxComponent* SlashBoxA;
-
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	UBoxComponent* SlashBoxB;
-
-	UPROPERTY(VisibleAnywhere, Category = "Components")
-	USphereComponent* CenterSphere;
+	UBoxComponent* SlashBox;
 
 	UPROPERTY()
 	TSet<AActor*> HitActors;
@@ -44,15 +38,9 @@ protected:
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 		const FHitResult& SweepResult);
 
-	UFUNCTION()
-	void OnCenterSphereOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-		const FHitResult& SweepResult);
-
 	FTimerHandle DestorySwordAuraHandle;
 	float SwordAuraLifetime = 1.0f;
 
 	UFUNCTION()
-	void DestroySwordAura();
-	
+	void DestroySwordAura();	
 };
