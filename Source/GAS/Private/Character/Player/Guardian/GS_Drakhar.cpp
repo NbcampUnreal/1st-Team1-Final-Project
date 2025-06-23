@@ -19,6 +19,7 @@
 #include "Character/Component/GS_CameraShakeComponent.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Component/GS_FootManagerComponent.h"
+#include "Character/Skill/Guardian/Drakhar/GS_EarthquakeEffect.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_DrakharFeverGauge.h"
@@ -426,6 +427,14 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 
 	const FVector Start = GetActorLocation() + 100.f;
 	TSet<AGS_Character*> EarthquakeDamagedCharacters = DetectPlayerInRange(Start, 200.f, EarthquakeRadius);
+
+	//[Test Land Destruction]
+	{
+		FVector SpawnLocation = Start + GetActorForwardVector() * 300.f;
+		AGS_EarthquakeEffect* GC_Earthquake = GetWorld()->SpawnActor<AGS_EarthquakeEffect>(GC_EarthquakeEffect, SpawnLocation + FVector(0.f,0.f,-200.f), GetActorRotation());
+		GC_Earthquake->SetOwner(this);
+		GC_Earthquake->MulticastTriggerDestruction(SpawnLocation, EarthquakeRadius, 3000.f);
+	}
 	
 	for (const auto& DamagedCharacter : EarthquakeDamagedCharacters)
 	{
@@ -444,10 +453,14 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			{
 				MulticastPlayEarthquakeImpactVFX(DamagedCharacter->GetActorLocation());
 			}
+			
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
 			MulticastPlayAttackHitSound();
 
+			// === 어스퀘이크 스킬 히트 사운드 재생 ===
+			//PlayAttackHitSound();
+			
 			FVector DrakharLocation = GetActorLocation();
 			FVector DamagedLocation = DamagedCharacter->GetActorLocation();
 
@@ -516,8 +529,7 @@ void AGS_Drakhar::SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGauge
 	{
 		//client
 		DrakharFeverGaugeWidget->InitializeGauge(GetCurrentFeverGauge());
-		OnCurrentFeverGaugeChanged.AddUObject(DrakharFeverGaugeWidget,
-		                                     &UGS_DrakharFeverGauge::OnCurrentFeverGaugeChanged);
+		OnCurrentFeverGaugeChanged.AddUObject(DrakharFeverGaugeWidget ,&UGS_DrakharFeverGauge::OnCurrentFeverGaugeChanged);
 	}
 }
 
@@ -539,6 +551,7 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 				FGS_StatRow Stat;
 				Stat.ATK = 50.f;
 				GetStatComp()->ResetStat(Stat);
+				MulticastRPC_OnFeverModeEnd();
 			}
 
 			IsFeverMode = false;
@@ -611,6 +624,7 @@ void AGS_Drakhar::StartFeverMode()
 	GetStatComp()->ChangeStat(Stat);
 	MulticastRPCFeverMontagePlay();
 	MulticastPlayFeverModeStartSound();
+	MulticastRPC_OnFeverModeStart();
 }
 
 void AGS_Drakhar::DecreaseFeverGauge()
@@ -806,9 +820,31 @@ void AGS_Drakhar::MulticastRPC_OnEarthquakeStart_Implementation()
 	if (VFXComponent) VFXComponent->OnEarthquakeStart();
 }
 
+void AGS_Drakhar::MulticastRPC_OnFeverModeStart_Implementation()
+{
+	if (VFXComponent) VFXComponent->OnFeverModeChanged(true);
+	BP_OnFeverModeStart();
+}
+
+void AGS_Drakhar::MulticastRPC_OnFeverModeEnd_Implementation()
+{
+	if (VFXComponent) VFXComponent->OnFeverModeChanged(false);
+	BP_OnFeverModeEnd();
+}
+
 void AGS_Drakhar::OnRep_IsFeverMode()
 {
 	if (VFXComponent) VFXComponent->OnFeverModeChanged(IsFeverMode);
+	
+	// 클라이언트에서도 블루프린트 이벤트 호출
+	if (IsFeverMode)
+	{
+		BP_OnFeverModeStart();
+	}
+	else
+	{
+		BP_OnFeverModeEnd();
+	}
 }
 
 void AGS_Drakhar::MulticastRPC_PlayAttackHitVFX_Implementation(FVector ImpactPoint)

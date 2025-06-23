@@ -15,6 +15,8 @@ class UNiagaraSystem;
 class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UAkAudioEvent;
+class AGS_EarthquakeEffect;
+struct FGS_CameraShakeInfo;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFeverGaugeChangedDelegate, float);
 
@@ -28,6 +30,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AGS_EarthquakeEffect> GC_EarthquakeEffect;
 	
 	//[combo attack variables]
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing=OnRep_CanCombo)
@@ -158,6 +163,8 @@ public:
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFlyEnd();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnUltimateStart();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnEarthquakeStart();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFeverModeStart();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFeverModeEnd();
 	
 	// === Blueprint Events ===
 	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Fly", meta = (DisplayName = "On Fly Start"))
@@ -168,6 +175,10 @@ public:
 	void BP_OnUltimateStart();
 	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Earthquake", meta = (DisplayName = "On Earthquake Start"))
 	void BP_OnEarthquakeStart();
+	UFUNCTION(BlueprintImplementableEvent, Category = "FeverMode", meta = (DisplayName = "On Fever Mode Start"))
+	void BP_OnFeverModeStart();
+	UFUNCTION(BlueprintImplementableEvent, Category = "FeverMode", meta = (DisplayName = "On Fever Mode End"))
+	void BP_OnFeverModeEnd();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))

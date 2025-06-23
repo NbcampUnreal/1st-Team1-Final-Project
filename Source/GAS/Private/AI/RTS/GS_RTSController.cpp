@@ -14,6 +14,8 @@
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/Skill/Monster/GS_MonsterSkillBase.h"
+#include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "Sound/GS_AudioManager.h"
 
@@ -241,6 +243,7 @@ void AGS_RTSController::OnCommandSkill(const FInputActionValue& Value)
 void AGS_RTSController::SkillSelectedUnits()
 {
 	CurrentCommand = ERTSCommand::Skill;
+	OnRTSCommandChanged.Broadcast(CurrentCommand);
 
 	TArray<AGS_Monster*> Commandables;
 	GatherCommandableUnits(Commandables);
@@ -545,6 +548,7 @@ void AGS_RTSController::AddUnitToSelection(AGS_Monster* Unit)
 	
 	UnitSelection.AddUnique(Unit);
 	OnSelectionChanged.Broadcast(UnitSelection);
+	OnSelectedUnitsSkillChanged.Broadcast(HasAnySelectedUnitSkill()); 
 	Unit->SetSelected(true, bShouldPlaySound);
 }
 
@@ -586,6 +590,7 @@ void AGS_RTSController::AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& 
 	}
 	
 	OnSelectionChanged.Broadcast(UnitSelection);
+	OnSelectedUnitsSkillChanged.Broadcast(HasAnySelectedUnitSkill()); 
 }
 
 void AGS_RTSController::SelectSameTypeFromSelection(AGS_Monster* Unit)
@@ -626,6 +631,7 @@ void AGS_RTSController::RemoveUnitFromSelection(AGS_Monster* Unit)
 	
 	UnitSelection.Remove(Unit);
 	OnSelectionChanged.Broadcast(UnitSelection);
+	OnSelectedUnitsSkillChanged.Broadcast(HasAnySelectedUnitSkill()); 
 	Unit->SetSelected(false);
 }
 
@@ -643,6 +649,7 @@ void AGS_RTSController::ClearUnitSelection()
 	
 	UnitSelection.Empty();
 	OnSelectionChanged.Broadcast(UnitSelection);
+	OnSelectedUnitsSkillChanged.Broadcast(HasAnySelectedUnitSkill()); 
 }
 
 
@@ -892,6 +899,19 @@ void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*
 	}
 }
 
+
+bool AGS_RTSController::HasAnySelectedUnitSkill() const
+{
+	for (AGS_Monster* SelectedMonster : UnitSelection)
+	{
+		UGS_MonsterSkillComp* SkillComp = SelectedMonster->GetMonsterSkillComp();
+		if (SkillComp && SkillComp->MonsterSkill)
+		{
+			return true; 
+		}
+	}
+	return false; 
+}
 
 void AGS_RTSController::GatherCommandableUnits(TArray<AGS_Monster*>& Out) const
 {

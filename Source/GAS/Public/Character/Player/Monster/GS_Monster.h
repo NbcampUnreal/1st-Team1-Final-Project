@@ -10,6 +10,7 @@
 #include "Sound/GS_MonsterAudioComponent.h"
 #include "GS_Monster.generated.h"
 
+class UWidgetComponent;
 class UGS_MonsterSkillComp;
 class UGS_MonsterAnimInstance;
 class UGS_DebuffVFXComponent;
@@ -53,6 +54,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category="Dead")
 	FOnMonsterDead OnMonsterDead;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
+	TObjectPtr<UWidgetComponent> SkillCooldownWidgetComp;
 	
 	// 전투 음악 관련 (BGM 이벤트만 유지, 트리거는 제거)
 	UPROPERTY(EditAnywhere, Category = "Combat")
@@ -97,6 +101,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Data")
 	FText GetTypeName() const { return MonsterData ? MonsterData->TypeName : FText::GetEmpty(); }
 
+	FORCEINLINE UGS_MonsterSkillComp* GetMonsterSkillComp() const { return MonsterSkillComp; }
+
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	virtual void UseSkill(); 
 	
@@ -119,4 +125,7 @@ protected:
 
 	void HandleDelayedDestroy();
 	virtual void OnDeath() override;
+
+	UFUNCTION()
+	void HandleSkillCooldownChanged(float InCurrentCoolTime, float InMaxCoolTime);
 }; 
