@@ -206,7 +206,7 @@ void AGS_Chan::Client_ChanAimingSkillBar_Implementation(bool bShow)
 
 void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float InRadius, FColor InColor, float InLifetime)
 {
-	DrawDebugSphere(
+	/*DrawDebugSphere(
 		GetWorld(),
 		InLocation,
 		InRadius,
@@ -214,21 +214,7 @@ void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float
 		InColor,
 		false,
 		InLifetime
-	);
-}
-
-void AGS_Chan::Multicast_DrawSkillCapsuleRange_Implementation(FVector InLocation, float InHalfRadius, float InRadius, FColor InColor, float InLifetime)
-{
-	DrawDebugCapsule(
-		GetWorld(),
-		InLocation,
-		InHalfRadius,
-		InRadius,
-		this->GetActorQuat(),
-		InColor,
-		false,
-		InLifetime
-	);
+	);*/
 }
 
 UAkComponent* AGS_Chan::GetOrCreateAkComponent()
