@@ -48,8 +48,6 @@ void UGS_AresRollingSkill::DeactiveSkill()
 	{
 		if (OwnerPlayer->HasAuthority())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("RollingSkill Deactive in Server %s"), *UEnum::GetValueAsString(OwnerPlayer->GetLocalRole())); // SJE
-			
 			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->ComboInputOpen();
 			OwnerPlayer->SetSkillInputControl(true, true, true);

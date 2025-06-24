@@ -33,15 +33,14 @@ void UGS_ChanAimingSkill::ActiveSkill()
 		OwnerPlayer->CurrentComboIndex = 0;
 		
 		// Control Input Key
-		OwnerPlayer->SetSkillInputControl(true, false, true); // SJE
+		OwnerPlayer->SetSkillInputControl(false, false, true); // SJE
 		// Change Slot
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(true);
 		OwnerPlayer->Multicast_SetMustTurnInPlace(true);
 		OwnerPlayer->SetSeekerGait(EGait::Walk);
 
 		// Play Montage
-		UE_LOG(LogTemp, Warning, TEXT("ChanAimingSkill::ActiveSkill")); //SJE
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 		OwnerPlayer->CanChangeSeekerGait = false;
 		
@@ -93,7 +92,7 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 			// Change Slot
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 			OwnerPlayer->SetLookControlValue(true, true);
-			OwnerPlayer->SetSeekerGait(OwnerPlayer->GetLastSeekerGait()); // SJE
+			OwnerPlayer->SetSeekerGait(OwnerPlayer->GetLastSeekerGait());
 			// Change Slot
 			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);

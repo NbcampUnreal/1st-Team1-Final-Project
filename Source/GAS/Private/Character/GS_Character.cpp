@@ -111,7 +111,6 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		FVector HitDirection = -PointEvent->ShotDirection;
 		if(UGS_HitReactComp* HitReactComponent = GetComponentByClass<UGS_HitReactComp>())
 		{
-			//HitReactComponent->PlayHitReact(EHitReactType::Additive, HitDirection); // SJE
 			HitReactComponent->PlayHitReact(EHitReactType::Interrupt, HitDirection);
 		}
 	}

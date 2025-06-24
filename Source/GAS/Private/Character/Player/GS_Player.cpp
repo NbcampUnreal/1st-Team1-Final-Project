@@ -298,12 +298,10 @@ void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage
 	{
 		if (Section == NAME_None)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Multicast_PlaySkillMontage %s"), *UEnum::GetValueAsString(GetLocalRole())); //SJE
 			AnimInstance->Montage_Play(Montage);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Multicast_PlaySkillMontage section %s"), *UEnum::GetValueAsString(GetLocalRole())); //SJE
 			if (AnimInstance->Montage_IsPlaying(Montage))
 			{
 				AnimInstance->Montage_Stop(0.0f, Montage); // 이걸 꼭 해줘야 새로 PlayRate가 반영됨
