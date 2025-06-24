@@ -26,6 +26,8 @@
 #include "Character/Component/GS_DebuffVFXComponent.h"
 #include "Animation/Character/Seeker/GS_ChooserInputObj.h"
 #include "Character/GS_TpsController.h"
+#include "Character/Skill/GS_SkillComp.h"
+#include "Character/Skill/GS_SkillBase.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -440,6 +442,17 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, CanAcceptComboInput);
 	DOREPLIFETIME(AGS_Seeker, CurrentComboIndex);
 	DOREPLIFETIME(AGS_Seeker, bComboEnded);
+}
+
+void AGS_Seeker::CallOnSkillAnimationEnd()
+{
+	for(int i=0; i<=(int)ESkillSlot::Rolling; i++)
+	{
+		if (GetSkillComp()->GetSkillFromSkillMap((ESkillSlot)i)->IsActive())
+		{
+			GetSkillComp()->GetSkillFromSkillMap((ESkillSlot)i)->OnSkillAnimationEnd();
+		}
+	}
 }
 
 void AGS_Seeker::Server_SetLookControlValue_Implementation(bool bLookUp, bool bLookRight)

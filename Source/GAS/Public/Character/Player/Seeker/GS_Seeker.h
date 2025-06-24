@@ -130,6 +130,9 @@ public:
 	// Replication Set
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	// Notify
+	void CallOnSkillAnimationEnd();
+
 public:
 	// Weapon
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
