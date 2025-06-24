@@ -686,3 +686,16 @@ void AGS_Merci::Multicast_PlayArrowEmptySound_Implementation()
 	}
 }
 
+void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
+{
+	// 타격 피드백 사운드는 화살을 쏜 플레이어에게만 재생
+	if (HitFeedbackSound && IsLocallyControlled())
+	{
+		UAkGameplayStatics::PostEvent(HitFeedbackSound, this, 0, FOnAkPostEventCallback());
+	}
+	else if (!HitFeedbackSound)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Client_PlayHitFeedbackSound_Implementation: HitFeedbackSound is null"));
+	}
+}
+
