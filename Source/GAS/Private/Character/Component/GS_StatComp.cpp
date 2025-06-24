@@ -158,7 +158,10 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 	//healing
 	if (bIsHealing)
 	{
-		
+		if (CurrentHealth > MaxHealth)
+		{
+			CurrentHealth = MaxHealth;
+		}
 	}
 	//damaged
 	else

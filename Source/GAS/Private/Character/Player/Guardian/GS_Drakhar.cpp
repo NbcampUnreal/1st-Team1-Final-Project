@@ -171,6 +171,24 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 
 }
 
+void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	GetWorldTimerManager().ClearTimer(FeverTimer);
+	GetWorldTimerManager().ClearTimer(ResetAttackTimer);
+	GetWorldTimerManager().ClearTimer(HealthRegenTimer);
+	GetWorldTimerManager().ClearTimer(HealthDelayTimer);
+}
+void AGS_Drakhar::OnDamageStart()
+{
+	//timer start
+	bIsDamaged = true;
+
+	StopHealRegeneration();
+	GetWorld()->GetTimerManager().SetTimer(HealthDelayTimer,this,&AGS_Drakhar::BeginHealRegeneration,5.f,false);
+}
+
 void AGS_Drakhar::Ctrl()
 {
 	if (!HasAuthority() && IsLocallyControlled())
@@ -244,7 +262,7 @@ void AGS_Drakhar::RightMouse()
 {
 	if (IsLocallyControlled())
 	{
-		//ultimate skill (DraconicFury)
+		//ultimate skill
 		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
 		{
 			ServerRPC_BeginDraconicFury();
@@ -455,12 +473,10 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			}
 			
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+			// === 어스퀘이크 스킬 히트 사운드 재생 ===
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
 			MulticastPlayAttackHitSound();
 
-			// === 어스퀘이크 스킬 히트 사운드 재생 ===
-			//PlayAttackHitSound();
-			
 			FVector DrakharLocation = GetActorLocation();
 			FVector DamagedLocation = DamagedCharacter->GetActorLocation();
 
@@ -491,32 +507,29 @@ void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 {
 	MulticastPlayDraconicFurySkillSound();
-
+	
+	FActorSpawnParameters Params;
+	Params.Instigator = this;
+	Params.Owner = this;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
 	if (IsFeverMode)
 	{
 		FeverModeDraconicFurySpawnLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f,0.f, 600.f);
 		FRotator SpawnRotation = GetActorRotation();
 		float RandomPitch = FMath::FRandRange(-35.f, -30.f);
 		SpawnRotation.Pitch += RandomPitch;
-		
-		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(FeverDraconicProjectile, FeverModeDraconicFurySpawnLocation, SpawnRotation);
-		
-		if (DrakharProjectile)
-		{
-			DrakharProjectile->SetOwner(this);
-		}
+		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(FeverDraconicProjectile, FeverModeDraconicFurySpawnLocation, SpawnRotation, Params);
 	}
 	else
 	{
 		GetRandomDraconicFuryTarget();
 
 		int32 Index = FMath::RandRange(0, DraconicFuryTargetArray.Num() - 1);
+		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[Index].GetLocation(), DraconicFuryTargetArray[Index].Rotator(), Params);
 		
-		//spawn meteor
-		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[Index].GetLocation(), DraconicFuryTargetArray[Index].Rotator());
 		if (DrakharProjectile)
 		{
-			DrakharProjectile->SetOwner(this);
 			MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
 		}
 	}
@@ -535,7 +548,7 @@ void AGS_Drakhar::SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGauge
 
 void AGS_Drakhar::SetFeverGauge(float InValue)
 {	
-	//client & server
+	//server
 	if (HasAuthority())
 	{
 		CurrentFeverGauge += InValue;
@@ -572,6 +585,17 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 		
 		OnRep_FeverGauge();
 	}
+}
+
+void AGS_Drakhar::ResetIsAttackingDuringFeverMode()
+{
+	GetWorldTimerManager().ClearTimer(ResetAttackTimer);
+	GetWorldTimerManager().SetTimer(ResetAttackTimer, this, &AGS_Drakhar::StartIsAttackingTimer, 3.f, false);
+}
+
+void AGS_Drakhar::StartIsAttackingTimer()
+{
+	bIsAttckingDuringFever = false;
 }
 
 void AGS_Drakhar::MulticastRPCFeverMontagePlay_Implementation()
@@ -634,7 +658,40 @@ void AGS_Drakhar::DecreaseFeverGauge()
 
 void AGS_Drakhar::MinusFeverGaugeValue()
 {
-	SetFeverGauge(-1.f);
+	if (IsFeverMode)
+	{
+		//공격 유지 안된 경우
+		if (!bIsAttckingDuringFever)
+		{
+			SetFeverGauge(-5.f);
+		}
+	}
+	else
+	{
+		SetFeverGauge(-1.f);
+	}
+}
+
+void AGS_Drakhar::BeginHealRegeneration()
+{
+	bIsDamaged = false;
+	
+	//health regeneration start
+	GetWorld()->GetTimerManager().SetTimer(HealthRegenTimer, this, &AGS_Drakhar::HealRegeneration,1.f,true);
+}
+void AGS_Drakhar::HealRegeneration()
+{
+	if (!bIsDamaged)
+	{
+		float CurrentHealth = GetStatComp()->GetCurrentHealth();
+		GetStatComp()->SetCurrentHealth(CurrentHealth + 2.f, true);
+		//UE_LOG(LogTemp,Warning, TEXT("healing!!!!!!!"));
+	}
+}
+
+void AGS_Drakhar::StopHealRegeneration()
+{
+	GetWorld()->GetTimerManager().ClearTimer(HealthRegenTimer);
 }
 
 void AGS_Drakhar::GetRandomDraconicFuryTarget()

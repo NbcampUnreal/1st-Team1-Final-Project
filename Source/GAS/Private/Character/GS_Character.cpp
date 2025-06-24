@@ -104,6 +104,9 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	float CurrentHealth = StatComp->GetCurrentHealth();
 
+	//when damage input start -> for drakhar 6/24
+	OnDamageStart();
+	
 	// SJE
 	if (CanHitReact && DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
@@ -122,6 +125,11 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	StatComp->SetCurrentHealth(NewHealth, false);
 
 	return ActualDamage;
+}
+
+void AGS_Character::OnDamageStart()
+{
+	//
 }
 
 void AGS_Character::Multicast_SetCanHitReact_Implementation(bool CanReact)
