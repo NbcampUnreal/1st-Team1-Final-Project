@@ -3,6 +3,7 @@
 #include "EngineUtils.h"
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
+#include "UI/DungeonEditor/GS_DungeonEditorWidget.h"
 #include "UI/DungeonEditor/GS_PropWidget.h"
 
 AGS_DEController::AGS_DEController()
@@ -39,10 +40,10 @@ void AGS_DEController::BeginPlay()
 	// Create Widget
 	if (IsLocalController())
 	{
-		PropWidget = CreateWidget<UGS_PropWidget>(this, PropWidgetClass);
-		if (PropWidget)
+		DungeonEditorWidget = CreateWidget<UGS_DungeonEditorWidget>(this, DungeonEditorWidgetClass);
+		if (DungeonEditorWidget)
 		{
-			PropWidget->AddToViewport();
+			DungeonEditorWidget->AddToViewport();
 		}
 	}
 }

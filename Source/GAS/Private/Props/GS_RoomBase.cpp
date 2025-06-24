@@ -3,16 +3,16 @@
 AGS_RoomBase::AGS_RoomBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	SetReplicates(true);
 
 	Floor = CreateDefaultSubobject<UStaticMeshComponent>("Floor");
-	Floor->SetupAttachment(RootComponent);
+	SetRootComponent(Floor);
 	
 	Wall = CreateDefaultSubobject<UStaticMeshComponent>("Wall");
 	Wall->SetupAttachment(Floor);
 
 	Ceiling = CreateDefaultSubobject<UStaticMeshComponent>("Ceiling");
 	Ceiling->SetupAttachment(Floor);
-	
 }
 
 void AGS_RoomBase::BeginPlay()

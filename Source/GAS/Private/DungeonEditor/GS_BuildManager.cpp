@@ -1,9 +1,13 @@
 #include "DungeonEditor/GS_BuildManager.h"
+
+#include "EngineUtils.h"
 #include "Components/BillboardComponent.h"
 #include "Components/DecalComponent.h"
 #include "DungeonEditor/GS_DEController.h"
 #include "DungeonEditor/Component/PlaceInfoComponent.h"
+#include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
+#include "Kismet/GameplayStatics.h"
 #include "Props/Placer/GS_PlacerBase.h"
 
 AGS_BuildManager::AGS_BuildManager()
@@ -28,6 +32,8 @@ AGS_BuildManager::AGS_BuildManager()
 	GridOpacity = 50.0f;
 
 	bIsCellUnderCursorChanged = false;
+
+	CurrentSaveSlotName = TEXT("Preset_0");
 	
 	InitGrid();
 }
@@ -695,4 +701,124 @@ void AGS_BuildManager::ClearDecalType()
 	{
 		DecalMaterialInstance->SetScalarParameterValue("ShowType", 7);
 	}
+}
+
+
+void AGS_BuildManager::SaveDungeonData()
+{
+	// 1. 세이브 객체 인스턴스 생성 또는 로드
+    UGS_DungeonEditorSaveGame* SaveGameObject;
+
+    // UGameplayStatics를 사용해 지정된 슬롯에 세이브 파일이 이미 있는지 확인합니다.
+    if (UGameplayStatics::DoesSaveGameExist(CurrentSaveSlotName, 0))
+    {
+        // 파일이 있다면, 파일로부터 객체를 불러옵니다.
+        SaveGameObject = Cast<UGS_DungeonEditorSaveGame>(UGameplayStatics::LoadGameFromSlot(CurrentSaveSlotName, 0));
+        UE_LOG(LogTemp, Warning, TEXT("Existing SaveGame '%s' found. Loading."), *CurrentSaveSlotName);
+    }
+    else
+    {
+        // 파일이 없다면, 새로운 세이브 객체를 생성합니다.
+        SaveGameObject = Cast<UGS_DungeonEditorSaveGame>(UGameplayStatics::CreateSaveGameObject(UGS_DungeonEditorSaveGame::StaticClass()));
+        UE_LOG(LogTemp, Warning, TEXT("No SaveGame found. Creating new one for slot '%s'."), *CurrentSaveSlotName);
+    }
+
+    // 객체 생성/로드에 실패했다면 함수를 종료합니다. (항상 null 체크!)
+    if (!IsValid(SaveGameObject))
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to create or load SaveGameObject."));
+        return;
+    }
+
+    // 2. 월드의 액터 정보를 수집하여 세이브 객체에 채우기
+    
+    // 이전 데이터를 지우고 새로 채웁니다.
+    SaveGameObject->ClearData();
+
+    // TActorIterator를 사용해 월드에 있는 모든 AMyCube 액터를 순회합니다.
+    // 'GetWorld()'는 현재 게임 월드에 대한 포인터를 반환합니다.
+    for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+    {
+        AActor* CurActor = *ActorItr;
+    	
+        // 액터가 유효하고, 파괴 중인 상태가 아닐 때만 저장합니다.
+        if (IsValid(CurActor)
+        	&& nullptr != CurActor->GetComponentByClass<UPlaceInfoComponent>())
+        {
+            FDESaveData ObjectData;
+            ObjectData.SpawnActorClass = CurActor->GetClass();
+            ObjectData.SpawnTransform = CurActor->GetActorTransform();
+
+            SaveGameObject->AddSaveData(ObjectData);
+        }
+    }
+
+    // 3. 파일에 최종 저장
+    
+    // 데이터가 채워진 세이브 객체를 슬롯에 저장합니다.
+    bool bWasSaved = UGameplayStatics::SaveGameToSlot(SaveGameObject, CurrentSaveSlotName, 0);
+
+    if (bWasSaved)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Game Saved successfully to slot '%s'! Total actors saved: %d"), *CurrentSaveSlotName, SaveGameObject->GetDataCount());
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to save game to slot '%s'."), *CurrentSaveSlotName);
+    }
+}
+
+void AGS_BuildManager::LoadDungeonData()
+{
+	// 1. 세이브 파일 존재 여부 확인
+	if (!UGameplayStatics::DoesSaveGameExist(CurrentSaveSlotName, 0))
+	{
+		UE_LOG(LogTemp, Error, TEXT("SaveGame '%s' does not exist. Cannot load."), *CurrentSaveSlotName);
+		return;
+	}
+
+	// 2. 불러오기 전, 기존에 있던 액터들 제거하기
+	// 이 과정을 생략하면 Load를 누를 때마다 액터들이 중복으로 스폰됩니다.
+	// UE_LOG(LogTemp, Warning, TEXT("Clearing existing actors before loading..."));
+	// for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	// {
+	// 	AActor* CurActor = *ActorItr;
+	// 	if (IsValid(CurActor))
+	// 	{
+	// 		CurActor->Destroy();
+	// 	}
+	// }
+
+	// 3. 파일로부터 데이터 로드 및 형변환(Cast)
+	UGS_DungeonEditorSaveGame* LoadGameObject = Cast<UGS_DungeonEditorSaveGame>(UGameplayStatics::LoadGameFromSlot(CurrentSaveSlotName, 0));
+
+	if (!IsValid(LoadGameObject))
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load SaveGame from slot '%s'. File might be corrupted."), *CurrentSaveSlotName);
+		return;
+	}
+    
+	UE_LOG(LogTemp, Warning, TEXT("SaveGame loaded successfully. Spawning actors..."));
+
+	// 4. 로드한 데이터를 기반으로 월드에 액터 스폰
+	UWorld* World = GetWorld();
+	if (IsValid(World))
+	{
+		// 저장된 배열에 있는 각 데이터에 대해 루프를 돕니다.
+		for (const FDESaveData& ObjectData : LoadGameObject->GetSaveDatas())
+		{
+			// 데이터가 유효한지 한번 더 확인 (클래스 정보가 비어있지 않은지 등)
+			if (ObjectData.SpawnActorClass)
+			{
+				// FActorSpawnParameters는 스폰 시 추가 옵션을 제공합니다.
+				FActorSpawnParameters SpawnParams;
+				// 스폰 시 충돌이 발생하더라도 항상 스폰되도록 설정합니다.
+				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+				World->SpawnActor<AActor>(ObjectData.SpawnActorClass, ObjectData.SpawnTransform, SpawnParams);
+			}
+		}
+	}
+    
+	UE_LOG(LogTemp, Warning, TEXT("Finished spawning %d actors from save file."), LoadGameObject->GetDataCount());
 }
