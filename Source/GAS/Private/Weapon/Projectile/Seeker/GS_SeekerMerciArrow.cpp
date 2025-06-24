@@ -157,6 +157,7 @@ void AGS_SeekerMerciArrow::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, A
 		if (AGS_Merci* MerciPlayer = Cast<AGS_Merci>(GetOwner()))
 		{
 			MerciPlayer->Client_ShowCrosshairHitFeedback();
+			MerciPlayer->Client_PlayHitFeedbackSound();
 		}
 	}
 

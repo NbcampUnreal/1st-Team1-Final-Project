@@ -920,6 +920,17 @@
 								</Action>
 							</ChildrenList>
 						</Event>
+						<Event Name="EV_ArrowHit_UI" ID="{19A9D1EE-8500-4FAB-BEB7-CB13F9A27600}">
+							<ChildrenList>
+								<Action Name="" ID="{376199F7-1F28-4F59-A84A-6E6995B03774}" ShortID="792218936">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="EV_ArrowHit_UI" ID="{F7097B12-ABAD-4CCC-8B71-1218A2C0A2CD}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
 					</ChildrenList>
 				</Folder>
 				<Event Name="EV_Merci_ArrowChange" ID="{E705CDED-3EB0-4631-B23E-66B019AFD271}">
