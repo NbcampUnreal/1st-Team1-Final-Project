@@ -30,7 +30,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	void OnDamageStart() override;
+	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AGS_EarthquakeEffect> GC_EarthquakeEffect;
 	
@@ -53,6 +55,9 @@ public:
 	UPROPERTY()
 	bool bIsAttckingDuringFever;
 	FTimerHandle ResetAttackTimer;
+
+	//[health regeneration]
+	bool bIsDamaged = false;
 	
 	//[Input Binding Function]
 	virtual void Ctrl() override;
@@ -145,6 +150,13 @@ public:
 	void DecreaseFeverGauge();
 	//minus 1 values per one seconds
 	void MinusFeverGaugeValue();
+
+	//[Healing System]
+	FTimerHandle HealthRegenTimer;
+	FTimerHandle HealthDelayTimer;
+	void BeginHealRegeneration();
+	void HealRegeneration();
+	void StopHealRegeneration();
 
 	// === Multicast RPCs delegated to components ===
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboAttackSound();

@@ -37,7 +37,7 @@ void AGS_DrakharProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherAct
 	bool bHitCharacter = false;
 	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
 	
-	if (IsValid(DamagedCharacter))
+	if (IsValid(DamagedCharacter) && !DamagedCharacter->IsA<AGS_Guardian>())
 	{
 		bHitCharacter = true;
 		FDamageEvent DamageEvent;

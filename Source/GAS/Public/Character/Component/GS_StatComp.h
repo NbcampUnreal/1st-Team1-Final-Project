@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound", meta = (ClampMin = "0.0", ClampMax = "5.0"))
 	float HitSoundCooldownTime = 1.75f;
 	
+	UPROPERTY(Replicated)
+	bool bIsInvincible = false;
+	
 	// 쿨다운 체크 함수
 	bool CanPlayHitSound() const;
 
@@ -79,10 +82,7 @@ public:
 	// heal system
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerRPCHeal(float InHealAmount);
-
-	UPROPERTY(Replicated)
-	bool bIsInvincible = false;
-
+	
 protected:
 	float CharacterWalkSpeed;
 
