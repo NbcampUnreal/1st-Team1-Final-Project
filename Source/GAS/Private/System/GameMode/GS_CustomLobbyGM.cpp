@@ -55,6 +55,7 @@ void AGS_CustomLobbyGM::PostLogin(APlayerController* NewPlayer)
     AGS_PlayerState* PS = NewPlayer->GetPlayerState<AGS_PlayerState>();
     if (PS)
     {
+        PlayerReadyStates.Add(PS, false);
         PS->InitializeDefaults();
 
         AGS_SpawnSlot* AvailableSlot = FindAvailableSlotForPlayer(PS);
@@ -82,6 +83,7 @@ void AGS_CustomLobbyGM::RestartPlayer(AController* NewPlayer)
     AGS_PlayerState* PS = NewPlayer->GetPlayerState<AGS_PlayerState>();
     if (PS)
     {
+        PlayerReadyStates.Add(PS, false);
         PS->InitializeDefaults();
 
         AGS_SpawnSlot* AvailableSlot = FindAvailableSlotForPlayer(PS);
@@ -101,6 +103,7 @@ void AGS_CustomLobbyGM::Logout(AController* Exiting)
     AGS_PlayerState* PS = Cast<AGS_PlayerState>(Exiting->PlayerState);
     if (PS)
     {
+        PlayerReadyStates.Remove(PS);
         PlayerToSlotMap.Remove(PS);
         if (AGS_CustomLobbyGS* LGS = GetGameState<AGS_CustomLobbyGS>())
         {
@@ -118,6 +121,10 @@ void AGS_CustomLobbyGM::UpdatePlayerReadyStatus(APlayerState* Player, bool bIsRe
     AGS_PlayerState* GSPlayer = Cast<AGS_PlayerState>(Player);
     if (GSPlayer)
     {
+        if (bool* PlayerStatus = PlayerReadyStates.Find(GSPlayer))
+        {
+            *PlayerStatus = bIsReady;
+        }
         if (AGS_CustomLobbyGS* LGS = GetGameState<AGS_CustomLobbyGS>())
         {
             LGS->UpdatePlayerInList(GSPlayer);
