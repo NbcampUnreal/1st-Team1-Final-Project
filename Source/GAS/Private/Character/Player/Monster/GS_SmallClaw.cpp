@@ -61,7 +61,9 @@ void AGS_SmallClaw::OnAttackBiteboxOverlap(UPrimitiveComponent* OverlappedCompon
 		return;
 	}
 	
-	if (!OtherActor || OtherActor == this)
+	AGS_Character* Damaged = Cast<AGS_Character>(OtherActor);
+	AGS_Character* Attacker = this;
+	if (!Damaged || !Attacker || !Damaged->IsEnemy(Attacker))
 	{
 		return;
 	}

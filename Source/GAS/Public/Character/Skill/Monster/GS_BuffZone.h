@@ -7,6 +7,7 @@
 #include "GS_BuffZone.generated.h"
 
 class AGS_Monster;
+struct FGS_StatRow;
 
 UCLASS()
 class GAS_API AGS_BuffZone : public AActor
@@ -27,6 +28,15 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff")
 	float BuffDuration = 10.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff")
+	float AttackPowerBuff = 30.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff")
+	float DefenseBuff = 30.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff")
+	float AttackSpeedBuff = 0.5f;
 
 private:
 	UPROPERTY()
@@ -37,5 +47,6 @@ private:
 	void ApplyBuffInZone();
 	void ApplyBuff(AGS_Monster* Monster);
 	void RemoveAllBuffs();
+	FGS_StatRow GetBuffStatRow() const;
 
 };

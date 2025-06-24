@@ -2,6 +2,7 @@
 
 
 #include "Character/Skill/Monster/GS_BuffZone.h"
+#include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -61,7 +62,6 @@ void AGS_BuffZone::ApplyBuffInZone()
 		{GetOwner()},
 		OverlappingActors
 	);
-	UE_LOG(LogTemp, Log, TEXT("BuffZone: %d마리 몬스터"), OverlappingActors.Num());
 	
 	for (AActor* Actor : OverlappingActors)
 	{
@@ -74,14 +74,47 @@ void AGS_BuffZone::ApplyBuffInZone()
 
 void AGS_BuffZone::ApplyBuff(AGS_Monster* Monster)
 {
-	// TODO : 스탯 컴포넌트에서 증가하는거 실행
+	UGS_StatComp* StatComp = Monster->GetStatComp();
+	if (!StatComp)
+	{
+		return;
+	}
+	
+	FGS_StatRow BuffStats = GetBuffStatRow();
+	StatComp->ChangeStat(BuffStats);
+	
+	BuffedMonsters.Add(Monster);
 }
 
 void AGS_BuffZone::RemoveAllBuffs()
 {
-	// TODO : 스탯 컴포넌트에서 다시 디폴트 되는거 실행
+	FGS_StatRow BuffStats = GetBuffStatRow();
+	
+	for (int32 i = BuffedMonsters.Num() - 1; i >= 0; i--)
+	{
+		AGS_Monster* Monster = BuffedMonsters[i];
+        
+		if (IsValid(Monster))
+		{
+			UGS_StatComp* StatComp = Monster->GetStatComp();
+			if (IsValid(StatComp))
+			{
+				StatComp->ResetStat(BuffStats);
+			}
+		}
+		
+		BuffedMonsters.RemoveAt(i);
+	}
 
 	GetWorld()->GetTimerManager().ClearTimer(BuffRemovalTimer);
 }
 
-
+FGS_StatRow AGS_BuffZone::GetBuffStatRow() const
+{
+	FGS_StatRow Stat;
+	Stat.ATK = AttackPowerBuff;
+	Stat.DEF = DefenseBuff;
+	Stat.ATS = AttackSpeedBuff;
+    
+	return Stat;
+}  

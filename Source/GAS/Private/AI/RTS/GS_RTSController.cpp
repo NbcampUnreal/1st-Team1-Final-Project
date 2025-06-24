@@ -45,6 +45,7 @@ void AGS_RTSController::BeginPlay()
 	{
 		ViewportClient->SetMouseCaptureMode(EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown);
 		ViewportClient->SetHideCursorDuringCapture(false);
+		ViewportClient->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
 	if (!HasAuthority() && IsLocalController())
 	{
