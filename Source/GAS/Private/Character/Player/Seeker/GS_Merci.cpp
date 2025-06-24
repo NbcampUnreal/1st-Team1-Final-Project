@@ -456,6 +456,18 @@ void AGS_Merci::SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget)
 	if (WidgetCrosshair)
 	{
 		WidgetCrosshair->SetCrosshairVisibility(true);
+
+		WidgetCrosshair->InitArrowCounters();
+		WidgetCrosshair->UpdateArrowType(CurrentArrowType);
+
+		if (CurrentArrowType == EArrowType::Axe)
+		{
+			WidgetCrosshair->UpdateArrowCnt(EArrowType::Axe, CurrentAxeArrows);
+		}
+		else if (CurrentArrowType == EArrowType::Child)
+		{
+			WidgetCrosshair->UpdateArrowCnt(EArrowType::Child, CurrentChildArrows);
+		}
 	}
 }
 
@@ -501,6 +513,16 @@ void AGS_Merci::LeftClickRelease_Implementation()
 	IGS_AttackInterface::LeftClickRelease_Implementation();
 }
 
+int32 AGS_Merci::GetMaxAxeArrows()
+{
+	return MaxAxeArrows;
+}
+
+int32 AGS_Merci::GetMaxChildArrows()
+{
+	return MaxChildArrows;
+}
+
 void AGS_Merci::OnRep_CurrentArrowType()
 {
 	if(ArrowTypeWidget)
@@ -520,6 +542,11 @@ void AGS_Merci::OnRep_CurrentArrowType()
 		}
 	}
 
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->UpdateArrowType(CurrentArrowType);
+	}
+
 	// 화살 타입 변경 사운드 재생
 	if (ArrowTypeChangeSound && IsLocallyControlled())
 	{
@@ -536,6 +563,11 @@ void AGS_Merci::OnRep_CurrentAxeArrows()
 			ArrowTypeWidget->UpdateArrowCount(CurrentAxeArrows);
 		}
 	}
+
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->UpdateArrowCnt(EArrowType::Axe, CurrentAxeArrows);
+	}
 }
 
 void AGS_Merci::OnRep_CurrentChildArrows()
@@ -546,6 +578,11 @@ void AGS_Merci::OnRep_CurrentChildArrows()
 		{
 			ArrowTypeWidget->UpdateArrowCount(CurrentChildArrows);
 		}
+	}
+
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->UpdateArrowCnt(EArrowType::Child, CurrentChildArrows);
 	}
 }
 

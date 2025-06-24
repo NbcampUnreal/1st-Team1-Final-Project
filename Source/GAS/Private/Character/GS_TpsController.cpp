@@ -254,6 +254,8 @@ void AGS_TpsController::TestFunction()
 					HPBoardWidget->InitBoardWidget();
 				}
 
+				PlayerWidgetInstance->AddToViewport(0);
+
 				CrosshairWidget = Cast<UGS_CrossHairImage>(PlayerWidgetInstance->GetWidgetFromName(TEXT("WBP_CrossHairImage")));
 				if (CrosshairWidget)
 				{
@@ -263,8 +265,6 @@ void AGS_TpsController::TestFunction()
 						MerciCharacter->SetCrosshairWidget(CrosshairWidget);
 					}
 				}
-
-				PlayerWidgetInstance->AddToViewport(0);
 			}
 		}
 	}

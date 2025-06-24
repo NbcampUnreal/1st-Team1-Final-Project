@@ -45,6 +45,13 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayArrowEmptySound();
 
+	// getter
+	UFUNCTION(BlueprintCallable, Category = "Arrow")
+	int32 GetMaxAxeArrows();
+
+	UFUNCTION(BlueprintCallable, Category = "Arrow")
+	int32 GetMaxChildArrows();
+
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;
 
