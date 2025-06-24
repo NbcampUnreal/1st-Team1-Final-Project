@@ -450,7 +450,7 @@ void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
 void UGS_SkillComp::Server_TryActiveSkill_Implementation(ESkillSlot Slot)
 {
 
-	if (SkillMap.Contains(Slot))
+	/*if (SkillMap.Contains(Slot))
 	{
 		if (SkillMap[Slot]->CanActive())
 		{
@@ -464,7 +464,7 @@ void UGS_SkillComp::Server_TryActiveSkill_Implementation(ESkillSlot Slot)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SkillMap does not contain slot"));
-	}
+	}*/
 	
 	TryActivateSkill(Slot);
 }

@@ -11,6 +11,6 @@ void UGS_AN_CheckAimSkillReady::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 
 	if (AGS_Chan* Character = Cast<AGS_Chan>(MeshComp->GetOwner()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Fucking TEST : %s"), *UEnum::GetValueAsString(Character->GetLocalRole())); // SJE
+		UE_LOG(LogTemp, Warning, TEXT("CheckAimSkillReady : %s"), *UEnum::GetValueAsString(Character->GetLocalRole())); // SJE
 	}
 }
