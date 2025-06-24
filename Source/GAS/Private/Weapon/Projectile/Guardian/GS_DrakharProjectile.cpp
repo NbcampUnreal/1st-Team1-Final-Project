@@ -10,13 +10,6 @@
 
 AGS_DrakharProjectile::AGS_DrakharProjectile()
 {
-	//CollisionComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn);
-	//CollisionComponent->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
-	//CollisionComponent->SetCollisionObjectType(ECC_GameTraceChannel1);
-	//CollisionComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Ignore);
-
-	//CollisionComponent->SetCollisio
-	//CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void AGS_DrakharProjectile::BeginPlay()
@@ -25,7 +18,7 @@ void AGS_DrakharProjectile::BeginPlay()
 
 	if (HasAuthority())
 	{
-		if (GetInstigator())
+		if (GetInstigator() && CollisionComponent)
 		{
 			CollisionComponent->IgnoreActorWhenMoving(GetInstigator(), true);
 		}
@@ -44,7 +37,7 @@ void AGS_DrakharProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherAct
 	bool bHitCharacter = false;
 	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
 	
-	if (IsValid(DamagedCharacter))
+	if (IsValid(DamagedCharacter) && !DamagedCharacter->IsA<AGS_Guardian>())
 	{
 		bHitCharacter = true;
 		FDamageEvent DamageEvent;

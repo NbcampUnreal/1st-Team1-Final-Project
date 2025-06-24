@@ -46,7 +46,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
+	virtual void OnDamageStart();
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetCanHitReact(bool CanReact);
 	

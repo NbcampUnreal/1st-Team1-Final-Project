@@ -30,7 +30,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	void OnDamageStart() override;
+	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AGS_EarthquakeEffect> GC_EarthquakeEffect;
 	
@@ -48,7 +50,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> FeverDraconicProjectile;
 
+	//[fever mode]
 	FOnCurrentFeverGaugeChangedDelegate OnCurrentFeverGaugeChanged;
+	UPROPERTY()
+	bool bIsAttckingDuringFever;
+	FTimerHandle ResetAttackTimer;
+
+	//[health regeneration]
+	bool bIsDamaged = false;
 	
 	//[Input Binding Function]
 	virtual void Ctrl() override;
@@ -126,7 +135,9 @@ public:
 	
 	void SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGaugeWidget);
 	void SetFeverGauge(float InValue);
-
+	void ResetIsAttackingDuringFeverMode();
+	void StartIsAttackingTimer();
+	
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCFeverMontagePlay();
 	
@@ -139,6 +150,13 @@ public:
 	void DecreaseFeverGauge();
 	//minus 1 values per one seconds
 	void MinusFeverGaugeValue();
+
+	//[Healing System]
+	FTimerHandle HealthRegenTimer;
+	FTimerHandle HealthDelayTimer;
+	void BeginHealRegeneration();
+	void HealRegeneration();
+	void StopHealRegeneration();
 
 	// === Multicast RPCs delegated to components ===
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboAttackSound();
@@ -300,12 +318,13 @@ private:
 
 	//[Fever Mode]
 	float MaxFeverGauge;
+
 	UPROPERTY(ReplicatedUsing = OnRep_FeverGauge)
 	float CurrentFeverGauge;
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsFeverMode)
 	bool IsFeverMode;
-
+	
 	FTimerHandle FeverTimer;
 
 	float PillarForwardOffset = 300.f;
