@@ -203,7 +203,7 @@ public:
 	bool HasAnySelectedUnitSkill() const;
 	
 	UFUNCTION(BlueprintCallable, Category="Cursor")
-	void SetRTSCursor(UTexture2D* CursorTexture);
+	void SetRTSCursor(const FName& CursorPath);
 
 protected:
 	virtual void BeginPlay() override;
