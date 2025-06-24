@@ -81,3 +81,16 @@ public:
 	UPROPERTY()
 	TObjectPtr<AActor> WallAndDoorOccupancyActor;
 };
+
+USTRUCT(Atomic, BlueprintType)
+struct FDESaveData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY()
+	TSubclassOf<AActor> SpawnActorClass;
+	UPROPERTY()
+	FTransform SpawnTransform;
+
+	FDESaveData() {}
+};

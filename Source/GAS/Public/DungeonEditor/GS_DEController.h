@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GS_DEController.generated.h"
 
+class UGS_DungeonEditorWidget;
 class UGS_PropWidget;
 class UInputMappingContext;
 class UInputAction;
@@ -46,6 +47,11 @@ public:
 	TSubclassOf<UGS_PropWidget> PropWidgetClass;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UGS_PropWidget> PropWidget;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UGS_DungeonEditorWidget> DungeonEditorWidgetClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<UGS_DungeonEditorWidget> DungeonEditorWidget;
 	
 protected:
 	void BeginPlay() override;

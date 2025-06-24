@@ -54,6 +54,10 @@ bool UGS_SkillBase::IsActive() const
 	return bIsActive;
 }
 
+void UGS_SkillBase::OnSkillAnimationEnd()
+{
+}
+
 void UGS_SkillBase::StartCoolDown()
 {
 	if (OwningComp)
