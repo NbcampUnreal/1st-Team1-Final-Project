@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 AGS_SwordAuraProjectile::AGS_SwordAuraProjectile()
@@ -25,6 +26,13 @@ AGS_SwordAuraProjectile::AGS_SwordAuraProjectile()
 	ProjectileMovementComponent->InitialSpeed = 4000.0f;
 	ProjectileMovementComponent->MaxSpeed = 4000.0f;
 	ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
+}
+
+void AGS_SwordAuraProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_SwordAuraProjectile, EffectType);
 }
 
 void AGS_SwordAuraProjectile::BeginPlay()
@@ -67,17 +75,28 @@ void AGS_SwordAuraProjectile::StopSwordSlashVFX()
 
 void AGS_SwordAuraProjectile::Multicast_StartSwordSlashVFX_Implementation()
 {
-	if (!SlashVFX || !SlashBox)
+	if (!SlashBox)
 	{
 		return;
 	}
-	UNiagaraFunctionLibrary::SpawnSystemAttached(
-		SlashVFX,
+
+	UNiagaraSystem* SelectedVFX = (EffectType == ESwordAuraEffectType::Left) ? LeftSlashVFX : RightSlashVFX;
+	UE_LOG(LogTemp, Warning, TEXT("SelectedVFX : %s"), *SelectedVFX->GetName());
+	if (!SelectedVFX)
+	{
+		return;
+	}
+
+	FVector LocalPos = FVector::ZeroVector; // 부모 위치 기준 (붙는 지점 기준)
+	FRotator LocalRot = FRotator::ZeroRotator; // 붙는 지점 기준 회전
+
+	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+		SelectedVFX,
 		SlashBox,
 		NAME_None,
-		FVector::ZeroVector,
-		FRotator::ZeroRotator,
-		EAttachLocation::KeepRelativeOffset,
+		LocalPos,
+		LocalRot, //Projectile 회전값 
+		EAttachLocation::KeepRelativeOffset,//월드 기준
 		true
 	);
 }
