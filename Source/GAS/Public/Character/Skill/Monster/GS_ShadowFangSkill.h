@@ -9,7 +9,7 @@
 
 class AGS_BuffZone;
 
-UCLASS()
+UCLASS(Blueprintable)
 class GAS_API UGS_ShadowFangSkill : public UGS_MonsterSkillBase
 {
 	GENERATED_BODY()
