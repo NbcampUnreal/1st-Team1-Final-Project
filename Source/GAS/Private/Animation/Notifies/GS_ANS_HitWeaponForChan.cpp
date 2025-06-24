@@ -15,7 +15,7 @@ void UGS_ANS_HitWeaponForChan::NotifyBegin(USkeletalMeshComponent* MeshComp, UAn
 	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(MeshComp->GetOwner()))
 	{
 		ECharacterType CharacterType = Seeker->GetCharacterType();
-		if (CharacterType == ECharacterType::Chan)
+		if (CharacterType == ECharacterType::Chan && Seeker->HasAuthority())
 		{
 			if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Seeker->GetWeaponByIndex(0)))
 			{
@@ -23,7 +23,7 @@ void UGS_ANS_HitWeaponForChan::NotifyBegin(USkeletalMeshComponent* MeshComp, UAn
 				Weapon->ServerEnableHit();
 			}
 		}
-		else if (CharacterType == ECharacterType::Ares)
+		else if (CharacterType == ECharacterType::Ares && Seeker->HasAuthority())
 		{
 			if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Seeker->GetWeaponByIndex(0)))
 			{
@@ -41,26 +41,18 @@ void UGS_ANS_HitWeaponForChan::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnim
 	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(MeshComp->GetOwner()))
 	{
 		ECharacterType CharacterType = Seeker->GetCharacterType();
-		if (CharacterType == ECharacterType::Chan)
+		if (CharacterType == ECharacterType::Chan && Seeker->HasAuthority())
 		{
 			if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Seeker->GetWeaponByIndex(0)))
 			{
 				Weapon->ServerDisableHit();
-				/*if (Attacker->HasAuthority())
-				{
-					Weapon->ServerDisableHit();
-				}*/
 			}
 		}
-		else if (CharacterType == ECharacterType::Ares)
+		else if (CharacterType == ECharacterType::Ares && Seeker->HasAuthority())
 		{
 			if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Seeker->GetWeaponByIndex(0)))
 			{
 				Weapon->ServerDisableHit();
-				/*if (Attacker->HasAuthority())
-				{
-					Weapon->ServerDisableHit();
-				}*/
 			}
 		}
 	}

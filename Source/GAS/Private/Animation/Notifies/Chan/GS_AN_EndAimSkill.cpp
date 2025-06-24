@@ -15,7 +15,6 @@ void UGS_AN_EndAimSkill::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceB
 	{
 		if (Character->HasAuthority())
 		{
-			Character->SetSeekerGait(Character->GetLastSeekerGait());
 			Character->Multicast_StopSkillMontage(Character->GetCurrentMontage());
 			Character->GetSkillComp()->TryDeactiveSkill(ESkillSlot::Aiming);
 		}

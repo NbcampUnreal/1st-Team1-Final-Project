@@ -24,6 +24,7 @@ void UGS_AN_EndCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 			Character->Multicast_SetIsFullBodySlot(false);
 			Character->Multicast_SetIsUpperBodySlot(false);
 			Character->Multicast_ComboEnd();
+			Character->Server_SetMoveControlValue(true, true);
 		}
 
 		Character->CanChangeSeekerGait = true;
