@@ -60,7 +60,6 @@ void UGS_ArrowCounter::CreateIndicators()
 		UGS_ArrowIndicator* NewIndicator = CreateWidget<UGS_ArrowIndicator>(this, ArrowIndicatorClass);
 		if (NewIndicator)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Created indicator %d"), i);
 			NewIndicator->SetArrowTexture(TextureToUse);
 			UHorizontalBoxSlot* HorizontalSlot = ArrowContainer->AddChildToHorizontalBox(NewIndicator);
 			if(HorizontalSlot)
@@ -72,12 +71,7 @@ void UGS_ArrowCounter::CreateIndicators()
 			}
 			ArrowIndicators.Add(NewIndicator);
 		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to create indicator %d"), i);
-		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Total indicators created: %d"), ArrowIndicators.Num());
 }
 
 UTexture2D* UGS_ArrowCounter::GetTextureForArrowType() const
