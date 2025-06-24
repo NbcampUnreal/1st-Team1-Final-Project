@@ -47,7 +47,7 @@ void AGS_RTSController::BeginPlay()
 		ViewportClient->SetHideCursorDuringCapture(false);
 		ViewportClient->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
-	SetRTSCursor(DefaultCursorTexture);
+	SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_GAS")));
 	bEnableMouseOverEvents = true; 
 	
 	if (!HasAuthority() && IsLocalController())
@@ -432,29 +432,16 @@ void AGS_RTSController::InitCameraActor()
 	}
 }
 
-void AGS_RTSController::SetRTSCursor(UTexture2D* CursorTexture)
+void AGS_RTSController::SetRTSCursor(const FName& CursorPath)
 {
-	if (!IsValid(CursorTexture))
-	{
-		if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
-		{
-			ViewportClient->SetHardwareCursor(EMouseCursor::Default, NAME_None, FIntPoint::ZeroValue);
-		}
-		return;
-	}
-	
 	if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
 	{
-		FString CursorPath = CursorTexture->GetPathName();
-		CursorPath = CursorPath.Replace(TEXT("/Game/"), TEXT(""));
-		
-		int32 LastDotIndex;
-		if (CursorPath.FindLastChar('.', LastDotIndex))
+		if (CursorPath.IsNone())
 		{
-			CursorPath = CursorPath.Left(LastDotIndex);
+			ViewportClient->SetHardwareCursor(EMouseCursor::Default, NAME_None, FIntPoint::ZeroValue);
+			return;
 		}
-		
-		ViewportClient->SetHardwareCursor(EMouseCursor::Default, FName(*CursorPath), FIntPoint::ZeroValue);
+		ViewportClient->SetHardwareCursor(EMouseCursor::Default, CursorPath, FIntPoint::ZeroValue);
 	}
 }
 
@@ -464,7 +451,7 @@ void AGS_RTSController::UpdateCursorForEdgeScroll()
     
 	if (bShouldShowEdgeCursor)
 	{
-		SetRTSCursor(ScrollCursorTexture);
+		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_GAS")));
 	}
 	else
 	{
@@ -477,13 +464,13 @@ void AGS_RTSController::UpdateCursorForCommand()
 	switch (CurrentCommand)
 	{
 	case ERTSCommand::Move:
-		SetRTSCursor(CommandCursorTexture);
+		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_GAS")));
 		break;
 	case ERTSCommand::Attack:
-		SetRTSCursor(CommandCursorTexture);
+		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_GAS")));
 		break;
 	default:
-		SetRTSCursor(DefaultCursorTexture);
+		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Guardian")));
 		break;
 	}
 }
