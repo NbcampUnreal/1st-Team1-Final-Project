@@ -8,8 +8,6 @@
 
 UGS_ShadowFangSkill::UGS_ShadowFangSkill()
 {
-	BuffZoneClass = AGS_BuffZone::StaticClass();
-
 	Cooltime = 20.0f; 
 	Damage = 0.0f;
 }

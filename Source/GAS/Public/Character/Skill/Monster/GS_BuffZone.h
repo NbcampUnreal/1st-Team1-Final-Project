@@ -24,19 +24,19 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff")
-	float BuffRadius = 1000.0f;
+	float BuffRadius;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff")
-	float BuffDuration = 10.0f;
+	float BuffDuration;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff")
-	float AttackPowerBuff = 30.0f;
+	float AttackPowerBuff;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff")
-	float DefenseBuff = 30.0f;
+	float DefenseBuff;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff")
-	float AttackSpeedBuff = 0.5f;
+	float AttackSpeedBuff;
 
 private:
 	UPROPERTY()

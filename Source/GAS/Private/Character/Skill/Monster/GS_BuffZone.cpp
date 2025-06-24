@@ -15,6 +15,12 @@ AGS_BuffZone::AGS_BuffZone()
 
 	CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionSphere"));
 	CollisionSphere->SetupAttachment(RootComponent);
+
+	BuffRadius = 1000.0f;
+	BuffDuration = 10.0f;
+	AttackPowerBuff = 30.0f;
+	DefenseBuff = 30.0f;
+	AttackSpeedBuff = 0.5f;
 }
 
 
