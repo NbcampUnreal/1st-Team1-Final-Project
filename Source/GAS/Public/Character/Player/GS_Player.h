@@ -36,6 +36,8 @@ struct FSkillInputControl
 	bool CanInputLC = true; // Left Click
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Control")
 	bool CanInputRC = true; // Right Click
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Control")
+	bool CanInputRoll = true; // SpaceBar;
 };
 
 UCLASS()
@@ -123,7 +125,7 @@ public:
 	virtual void OnDeath() override;
 	
 	// Skll Input Control
-	void SetSkillInputControl(bool CanLeftClick, bool CanRightClick);
+	void SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick);
 	FSkillInputControl GetSkillInputControl();
 	
 	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }

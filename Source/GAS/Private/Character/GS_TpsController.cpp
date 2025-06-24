@@ -20,6 +20,7 @@
 #include "UI/Character/GS_BossHP.h"
 #include "UI/Character/GS_DrakharFeverGauge.h"
 #include "UI/Character/GS_FeverGaugeBoard.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 AGS_TpsController::AGS_TpsController()
@@ -38,6 +39,7 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 {
 	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
 	LastRotatorInMoving = GetControlRotation();
+	Server_CacheMoveInputValue(InputAxisVector);
 	const FRotator YawRotation(0.f, LastRotatorInMoving.Yaw, 0.0f);
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
@@ -128,6 +130,8 @@ void AGS_TpsController::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AGS_TpsController, ControlValues);
+	DOREPLIFETIME(AGS_TpsController, MoveInputValue);
+	DOREPLIFETIME(AGS_TpsController, bIsAutoMoving);
 }
 
 float AGS_TpsController::GetCurrentMouseSensitivity() const
@@ -211,6 +215,11 @@ void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
 	}
 }
 
+void AGS_TpsController::Server_CacheMoveInputValue_Implementation(FVector2D InputValue)
+{
+	MoveInputValue = InputValue;
+}
+
 void AGS_TpsController::TestFunction()
 {
 	AGS_Character* GS_Character = Cast<AGS_Character>(GetPawn());
@@ -268,6 +277,65 @@ void AGS_TpsController::TestFunction()
 			}
 		}
 	}
+}
+
+void AGS_TpsController::StartAutoMoveForward()
+{
+	bIsAutoMoving = true;
+
+	Client_StartAutoMoveForward();
+}
+
+void AGS_TpsController::StopAutoMoveForward()
+{
+	bIsAutoMoving = false;
+	
+	Client_StopAutoMoveForward();
+}
+
+void AGS_TpsController::AutoMoveTick()
+{
+	if (!bIsAutoMoving)
+		return;
+
+	/*UE_LOG(LogTemp, Warning, TEXT("Authority: %s"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"));*/
+	const FRotator YawRotation(0.f, GetPawn()->GetActorRotation().Yaw, 0.0f);
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
+	{
+		if (UCharacterMovementComponent* Movement = ControlledPawn->GetCharacterMovement())
+		{
+			/*UE_LOG(LogTemp, Warning, TEXT("MovementMode: %d | Velocity: %s | MaxWalkSpeed: %f | RootMotion: %s"),
+				(int32)Movement->MovementMode,
+				*Movement->Velocity.ToString(),
+				Movement->MaxWalkSpeed,
+				ControlledPawn->IsPlayingRootMotion() ? TEXT("true") : TEXT("false"));*/
+		}
+		ControlledPawn->AddMovementInput(ForwardDirection, 10.0f);
+	}
+}
+
+void AGS_TpsController::Client_StopAutoMoveForward_Implementation()
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	bIsAutoMoving = false;
+	GetWorld()->GetTimerManager().ClearTimer(AutoMoveTickHandle);
+}
+
+void AGS_TpsController::Client_StartAutoMoveForward_Implementation()
+{
+	if (!IsLocalController()) 
+	{
+		return;
+	}
+
+	bIsAutoMoving = true;
+	GetWorld()->GetTimerManager().SetTimer(AutoMoveTickHandle, this, &AGS_TpsController::AutoMoveTick, 0.01f, true);
 }
 
 void AGS_TpsController::BeginPlay()

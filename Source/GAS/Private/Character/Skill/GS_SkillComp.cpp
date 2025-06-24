@@ -144,6 +144,7 @@ void UGS_SkillComp::InitSkills()
 		SetSkill(ESkillSlot::Aiming, SkillSet->AimingSkill);
 		SetSkill(ESkillSlot::Moving, SkillSet->MovingSkill);
 		SetSkill(ESkillSlot::Ultimate, SkillSet->UltimateSkill);
+		SetSkill(ESkillSlot::Rolling, SkillSet->RollingSkill);
 	}
 }
 
@@ -311,9 +312,16 @@ void UGS_SkillComp::StartCooldownForSkill(ESkillSlot Slot)
 	State.bIsOnCooldown = true;
 
 	// 쿨다운 타이머
+	TWeakObjectPtr<UGS_SkillComp> WeakThis = this;
 	GetWorld()->GetTimerManager().SetTimer(
 		State.CooldownTimer,
-		[this, Slot]() { HandleCooldownComplete(Slot); },
+		[WeakThis, Slot]() 
+		{ 
+			if (WeakThis.IsValid())
+			{
+				WeakThis->HandleCooldownComplete(Slot); 
+			}
+		},
 		CooldownTime,
 		false
 	);
@@ -321,7 +329,13 @@ void UGS_SkillComp::StartCooldownForSkill(ESkillSlot Slot)
 	// UI 업데이트 타이머
 	GetWorld()->GetTimerManager().SetTimer(
 		State.UIUpdateTimer,
-		[this, Slot]() { HandleCooldownProgress(Slot); },
+		[WeakThis, Slot]() 
+		{ 
+			if (WeakThis.IsValid())
+			{
+				WeakThis->HandleCooldownProgress(Slot); 
+			}
+		},
 		0.1f,
 		true
 	);
@@ -482,4 +496,19 @@ void UGS_SkillComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME(UGS_SkillComp, ReplicatedSkillStates);
 	DOREPLIFETIME(UGS_SkillComp, bCanUseSkill);
 	DOREPLIFETIME(UGS_SkillComp, ReplicatedCooldownStates);
+}
+
+void UGS_SkillComp::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (GetWorld())
+	{
+		for (auto& Pair : CooldownStates)
+		{
+			FSkillCooldownState& State = Pair.Value;
+			GetWorld()->GetTimerManager().ClearTimer(State.CooldownTimer);
+			GetWorld()->GetTimerManager().ClearTimer(State.UIUpdateTimer);
+		}
+	}
 }

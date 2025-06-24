@@ -9,6 +9,8 @@
 #include "UI/Common/CustomCommonButton.h"
 #include "UI/Common//GS_CommonTwoBtnPopup.h"
 #include "UI/Screen/Option/GS_OptionMenuUI.h"
+#include "UI/Popup/GS_JoinFriendListWidget.h"
+#include "Components/Overlay.h"
 
 void UGS_MainMenuUI::NativeConstruct()
 {
@@ -21,7 +23,6 @@ void UGS_MainMenuUI::NativeConstruct()
 			PlayButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnPlayButtonClicked);
 		}
 	}
-	else UE_LOG(LogTemp, Error, TEXT("UGS_MainMenuUI: PlayButton is not bound in Blueprint!"));
 
 	if (CustomGameButton)
 	{
@@ -30,7 +31,6 @@ void UGS_MainMenuUI::NativeConstruct()
 			CustomGameButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnCustomGameButtonClicked);
 		}
 	}
-	else UE_LOG(LogTemp, Error, TEXT("UGS_MainMenuUI: CustomGameButton is not bound in Blueprint!"));
 
 	if (ExitButton)
 	{
@@ -39,7 +39,14 @@ void UGS_MainMenuUI::NativeConstruct()
 			ExitButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnExitButtonClicked);
 		}
 	}
-	else UE_LOG(LogTemp, Error, TEXT("UGS_MainMenuUI: ExitButton is not bound in Blueprint!"));
+
+	if (FriendListButton)
+	{
+		if (UCommonButtonBase* FriendListButtonBase = Cast<UCommonButtonBase>(FriendListButton))
+		{
+			FriendListButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnFriendListButtonClicked);
+		}
+	}
 	
 	//텍스트 초기 설정
 	//if (PlayText) PlayText->SetText(FText::FromString(TEXT("Play")));
@@ -121,4 +128,32 @@ void UGS_MainMenuUI::OnExitPopupYesButtonClicked()
 
 void UGS_MainMenuUI::OnExitPopupNoButtonClicked()
 {
+}
+
+void UGS_MainMenuUI::OnFriendListButtonClicked()
+{
+	if (!FriendListOverlay) return;
+
+	if (!FriendListWidgetInstance)
+	{
+		if (FriendListWidgetClass)
+		{
+			FriendListWidgetInstance = CreateWidget<UGS_JoinFriendListWidget>(GetOwningPlayer(), FriendListWidgetClass);
+			if (FriendListWidgetInstance)
+			{
+				FriendListOverlay->AddChild(FriendListWidgetInstance);
+				FriendListOverlay->SetVisibility(ESlateVisibility::Visible);
+				return;
+			}
+		}
+	}
+
+	if (FriendListOverlay->GetVisibility() == ESlateVisibility::Collapsed)
+	{
+		FriendListOverlay->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		FriendListOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }

@@ -92,7 +92,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "PlayerState")
     void SetPlayerRole(EPlayerRole NewRole);
 
-protected:
     UFUNCTION()
     void HandleCurrentHPChanged(UGS_StatComp* StatComp);
 

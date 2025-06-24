@@ -6,11 +6,21 @@
 #include "Sound/GS_EnvironmentAudioSystem.h"
 #include "AkAudioDevice.h"
 #include "System/GS_PlayerState.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
+#include "Engine/World.h"
 
 UGS_AudioManager::UGS_AudioManager()
 {
 	// 맵 BGM 상태 초기화
 	bIsMapBGMPlaying = false;
+
+	// 캐시 초기화
+	CachedWorld = nullptr;
+	CachedNetMode = NM_Standalone;
+	LastNetModeCheckTime = -1.0f;
+	CachedPlayerController = nullptr;
+	LastPlayerControllerCheckTime = -1.0f;
 
 	// 포인터 멤버 초기화
 	UIAudio = nullptr;
@@ -54,7 +64,6 @@ UGS_AudioManager::UGS_AudioManager()
 	if (CombatStopEventFinder.Succeeded())
 	{
 		DefaultCombatStopEvent = CombatStopEventFinder.Object;
-		UE_LOG(LogTemp, Warning, TEXT("기본 전투 BGM 정지 이벤트 로드 성공: EV_CombatStop"));
 	}
 	else
 	{
@@ -82,6 +91,9 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	// 맵 BGM 상태 초기화
 	bIsMapBGMPlaying = false;
+
+	// 초기 캐시 업데이트
+	UpdateCachedValues();
 }
 
 void UGS_AudioManager::Deinitialize()
@@ -96,6 +108,10 @@ void UGS_AudioManager::Deinitialize()
 	// 전투 BGM 상태 정리
 	CurrentCombatMusicStartEvent = nullptr;
 	CurrentCombatMusicStopEvent = nullptr;
+
+	// 캐시 클리어
+	CachedWorld = nullptr;
+	CachedPlayerController = nullptr;
 
 	Super::Deinitialize();
 }
@@ -116,142 +132,54 @@ void UGS_AudioManager::PlayEvent(UAkAudioEvent* Event, AActor* Context)
 
 void UGS_AudioManager::StartMapBGM(AActor* Context)
 {
-	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	UpdateCachedValues();
+	if (ShouldSkipAudioProcessing() || !MapBGMEvent || bIsMapBGMPlaying)
 	{
-		UE_LOG(LogTemp, Log, TEXT("UGS_AudioManager::StartMapBGM - Skipping audio on dedicated server"));
 		return;
 	}
 
-	if (!MapBGMEvent)
-	{
-		UE_LOG(LogTemp, Error, TEXT("UGS_AudioManager::StartMapBGM - MapBGMEvent is null!"));
-		return;
-	}
+	// RTS 모드에서는 TargetActor가 nullptr이 되어 전역(2D) 오디오로 재생됩니다.
+	AActor* TargetActor = GetOptimalTargetActor(Context);
+	const bool bIsRTSMode = (TargetActor == nullptr);
 
-	if (bIsMapBGMPlaying)
-	{
-		return; // 중복 재생 방지
-	}
-
-	if (!FAkAudioDevice::Get())
-	{
-		UE_LOG(LogTemp, Error, TEXT("UGS_AudioManager::StartMapBGM - Wwise AudioDevice is null!"));
-		return;
-	}
-
-	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor = nullptr;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			// TPS 모드 (시커): Pawn이 있으므로 타겟 액터 기반 재생
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			// RTS 모드 (가디언): Pawn이 없으므로 전역 재생
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		// Context가 제공된 경우 이를 사용
-		TargetActor = Context;
-	}
-	else
-	{
-		// 기본값으로 전역 재생
-		TargetActor = nullptr;
-	}
-
-	// RTPC 볼륨을 먼저 1.0으로 설정
+	// BGM 볼륨을 설정합니다 (RTS 모드에서는 약간 증폭).
 	if (MapBGMVolumeRTPC)
 	{
-		SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, 0.0f);
+		const float VolumeLevel = bIsRTSMode ? 1.5f : 1.0f;
+		SetRTPCValue(MapBGMVolumeRTPC, VolumeLevel, TargetActor, 0.0f);
 	}
 
-	// 실제 BGM 시작
-	FOnAkPostEventCallback DummyCallback;
-	UAkGameplayStatics::PostEvent(MapBGMEvent, TargetActor, 0, DummyCallback);
+	// BGM 이벤트를 재생합니다. TargetActor가 nullptr이면 전역으로 재생됩니다.
+	UAkGameplayStatics::PostEvent(MapBGMEvent, TargetActor, 0, FOnAkPostEventCallback{});
 	bIsMapBGMPlaying = true;
+
+	UE_LOG(LogTemp, Log, TEXT("StartMapBGM: BGM started %s"), bIsRTSMode ? TEXT("globally (RTS)") : TEXT("on actor (TPS)"));
 }
 
 void UGS_AudioManager::StopMapBGM(AActor* Context)
 {
-	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::StopMapBGM - Skipping audio on dedicated server"));
-		return;
-	}
-
-	if (!bIsMapBGMPlaying)
+	UpdateCachedValues();
+	if (ShouldSkipAudioProcessing() || !bIsMapBGMPlaying)
 	{
 		return;
 	}
 
-	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor = nullptr;
+	AActor* TargetActor = GetOptimalTargetActor(Context);
 
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
+	if (MapBGMStopEvent)
 	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			// TPS 모드 (시커): Pawn이 있으므로 타겟 액터 기반 정지
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			// RTS 모드 (가디언): Pawn이 없으므로 전역 정지
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		// Context가 제공된 경우 이를 사용
-		TargetActor = Context;
+		UAkGameplayStatics::PostEvent(MapBGMStopEvent, TargetActor, 0, FOnAkPostEventCallback{});
 	}
 	else
 	{
-		// 기본값으로 전역 정지
-		TargetActor = nullptr;
-	}
-
-	// Wwise Stop 이벤트를 사용한 부드러운 정지
-	if (MapBGMStopEvent)
-	{
-		FOnAkPostEventCallback DummyCallback;
-		UAkGameplayStatics::PostEvent(MapBGMStopEvent, TargetActor, 0, DummyCallback);
-		bIsMapBGMPlaying = false;
-	}
-	else if (!MapBGMStopEvent)
-	{
-		UE_LOG(LogTemp, Error, TEXT("MapBGMStopEvent가 null입니다! 강제 정지로 대체합니다."));
-		
-		// Stop 이벤트가 없다면 MapBGM만 선택적으로 정지
+		// Stop 이벤트가 없는 경우 볼륨을 0으로 설정하여 대체
+		UE_LOG(LogTemp, Warning, TEXT("StopMapBGM: No stop event found, using volume fade as fallback"));
 		if (MapBGMVolumeRTPC)
 		{
 			SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, 0.0f);
 		}
-		
-		// 볼륨을 0으로 만든 후 짧은 지연으로 정지
-		FTimerHandle StopHandle;
-		GetWorld()->GetTimerManager().SetTimer(StopHandle, [this]()
-		{
-			bIsMapBGMPlaying = false;
-			// TargetActor 기반으로 MapBGM만 정지
-			UE_LOG(LogTemp, Warning, TEXT("MapBGM 강제 정지됨 - StopEvent 없음"));
-		}, 0.1f, false);
 	}
+	bIsMapBGMPlaying = false;
 }
 
 void UGS_AudioManager::FadeMapBGMForCombat(AActor* Context, float FadeTime)
@@ -260,34 +188,12 @@ void UGS_AudioManager::FadeMapBGMForCombat(AActor* Context, float FadeTime)
 	{
 		return;
 	}
+	
+	UpdateCachedValues();
+	if (ShouldSkipAudioProcessing()) return;
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor = nullptr;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			// TPS 모드 (시커): Pawn이 있으므로 타겟 액터 기반
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			// RTS 모드 (가디언): Pawn이 없으므로 전역
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		TargetActor = Context;
-	}
-	else
-	{
-		TargetActor = nullptr;
-	}
+	AActor* TargetActor = GetOptimalTargetActor(Context);
 
 	// 맵 BGM 볼륨을 30%로 감소
 	float CombatVolume = 0.3f;
@@ -301,33 +207,11 @@ void UGS_AudioManager::RestoreMapBGMFromCombat(AActor* Context, float FadeTime)
 		return;
 	}
 
-	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor = nullptr;
+	UpdateCachedValues();
+	if (ShouldSkipAudioProcessing()) return;
 
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			// TPS 모드 (시커): Pawn이 있으므로 타겟 액터 기반
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			// RTS 모드 (가디언): Pawn이 없으므로 전역
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		TargetActor = Context;
-	}
-	else
-	{
-		TargetActor = nullptr;
-	}
+	// 게임 모드에 따른 조건부 타겟 액터 결정
+	AActor* TargetActor = GetOptimalTargetActor(Context);
 
 	// 맵 BGM 볼륨을 100%로 복원
 	SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, FadeTime * 1000.0f);
@@ -335,14 +219,18 @@ void UGS_AudioManager::RestoreMapBGMFromCombat(AActor* Context, float FadeTime)
 
 void UGS_AudioManager::SetMapBGMVolume(float Volume, AActor* Context, float FadeTime)
 {
-	Volume = FMath::Clamp(Volume, 0.0f, 1.0f);
-
 	if (!bIsMapBGMPlaying)
 	{
 		return;
 	}
 
-	SetRTPCValue(MapBGMVolumeRTPC, Volume, Context, FadeTime * 1000.0f);
+	Volume = FMath::Clamp(Volume, 0.0f, 2.0f); // RTS 모드를 위해 최대 볼륨을 2.0으로 유지
+
+	// GetOptimalTargetActor가 RTS 모드에서 이미 nullptr을 반환하므로,
+	// 여기서 추가적인 모드 확인 없이 바로 TargetActor를 사용합니다.
+	AActor* TargetActor = GetOptimalTargetActor(Context);
+
+	SetRTPCValue(MapBGMVolumeRTPC, Volume, TargetActor, FadeTime * 1000.0f);
 }
 
 // === RTPC 헬퍼 함수 ===
@@ -384,8 +272,9 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 		return;
 	}
 
+	UpdateCachedValues();
 	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	if (ShouldSkipAudioProcessing())
 	{
 		CurrentCombatMusicStartEvent = CombatMusicStartEvent;
 		CurrentCombatMusicStopEvent = CombatMusicStopEvent;
@@ -403,29 +292,10 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 	}
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정 (맵 BGM 정지용)
-	AActor* MapBGMTargetActor = nullptr;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			MapBGMTargetActor = PlayerPawn;
-		}
-		else
-		{
-			MapBGMTargetActor = nullptr;
-		}
-	}
-	else
-	{
-		MapBGMTargetActor = nullptr;
-	}
+	AActor* MapBGMTargetActor = GetOptimalTargetActor();
 
 	// 멀티플레이어 환경에서는 맵 BGM을 즉시 강제 정지
-	if (GetWorld() && GetWorld()->GetNetMode() != NM_Standalone)
+	if (CachedNetMode != NM_Standalone)
 	{
 		if (MapBGMVolumeRTPC)
 		{
@@ -441,7 +311,7 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 	CurrentCombatMusicStartEvent = CombatMusicStartEvent;
 	CurrentCombatMusicStopEvent = CombatMusicStopEvent;
 
-	float DelayTime = (GetWorld() && GetWorld()->GetNetMode() != NM_Standalone) ? 0.1f : FadeTime;
+	float DelayTime = (CachedNetMode != NM_Standalone) ? 0.1f : FadeTime;
 
 	FTimerHandle CombatBGMHandle;
 	GetWorld()->GetTimerManager().SetTimer(CombatBGMHandle, [this, Context, CombatMusicStartEvent]()
@@ -466,8 +336,9 @@ void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatM
 		return;
 	}
 
+	UpdateCachedValues();
 	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	if (ShouldSkipAudioProcessing())
 	{
 		CurrentCombatMusicStartEvent = nullptr;
 		CurrentCombatMusicStopEvent = nullptr;
@@ -475,30 +346,7 @@ void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatM
 	}
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor = nullptr;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		TargetActor = Context;
-	}
-	else
-	{
-		TargetActor = nullptr;
-	}
+	AActor* TargetActor = GetOptimalTargetActor(Context);
 
 	// 전투 BGM 정지 처리
 	if (CombatMusicStopEvent)
@@ -569,15 +417,6 @@ void UGS_AudioManager::LogCurrentBGMStatus() const
 			break;
 		}
 	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("=== BGM 상태 정보 ==="));
-	UE_LOG(LogTemp, Warning, TEXT("네트워크 모드: %s"), *NetModeString);
-	UE_LOG(LogTemp, Warning, TEXT("맵 BGM 재생 중: %s"), bIsMapBGMPlaying ? TEXT("예") : TEXT("아니오"));
-	UE_LOG(LogTemp, Warning, TEXT("MapBGMEvent: %s"), MapBGMEvent ? TEXT("로드됨") : TEXT("null"));
-	UE_LOG(LogTemp, Warning, TEXT("MapBGMStopEvent: %s"), MapBGMStopEvent ? TEXT("로드됨") : TEXT("null"));
-	UE_LOG(LogTemp, Warning, TEXT("MapBGMVolumeRTPC: %s"), MapBGMVolumeRTPC ? TEXT("로드됨") : TEXT("null"));
-	UE_LOG(LogTemp, Warning, TEXT("Wwise AudioDevice: %s"), FAkAudioDevice::Get() ? TEXT("활성") : TEXT("비활성"));
-	UE_LOG(LogTemp, Warning, TEXT("=================="));
 }
 
 void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
@@ -587,33 +426,11 @@ void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
 		return;
 	}
 	
-	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor = nullptr;
+	UpdateCachedValues();
+	if (ShouldSkipAudioProcessing()) return;
 
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			// TPS 모드 (시커): Pawn이 있으므로 타겟 액터 기반
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			// RTS 모드 (가디언): Pawn이 없으므로 전역
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		TargetActor = Context;
-	}
-	else
-	{
-		TargetActor = nullptr;
-	}
+	// 게임 모드에 따른 조건부 타겟 액터 결정
+	AActor* TargetActor = GetOptimalTargetActor(Context);
 	
 	if (!MapBGMVolumeRTPC)
 	{
@@ -638,37 +455,15 @@ void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
 
 void UGS_AudioManager::FadeInAndStartMapBGM(AActor* Context, float FadeTime)
 {
+	UpdateCachedValues();
 	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	if (ShouldSkipAudioProcessing())
 	{
 		return;
 	}
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor = nullptr;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		TargetActor = Context;
-	}
-	else
-	{
-		TargetActor = nullptr;
-	}
+	AActor* TargetActor = GetOptimalTargetActor(Context);
 
 	// 맵 BGM이 이미 재생 중인지 확인
 	if (!bIsMapBGMPlaying)
@@ -695,4 +490,68 @@ void UGS_AudioManager::FadeInAndStartMapBGM(AActor* Context, float FadeTime)
 			}
 		}, 0.1f, false);
 	}
+}
+
+// === 성능 최적화 함수 구현 ===
+
+void UGS_AudioManager::UpdateCachedValues()
+{
+	UWorld* CurrentWorld = GetWorld();
+	if (!CurrentWorld) return;
+
+	const float CurrentTime = CurrentWorld->GetTimeSeconds();
+
+	// 월드 캐싱
+	if (!CachedWorld.IsValid())
+	{
+		CachedWorld = CurrentWorld;
+	}
+
+	// 네트워크 모드 캐싱 (일정 간격으로)
+	if (CurrentTime - LastNetModeCheckTime > NET_MODE_CHECK_INTERVAL)
+	{
+		CachedNetMode = CurrentWorld->GetNetMode();
+		LastNetModeCheckTime = CurrentTime;
+	}
+	
+	// 플레이어 컨트롤러 캐싱 (더 자주 업데이트하여 RTS 모드 전환 감지 개선)
+	if (CurrentTime - LastPlayerControllerCheckTime > (PLAYER_CONTROLLER_CHECK_INTERVAL * 0.5f))
+	{
+		APlayerController* NewPlayerController = UGameplayStatics::GetPlayerController(CurrentWorld, 0);
+		if (NewPlayerController != CachedPlayerController.Get())
+		{
+			CachedPlayerController = NewPlayerController;
+		}
+		LastPlayerControllerCheckTime = CurrentTime;
+	}
+}
+
+AActor* UGS_AudioManager::GetOptimalTargetActor(AActor* Context)
+{
+	if (Context)
+	{
+		return Context;
+	}
+	
+	if (CachedPlayerController.IsValid())
+	{
+		// TPS 모드: Pawn이 있으면 Pawn을 사용
+		AActor* PlayerPawn = CachedPlayerController->GetPawn();
+		if (PlayerPawn)
+		{
+					return PlayerPawn; 
+	}
+	
+	// RTS 모드: Pawn이 없는 경우 전역 오디오(nullptr) 사용
+	return nullptr; // RTS 모드에서는 전역 오디오로 재생
+}
+
+// 어떤 조건도 맞지 않으면 전역으로 처리 (nullptr)
+return nullptr;
+}
+
+bool UGS_AudioManager::ShouldSkipAudioProcessing() const
+{
+	// 전용 서버이거나, 월드가 유효하지 않거나, 오디오 디바이스가 없는 경우 오디오 처리 건너뛰기
+	return CachedNetMode == NM_DedicatedServer || !CachedWorld.IsValid() || !FAkAudioDevice::Get();
 }

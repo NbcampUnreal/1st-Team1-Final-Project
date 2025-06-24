@@ -79,9 +79,14 @@ void AGS_Character::Tick(float DeltaTime)
 
 	if (IsValid(HPTextWidgetComp) && !HasAuthority())
 	{
-		FVector WidgetComponentLocation = HPTextWidgetComp->GetComponentLocation();
-		FVector LocalPlayerCameraLocation = UGameplayStatics::GetPlayerCameraManager(this, 0)->GetCameraLocation();
-		HPTextWidgetComp->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(WidgetComponentLocation, LocalPlayerCameraLocation));
+		APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
+		
+		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+        
+		HPTextWidgetComp->SetWorldRotation(WidgetRotation);
 	}
 }
 
@@ -106,7 +111,8 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 		FVector HitDirection = -PointEvent->ShotDirection;
 		if(UGS_HitReactComp* HitReactComponent = GetComponentByClass<UGS_HitReactComp>())
 		{
-			HitReactComponent->PlayHitReact(EHitReactType::Additive, HitDirection);
+			//HitReactComponent->PlayHitReact(EHitReactType::Additive, HitDirection); // SJE
+			HitReactComponent->PlayHitReact(EHitReactType::Interrupt, HitDirection);
 		}
 	}
 
@@ -218,14 +224,11 @@ bool AGS_Character::IsDead() const
 
 void AGS_Character::Server_SetCharacterSpeed_Implementation(float InRatio)
 {
-	if (InRatio >= 0 && InRatio <= 1)
-	{
-		CharacterSpeed = DefaultCharacterSpeed * InRatio;
+	CharacterSpeed = DefaultCharacterSpeed * InRatio;
 
-		if (HasAuthority())
-		{
-			OnRep_CharacterSpeed(); // 서버도 직접 반영
-		}
+	if (HasAuthority())
+	{
+		OnRep_CharacterSpeed(); // 서버도 직접 반영
 	}
 }
 

@@ -18,7 +18,8 @@ public class GAS : ModuleRules
 			"SlateCore",
 			"Slate",
 			"UMG",
-			"Slate",
+            "CoreOnline",
+            "Slate",
 			"SlateCore",
 			"OnlineSubsystem",
 			"OnlineSubsystemUtils",
@@ -29,7 +30,8 @@ public class GAS : ModuleRules
             "CommonUI",
             "CommonInput",
             "Chooser",
-            "PoseSearch"
+            "PoseSearch",
+            "GeometryCollectionEngine"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

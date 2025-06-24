@@ -87,6 +87,8 @@ protected:
 public:
     FString GetAndClearPendingConnectString();
 
+    void LeaveCurrentSessionAndJoin(APlayerController* RequestingPlayer, const FOnlineSessionSearchResult& SearchResultToJoin);
+
     bool bJoiningFromInvite = false;
 
 protected:
@@ -96,7 +98,6 @@ protected:
     TWeakObjectPtr<APlayerController> PlayerJoiningFromInvite;
     FOnlineSessionSearchResult InviteSessionToJoinAfterDestroy;
 
-    void LeaveCurrentSessionAndJoin(APlayerController* RequestingPlayer, const FOnlineSessionSearchResult& SearchResultToJoin);
     virtual void OnDestroySessionCompleteForInvite(FName SessionName, bool bWasSuccessful);
 
     FOnSessionUserInviteAcceptedDelegate OnSessionUserInviteAcceptedDelegate;

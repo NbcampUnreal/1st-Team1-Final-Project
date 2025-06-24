@@ -125,4 +125,25 @@ private:
 
 	// RTPC 헬퍼 함수
 	void SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context, float InterpolationTime = 0.0f);
+
+	// === 성능 최적화: 캐싱된 값들 ===
+	// 월드와 네트워크 모드 캐싱
+	UPROPERTY(Transient)
+	TWeakObjectPtr<UWorld> CachedWorld;
+	
+	ENetMode CachedNetMode;
+	float LastNetModeCheckTime;
+	static constexpr float NET_MODE_CHECK_INTERVAL = 1.0f; // 1초마다 네트워크 모드 체크
+	
+	// PlayerController 캐싱
+	UPROPERTY(Transient)
+	TWeakObjectPtr<APlayerController> CachedPlayerController;
+	
+	float LastPlayerControllerCheckTime;
+	static constexpr float PLAYER_CONTROLLER_CHECK_INTERVAL = 0.5f;
+	
+	// 캐싱된 값들 업데이트 함수
+	void UpdateCachedValues();
+	AActor* GetOptimalTargetActor(AActor* Context = nullptr);
+	bool ShouldSkipAudioProcessing() const;
 };

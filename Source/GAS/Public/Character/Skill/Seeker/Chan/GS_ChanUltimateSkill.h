@@ -19,6 +19,8 @@ public:
 	virtual void ActiveSkill() override;
 	virtual void ExecuteSkillEffect() override;
 
+	void HandleUltimateCollision(AActor* HitActor);
+
 protected:
 	// 공격
 	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target) override;
@@ -38,7 +40,7 @@ private:
 	float KnockbackRadius = 300.0f; // 넉백 반경
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
-	float KnockbackForce = 1000.0f; // 넉백 힘
+	float KnockbackForce = 2000.0f; // 넉백 힘
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
 	float MaxLateralSpeed = 300.0f;
@@ -51,6 +53,7 @@ private:
 	FVector ChargeStartLocation;
 	FVector ChargeDirection;
 	FTimerHandle ChargeTimerHandle;
+	FTimerHandle ChargeUpdateTimerHandle;
 
 	// 캐릭터가 움직일 틱 간격 (예: 60FPS)
 	static constexpr float ChargeTickInterval = 0.016f;
@@ -65,7 +68,6 @@ private:
 	TSet<AActor*> HitActors;
 
 	void StartCharge();
-	void UpdateCharge();
 	void EndCharge();
 
 	// 가디언용 넉백 설정

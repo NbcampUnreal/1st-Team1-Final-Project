@@ -19,22 +19,16 @@ void UGS_ANS_HitWeaponForChan::NotifyBegin(USkeletalMeshComponent* MeshComp, UAn
 		{
 			if (AGS_WeaponAxe* Weapon = Cast<AGS_WeaponAxe>(Seeker->GetWeaponByIndex(0)))
 			{
+				UE_LOG(LogTemp, Warning, TEXT("NotifyBegin, ServerEnableHit, Chan"));
 				Weapon->ServerEnableHit();
-				/*if (Attacker->HasAuthority())
-				{
-					Weapon->ServerEnableHit();
-				}*/
 			}
 		}
 		else if (CharacterType == ECharacterType::Ares)
 		{
 			if (AGS_WeaponSword* Weapon = Cast<AGS_WeaponSword>(Seeker->GetWeaponByIndex(0)))
 			{
+				UE_LOG(LogTemp, Warning, TEXT("NotifyBegin, ServerEnableHit, Ares"));
 				Weapon->ServerEnableHit();
-				/*if (Attacker->HasAuthority())
-				{
-					Weapon->ServerEnableHit();
-				}*/
 			}
 		}
 	}	
