@@ -8,6 +8,7 @@
 
 class UBoxComponent;
 class USphereComponent;
+class UNiagaraSystem;
 
 /**
  * 
@@ -26,6 +27,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	UBoxComponent* SlashBox;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
+	UNiagaraSystem* SlashVFX;
+
+
 	UPROPERTY()
 	TSet<AActor*> HitActors;
 
@@ -42,5 +47,21 @@ protected:
 	float SwordAuraLifetime = 1.0f;
 
 	UFUNCTION()
-	void DestroySwordAura();	
+	void DestroySwordAura();
+
+
+	//VFX
+	UFUNCTION(BlueprintCallable, Category = "Sword FX")
+	void StartSwordSlashVFX();
+
+	UFUNCTION(BlueprintCallable, Category = "Sword FX")
+	void StopSwordSlashVFX();
+
+
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StartSwordSlashVFX();
+	void Multicast_StartSwordSlashVFX_Implementation();
+
+
 };

@@ -5,6 +5,8 @@
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 AGS_SwordAuraProjectile::AGS_SwordAuraProjectile()
@@ -28,7 +30,7 @@ AGS_SwordAuraProjectile::AGS_SwordAuraProjectile()
 void AGS_SwordAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-
+	Multicast_StartSwordSlashVFX();
 	// 오버랩 이벤트 바인딩
 	SlashBox->OnComponentBeginOverlap.AddDynamic(this, &AGS_SwordAuraProjectile::OnSlashBoxOverlap);	
 
@@ -47,4 +49,35 @@ void AGS_SwordAuraProjectile::OnSlashBoxOverlap(UPrimitiveComponent* OverlappedC
 void AGS_SwordAuraProjectile::DestroySwordAura()
 {
 	Destroy();
+}
+
+
+
+void AGS_SwordAuraProjectile::StartSwordSlashVFX()
+{
+
+}
+
+
+void AGS_SwordAuraProjectile::StopSwordSlashVFX()
+{
+
+}
+
+
+void AGS_SwordAuraProjectile::Multicast_StartSwordSlashVFX_Implementation()
+{
+	if (!SlashVFX || !SlashBox)
+	{
+		return;
+	}
+	UNiagaraFunctionLibrary::SpawnSystemAttached(
+		SlashVFX,
+		SlashBox,
+		NAME_None,
+		FVector::ZeroVector,
+		FRotator::ZeroRotator,
+		EAttachLocation::KeepRelativeOffset,
+		true
+	);
 }
