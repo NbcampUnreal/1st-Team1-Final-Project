@@ -31,10 +31,12 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	
 	if (OwnerPlayer && OwnerPlayer->UltimateSkillSound)
 	{
+		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 		// 애니메이션 재생
 		if(SkillAnimMontages[0])
 		{
-			//OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 		}
 
 		// 궁극기 사운드 재생
@@ -52,6 +54,16 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 void UGS_ChanUltimateSkill::ExecuteSkillEffect()
 {
 
+}
+
+void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
+{
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	if(OwnerPlayer)
+	{
+		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+	}
 }
 
 void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor)
@@ -174,10 +186,11 @@ void UGS_ChanUltimateSkill::StartCharge()
 void UGS_ChanUltimateSkill::EndCharge()
 {
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+
 	if (OwnerPlayer && SkillAnimMontages[1])
 	{
 		// 애니메이션 재생
-		//OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
 	}
 
 	
