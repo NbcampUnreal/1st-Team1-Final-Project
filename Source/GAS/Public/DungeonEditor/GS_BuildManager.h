@@ -85,9 +85,16 @@ public:
 	void ReleasedRMB();
 	void RotateProp();
 	void PressedDel();
+
+	void SaveDungeonData();
+	void LoadDungeonData();
 	
 protected:
 	virtual void BeginPlay() override;
+
+	// 저장할 슬롯 이름을 지정합니다.
+	// 추후에 배열형태로 변경해 프리셋으로 사용해주어야 할 것 같다.
+	FString CurrentSaveSlotName;
 
 private:
 	virtual void OnConstruction(const FTransform& Transform) override;
