@@ -45,6 +45,13 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayArrowEmptySound();
 
+	// getter
+	UFUNCTION(BlueprintCallable, Category = "Arrow")
+	int32 GetMaxAxeArrows();
+
+	UFUNCTION(BlueprintCallable, Category = "Arrow")
+	int32 GetMaxChildArrows();
+
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;
 
@@ -108,6 +115,10 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_ShowCrosshairHitFeedback();
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlayHitFeedbackSound();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -153,6 +164,10 @@ protected:
 	// 화살 부족 사운드
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Arrow")
 	UAkAudioEvent* ArrowEmptySound; // 화살이 없을 때
+
+	// 타격 피드백 사운드
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Feedback")
+	UAkAudioEvent* HitFeedbackSound; // 화살이 적을 맞췄을 때의 UI 피드백 사운드
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 

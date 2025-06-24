@@ -2,8 +2,11 @@
 
 
 #include "UI/Character/GS_CrossHairImage.h"
-#include "Character/GS_Character.h"
 #include "Components/Image.h"
+#include "Components/WidgetSwitcher.h"
+#include "Character/GS_Character.h"
+#include "UI/Character/GS_ArrowCounter.h"
+#include "Weapon/Projectile/Seeker/GS_ArrowType.h"
 
 void UGS_CrossHairImage::NativeConstruct()
 {
@@ -14,6 +17,11 @@ void UGS_CrossHairImage::NativeConstruct()
 	bIsAnimating = false;
 	Center->SetVisibility(ESlateVisibility::Hidden);
 	SetCrosshairVisibility(true);
+
+	if (ArrowCounterSwitcher)
+	{
+		ArrowCounterSwitcher->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void UGS_CrossHairImage::NativeOnInitialized()
@@ -23,13 +31,6 @@ void UGS_CrossHairImage::NativeOnInitialized()
 		AimAnimEndDelegate.Clear();
 		AimAnimEndDelegate.BindDynamic(this, &UGS_CrossHairImage::OnAimAnimFinished);
 		BindToAnimationFinished(Aim_Anim, AimAnimEndDelegate);
-	}
-
-	if (HitFeedback_Anim)
-	{
-		HitFeedbackAnimEndDelegate.Clear();
-		HitFeedbackAnimEndDelegate.BindDynamic(this, &UGS_CrossHairImage::OnHitFeedbackAnimFinished);
-		BindToAnimationFinished(HitFeedback_Anim, HitFeedbackAnimEndDelegate);
 	}
 }
 
@@ -85,6 +86,63 @@ void UGS_CrossHairImage::SetCrosshairVisibility(bool bVisible)
 	SetVisibility(NewVisibility);
 }
 
+void UGS_CrossHairImage::UpdateArrowType(EArrowType NewType)
+{
+	if (!ArrowCounterSwitcher)
+	{
+		return;
+	}
+
+	switch (NewType)
+	{
+	case EArrowType::Axe:
+		ArrowCounterSwitcher->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ArrowCounterSwitcher->SetActiveWidgetIndex(0);
+		break;
+	case EArrowType::Child:
+		ArrowCounterSwitcher->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ArrowCounterSwitcher->SetActiveWidgetIndex(1);
+		break;
+	default:
+		ArrowCounterSwitcher->SetVisibility(ESlateVisibility::Hidden);
+		break;
+	}
+}
+
+void UGS_CrossHairImage::UpdateArrowCnt(EArrowType ArrowType, int32 CurrCnt)
+{
+	switch (ArrowType)
+	{
+	case EArrowType::Axe:
+		if (AxeArrowCounter)
+		{
+			AxeArrowCounter->UpdateArrowCnt(CurrCnt);
+		}
+		break;
+	case EArrowType::Child:
+		if (ChildArrowCounter)
+		{
+			ChildArrowCounter->UpdateArrowCnt(CurrCnt);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void UGS_CrossHairImage::InitArrowCounters()
+{
+	if (AxeArrowCounter)
+	{
+		AxeArrowCounter->Init(EArrowType::Axe);
+	}
+
+	if (ChildArrowCounter)
+	{
+		ChildArrowCounter->Init(EArrowType::Child);
+	}
+}
+
 void UGS_CrossHairImage::OnAimAnimFinished()
 {
 	bIsAnimating = false;
@@ -94,13 +152,5 @@ void UGS_CrossHairImage::OnAimAnimFinished()
 		{
 			Center->SetVisibility(ESlateVisibility::Visible);
 		}
-	}
-}
-
-void UGS_CrossHairImage::OnHitFeedbackAnimFinished()
-{
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Hit Feedback Completed"));
 	}
 }

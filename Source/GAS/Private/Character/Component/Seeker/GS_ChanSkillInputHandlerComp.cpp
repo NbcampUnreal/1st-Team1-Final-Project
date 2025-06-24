@@ -26,6 +26,7 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	{
 		if (!ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Chan Ainimg TryActiveSkill")); // SJE
 			ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 		}
 	}

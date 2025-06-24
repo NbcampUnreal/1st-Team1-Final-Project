@@ -111,6 +111,9 @@ protected:
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void NotifyActorBeginCursorOver() override;
+	virtual void NotifyActorEndCursorOver() override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
 	TObjectPtr<UGS_MonsterSkillComp> MonsterSkillComp;
 	
@@ -128,4 +131,14 @@ protected:
 
 	UFUNCTION()
 	void HandleSkillCooldownChanged(float InCurrentCoolTime, float InMaxCoolTime);
+
+private:
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynamicDecalMaterial;
+
+	bool bIsRTSSelected = false;
+	bool bIsRTSHovered = false;
+    
+	void UpdateDecalColor();
+	void SetHovered(bool bIsHovered);
 }; 

@@ -15,8 +15,6 @@ class GAS_API UGS_OptionSettinsSaveGame : public USaveGame
 	GENERATED_BODY()
 	
 public:
-	UGS_OptionSettinsSaveGame();
-
 	UPROPERTY(VisibleAnywhere, Category = "Settings")
 	float MouseSensitivity;
 };

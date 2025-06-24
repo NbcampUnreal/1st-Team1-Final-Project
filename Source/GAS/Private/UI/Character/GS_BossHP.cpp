@@ -54,18 +54,25 @@ void UGS_BossHP::HideBossHP()
 
 void UGS_BossHP::OnBossFightStateChanged(bool bInBossFight)
 {
-	// 가디언은 항상 보임
 	AGS_PlayerState* PlayerState = GetOwningPlayer()->GetPlayerState<AGS_PlayerState>();
 	AGS_Player* CurrentPlayer = Cast<AGS_Player>(GetOwningPlayer()->GetPawn());
 	bool bIsGuardianPlayer = IsValid(CurrentPlayer) && CurrentPlayer->IsA<AGS_Guardian>();
 	
+	// 가디언은 항상 보임
 	if (IsValid(PlayerState) && (PlayerState->CurrentPlayerRole == EPlayerRole::PR_Guardian || bIsGuardianPlayer))
 	{
 		ShowBossHP();
 		return;
 	}
 
-	// 시커는 보스 전투 상태에 따라 결정
+	// 시커도 가디언 HP를 항상 볼 수 있도록 변경
+	if (IsValid(PlayerState) && PlayerState->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+	{
+		ShowBossHP();
+		return;
+	}
+
+	// 기타 경우에는 보스 전투 상태에 따라 결정
 	if (bInBossFight)
 	{
 		ShowBossHP();
@@ -143,13 +150,16 @@ void UGS_BossHP::InitGuardianHPWidget()
 			AGS_Player* CurrentPlayer = Cast<AGS_Player>(GetOwningPlayer()->GetPawn());
 			bool bIsGuardianPlayer = IsValid(CurrentPlayer) && CurrentPlayer->IsA<AGS_Guardian>();
 			
-			if (PlayerState->CurrentPlayerRole == EPlayerRole::PR_Guardian || bIsGuardianPlayer)
+			// 가디언과 시커 모두 가디언 HP를 볼 수 있음
+			if (PlayerState->CurrentPlayerRole == EPlayerRole::PR_Guardian || 
+				PlayerState->CurrentPlayerRole == EPlayerRole::PR_Seeker || 
+				bIsGuardianPlayer)
 			{
 				ShowBossHP();
 			}
 			else
 			{
-				// 시커는 기본적으로 숨김
+				// 기타 역할은 숨김
 				HideBossHP();
 			}
 		}

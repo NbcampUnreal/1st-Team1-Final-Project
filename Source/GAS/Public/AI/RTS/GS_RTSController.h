@@ -201,6 +201,9 @@ public:
 	void OnEscapeButtonClicked();
 
 	bool HasAnySelectedUnitSkill() const;
+	
+	UFUNCTION(BlueprintCallable, Category="Cursor")
+	void SetRTSCursor(UTexture2D* CursorTexture);
 
 protected:
 	virtual void BeginPlay() override;
@@ -240,6 +243,21 @@ private:
 	UPROPERTY(EditAnywhere, Category="UI")
 	TSubclassOf<UUserWidget> RTSWidgetClass;
 
+	UPROPERTY(EditAnywhere, Category="Cursor")
+	UTexture2D* DefaultCursorTexture;
+    
+	UPROPERTY(EditAnywhere, Category="Cursor")
+	UTexture2D* CommandCursorTexture;
+    
+	UPROPERTY(EditAnywhere, Category="Cursor")
+	UTexture2D* AttackCursorTexture;
+
+	UPROPERTY(EditAnywhere, Category="Cursor")
+	UTexture2D* ClickCursorTexture;
+    
+	UPROPERTY(EditAnywhere, Category="Cursor")
+	UTexture2D* ScrollCursorTexture;
+
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
 	FVector2D GetFinalDirection() const;
@@ -255,4 +273,7 @@ private:
 
 	UFUNCTION()
 	void OnSelectedUnitDead(AGS_Monster* Monster);
+
+	void UpdateCursorForCommand();
+	void UpdateCursorForEdgeScroll();
 };

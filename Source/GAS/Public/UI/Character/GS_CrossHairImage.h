@@ -8,7 +8,9 @@
 #include "GS_CrossHairImage.generated.h"
 
 class UImage;
+class UWidgetSwitcher;
 class AGS_Character;
+class UGS_ArrowCounter;
 
 UCLASS()
 class GAS_API UGS_CrossHairImage : public UUserWidget
@@ -26,6 +28,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	UImage* Center;
 
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	UWidgetSwitcher* ArrowCounterSwitcher;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<UGS_ArrowCounter> AxeArrowCounter;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<UGS_ArrowCounter> ChildArrowCounter;
+
 	void SetOwingActor(AGS_Character* InOwningCharacter);
 
 	UFUNCTION(BlueprintCallable, Category = "Crosshair")
@@ -40,6 +51,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Crosshair")
 	void SetCrosshairVisibility(bool bVisible);
 
+	UFUNCTION(BlueprintCallable, Category = "Arrow")
+	void UpdateArrowType(EArrowType NewType);
+
+	UFUNCTION(BlueprintCallable, Category = "Arrow")
+	void UpdateArrowCnt(EArrowType ArrowType, int32 CurrCnt);
+
+	UFUNCTION(BlueprintCallable, Category = "Arrow")
+	void InitArrowCounters();
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeOnInitialized() override;
@@ -53,11 +73,7 @@ private:
 	bool bIsAnimating = false;
 
 	FWidgetAnimationDynamicEvent AimAnimEndDelegate;
-	FWidgetAnimationDynamicEvent HitFeedbackAnimEndDelegate;
 
 	UFUNCTION()
 	void OnAimAnimFinished();
-
-	UFUNCTION()
-	void OnHitFeedbackAnimFinished();
 };

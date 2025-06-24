@@ -10978,6 +10978,292 @@
 										</ObjectList>
 									</ObjectLists>
 								</RandomSequenceContainer>
+								<BlendContainer Name="EV_ArrowHit_UI" ID="{F7097B12-ABAD-4CCC-8B71-1218A2C0A2CD}" ShortID="521558990">
+									<PropertyList>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-1</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{DBCFB8E8-7839-49CD-AFF4-143F0C284828}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-2"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="SFX_ArrowImpact_Body" ID="{84A81083-70AC-4724-A7BA-4357CD7D3F6D}" ShortID="962377581">
+											<PropertyList>
+												<Property Name="3DSpatialization" Type="int16" Value="2"/>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>20</Value>
+													</ValueList>
+												</Property>
+												<Property Name="InitialDelay" Type="Real64">
+													<ValueList>
+														<Value>0.09</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>15</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>-8</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>100</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{6D8EF5E1-43A4-46FA-AEDD-016BEE1C8FB0}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="100"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-12</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{F4B4DFA2-B834-4EB1-B62B-3CC843A4D83D}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-5"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Attenuation">
+													<ObjectRef Name="ArrowAttenuation" ID="{E8C3AD10-3E92-476B-BCB9-940E50098DC5}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+												</Reference>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ArrowImpactBody_BW_54264" ID="{870529FC-9413-46AA-BAE4-4251B99176E6}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0424338065863137"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.18118962891254"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.142637554519269"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.490137742341869"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ArrowImpactBody_BW.54264.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="689500474"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<PositioningInfo>
+												<Position Name="" ID="{24F784DF-854C-46ED-85B0-FBE8E6FCFFF9}"/>
+											</PositioningInfo>
+											<ActiveSourceList>
+												<ActiveSource Name="ArrowImpactBody_BW_54264" ID="{870529FC-9413-46AA-BAE4-4251B99176E6}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="SFX_Arrow_Shot" ID="{785B196C-C2FA-4ECB-872D-84051F95B444}" ShortID="684302631">
+											<PropertyList>
+												<Property Name="3DPosition" Type="int16" Value="1"/>
+												<Property Name="3DSpatialization" Type="int16" Value="1"/>
+												<Property Name="GameAuxSendVolume" Type="Real64">
+													<ValueList>
+														<Value>2</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>20</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>20</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>-2</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{89C1A0BC-4542-4FE0-9C14-E1F04C60E712}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-5"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-4</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{884708E3-4F3F-416D-90F3-DDA3C045FB8A}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Attenuation">
+													<Custom>
+														<Attenuation Name="Attenuation (Custom)" ID="{C87B262E-1C74-4E8E-976C-0D7FB8331E3D}" ShortID="278391816">
+															<PropertyList>
+																<Property Name="RadiusMax" Type="Real64" Value="500"/>
+															</PropertyList>
+															<CurveUsageInfoList>
+																<VolumeDryUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
+																		<Curve Name="VolumeDry" ID="{8AACE09F-3DD3-4722-BFF2-8EF9502AA34C}">
+																			<PropertyList>
+																				<Property Name="Flags" Type="int32" Value="3"/>
+																			</PropertyList>
+																			<PointList>
+																				<Point>
+																					<XPos>0</XPos>
+																					<YPos>0</YPos>
+																					<Flags>5</Flags>
+																					<SegmentShape>Exp3</SegmentShape>
+																				</Point>
+																				<Point>
+																					<XPos>500</XPos>
+																					<YPos>-200</YPos>
+																					<Flags>37</Flags>
+																				</Point>
+																			</PointList>
+																		</Curve>
+																	</CurveUsageInfo>
+																</VolumeDryUsage>
+																<VolumeWetGameUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseVolumeDry"/>
+																</VolumeWetGameUsage>
+																<VolumeWetUserUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseVolumeDry"/>
+																</VolumeWetUserUsage>
+																<LowPassFilterUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+																</LowPassFilterUsage>
+																<HighPassFilterUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+																</HighPassFilterUsage>
+																<SpreadUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+																</SpreadUsage>
+																<FocusUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+																</FocusUsage>
+																<ObstructionVolumeUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</ObstructionVolumeUsage>
+																<ObstructionLPFUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</ObstructionLPFUsage>
+																<ObstructionHPFUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</ObstructionHPFUsage>
+																<OcclusionVolumeUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</OcclusionVolumeUsage>
+																<OcclusionLPFUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</OcclusionLPFUsage>
+																<OcclusionHPFUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</OcclusionHPFUsage>
+																<DiffractionVolumeUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</DiffractionVolumeUsage>
+																<DiffractionLPFUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</DiffractionLPFUsage>
+																<DiffractionHPFUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</DiffractionHPFUsage>
+																<TransmissionVolumeUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</TransmissionVolumeUsage>
+																<TransmissionLPFUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</TransmissionLPFUsage>
+																<TransmissionHPFUsage>
+																	<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+																</TransmissionHPFUsage>
+															</CurveUsageInfoList>
+														</Attenuation>
+													</Custom>
+												</Reference>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="SFX_Arrow_Realse" ID="{B8DD6061-4F89-4804-B7F7-DA1CA7C3A476}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0196778798024124"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.345257345624144"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>SFX_Arrow_Realse.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="373316616"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<PositioningInfo>
+												<Position Name="" ID="{A567BEB2-E9C5-43E2-96EB-7C072AC563C7}"/>
+											</PositioningInfo>
+											<ActiveSourceList>
+												<ActiveSource Name="SFX_Arrow_Realse" ID="{B8DD6061-4F89-4804-B7F7-DA1CA7C3A476}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+								</BlendContainer>
 							</ChildrenList>
 						</Folder>
 						<Folder Name="Chan" ID="{51207146-34BA-4509-A4DE-E3C35A48426C}" ShortID="451123922">

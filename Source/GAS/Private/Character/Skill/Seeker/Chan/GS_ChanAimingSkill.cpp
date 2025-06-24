@@ -23,28 +23,27 @@ UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 }
 
 void UGS_ChanAimingSkill::ActiveSkill()
-{	
+{
 	if (!CanActive()) return;
 	Super::ActiveSkill();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{		
-		if (OwnerPlayer->HasAuthority())
-		{			
-			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
-			// Combo Control Value
-			OwnerPlayer->ComboInputClose();
-			OwnerPlayer->CurrentComboIndex = 0;
-			
-			// Control Input Key
-			OwnerPlayer->SetSkillInputControl(false, false, false);
-			// Change Slot
-			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(true);
+	{
+		// Combo Control Value
+		OwnerPlayer->ComboInputClose();
+		OwnerPlayer->CurrentComboIndex = 0;
+		
+		// Control Input Key
+		OwnerPlayer->SetSkillInputControl(true, false, true); // SJE
+		// Change Slot
+		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		OwnerPlayer->Multicast_SetMustTurnInPlace(true);
+		OwnerPlayer->SetSeekerGait(EGait::Walk);
 
-			// Play Montage
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-			OwnerPlayer->CanChangeSeekerGait = false;
-		}
+		// Play Montage
+		UE_LOG(LogTemp, Warning, TEXT("ChanAimingSkill::ActiveSkill")); //SJE
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		OwnerPlayer->CanChangeSeekerGait = false;
 		
 		// 에이밍 스킬 시작 사운드 재생
 		if (OwnerPlayer->AimingSkillStartSound)
@@ -52,6 +51,7 @@ void UGS_ChanAimingSkill::ActiveSkill()
 			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillStartSound);
 		}
 
+		
 		// =======================
 		// VFX 재생 - 컴포넌트 RPC 사용
 		// =======================
@@ -93,11 +93,10 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 			// Change Slot
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 			OwnerPlayer->SetLookControlValue(true, true);
-
+			OwnerPlayer->SetSeekerGait(OwnerPlayer->GetLastSeekerGait()); // SJE
 			// Change Slot
 			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			OwnerPlayer->Multicast_SetIsLeftArmSlot(false);
 			
 			OwnerPlayer->CanChangeSeekerGait = true;
 

@@ -71,6 +71,12 @@ AGS_Monster::AGS_Monster()
 void AGS_Monster::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (SelectionDecal && SelectionDecal->GetDecalMaterial())
+	{
+		DynamicDecalMaterial = UMaterialInstanceDynamic::Create(SelectionDecal->GetDecalMaterial(), this);
+		SelectionDecal->SetDecalMaterial(DynamicDecalMaterial);
+	}
 	
 	if (IsValid(MonsterSkillComp))
 	{
@@ -91,6 +97,20 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 	DOREPLIFETIME(AGS_Monster, bCommandLocked);
 	DOREPLIFETIME(AGS_Monster, bSelectionLocked);
+}
+
+void AGS_Monster::NotifyActorBeginCursorOver()
+{
+	Super::NotifyActorBeginCursorOver();
+	
+	SetHovered(true);
+}
+
+void AGS_Monster::NotifyActorEndCursorOver()
+{
+	Super::NotifyActorEndCursorOver();
+	
+	SetHovered(false);
 }
 
 void AGS_Monster::OnDeath()
@@ -146,19 +166,6 @@ void AGS_Monster::Multicast_OnDeath_Implementation()
 	OnMonsterDead.Broadcast(this);
 }
 
-void AGS_Monster::SetSelected(bool bIsSelected, bool bPlaySound)
-{
-	if (SelectionDecal)
-	{
-		SelectionDecal->SetVisibility(bIsSelected);
-	}
-
-	// 선택되었고, 소리 재생이 허용된 경우에만 소리 재생
-	if (bIsSelected && bPlaySound && ClickSoundEvent)
-	{
-		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
-	}
-}
 
 void AGS_Monster::UseSkill()
 {	
@@ -200,3 +207,44 @@ void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 	MonsterAnim->Montage_Play(AttackMontage);
 }
 
+
+void AGS_Monster::SetSelected(bool bIsSelected, bool bPlaySound)
+{
+	bIsRTSSelected = bIsSelected;
+	UpdateDecalColor();
+
+	// 선택되었고, 소리 재생이 허용된 경우에만 소리 재생
+	if (bIsSelected && bPlaySound && ClickSoundEvent)
+	{
+		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
+	}
+}
+
+void AGS_Monster::SetHovered(bool bIsHovered)
+{
+	bIsRTSHovered = bIsHovered;
+	UpdateDecalColor();
+}
+
+void AGS_Monster::UpdateDecalColor()
+{
+	if (!DynamicDecalMaterial || !SelectionDecal)
+	{
+		return;
+	}
+    
+	if (bIsRTSSelected)
+	{
+		SelectionDecal->SetVisibility(true);
+		DynamicDecalMaterial->SetVectorParameterValue("DecalColor", FLinearColor::Green);
+	}
+	else if (bIsRTSHovered)
+	{
+		SelectionDecal->SetVisibility(true);
+		DynamicDecalMaterial->SetVectorParameterValue("DecalColor", FLinearColor::Yellow);
+	}
+	else
+	{
+		SelectionDecal->SetVisibility(false);
+	}
+}

@@ -29,14 +29,20 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	Super::ActiveSkill();
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	
-	// 궁극기 사운드 재생
 	if (OwnerPlayer && OwnerPlayer->UltimateSkillSound)
 	{
-		OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->UltimateSkillSound);
+		// 애니메이션 재생
+		if(SkillAnimMontages[0])
+		{
+			//OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		}
+
+		// 궁극기 사운드 재생
+		if(OwnerPlayer->UltimateSkillSound)
+		{
+			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->UltimateSkillSound);
+		}
 	}
-	
-	// 애니메이션 재생
-	//OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 
 	// 돌진 시작 (약간 딜레이)
 	FTimerHandle DelayHandle;
@@ -168,6 +174,13 @@ void UGS_ChanUltimateSkill::StartCharge()
 void UGS_ChanUltimateSkill::EndCharge()
 {
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	if (OwnerPlayer && SkillAnimMontages[1])
+	{
+		// 애니메이션 재생
+		//OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+	}
+
+	
 	// EndCharge 안에서
 	OwnerPlayer->UltimateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	// 속도 조절

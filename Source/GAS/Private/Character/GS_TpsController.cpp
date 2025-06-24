@@ -263,6 +263,8 @@ void AGS_TpsController::TestFunction()
 					HPBoardWidget->InitBoardWidget();
 				}
 
+				PlayerWidgetInstance->AddToViewport(0);
+
 				CrosshairWidget = Cast<UGS_CrossHairImage>(PlayerWidgetInstance->GetWidgetFromName(TEXT("WBP_CrossHairImage")));
 				if (CrosshairWidget)
 				{
@@ -272,8 +274,6 @@ void AGS_TpsController::TestFunction()
 						MerciCharacter->SetCrosshairWidget(CrosshairWidget);
 					}
 				}
-
-				PlayerWidgetInstance->AddToViewport(0);
 			}
 		}
 	}
@@ -281,27 +281,16 @@ void AGS_TpsController::TestFunction()
 
 void AGS_TpsController::StartAutoMoveForward()
 {
-	if (!IsLocalController())
-	{
-		Client_StartAutoMoveForward();
-		return;
-	}
-
 	bIsAutoMoving = true;
 
-	GetWorld()->GetTimerManager().SetTimer(AutoMoveTickHandle, this, &AGS_TpsController::AutoMoveTick, 0.01f, true);
+	Client_StartAutoMoveForward();
 }
 
 void AGS_TpsController::StopAutoMoveForward()
 {
-	if (!IsLocalController())
-	{
-		Client_StopAutoMoveForward();
-		return;
-	}
-
 	bIsAutoMoving = false;
-	GetWorld()->GetTimerManager().ClearTimer(AutoMoveTickHandle);
+	
+	Client_StopAutoMoveForward();
 }
 
 void AGS_TpsController::AutoMoveTick()
@@ -329,12 +318,24 @@ void AGS_TpsController::AutoMoveTick()
 
 void AGS_TpsController::Client_StopAutoMoveForward_Implementation()
 {
-	StopAutoMoveForward();
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	bIsAutoMoving = false;
+	GetWorld()->GetTimerManager().ClearTimer(AutoMoveTickHandle);
 }
 
 void AGS_TpsController::Client_StartAutoMoveForward_Implementation()
 {
-	StartAutoMoveForward();
+	if (!IsLocalController()) 
+	{
+		return;
+	}
+
+	bIsAutoMoving = true;
+	GetWorld()->GetTimerManager().SetTimer(AutoMoveTickHandle, this, &AGS_TpsController::AutoMoveTick, 0.01f, true);
 }
 
 void AGS_TpsController::BeginPlay()

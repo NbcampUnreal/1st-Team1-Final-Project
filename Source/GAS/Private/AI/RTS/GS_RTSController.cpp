@@ -45,7 +45,11 @@ void AGS_RTSController::BeginPlay()
 	{
 		ViewportClient->SetMouseCaptureMode(EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown);
 		ViewportClient->SetHideCursorDuringCapture(false);
+		ViewportClient->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
+	SetRTSCursor(DefaultCursorTexture);
+	bEnableMouseOverEvents = true; 
+	
 	if (!HasAuthority() && IsLocalController())
 	{
 		if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
@@ -76,18 +80,6 @@ void AGS_RTSController::BeginPlay()
 		if (IsValid(Seeker))
 		{
 			Seeker->HPTextWidgetComp->SetVisibility(true);
-		}
-	}
-
-	// RTS 모드에서 BGM 시작 (로컬 플레이어에게만)
-	if (IsLocalController())
-	{
-		if (UGameInstance* GameInstance = GetGameInstance())
-		{
-			if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
-			{
-				AudioManager->StartMapBGM(this);
-			}
 		}
 	}
 }
@@ -141,6 +133,8 @@ void AGS_RTSController::Tick(float DeltaTime)
 
 	// 마우스 엣지 감지
 	MouseEdgeDir = GetMouseEdgeDirection();
+	
+	UpdateCursorForEdgeScroll();
 	
 	FVector2D FinalDir = GetFinalDirection();
 	if (!FinalDir.IsNearlyZero())
@@ -438,6 +432,61 @@ void AGS_RTSController::InitCameraActor()
 	}
 }
 
+void AGS_RTSController::SetRTSCursor(UTexture2D* CursorTexture)
+{
+	if (!IsValid(CursorTexture))
+	{
+		if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
+		{
+			ViewportClient->SetHardwareCursor(EMouseCursor::Default, NAME_None, FIntPoint::ZeroValue);
+		}
+		return;
+	}
+	
+	if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
+	{
+		FString CursorPath = CursorTexture->GetPathName();
+		CursorPath = CursorPath.Replace(TEXT("/Game/"), TEXT(""));
+		
+		int32 LastDotIndex;
+		if (CursorPath.FindLastChar('.', LastDotIndex))
+		{
+			CursorPath = CursorPath.Left(LastDotIndex);
+		}
+		
+		ViewportClient->SetHardwareCursor(EMouseCursor::Default, FName(*CursorPath), FIntPoint::ZeroValue);
+	}
+}
+
+void AGS_RTSController::UpdateCursorForEdgeScroll()
+{
+	bool bShouldShowEdgeCursor = !MouseEdgeDir.IsNearlyZero();
+    
+	if (bShouldShowEdgeCursor)
+	{
+		SetRTSCursor(ScrollCursorTexture);
+	}
+	else
+	{
+		UpdateCursorForCommand();
+	}
+}
+
+void AGS_RTSController::UpdateCursorForCommand()
+{
+	switch (CurrentCommand)
+	{
+	case ERTSCommand::Move:
+		SetRTSCursor(CommandCursorTexture);
+		break;
+	case ERTSCommand::Attack:
+		SetRTSCursor(CommandCursorTexture);
+		break;
+	default:
+		SetRTSCursor(DefaultCursorTexture);
+		break;
+	}
+}
 
 void AGS_RTSController::SelectOnCtrlClick()
 {	
