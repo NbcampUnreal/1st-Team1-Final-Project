@@ -152,7 +152,7 @@ void AGS_Seeker::SetSeekerGait(EGait Gait)
 		SetCharacterSpeed(1.0f);
 		break;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Gait: %d, Last Gait : %d"), SeekerGait, LastSeekerGait); // SJE
+	//UE_LOG(LogTemp, Warning, TEXT("Gait: %d, Last Gait : %d"), SeekerGait, LastSeekerGait); // SJE
 }
 
 EGait AGS_Seeker::GetSeekerGait()

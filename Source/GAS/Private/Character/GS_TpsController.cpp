@@ -116,6 +116,10 @@ void AGS_TpsController::PageDown(const FInputActionValue& InputValue)
 
 void AGS_TpsController::SetMoveControlValue(bool CanMoveRight, bool CanMoveForward)
 {
+	if (this->HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetMovecontrolValue")) // SJE
+	}
 	ControlValues.bCanMoveForward = CanMoveForward;
 	ControlValues.bCanMoveRight = CanMoveRight;
 }

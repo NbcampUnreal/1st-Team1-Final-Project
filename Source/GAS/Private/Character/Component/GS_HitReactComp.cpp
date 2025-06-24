@@ -32,7 +32,6 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 			}
 		}
 		OwnerCharacter->Multicast_SetCanHitReact(false);
-		UE_LOG(LogTemp, Warning, TEXT("PlayHitReact")); // SJE
 		OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[ReactType], Section);
 	}
 }
@@ -56,8 +55,6 @@ FName UGS_HitReactComp::CalculateHitDirection(FVector HitDirection)
 
 		float FrontDot = FVector::DotProduct(Front, HitDirection);
 		float RightDot = FVector::DotProduct(Right, HitDirection);
-		UE_LOG(LogTemp, Warning, TEXT("Hit Direction : %s"), *HitDirection.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("Hit Front Dot : %f / Right Dot : %f"), FrontDot, RightDot);
 
 		if (FrontDot > 0.7f)
 		{

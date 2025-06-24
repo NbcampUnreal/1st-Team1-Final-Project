@@ -17,16 +17,19 @@ void UGS_AN_EndCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 			Character->CanChangeSeekerGait = false;
 			return;
 		};
-		
 		if (Character->HasAuthority())
 		{
 			Character->bComboEnded = true;
-			Character->Multicast_SetIsFullBodySlot(false);
-			Character->Multicast_SetIsUpperBodySlot(false);
+			UGS_SeekerAnimInstance* SeekerAnimInstance = Cast<UGS_SeekerAnimInstance>(Character->GetMesh()->GetAnimInstance());
+			if (SeekerAnimInstance)
+			{
+				SeekerAnimInstance->IsPlayingFullBodyMontage = false;
+				SeekerAnimInstance->IsPlayingUpperBodyMontage = false;
+			}
 			Character->Multicast_ComboEnd();
-			Character->Server_SetMoveControlValue(true, true);
+			UE_LOG(LogTemp, Warning, TEXT("AN_End Combo HasAuthority"));
+			Character->SetMoveControlValue(true, true);
 		}
-
 		Character->CanChangeSeekerGait = true;
 	}
 }

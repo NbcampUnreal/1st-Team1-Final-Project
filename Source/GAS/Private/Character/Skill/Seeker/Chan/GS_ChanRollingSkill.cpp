@@ -24,7 +24,7 @@ void UGS_ChanRollingSkill::ActiveSkill()
 			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
 			OwnerPlayer->ComboInputClose();
 			OwnerPlayer->CurrentComboIndex = 0;
-			OwnerPlayer->SetSkillInputControl(false, false, false);
+			OwnerPlayer->SetSkillInputControl(false, false, true);
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 			OwnerPlayer->CanChangeSeekerGait = false;
@@ -49,9 +49,6 @@ void UGS_ChanRollingSkill::DeactiveSkill()
 	{
 		if (OwnerPlayer->HasAuthority())
 		{
-			// Giat Change ...
-			//
-			UE_LOG(LogTemp, Warning, TEXT("RollingSkill Deactive in Server %s"), *UEnum::GetValueAsString(OwnerPlayer->GetLocalRole())); // SJE
 			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->ComboInputOpen();
 			OwnerPlayer->SetSkillInputControl(true, true, true);

@@ -26,7 +26,6 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	{
 		if (!ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Chan Ainimg TryActiveSkill")); // SJE
 			ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 		}
 	}
@@ -91,6 +90,8 @@ void UGS_ChanSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& In
 	}
 	if (AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter))
 	{
+		// 만약 다른 스킬들이 활성화 중이었다면 해당 스킬들의 Deactive 에 해당하는 로직 수행. // SJE
+		
 		ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Rolling);
 	}
 
