@@ -31,7 +31,7 @@ public class GAS : ModuleRules
             "CommonInput",
             "Chooser",
             "PoseSearch",
-            "GeometryCollectionEngine"
+            "GeometryCollectionEngine",
             "NavigationSystem"
         });
 
