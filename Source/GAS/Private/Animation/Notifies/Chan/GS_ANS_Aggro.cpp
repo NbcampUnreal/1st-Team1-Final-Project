@@ -10,6 +10,14 @@ void UGS_ANS_Aggro::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceB
                                 const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
+
+	if (AGS_Chan* Character = Cast<AGS_Chan>(MeshComp->GetOwner()))
+	{
+		if (Character->HasAuthority())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Chan Roar in server")); // SJE
+		}
+	}
 }
 
 void UGS_ANS_Aggro::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
@@ -18,6 +26,7 @@ void UGS_ANS_Aggro::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
 	if (AGS_Chan* Character = Cast<AGS_Chan>(MeshComp->GetOwner()))
 	{
+		
 		Character->GetSkillComp()->TryDeactiveSkill(ESkillSlot::Moving);
 	}
 }

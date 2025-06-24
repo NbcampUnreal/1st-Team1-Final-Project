@@ -150,7 +150,7 @@ void AGS_Seeker::SetSeekerGait(EGait Gait)
 		SetCharacterSpeed(1.0f);
 		break;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Gait: %d, Last Gait : %d"), SeekerGait, LastSeekerGait);
+	UE_LOG(LogTemp, Warning, TEXT("Gait: %d, Last Gait : %d"), SeekerGait, LastSeekerGait); // SJE
 }
 
 EGait AGS_Seeker::GetSeekerGait()
@@ -177,9 +177,7 @@ void AGS_Seeker::Multicast_ComboEnd_Implementation()
 	{
 		StopAnimMontage(ComboAnimMontage);
 		CurrentComboIndex = 0;
-		CanAcceptComboInput = true;
-
-		Server_SetMoveControlValue(true, true);
+		CanAcceptComboInput = true;		
 	}
 }
 

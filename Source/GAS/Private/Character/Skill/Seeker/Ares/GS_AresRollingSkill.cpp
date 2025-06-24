@@ -13,6 +13,11 @@ void UGS_AresRollingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
+		if (!OwnerPlayer->GetSkillInputControl().CanInputRoll)
+		{
+			return;
+		}
+		
 		if (OwnerPlayer->HasAuthority())
 		{
 			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
@@ -43,9 +48,8 @@ void UGS_AresRollingSkill::DeactiveSkill()
 	{
 		if (OwnerPlayer->HasAuthority())
 		{
-			// Giat Change ...
-			//
-			UE_LOG(LogTemp, Warning, TEXT("RollingSkill Deactive in Server")); // SJE
+			UE_LOG(LogTemp, Warning, TEXT("RollingSkill Deactive in Server %s"), *UEnum::GetValueAsString(OwnerPlayer->GetLocalRole())); // SJE
+			
 			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->ComboInputOpen();
 			OwnerPlayer->SetSkillInputControl(true, true, true);
