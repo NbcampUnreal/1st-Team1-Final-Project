@@ -17,6 +17,8 @@ class UGS_HPWidget;
 class AGS_Weapon;
 class UAkAudioEvent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeath);
+
 USTRUCT(BlueprintType)
 struct FWeaponSlot
 {
@@ -125,6 +127,9 @@ public:
 	void SetCharacterSpeed(float InRatio);
 
 	bool IsDead() const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCharacterDeath OnDeathDelegate;
 	
 protected:
 	//component

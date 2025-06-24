@@ -34,6 +34,13 @@ public:
 	//Crosshair
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FOnArrowHitEnemy OnArrowHitEnemy;
+
+	UFUNCTION()
+	void OnTargetDestroyed(AActor* DestroyedActor);
+
+	UFUNCTION()
+	void OnTargetDied();
+
 protected:
 	virtual void BeginPlay() override;
 	void StickWithVisualOnly(const FHitResult& Hit);

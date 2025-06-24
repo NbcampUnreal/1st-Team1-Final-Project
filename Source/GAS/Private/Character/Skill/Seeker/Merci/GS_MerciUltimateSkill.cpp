@@ -105,6 +105,12 @@ AActor* UGS_MerciUltimateSkill::FindCloseTarget()
 	{
 		if (!IsValid(Target)) continue;
 
+		// 죽은 타겟은 건너뛰기
+		if (AGS_Character* CharacterTarget = Cast<AGS_Character>(Target))
+		{
+			if (CharacterTarget->IsDead()) continue;
+		}
+
 		FVector ToTarget = (Target->GetActorLocation() - CamLoc).GetSafeNormal();
 		float Dot = FVector::DotProduct(ViewDir, ToTarget);
 

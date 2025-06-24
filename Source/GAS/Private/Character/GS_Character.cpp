@@ -145,6 +145,9 @@ void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 void AGS_Character::OnDeath()
 {
 	bIsDead = true;
+
+	OnDeathDelegate.Broadcast();
+
 	// 죽음 사운드 재생
 	if (DeathSoundEvent)
 	{
