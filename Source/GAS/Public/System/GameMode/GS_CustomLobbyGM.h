@@ -34,7 +34,7 @@ protected:
 	FName NextLevelName = "InGameTestLevel_v2"; // 테스트 후에 다시 LoadingLevel로 바꿔놔야함!!!!!!!!!!!!!!!!!!!
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
-	int32 MinPlayersToStart = 2;
+	int32 MinPlayersToStart = 1;
 
 	//폰 배치
 public:

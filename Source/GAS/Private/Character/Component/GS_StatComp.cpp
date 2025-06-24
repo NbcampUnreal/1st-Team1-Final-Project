@@ -116,7 +116,6 @@ void UGS_StatComp::UpdateStat_Implementation(const FGS_StatRow& RuneStats)
 		Defense = FoundRow->DEF + RuneStats.DEF;
 		Agility = FoundRow->AGL + RuneStats.AGL;
 		AttackSpeed = FoundRow->ATS + RuneStats.ATS;
-		CurrentHealth = MaxHealth;
 
 		UE_LOG(LogTemp, Log, TEXT("캐릭터 스탯 업데이트 - HP: %.1f, ATK: %.1f, DEF: %.1f, AGL: %.1f, ATS: %.1f"),
 			MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
