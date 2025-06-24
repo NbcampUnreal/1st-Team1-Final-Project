@@ -28,6 +28,19 @@ AGS_SeekerMerciArrow::AGS_SeekerMerciArrow()
 	}
 }
 
+void AGS_SeekerMerciArrow::OnTargetDestroyed(AActor* DestroyedActor)
+{
+	if (DestroyedActor == HomingTarget)
+	{
+		Destroy();  // 화살 제거
+	}
+}
+
+void AGS_SeekerMerciArrow::OnTargetDied()
+{
+	Destroy();
+}
+
 void AGS_SeekerMerciArrow::BeginPlay()
 {
 	Super::BeginPlay();
@@ -99,6 +112,13 @@ void AGS_SeekerMerciArrow::Multicast_InitHomingTarget_Implementation(AActor* Tar
 
 	if(Target)
 	{
+		if (!Target || !IsValid(Target))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("타겟이 유효하지 않거나 이미 제거됨. 화살 파괴."));
+			Destroy();  // 유효하지 않으면 화살도 제거
+			return;
+		}
+
 		UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(Target->GetRootComponent());
 		if (!RootPrim)
 		{
@@ -116,6 +136,11 @@ void AGS_SeekerMerciArrow::Multicast_InitHomingTarget_Implementation(AActor* Tar
 		ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileMovementComponent->InitialSpeed;
 
 		HomingTarget = Target;
+		Target->OnDestroyed.AddDynamic(this, &AGS_SeekerMerciArrow::OnTargetDestroyed);
+		if (AGS_Character* TargetCharacter = Cast<AGS_Character>(Target))
+		{
+			TargetCharacter->OnDeathDelegate.AddDynamic(this, &AGS_SeekerMerciArrow::OnTargetDied);
+		}
 		UE_LOG(LogTemp, Warning, TEXT("HomingTarget set to %s"), *Target->GetName());
 	}
 	else
