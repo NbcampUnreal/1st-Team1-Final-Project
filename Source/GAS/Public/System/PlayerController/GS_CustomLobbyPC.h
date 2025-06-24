@@ -5,13 +5,16 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "System/GS_PlayerRole.h"
+#include "System/GameState/GS_CustomLobbyGS.h"
 #include "GS_CustomLobbyPC.generated.h"
 
 class UUserWidget;
 class AGS_PlayerState;
-class UUserWidget;
 class UGS_CustomLobbyUI;
 class UGS_ArcaneBoardWidget;
+class AGS_LobbyDisplayActor;
+class AGS_SpawnSlot;
+class UGS_PawnMappingDataAsset;
 
 enum class EPendingWork : uint8
 {
@@ -106,4 +109,26 @@ public:
 private:
 	EPendingWork PendingWork;
 	void ShowPerkSaveConfirmPopup();
+
+	// 플레이어 스폰
+private:
+	UPROPERTY()
+	TMap<TWeakObjectPtr<APlayerState>, TObjectPtr<AGS_LobbyDisplayActor>> SpawnedLobbyActors;
+
+	// 스폰 슬롯 액터들을 캐싱하기 위한 배열
+	UPROPERTY()
+	TArray<TObjectPtr<AGS_SpawnSlot>> CachedGuardianSlots;
+
+	UPROPERTY()
+	TArray<TObjectPtr<AGS_SpawnSlot>> CachedSeekerSlots;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Lobby")
+	TObjectPtr<UGS_PawnMappingDataAsset> PawnMappingData;
+
+	// GameState의 플레이어 목록이 업데이트 될 때 호출될 함수
+	UFUNCTION()
+	void OnLobbyPlayerListUpdated();
+
+	void SpawnOrUpdateLobbyActor(const FLobbyPlayerInfo& PlayerInfo);
+	void CollectAndCacheSpawnSlots();
 };
