@@ -25,6 +25,7 @@ private:
 	UFUNCTION()
 	void AnimNotify_Reset();
 
+	//[last combo attack]
 	UFUNCTION()
 	void AnimNotify_ShootEnergy();
 
@@ -39,4 +40,7 @@ private:
 	//[skill check]
 	UFUNCTION()
 	void AnimNotify_CtrlSkillEnd();
+
+	UFUNCTION()
+	void AnimNotify_FinishCtrlSkill();
 };

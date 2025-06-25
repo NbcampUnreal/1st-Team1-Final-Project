@@ -6,17 +6,12 @@
 #include "Character/Skill/GS_SkillBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Weapon/Projectile/Guardian/GS_DrakharProjectile.h"
-#include "AkGameplayStatics.h"
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "NiagaraSystem.h"
-#include "NiagaraComponent.h"
-#include "NiagaraFunctionLibrary.h"
 #include "Components/ArrowComponent.h"
-#include "Character/Component/GS_CameraShakeComponent.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Component/GS_FootManagerComponent.h"
 #include "Character/Skill/Guardian/Drakhar/GS_EarthquakeEffect.h"
@@ -60,8 +55,9 @@ AGS_Drakhar::AGS_Drakhar()
 	DraconicAttackPersistenceTime = 5.f;
 
 	//Guardian State Setting
-	ClientGuardianState = EGuardianState::CtrlSkillEnd;
-
+	ClientGuardianState = EGuardianState::CtrlEnd;
+	ClientGuardianDoSkillState = EGuardianDoSkill::None;
+	
 	//boss monster tag for user widget
 	Tags.Add("Guardian");
 
@@ -134,7 +130,7 @@ void AGS_Drakhar::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GuardianState = EGuardianState::CtrlSkillEnd;
+	GuardianState = EGuardianState::CtrlEnd;
 
 	UGS_DrakharAnimInstance* Anim = Cast<UGS_DrakharAnimInstance>(GetMesh()->GetAnimInstance());
 	if (IsValid(Anim))
@@ -147,7 +143,7 @@ void AGS_Drakhar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if (SpringArmComp && bIsFlying)  
+	if (SpringArmComp && bIsFlying)
 	{
 		if (FMath::IsNearlyEqual(SpringArmComp->TargetArmLength, TargetSpringArmLength, 1.0f))
 		{
@@ -168,7 +164,6 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	DOREPLIFETIME(ThisClass, bCanCombo);
 	DOREPLIFETIME(ThisClass, CurrentFeverGauge);
 	DOREPLIFETIME(ThisClass, IsFeverMode);
-
 }
 
 void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -180,12 +175,14 @@ void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	GetWorldTimerManager().ClearTimer(HealthRegenTimer);
 	GetWorldTimerManager().ClearTimer(HealthDelayTimer);
 }
+
 void AGS_Drakhar::OnDamageStart()
 {
-	//timer start
 	bIsDamaged = true;
 
 	StopHealRegeneration();
+	
+	//timer start
 	GetWorld()->GetTimerManager().SetTimer(HealthDelayTimer,this,&AGS_Drakhar::BeginHealRegeneration,5.f,false);
 }
 
@@ -193,38 +190,35 @@ void AGS_Drakhar::Ctrl()
 {
 	if (!HasAuthority() && IsLocallyControlled())
 	{
-		if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
+		//not flying
+		if (ClientGuardianState == EGuardianState::CtrlEnd)
 		{
+			//if execute flying skill, prevent change state
+			if (ClientGuardianDoSkillState != EGuardianDoSkill::None)
+			{
+				return;
+			}
+			
+			ClientGuardianState = EGuardianState::CtrlUp;
+			TargetSpringArmLength = 800.f;
+			bIsFlying = true;
+			
+			//server logic
 			GetSkillComp()->TryActivateSkill(ESkillSlot::Ready);
-			ClientGuardianState = EGuardianState::CtrlUp; // 클라이언트 상태 즉시 업데이트
 			ServerRPCStartCtrl();
 		}
-		//for fix input bugs...
-		else
-		{
-			ClientGuardianState = EGuardianState::CtrlSkillEnd;
-		}
-
-		TargetSpringArmLength = 800.f;
-		bIsFlying = true;
 	}
-
-	DraconicAttackPersistenceTime = 5.f;
-
-	//Guardian State Setting
-	ClientGuardianState = EGuardianState::CtrlSkillEnd;
 }
 
 void AGS_Drakhar::CtrlStop()
 {
 	if (!HasAuthority() && IsLocallyControlled())
 	{
-		GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
-		ClientGuardianState = EGuardianState::CtrlSkillEnd; // 클라이언트 상태 즉시 업데이트
-		ServerRPCStopCtrl();
-		
-		TargetSpringArmLength = 500.f;
-		bIsFlying = true;
+		//stop flying
+		if (ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		{
+			StopCtrl();
+		}
 	}
 }
 
@@ -234,14 +228,15 @@ void AGS_Drakhar::LeftMouse()
 
 	if (!HasAuthority() && IsLocallyControlled())
 	{
-		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
+		//flying & not using flying skill
+		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready) && ClientGuardianDoSkillState == EGuardianDoSkill::None)
 		{
-			//earthquake
+			//check earthquake skill
 			GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 		}
-
-		//not flying
-		else if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
+		
+		//not flying & not using skills
+		else if (ClientGuardianDoSkillState == EGuardianDoSkill::None)
 		{
 			if (bClientCanCombo)
 			{
@@ -250,26 +245,23 @@ void AGS_Drakhar::LeftMouse()
 				bClientCanCombo = false;
 			}
 		}
-		//for fix input bugs...
-		else
-		{
-			ClientGuardianState = EGuardianState::CtrlSkillEnd;
-		}
 	}
 }
 
 void AGS_Drakhar::RightMouse()
 {
-	if (IsLocallyControlled())
+	if (!HasAuthority() && IsLocallyControlled())
 	{
-		//ultimate skill
-		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
+		//flying & not using flying skill
+		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready) && ClientGuardianDoSkillState == EGuardianDoSkill::None)
 		{
+			//ultimate skill check
 			ServerRPC_BeginDraconicFury();
 		}
-		//dash skill
-		else if (ClientGuardianState == EGuardianState::CtrlSkillEnd)
+		//not flying & not using flying skills
+		else if (ClientGuardianState == EGuardianState::CtrlEnd && ClientGuardianDoSkillState == EGuardianDoSkill::None)
 		{
+			//dash skill check
 			GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 		}
 	}
@@ -379,7 +371,9 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 {
 	//collision setting first
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-
+	//skill state reset
+	GuardianDoSkillState = EGuardianDoSkill::None;
+	
 	if (DamagedCharactersFromDash.IsEmpty())
 	{
 		return;
@@ -409,7 +403,7 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 
 		DamagedCharacter->LaunchCharacter(ResultVector.GetSafeNormal() * 10000.f, true, true);
 	}
-
+	
 	DamagedCharactersFromDash.Empty();
 	bCanCombo = true;
 
@@ -446,13 +440,11 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 	const FVector Start = GetActorLocation() + 100.f;
 	TSet<AGS_Character*> EarthquakeDamagedCharacters = DetectPlayerInRange(Start, 200.f, EarthquakeRadius);
 
-	//[Test Land Destruction]
-	{
-		FVector SpawnLocation = Start + GetActorForwardVector() * 300.f;
-		AGS_EarthquakeEffect* GC_Earthquake = GetWorld()->SpawnActor<AGS_EarthquakeEffect>(GC_EarthquakeEffect, SpawnLocation + FVector(0.f,0.f,-200.f), GetActorRotation());
-		GC_Earthquake->SetOwner(this);
-		GC_Earthquake->MulticastTriggerDestruction(SpawnLocation, EarthquakeRadius, 3000.f);
-	}
+	//Spawn Skill Effect
+	FVector SpawnLocation = Start + GetActorForwardVector() * 300.f;
+	AGS_EarthquakeEffect* GC_Earthquake = GetWorld()->SpawnActor<AGS_EarthquakeEffect>(GC_EarthquakeEffect, SpawnLocation + FVector(0.f,0.f,-200.f), GetActorRotation());
+	GC_Earthquake->SetOwner(this);
+	GC_Earthquake->MulticastTriggerDestruction(SpawnLocation, EarthquakeRadius, 3000.f);
 	
 	for (const auto& DamagedCharacter : EarthquakeDamagedCharacters)
 	{
@@ -479,9 +471,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 
 			FVector DrakharLocation = GetActorLocation();
 			FVector DamagedLocation = DamagedCharacter->GetActorLocation();
-
 			FVector LaunchVector = (DamagedLocation - DrakharLocation).GetSafeNormal();
-
 			//Guardian 쪽으로 당겨오기
 			DamagedCharacter->LaunchCharacter(-LaunchVector * EarthquakePower + FVector(0.f, 0.f, 500.f), false, false);
 		}
@@ -496,10 +486,24 @@ void AGS_Drakhar::ServerRPCStartCtrl_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
+void AGS_Drakhar::StopCtrl()
+{
+	//[Client] reset flying skill values
+	if (!HasAuthority())
+	{
+		ServerRPCStopCtrl();
+		GetSkillComp()->TryDeactiveSkill(ESkillSlot::Ready);
+		
+		ClientGuardianState = EGuardianState::CtrlEnd;
+		ClientGuardianDoSkillState = EGuardianDoSkill::None;
+		TargetSpringArmLength = 500.f;
+		bIsFlying = true;
+	}
+}
+ 
 void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
 {
-	GuardianState = EGuardianState::CtrlSkillEnd;
-
+	GuardianState = EGuardianState::CtrlEnd;
 	MoveSpeed = NormalMoveSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
@@ -679,13 +683,13 @@ void AGS_Drakhar::BeginHealRegeneration()
 	//health regeneration start
 	GetWorld()->GetTimerManager().SetTimer(HealthRegenTimer, this, &AGS_Drakhar::HealRegeneration,1.f,true);
 }
+
 void AGS_Drakhar::HealRegeneration()
 {
 	if (!bIsDamaged)
 	{
 		float CurrentHealth = GetStatComp()->GetCurrentHealth();
 		GetStatComp()->SetCurrentHealth(CurrentHealth + 2.f, true);
-		//UE_LOG(LogTemp,Warning, TEXT("healing!!!!!!!"));
 	}
 }
 
@@ -811,8 +815,11 @@ void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
 
 void AGS_Drakhar::EndDraconicFury()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Draconic Fury Skill End"));
+	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT] Draconic Fury Skill End")));
+	
 	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
-	GuardianState = EGuardianState::ForceLanded;
+	GuardianState = EGuardianState::CtrlEnd;
 
 	MoveSpeed = NormalMoveSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
