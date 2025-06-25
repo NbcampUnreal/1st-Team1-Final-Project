@@ -126,13 +126,13 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 	{
 		if (OwnerPlayer->HasAuthority())
 		{
-			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
-		
-			// Control Input Value
+			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+			
 			OwnerPlayer->SetLookControlValue(false, false);
 			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->SetSkillInputControl(false, false, true);
+			OwnerPlayer->SetSkillInputControl(false, false, false);
 			
 			// Play Montage
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
@@ -240,6 +240,21 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 bool UGS_ChanAimingSkill::IsActive() const
 {
 	return bIsHoldingUp;
+}
+
+void UGS_ChanAimingSkill::OnSkillAnimationEnd()
+{
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	UE_LOG(LogTemp, Warning, TEXT("ChanAimingSkill::OnSkillAnimationEnd | LocalRole : %s"), *UEnum::GetValueAsString(OwnerPlayer->GetLocalRole()));
+	if(OwnerPlayer->HasAuthority())
+	{
+		if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerPlayer->GetMesh()->GetAnimInstance()))
+		{
+			SeekerAnim->IsPlayingFullBodyMontage = false;
+			SeekerAnim->IsPlayingUpperBodyMontage = false;
+		}
+		OwnerPlayer->SetMoveControlValue(true, true);
+	}
 }
 
 void UGS_ChanAimingSkill::OnShieldSlam()

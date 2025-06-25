@@ -9,6 +9,7 @@
 void UGS_AN_EndCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
 	Super::Notify(MeshComp, Animation, EventReference);
+	UE_LOG(LogTemp, Warning, TEXT("AN_EndCombo %s"), *UEnum::GetValueAsString(MeshComp->GetOwner()->GetLocalRole())); // SJE
 	
 	if (AGS_Seeker* Character = Cast<AGS_Seeker>(MeshComp->GetOwner()))
 	{		

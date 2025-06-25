@@ -22,6 +22,7 @@ public:
 	virtual void OnSkillCommand() override;
 	virtual void ExecuteSkillEffect() override;
 	virtual bool IsActive() const override;
+	virtual void OnSkillAnimationEnd() override;
 
 	// 공격
 	void OnShieldSlam();

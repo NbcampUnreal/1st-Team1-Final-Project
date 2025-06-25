@@ -15,6 +15,7 @@
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/GS_TpsController.h"
 #include "AIController.h"
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 
 
 
@@ -59,10 +60,14 @@ void UGS_ChanUltimateSkill::ExecuteSkillEffect()
 void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 {
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if(OwnerPlayer)
+	if(OwnerPlayer->HasAuthority())
 	{
-		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerPlayer->GetMesh()->GetAnimInstance()))
+		{
+			SeekerAnim->IsPlayingFullBodyMontage = false;
+			SeekerAnim->IsPlayingUpperBodyMontage = false;
+		}
+		OwnerPlayer->SetMoveControlValue(true, true);
 	}
 }
 
