@@ -8,7 +8,7 @@
 AGS_DEPawn::AGS_DEPawn()
 {
  	PrimaryActorTick.bCanEverTick = true;
-
+	
 	SceneComp = CreateDefaultSubobject<USceneComponent>("Scene");
 	SetRootComponent(SceneComp);
 	
@@ -41,76 +41,76 @@ void AGS_DEPawn::Tick(float DeltaTime)
 
 }
 
-void AGS_DEPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (UEnhancedInputComponent* EnhancedInput
-		= Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		if (AGS_DEController* PlayerController
-			= Cast<AGS_DEController>(GetController()))
-		{
-			if (PlayerController->MoveAction)
-			{
-				EnhancedInput->BindAction(PlayerController->MoveAction
-					, ETriggerEvent::Triggered
-					,this
-					, &AGS_DEPawn::Move);
-			}
-
-			if (PlayerController->ZoomAction)
-			{
-				EnhancedInput->BindAction(PlayerController->ZoomAction
-					, ETriggerEvent::Triggered
-					,this
-					, &AGS_DEPawn::Zoom);
-			}
-
-			if (PlayerController->PropRotationAction)
-			{
-				EnhancedInput->BindAction(PlayerController->PropRotationAction
-					, ETriggerEvent::Started
-					,this
-					, &AGS_DEPawn::PropRotation);
-			}
-			
-			if (PlayerController->ClickLMBAction)
-			{
-				EnhancedInput->BindAction(PlayerController->ClickLMBAction
-					, ETriggerEvent::Triggered
-					,this
-					, &AGS_DEPawn::ClickLMB);
-
-				EnhancedInput->BindAction(PlayerController->ClickLMBAction
-					, ETriggerEvent::Completed
-					,this
-					, &AGS_DEPawn::ReleasedLMB);
-			}
-			
-			if (PlayerController->ClickRMBAction)
-			{
-				EnhancedInput->BindAction(PlayerController->ClickRMBAction
-					, ETriggerEvent::Triggered
-					,this
-					, &AGS_DEPawn::ClickRMB);
-
-				EnhancedInput->BindAction(PlayerController->ClickRMBAction
-					, ETriggerEvent::Completed
-					,this
-					, &AGS_DEPawn::ReleasedRMB);
-			}
-
-			if (PlayerController->ClickDeleteAction)
-			{
-				EnhancedInput->BindAction(PlayerController->ClickDeleteAction
-					, ETriggerEvent::Started
-					,this
-					, &AGS_DEPawn::ClickDelete);
-			}
-		}
-	}
-}
+// void AGS_DEPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+// {
+// 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+//
+// 	if (UEnhancedInputComponent* EnhancedInput
+// 		= Cast<UEnhancedInputComponent>(PlayerInputComponent))
+// 	{
+// 		if (AGS_DEController* PlayerController
+// 			= Cast<AGS_DEController>(GetController()))
+// 		{
+// 			if (PlayerController->MoveAction)
+// 			{
+// 				EnhancedInput->BindAction(PlayerController->MoveAction
+// 					, ETriggerEvent::Triggered
+// 					,this
+// 					, &AGS_DEPawn::Move);
+// 			}
+//
+// 			if (PlayerController->ZoomAction)
+// 			{
+// 				EnhancedInput->BindAction(PlayerController->ZoomAction
+// 					, ETriggerEvent::Triggered
+// 					,this
+// 					, &AGS_DEPawn::Zoom);
+// 			}
+//
+// 			if (PlayerController->PropRotationAction)
+// 			{
+// 				EnhancedInput->BindAction(PlayerController->PropRotationAction
+// 					, ETriggerEvent::Started
+// 					,this
+// 					, &AGS_DEPawn::PropRotation);
+// 			}
+// 			
+// 			if (PlayerController->ClickLMBAction)
+// 			{
+// 				EnhancedInput->BindAction(PlayerController->ClickLMBAction
+// 					, ETriggerEvent::Triggered
+// 					,this
+// 					, &AGS_DEPawn::ClickLMB);
+//
+// 				EnhancedInput->BindAction(PlayerController->ClickLMBAction
+// 					, ETriggerEvent::Completed
+// 					,this
+// 					, &AGS_DEPawn::ReleasedLMB);
+// 			}
+// 			
+// 			if (PlayerController->ClickRMBAction)
+// 			{
+// 				EnhancedInput->BindAction(PlayerController->ClickRMBAction
+// 					, ETriggerEvent::Triggered
+// 					,this
+// 					, &AGS_DEPawn::ClickRMB);
+//
+// 				EnhancedInput->BindAction(PlayerController->ClickRMBAction
+// 					, ETriggerEvent::Completed
+// 					,this
+// 					, &AGS_DEPawn::ReleasedRMB);
+// 			}
+//
+// 			if (PlayerController->ClickDeleteAction)
+// 			{
+// 				EnhancedInput->BindAction(PlayerController->ClickDeleteAction
+// 					, ETriggerEvent::Started
+// 					,this
+// 					, &AGS_DEPawn::ClickDelete);
+// 			}
+// 		}
+// 	}
+// }
 
 void AGS_DEPawn::Move(const FInputActionValue& Value)
 {

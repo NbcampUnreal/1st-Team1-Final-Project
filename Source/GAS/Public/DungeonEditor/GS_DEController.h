@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GS_DEController.generated.h"
 
+struct FInputActionValue;
 class UGS_DungeonEditorWidget;
 class UGS_PropWidget;
 class UInputMappingContext;
@@ -52,10 +53,45 @@ public:
 	TSubclassOf<UGS_DungeonEditorWidget> DungeonEditorWidgetClass;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
 	TObjectPtr<UGS_DungeonEditorWidget> DungeonEditorWidget;
+
+	TObjectPtr<APawn>& GetEditorPawn() { return EditorPawn; }
 	
 protected:
 	void BeginPlay() override;
 
-private:
+	void CreateDEWidgets();
+
+	UPROPERTY()
+	bool Is_DEActive;
+
+	UPROPERTY()
 	TObjectPtr<APawn> EditorPawn;
+	
+	virtual void EnterEditorMode(AActor* SpawnPoint);
+	virtual void ExitEditorMode();
+	
+	// 서버에 에디터 모드 진입을 요청하는 RPC
+	UFUNCTION(Server, Reliable)
+	void Server_RequestEnterEditorMode(AActor* SpawnPoint);
+	// 서버에 에디터 모드 종료를 요청하는 RPC
+	UFUNCTION(Server, Reliable)
+	void Server_RequestExitEditorMode();
+	// 서버가 클라이언트에게 에디터 모드 진입이 완료되었음을 알리는 RPC
+	UFUNCTION(Client, Reliable)
+	void Client_OnEnteredEditorMode();
+	// 서버가 클라이언트에게 에디터 모드 종료가 완료되었음을 알리는 RPC
+	UFUNCTION(Client, Reliable)
+	void Client_OnExitedEditorMode();
+
+	// 입력
+	virtual void SetupInputComponent() override;
+	
+	void HandleMove(const FInputActionValue& Value);
+	void HandleZoom(const FInputActionValue& Value);
+	void HandlePropRotation(const FInputActionValue& Value);
+	void HandleClickLMB(const FInputActionValue& Value);
+	void HandleReleasedLMB(const FInputActionValue& Value);
+	void HandleClickRMB(const FInputActionValue& Value);
+	void HandleReleasedRMB(const FInputActionValue& Value);
+	void HandleClickDelete(const FInputActionValue& Value);
 };
