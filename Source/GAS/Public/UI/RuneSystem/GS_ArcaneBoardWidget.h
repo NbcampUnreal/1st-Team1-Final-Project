@@ -157,6 +157,22 @@ protected:
 
 	FTimerHandle TooltipDelayTimer;
 
+	// 룬 시스템 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	class USoundBase* RunePickupSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* RunePlaceSuccessSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* RunePlaceFailSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* RuneCancelSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* RuneConnectionBonusSound;
+
 private:
 	void BindToLPS();
 	void UnbindFromLPS();
