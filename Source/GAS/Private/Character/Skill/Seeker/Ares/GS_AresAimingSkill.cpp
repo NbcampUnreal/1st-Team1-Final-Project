@@ -4,6 +4,7 @@
 #include "Character/Skill/Seeker/Ares/GS_AresAimingSkill.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Weapon/Projectile/Seeker/GS_SwordAuraProjectile.h"
+#include "Kismet/GameplayStatics.h"
 #include "Character/GS_Character.h"
 
 UGS_AresAimingSkill::UGS_AresAimingSkill()
@@ -48,18 +49,30 @@ void UGS_AresAimingSkill::ExecuteSkillEffect()
 
 	// 생성 위치: 캐릭터 정면 약간 앞 + 위
 	FVector SpawnLocation = OwnerCharacter->GetActorLocation()
-		+ FVector(0, 0, 50)
-		+ LaunchDirection * 100.f;
+		+ FVector(0, 0, 0)
+		+ LaunchDirection * 1.f;
 
 	// 첫 번째 발사 (기본 방향)
 	FRotator SpawnRotationA = LaunchDirection.Rotation();
 	SpawnRotationA.Roll = -45.f;
 
-	AGS_SwordAuraProjectile* ProjectileA = World->SpawnActor<AGS_SwordAuraProjectile>(
+	FTransform SpawnTransform(SpawnRotationA, SpawnLocation);
+
+
+	AGS_SwordAuraProjectile* ProjectileA = World->SpawnActorDeferred<AGS_SwordAuraProjectile>(
 		AresCharacter->AresProjectileClass,
-		SpawnLocation,
-		SpawnRotationA
+		SpawnTransform,
+		OwnerCharacter,
+		nullptr,
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
 	);
+
+	if (ProjectileA)
+	{
+		ProjectileA->EffectType = ESwordAuraEffectType::Left;
+		UGameplayStatics::FinishSpawningActor(ProjectileA, SpawnTransform);
+		ProjectileA->Multicast_StartSwordSlashVFX();
+	}
 
 	// 두 번째 발사 (90도 회전 방향)
 	// 두 번째 Projectile은 0.1초 뒤에 발사
@@ -95,19 +108,31 @@ void UGS_AresAimingSkill::SpawnSecondProjectile()
 
 	// 생성 위치: 캐릭터 정면 약간 앞 + 위
 	FVector SpawnLocation = OwnerCharacter->GetActorLocation()
-		+ FVector(0, 0, 50)
-		+ LaunchDirection * 100.f;
+		+ FVector(0, 0, 0)
+		+ LaunchDirection * 1.f;
 
 	// 첫 번째 발사 (기본 방향)
 	FRotator SpawnRotationB = LaunchDirection.Rotation();
 	SpawnRotationB.Roll = 45.f;
 
-	AGS_SwordAuraProjectile* ProjectileB = World->SpawnActor<AGS_SwordAuraProjectile>(
+	FTransform SpawnTransform(SpawnRotationB, SpawnLocation);
+
+	AGS_SwordAuraProjectile* ProjectileB = World->SpawnActorDeferred<AGS_SwordAuraProjectile>(
 		AresCharacter->AresProjectileClass,
-		SpawnLocation,
-		SpawnRotationB
+		SpawnTransform,
+		OwnerCharacter,
+		nullptr,
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
 	);
 
+
+	if (ProjectileB)
+	{
+		ProjectileB->EffectType = ESwordAuraEffectType::Right;
+		UGameplayStatics::FinishSpawningActor(ProjectileB, SpawnTransform);
+		ProjectileB->Multicast_StartSwordSlashVFX();
+	}
+	
 	// 스킬 종료 처리
 	bIsActive = false;
 }

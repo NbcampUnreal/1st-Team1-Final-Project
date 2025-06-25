@@ -5,6 +5,9 @@
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
 AGS_SwordAuraProjectile::AGS_SwordAuraProjectile()
@@ -25,10 +28,17 @@ AGS_SwordAuraProjectile::AGS_SwordAuraProjectile()
 	ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 }
 
+void AGS_SwordAuraProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_SwordAuraProjectile, EffectType);
+}
+
 void AGS_SwordAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-
+	Multicast_StartSwordSlashVFX();
 	// 오버랩 이벤트 바인딩
 	SlashBox->OnComponentBeginOverlap.AddDynamic(this, &AGS_SwordAuraProjectile::OnSlashBoxOverlap);	
 
@@ -47,4 +57,46 @@ void AGS_SwordAuraProjectile::OnSlashBoxOverlap(UPrimitiveComponent* OverlappedC
 void AGS_SwordAuraProjectile::DestroySwordAura()
 {
 	Destroy();
+}
+
+
+
+void AGS_SwordAuraProjectile::StartSwordSlashVFX()
+{
+
+}
+
+
+void AGS_SwordAuraProjectile::StopSwordSlashVFX()
+{
+
+}
+
+
+void AGS_SwordAuraProjectile::Multicast_StartSwordSlashVFX_Implementation()
+{
+	if (!SlashBox)
+	{
+		return;
+	}
+
+	UNiagaraSystem* SelectedVFX = (EffectType == ESwordAuraEffectType::Left) ? LeftSlashVFX : RightSlashVFX;
+	UE_LOG(LogTemp, Warning, TEXT("SelectedVFX : %s"), *SelectedVFX->GetName());
+	if (!SelectedVFX)
+	{
+		return;
+	}
+
+	FVector LocalPos = FVector::ZeroVector; // 부모 위치 기준 (붙는 지점 기준)
+	FRotator LocalRot = FRotator::ZeroRotator; // 붙는 지점 기준 회전
+
+	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+		SelectedVFX,
+		SlashBox,
+		NAME_None,
+		LocalPos,
+		LocalRot, //Projectile 회전값 
+		EAttachLocation::KeepRelativeOffset,//월드 기준
+		true
+	);
 }

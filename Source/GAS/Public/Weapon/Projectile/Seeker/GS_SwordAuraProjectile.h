@@ -8,10 +8,15 @@
 
 class UBoxComponent;
 class USphereComponent;
+class UNiagaraSystem;
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum class ESwordAuraEffectType : uint8
+{
+	Left,
+	Right
+};
+
 UCLASS()
 class GAS_API AGS_SwordAuraProjectile : public AGS_WeaponProjectile
 {
@@ -20,11 +25,25 @@ class GAS_API AGS_SwordAuraProjectile : public AGS_WeaponProjectile
 public:
 	AGS_SwordAuraProjectile();
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	ESwordAuraEffectType EffectType = ESwordAuraEffectType::Left;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StartSwordSlashVFX();
+	void Multicast_StartSwordSlashVFX_Implementation();
+
+
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	UBoxComponent* SlashBox;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
+	UNiagaraSystem* LeftSlashVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
+	UNiagaraSystem* RightSlashVFX;
 
 	UPROPERTY()
 	TSet<AActor*> HitActors;
@@ -42,5 +61,19 @@ protected:
 	float SwordAuraLifetime = 1.0f;
 
 	UFUNCTION()
-	void DestroySwordAura();	
+	void DestroySwordAura();
+
+	
+
+
+	//VFX
+	UFUNCTION(BlueprintCallable, Category = "Sword FX")
+	void StartSwordSlashVFX();
+
+	UFUNCTION(BlueprintCallable, Category = "Sword FX")
+	void StopSwordSlashVFX();
+
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
 };
