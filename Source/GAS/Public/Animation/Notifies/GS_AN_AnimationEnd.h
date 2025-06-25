@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
+#include "Character/Skill/ESkill.h"
 #include "GS_AN_AnimationEnd.generated.h"
 
 /**
@@ -16,4 +17,7 @@ class GAS_API UGS_AN_AnimationEnd : public UAnimNotify
 	
 public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ESkillSlot SkillType;
 };

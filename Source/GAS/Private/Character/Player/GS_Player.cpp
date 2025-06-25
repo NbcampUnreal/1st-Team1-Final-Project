@@ -224,17 +224,12 @@ void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, boo
 	SkillInputControl.CanInputLC = CanLeftClick;
 	SkillInputControl.CanInputRC = CanRightClick;
 	SkillInputControl.CanInputRoll= CanRollClick;
+	UE_LOG(LogTemp, Warning, TEXT("SetSkillInputControl LC : %d, RC : %d, Roll : %d"), SkillInputControl.CanInputLC, SkillInputControl.CanInputRC, SkillInputControl.CanInputRoll);
 }
 
 FSkillInputControl AGS_Player::GetSkillInputControl()
 {
 	return SkillInputControl;
-}
-
-void AGS_Player::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AGS_Player, SkillInputControl);
 }
 
 void AGS_Player::SetCanUseSkill(bool bCanUse)
@@ -243,6 +238,12 @@ void AGS_Player::SetCanUseSkill(bool bCanUse)
 	{
 		SkillComp->SetCanUseSkill(bCanUse);
 	}
+}
+
+void AGS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AGS_Player, SkillInputControl);
 }
 
 void AGS_Player::Multicast_StopSkillMontage_Implementation(UAnimMontage* Montage)

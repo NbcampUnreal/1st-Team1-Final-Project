@@ -7,6 +7,7 @@
 #include "Character/Skill/GS_SkillSet.h"
 #include "UI/Character/GS_SkillWidget.h"
 #include "Net/UnrealNetwork.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 
 
 UGS_SkillComp::UGS_SkillComp()
@@ -194,17 +195,12 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 		UE_LOG(LogTemp, Warning, TEXT("TryActivateSkill failed: bCanUseSkill = false"));
 		return;
 	}
-
-	if (!GetOwner()->HasAuthority())
-	{		
-		Server_TryActiveSkill(Slot);
-		return;
-	}
-
+	// 먼저 AutonomousProxy 에서 ActiveSkill() 실행.
 	if (SkillMap.Contains(Slot))
 	{
 		if (SkillMap[Slot]->CanActive())
 		{
+			SkillsInterrupt();
 			SkillMap[Slot]->ActiveSkill();
 		}
 		else
@@ -216,19 +212,26 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SkillMap does not contain slot"));
 	}
+
+	// 후에 Authority 에서 ActiveSkill() 실행.
+	if (!GetOwner()->HasAuthority())
+	{		
+		Server_TryActiveSkill(Slot);
+		return;
+	}
 }
 
 void UGS_SkillComp::TryDeactiveSkill(ESkillSlot Slot)
 {
+	if (SkillMap.Contains(Slot))
+	{
+		SkillMap[Slot]->DeactiveSkill();
+	}
+	
 	if (!GetOwner()->HasAuthority())
 	{
 		Server_TryDeactiveSkill(Slot);
 		return;
-	}
-
-	if (SkillMap.Contains(Slot))
-	{
-		SkillMap[Slot]->DeactiveSkill();
 	}
 }
 
@@ -342,6 +345,31 @@ void UGS_SkillComp::StartCooldownForSkill(ESkillSlot Slot)
 	
 	Skill->SetCoolingDown(true);
 	UpdateReplicatedCooldownStates();
+}
+
+void UGS_SkillComp::SkillsInterrupt()
+{
+	AGS_Seeker* Seeker = Cast<AGS_Seeker>(GetOwner());
+	
+	if (Seeker->HasAuthority())
+	{
+		if (Seeker->CurrentComboIndex > 0)
+		{
+			Seeker->CurrentComboIndex = 0;
+			Seeker->CanAcceptComboInput = true;
+			Seeker->bComboEnded = true;
+			Seeker->bNextCombo = false;
+		}
+	}
+	
+	for (TPair<ESkillSlot, UGS_SkillBase*> slot : SkillMap)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *UEnum::GetValueAsString(slot.Key));
+		if (slot.Value->IsActive())
+		{
+			slot.Value->InterruptSkill(); 
+		}
+	}
 }
 
 void UGS_SkillComp::HandleCooldownComplete(ESkillSlot Slot)

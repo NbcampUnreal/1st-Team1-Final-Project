@@ -10,6 +10,9 @@ void UGS_AN_CheckNextCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
 
 	if (AGS_Seeker* Character = Cast<AGS_Seeker>(MeshComp->GetOwner()))
 	{
-		Character->ComboInputClose();
+		if (Character->HasAuthority())
+		{
+			Character->ComboInputClose();
+		}
 	}
 }

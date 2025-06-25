@@ -10,6 +10,9 @@ void UGS_AN_ComboInputOpen::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
 
 	if (AGS_Seeker* Character = Cast<AGS_Seeker>(MeshComp->GetOwner()))
 	{
-		Character->ComboInputOpen();
+		if (Character->HasAuthority())
+		{
+			Character->ComboInputOpen();
+		}
 	}
 }

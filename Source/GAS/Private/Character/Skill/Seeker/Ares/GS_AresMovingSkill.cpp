@@ -27,7 +27,6 @@ void UGS_AresMovingSkill::ActiveSkill()
 		bPressedDuringCooldown = true;
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("AresMovingSkill Activated!"));
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);

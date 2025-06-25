@@ -10,7 +10,10 @@ void UGS_AN_AnimationEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 	
 	if (SeekerOwner)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CallOnSkillAnimationEnd!!!!!!!!!!!!!!!!!! | %s"), *UEnum::GetValueAsString(SeekerOwner->GetLocalRole()));
-		SeekerOwner->CallOnSkillAnimationEnd();
+		UE_LOG(LogTemp, Warning, TEXT("UGS_AN_AnimationEnd!!!!!!!!!!!!!!!!!! | %s"), *UEnum::GetValueAsString(SeekerOwner->GetLocalRole()));
+		if (SeekerOwner->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
+		{
+			SeekerOwner->CallDeactiveSkill(SkillType);
+		}
 	}
 }

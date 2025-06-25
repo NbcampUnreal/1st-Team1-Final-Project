@@ -152,7 +152,6 @@ void AGS_Seeker::SetSeekerGait(EGait Gait)
 		SetCharacterSpeed(1.0f);
 		break;
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("Gait: %d, Last Gait : %d"), SeekerGait, LastSeekerGait); // SJE
 }
 
 EGait AGS_Seeker::GetSeekerGait()
@@ -163,29 +162,6 @@ EGait AGS_Seeker::GetSeekerGait()
 EGait AGS_Seeker::GetLastSeekerGait()
 {
 	return LastSeekerGait;
-}
-
-void AGS_Seeker::Server_SetMoveControlValue_Implementation(bool bMoveForward, bool bMoveRight)
-{
-	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(this->GetController()))
-	{
-		TpsController->SetMoveControlValue(bMoveRight, bMoveForward);
-	}
-}
-
-void AGS_Seeker::Multicast_ComboEnd_Implementation()
-{
-	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		StopAnimMontage(ComboAnimMontage);
-		CurrentComboIndex = 0;
-		CanAcceptComboInput = true;		
-	}
-}
-
-void AGS_Seeker::Server_ComboEnd_Implementation(bool bComboEnd)
-{
-	bComboEnded = bComboEnd;
 }
 
 void AGS_Seeker::BeginPlay()
@@ -244,6 +220,16 @@ void AGS_Seeker::InitializeCameraManager()
 	}
 }
 
+void AGS_Seeker::Server_SetNextComboFlag_Implementation(bool NextCombo)
+{
+	bNextCombo = NextCombo;
+}
+
+void AGS_Seeker::Server_SetComboInputFlag_Implementation(bool InputCombo)
+{
+	CanAcceptComboInput = InputCombo;
+}
+
 void AGS_Seeker::ComboInputOpen()
 {
 	CanAcceptComboInput = true;
@@ -251,30 +237,29 @@ void AGS_Seeker::ComboInputOpen()
 
 void AGS_Seeker::ComboInputClose()
 {
-	CanAcceptComboInput = false;
-	if (bNextCombo)
+	if (HasAuthority())
 	{
-		ServerAttackMontage();
-		bNextCombo = false;
+		CanAcceptComboInput = false;
+		if (bNextCombo)
+		{
+			ServerAttackMontage();
+			Server_SetNextComboFlag(false);
+		}
 	}
 }
 
 void AGS_Seeker::OnComboAttack()
-{
-	Server_ComboEnd(false);
-	CanChangeSeekerGait = false;
-	
+{	
 	if (CanAcceptComboInput)
 	{
 		if (CurrentComboIndex == 0)
 		{
 			ServerAttackMontage();
-			Server_SetMoveControlValue(false, false);
 		}
 		else
 		{
-			bNextCombo = true;
-			CanAcceptComboInput = false;
+			Server_SetNextComboFlag(true);
+			Server_SetComboInputFlag(false);
 		}
 	}
 }
@@ -306,24 +291,26 @@ void AGS_Seeker::UpdatePostProcessEffect(float EffectStrength)
 void AGS_Seeker::ServerAttackMontage_Implementation()
 {
 	MulticastPlayComboSection();
-	Multicast_SetIsFullBodySlot(true);
-	Multicast_SetIsUpperBodySlot(false);
 }
 
 void AGS_Seeker::MulticastPlayComboSection_Implementation()
 {
 	FName SectionName = FName(*FString::Printf(TEXT("Attack%d"), CurrentComboIndex + 1));
-	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
-	
-	CurrentComboIndex++;
-	if (AnimInstance && ComboAnimMontage)
+
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
+		if (HasAuthority())
+		{
+			Multicast_SetIsFullBodySlot(true);
+			Multicast_SetIsUpperBodySlot(false); // Montage_Play 의 slot 에 직접적 영향. Replicated 대신 Multicast 사용.
+			SetMoveControlValue(false, false);
+			CurrentComboIndex++;
+			CanAcceptComboInput = false;
+			bNextCombo = false;
+		}
 		AnimInstance->Montage_Play(ComboAnimMontage);
-		AnimInstance->IsPlayingUpperBodyMontage = true;
 		AnimInstance->Montage_JumpToSection(SectionName, ComboAnimMontage);
 	}
-	CanAcceptComboInput = false;
-	bNextCombo = false;
 }
 
 void AGS_Seeker::HandleLowHealthEffect(UGS_StatComp* InStatComp)
@@ -444,25 +431,10 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, bComboEnded);
 }
 
-void AGS_Seeker::CallOnSkillAnimationEnd()
+void AGS_Seeker::CallDeactiveSkill(ESkillSlot Slot)
 {
-	UE_LOG(LogTemp, Warning, TEXT("CallOnSkillAnimationEnd")); // SJE
-	for(int i = 0; i <= static_cast<int>(ESkillSlot::Rolling); i++)
-	{
-		if (GetSkillComp()->GetSkillFromSkillMap(static_cast<ESkillSlot>(i))->IsActive()) // 현재 모든 스킬의 Active 를 검색하는데 특정 스킬의 Active 만 확인하고 해당 스킬의 OnSkillAnimationEnd() 함수 호출하도록 수정할 것.
-		{
-			GetSkillComp()->GetSkillFromSkillMap(static_cast<ESkillSlot>(i))->OnSkillAnimationEnd();
-			GetSkillComp()->SetSkillActiveState(static_cast<ESkillSlot>(i), false);
-		}
-	}
-}
-
-void AGS_Seeker::Server_SetLookControlValue_Implementation(bool bLookUp, bool bLookRight)
-{
-	if (AGS_TpsController* TpsController = Cast<AGS_TpsController>(this->GetController()))
-	{
-		TpsController->SetLookControlValue(bLookRight, bLookUp);
-	}
+	GetSkillComp()->TryDeactiveSkill(Slot);
+	GetSkillComp()->SetSkillActiveState(Slot, false);
 }
 
 void AGS_Seeker::OnRep_SeekerGait()
@@ -473,20 +445,6 @@ void AGS_Seeker::OnRep_SeekerGait()
 		{
 			InputObj->Gait = SeekerGait;
 		}
-	}
-}
-
-void AGS_Seeker::Multicast_SetIsLeftArmSlot_Implementation(bool bLeftArmSlot)
-{
-	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
-	{
-		return;
-	}
-
-	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		AnimInstance->IsPlayingLeftArmMontage = bLeftArmSlot;
-		UE_LOG(LogTemp, Warning, TEXT("LeftArmSlot : %d"), AnimInstance->IsPlayingLeftArmMontage);
 	}
 }
 
