@@ -446,11 +446,13 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 
 void AGS_Seeker::CallOnSkillAnimationEnd()
 {
-	for(int i=0; i<=(int)ESkillSlot::Rolling; i++)
+	UE_LOG(LogTemp, Warning, TEXT("CallOnSkillAnimationEnd")); // SJE
+	for(int i = 0; i <= static_cast<int>(ESkillSlot::Rolling); i++)
 	{
-		if (GetSkillComp()->GetSkillFromSkillMap((ESkillSlot)i)->IsActive())
+		if (GetSkillComp()->GetSkillFromSkillMap(static_cast<ESkillSlot>(i))->IsActive()) // 현재 모든 스킬의 Active 를 검색하는데 특정 스킬의 Active 만 확인하고 해당 스킬의 OnSkillAnimationEnd() 함수 호출하도록 수정할 것.
 		{
-			GetSkillComp()->GetSkillFromSkillMap((ESkillSlot)i)->OnSkillAnimationEnd();
+			GetSkillComp()->GetSkillFromSkillMap(static_cast<ESkillSlot>(i))->OnSkillAnimationEnd();
+			GetSkillComp()->SetSkillActiveState(static_cast<ESkillSlot>(i), false);
 		}
 	}
 }
