@@ -190,38 +190,4 @@ private:
     // Not replicated, used by server authority only.
     UPROPERTY(Transient) 
     TMap<EMonsterAudioState, float> ServerLastBroadcastTime;
-
-    // === 성능 최적화 관련 ===
-    // 거리 체크 최적화 - 동적 인터벌 조정
-    float DynamicDistanceCheckInterval;
-    float LastPlayerDistance;
-    
-    // LOD 시스템 - 거리에 따른 업데이트 빈도 조정
-    enum class EAudioLOD : uint8
-    {
-        High,    // 가까운 거리 - 높은 빈도
-        Medium,  // 중간 거리 - 중간 빈도  
-        Low,     // 먼 거리 - 낮은 빈도
-        Disabled // 매우 먼 거리 - 비활성화
-    };
-    
-    EAudioLOD CurrentAudioLOD;
-    
-    // 플레이어 위치 캐싱
-    FVector CachedPlayerLocation;
-    float LastPlayerLocationCheckTime;
-    
-    // 성능 관련 설정값
-    static constexpr float CLOSE_DISTANCE_THRESHOLD = 500.0f;
-    static constexpr float MEDIUM_DISTANCE_THRESHOLD = 1000.0f;
-    static constexpr float FAR_DISTANCE_THRESHOLD = 1500.0f;
-    
-    static constexpr float HIGH_LOD_INTERVAL = 0.2f;   // 5FPS
-    static constexpr float MEDIUM_LOD_INTERVAL = 0.5f; // 2FPS
-    static constexpr float LOW_LOD_INTERVAL = 1.0f;    // 1FPS
-    
-    // 최적화 함수들
-    void UpdateAudioLOD(float Distance);
-    void OptimizeUpdateFrequency();
-    bool ShouldUpdateAudio() const;
 }; 

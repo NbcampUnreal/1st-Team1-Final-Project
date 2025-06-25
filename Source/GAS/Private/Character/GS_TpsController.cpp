@@ -32,7 +32,7 @@ AGS_TpsController::AGS_TpsController()
 
 	//KimYJ
 	bReplicates = true;
-	SetReplicates(true);
+	//SetReplicates(true); 신중은
 }
 
 void AGS_TpsController::Move(const FInputActionValue& InputValue)

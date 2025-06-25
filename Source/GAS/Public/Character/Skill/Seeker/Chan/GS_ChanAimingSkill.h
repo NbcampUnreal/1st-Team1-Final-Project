@@ -21,7 +21,8 @@ public:
 	virtual void DeactiveSkill() override;
 	virtual void OnSkillCommand() override;
 	virtual void ExecuteSkillEffect() override;
-	virtual bool IsActive() const override;
+	/*virtual bool IsActive() const override;*/
+	virtual void InterruptSkill() override;
 
 	// 공격
 	void OnShieldSlam();
@@ -64,4 +65,8 @@ private:
 	void ShowProgressBar(bool bShow);
 
 	FTimerHandle KnockbackHandle;
+	
+	//Range VFX
+	FTimerHandle RangeVFXSpawnHandle;
+	void SpawnAimingSkillVFX();
 };

@@ -224,17 +224,12 @@ void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, boo
 	SkillInputControl.CanInputLC = CanLeftClick;
 	SkillInputControl.CanInputRC = CanRightClick;
 	SkillInputControl.CanInputRoll= CanRollClick;
+	UE_LOG(LogTemp, Warning, TEXT("SetSkillInputControl LC : %d, RC : %d, Roll : %d"), SkillInputControl.CanInputLC, SkillInputControl.CanInputRC, SkillInputControl.CanInputRoll);
 }
 
 FSkillInputControl AGS_Player::GetSkillInputControl()
 {
 	return SkillInputControl;
-}
-
-void AGS_Player::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AGS_Player, SkillInputControl);
 }
 
 void AGS_Player::SetCanUseSkill(bool bCanUse)
@@ -243,6 +238,12 @@ void AGS_Player::SetCanUseSkill(bool bCanUse)
 	{
 		SkillComp->SetCanUseSkill(bCanUse);
 	}
+}
+
+void AGS_Player::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AGS_Player, SkillInputControl);
 }
 
 void AGS_Player::Multicast_StopSkillMontage_Implementation(UAnimMontage* Montage)
@@ -298,12 +299,10 @@ void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage
 	{
 		if (Section == NAME_None)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Multicast_PlaySkillMontage %s"), *UEnum::GetValueAsString(GetLocalRole())); //SJE
 			AnimInstance->Montage_Play(Montage);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Multicast_PlaySkillMontage section %s"), *UEnum::GetValueAsString(GetLocalRole())); //SJE
 			if (AnimInstance->Montage_IsPlaying(Montage))
 			{
 				AnimInstance->Montage_Stop(0.0f, Montage); // 이걸 꼭 해줘야 새로 PlayRate가 반영됨
