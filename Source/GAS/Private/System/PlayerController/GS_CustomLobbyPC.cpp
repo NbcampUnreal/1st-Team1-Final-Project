@@ -21,6 +21,7 @@
 #include "Character/Player/GS_LobbyDisplayActor.h"
 #include "System/GS_SpawnSlot.h"
 #include "Character/Player/GS_PawnMappingDataAsset.h"
+#include <DungeonEditor/Data/GS_DungeonEditorSaveGame.h>
 
 
 AGS_CustomLobbyPC::AGS_CustomLobbyPC()
@@ -738,4 +739,28 @@ void AGS_CustomLobbyPC::OnPerkSaveNo()
 	}
 
 	PendingWork = EPendingWork::None;
+}
+
+void AGS_CustomLobbyPC::Client_RequestLoadAndSendData_Implementation()
+{
+	AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+	if (PS)
+	{
+		// 1. 클라이언트 PC에서 로컬 .sav 파일을 읽습니다.
+		UGS_DungeonEditorSaveGame* LoadGameObject = Cast<UGS_DungeonEditorSaveGame>(UGameplayStatics::LoadGameFromSlot(PS->CurrentSaveSlotName, 0));
+
+		if (IsValid(LoadGameObject))
+		{
+			TArray<FDESaveData> LoadedData = LoadGameObject->GetSaveDatas();
+			UE_LOG(LogTemp, Warning, TEXT("Client: Loaded %d objects. Sending to server..."), LoadedData.Num());
+            
+			// 2. 읽어온 데이터를 담아 서버로 RPC를 보냅니다.
+			PS->Server_SetObjectData(LoadedData);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Client: Save file could not be loaded. Sending empty data."));
+			PS->Server_SetObjectData({}); // 로드 실패 시 빈 데이터를 보냅니다.
+		}
+	}
 }

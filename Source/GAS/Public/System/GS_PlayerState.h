@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
 #include "System/GS_PlayerRole.h"
+#include "DungeonEditor/Data/GS_DungeonEditorTypes.h"
 #include "GS_PlayerState.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoleChangedSignature, EPlayerRole, NewRole);
@@ -57,6 +58,13 @@ public:
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_SetGuardianJob(EGuardianJob NewJob);
 
+    UPROPERTY(Replicated)
+    TArray<FDESaveData> ObjectData;
+    UFUNCTION(Server, Reliable)
+	void Server_SetObjectData(const TArray<FDESaveData>& InObjectData);
+    FString CurrentSaveSlotName = TEXT("Preset_0");
+
+    // 준비
     UPROPERTY(ReplicatedUsing = OnRep_IsReady, BlueprintReadOnly, Category = "Lobby")
     bool bIsReady;
     UFUNCTION()

@@ -131,4 +131,9 @@ private:
 
 	void SpawnOrUpdateLobbyActor(const FLobbyPlayerInfo& PlayerInfo);
 	void CollectAndCacheSpawnSlots();
+
+	// 던전 정보 넘기기
+public:
+	UFUNCTION(Client, Reliable)
+	void Client_RequestLoadAndSendData();
 };

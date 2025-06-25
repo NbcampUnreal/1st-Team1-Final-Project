@@ -186,13 +186,36 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady()
     if (bAllReady && CurrentPlayerCount > 0)
     {
         UE_LOG(LogTemp, Warning, TEXT("LobbyGM: All %d players are ready! Traveling to %s..."), CurrentPlayerCount, *NextLevelName.ToString());
+        for (APlayerState* PS : GameState->PlayerArray)
+        {
+            AGS_PlayerState* GPS = Cast<AGS_PlayerState>(PS);
+            if (GPS && GPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+            {
+                if (AGS_CustomLobbyPC* GuardianPC = Cast<AGS_CustomLobbyPC>(GPS->GetPlayerController()))
+                {
+                    GuardianPC->Client_RequestLoadAndSendData();
+                }
+                break;
+            }
+        }
+        
         UWorld* World = GetWorld();
         if (World)
         {
             UE_LOG(LogTemp, Warning, TEXT("LobbyGM: ServerTravel Start ***"));
-            bUseSeamlessTravel = true;
-            World->ServerTravel(NextLevelName.ToString() + "?listen", true);
+            FTimerHandle TravelDelayHandle;
+            World->GetTimerManager().SetTimer(TravelDelayHandle, this, &AGS_CustomLobbyGM::DoServerTravel, 2.0f, false);
         }
+    }
+}
+
+void AGS_CustomLobbyGM::DoServerTravel()
+{
+    UWorld* World = GetWorld();
+    if (World)
+    {
+        bUseSeamlessTravel = true;
+        World->ServerTravel(NextLevelName.ToString() + "?listen", true);
     }
 }
 
