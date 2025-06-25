@@ -13,17 +13,19 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 	{
 		if (Character->HasAuthority())
 		{
-			Character->bComboEnded = true;
 			Character->Multicast_SetIsFullBodySlot(false);
 			Character->Multicast_SetIsUpperBodySlot(false);
 			Character->Multicast_SetMustTurnInPlace(false);
-			Character->Server_SetMoveControlValue(true, true);
-			Character->Server_SetLookControlValue(true, true);
-			Character->SetSkillInputControl(true, true, true);
-			Character->Multicast_ComboEnd();
 			Character->Multicast_SetCanHitReact(true);
+			Character->CanChangeSeekerGait = true;
 		}
-
-		Character->CanChangeSeekerGait = true;
+		else
+		{
+			Character->bComboEnded = true;
+			Character->SetSkillInputControl(true, true, true);
+			Character->SetMoveControlValue(true, true);
+			Character->SetLookControlValue(true, true);
+			Character->bComboEnded = true;
+		}
 	}
 }

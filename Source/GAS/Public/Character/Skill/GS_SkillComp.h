@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GS_SkillSet.h"
+#include "ESkill.h"
 #include "GS_SkillComp.generated.h"
 
 
-UENUM(BlueprintType)
+/*UENUM(BlueprintType)
 enum class ESkillSlot : uint8
 {
 	Ready,
@@ -16,7 +17,7 @@ enum class ESkillSlot : uint8
 	Aiming,
 	Ultimate,
 	Rolling
-};
+};*/
 
 USTRUCT()
 struct FSkillCooldownState
@@ -79,6 +80,8 @@ public:
 	bool IsSkillActive(ESkillSlot Slot) const;
 	
 	void StartCooldownForSkill(ESkillSlot Slot);
+
+	void SkillsInterrupt();
 
 	//for skill widget
 	UFUNCTION()

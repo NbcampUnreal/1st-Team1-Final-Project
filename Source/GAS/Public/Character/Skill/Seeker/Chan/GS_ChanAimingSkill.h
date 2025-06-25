@@ -21,8 +21,8 @@ public:
 	virtual void DeactiveSkill() override;
 	virtual void OnSkillCommand() override;
 	virtual void ExecuteSkillEffect() override;
-	virtual bool IsActive() const override;
-	virtual void OnSkillAnimationEnd() override;
+	/*virtual bool IsActive() const override;*/
+	virtual void InterruptSkill() override;
 
 	// 공격
 	void OnShieldSlam();

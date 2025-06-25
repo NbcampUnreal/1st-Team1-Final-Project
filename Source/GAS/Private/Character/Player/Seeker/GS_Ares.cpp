@@ -39,7 +39,7 @@ void AGS_Ares::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AGS_Ares::OnComboAttack()
 {
 	Super::OnComboAttack();
-	Server_ComboEnd(false);
+	bComboEnded = false;
 	CanChangeSeekerGait = false;
 
 	if (CanAcceptComboInput)
@@ -50,6 +50,7 @@ void AGS_Ares::OnComboAttack()
 		}
 		else
 		{
+			UE_LOG(LogTemp, Warning, TEXT("On Combo Attack CanAcceptComboInput : %d"), CanAcceptComboInput);
 			bNextCombo = true;
 			CanAcceptComboInput = false;
 		}

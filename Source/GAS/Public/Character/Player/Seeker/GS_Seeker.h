@@ -3,11 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
 #include "Character/Player/GS_Player.h"
-#include "Particles/ParticleSystemComponent.h"
 #include "NiagaraComponent.h"
 #include "Animation/Character/E_SeekerAnim.h"
+#include "Character/Skill/GS_SkillComp.h"
 #include "GS_Seeker.generated.h"
 
 class UGS_SkillInputHandlerComp;
@@ -77,12 +76,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "State")
 	EGait GetLastSeekerGait();
 
-	UFUNCTION(Server, Reliable)
-	void Server_SetMoveControlValue(bool bMoveForward, bool bMoveRight);
-
-	UFUNCTION(Server, Reliable)
-	void Server_SetLookControlValue(bool bLookUp, bool bLookRight);
-
 	UFUNCTION()
 	void OnRep_SeekerGait();
 
@@ -93,18 +86,18 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsLeftArmSlot(bool bLeftArmSlot);
+	/*UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsLeftArmSlot(bool bLeftArmSlot);*/
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetMustTurnInPlace(bool MustTurn);
 
 	// Combo
 	UFUNCTION(Server, Reliable)
-	void Server_ComboEnd(bool bComboEnd);
+	void Server_SetNextComboFlag(bool NextCombo);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_ComboEnd();
+	UFUNCTION(Server, Reliable)
+	void Server_SetComboInputFlag(bool InputCombo);
 
 	UFUNCTION(Server, Reliable)
 	virtual void ServerAttackMontage();
@@ -131,7 +124,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	// Notify
-	void CallOnSkillAnimationEnd();
+	void CallDeactiveSkill(ESkillSlot Slot);
 
 public:
 	// Weapon
@@ -156,7 +149,9 @@ public:
 	UPROPERTY(Replicated)
 	bool CanAcceptComboInput = true;
 
+	UPROPERTY(Replicated)
 	bool bNextCombo = false;
+	
 	UPROPERTY(ReplicatedUsing = OnRep_SeekerGait)
 	EGait SeekerGait;
 

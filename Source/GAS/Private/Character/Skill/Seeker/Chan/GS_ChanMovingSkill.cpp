@@ -25,16 +25,16 @@ void UGS_ChanMovingSkill::ActiveSkill()
 	{
 		if (OwnerPlayer->HasAuthority())
 		{
-			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
-			OwnerPlayer->CanAcceptComboInput = false;
-			OwnerPlayer->ComboInputClose();
-			OwnerPlayer->CurrentComboIndex = 0;
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->SetSkillInputControl(false, false, true);
-
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+			
+			if (OwnerCharacter->GetSkillComp())
+			{
+				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, true);
+			}
 			// =======================
 			// VFX 재생 - 컴포넌트 RPC 사용
 			// =======================
@@ -49,15 +49,20 @@ void UGS_ChanMovingSkill::ActiveSkill()
 				// 스킬 범위 표시 VFX 재생
 				OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, 800.0f);
 			}
+			
+			// 무빙 스킬 사운드 재생
+			if (OwnerPlayer->MovingSkillSound)
+			{
+				OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->MovingSkillSound);
+			}
+
+			ExecuteSkillEffect();
 		}
-		// 무빙 스킬 사운드 재생
-		if (OwnerPlayer->MovingSkillSound)
+		else
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->MovingSkillSound);
+			
 		}
 	}
-	
-	ExecuteSkillEffect();
 }
 
 void UGS_ChanMovingSkill::DeactiveSkill()
@@ -67,13 +72,17 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 
 	if (OwnerPlayer->HasAuthority())
 	{
-		OwnerPlayer->ComboInputOpen();
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 		OwnerPlayer->SetMoveControlValue(true, true);
-		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 		OwnerPlayer->SetSkillInputControl(true, true, true);
+		OwnerPlayer->CanChangeSeekerGait = true;
 
+		if (OwnerCharacter->GetSkillComp())
+		{
+			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
+		}
+		
 		// =======================
 		// 스킬 종료 VFX 재생
 		// =======================
@@ -85,8 +94,26 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 			// 스킬 종료 VFX 재생
 			OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
 		}
-		
-		OwnerPlayer->CanChangeSeekerGait = true;
+	}
+	else
+	{
+	}
+}
+
+void UGS_ChanMovingSkill::InterruptSkill()
+{
+	Super::InterruptSkill();
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	if(OwnerPlayer->HasAuthority())
+	{
+		if (OwnerCharacter->GetSkillComp())
+		{
+			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
+		}
+	}
+	else
+	{
+		OwnerCharacter->GetWorldTimerManager().ClearTimer(DEFBuffHandle); // SJE To KCY
 	}
 }
 

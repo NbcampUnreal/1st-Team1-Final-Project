@@ -28,28 +28,36 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 {
 	if (!CanActive()) return;
 	Super::ActiveSkill();
-	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	
-	if (OwnerPlayer && OwnerPlayer->UltimateSkillSound)
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	if (OwnerPlayer->HasAuthority())
 	{
 		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		// 애니메이션 재생
-		if(SkillAnimMontages[0])
+		OwnerPlayer->SetSkillInputControl(false, false, false);
+		if (OwnerCharacter->GetSkillComp())
+		{
+			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, true);
+		}
+
+		if (OwnerPlayer->UltimateSkillSound)
 		{
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-		}
 
-		// 궁극기 사운드 재생
-		if(OwnerPlayer->UltimateSkillSound)
-		{
-			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->UltimateSkillSound);
+			// 궁극기 사운드 재생
+			if(OwnerPlayer->UltimateSkillSound)
+			{
+				OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->UltimateSkillSound);
+			}
+
+			// 돌진 시작 (약간 딜레이)
+			FTimerHandle DelayHandle;
+			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UGS_ChanUltimateSkill::StartCharge, 0.5f, false);
 		}
 	}
-
-	// 돌진 시작 (약간 딜레이)
-	FTimerHandle DelayHandle;
-	GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UGS_ChanUltimateSkill::StartCharge, 0.5f, false);
+	else
+	{
+	}
 }
 
 void UGS_ChanUltimateSkill::ExecuteSkillEffect()
@@ -57,8 +65,10 @@ void UGS_ChanUltimateSkill::ExecuteSkillEffect()
 
 }
 
-void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
+void UGS_ChanUltimateSkill::DeactiveSkill()
 {
+	Super::DeactiveSkill();
+
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	if(OwnerPlayer->HasAuthority())
 	{
@@ -66,9 +76,24 @@ void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 		{
 			SeekerAnim->IsPlayingFullBodyMontage = false;
 			SeekerAnim->IsPlayingUpperBodyMontage = false;
+			OwnerPlayer->SetMoveControlValue(true, true);
+			OwnerPlayer->SetSkillInputControl(true, true, true);
+			OwnerPlayer->CanChangeSeekerGait = true;
 		}
-		OwnerPlayer->SetMoveControlValue(true, true);
+		if (OwnerCharacter->GetSkillComp())
+		{
+			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
+		}
 	}
+	else
+	{
+		
+	}
+}
+
+void UGS_ChanUltimateSkill::InterruptSkill()
+{
+	Super::InterruptSkill();
 }
 
 void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor)
