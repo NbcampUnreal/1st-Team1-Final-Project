@@ -8,6 +8,7 @@
 #include "GS_InGameGM.generated.h"
 
 class AGS_PlayerState;
+struct FDESaveData;
 
 UCLASS()
 class GAS_API AGS_InGameGM : public AGS_BaseGM
@@ -20,8 +21,8 @@ public:
 	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
-	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
-
+	//virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 	virtual void StartPlay() override;
 
 	virtual void Logout(AController* Exiting) override;
@@ -72,4 +73,17 @@ private:
 
 	bool bMatchHasStarted;
 	bool bGameEnded;
+
+	//던전 스폰
+protected:
+	void SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData);
+
+	UPROPERTY()
+	TArray<FDESaveData> CachedSaveData;
+
+	// --- [내비메시 관련 코드 추가] ---
+	void CheckNavMeshBuildStatus();
+	void OnNavMeshBuildComplete();
+
+	FTimerHandle NavMeshBuildTimerHandle;
 };
