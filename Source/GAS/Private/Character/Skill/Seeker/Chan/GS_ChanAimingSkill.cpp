@@ -152,16 +152,13 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		// =======================
 		// 스킬 범위 VFX 재생
 		// =======================
-		if (OwningComp)
-		{
-			const FVector Start = OwnerCharacter->GetActorLocation();
-			const FVector Forward = OwnerCharacter->GetActorForwardVector();
-			FVector SkillLocation = Start + Forward * 150.0f;
-			const float Radius = 200.f;
-			
-			// 스킬 범위 표시 VFX 재생
-			OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, Radius);
-		}
+		
+		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(
+			RangeVFXSpawnHandle,
+			FTimerDelegate::CreateUObject(this, &UGS_ChanAimingSkill::SpawnAimingSkillVFX),
+			0.93f,
+			false
+		);
 
 		// End Skill
 		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(KnockbackHandle, this, &UGS_ChanAimingSkill::ExecuteSkillEffect, 0.8f, false);
@@ -174,6 +171,21 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 	}
 }
+
+void UGS_ChanAimingSkill::SpawnAimingSkillVFX()
+{
+	if (OwningComp&& OwnerCharacter)
+	{
+		const FVector Start = OwnerCharacter->GetActorLocation();
+		const FVector Forward = OwnerCharacter->GetActorForwardVector();
+		FVector SkillLocation = Start + Forward * 150.0f;
+		const float Radius = 200.f;
+
+		// 스킬 범위 표시 VFX 재생
+		OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, Radius);
+	}
+}
+
 
 void UGS_ChanAimingSkill::ExecuteSkillEffect()
 {
