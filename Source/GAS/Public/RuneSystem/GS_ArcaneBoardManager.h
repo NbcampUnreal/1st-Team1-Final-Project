@@ -124,7 +124,10 @@ private:
 	//현재 그리드의 셀 상태
 	TMap<FIntPoint, FGridCellData> CurrGridState;
 
+public:
 	int32 ConnectedRuneCnt;
+
+private:
 
 	void ApplyRuneToGrid(uint8 RuneID, const FIntPoint& Pos, EGridCellState NewState, bool bApplyTexture = true);
 

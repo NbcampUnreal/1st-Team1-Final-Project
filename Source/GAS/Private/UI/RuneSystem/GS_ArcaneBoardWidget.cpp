@@ -12,6 +12,7 @@
 #include "UI/RuneSystem/GS_DragVisualWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "UI/RuneSystem/GS_RuneTooltipWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 
 UGS_ArcaneBoardWidget::UGS_ArcaneBoardWidget(const FObjectInitializer& ObjectInitializer)
@@ -181,6 +182,7 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseButtonDown(const FGeometry& InGeometr
 	}
 	else if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
 	{
+		// 우클릭으로 취소할 때는 EndRuneSelection에서 취소 사운드를 재생
 		EndRuneSelection(false);
 		return FReply::Handled();
 	}
@@ -324,6 +326,12 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 {
 	UE_LOG(LogTemp, Display, TEXT("룬 선택 시작: ID=%d"), RuneID);
 
+	// 룬 픽업 사운드 재생
+	if (RunePickupSound)
+	{
+		UGameplayStatics::PlaySound2D(this, RunePickupSound);
+	}
+
 	HideTooltip();
 
 	if (bIsInSelectionMode)
@@ -365,6 +373,9 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 			SelectionVisualWidget->AddToViewport(3);
 		}
 	}
+
+	// 룬 픽업 사운드 재생
+	UGameplayStatics::PlaySound2D(this, RunePickupSound);
 }
 
 void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
@@ -373,6 +384,12 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 
 	if (!bPlaceRune)
 	{
+		// 룬 취소 사운드 재생
+		if (RuneCancelSound)
+		{
+			UGameplayStatics::PlaySound2D(this, RuneCancelSound);
+		}
+
 		if (IsValid(SelectionVisualWidget))
 		{
 			SelectionVisualWidget->RemoveFromParent();
@@ -399,21 +416,70 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 
 				if (BoardManager->FindOptimalPlacementPos(SelectedRuneID, ClickedCellPos, OptimalPos))
 				{
+					// 연결 상태 미리 체크하여 보너스 사운드 여부 결정
+					bool bHadConnectionBefore = false;
+					int32 PreviousConnectedRuneCnt = 0;
+					if (BoardManager)
+					{
+						PreviousConnectedRuneCnt = BoardManager->ConnectedRuneCnt;
+					}
+
 					bool bPlaceSuccess = BoardManager->PlaceRune(SelectedRuneID, OptimalPos);
 
 					if (bPlaceSuccess)
 					{
+						// 룬 배치 성공 사운드
+						if (RunePlaceSuccessSound)
+						{
+							UGameplayStatics::PlaySound2D(this, RunePlaceSuccessSound);
+						}
+
+						// 연결 보너스 체크 및 사운드 재생
+						if (BoardManager && BoardManager->ConnectedRuneCnt > PreviousConnectedRuneCnt)
+						{
+							if (RuneConnectionBonusSound)
+							{
+								// 약간의 딜레이 후 연결 보너스 사운드 재생
+								if (GetWorld())
+								{
+									FTimerHandle ConnectionSoundTimer;
+									GetWorld()->GetTimerManager().SetTimer(ConnectionSoundTimer, [this]()
+									{
+										UGameplayStatics::PlaySound2D(this, RuneConnectionBonusSound);
+									}, 0.3f, false);
+								}
+							}
+						}
+
 						UpdateGridVisuals();
 						RuneInven->UpdatePlacedStateOfRune(SelectedRuneID, true);
 					}
 					else
 					{
+						// 룸 배치 실패 사운드
+						if (RunePlaceFailSound)
+						{
+							UGameplayStatics::PlaySound2D(this, RunePlaceFailSound);
+						}
 						UE_LOG(LogTemp, Warning, TEXT("룬 배치 실패: ID=%d"), SelectedRuneID);
 					}
 				}
 				else
 				{
+					// 룬 배치 실패 사운드
+					if (RunePlaceFailSound)
+					{
+						UGameplayStatics::PlaySound2D(this, RunePlaceFailSound);
+					}
 					UE_LOG(LogTemp, Warning, TEXT("배치 위치를 찾을 수 없음: ID=%d"), SelectedRuneID);
+				}
+			}
+			else
+			{
+				// 잘못된 위치 클릭 시 실패 사운드
+				if (RunePlaceFailSound)
+				{
+					UGameplayStatics::PlaySound2D(this, RunePlaceFailSound);
 				}
 			}
 
