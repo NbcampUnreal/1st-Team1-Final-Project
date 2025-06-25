@@ -49,8 +49,8 @@ void UGS_AresAimingSkill::ExecuteSkillEffect()
 
 	// 생성 위치: 캐릭터 정면 약간 앞 + 위
 	FVector SpawnLocation = OwnerCharacter->GetActorLocation()
-		+ FVector(0, 0, 50)
-		+ LaunchDirection * 100.f;
+		+ FVector(0, 0, 0)
+		+ LaunchDirection * 1.f;
 
 	// 첫 번째 발사 (기본 방향)
 	FRotator SpawnRotationA = LaunchDirection.Rotation();
@@ -108,8 +108,8 @@ void UGS_AresAimingSkill::SpawnSecondProjectile()
 
 	// 생성 위치: 캐릭터 정면 약간 앞 + 위
 	FVector SpawnLocation = OwnerCharacter->GetActorLocation()
-		+ FVector(0, 0, 50)
-		+ LaunchDirection * 100.f;
+		+ FVector(0, 0, 0)
+		+ LaunchDirection * 1.f;
 
 	// 첫 번째 발사 (기본 방향)
 	FRotator SpawnRotationB = LaunchDirection.Rotation();
