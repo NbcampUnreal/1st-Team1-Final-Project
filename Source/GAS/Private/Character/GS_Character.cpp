@@ -58,8 +58,9 @@ void AGS_Character::BeginPlay()
 			}
 		}
 	}
-	
-	if (HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
+
+	//[TODO] tag로 분리하기
+	//if (HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
 	{
 		HPTextWidgetComp->SetVisibility(true);
 	}
