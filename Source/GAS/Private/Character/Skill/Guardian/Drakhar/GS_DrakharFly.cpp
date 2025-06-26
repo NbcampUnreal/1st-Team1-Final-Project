@@ -39,17 +39,18 @@ void UGS_DrakharFly::ActiveSkill()
 void UGS_DrakharFly::DeactiveSkill()
 {
 	bIsFlying = false;
-
+	
 	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
 	{
 		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ready, false);
 	}
-
+	
 	if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter))
 	{
 		Drakhar->MulticastRPC_OnFlyEnd();
+		Drakhar->GuardianDoSkillState = EGuardianDoSkill::None;
 	}
-
+	
 	ExecuteSkillEffect();
 }
 

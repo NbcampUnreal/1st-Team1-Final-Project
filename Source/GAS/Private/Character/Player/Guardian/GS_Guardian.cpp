@@ -3,7 +3,6 @@
 #include "Animation/AnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
-#include "Character/Component/GS_DrakharSFXComponent.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
@@ -44,6 +43,7 @@ void AGS_Guardian::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, GuardianState);
+	DOREPLIFETIME(ThisClass, GuardianDoSkillState);
 	DOREPLIFETIME(ThisClass, MoveSpeed);
 }
 
@@ -63,6 +63,11 @@ void AGS_Guardian::RightMouse()
 {
 }
 
+void AGS_Guardian::StopCtrl()
+{
+	
+}
+
 void AGS_Guardian::OnRep_MoveSpeed()
 {
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
@@ -72,7 +77,7 @@ void AGS_Guardian::MeleeAttackCheck()
 {
 	if (HasAuthority())
 	{
-		GuardianState = EGuardianState::CtrlSkillEnd;
+		GuardianState = EGuardianState::CtrlEnd;
 
 		const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 		const float MeleeAttackRange = 200.f;
@@ -149,7 +154,7 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 			{
 				Drakhar->SetFeverGauge(10.f);
 			}
-			if (Drakhar->GetIsFeverMode())
+			else if (Drakhar->GetIsFeverMode())
 			{
 				Drakhar->bIsAttckingDuringFever = true;
 				Drakhar->ResetIsAttackingDuringFeverMode();
@@ -170,11 +175,17 @@ void AGS_Guardian::OnRep_GuardianState()
 	ClientGuardianState = GuardianState;
 }
 
+void AGS_Guardian::OnRep_GuardianDoSkillState()
+{
+	ClientGuardianDoSkillState = GuardianDoSkillState;
+}
+
 void AGS_Guardian::QuitGuardianSkill()
 {
 	//reset skill state
-	GuardianState = EGuardianState::CtrlSkillEnd;
-
+	GuardianState = EGuardianState::CtrlEnd;
+	GuardianDoSkillState = EGuardianDoSkill::None;
+	
 	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
 	if (Drakhar)
 	{
@@ -182,6 +193,11 @@ void AGS_Guardian::QuitGuardianSkill()
 	}
 	//fly end
 	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+}
+
+void AGS_Guardian::FinishCtrlSkill()
+{
+	StopCtrl();
 }
 
 void AGS_Guardian::MulticastRPCApplyHitStop_Implementation(AGS_Character* InDamagedCharacter)

@@ -171,31 +171,23 @@ void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
 {
 	if (GetWorld()->GetGameState()->PlayerArray.IsEmpty())
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("Player Array EMPTY"));
 		return;
 	}
 	
 	for (const auto& PS : GetWorld()->GetGameState()->PlayerArray)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("---valid ps"));
-
 		AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
 		if (IsValid(GS_PS))
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("---valid GS_PS"));
 			if (GS_PS->bIsAlive && GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker) 
 			{
 				AGS_TpsController* AlivePlayerController = Cast<AGS_TpsController>(GS_PS->GetPlayerController());
 				
 				if (IsValid(AlivePlayerController))
 				{
-					//UE_LOG(LogTemp, Warning, TEXT("---valid Alive PlayerPC"));
-					
 					APlayerController* DeadPlayerPC = Cast<APlayerController>(this);
 					if (DeadPlayerPC)
 					{
-						//UE_LOG(LogTemp, Warning, TEXT("---valid dead player PC"));
-
 						APawn* DeadPawn = Cast<APawn>(DeadPlayerPC->GetPawn());
 						
 						DeadPlayerPC->UnPossess();
@@ -203,7 +195,6 @@ void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
 						
 						if (DeadPawn)
 						{
-							//UE_LOG(LogTemp, Warning, TEXT("-------%s"), *DeadPawn->GetName());
 							DeadPawn->SetLifeSpan(2.f);
 						}
 					}
@@ -230,7 +221,6 @@ void AGS_TpsController::TestFunction()
 		{
 			if (PlayerWidgetInstance)
 			{
-				//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Remove ")),true, true, FLinearColor::Blue,5.f);
 				PlayerWidgetInstance->RemoveFromParent();
 				PlayerWidgetInstance = nullptr;
 				CrosshairWidget = nullptr;
@@ -246,20 +236,17 @@ void AGS_TpsController::TestFunction()
 				if (BossWidget)
 				{
 					//HP
-					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Boss HP Init ")),true, true, FLinearColor::Red,5.f);
 					BossWidget->SetOwningActor(GS_Character);
 					BossWidget->InitGuardianHPWidget();
 				}
 
 				if (FeverWidget)
 				{
-					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("Fever Gauge Init ")),true, true, FLinearColor::Red,5.f);
 					FeverWidget->InitDrakharFeverWidget();
 				}
 				
 				if (HPBoardWidget)
 				{
-					//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("---- Valid HP Board Widget ")),true, true, FLinearColor::Red,5.f);
 					HPBoardWidget->InitBoardWidget();
 				}
 

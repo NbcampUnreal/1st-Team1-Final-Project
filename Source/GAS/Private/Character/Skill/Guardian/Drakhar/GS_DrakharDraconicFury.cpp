@@ -1,5 +1,6 @@
 #include "Character/Skill/Guardian/Drakhar/GS_DrakharDraconicFury.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Skill/GS_SkillComp.h"
 
 UGS_DrakharDraconicFury::UGS_DrakharDraconicFury()
@@ -24,5 +25,15 @@ void UGS_DrakharDraconicFury::InterruptSkill()
 void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 {
 	StartCoolDown();
-	OwnerCharacter->MulticastRPCPlaySkillMontage((SkillAnimMontages[0]));
+
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
+	}
+	
+	AGS_Guardian* Guardian =Cast<AGS_Guardian>(OwnerCharacter);
+	if (Guardian)
+	{
+		Guardian->GuardianDoSkillState = EGuardianDoSkill::Ultimate;	
+	}
 }

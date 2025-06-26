@@ -10,13 +10,23 @@ class UGS_DrakharAnimInstance;
 class UGS_DebuffVFXComponent;
 class UGS_CameraShakeComponent;
 
+//check ctrl input
 UENUM(BlueprintType)
 enum class EGuardianState : uint8
 {
 	None,
 	CtrlUp,
-	CtrlSkillEnd,
-	ForceLanded,
+	CtrlEnd,
+};
+
+//check do skill
+UENUM(BlueprintType)
+enum class EGuardianDoSkill : uint8
+{
+	None,
+	Moving,
+	Aiming,
+	Ultimate
 };
 
 UCLASS()
@@ -37,6 +47,14 @@ public:
 	UPROPERTY(ReplicatedUsing=OnRep_GuardianState)
 	EGuardianState GuardianState;
 
+	UPROPERTY(ReplicatedUsing=OnRep_GuardianDoSkillState)
+	EGuardianDoSkill GuardianDoSkillState;
+
+	UPROPERTY()
+	EGuardianState ClientGuardianState;
+	UPROPERTY()
+	EGuardianDoSkill ClientGuardianDoSkillState;
+	
 	UPROPERTY(ReplicatedUsing=OnRep_MoveSpeed)
 	float MoveSpeed;
 	
@@ -57,6 +75,8 @@ public:
 	virtual void CtrlStop();
 	virtual void RightMouse();
 	
+	virtual void StopCtrl();
+	
 	UFUNCTION()
 	void OnRep_MoveSpeed();
 	
@@ -72,6 +92,9 @@ public:
 	
 	UFUNCTION()
 	void OnRep_GuardianState();
+	
+	UFUNCTION()
+	void OnRep_GuardianDoSkillState();
 
 	//[quit skill - server logic]
 	UFUNCTION(BlueprintCallable)
@@ -80,11 +103,12 @@ public:
 	//for debugging
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCDrawDebugSphere(bool bIsOverlap, const FVector& Location, float CapsuleRadius);
+
+	//skill state check - client logic
+	UFUNCTION()
+	void FinishCtrlSkill();
 	
 protected:
-	UPROPERTY()
-	EGuardianState ClientGuardianState;
-	
 	float NormalMoveSpeed;
 	float SpeedUpMoveSpeed;
 	
@@ -93,8 +117,7 @@ protected:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCEndHitStop(AGS_Character* InDamagedCharacter);
-
-
+	
 private:
 	//hit stop duration
 	UPROPERTY()
