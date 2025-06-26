@@ -20,6 +20,12 @@ void UGS_DrakharDraconicFury::ActiveSkill()
 
 void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 {
+	if (!OwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	//server logic
 	StartCoolDown();
 
 	if (OwnerCharacter)
