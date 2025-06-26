@@ -20,6 +20,11 @@ void UGS_DrakharEarthquake::ActiveSkill()
 	ExecuteSkillEffect();
 }
 
+void UGS_DrakharEarthquake::InterruptSkill()
+{
+	Super::InterruptSkill();
+}
+
 void UGS_DrakharEarthquake::ExecuteSkillEffect()
 {
 	bIsEarthquaking = true;

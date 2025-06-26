@@ -15,6 +15,11 @@ void UGS_DrakharWingRush::ActiveSkill()
 	ExecuteSkillEffect();
 }
 
+void UGS_DrakharWingRush::InterruptSkill()
+{
+	Super::InterruptSkill();
+}
+
 void UGS_DrakharWingRush::ExecuteSkillEffect()
 {
 	Super::ExecuteSkillEffect();

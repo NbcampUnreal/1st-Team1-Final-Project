@@ -350,6 +350,9 @@ void UGS_SkillComp::StartCooldownForSkill(ESkillSlot Slot)
 void UGS_SkillComp::SkillsInterrupt()
 {
 	AGS_Seeker* Seeker = Cast<AGS_Seeker>(GetOwner());
+
+	if (Seeker == nullptr)
+	{return;}
 	
 	if (Seeker->HasAuthority())
 	{

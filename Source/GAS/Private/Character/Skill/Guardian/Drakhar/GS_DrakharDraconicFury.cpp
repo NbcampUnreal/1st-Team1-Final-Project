@@ -16,6 +16,11 @@ void UGS_DrakharDraconicFury::ActiveSkill()
 	ExecuteSkillEffect();
 }
 
+void UGS_DrakharDraconicFury::InterruptSkill()
+{
+	Super::InterruptSkill();
+}
+
 void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 {
 	StartCoolDown();

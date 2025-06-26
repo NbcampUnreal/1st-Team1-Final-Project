@@ -15,5 +15,6 @@ public:
 	UGS_DrakharDraconicFury();
 
 	virtual void ActiveSkill() override;
+	virtual void InterruptSkill() override;
 	virtual void ExecuteSkillEffect() override;
 };
