@@ -1,6 +1,7 @@
 #include "DungeonEditor/GS_BuildManager.h"
 
 #include "EngineUtils.h"
+#include "Character/Player/Monster/GS_Monster.h"
 #include "Components/BillboardComponent.h"
 #include "Components/DecalComponent.h"
 #include "DungeonEditor/GS_DEController.h"
@@ -635,11 +636,41 @@ void AGS_BuildManager::PressedDel()
 						SetOccupancyData(CellCoords[i], ConvertTargetCellType, ObjectType, nullptr, IsRoom, true);
 					}
 				}
-
-				//DelActorUnderCursor->Destroy();
 			}
 		}
 	}
+}
+
+void AGS_BuildManager::ResetDungeonData()
+{
+	for (const auto& Pair : OccupancyData)
+	{
+		FIntPoint CellCoordinates = Pair.Key;
+		const FDEOccupancyData& Data = Pair.Value;
+		
+		if (IsValid(Data.RoomOccupancyActor))
+		{
+			Data.RoomOccupancyActor->Destroy();
+		}
+		if (IsValid(Data.WallAndDoorOccupancyActor))
+		{
+			Data.WallAndDoorOccupancyActor->Destroy();
+		}
+		if (IsValid(Data.FloorOccupancyActor))
+		{
+			if (AGS_Monster* MonsterActor = Cast<AGS_Monster>(Data.FloorOccupancyActor))
+			{
+				MonsterActor->DestroyAllWeapons();
+			}
+			Data.FloorOccupancyActor->Destroy();
+		}
+		if (IsValid(Data.CeilingOccupancyActor))
+		{
+			Data.CeilingOccupancyActor->Destroy();
+		}
+	}
+	
+	OccupancyData.Empty();
 }
 
 void AGS_BuildManager::ChangeDecalType(FDataTableRowHandle* Data)
@@ -746,6 +777,11 @@ void AGS_BuildManager::SaveDungeonData()
         if (IsValid(CurActor)
         	&& nullptr != CurActor->GetComponentByClass<UPlaceInfoComponent>())
         {
+        	if (CurActor->ActorHasTag("Lobby"))
+        	{
+        		continue;
+        	}
+        	
             FDESaveData ObjectData;
             ObjectData.SpawnActorClass = CurActor->GetClass();
             ObjectData.SpawnTransform = CurActor->GetActorTransform();
@@ -804,7 +840,10 @@ void AGS_BuildManager::LoadDungeonData()
     
 	UE_LOG(LogTemp, Warning, TEXT("SaveGame loaded successfully. Spawning actors..."));
 
-	// 3. 로드한 데이터를 기반으로 월드에 액터 스폰 (Room 다음 Wall&Door 다음 나머지 프랍 순서)
+	// 3.데이터 리셋
+	ResetDungeonData();
+	
+	// 4. 로드한 데이터를 기반으로 월드에 액터 스폰 (Room 다음 Wall&Door 다음 나머지 프랍 순서)
 	UWorld* World = GetWorld();
 	if (IsValid(World))
 	{
@@ -818,18 +857,6 @@ void AGS_BuildManager::LoadDungeonData()
 			default: return 2;
 			}
 		};
-
-		// SortedObjectData.Sort([&](const FDESaveData& A, const FDESaveData& B) {
-		// 	UPlaceInfoComponent* PlaceInfoA = A.SpawnActorClass ? A.SpawnActorClass->GetDefaultObject<AActor>()->FindComponentByClass<UPlaceInfoComponent>() : nullptr;
-		// 	UPlaceInfoComponent* PlaceInfoB = B.SpawnActorClass ? B.SpawnActorClass->GetDefaultObject<AActor>()->FindComponentByClass<UPlaceInfoComponent>() : nullptr;
-		//
-		// 	if (!PlaceInfoA || !PlaceInfoB)
-		// 	{
-		// 		return false;
-		// 	}
-		//
-		// 	return GetSortPriority(PlaceInfoA->GetObjectType()) < GetSortPriority(PlaceInfoB->GetObjectType());
-		// });
 
 		SortedObjectData.Sort([&](const FDESaveData& A, const FDESaveData& B) {
 		  return GetSortPriority(A.ObjectType) < GetSortPriority(B.ObjectType);

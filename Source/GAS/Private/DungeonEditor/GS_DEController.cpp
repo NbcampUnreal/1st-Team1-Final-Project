@@ -108,6 +108,7 @@ void AGS_DEController::Client_OnEnteredEditorMode_Implementation()
 	SetInputMode(FInputModeGameAndUI());
 	//SetupInputComponent();
 	
+	BuildManagerRef->ResetDungeonData();
 	CreateDEWidgets();
 }
 

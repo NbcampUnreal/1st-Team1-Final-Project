@@ -86,6 +86,8 @@ public:
 	void RotateProp();
 	void PressedDel();
 
+	void ResetDungeonData();
+	
 	void SaveDungeonData();
 	void LoadDungeonData();
 	

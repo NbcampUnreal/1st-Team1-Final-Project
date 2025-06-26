@@ -410,25 +410,6 @@ void AGS_CustomLobbyPC::RequestOpenPerkOrDungeonPopup()
 	}
 	else
 	{
-		//// WidgetToOpen = GuardianDungeonWidgetClass;
-		//CreateDEWidgets();
-		//CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
-		//LogMessage = TEXT("Guardian Dungeon UI Opened");
-
-		// 1. 던전 에디터 시작 위치를 찾습니다.
-		// TArray<AActor*> FoundActors;
-		// UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("DungeonEditorStart"), FoundActors);
-		//
-		// if (FoundActors.Num() > 0)
-		// {
-		// 	// 2. 에디터 모드 진입 함수를 호출합니다.
-		// 	EnterEditorMode(FoundActors[0]);
-		// }
-		// else
-		// {
-		// 	UE_LOG(LogTemp, Error, TEXT("DungeonEditorStart 태그를 가진 액터를 찾을 수 없습니다."));
-		// }
-
 		TArray<AActor*> FoundActors;
 		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("DungeonEditorStart"), FoundActors);
 		if (FoundActors.Num() > 0)
@@ -436,30 +417,6 @@ void AGS_CustomLobbyPC::RequestOpenPerkOrDungeonPopup()
 			EnterEditorMode(FoundActors[0]);
 		}
 	}
-
-	// UGS_CustomLobbyUI* LobbyUI = Cast<UGS_CustomLobbyUI>(CustomLobbyWidgetInstance);
-	// if (!LobbyUI) return;
-	// UOverlay* ModalOverlay = LobbyUI->GetModalOverlay();
-	// if (!ModalOverlay) return;
-	//
-	// if (WidgetToOpen)
-	// {
-	// 	CurrentModalWidget = CreateWidget<UUserWidget>(this, WidgetToOpen);
-	// 	if (CurrentModalWidget)
-	// 	{
-	// 		UOverlaySlot* OS = ModalOverlay->AddChildToOverlay(CurrentModalWidget);
-	// 		if (OS)
-	// 		{
-	// 			OS->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
-	// 			OS->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
-	// 		}
-	// 		UE_LOG(LogTemp, Log, TEXT("%s"), *LogMessage);
-	// 	}
-	// }
-	// else
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("Failed to create Perk/Dungeon widget"));
-	// }
 }
 
 void AGS_CustomLobbyPC::SelectSeekerJob(ESeekerJob NewJob)
