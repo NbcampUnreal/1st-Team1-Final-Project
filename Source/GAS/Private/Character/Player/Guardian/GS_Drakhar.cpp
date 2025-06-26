@@ -142,7 +142,8 @@ void AGS_Drakhar::BeginPlay()
 void AGS_Drakhar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
+	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("@@@@@@@@@@@@@@@@@@@@@@@@@@@ %d | %d"),ClientGuardianDoSkillState, GuardianDoSkillState));
 	if (SpringArmComp && bIsFlying)
 	{
 		if (FMath::IsNearlyEqual(SpringArmComp->TargetArmLength, TargetSpringArmLength, 1.0f))

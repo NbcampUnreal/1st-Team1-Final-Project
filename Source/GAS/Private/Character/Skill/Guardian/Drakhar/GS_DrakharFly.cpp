@@ -2,6 +2,7 @@
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 UGS_DrakharFly::UGS_DrakharFly()
 {
@@ -48,16 +49,13 @@ void UGS_DrakharFly::DeactiveSkill()
 	if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter))
 	{
 		Drakhar->MulticastRPC_OnFlyEnd();
+		Drakhar->ClientGuardianDoSkillState = EGuardianDoSkill::None;
 		Drakhar->GuardianDoSkillState = EGuardianDoSkill::None;
 	}
 	
 	ExecuteSkillEffect();
 }
 
-void UGS_DrakharFly::InterruptSkill()
-{
-	Super::InterruptSkill();
-}
 
 void UGS_DrakharFly::ExecuteSkillEffect()
 {
