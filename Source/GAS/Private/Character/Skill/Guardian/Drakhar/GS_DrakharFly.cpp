@@ -53,6 +53,11 @@ void UGS_DrakharFly::DeactiveSkill()
 	ExecuteSkillEffect();
 }
 
+void UGS_DrakharFly::InterruptSkill()
+{
+	Super::InterruptSkill();
+}
+
 void UGS_DrakharFly::ExecuteSkillEffect()
 {
 	if (bIsFlying)

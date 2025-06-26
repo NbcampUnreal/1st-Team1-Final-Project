@@ -61,10 +61,11 @@ void UGS_SkillBase::InterruptSkill()
 	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter);
 	if (Seeker->HasAuthority())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("SkillBase::InterruptSkill")); // SJE
 		if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerCharacter->GetMesh()->GetAnimInstance()))
 		{
-			SeekerAnim->IsPlayingFullBodyMontage = false;
-			SeekerAnim->IsPlayingUpperBodyMontage = false;
+			Seeker->Multicast_SetIsFullBodySlot(false);
+			Seeker->Multicast_SetIsUpperBodySlot(false);
 			Seeker->SetSkillInputControl(true, true, true);
 			Seeker->SetMoveControlValue(true, true);
 			Seeker->CanChangeSeekerGait = true;

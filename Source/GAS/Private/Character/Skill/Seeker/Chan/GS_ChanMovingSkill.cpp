@@ -28,7 +28,7 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->SetSkillInputControl(false, false, true);
+			OwnerPlayer->SetSkillInputControl(false, false, false);
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 			
 			if (OwnerCharacter->GetSkillComp())

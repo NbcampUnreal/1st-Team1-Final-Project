@@ -15,6 +15,7 @@ public:
 	
 	virtual void ActiveSkill() override;
 	virtual void DeactiveSkill() override;
+	virtual void InterruptSkill() override;
 	virtual void ExecuteSkillEffect() override;
 
 private:

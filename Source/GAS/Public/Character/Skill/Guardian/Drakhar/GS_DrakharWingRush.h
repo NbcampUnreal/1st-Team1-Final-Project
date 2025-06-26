@@ -12,6 +12,7 @@ public:
 	UGS_DrakharWingRush();
 
 	virtual void ActiveSkill() override;
+	virtual void InterruptSkill() override;
 	virtual void ExecuteSkillEffect() override;
 
 	// UFUNCTION()

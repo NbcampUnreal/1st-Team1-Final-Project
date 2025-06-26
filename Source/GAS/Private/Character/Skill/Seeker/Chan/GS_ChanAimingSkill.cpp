@@ -134,6 +134,8 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 	Super::OnSkillCommand();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("IsActive : %d, | LocalRole : %s"), OwnerPlayer->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming), *UEnum::GetValueAsString(OwnerPlayer->GetLocalRole()) ); 
+		
 		if (OwnerPlayer->HasAuthority())
 		{
 			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
@@ -290,6 +292,7 @@ void UGS_ChanAimingSkill::InterruptSkill()
 		OwnerPlayer->SetLookControlValue(true, true);
 		if (OwnerCharacter->GetSkillComp())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("ChanAimingSkill::InterruptSkill")); // SJE
 			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
 		}
 	}
