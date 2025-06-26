@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{B0F96A62-FC19-9C37-6BB5-5FCB8C6387F5}",
+    "Hash": "{A1339CF9-15A0-64B3-5D68-7C4144E42A44}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -702,6 +702,14 @@
       "Location": "Memory",
       "ShortName": "BowPullString_BW.54384.wav",
       "CachePath": "4D/{4D3DE185-41C6-22A1-0252-ED8CD668A097}.wem"
+     },
+     {
+      "Id": "477469204",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_DGF_fx_foley_footstep_water_deep_run_movement_splash_bubbles_08.wav",
+      "CachePath": "B8/{B802FFBA-F05C-6C3C-ED40-6CE002A27B1E}.wem"
      },
      {
       "Id": "482396296",
@@ -1582,6 +1590,14 @@
       "Location": "Memory",
       "ShortName": "Footstep_Grass (2).wav",
       "CachePath": "9B/{9B9B5F63-CDC2-D1D4-472A-4C3C2821144E}.wem"
+     },
+     {
+      "Id": "1070322442",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_DGF_fx_foley_footstep_water_deep_run_movement_splash_bubbles_10.wav",
+      "CachePath": "7D/{7DDC27AE-F745-4453-E1BA-CA6A68F289AF}.wem"
      },
      {
       "Id": "1072008213",
@@ -3132,7 +3148,7 @@
       "MaxAttenuation": "720",
       "DurationType": "OneShot",
       "DurationMin": "0.14552888",
-      "DurationMax": "1.0848088",
+      "DurationMax": "1.204451",
       "SwitchContainers": [
        {
         "SwitchValue": {
@@ -3180,8 +3196,7 @@
          "GroupType": "Switch",
          "GroupId": "2385628198",
          "Id": "1216965916",
-         "GUID": "{A2E9AE84-5D39-47B8-B5E3-0D1F4E1AF642}",
-         "Default": "true"
+         "GUID": "{A2E9AE84-5D39-47B8-B5E3-0D1F4E1AF642}"
         },
         "MediaRefs": [
          {
@@ -3192,6 +3207,23 @@
          },
          {
           "Id": "969253722"
+         }
+        ]
+       },
+       {
+        "SwitchValue": {
+         "GroupType": "Switch",
+         "GroupId": "2385628198",
+         "Id": "2654748154",
+         "GUID": "{30B5ABC7-3DAC-4CD1-A105-B88EFD6E1BD1}",
+         "Default": "true"
+        },
+        "MediaRefs": [
+         {
+          "Id": "477469204"
+         },
+         {
+          "Id": "1070322442"
          }
         ]
        },
@@ -3936,6 +3968,12 @@
         "GUID": "{829C7383-ED30-47D8-A302-C54566F2536C}"
        },
        {
+        "Id": "2654748154",
+        "Name": "Water",
+        "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Water",
+        "GUID": "{30B5ABC7-3DAC-4CD1-A105-B88EFD6E1BD1}"
+       },
+       {
         "Id": "4248645337",
         "Name": "Grass",
         "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Grass",
@@ -3984,6 +4022,6 @@
     ]
    }
   ],
-  "FileHash": "{197F12C5-D228-0544-A783-82A706D99CBC}"
+  "FileHash": "{D1F699AD-E8A8-696B-E5D3-BA66A391CB0A}"
  }
 }

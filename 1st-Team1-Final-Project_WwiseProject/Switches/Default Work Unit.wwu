@@ -10,6 +10,7 @@
 						<Switch Name="Grass" ID="{5EB68FE6-A580-4AC2-AB44-C54536ADFA61}"/>
 						<Switch Name="Metal" ID="{829C7383-ED30-47D8-A302-C54566F2536C}"/>
 						<Switch Name="Lava" ID="{9FA661EF-9442-48F6-B069-7B4141D21DE5}"/>
+						<Switch Name="Water" ID="{30B5ABC7-3DAC-4CD1-A105-B88EFD6E1BD1}"/>
 					</ChildrenList>
 				</SwitchGroup>
 				<SwitchGroup Name="BossFootSteps" ID="{B6847FDB-A219-445B-8880-08AFD91F4E57}">

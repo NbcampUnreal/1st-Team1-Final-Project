@@ -90,6 +90,7 @@ Switch	ID	Name	Switch Group			Notes
 	1216965916	Stone	FootSteps			
 	2195636714	Dirt	FootSteps			
 	2473969246	Metal	FootSteps			
+	2654748154	Water	FootSteps			
 	4248645337	Grass	FootSteps			
 	540301611	Lava	BossFootSteps			
 	1216965916	Stone	BossFootSteps			
@@ -225,6 +226,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	457760460	Explode_Fiery_Loud	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F9\{F916F059-DBCE-BF67-C98B-627AB29CEFFA}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Guardian\EV_DraconicFury_Hit\Explode_Fiery_Loud		419340
 	457873650	Burn_fire	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CF\{CF033A5A-9518-C199-7D3C-067465945448}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_FlameShot\Burn_fire		205748
 	460690503	BowPullString_02	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\4D\{4D3DE185-41C6-22A1-0252-ED8CD668A097}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Merci\SFX_BowPull\BowPullString_02		121056
+	477469204	FootstepsWater1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B8\{B802FFBA-F05C-6C3C-ED40-6CE002A27B1E}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Water\FootstepsWater1		193804
 	482396296	5	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E5\{E5AB914C-B81E-DC27-6AF2-7410630CAADB}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_Swing_Hit\5		113048
 	484226950	Merci_Outch4	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\84\{849837E6-C4EE-37F8-9A81-9408617CA207}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Merci\Voice_Merci_Hit\Merci_Outch4		83412
 	485972195	Undead_Monster_Fat	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\85\{85F5361E-770E-B89D-F182-881B12B372B6}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_Monster\SFX_Mon_IronFang_RTS\Undead_Monster_Fat		141268
@@ -335,6 +337,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	1053975739	Metal_heavy_impact	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\7F\{7F07AD8E-AB0C-CE34-FD5C-765668E7BCE7}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Chan\EV_ChanAimingSkill_Slam\Slam2\Metal_heavy_impact		103264
 	1054283662	Steel_fence	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BB\{BBA79A5D-B032-3F8C-26C0-D6B550B3F42B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Chan\ChanMoveSound\Steel_fence		61620
 	1069660761	Footstep_Grass (2)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\9B\{9B9B5F63-CDC2-D1D4-472A-4C3C2821144E}.wem		\Actor-Mixer Hierarchy\Default Work Unit\BossFootSteps\Grass\Footstep_Grass (2)		38756
+	1070322442	FootstepsWater	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\7D\{7DDC27AE-F745-4453-E1BA-CA6A68F289AF}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Water\FootstepsWater		172540
 	1072008213	Beast_Growl_Attack_Dry_01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\4B\{4B954174-5002-A301-D166-6C4FEBCF59B4}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_Monster\SFX_Mon_IronFang_RTS\Beast_Growl_Attack_Dry_01		62734
 	1073517265	SFX_PortalTrigger	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BE\{BE000CF7-9B8A-9886-06D6-E59C4CE511F8}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_PortalTrigger		978864
 
