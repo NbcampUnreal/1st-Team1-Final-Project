@@ -8,6 +8,7 @@
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "AkGameplayStatics.h"
 #include "AkAudioDevice.h"
 #include "AkComponent.h"
@@ -59,6 +60,10 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	FootDecalLifeSpan = 10.0f;
 	DecalRotationOffsetYaw = 180.0f;
 
+	// Initialize water effect properties
+	bEnableWaterEffects = true;
+	WaterSplashScale = 1.0f;
+
 	// Set default switch group name
 	SwitchGroupName = TEXT("FootSteps");
 
@@ -69,6 +74,7 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	SurfaceSwitchValues.Add(SurfaceType3, TEXT("Metal"));
 	SurfaceSwitchValues.Add(SurfaceType4, TEXT("Stone"));
 	SurfaceSwitchValues.Add(SurfaceType5, TEXT("Lava"));
+	SurfaceSwitchValues.Add(SurfaceType6, TEXT("Water"));
 
 	// Initialize foot dust effects with asset references
 	// Note: Asset paths should be adjusted based on your project structure
@@ -98,6 +104,13 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	if (LavaEffect.Succeeded())
 	{
 		FootDustEffects.Add(SurfaceType5, LavaEffect.Object);
+	}
+
+	// Water splash effect
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> WaterEffect(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
+	if (WaterEffect.Succeeded())
+	{
+		FootDustEffects.Add(SurfaceType6, WaterEffect.Object);
 	}
 }
 
@@ -350,8 +363,14 @@ bool UGS_FootManagerComponent::PerformFootTrace(EFootStep Foot, FHitResult& OutH
 	return bHit;
 }
 
-void UGS_FootManagerComponent::SpawnFootstepDecal(EPhysicalSurface /*Surface*/, const FVector& Location, const FVector& Normal, EFootStep Foot)
+void UGS_FootManagerComponent::SpawnFootstepDecal(EPhysicalSurface Surface, const FVector& Location, const FVector& Normal, EFootStep Foot)
 {
+	// Water surface doesn't create footprint decals, only splash effects
+	if (Surface == SurfaceType6) // Water surface
+	{
+		return;
+	}
+
 	UMaterialInterface* DecalMaterial = (Foot == EFootStep::LeftFoot) ? LeftFootDecal : RightFootDecal;
 	if (!DecalMaterial)
 	{
@@ -465,6 +484,12 @@ void UGS_FootManagerComponent::SpawnFootDustEffect(EPhysicalSurface Surface, con
 		return;
 	}
 
+	// Water surface special handling
+	if (Surface == SurfaceType6 && !bEnableWaterEffects) // Water surface
+	{
+		return; // Water effects disabled
+	}
+
 	const FRotator EffectRotation = FRotationMatrix::MakeFromZ(Normal).Rotator();
 
 	UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
@@ -476,6 +501,12 @@ void UGS_FootManagerComponent::SpawnFootDustEffect(EPhysicalSurface Surface, con
 
 	if (SpawnedEffect)
 	{
+		// Apply water splash scaling for water surfaces
+		if (Surface == SurfaceType6 && WaterSplashScale != 1.0f) // Water surface
+		{
+			SpawnedEffect->SetWorldScale3D(FVector(WaterSplashScale));
+		}
+		
 		OnFootDustSpawned(Surface, Location);
 	}
 }
@@ -506,4 +537,39 @@ USkeletalMeshComponent* UGS_FootManagerComponent::GetOwnerSkeletalMesh() const
 	}
 
 	return GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+}
+
+void UGS_FootManagerComponent::TestWaterFootstep()
+{
+	// Force play water footstep sound
+	PlayFootstepSound(SurfaceType6, GetOwner()->GetActorLocation());
+	
+	// Force spawn water splash effect
+	const FVector Location = GetOwner()->GetActorLocation();
+	const FVector Normal = FVector::UpVector;
+	SpawnFootDustEffect(SurfaceType6, Location, Normal);
+}
+
+int32 UGS_FootManagerComponent::GetCurrentSurfaceType()
+{
+	if (!CachedSkeletalMesh)
+	{
+		return -1;
+	}
+
+	// Perform trace to detect current surface
+	FHitResult HitResult;
+	if (!PerformFootTrace(EFootStep::LeftFoot, HitResult))
+	{
+		return -1;
+	}
+
+	// Get the physical surface from hit result
+	EPhysicalSurface SurfaceType = SurfaceType_Default;
+	if (HitResult.PhysMaterial.IsValid())
+	{
+		SurfaceType = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+	}
+
+	return (int32)SurfaceType;
 } 
