@@ -37,7 +37,7 @@
 							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
 						</Reference>
 						<Reference Name="DefaultSwitchOrState">
-							<ObjectRef Name="Stone" ID="{A2E9AE84-5D39-47B8-B5E3-0D1F4E1AF642}" WorkUnitID="{A3549E82-5CB2-4F42-AE3B-1D8A65A900E9}"/>
+							<ObjectRef Name="Water" ID="{30B5ABC7-3DAC-4CD1-A105-B88EFD6E1BD1}" WorkUnitID="{A3549E82-5CB2-4F42-AE3B-1D8A65A900E9}"/>
 						</Reference>
 						<Reference Name="OutputBus">
 							<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
@@ -801,6 +801,129 @@
 								</Sound>
 							</ChildrenList>
 						</RandomSequenceContainer>
+						<RandomSequenceContainer Name="Water" ID="{BF72D3D9-1EBE-4A9B-BAB2-5DE529620863}" ShortID="284448444">
+							<PropertyList>
+								<Property Name="Highpass" Type="int16">
+									<ValueList>
+										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>10</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>-3</Value>
+									</ValueList>
+								</Property>
+								<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+								<Property Name="Pitch" Type="int32">
+									<ValueList>
+										<Value>-100</Value>
+									</ValueList>
+									<ModifierList>
+										<ModifierInfo>
+											<Modifier Name="" ID="{D5B89683-B78E-42CA-A064-5B81FADF403C}">
+												<PropertyList>
+													<Property Name="Enabled" Type="bool" Value="True"/>
+													<Property Name="Max" Type="Real64" Value="25"/>
+													<Property Name="Min" Type="Real64" Value="-50"/>
+												</PropertyList>
+											</Modifier>
+										</ModifierInfo>
+									</ModifierList>
+								</Property>
+								<Property Name="Volume" Type="Real64">
+									<ValueList>
+										<Value>-10</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="FootstepsWater1" ID="{722EC997-5C23-4C99-9B04-06944C328AED}" ShortID="478300237">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="FootstepsConcrete1" ID="{DD209197-D78C-4D90-B9A3-50FBB2D1046E}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.00993959270781725"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.0285362500321205"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0125046488904798"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.16736990622304"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>FootstepsConcrete1.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="866318197"/>
+											</MediaIDList>
+										</AudioFileSource>
+										<AudioFileSource Name="ESM_DGF_fx_foley_footstep_water_deep_run_movement_splash_bubbles_08" ID="{C754DC8F-B413-4A73-AD98-554ED28E814F}">
+											<Language>SFX</Language>
+											<AudioFile>ESM_DGF_fx_foley_footstep_water_deep_run_movement_splash_bubbles_08.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="477469204"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="ESM_DGF_fx_foley_footstep_water_deep_run_movement_splash_bubbles_08" ID="{C754DC8F-B413-4A73-AD98-554ED28E814F}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="FootstepsWater" ID="{0083D856-77DF-4CAA-BECF-A5B86FAB54B3}" ShortID="939195793">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="FootstepsConcrete" ID="{C0694944-5591-4BF0-89BD-BCC686939D9C}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0297396620502948"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.0240448331470469"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0221465568459642"/>
+												<Property Name="TrimEnd" Type="Real64" Value="0.302458699540129"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>FootstepsConcrete.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="969253722"/>
+											</MediaIDList>
+										</AudioFileSource>
+										<AudioFileSource Name="ESM_DGF_fx_foley_footstep_water_deep_run_movement_splash_bubbles_10" ID="{0D34BCD2-9F7C-4E10-B95E-4D43F2725BC1}">
+											<Language>SFX</Language>
+											<AudioFile>ESM_DGF_fx_foley_footstep_water_deep_run_movement_splash_bubbles_10.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="1070322442"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="ESM_DGF_fx_foley_footstep_water_deep_run_movement_splash_bubbles_10" ID="{0D34BCD2-9F7C-4E10-B95E-4D43F2725BC1}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+						</RandomSequenceContainer>
 					</ChildrenList>
 					<GroupingInfo>
 						<GroupingBehaviorList>
@@ -815,6 +938,9 @@
 							</GroupingBehavior>
 							<GroupingBehavior>
 								<ItemRef Name="Grass" ID="{EAF8B345-DCA9-4A63-983C-083F3D5C86BD}"/>
+							</GroupingBehavior>
+							<GroupingBehavior>
+								<ItemRef Name="Water" ID="{BF72D3D9-1EBE-4A9B-BAB2-5DE529620863}"/>
 							</GroupingBehavior>
 							<GroupingBehavior>
 								<ItemRef Name="Metal" ID="{466D8BF0-703D-4D0F-90D1-2991EC45426D}"/>
@@ -837,6 +963,12 @@
 								<SwitchRef Name="Stone" ID="{A2E9AE84-5D39-47B8-B5E3-0D1F4E1AF642}"/>
 								<ItemList>
 									<ItemRef Name="Stone" ID="{727A2124-3657-4EEA-BDDC-E5CF759FE544}"/>
+								</ItemList>
+							</Grouping>
+							<Grouping>
+								<SwitchRef Name="Water" ID="{30B5ABC7-3DAC-4CD1-A105-B88EFD6E1BD1}"/>
+								<ItemList>
+									<ItemRef Name="Water" ID="{BF72D3D9-1EBE-4A9B-BAB2-5DE529620863}"/>
 								</ItemList>
 							</Grouping>
 							<Grouping>

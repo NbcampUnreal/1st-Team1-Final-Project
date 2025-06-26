@@ -28,60 +28,54 @@ void UGS_ChanAimingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		if (OwnerPlayer->HasAuthority())
+		// Change Slot
+		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(true);
+		OwnerPlayer->Multicast_SetMustTurnInPlace(true);
+		OwnerPlayer->SetSeekerGait(EGait::Walk);
+
+		// Control Input Key
+		OwnerPlayer->SetSkillInputControl(false, false, true);
+
+		OwnerPlayer->CanChangeSeekerGait = false;
+		OwnerPlayer->SetSkillInputControl(false, false, false);
+		OwnerPlayer->SetMoveControlValue(true, true);
+		OwnerPlayer->SetLookControlValue(true, true);
+
+		// Play Montage
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		OwnerPlayer->CanChangeSeekerGait = false;
+
+		// Skill State
+		if (OwnerCharacter->GetSkillComp())
 		{
-			// Change Slot
-			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(true);
-			OwnerPlayer->Multicast_SetMustTurnInPlace(true);
-			OwnerPlayer->SetSeekerGait(EGait::Walk);
-
-			// Control Input Key
-			OwnerPlayer->SetSkillInputControl(false, false, true);
-
-			OwnerPlayer->CanChangeSeekerGait = false;
-			OwnerPlayer->SetSkillInputControl(false, false, false);
-			OwnerPlayer->SetMoveControlValue(true, true);
-			OwnerPlayer->SetLookControlValue(true, true);
-
-			// Play Montage
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-			OwnerPlayer->CanChangeSeekerGait = false;
-
-			// Skill State
-			if (OwnerCharacter->GetSkillComp())
-			{
-				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
-			}
-
-			// 에이밍 스킬 시작 사운드 재생
-			if (OwnerPlayer->AimingSkillStartSound)
-			{
-				OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillStartSound);
-			}
-		
-			// =======================
-			// VFX 재생 - 컴포넌트 RPC 사용
-			// =======================
-			if (OwningComp)
-			{
-				FVector SkillLocation = OwnerCharacter->GetActorLocation();
-				FRotator SkillRotation = OwnerCharacter->GetActorRotation();
-		
-				// 스킬 시전 VFX 재생
-				OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
-			}
+			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
 		}
-		else
-		{	
-			// Skill Stat
-			CurrentStamina = MaxStamina;
-		
-			// UI
-			ShowProgressBar(true);
-			UpdateProgressBar(CurrentStamina);
-			OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 1.0f, true);
+
+		// 에이밍 스킬 시작 사운드 재생
+		if (OwnerPlayer->AimingSkillStartSound)
+		{
+			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillStartSound);
 		}
+	
+		// =======================
+		// VFX 재생 - 컴포넌트 RPC 사용
+		// =======================
+		if (OwningComp)
+		{
+			FVector SkillLocation = OwnerCharacter->GetActorLocation();
+			FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+	
+			// 스킬 시전 VFX 재생
+			OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
+		}
+		// Skill Stat
+		CurrentStamina = MaxStamina;
+	
+		// UI
+		ShowProgressBar(true);
+		UpdateProgressBar(CurrentStamina);
+		OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 1.0f, true);
 	}
 }
 
@@ -90,42 +84,37 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 	Super::DeactiveSkill();
 	
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{		
-		if (OwnerPlayer->HasAuthority())
-		{
-			// Change Slot
-			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
-			OwnerPlayer->SetSeekerGait(OwnerPlayer->GetLastSeekerGait());
-			// Change Slot
-			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			
-			OwnerPlayer->CanChangeSeekerGait = true;
-			OwnerPlayer->SetSkillInputControl(true, true, true);
-			OwnerPlayer->SetMoveControlValue(true, true);
-			OwnerPlayer->SetLookControlValue(true, true);
+	{
+		// Change Slot
+		OwnerPlayer->Multicast_SetMustTurnInPlace(false);
+		OwnerPlayer->SetSeekerGait(OwnerPlayer->GetLastSeekerGait());
+		// Change Slot
+		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		
+		OwnerPlayer->CanChangeSeekerGait = true;
+		OwnerPlayer->SetSkillInputControl(true, true, true);
+		OwnerPlayer->SetMoveControlValue(true, true);
+		OwnerPlayer->SetLookControlValue(true, true);
 
-			if (OwnerCharacter->GetSkillComp())
-			{
-				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
-			}
-			// =======================
-			// 스킬 종료 VFX 재생
-			// =======================
-			if (OwningComp)
-			{
-				FVector SkillLocation = OwnerCharacter->GetActorLocation();
-				FRotator SkillRotation = OwnerCharacter->GetActorRotation();
-				
-				// 스킬 종료 VFX 재생
-				OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
-			}
-		}
-		else
+		if (OwnerCharacter->GetSkillComp())
 		{
-			ShowProgressBar(false);
-			OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
 		}
+		// =======================
+		// 스킬 종료 VFX 재생
+		// =======================
+		if (OwningComp)
+		{
+			FVector SkillLocation = OwnerCharacter->GetActorLocation();
+			FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+			
+			// 스킬 종료 VFX 재생
+			OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
+		}
+	
+		ShowProgressBar(false);
+		OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 	}
 }
 
@@ -134,74 +123,48 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 	Super::OnSkillCommand();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		if (OwnerPlayer->HasAuthority())
+		UE_LOG(LogTemp, Warning, TEXT("IsActive : %d, | LocalRole : %s"), OwnerPlayer->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming), *UEnum::GetValueAsString(OwnerPlayer->GetLocalRole()) ); 
+		
+		OwnerPlayer->Multicast_SetMustTurnInPlace(false);
+		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+
+		OwnerPlayer->SetLookControlValue(false, false);
+		OwnerPlayer->SetMoveControlValue(false, false);
+		OwnerPlayer->SetSkillInputControl(false, false, false);
+		
+		// Play Montage
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+		
+		// Forward Jump
+		const FVector Forward = OwnerPlayer->GetActorForwardVector();
+		const FVector JumpVelocity = Forward * 600.0f + FVector(0.f, 0.f, 420.0f);
+		OwnerPlayer->LaunchCharacter(JumpVelocity, true, true);
+
+		// 방패 슬램 사운드 재생
+		if (OwnerPlayer->AimingSkillSlamSound)
 		{
-			OwnerPlayer->Multicast_SetMustTurnInPlace(false);
-			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-
-			OwnerPlayer->SetLookControlValue(false, false);
-			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->SetSkillInputControl(false, false, false);
-			
-			// Play Montage
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
-			
-			// Forward Jump
-			const FVector Forward = OwnerPlayer->GetActorForwardVector();
-			const FVector JumpVelocity = Forward * 600.0f + FVector(0.f, 0.f, 420.0f);
-			OwnerPlayer->LaunchCharacter(JumpVelocity, true, true);
-
-			// 방패 슬램 사운드 재생
-			if (OwnerPlayer->AimingSkillSlamSound)
-			{
-				OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillSlamSound);
-			}
-
-			// =======================
-			// 스킬 범위 VFX 재생
-			// =======================
-			OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(
-			RangeVFXSpawnHandle,
-			FTimerDelegate::CreateUObject(this, &UGS_ChanAimingSkill::SpawnAimingSkillVFX),
-			0.93f,
-			false
-		);
-
-			// End Skill
-			OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(KnockbackHandle, this, &UGS_ChanAimingSkill::ExecuteSkillEffect, 0.8f, false);
+			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillSlamSound);
 		}
-		else
-		{
-			ShowProgressBar(false);
-			OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
-		}
-	}
-}
 
-		/*// =======================
+		// =======================
 		// 스킬 범위 VFX 재생
 		// =======================
-		
 		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(
-			RangeVFXSpawnHandle,
-			FTimerDelegate::CreateUObject(this, &UGS_ChanAimingSkill::SpawnAimingSkillVFX),
-			0.93f,
-			false
-		);
+		RangeVFXSpawnHandle,
+		FTimerDelegate::CreateUObject(this, &UGS_ChanAimingSkill::SpawnAimingSkillVFX),
+		0.93f,
+		false
+	);
 
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
-		}
-	}
-	else
-	{
-		CurrentStamina = 0;
+		// End Skill
+		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(KnockbackHandle, this, &UGS_ChanAimingSkill::ExecuteSkillEffect, 0.8f, false);
+
 		ShowProgressBar(false);
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+
 	}
-}*/
+}
 
 void UGS_ChanAimingSkill::SpawnAimingSkillVFX()
 {
@@ -285,20 +248,17 @@ void UGS_ChanAimingSkill::InterruptSkill()
 	Super::InterruptSkill();
 
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if (OwnerPlayer->HasAuthority())
+
+	OwnerPlayer->SetLookControlValue(true, true);
+	if (OwnerCharacter->GetSkillComp())
 	{
-		OwnerPlayer->SetLookControlValue(true, true);
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
-		}
+		UE_LOG(LogTemp, Warning, TEXT("ChanAimingSkill::InterruptSkill")); // SJE
+		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
 	}
-	else
-	{
-		CurrentStamina = 0;
-		ShowProgressBar(false);
-		OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
-	}
+
+	CurrentStamina = 0;
+	ShowProgressBar(false);
+	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 }
 
 

@@ -224,7 +224,7 @@ void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, boo
 	SkillInputControl.CanInputLC = CanLeftClick;
 	SkillInputControl.CanInputRC = CanRightClick;
 	SkillInputControl.CanInputRoll= CanRollClick;
-	UE_LOG(LogTemp, Warning, TEXT("SetSkillInputControl LC : %d, RC : %d, Roll : %d"), SkillInputControl.CanInputLC, SkillInputControl.CanInputRC, SkillInputControl.CanInputRoll);
+	UE_LOG(LogTemp, Warning, TEXT("SetSkillInputControl LC : %d, RC : %d, Roll : %d"), SkillInputControl.CanInputLC, SkillInputControl.CanInputRC, SkillInputControl.CanInputRoll); // SJE
 }
 
 FSkillInputControl AGS_Player::GetSkillInputControl()

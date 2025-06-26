@@ -46,3 +46,8 @@ void UGS_DrakharAnimInstance::AnimNotify_CtrlSkillEnd()
 {
 	Drakhar->ServerRPCStopCtrl();
 }
+
+void UGS_DrakharAnimInstance::AnimNotify_FinishCtrlSkill()
+{
+	Drakhar->FinishCtrlSkill();
+}

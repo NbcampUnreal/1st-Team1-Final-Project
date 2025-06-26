@@ -1,9 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Character/Skill/Guardian/Drakhar/GS_DrakharEarthquake.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 UGS_DrakharEarthquake::UGS_DrakharEarthquake()
 {
@@ -16,7 +14,7 @@ void UGS_DrakharEarthquake::ActiveSkill()
 	{
 		return;
 	}
-
+	
 	ExecuteSkillEffect();
 }
 
@@ -25,6 +23,15 @@ void UGS_DrakharEarthquake::ExecuteSkillEffect()
 	bIsEarthquaking = true;
 	
 	StartCoolDown();
-
-	OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
+	
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
+	}
+	AGS_Guardian* Guardian =Cast<AGS_Guardian>(OwnerCharacter);
+	if (Guardian)
+	{
+		Guardian->ClientGuardianDoSkillState = EGuardianDoSkill::Aiming;
+		Guardian->GuardianDoSkillState = EGuardianDoSkill::Aiming;
+	}
 }

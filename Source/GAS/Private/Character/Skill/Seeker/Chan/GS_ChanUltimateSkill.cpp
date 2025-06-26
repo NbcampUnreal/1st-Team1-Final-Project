@@ -30,33 +30,23 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	Super::ActiveSkill();
 	
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if (OwnerPlayer->HasAuthority())
+	OwnerPlayer->SetSkillInputControl(false, false, false);
+	if (OwnerCharacter->GetSkillComp())
 	{
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		OwnerPlayer->SetSkillInputControl(false, false, false);
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, true);
-		}
-
-		if (OwnerPlayer->UltimateSkillSound)
-		{
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-
-			// 궁극기 사운드 재생
-			if(OwnerPlayer->UltimateSkillSound)
-			{
-				OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->UltimateSkillSound);
-			}
-
-			// 돌진 시작 (약간 딜레이)
-			FTimerHandle DelayHandle;
-			GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UGS_ChanUltimateSkill::StartCharge, 0.5f, false);
-		}
+		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, true);
 	}
-	else
+
+	if (OwnerPlayer->UltimateSkillSound)
 	{
+		// 궁극기 사운드 재생
+		if(OwnerPlayer->UltimateSkillSound)
+		{
+			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->UltimateSkillSound);
+		}
+
+		// 돌진 시작 (약간 딜레이)
+		FTimerHandle DelayHandle;
+		GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UGS_ChanUltimateSkill::StartCharge, 0.5f, false);
 	}
 }
 
@@ -70,24 +60,17 @@ void UGS_ChanUltimateSkill::DeactiveSkill()
 	Super::DeactiveSkill();
 
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if(OwnerPlayer->HasAuthority())
+	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerPlayer->GetMesh()->GetAnimInstance()))
 	{
-		if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerPlayer->GetMesh()->GetAnimInstance()))
-		{
-			SeekerAnim->IsPlayingFullBodyMontage = false;
-			SeekerAnim->IsPlayingUpperBodyMontage = false;
-			OwnerPlayer->SetMoveControlValue(true, true);
-			OwnerPlayer->SetSkillInputControl(true, true, true);
-			OwnerPlayer->CanChangeSeekerGait = true;
-		}
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
-		}
+		SeekerAnim->IsPlayingFullBodyMontage = false;
+		SeekerAnim->IsPlayingUpperBodyMontage = false;
+		OwnerPlayer->SetMoveControlValue(true, true);
+		OwnerPlayer->SetSkillInputControl(true, true, true);
+		OwnerPlayer->CanChangeSeekerGait = true;
 	}
-	else
+	if (OwnerCharacter->GetSkillComp())
 	{
-		
+		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
 	}
 }
 
@@ -210,6 +193,17 @@ void UGS_ChanUltimateSkill::StartCharge()
 	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
 	Controller->SetMoveControlValue(true, true);
 	Controller->StartAutoMoveForward();
+
+	if (OwnerPlayer)
+	{
+		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		// 애니메이션 재생
+		if (SkillAnimMontages[0])
+		{
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		}
+	}
 }
 
 

@@ -125,6 +125,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPCStartCtrl();
 
+	void StopCtrl() override;
+	
 	UFUNCTION(Server, Reliable)
 	void ServerRPCStopCtrl();
 	
