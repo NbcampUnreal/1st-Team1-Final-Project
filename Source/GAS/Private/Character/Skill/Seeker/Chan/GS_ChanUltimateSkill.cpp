@@ -30,9 +30,6 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	Super::ActiveSkill();
 	
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-
-	OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-	OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 	OwnerPlayer->SetSkillInputControl(false, false, false);
 	if (OwnerCharacter->GetSkillComp())
 	{
@@ -41,8 +38,6 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 
 	if (OwnerPlayer->UltimateSkillSound)
 	{
-		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-
 		// 궁극기 사운드 재생
 		if(OwnerPlayer->UltimateSkillSound)
 		{
