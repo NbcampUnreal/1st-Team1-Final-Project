@@ -195,7 +195,13 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 		UE_LOG(LogTemp, Warning, TEXT("TryActivateSkill failed: bCanUseSkill = false"));
 		return;
 	}
-	// 먼저 AutonomousProxy 에서 ActiveSkill() 실행.
+
+	if (!GetOwner()->HasAuthority())
+	{		
+		Server_TryActiveSkill(Slot);
+		return;
+	}
+	
 	if (SkillMap.Contains(Slot))
 	{
 		if (SkillMap[Slot]->CanActive())
@@ -212,26 +218,19 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SkillMap does not contain slot"));
 	}
-
-	// 후에 Authority 에서 ActiveSkill() 실행.
-	if (!GetOwner()->HasAuthority())
-	{		
-		Server_TryActiveSkill(Slot);
-		return;
-	}
 }
 
 void UGS_SkillComp::TryDeactiveSkill(ESkillSlot Slot)
 {
-	if (SkillMap.Contains(Slot))
-	{
-		SkillMap[Slot]->DeactiveSkill();
-	}
-	
 	if (!GetOwner()->HasAuthority())
 	{
 		Server_TryDeactiveSkill(Slot);
 		return;
+	}
+	
+	if (SkillMap.Contains(Slot))
+	{
+		SkillMap[Slot]->DeactiveSkill();
 	}
 }
 
@@ -354,15 +353,12 @@ void UGS_SkillComp::SkillsInterrupt()
 	if (Seeker == nullptr)
 	{return;}
 	
-	if (Seeker->HasAuthority())
+	if (Seeker->CurrentComboIndex > 0)
 	{
-		if (Seeker->CurrentComboIndex > 0)
-		{
-			Seeker->CurrentComboIndex = 0;
-			Seeker->CanAcceptComboInput = true;
-			Seeker->bComboEnded = true;
-			Seeker->bNextCombo = false;
-		}
+		Seeker->CurrentComboIndex = 0;
+		Seeker->CanAcceptComboInput = true;
+		Seeker->bComboEnded = true;
+		Seeker->bNextCombo = false;
 	}
 	
 	for (TPair<ESkillSlot, UGS_SkillBase*> slot : SkillMap)
