@@ -65,8 +65,4 @@ private:
 	void ShowProgressBar(bool bShow);
 
 	FTimerHandle KnockbackHandle;
-	
-	//Range VFX
-	FTimerHandle RangeVFXSpawnHandle;
-	void SpawnAimingSkillVFX();
 };

@@ -81,6 +81,7 @@ void AGS_SwordAuraProjectile::Multicast_StartSwordSlashVFX_Implementation()
 	}
 
 	UNiagaraSystem* SelectedVFX = (EffectType == ESwordAuraEffectType::Left) ? LeftSlashVFX : RightSlashVFX;
+	UE_LOG(LogTemp, Warning, TEXT("SelectedVFX : %s"), *SelectedVFX->GetName());
 	if (!SelectedVFX)
 	{
 		return;
