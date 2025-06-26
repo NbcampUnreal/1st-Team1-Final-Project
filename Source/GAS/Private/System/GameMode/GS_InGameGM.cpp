@@ -150,9 +150,6 @@ void AGS_InGameGM::StartPlay()
 {
     Super::StartPlay();
 
-    bMatchHasStarted = false;
-    bGameEnded = false;
-
     /*FString BossLevelName = TEXT("BossLevel");
     FString ResultLevelName = TEXT("ResultLevel");
     UGameplayStatics::LoadStreamLevel(this, FName(*BossLevelName), false, false, FLatentActionInfo());
@@ -182,7 +179,6 @@ void AGS_InGameGM::StartPlay()
                     SpawnDungeonFromArray(GPS->ObjectData);
                 }
             }
-            GetWorldTimerManager().SetTimer(MatchStartTimerHandle, this, &AGS_InGameGM::StartMatchCheck, 2.0f, false);
         }
     }, 0.2f, false);
 
@@ -240,13 +236,6 @@ void AGS_InGameGM::BindToPlayerState(APlayerController* PlayerController)
     }
 }
 
-void AGS_InGameGM::StartMatchCheck()
-{
-    UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Match checks started. bMatchHasStarted = true"));
-    bMatchHasStarted = true;
-    CheckAllPlayersDead(); //이거 지워도 상관 없음
-}
-
 void AGS_InGameGM::OnTimerEnd()
 {
     UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: OnTimerEnd called (likely by GameState). Seekers Lose."));
@@ -255,12 +244,6 @@ void AGS_InGameGM::OnTimerEnd()
 
 void AGS_InGameGM::EndGame(EGameResult Result)
 {
-    if (bGameEnded)
-    {
-        return;
-    }
-    bGameEnded = true;
-
     // 명시적으로 bIsAlive를 다시 한번 확실하게 동기화
     if (GameState)
     {
@@ -371,14 +354,7 @@ void AGS_InGameGM::CheckAllPlayersDead()
     if (PlayerCount > 0 && bAllPlayersDead)
     {
         UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: All relevant players are dead!"));
-        if (bMatchHasStarted)
-        {
-            EndGame(EGameResult::GR_SeekersLost);
-        }
-        else
-        {
-            UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: All dead check triggered, but match not started yet. Ignoring EndGame."));
-        }
+        EndGame(EGameResult::GR_SeekersLost);
     }
     else
     {

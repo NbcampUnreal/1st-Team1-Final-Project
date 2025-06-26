@@ -69,11 +69,6 @@ public:
 private:
 	void SetGameResultOnAllPlayers(EGameResult Result);
 
-	FTimerHandle MatchStartTimerHandle;
-
-	bool bMatchHasStarted;
-	bool bGameEnded;
-
 	//던전 스폰
 protected:
 	void SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData);

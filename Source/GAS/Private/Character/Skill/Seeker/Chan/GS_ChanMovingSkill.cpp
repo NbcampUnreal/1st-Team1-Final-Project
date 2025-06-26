@@ -23,8 +23,7 @@ void UGS_ChanMovingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		if (OwnerPlayer->HasAuthority())
-		{
+		
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 			OwnerPlayer->SetMoveControlValue(false, false);
@@ -57,11 +56,6 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			}
 
 			ExecuteSkillEffect();
-		}
-		else
-		{
-			
-		}
 	}
 }
 
@@ -70,8 +64,6 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 	Super::DeactiveSkill();
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 
-	if (OwnerPlayer->HasAuthority())
-	{
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 		OwnerPlayer->SetMoveControlValue(true, true);
@@ -94,27 +86,21 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 			// 스킬 종료 VFX 재생
 			OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
 		}
-	}
-	else
-	{
-	}
+
 }
 
 void UGS_ChanMovingSkill::InterruptSkill()
 {
 	Super::InterruptSkill();
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if(OwnerPlayer->HasAuthority())
-	{
+
 		if (OwnerCharacter->GetSkillComp())
 		{
 			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
 		}
-	}
-	else
-	{
+
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(DEFBuffHandle); // SJE To KCY
-	}
+
 }
 
 void UGS_ChanMovingSkill::ExecuteSkillEffect()
