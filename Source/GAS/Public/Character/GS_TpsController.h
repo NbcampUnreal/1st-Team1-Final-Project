@@ -149,6 +149,8 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "UI")
 	UGS_CrossHairImage* CrosshairWidget;
 
+	void SnapCameraToCharacterYaw();
+
 private:
 	// Auto Moving (KCY)
 	FTimerHandle AutoMoveTickHandle;
@@ -163,4 +165,20 @@ private:
 	UFUNCTION(Client, Reliable)
 	void Client_StopAutoMoveForward();
 
+	void ApplyChargeCameraSettings(bool bCharging);
+	void SaveOriginalCameraSettings();
+	void RestoreOriginalCameraSettings();
+
+	// 카메라 자동 회전 (KCY)
+	FTimerHandle CameraSnapTimerHandle;
+	bool bIsSnappingCamera = false;
+	float CameraSnapInterpSpeed = 5.0f; // 회전 속도 (낮을수록 느림)
+
+	// 돌진 시 원래 카메라 설정 저장용
+	bool bOriginalUseControllerRotationYaw = true;
+	bool bOriginalOrientRotationToMovement = false;
+	bool bOriginalUsePawnControlRotation = true;
+	bool bOriginalEnableCameraLag = true;
+	bool bOriginalEnableCameraRotationLag = true;
+	bool bOriginalInheritYaw = true;
 };

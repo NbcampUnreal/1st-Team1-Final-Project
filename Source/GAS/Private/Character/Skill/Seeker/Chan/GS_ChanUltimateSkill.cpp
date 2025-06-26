@@ -32,13 +32,13 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	
 	if (OwnerPlayer && OwnerPlayer->UltimateSkillSound)
 	{
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		// 애니메이션 재생
-		if(SkillAnimMontages[0])
-		{
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-		}
+		//OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		//OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		//// 애니메이션 재생
+		//if(SkillAnimMontages[0])
+		//{
+		//	OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		//}
 
 		// 궁극기 사운드 재생
 		if(OwnerPlayer->UltimateSkillSound)
@@ -185,6 +185,17 @@ void UGS_ChanUltimateSkill::StartCharge()
 	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
 	Controller->SetMoveControlValue(true, true);
 	Controller->StartAutoMoveForward();
+
+	if (OwnerPlayer)
+	{
+		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		// 애니메이션 재생
+		if (SkillAnimMontages[0])
+		{
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		}
+	}
 }
 
 

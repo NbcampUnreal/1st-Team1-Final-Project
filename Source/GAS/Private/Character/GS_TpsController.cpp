@@ -21,6 +21,7 @@
 #include "UI/Character/GS_DrakharFeverGauge.h"
 #include "UI/Character/GS_FeverGaugeBoard.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 
 AGS_TpsController::AGS_TpsController()
@@ -45,6 +46,22 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
     if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
 	{
+		//// 자동 이동 중일 때는 좌우 회전만 적용
+		//if (bIsAutoMoving)
+		//{
+		//	if (!FMath::IsNearlyZero(InputAxisVector.Y)) // A or D
+		//	{
+		//		// 회전 속도 작게
+		//		float TurnSpeed = 120.0f;
+		//		FRotator NewRot = ControlledPawn->GetActorRotation();
+		//		NewRot.Yaw += InputAxisVector.Y * TurnSpeed * GetWorld()->GetDeltaSeconds();
+		//		ControlledPawn->SetActorRotation(NewRot);
+		//	}
+
+		//	// W/S 방향은 무시 (이미 AutoMoveTick에서 전진 중)
+		//	return;
+		//}
+
 		if (ControlValues.bCanMoveForward)
 		{
 			ControlledPawn->AddMovementInput(ForwardDirection, InputAxisVector.X);
@@ -53,7 +70,11 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 		{
 			ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.Y);
 		}
+
+		UE_LOG(LogTemp, Warning, TEXT("Yaw: %f"), ControlledPawn->GetActorRotation().Yaw);
 	}
+
+
 }
 
 void AGS_TpsController::Look(const FInputActionValue& InputValue)
@@ -286,38 +307,27 @@ void AGS_TpsController::TestFunction()
 void AGS_TpsController::StartAutoMoveForward()
 {
 	bIsAutoMoving = true;
-
-	Client_StartAutoMoveForward();
+	Client_StartAutoMoveForward(); // 돌진 시작	
 }
 
 void AGS_TpsController::StopAutoMoveForward()
 {
 	bIsAutoMoving = false;
-	
 	Client_StopAutoMoveForward();
 }
 
-void AGS_TpsController::AutoMoveTick()
+void AGS_TpsController::Client_StartAutoMoveForward_Implementation()
 {
-	if (!bIsAutoMoving)
-		return;
-
-	/*UE_LOG(LogTemp, Warning, TEXT("Authority: %s"), HasAuthority() ? TEXT("SERVER") : TEXT("CLIENT"));*/
-	const FRotator YawRotation(0.f, GetPawn()->GetActorRotation().Yaw, 0.0f);
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
-	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
+	if (!IsLocalController())
 	{
-		if (UCharacterMovementComponent* Movement = ControlledPawn->GetCharacterMovement())
-		{
-			/*UE_LOG(LogTemp, Warning, TEXT("MovementMode: %d | Velocity: %s | MaxWalkSpeed: %f | RootMotion: %s"),
-				(int32)Movement->MovementMode,
-				*Movement->Velocity.ToString(),
-				Movement->MaxWalkSpeed,
-				ControlledPawn->IsPlayingRootMotion() ? TEXT("true") : TEXT("false"));*/
-		}
-		ControlledPawn->AddMovementInput(ForwardDirection, 10.0f);
+		return;
 	}
+
+	bIsAutoMoving = true;
+	SaveOriginalCameraSettings();
+	ApplyChargeCameraSettings(true);
+	SnapCameraToCharacterYaw();
+	GetWorld()->GetTimerManager().SetTimer(AutoMoveTickHandle, this, &AGS_TpsController::AutoMoveTick, 0.01f, true);
 }
 
 void AGS_TpsController::Client_StopAutoMoveForward_Implementation()
@@ -329,17 +339,124 @@ void AGS_TpsController::Client_StopAutoMoveForward_Implementation()
 
 	bIsAutoMoving = false;
 	GetWorld()->GetTimerManager().ClearTimer(AutoMoveTickHandle);
+	RestoreOriginalCameraSettings();
 }
 
-void AGS_TpsController::Client_StartAutoMoveForward_Implementation()
+void AGS_TpsController::SnapCameraToCharacterYaw()
 {
-	if (!IsLocalController()) 
+	if (!IsLocalController())
 	{
 		return;
 	}
 
-	bIsAutoMoving = true;
-	GetWorld()->GetTimerManager().SetTimer(AutoMoveTickHandle, this, &AGS_TpsController::AutoMoveTick, 0.01f, true);
+	if (APawn* MyPawn = GetPawn())
+	{
+		// 카메라를 캐릭터 뒤쪽으로 정렬
+		FRotator CharacterRotation = MyPawn->GetActorRotation();
+		SetControlRotation(CharacterRotation);
+	}
+}
+
+void AGS_TpsController::AutoMoveTick()
+{
+	if (!bIsAutoMoving)
+	{
+		return;
+	}
+
+	const FRotator YawRotation(0.f, GetPawn()->GetActorRotation().Yaw, 0.0f);
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
+	{
+		ControlledPawn->AddMovementInput(ForwardDirection, 10.0f);
+	}
+}
+
+void AGS_TpsController::SaveOriginalCameraSettings()
+{
+	if (APawn* MyPawn = GetPawn())
+	{
+		bOriginalUseControllerRotationYaw = MyPawn->bUseControllerRotationYaw;
+
+		if (AGS_Character* MyCharacter = Cast<AGS_Character>(MyPawn))
+		{
+			if (UCharacterMovementComponent* Movement = MyCharacter->GetCharacterMovement())
+			{
+				bOriginalOrientRotationToMovement = Movement->bOrientRotationToMovement;
+			}
+
+			if (USpringArmComponent* SpringArm = MyCharacter->FindComponentByClass<USpringArmComponent>())
+			{
+				bOriginalUsePawnControlRotation = SpringArm->bUsePawnControlRotation;
+				bOriginalEnableCameraLag = SpringArm->bEnableCameraLag;
+				bOriginalEnableCameraRotationLag = SpringArm->bEnableCameraRotationLag;
+				bOriginalInheritYaw = SpringArm->bInheritYaw;
+			}
+		}
+	}
+}
+
+void AGS_TpsController::RestoreOriginalCameraSettings()
+{
+	if (APawn* MyPawn = GetPawn())
+	{
+		MyPawn->bUseControllerRotationYaw = bOriginalUseControllerRotationYaw;
+
+		if (AGS_Character* MyCharacter = Cast<AGS_Character>(MyPawn))
+		{
+			if (UCharacterMovementComponent* Movement = MyCharacter->GetCharacterMovement())
+			{
+				Movement->bOrientRotationToMovement = bOriginalOrientRotationToMovement;
+			}
+
+			if (USpringArmComponent* SpringArm = MyCharacter->FindComponentByClass<USpringArmComponent>())
+			{
+				SpringArm->bUsePawnControlRotation = bOriginalUsePawnControlRotation;
+				SpringArm->bEnableCameraLag = bOriginalEnableCameraLag;
+				SpringArm->bEnableCameraRotationLag = bOriginalEnableCameraRotationLag;
+				SpringArm->bInheritYaw = bOriginalInheritYaw;
+			}
+		}
+	}
+
+	// 마우스 입력 복구
+	SetLookControlValue(true, true);
+}
+
+void AGS_TpsController::ApplyChargeCameraSettings(bool bCharging)
+{
+	if (!IsLocalController())
+	{
+		return; // 로컬 컨트롤러에서만 실행
+	}
+
+	if (APawn* MyPawn = GetPawn())
+	{
+		// === 게임플레이에 영향을 주는 설정 (서버-클라 동기화 필요) ===
+		// 이 부분은 서버에서도 설정되어야 함 (별도 함수로 분리 권장)
+		MyPawn->bUseControllerRotationYaw = false;
+
+		if (AGS_Character* MyCharacter = Cast<AGS_Character>(MyPawn))
+		{
+			if (UCharacterMovementComponent* Movement = MyCharacter->GetCharacterMovement())
+			{
+				Movement->bOrientRotationToMovement = true;
+			}
+
+			// === 시각적 표현만 담당하는 설정 (클라이언트 전용) ===
+			if (USpringArmComponent* SpringArm = MyCharacter->FindComponentByClass<USpringArmComponent>())
+			{
+				SpringArm->bUsePawnControlRotation = false;
+				SpringArm->bEnableCameraLag = false;
+				SpringArm->bEnableCameraRotationLag = false;
+				SpringArm->bInheritYaw = true;
+			}
+		}
+	}
+
+	// 마우스 입력 비활성화 (클라이언트 전용)
+	SetLookControlValue(false, false);
 }
 
 void AGS_TpsController::BeginPlay()
