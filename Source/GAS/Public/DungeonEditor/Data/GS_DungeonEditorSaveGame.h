@@ -21,6 +21,11 @@ public:
 	int GetDataCount() const { return SavedDungeonActorData.Num(); }
 	UFUNCTION()
 	TArray<FDESaveData>& GetSaveDatas() { return SavedDungeonActorData; }
+
+	UPROPERTY()
+	TMap<FIntPoint,EDEditorCellType> FloorOccupancyData;
+	UPROPERTY()
+	TMap<FIntPoint,EDEditorCellType> CeilingOccupancyData;
 	
 protected:
 	UPROPERTY()
