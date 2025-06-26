@@ -2,6 +2,7 @@
 
 #include "CommonButtonBase.h"
 #include "DungeonEditor/GS_DEController.h"
+#include "System/PlayerController/GS_CustomLobbyPC.h"
 
 void UGS_DungeonEditorWidget::NativeConstruct()
 {
@@ -20,6 +21,14 @@ void UGS_DungeonEditorWidget::NativeConstruct()
 		if (UCommonButtonBase* LoadButtonBase = Cast<UCommonButtonBase>(LoadButton))
 		{
 			LoadButtonBase->OnClicked().AddUObject(this, &UGS_DungeonEditorWidget::OnLoadButtonClicked);
+		}
+	}
+
+	if (BackButton)
+	{
+		if (UCommonButtonBase* BackButtonBase = Cast<UCommonButtonBase>(BackButton))
+		{
+			BackButtonBase->OnClicked().AddUObject(this, &UGS_DungeonEditorWidget::OnBackButtonClicked);
 		}
 	}
 }
@@ -42,6 +51,17 @@ void UGS_DungeonEditorWidget::OnLoadButtonClicked()
 		if (AGS_DEController* DEPC = Cast<AGS_DEController>(PC))
 		{
 			DEPC->GetBuildManager()->LoadDungeonData();
+		}
+	}
+}
+
+void UGS_DungeonEditorWidget::OnBackButtonClicked()
+{
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		if (AGS_CustomLobbyPC* CustomLobbyPC = Cast<AGS_CustomLobbyPC>(PC))
+		{
+			CustomLobbyPC->RequestDungeonEditorToLobby();
 		}
 	}
 }

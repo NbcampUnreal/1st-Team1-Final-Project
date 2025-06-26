@@ -79,7 +79,7 @@ public:
 	virtual void OnSkillCommand();
 	virtual bool CanActive() const;
 	virtual bool IsActive() const;
-	virtual void OnSkillAnimationEnd();
+	virtual void InterruptSkill();
 
 	// 쿨타임 
 	void SetCoolingDown(bool bInCoolingDown) { bIsCoolingDown = bInCoolingDown; }

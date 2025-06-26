@@ -21,6 +21,7 @@
 #include "Character/Player/GS_LobbyDisplayActor.h"
 #include "System/GS_SpawnSlot.h"
 #include "Character/Player/GS_PawnMappingDataAsset.h"
+#include <DungeonEditor/Data/GS_DungeonEditorSaveGame.h>
 
 
 AGS_CustomLobbyPC::AGS_CustomLobbyPC()
@@ -32,10 +33,25 @@ AGS_CustomLobbyPC::AGS_CustomLobbyPC()
 
 void AGS_CustomLobbyPC::BeginPlay()
 {
+	Is_DEActive = false;
+	
 	Super::BeginPlay();
 
 	if (IsLocalController())
 	{
+		TArray<AActor*> FoundCameras;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
+
+		if (FoundCameras.Num() > 0)
+		{
+			// 첫 번째로 찾은 카메라를 뷰 타겟으로 설정합니다.
+			SetViewTargetWithBlend(FoundCameras[0]);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LobbyCamera 태그를 가진 CameraActor를 찾을 수 없습니다."));
+		}
+		
 		CollectAndCacheSpawnSlots();
 
 		AGS_CustomLobbyGS* LGS = GetWorld()->GetGameState<AGS_CustomLobbyGS>();
@@ -349,36 +365,83 @@ void AGS_CustomLobbyPC::RequestOpenPerkOrDungeonPopup()
 	{
 		WidgetToOpen = SeekerPerkWidgetClass;
 		LogMessage = TEXT("Seeker Perk UI Opened");
-	}
-	else
-	{
-		WidgetToOpen = GuardianDungeonWidgetClass;
-		LogMessage = TEXT("Guardian Dungeon UI Opened");
-	}
 
-	UGS_CustomLobbyUI* LobbyUI = Cast<UGS_CustomLobbyUI>(CustomLobbyWidgetInstance);
-	if (!LobbyUI) return;
-	UOverlay* ModalOverlay = LobbyUI->GetModalOverlay();
-	if (!ModalOverlay) return;
+		UGS_CustomLobbyUI* LobbyUI = Cast<UGS_CustomLobbyUI>(CustomLobbyWidgetInstance);
+		if (!LobbyUI) return;
+		UOverlay* ModalOverlay = LobbyUI->GetModalOverlay();
+		if (!ModalOverlay) return;
 
-	if (WidgetToOpen)
-	{
-		CurrentModalWidget = CreateWidget<UUserWidget>(this, WidgetToOpen);
-		if (CurrentModalWidget)
+		if (WidgetToOpen)
 		{
-			UOverlaySlot* OS = ModalOverlay->AddChildToOverlay(CurrentModalWidget);
-			if (OS)
+			CurrentModalWidget = CreateWidget<UUserWidget>(this, WidgetToOpen);
+			if (CurrentModalWidget)
 			{
-				OS->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
-				OS->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+				UOverlaySlot* OS = ModalOverlay->AddChildToOverlay(CurrentModalWidget);
+				if (OS)
+				{
+					OS->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+					OS->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+				}
+				UE_LOG(LogTemp, Log, TEXT("%s"), *LogMessage);
 			}
-			UE_LOG(LogTemp, Log, TEXT("%s"), *LogMessage);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to create Perk/Dungeon widget"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to create Perk/Dungeon widget"));
+		//// WidgetToOpen = GuardianDungeonWidgetClass;
+		//CreateDEWidgets();
+		//CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+		//LogMessage = TEXT("Guardian Dungeon UI Opened");
+
+		// 1. 던전 에디터 시작 위치를 찾습니다.
+		// TArray<AActor*> FoundActors;
+		// UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("DungeonEditorStart"), FoundActors);
+		//
+		// if (FoundActors.Num() > 0)
+		// {
+		// 	// 2. 에디터 모드 진입 함수를 호출합니다.
+		// 	EnterEditorMode(FoundActors[0]);
+		// }
+		// else
+		// {
+		// 	UE_LOG(LogTemp, Error, TEXT("DungeonEditorStart 태그를 가진 액터를 찾을 수 없습니다."));
+		// }
+
+		TArray<AActor*> FoundActors;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("DungeonEditorStart"), FoundActors);
+		if (FoundActors.Num() > 0)
+		{
+			EnterEditorMode(FoundActors[0]);
+		}
 	}
+
+	// UGS_CustomLobbyUI* LobbyUI = Cast<UGS_CustomLobbyUI>(CustomLobbyWidgetInstance);
+	// if (!LobbyUI) return;
+	// UOverlay* ModalOverlay = LobbyUI->GetModalOverlay();
+	// if (!ModalOverlay) return;
+	//
+	// if (WidgetToOpen)
+	// {
+	// 	CurrentModalWidget = CreateWidget<UUserWidget>(this, WidgetToOpen);
+	// 	if (CurrentModalWidget)
+	// 	{
+	// 		UOverlaySlot* OS = ModalOverlay->AddChildToOverlay(CurrentModalWidget);
+	// 		if (OS)
+	// 		{
+	// 			OS->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+	// 			OS->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
+	// 		}
+	// 		UE_LOG(LogTemp, Log, TEXT("%s"), *LogMessage);
+	// 	}
+	// }
+	// else
+	// {
+	// 	UE_LOG(LogTemp, Warning, TEXT("Failed to create Perk/Dungeon widget"));
+	// }
 }
 
 void AGS_CustomLobbyPC::SelectSeekerJob(ESeekerJob NewJob)
@@ -522,6 +585,101 @@ void AGS_CustomLobbyPC::ShowPerkSaveConfirmPopup()
 	if (UGS_CustomLobbyUI* LobbyUI = Cast<UGS_CustomLobbyUI>(CustomLobbyWidgetInstance))
 	{
 		LobbyUI->ShowPerkSaveConfirmPopup();
+	}
+}
+
+// void AGS_CustomLobbyPC::EnterEditorMode(AActor* SpawnPoint)
+// {
+// 	Super::EnterEditorMode(SpawnPoint);
+//
+// 	if (CustomLobbyWidgetInstance)
+// 	{
+// 		CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+// 	}
+// }
+//
+// void AGS_CustomLobbyPC::ExitEditorMode()
+// {
+// 	Super::ExitEditorMode();
+//
+// 	// 2. 로비 카메라를 다시 뷰 타겟으로 설정합니다.
+// 	TArray<AActor*> FoundCameras;
+// 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
+// 	if (FoundCameras.Num() > 0)
+// 	{
+// 		SetViewTargetWithBlend(FoundCameras[0]);
+// 	}
+//
+// 	// 3. 로비 UI를 다시 보여줍니다.
+// 	if (CustomLobbyWidgetInstance)
+// 	{
+// 		CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+// 		// 로비에 맞는 입력 모드로 다시 설정합니다.
+// 		FInputModeUIOnly InputModeData;
+// 		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+// 		SetInputMode(InputModeData);
+// 		SetShowMouseCursor(true);
+// 	}
+// }
+
+void AGS_CustomLobbyPC::Client_OnEnteredEditorMode_Implementation()
+{
+	// 부모의 클라이언트 로직 실행 (입력, 에디터 UI 생성 등)
+	Super::Client_OnEnteredEditorMode_Implementation();
+
+	// 로비 UI 숨기기
+	if (CustomLobbyWidgetInstance)
+	{
+		CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void AGS_CustomLobbyPC::Client_OnExitedEditorMode_Implementation()
+{
+	// 부모의 클라이언트 로직 실행 (입력 초기화, 에디터 UI 제거 등)
+	Super::Client_OnExitedEditorMode_Implementation();
+
+	// 로비 카메라로 뷰 타겟 변경
+	TArray<AActor*> FoundCameras;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
+	if (FoundCameras.Num() > 0)
+	{
+		SetViewTargetWithBlend(FoundCameras[0]);
+	}
+
+	// 로비 UI 보이기
+	if (CustomLobbyWidgetInstance)
+	{
+		CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+        
+		// 로비에 맞는 입력 모드로 복귀
+		FInputModeUIOnly InputModeData;
+		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		SetInputMode(InputModeData);
+		SetShowMouseCursor(true);
+	}
+}
+
+void AGS_CustomLobbyPC::RequestDungeonEditorToLobby()
+{
+	if (IsLocalController())
+	{
+		ExitEditorMode();
+		
+		TArray<AActor*> FoundCameras;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
+
+		if (FoundCameras.Num() > 0)
+		{
+			// 첫 번째로 찾은 카메라를 뷰 타겟으로 설정합니다.
+			SetViewTargetWithBlend(FoundCameras[0]);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LobbyCamera 태그를 가진 CameraActor를 찾을 수 없습니다."));
+		}
+		
+		ShowCustomLobbyUI();
 	}
 }
 
@@ -738,4 +896,28 @@ void AGS_CustomLobbyPC::OnPerkSaveNo()
 	}
 
 	PendingWork = EPendingWork::None;
+}
+
+void AGS_CustomLobbyPC::Client_RequestLoadAndSendData_Implementation()
+{
+	AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+	if (PS)
+	{
+		// 1. 클라이언트 PC에서 로컬 .sav 파일을 읽습니다.
+		UGS_DungeonEditorSaveGame* LoadGameObject = Cast<UGS_DungeonEditorSaveGame>(UGameplayStatics::LoadGameFromSlot(PS->CurrentSaveSlotName, 0));
+
+		if (IsValid(LoadGameObject))
+		{
+			TArray<FDESaveData> LoadedData = LoadGameObject->GetSaveDatas();
+			UE_LOG(LogTemp, Warning, TEXT("Client: Loaded %d objects. Sending to server..."), LoadedData.Num());
+            
+			// 2. 읽어온 데이터를 담아 서버로 RPC를 보냅니다.
+			PS->Server_SetObjectData(LoadedData);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Client: Save file could not be loaded. Sending empty data."));
+			PS->Server_SetObjectData({}); // 로드 실패 시 빈 데이터를 보냅니다.
+		}
+	}
 }

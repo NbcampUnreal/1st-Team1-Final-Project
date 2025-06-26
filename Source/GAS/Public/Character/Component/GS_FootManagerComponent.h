@@ -13,6 +13,7 @@
 
 // Forward Declarations
 class UNiagaraSystem;
+class UNiagaraComponent;
 class UAkAudioEvent;
 class UMaterialInterface;
 
@@ -83,6 +84,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Footstep")
 	void ToggleAutoDetection(bool bEnable) { bAutoDetectionEnabled = bEnable; }
 
+	/**
+	 * 물 소리 테스트용 함수 - 강제로 물 표면 발걸음 재생
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep|Debug")
+	void TestWaterFootstep();
+
+	/**
+	 * 현재 서 있는 표면 타입을 반환하는 디버그 함수
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep|Debug")
+	int32 GetCurrentSurfaceType();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -142,6 +155,14 @@ protected:
 	/** 물리 표면별 먼지 VFX 맵 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Assets")
 	TMap<TEnumAsByte<EPhysicalSurface>, UNiagaraSystem*> FootDustEffects;
+
+	/** 물 표면에서의 특별한 처리 활성화 여부 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water")
+	bool bEnableWaterEffects = true;
+
+	/** 물 표면에서의 물보라 크기 배율 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water", meta = (ClampMin = "0.1", ClampMax = "5.0"))
+	float WaterSplashScale = 1.0f;
 
 	// ======== Blueprint Events  ========
 

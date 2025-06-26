@@ -27,12 +27,15 @@ public:
 protected:
 	void CheckAllPlayersReady();
 
+	void DoServerTravel();
+
 	UPROPERTY()
 	TMap<TObjectPtr<APlayerState>, bool> PlayerReadyStates;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
-	FName NextLevelName = "InGameTestLevel_v2"; // 테스트 후에 다시 LoadingLevel로 바꿔놔야함!!!!!!!!!!!!!!!!!!!
-
+	FName NextLevelName = "InGameLevel";
+	//FName NextLevelName = "InGameTestLevel_v2"; // 테스트 후에 다시 LoadingLevel로 바꿔놔야함!!!!!!!!!!!!!!!!!!!
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
 	int32 MinPlayersToStart = 1;
 
@@ -57,4 +60,5 @@ private:
 	void SpawnLobbyActorForPlayer(AGS_PlayerState* PlayerState, AGS_SpawnSlot* SpawnSlot);
 	void DestroyLobbyActorForPlayer(AGS_PlayerState* PlayerState);
 	AGS_SpawnSlot* FindAvailableSlotForPlayer(AGS_PlayerState* PlayerState);
+
 };

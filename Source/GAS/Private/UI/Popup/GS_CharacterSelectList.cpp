@@ -10,6 +10,7 @@
 #include "System/PlayerController/GS_CustomLobbyPC.h"
 #include "UI/Common/CustomCommonButton.h"
 #include "UI/Data/GS_UICharacterInfoRow.h"
+#include "Kismet/GameplayStatics.h"
 
 void UGS_CharacterSelectList::NativeConstruct()
 {
@@ -32,6 +33,10 @@ void UGS_CharacterSelectList::NativeDestruct()
 
 void UGS_CharacterSelectList::CreateChildWidgets(EPlayerRole PlayerRole)
 {
+	// 새로운 역할로 위젯을 생성할 때 이전 선택 상태 리셋
+	LastSelectedCharacterID = -1;
+	LastSelectedPlayerRole = static_cast<EPlayerRole>(0);
+
 	AddSpacerInVerticalBox();
 
 	int LoopCount = 0;
@@ -118,6 +123,9 @@ void UGS_CharacterSelectList::AddSpacerInVerticalBox()
 
 void UGS_CharacterSelectList::OnCharacterSelectClicked(int32 CharacterID, EPlayerRole PlayerRole)
 {
+	// 캐릭터 선택 사운드 재생
+	PlayCharacterSelectSound(CharacterID, PlayerRole);
+	
 	AGS_PlayerState* GSPlayerState = GetOwningPlayerState<AGS_PlayerState>();
 	if (!GSPlayerState)
 		return;
@@ -158,5 +166,59 @@ void UGS_CharacterSelectList::OnCharacterSelectClicked(int32 CharacterID, EPlaye
 			UE_LOG(LogTemp, Warning, TEXT("This UI is Locked"));
 			return;
 		}
+	}
+}
+
+void UGS_CharacterSelectList::PlayCharacterSelectSound(int32 CharacterID, EPlayerRole PlayerRole)
+{
+	// 같은 캐릭터를 다시 선택한 경우 사운드 재생하지 않음
+	if (LastSelectedCharacterID == CharacterID && LastSelectedPlayerRole == PlayerRole)
+	{
+		return;
+	}
+
+	// 현재 선택을 저장
+	LastSelectedCharacterID = CharacterID;
+	LastSelectedPlayerRole = PlayerRole;
+
+	USoundBase* SoundToPlay = nullptr;
+	
+	if (PlayerRole == EPlayerRole::PR_Guardian)
+	{
+		// 가디언 캐릭터 사운드
+		switch (static_cast<EGuardianJob>(CharacterID))
+		{
+			case EGuardianJob::Drakhar:
+				SoundToPlay = DrakharSelectSound;
+				break;
+			default:
+				break;
+		}
+	}
+	else if (PlayerRole == EPlayerRole::PR_Seeker)
+	{
+		// 시커 캐릭터 사운드
+		switch (static_cast<ESeekerJob>(CharacterID))
+		{
+			case ESeekerJob::Ares:
+				SoundToPlay = AresSelectSound;
+				break;
+			case ESeekerJob::Chan:
+				SoundToPlay = ChanSelectSound;
+				break;
+			case ESeekerJob::Merci:
+				SoundToPlay = MerciSelectSound;
+				break;
+			case ESeekerJob::Reina:
+				SoundToPlay = ReinaSelectSound;
+				break;
+			default:
+				break;
+		}
+	}
+
+	if (SoundToPlay)
+	{
+		UGameplayStatics::PlaySound2D(this, SoundToPlay);
 	}
 }

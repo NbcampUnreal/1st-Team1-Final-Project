@@ -168,6 +168,12 @@
         "GUID": "{829C7383-ED30-47D8-A302-C54566F2536C}"
        },
        {
+        "Id": "2654748154",
+        "Name": "Water",
+        "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Water",
+        "GUID": "{30B5ABC7-3DAC-4CD1-A105-B88EFD6E1BD1}"
+       },
+       {
         "Id": "4248645337",
         "Name": "Grass",
         "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Grass",
@@ -236,6 +242,6 @@
     ]
    }
   ],
-  "FileHash": "{62E00A79-4A6D-E961-1223-5981E9A2D9C0}"
+  "FileHash": "{4DB9609F-8219-664E-D662-DD76A78D1988}"
  }
 }

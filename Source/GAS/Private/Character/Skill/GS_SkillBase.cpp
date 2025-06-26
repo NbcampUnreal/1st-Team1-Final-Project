@@ -3,6 +3,8 @@
 #include "Character/Skill/GS_SkillComp.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Animation/Character/GS_SeekerAnimInstance.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 
 UTexture2D* UGS_SkillBase::GetSkillImage()
 {
@@ -54,8 +56,19 @@ bool UGS_SkillBase::IsActive() const
 	return bIsActive;
 }
 
-void UGS_SkillBase::OnSkillAnimationEnd()
+void UGS_SkillBase::InterruptSkill()
 {
+	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter);
+	
+	UE_LOG(LogTemp, Warning, TEXT("SkillBase::InterruptSkill")); // SJE
+	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerCharacter->GetMesh()->GetAnimInstance()))
+	{
+		Seeker->Multicast_SetIsFullBodySlot(false);
+		Seeker->Multicast_SetIsUpperBodySlot(false);
+		Seeker->SetSkillInputControl(true, true, true);
+		Seeker->SetMoveControlValue(true, true);
+		Seeker->CanChangeSeekerGait = true;
+	}
 }
 
 void UGS_SkillBase::StartCoolDown()

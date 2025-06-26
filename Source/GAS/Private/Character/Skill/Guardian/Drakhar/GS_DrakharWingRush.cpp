@@ -1,6 +1,8 @@
 #include "Character/Skill/Guardian/Drakhar/GS_DrakharWingRush.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Templates/SharedPointer.h"
 
 UGS_DrakharWingRush::UGS_DrakharWingRush()
@@ -18,7 +20,20 @@ void UGS_DrakharWingRush::ActiveSkill()
 void UGS_DrakharWingRush::ExecuteSkillEffect()
 {
 	Super::ExecuteSkillEffect();
-
-	OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
+	
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
+	}
+	
+	AGS_Guardian* Guardian = Cast<AGS_Guardian>(OwnerCharacter);
+	if (Guardian)
+	{
+		//[CHECK] other skills logic...
+		//6/26 -> server logic change to client logic
+		//need to change client variables...
+		Guardian->ClientGuardianDoSkillState = EGuardianDoSkill::Moving;	
+		Guardian->GuardianDoSkillState = EGuardianDoSkill::Moving;	
+	}
 }
 

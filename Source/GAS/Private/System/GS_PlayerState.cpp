@@ -5,6 +5,9 @@
 #include "Character/Player/GS_Player.h"
 #include "Character/Component/GS_StatComp.h"
 #include "System/SteamAvatarHelper.h"
+#include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
+#include "Kismet/GameplayStatics.h"
+#include "DungeonEditor/Data/GS_DungeonEditorTypes.h"
 
 AGS_PlayerState::AGS_PlayerState()
     : CurrentPlayerRole(EPlayerRole::PR_Seeker)
@@ -13,7 +16,6 @@ AGS_PlayerState::AGS_PlayerState()
     , CurrentGameResult(EGameResult::GR_InProgress)
     , bIsReady(false)
 	, CurrentHealth(99999.f)
-	, bIsAlive(true)
 	, BoundStatComp(nullptr)
 {
     bReplicates = true;
@@ -28,6 +30,7 @@ void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
     DOREPLIFETIME(AGS_PlayerState, CurrentGameResult);
     DOREPLIFETIME(AGS_PlayerState, bIsReady);
     DOREPLIFETIME(AGS_PlayerState, bIsAlive);
+    DOREPLIFETIME(AGS_PlayerState, ObjectData);
 }
 
 void AGS_PlayerState::BeginPlay()
@@ -56,6 +59,7 @@ void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
         NewPS->MySteamAvatar = MySteamAvatar;
+        NewPS->ObjectData = ObjectData;
     }
 }
 
@@ -74,6 +78,7 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
         NewPS->MySteamAvatar = MySteamAvatar;
+        NewPS->ObjectData = ObjectData;
     }
 }
 
@@ -280,6 +285,12 @@ void AGS_PlayerState::Server_SetGuardianJob_Implementation(EGuardianJob NewJob)
             Server_SetReadyStatus(false);
         }
 	}
+}
+
+void AGS_PlayerState::Server_SetObjectData_Implementation(const TArray<FDESaveData>& InObjectData)
+{
+    this->ObjectData = InObjectData; 
+    UE_LOG(LogTemp, Warning, TEXT("Server: Received and stored %d dungeon data objects for player %s."), ObjectData.Num(), *GetPlayerName());
 }
 
 void AGS_PlayerState::OnRep_IsReady()

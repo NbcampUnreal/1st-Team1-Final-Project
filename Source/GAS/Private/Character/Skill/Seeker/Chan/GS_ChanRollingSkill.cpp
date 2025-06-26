@@ -13,21 +13,17 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	}
 	Super::ActiveSkill();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{
-		if (!OwnerPlayer->GetSkillInputControl().CanInputRoll)
-		{
-			return;
-		}
-		
-		if (OwnerPlayer->HasAuthority())
-		{
-			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
-			OwnerPlayer->ComboInputClose();
-			OwnerPlayer->CurrentComboIndex = 0;
-			OwnerPlayer->SetSkillInputControl(false, false, true);
+	{		
+
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+			OwnerPlayer->SetSkillInputControl(false, false, true);
+			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->CanChangeSeekerGait = false;
+			if (OwnerCharacter->GetSkillComp())
+			{
+				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, true);
+			}
 			FName RollDirection = CalRollDirection();
 			if (RollDirection == FName("00"))
 			{
@@ -37,7 +33,7 @@ void UGS_ChanRollingSkill::ActiveSkill()
 			{
 				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
 			}
-		}
+
 	}
 }
 
@@ -47,16 +43,18 @@ void UGS_ChanRollingSkill::DeactiveSkill()
 
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		if (OwnerPlayer->HasAuthority())
-		{
+
 			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-			OwnerPlayer->ComboInputOpen();
-			OwnerPlayer->SetSkillInputControl(true, true, true);
-			OwnerPlayer->SetMoveControlValue(true, true);
 			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		}
-		OwnerPlayer->CanChangeSeekerGait = false;
+			OwnerPlayer->SetSkillInputControl(true, true, true);
+			OwnerPlayer->SetMoveControlValue(true, true);
+			OwnerPlayer->CanChangeSeekerGait = true;
+
+			if (OwnerCharacter->GetSkillComp())
+			{
+				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
+			}
+
 	}
-	
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DungeonEditor/GS_DEController.h"
 #include "GameFramework/PlayerController.h"
 #include "System/GS_PlayerRole.h"
 #include "System/GameState/GS_CustomLobbyGS.h"
@@ -24,7 +25,7 @@ enum class EPendingWork : uint8
 };
 
 UCLASS()
-class GAS_API AGS_CustomLobbyPC : public APlayerController
+class GAS_API AGS_CustomLobbyPC : public AGS_DEController
 {
 	GENERATED_BODY()
 
@@ -68,7 +69,9 @@ public:
 	void SelectSeekerJob(ESeekerJob NewJob);
 	UFUNCTION(BlueprintCallable, Category = "Lobby Actions")
 	void SelectGuardianJob(EGuardianJob NewJob);
-
+	UFUNCTION(BlueprintCallable, Category = "Lobby Actions")
+	void RequestDungeonEditorToLobby();
+	
 	UFUNCTION(BlueprintCallable, Category = "Lobby Actions")
 	void RequestToggleReadyStatus();
 
@@ -110,6 +113,15 @@ private:
 	EPendingWork PendingWork;
 	void ShowPerkSaveConfirmPopup();
 
+protected:
+	// 던전 에디터 관련
+	// virtual void EnterEditorMode(AActor* SpawnPoint) override;
+	// virtual void ExitEditorMode() override;
+
+	// 서버가 클라이언트에게 모드 변경이 완료되었음을 알리는 RPC를 오버라이드
+	virtual void Client_OnEnteredEditorMode_Implementation() override;
+	virtual void Client_OnExitedEditorMode_Implementation() override;
+	
 	// 플레이어 스폰
 private:
 	UPROPERTY()
@@ -131,4 +143,9 @@ private:
 
 	void SpawnOrUpdateLobbyActor(const FLobbyPlayerInfo& PlayerInfo);
 	void CollectAndCacheSpawnSlots();
+
+	// 던전 정보 넘기기
+public:
+	UFUNCTION(Client, Reliable)
+	void Client_RequestLoadAndSendData();
 };

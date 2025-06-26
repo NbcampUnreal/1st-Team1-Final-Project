@@ -13,25 +13,4 @@ public:
 
 	virtual void ActiveSkill() override;
 	virtual void ExecuteSkillEffect() override;
-
-	// UFUNCTION()
-	// void DashTimerEnd();
-	// int32 DashMoveSetting();
-	// void DoDash();
-
-	
-protected:
-	// FTimerHandle DashTimer;
-	// FVector DashStartLocation;
-	// FVector DashEndLocation;
-	//
-	// float DashRemainTime;
-	// float DashPower;
-
-	//float DashInterpAlpha;
-	//int32 Activeid;
-
-	// UFUNCTION(BlueprintImplementableEvent)
-	// void OnPreciseMoveStarted(float Duration);
-	//
 };
