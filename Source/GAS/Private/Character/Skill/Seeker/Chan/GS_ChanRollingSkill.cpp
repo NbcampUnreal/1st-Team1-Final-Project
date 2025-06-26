@@ -14,8 +14,7 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{		
-		if (OwnerPlayer->HasAuthority())
-		{
+
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 			OwnerPlayer->SetSkillInputControl(false, false, true);
@@ -34,10 +33,7 @@ void UGS_ChanRollingSkill::ActiveSkill()
 			{
 				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
 			}
-		}
-		else
-		{
-		}
+
 	}
 }
 
@@ -47,8 +43,7 @@ void UGS_ChanRollingSkill::DeactiveSkill()
 
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		if (OwnerPlayer->HasAuthority())
-		{
+
 			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
@@ -60,10 +55,6 @@ void UGS_ChanRollingSkill::DeactiveSkill()
 			{
 				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
 			}
-		}
-		else
-		{
-			
-		}
+
 	}
 }
