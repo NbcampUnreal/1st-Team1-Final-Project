@@ -22,6 +22,7 @@
 #include "UI/Character/GS_FeverGaugeBoard.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/PlayerController.h"
 
 
 AGS_TpsController::AGS_TpsController()
@@ -41,26 +42,29 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
 	LastRotatorInMoving = GetControlRotation();
 	Server_CacheMoveInputValue(InputAxisVector);
-	const FRotator YawRotation(0.f, LastRotatorInMoving.Yaw, 0.0f);
-	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-    if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
+	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
 	{
-		//// 자동 이동 중일 때는 좌우 회전만 적용
-		//if (bIsAutoMoving)
-		//{
-		//	if (!FMath::IsNearlyZero(InputAxisVector.Y)) // A or D
-		//	{
-		//		// 회전 속도 작게
-		//		float TurnSpeed = 120.0f;
-		//		FRotator NewRot = ControlledPawn->GetActorRotation();
-		//		NewRot.Yaw += InputAxisVector.Y * TurnSpeed * GetWorld()->GetDeltaSeconds();
-		//		ControlledPawn->SetActorRotation(NewRot);
-		//	}
+		// 자동 이동 시 좌우 이동 (KCY)
+		if (bIsAutoMoving)
+		{
+			if (!FMath::IsNearlyZero(InputAxisVector.Y))
+			{
+				float TurnSpeed = 0.4f;
 
-		//	// W/S 방향은 무시 (이미 AutoMoveTick에서 전진 중)
-		//	return;
-		//}
+				if (IsLocalController())
+				{
+					FRotator ControlRot = GetControlRotation();
+					ControlRot.Yaw += InputAxisVector.Y * TurnSpeed;
+					SetControlRotation(ControlRot);
+				}
+			}
+			return;
+		}
+
+		// 일반 이동
+		const FRotator YawRotation(0.f, LastRotatorInMoving.Yaw, 0.0f);
+		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
 		if (ControlValues.bCanMoveForward)
 		{
@@ -70,11 +74,7 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 		{
 			ControlledPawn->AddMovementInput(RightDirection, InputAxisVector.Y);
 		}
-
-		UE_LOG(LogTemp, Warning, TEXT("Yaw: %f"), ControlledPawn->GetActorRotation().Yaw);
 	}
-
-
 }
 
 void AGS_TpsController::Look(const FInputActionValue& InputValue)
@@ -435,13 +435,13 @@ void AGS_TpsController::ApplyChargeCameraSettings(bool bCharging)
 	{
 		// === 게임플레이에 영향을 주는 설정 (서버-클라 동기화 필요) ===
 		// 이 부분은 서버에서도 설정되어야 함 (별도 함수로 분리 권장)
-		MyPawn->bUseControllerRotationYaw = false;
+		MyPawn->bUseControllerRotationYaw = true;
 
 		if (AGS_Character* MyCharacter = Cast<AGS_Character>(MyPawn))
 		{
 			if (UCharacterMovementComponent* Movement = MyCharacter->GetCharacterMovement())
 			{
-				Movement->bOrientRotationToMovement = true;
+				Movement->bOrientRotationToMovement = false;
 			}
 
 			// === 시각적 표현만 담당하는 설정 (클라이언트 전용) ===

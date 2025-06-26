@@ -154,27 +154,22 @@ protected:
 private:
 	// Auto Moving (KCY)
 	FTimerHandle AutoMoveTickHandle;
+	
 	UPROPERTY(Replicated)
 	bool bIsAutoMoving = false;
 
 	void AutoMoveTick();
-	
+	void ApplyChargeCameraSettings(bool bCharging);
+	void SaveOriginalCameraSettings();
+	void RestoreOriginalCameraSettings();
+
 	UFUNCTION(Client, Reliable)
 	void Client_StartAutoMoveForward();
 
 	UFUNCTION(Client, Reliable)
 	void Client_StopAutoMoveForward();
 
-	void ApplyChargeCameraSettings(bool bCharging);
-	void SaveOriginalCameraSettings();
-	void RestoreOriginalCameraSettings();
-
-	// 카메라 자동 회전 (KCY)
-	FTimerHandle CameraSnapTimerHandle;
-	bool bIsSnappingCamera = false;
-	float CameraSnapInterpSpeed = 5.0f; // 회전 속도 (낮을수록 느림)
-
-	// 돌진 시 원래 카메라 설정 저장용
+	// 돌진 시 원래 카메라 설정 저장용 (KCY)
 	bool bOriginalUseControllerRotationYaw = true;
 	bool bOriginalOrientRotationToMovement = false;
 	bool bOriginalUsePawnControlRotation = true;
