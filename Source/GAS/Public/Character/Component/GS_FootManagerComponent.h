@@ -96,6 +96,30 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Footstep|Debug")
 	int32 GetCurrentSurfaceType();
 
+	/**
+	 * 물 관련 나이아가라 VFX 동적 설정 함수
+	 * @param EffectType 설정할 이펙트 타입 (0: Splash, 1: DeepWater, 2: Ripple, 3: Bubble, 4: Mist)
+	 * @param NiagaraSystem 설정할 나이아가라 시스템
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep|Water VFX")
+	void SetWaterVFX(int32 EffectType, UNiagaraSystem* NiagaraSystem);
+
+	/**
+	 * 물 깊이에 따른 적절한 이펙트 선택
+	 * @param WaterDepth 물 깊이 (cm)
+	 * @return 선택된 나이아가라 시스템
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep|Water VFX")
+	UNiagaraSystem* GetWaterEffectByDepth(float WaterDepth);
+
+	/**
+	 * 모든 물 이펙트를 한번에 스폰 (조합 효과)
+	 * @param Location 스폰 위치
+	 * @param WaterDepth 물 깊이
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep|Water VFX")
+	void SpawnCombinedWaterEffects(const FVector& Location, float WaterDepth = 10.0f);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -163,6 +187,34 @@ protected:
 	/** 물 표면에서의 물보라 크기 배율 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water", meta = (ClampMin = "0.1", ClampMax = "5.0"))
 	float WaterSplashScale = 1.0f;
+
+	/** 물 관련 나이아가라 VFX 시스템들 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX")
+	UNiagaraSystem* WaterSplashEffect;
+
+	/** 깊은 물에서의 나이아가라 VFX */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX")
+	UNiagaraSystem* DeepWaterSplashEffect;
+
+	/** 물 파동 나이아가라 VFX */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX")
+	UNiagaraSystem* WaterRippleEffect;
+
+	/** 물 거품 나이아가라 VFX */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX")
+	UNiagaraSystem* WaterBubbleEffect;
+
+	/** 물 안개 나이아가라 VFX */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX")
+	UNiagaraSystem* WaterMistEffect;
+
+	/** 물 깊이에 따른 이펙트 전환 임계값 (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX", meta = (ClampMin = "1.0", ClampMax = "100.0"))
+	float DeepWaterThreshold = 20.0f;
+
+	/** 물 이펙트 동시 재생 개수 제한 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX", meta = (ClampMin = "1", ClampMax = "5"))
+	int32 MaxConcurrentWaterEffects = 3;
 
 	// ======== Blueprint Events  ========
 

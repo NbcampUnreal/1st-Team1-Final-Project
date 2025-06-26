@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{8B507B3A-79EB-F680-A7A1-080A1E1030A1}",
+    "Hash": "{31173A43-7D25-FDB2-BCFB-805F16234D7C}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -232,6 +232,12 @@
         "GUID": "{AE6336BB-30DB-47DC-B64A-11CDF78AFD24}"
        },
        {
+        "Id": "2654748154",
+        "Name": "Water",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Water",
+        "GUID": "{453275E6-3BE6-4F2F-979F-6F08536D1497}"
+       },
+       {
         "Id": "4248645337",
         "Name": "Grass",
         "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Grass",
@@ -242,6 +248,6 @@
     ]
    }
   ],
-  "FileHash": "{4DB9609F-8219-664E-D662-DD76A78D1988}"
+  "FileHash": "{5F3A4361-635C-961A-D565-AB4FB1A97217}"
  }
 }

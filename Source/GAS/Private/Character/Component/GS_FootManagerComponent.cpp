@@ -63,6 +63,21 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	// Initialize water effect properties
 	bEnableWaterEffects = true;
 	WaterSplashScale = 1.0f;
+	DeepWaterThreshold = 20.0f;
+	MaxConcurrentWaterEffects = 3;
+
+	// Initialize water VFX systems with default PS_Splash
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> DefaultWaterSplash(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
+	if (DefaultWaterSplash.Succeeded())
+	{
+		WaterSplashEffect = DefaultWaterSplash.Object;
+		DeepWaterSplashEffect = DefaultWaterSplash.Object; // Default to same effect
+	}
+
+	// Initialize additional water VFX (can be set in Blueprint)
+	WaterRippleEffect = nullptr;
+	WaterBubbleEffect = nullptr;
+	WaterMistEffect = nullptr;
 
 	// Set default switch group name
 	SwitchGroupName = TEXT("FootSteps");
@@ -464,6 +479,22 @@ void UGS_FootManagerComponent::PlayFootstepSound(EPhysicalSurface Surface, const
 
 void UGS_FootManagerComponent::SpawnFootDustEffect(EPhysicalSurface Surface, const FVector& Location, const FVector& Normal)
 {
+	// Water surface special handling with enhanced VFX system
+	if (Surface == SurfaceType6) // Water surface
+	{
+		if (!bEnableWaterEffects)
+		{
+			return; // Water effects disabled
+		}
+
+		// Use enhanced water VFX system
+		// Estimate water depth based on trace distance (simple approximation)
+		const float EstimatedWaterDepth = 10.0f; // Default depth, can be improved with additional tracing
+		SpawnCombinedWaterEffects(Location, EstimatedWaterDepth);
+		return;
+	}
+
+	// Default behavior for non-water surfaces
 	UNiagaraSystem* VFXToSpawn = nullptr;
 
 	if (OverriddenFootDustEffect)
@@ -484,12 +515,6 @@ void UGS_FootManagerComponent::SpawnFootDustEffect(EPhysicalSurface Surface, con
 		return;
 	}
 
-	// Water surface special handling
-	if (Surface == SurfaceType6 && !bEnableWaterEffects) // Water surface
-	{
-		return; // Water effects disabled
-	}
-
 	const FRotator EffectRotation = FRotationMatrix::MakeFromZ(Normal).Rotator();
 
 	UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
@@ -501,12 +526,6 @@ void UGS_FootManagerComponent::SpawnFootDustEffect(EPhysicalSurface Surface, con
 
 	if (SpawnedEffect)
 	{
-		// Apply water splash scaling for water surfaces
-		if (Surface == SurfaceType6 && WaterSplashScale != 1.0f) // Water surface
-		{
-			SpawnedEffect->SetWorldScale3D(FVector(WaterSplashScale));
-		}
-		
 		OnFootDustSpawned(Surface, Location);
 	}
 }
@@ -572,4 +591,114 @@ int32 UGS_FootManagerComponent::GetCurrentSurfaceType()
 	}
 
 	return (int32)SurfaceType;
+}
+
+void UGS_FootManagerComponent::SetWaterVFX(int32 EffectType, UNiagaraSystem* NiagaraSystem)
+{
+	switch (EffectType)
+	{
+	case 0: // Splash
+		WaterSplashEffect = NiagaraSystem;
+		break;
+	case 1: // Deep Water
+		DeepWaterSplashEffect = NiagaraSystem;
+		break;
+	case 2: // Ripple
+		WaterRippleEffect = NiagaraSystem;
+		break;
+	case 3: // Bubble
+		WaterBubbleEffect = NiagaraSystem;
+		break;
+	case 4: // Mist
+		WaterMistEffect = NiagaraSystem;
+		break;
+	default:
+		break;
+	}
+}
+
+UNiagaraSystem* UGS_FootManagerComponent::GetWaterEffectByDepth(float WaterDepth)
+{
+	// Choose effect based on water depth
+	if (WaterDepth >= DeepWaterThreshold && DeepWaterSplashEffect)
+	{
+		return DeepWaterSplashEffect;
+	}
+	else if (WaterSplashEffect)
+	{
+		return WaterSplashEffect;
+	}
+	
+	// Fallback to FootDustEffects map
+	UNiagaraSystem* const* FoundVFX = FootDustEffects.Find(SurfaceType6);
+	return (FoundVFX && *FoundVFX) ? *FoundVFX : nullptr;
+}
+
+void UGS_FootManagerComponent::SpawnCombinedWaterEffects(const FVector& Location, float WaterDepth)
+{
+	if (!bEnableWaterEffects)
+	{
+		return;
+	}
+
+	const FVector Normal = FVector::UpVector;
+	const FRotator EffectRotation = FRotationMatrix::MakeFromZ(Normal).Rotator();
+	int32 SpawnedEffects = 0;
+
+	// 1. Main water splash effect (always spawn)
+	UNiagaraSystem* MainEffect = GetWaterEffectByDepth(WaterDepth);
+	if (MainEffect && SpawnedEffects < MaxConcurrentWaterEffects)
+	{
+		UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			MainEffect,
+			Location,
+			EffectRotation
+		);
+		
+		if (SpawnedEffect)
+		{
+			SpawnedEffect->SetWorldScale3D(FVector(WaterSplashScale));
+			SpawnedEffects++;
+		}
+	}
+
+	// 2. Water ripple effect (optional)
+	if (WaterRippleEffect && SpawnedEffects < MaxConcurrentWaterEffects)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			WaterRippleEffect,
+			Location + FVector(0, 0, -2.0f), // Slightly lower for ripples
+			EffectRotation
+		);
+		SpawnedEffects++;
+	}
+
+	// 3. Water bubble effect for deep water (optional)
+	if (WaterDepth >= DeepWaterThreshold && WaterBubbleEffect && SpawnedEffects < MaxConcurrentWaterEffects)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			WaterBubbleEffect,
+			Location + FVector(FMath::RandRange(-5.0f, 5.0f), FMath::RandRange(-5.0f, 5.0f), 0),
+			EffectRotation
+		);
+		SpawnedEffects++;
+	}
+
+	// 4. Water mist effect (optional)
+	if (WaterMistEffect && SpawnedEffects < MaxConcurrentWaterEffects)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			WaterMistEffect,
+			Location + FVector(0, 0, 5.0f), // Slightly higher for mist
+			EffectRotation
+		);
+		SpawnedEffects++;
+	}
+
+	// Trigger Blueprint event
+	OnFootDustSpawned(SurfaceType6, Location);
 } 

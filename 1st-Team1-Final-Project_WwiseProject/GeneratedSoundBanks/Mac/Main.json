@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{A1339CF9-15A0-64B3-5D68-7C4144E42A44}",
+    "Hash": "{96ADB8B0-041A-1499-A0BC-211523EE374C}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -54,6 +54,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
       "CachePath": "69/{69283A98-7A63-273F-A660-E7C5A5D74086}.wem"
+     },
+     {
+      "Id": "33319739",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_DGF_fx_foley_footstep_water_deep_run_movement_splash_bubbles_10.wav",
+      "CachePath": "24/{24053DC7-9C92-443A-25F1-39E4054A461C}.wem"
      },
      {
       "Id": "42963631",
@@ -454,14 +462,6 @@
       "Location": "Memory",
       "ShortName": "MARS_FOUND_FX_one_shot_fire_woosh_tube.wav",
       "CachePath": "9D/{9D592BC7-6226-7CC6-8DE3-F16A210A4DE5}.wem"
-     },
-     {
-      "Id": "304594696",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_Dragon_Vocal_Pain_Wounded_Monster_Creature_Voice.wav",
-      "CachePath": "17/{17CB4EFB-009C-FE93-B62C-2FB6EDA18804}.wem"
      },
      {
       "Id": "307021949",
@@ -1176,14 +1176,6 @@
       "CachePath": "CE/{CE3C29A7-F253-129E-015E-D6A12C1CCE9F}.wem"
      },
      {
-      "Id": "802689926",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "PE-Whoosh_BW.43660.wav",
-      "CachePath": "29/{29AB9534-93D4-C2AB-0191-3C755313AFD3}.wem"
-     },
-     {
       "Id": "809366429",
       "Language": "SFX",
       "Streaming": "false",
@@ -1286,6 +1278,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
       "CachePath": "19/{1995D7F9-FF12-1054-7CF2-43FF3B70532E}.wem"
+     },
+     {
+      "Id": "861411022",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_DGF_fx_foley_footstep_water_deep_run_movement_splash_bubbles_08.wav",
+      "CachePath": "01/{01640E22-782B-18A8-6A77-92C92C41C694}.wem"
      },
      {
       "Id": "866318197",
@@ -1558,14 +1558,6 @@
       "Location": "Memory",
       "ShortName": "PE-Whoosh_BW.43601.wav",
       "CachePath": "60/{6029D1F2-A022-AD76-DFBD-3F7F26416E45}.wem"
-     },
-     {
-      "Id": "1053226406",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_Dragon_Vocal_Fight_Grunt_Ah_Monster_Creature_Voice.wav",
-      "CachePath": "33/{33745F0A-01A3-7D56-37A1-EC0B47EFA82C}.wem"
      },
      {
       "Id": "1053975739",
@@ -1982,8 +1974,7 @@
          "GroupType": "Switch",
          "GroupId": "4110752327",
          "Id": "2195636714",
-         "GUID": "{5BFEB7D9-7BCB-4C93-9CCC-8BF538074FF2}",
-         "Default": "true"
+         "GUID": "{5BFEB7D9-7BCB-4C93-9CCC-8BF538074FF2}"
         },
         "MediaRefs": [
          {
@@ -2000,6 +1991,23 @@
          },
          {
           "Id": "1040176000"
+         }
+        ]
+       },
+       {
+        "SwitchValue": {
+         "GroupType": "Switch",
+         "GroupId": "4110752327",
+         "Id": "2654748154",
+         "GUID": "{453275E6-3BE6-4F2F-979F-6F08536D1497}",
+         "Default": "true"
+        },
+        "MediaRefs": [
+         {
+          "Id": "33319739"
+         },
+         {
+          "Id": "861411022"
          }
         ]
        }
@@ -2424,11 +2432,8 @@
       "MaxAttenuation": "880",
       "DurationType": "OneShot",
       "DurationMin": "1.5866909",
-      "DurationMax": "3.9440281",
+      "DurationMax": "1.8067616",
       "MediaRefs": [
-       {
-        "Id": "802689926"
-       },
        {
         "Id": "938965371"
        },
@@ -2521,16 +2526,10 @@
         "Id": "285196517"
        },
        {
-        "Id": "303740880"
-       },
-       {
         "Id": "659322826"
        },
        {
         "Id": "665252404"
-       },
-       {
-        "Id": "1002490439"
        }
       ]
      },
@@ -2611,13 +2610,7 @@
         "Id": "243265281"
        },
        {
-        "Id": "304594696"
-       },
-       {
         "Id": "766479874"
-       },
-       {
-        "Id": "1053226406"
        }
       ],
       "PluginRefs": {
@@ -3184,9 +3177,6 @@
           "Id": "290212776"
          },
          {
-          "Id": "401627905"
-         },
-         {
           "Id": "809366429"
          }
         ]
@@ -3235,9 +3225,6 @@
          "GUID": "{5EB68FE6-A580-4AC2-AB44-C54536ADFA61}"
         },
         "MediaRefs": [
-         {
-          "Id": "326406373"
-         },
          {
           "Id": "377837800"
          },
@@ -3637,9 +3624,6 @@
       "DurationMax": "3.572227",
       "MediaRefs": [
        {
-        "Id": "140100063"
-       },
-       {
         "Id": "140776273"
        },
        {
@@ -4012,6 +3996,12 @@
         "GUID": "{AE6336BB-30DB-47DC-B64A-11CDF78AFD24}"
        },
        {
+        "Id": "2654748154",
+        "Name": "Water",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Water",
+        "GUID": "{453275E6-3BE6-4F2F-979F-6F08536D1497}"
+       },
+       {
         "Id": "4248645337",
         "Name": "Grass",
         "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Grass",
@@ -4022,6 +4012,6 @@
     ]
    }
   ],
-  "FileHash": "{F02F39D3-EDF3-C98F-B323-24B012E8A321}"
+  "FileHash": "{7737DB3E-9F1A-E609-C4CD-2FA02E4D887D}"
  }
 }
