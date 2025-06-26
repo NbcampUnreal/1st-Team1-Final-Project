@@ -8,6 +8,7 @@
 #include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
 #include "Kismet/GameplayStatics.h"
+#include "Props/GS_RoomBase.h"
 #include "Props/Placer/GS_PlacerBase.h"
 
 AGS_BuildManager::AGS_BuildManager()
@@ -748,13 +749,28 @@ void AGS_BuildManager::SaveDungeonData()
             FDESaveData ObjectData;
             ObjectData.SpawnActorClass = CurActor->GetClass();
             ObjectData.SpawnTransform = CurActor->GetActorTransform();
+            if (UPlaceInfoComponent* PlaceInfo = CurActor->FindComponentByClass<UPlaceInfoComponent>())
+        	{
+        		ObjectData.CellCoord = PlaceInfo->GetCellCoord();
+        		ObjectData.ObjectType = PlaceInfo->GetObjectType();
+        		ObjectData.TrapPlacement = PlaceInfo->GetTrapPlacement();
+        	}
 
             SaveGameObject->AddSaveData(ObjectData);
         }
     }
 
-    // 3. 파일에 최종 저장
-    
+	// 3. OccupancyData 저장
+	for (const auto& Pair : OccupancyData)
+	{
+		FIntPoint CellCoordinates = Pair.Key;
+		const FDEOccupancyData& Data = Pair.Value;
+
+		SaveGameObject->FloorOccupancyData.FindOrAdd(CellCoordinates, Data.FloorOccupancyData);
+		SaveGameObject->CeilingOccupancyData.FindOrAdd(CellCoordinates, Data.CeilingOccupancyData);
+	}
+	
+    // 4. 파일에 최종 저장
     // 데이터가 채워진 세이브 객체를 슬롯에 저장합니다.
     bool bWasSaved = UGameplayStatics::SaveGameToSlot(SaveGameObject, CurrentSaveSlotName, 0);
 
@@ -777,19 +793,7 @@ void AGS_BuildManager::LoadDungeonData()
 		return;
 	}
 
-	// 2. 불러오기 전, 기존에 있던 액터들 제거하기
-	// 이 과정을 생략하면 Load를 누를 때마다 액터들이 중복으로 스폰됩니다.
-	// UE_LOG(LogTemp, Warning, TEXT("Clearing existing actors before loading..."));
-	// for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	// {
-	// 	AActor* CurActor = *ActorItr;
-	// 	if (IsValid(CurActor))
-	// 	{
-	// 		CurActor->Destroy();
-	// 	}
-	// }
-
-	// 3. 파일로부터 데이터 로드 및 형변환(Cast)
+	// 2. 파일로부터 데이터 로드 및 형변환(Cast)
 	UGS_DungeonEditorSaveGame* LoadGameObject = Cast<UGS_DungeonEditorSaveGame>(UGameplayStatics::LoadGameFromSlot(CurrentSaveSlotName, 0));
 
 	if (!IsValid(LoadGameObject))
@@ -800,22 +804,68 @@ void AGS_BuildManager::LoadDungeonData()
     
 	UE_LOG(LogTemp, Warning, TEXT("SaveGame loaded successfully. Spawning actors..."));
 
-	// 4. 로드한 데이터를 기반으로 월드에 액터 스폰
+	// 3. 로드한 데이터를 기반으로 월드에 액터 스폰 (Room 다음 Wall&Door 다음 나머지 프랍 순서)
 	UWorld* World = GetWorld();
 	if (IsValid(World))
 	{
-		// 저장된 배열에 있는 각 데이터에 대해 루프를 돕니다.
-		for (const FDESaveData& ObjectData : LoadGameObject->GetSaveDatas())
+		TArray<FDESaveData> SortedObjectData = LoadGameObject->GetSaveDatas();
+
+		auto GetSortPriority = [](EObjectType Type) -> int32 {
+			switch (Type)
+			{
+			case EObjectType::Room: return 0;
+			case EObjectType::DoorAndWall: return 1;
+			default: return 2;
+			}
+		};
+
+		// SortedObjectData.Sort([&](const FDESaveData& A, const FDESaveData& B) {
+		// 	UPlaceInfoComponent* PlaceInfoA = A.SpawnActorClass ? A.SpawnActorClass->GetDefaultObject<AActor>()->FindComponentByClass<UPlaceInfoComponent>() : nullptr;
+		// 	UPlaceInfoComponent* PlaceInfoB = B.SpawnActorClass ? B.SpawnActorClass->GetDefaultObject<AActor>()->FindComponentByClass<UPlaceInfoComponent>() : nullptr;
+		//
+		// 	if (!PlaceInfoA || !PlaceInfoB)
+		// 	{
+		// 		return false;
+		// 	}
+		//
+		// 	return GetSortPriority(PlaceInfoA->GetObjectType()) < GetSortPriority(PlaceInfoB->GetObjectType());
+		// });
+
+		SortedObjectData.Sort([&](const FDESaveData& A, const FDESaveData& B) {
+		  return GetSortPriority(A.ObjectType) < GetSortPriority(B.ObjectType);
+	  });
+		
+		for (const FDESaveData& ObjectData : SortedObjectData)
 		{
-			// 데이터가 유효한지 한번 더 확인 (클래스 정보가 비어있지 않은지 등)
 			if (ObjectData.SpawnActorClass)
 			{
-				// FActorSpawnParameters는 스폰 시 추가 옵션을 제공합니다.
 				FActorSpawnParameters SpawnParams;
-				// 스폰 시 충돌이 발생하더라도 항상 스폰되도록 설정합니다.
 				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-				World->SpawnActor<AActor>(ObjectData.SpawnActorClass, ObjectData.SpawnTransform, SpawnParams);
+				AActor* NewActor = World->SpawnActor<AActor>(ObjectData.SpawnActorClass, ObjectData.SpawnTransform, SpawnParams);
+
+				bool Is_Room = false;
+				if (NewActor)
+				{
+					if (AGS_RoomBase* NewRoom = Cast<AGS_RoomBase>(NewActor))
+					{
+						NewRoom->HideCeiling();
+						NewRoom->UseDepthStencil();
+						Is_Room = true;
+					}
+				}
+
+				if (UPlaceInfoComponent* PlaceInfoCompo = NewActor->FindComponentByClass<UPlaceInfoComponent>())
+				{
+					PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapPlacement, ObjectData.CellCoord);
+					for (int i = 0; i < ObjectData.CellCoord.Num(); ++i)
+					{
+						EDEditorCellType TargetType = GetTargetCellType(ObjectData.ObjectType, ObjectData.TrapPlacement);
+						SetOccupancyData(ObjectData.CellCoord[i], TargetType, ObjectData.ObjectType, NewActor, Is_Room);
+						OccupancyData.FindOrAdd(ObjectData.CellCoord[i]).FloorOccupancyData = LoadGameObject->FloorOccupancyData.FindOrAdd(ObjectData.CellCoord[i]);
+						OccupancyData.FindOrAdd(ObjectData.CellCoord[i]).CeilingOccupancyData = LoadGameObject->CeilingOccupancyData.FindOrAdd(ObjectData.CellCoord[i]);
+					}
+				}
 			}
 		}
 	}

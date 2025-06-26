@@ -29,6 +29,8 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	if (!CanActive()) return;
 	Super::ActiveSkill();
 	
+	bInStructureCrash = false;
+
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerPlayer->SetSkillInputControl(false, false, false);
 	if (OwnerCharacter->GetSkillComp())
@@ -79,7 +81,7 @@ void UGS_ChanUltimateSkill::InterruptSkill()
 	Super::InterruptSkill();
 }
 
-void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor)
+void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitiveComponent* HitComp)
 {
 	if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(HitActor))
 	{
@@ -93,6 +95,12 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor)
 			HitActors.Add(Monster);
 			ApplyEffectToDungeonMonster(Monster);
 		}
+	}
+
+	if (HitComp && HitComp->ComponentHasTag("Wall"))
+	{
+		bInStructureCrash = true;
+		EndCharge(); // 예시
 	}
 }
 
@@ -182,7 +190,7 @@ void UGS_ChanUltimateSkill::StartCharge()
 		ChargeTimerHandle,
 		this,
 		&UGS_ChanUltimateSkill::EndCharge,
-		2.0f, 
+		1.5f, 
 		false
 	);
 
@@ -210,11 +218,21 @@ void UGS_ChanUltimateSkill::StartCharge()
 void UGS_ChanUltimateSkill::EndCharge()
 {
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-
-	if (OwnerPlayer && SkillAnimMontages[1])
+	if(bInStructureCrash)
 	{
-		// 애니메이션 재생
-		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+		if (OwnerPlayer && SkillAnimMontages[2])
+		{
+			// 애니메이션 재생
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[2]);
+		}
+	}
+	else
+	{
+		if (OwnerPlayer && SkillAnimMontages[1])
+		{
+			// 애니메이션 재생
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+		}
 	}
 
 	
