@@ -24,7 +24,7 @@ void UGS_AN_EndCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 			Character->SetMoveControlValue(true, true);
 			Character->SetSkillInputControl(true, true, true);
 			Character->CanChangeSeekerGait = true;
-			Character->bComboEnded = true;
+			//Character->bComboEnded = true;
 			Character->CurrentComboIndex = 0;
 			Character->ComboInputOpen();
 		}

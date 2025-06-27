@@ -211,6 +211,7 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 		{
 			SkillsInterrupt();
 			SkillMap[Slot]->ActiveSkill();
+			
 		}
 		else
 		{
@@ -352,7 +353,6 @@ void UGS_SkillComp::StartCooldownForSkill(ESkillSlot Slot)
 void UGS_SkillComp::SkillsInterrupt()
 {
 	AGS_Seeker* Seeker = Cast<AGS_Seeker>(GetOwner());
-
 	if (Seeker == nullptr)
 	{return;}
 	
@@ -360,16 +360,17 @@ void UGS_SkillComp::SkillsInterrupt()
 	{
 		Seeker->CurrentComboIndex = 0;
 		Seeker->CanAcceptComboInput = true;
-		Seeker->bComboEnded = true;
 		Seeker->bNextCombo = false;
 	}
 	
 	for (TPair<ESkillSlot, UGS_SkillBase*> slot : SkillMap)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *UEnum::GetValueAsString(slot.Key));
-		if (slot.Value->IsActive())
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *slot.Value->GetName());
+
+		if (Seeker->GetSkillComp()->IsSkillActive(slot.Key))
 		{
-			slot.Value->InterruptSkill(); 
+			slot.Value->InterruptSkill();
+			Seeker->SetSkillInputControl(false, false, false);
 		}
 	}
 }

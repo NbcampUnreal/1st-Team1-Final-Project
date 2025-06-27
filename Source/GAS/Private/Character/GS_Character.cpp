@@ -108,7 +108,7 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	OnDamageStart();
 	
 	// SJE
-	if (CanHitReact && DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	if (CanHitReact)
 	{
 		const FPointDamageEvent* PointEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		FVector HitDirection = -PointEvent->ShotDirection;
@@ -117,8 +117,6 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 			HitReactComponent->PlayHitReact(EHitReactType::Interrupt, HitDirection);
 		}
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("%s Damaged %f by %s"), *GetName(), ActualDamage, DamageCauser ? *DamageCauser->GetName() : TEXT("Unknown"));
 
 	float NewHealth = CurrentHealth - ActualDamage;
 	StatComp->SetCurrentHealth(NewHealth, false);
