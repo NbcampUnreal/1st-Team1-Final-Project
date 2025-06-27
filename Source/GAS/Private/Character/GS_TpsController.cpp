@@ -445,11 +445,6 @@ void AGS_TpsController::ApplyChargeCameraSettings(bool bCharging)
 void AGS_TpsController::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (IsLocalController())
-	{
-		TestFunction();
-	}
 
 	GameInstance = Cast<UGS_GameInstance>(GetGameInstance());
 	
