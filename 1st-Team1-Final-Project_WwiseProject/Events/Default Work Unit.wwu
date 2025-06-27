@@ -47,17 +47,6 @@
 						</Action>
 					</ChildrenList>
 				</Event>
-				<Event Name="EV_GameState" ID="{6CB15BE6-8B8A-4C5E-BD0C-81EB81C18C52}">
-					<ChildrenList>
-						<Action Name="" ID="{D715F06A-A77E-463C-A382-F867EE130546}" ShortID="826454007">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="BGM_Theme" ID="{C8B3A831-1A9D-4BDB-8BF8-46E57747CC19}" WorkUnitID="{805731CD-25EB-4476-9DAF-C545D2251845}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
 				<Event Name="EV_ArrowImpact_Stone" ID="{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}">
 					<ChildrenList>
 						<Action Name="" ID="{3C81E8EE-4321-4A80-AB47-1CCE3A98E483}" ShortID="188686223">
@@ -606,7 +595,7 @@
 										<Action Name="" ID="{BF6B78CF-114F-462D-8D12-8F7E07B704AE}" ShortID="952441864">
 											<ReferenceList>
 												<Reference Name="Target">
-													<ObjectRef Name="EV_ChanUltimateSkill" ID="{78BBFF70-AA7B-436E-8658-4CE72E7CE006}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+													<ObjectRef Name="EV_ChanUltimate" ID="{E0F9ADEC-AC3A-4691-9AAA-C2262EFFF186}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>
@@ -632,6 +621,17 @@
 											<ReferenceList>
 												<Reference Name="Target">
 													<ObjectRef Name="EV_ChanFinalAttackSound" ID="{1BEDD7E4-F077-41ED-AB21-0B21E5482DEF}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="SFX_ChanHitWall" ID="{8151B500-BECD-4ED7-B5E7-B09771D5C0BC}">
+									<ChildrenList>
+										<Action Name="" ID="{F4C98997-2A30-481B-A2F7-83C22FD7378A}" ShortID="664743343">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_ChanHitWall" ID="{1B981B07-7DFE-4EE3-9F97-96016D90BC71}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>
