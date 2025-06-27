@@ -387,26 +387,75 @@ void UGS_DrakharVFXComponent::HandleDraconicProjectileImpact(const FVector& Impa
 {
 	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer || !OwnerDrakhar) return;
 
-	UNiagaraSystem* VFXToPlay = bHitCharacter ? OwnerDrakhar->DraconicProjectileExplosionVFX : OwnerDrakhar->DraconicProjectileImpactVFX;
+	// 피버모드 상태 확인
+	bool bIsFeverMode = OwnerDrakhar->GetIsFeverMode();
+	
+	// 피버모드와 노멀모드에 따라 다른 VFX 선택
+	UNiagaraSystem* VFXToPlay = nullptr;
+	if (bHitCharacter)
+	{
+		// 캐릭터 히트 시 폭발 VFX
+		VFXToPlay = bIsFeverMode ? OwnerDrakhar->FeverDraconicProjectileExplosionVFX : OwnerDrakhar->DraconicProjectileExplosionVFX;
+	}
+	else
+	{
+		// 일반 임팩트 VFX
+		VFXToPlay = bIsFeverMode ? OwnerDrakhar->FeverDraconicProjectileImpactVFX : OwnerDrakhar->DraconicProjectileImpactVFX;
+	}
+	
 	if (VFXToPlay && GetWorld())
 	{
-		UNiagaraComponent* ImpactVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), VFXToPlay, ImpactLocation, FRotationMatrix::MakeFromZ(ImpactNormal).Rotator(), FVector(1.0f, 1.0f, 1.0f), true, true, ENCPoolMethod::None, true);
+		// 피버모드에 따른 VFX 스케일 및 강도 조정
+		float BaseScale = bHitCharacter ? 1.5f : 1.0f;
+		float FeverModeMultiplier = bIsFeverMode ? 1.5f : 1.0f;
+		float FinalScale = BaseScale * FeverModeMultiplier;
+		
+		float BaseIntensity = bHitCharacter ? 2.0f : 1.0f;
+		float FinalIntensity = BaseIntensity * (bIsFeverMode ? 1.3f : 1.0f);
+		
+		UNiagaraComponent* ImpactVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(), 
+			VFXToPlay, 
+			ImpactLocation, 
+			FRotationMatrix::MakeFromZ(ImpactNormal).Rotator(), 
+			FVector(FinalScale, FinalScale, FinalScale), 
+			true, true, ENCPoolMethod::None, true
+		);
+		
 		if (ImpactVFXComponent)
 		{
 			ImpactVFXComponent->SetVectorParameter(FName("ImpactNormal"), ImpactNormal);
-			ImpactVFXComponent->SetFloatParameter(FName("ImpactIntensity"), bHitCharacter ? 2.0f : 1.0f);
-			float VFXScale = bHitCharacter ? 1.5f : 1.0f;
-			ImpactVFXComponent->SetWorldScale3D(FVector(VFXScale, VFXScale, VFXScale));
-			FLinearColor ImpactColor = bHitCharacter ? FLinearColor::Red : FLinearColor(1.0f, 0.5f, 0.0f, 1.0f);
+			ImpactVFXComponent->SetFloatParameter(FName("ImpactIntensity"), FinalIntensity);
+			
+			// 피버모드에 따른 색상 변경
+			FLinearColor ImpactColor;
+			if (bIsFeverMode)
+			{
+				// 피버모드 시 더 강렬한 색상 (붉은 불꽃)
+				ImpactColor = bHitCharacter ? FLinearColor(1.0f, 0.2f, 0.0f, 1.0f) : FLinearColor(1.0f, 0.4f, 0.0f, 1.0f);
+			}
+			else
+			{
+				// 노멀모드 시 일반적인 색상
+				ImpactColor = bHitCharacter ? FLinearColor::Red : FLinearColor(1.0f, 0.5f, 0.0f, 1.0f);
+			}
 			ImpactVFXComponent->SetColorParameter(FName("ImpactColor"), ImpactColor);
+			
+			// 피버모드 시 추가적인 파라미터 설정
+			if (bIsFeverMode)
+			{
+				ImpactVFXComponent->SetFloatParameter(FName("FeverMode"), 1.0f);
+				ImpactVFXComponent->SetFloatParameter(FName("EmissionRate"), 2.0f);
+			}
 		}
 	}
 
+	// 카메라 쉐이크 - 피버모드 시 더 강한 효과
 	if (bHitCharacter && OwnerDrakhar && OwnerDrakhar->GetCameraShakeComponent())
 	{
 		FGS_CameraShakeInfo ImpactShakeInfo;
-		ImpactShakeInfo.Intensity = 4.0f;
-		ImpactShakeInfo.MaxDistance = 1000.0f;
+		ImpactShakeInfo.Intensity = bIsFeverMode ? 6.0f : 4.0f;
+		ImpactShakeInfo.MaxDistance = bIsFeverMode ? 1500.0f : 1000.0f;
 		ImpactShakeInfo.MinDistance = 100.0f;
 		ImpactShakeInfo.PropagationSpeed = 500000.0f;
 		ImpactShakeInfo.bUseFalloff = true;

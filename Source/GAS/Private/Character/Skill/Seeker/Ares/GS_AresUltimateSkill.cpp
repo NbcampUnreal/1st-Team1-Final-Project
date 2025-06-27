@@ -5,6 +5,7 @@
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_StatRow.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 
 UGS_AresUltimateSkill::UGS_AresUltimateSkill()
 {
@@ -16,6 +17,17 @@ void UGS_AresUltimateSkill::ActiveSkill()
 	if (!CanActive()) return;
 	Super::ActiveSkill();
 	UE_LOG(LogTemp, Warning, TEXT("Ares Ultimate Skill Active"));
+
+	// 스킬 시작 사운드 재생
+	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (SkillInfo && SkillInfo->SkillStartSound)
+		{
+			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+		}
+	}
+	
 	bIsBerserker = true;
 	// 만약 일정 시간 후 효과 해제를 원하면, 타이머로 DeactiveSkill 호출
 	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UltimateSkillTimerHandle, this, &UGS_AresUltimateSkill::DeactiveSkill, 10.f, false);

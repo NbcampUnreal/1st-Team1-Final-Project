@@ -4,6 +4,7 @@
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Chan.h"
+#include "Character/Skill/GS_SkillSet.h"
 #include "AkAudioEvent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -38,18 +39,16 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, true);
 	}
 
-	if (OwnerPlayer->UltimateSkillSound)
+	// 궁극기 사운드 재생
+	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+	if (SkillInfo && SkillInfo->SkillStartSound)
 	{
-		// 궁극기 사운드 재생
-		if(OwnerPlayer->UltimateSkillSound)
-		{
-			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->UltimateSkillSound);
-		}
-
-		// 돌진 시작 (약간 딜레이)
-		FTimerHandle DelayHandle;
-		GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UGS_ChanUltimateSkill::StartCharge, 0.5f, false);
+		OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
 	}
+
+	// 돌진 시작 (약간 딜레이)
+	FTimerHandle DelayHandle;
+	GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UGS_ChanUltimateSkill::StartCharge, 0.5f, false);
 }
 
 void UGS_ChanUltimateSkill::ExecuteSkillEffect()
@@ -83,9 +82,21 @@ void UGS_ChanUltimateSkill::InterruptSkill()
 
 void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitiveComponent* HitComp)
 {
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	
+	// 데이터 테이블에서 스킬 정보 가져오기
+	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+	
 	if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(HitActor))
 	{
 		ApplyEffectToGuardian(Guardian);
+		
+		// 가디언 충돌 사운드 재생
+		if (OwnerPlayer && SkillInfo && SkillInfo->GuardianCollisionSound)
+		{
+			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->GuardianCollisionSound);
+		}
+		
 		EndCharge();
 	}
 	else if (AGS_Monster* Monster = Cast<AGS_Monster>(HitActor))
@@ -94,13 +105,27 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 		{
 			HitActors.Add(Monster);
 			ApplyEffectToDungeonMonster(Monster);
+			
+			// 몬스터 충돌 사운드 재생
+			if (OwnerPlayer && SkillInfo && SkillInfo->MonsterCollisionSound)
+			{
+				OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->MonsterCollisionSound);
+			}
 		}
 	}
 
+	// 벽 충돌 체크
 	if (HitComp && HitComp->ComponentHasTag("Wall"))
 	{
 		bInStructureCrash = true;
-		EndCharge(); // 예시
+		
+		// 벽 충돌 사운드 재생
+		if (OwnerPlayer && SkillInfo && SkillInfo->WallCollisionSound)
+		{
+			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->WallCollisionSound);
+		}
+		
+		EndCharge();
 	}
 }
 

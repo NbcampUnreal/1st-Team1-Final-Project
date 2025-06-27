@@ -20,6 +20,7 @@
 						<Switch Name="Grass" ID="{D2AFE85C-F925-413C-ADEB-494001ED4CB4}"/>
 						<Switch Name="Metal" ID="{AE6336BB-30DB-47DC-B64A-11CDF78AFD24}"/>
 						<Switch Name="Lava" ID="{8DA08B1B-F569-4C9E-9E1B-550EB1014C63}"/>
+						<Switch Name="Water" ID="{453275E6-3BE6-4F2F-979F-6F08536D1497}"/>
 					</ChildrenList>
 				</SwitchGroup>
 				<SwitchGroup Name="GameState" ID="{CCC9218E-CC79-4165-BB1C-EC62716FDE31}">

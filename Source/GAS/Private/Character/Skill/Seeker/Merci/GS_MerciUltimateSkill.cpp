@@ -21,6 +21,16 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 
 	if(OwnerCharacter)
 	{
+		// 스킬 시작 사운드 재생
+		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+		if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
+		{
+			if (SkillInfo && SkillInfo->SkillStartSound)
+			{
+				OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			}
+		}
+
 		// Skill State
 		if (OwnerCharacter->GetSkillComp())
 		{
