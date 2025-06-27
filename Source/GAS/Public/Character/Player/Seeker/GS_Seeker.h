@@ -123,6 +123,10 @@ public:
 	// Notify
 	void CallDeactiveSkill(ESkillSlot Slot);
 
+	// 스킬 사운드 재생 (모든 시커 캐릭터에서 사용)
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlaySkillSound(class UAkAudioEvent* SoundToPlay);
+
 public:
 	// Weapon
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
@@ -234,20 +238,30 @@ private:
 	TArray<class AGS_Monster*> NearbyMonsters;
 
 	void StartCombatMusic();
-	
+	void StopCombatMusic();
+
 	UFUNCTION(Client, Unreliable)
 	void ClientRPCStopCombatMusic();
+
 	void UpdateCombatMusicState();
 
-	// PlayerState 생존 상태 변경 핸들러
-	UFUNCTION()
+	// 플레이어 상태 변경 처리
 	void HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive);
 
 protected:
 	virtual void BeginPlay() override;
-
-	// EndPlay 함수 선언 추가
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	// 상수들
+	static const FName HPRatioParamName;
+	static const FName EffectIntensityParamName;
+
+	// Post Process 설정
+	void InitializeCameraManager();
+	void UpdatePostProcessEffect(float EffectStrength);
+
+	// 사운드 관련 헬퍼 함수
+	class UAkComponent* GetOrCreateAkComponent();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
@@ -259,10 +273,6 @@ protected:
 	// 카메라 매니저 참조 추가
 	UPROPERTY()
 	APlayerCameraManager* LocalCameraManager;
-
-	// 카메라 매니저 관련 함수
-	void InitializeCameraManager();
-	void UpdatePostProcessEffect(float EffectStrength);
 
 	// ===================================
 	// LowHP 스크린 효과 (효과 보간 관련 변수)
@@ -290,16 +300,6 @@ protected:
 	
 	UFUNCTION()
 	void OnRep_CurrentEffectStrength();
-
-
-
-	// 머티리얼 파라미터 이름 상수
-	static const FName HPRatioParamName;
-	static const FName EffectIntensityParamName;
-
-private:
-
-
 
 	// ================
 	// LowHP 스크린 효과

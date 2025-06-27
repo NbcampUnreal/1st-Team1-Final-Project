@@ -30,6 +30,13 @@ void UGS_AresMovingSkill::ActiveSkill()
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+
+		// 스킬 시작 사운드 재생
+		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+		if (SkillInfo && SkillInfo->SkillStartSound)
+		{
+			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+		}
 	}
 
 	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());

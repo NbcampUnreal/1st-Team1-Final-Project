@@ -59,6 +59,12 @@ public:
 	UAkAudioEvent* AttackVoiceSound;
 
 	// ===============
+	// 스킬 사운드
+	// ===============
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
+	UAkAudioEvent* AimingSkillSlamSound;
+
+	// ===============
 	// 공격 사운드 리셋 관련
 	// ===============
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack", meta = (ClampMin = "0.1", ClampMax = "5.0"))
@@ -78,22 +84,6 @@ public:
 	// ===============
 	// 스킬 사운드
 	// ===============
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
-	UAkAudioEvent* AimingSkillStartSound;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
-	UAkAudioEvent* AimingSkillSlamSound;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
-	UAkAudioEvent* MovingSkillSound;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
-	UAkAudioEvent* UltimateSkillSound;
-
-
-	// 스킬 사운드 재생 함수
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlaySkillSound(UAkAudioEvent* SoundToPlay);
 
 	// [Widget]
 	void SetChanAimingSkillBarWidget(UGS_ChanAimingSkillBar* Widget) { ChanAimingSkillBarWidget = Widget; }
@@ -122,7 +112,4 @@ protected:
 
 private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;
-
-	// === Wwise 헬퍼 함수 ===
-	UAkComponent* GetOrCreateAkComponent();
 };

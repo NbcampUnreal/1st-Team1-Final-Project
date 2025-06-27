@@ -28,6 +28,9 @@
 #include "Character/GS_TpsController.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Skill/GS_SkillBase.h"
+#include "AkAudioEvent.h"
+#include "AkComponent.h"
+#include "AkAudioDevice.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -673,5 +676,58 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 		ClientRPCStopCombatMusic();
 		NearbyMonsters.Empty();
 	}
+}
+
+void AGS_Seeker::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
+{
+	// 데디케이티드 서버에서는 사운드 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	if (!SoundToPlay)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::Multicast_PlaySkillSound - SoundEvent is null"));
+		return;
+	}
+
+	if (!FAkAudioDevice::Get())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::Multicast_PlaySkillSound - Wwise AudioDevice is not initialized"));
+		return;
+	}
+
+	// AkComponent가 없거나 유효하지 않으면 새로 생성
+	UAkComponent* AkComp = GetOrCreateAkComponent();
+	if (AkComp)
+	{
+		AkComp->PostAkEvent(SoundToPlay);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGS_Seeker::Multicast_PlaySkillSound - Failed to get or create AkComponent"));
+	}
+}
+
+UAkComponent* AGS_Seeker::GetOrCreateAkComponent()
+{
+	UAkComponent* AkComp = FindComponentByClass<UAkComponent>();
+	if (!AkComp)
+	{
+		// AkComponent가 없으면 새로 생성
+		AkComp = NewObject<UAkComponent>(this, TEXT("RuntimeAkAudioComponent"));
+		if (AkComp)
+		{
+			AkComp->SetupAttachment(GetRootComponent());
+			AkComp->RegisterComponent();
+			UE_LOG(LogTemp, Log, TEXT("AGS_Seeker::GetOrCreateAkComponent - Created new AkComponent"));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("AGS_Seeker::GetOrCreateAkComponent - Failed to create AkComponent"));
+		}
+	}
+	return AkComp;
 }
 
