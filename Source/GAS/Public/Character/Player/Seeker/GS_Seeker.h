@@ -134,8 +134,8 @@ public:
 
 	
 	// Combo
-	UPROPERTY(Replicated)
-	bool bComboEnded = true;
+	/*UPROPERTY(Replicated)
+	bool bComboEnded = true;*/
 	
 	UPROPERTY(EditAnywhere, Category="Animation")
 	UAnimMontage* ComboAnimMontage;
