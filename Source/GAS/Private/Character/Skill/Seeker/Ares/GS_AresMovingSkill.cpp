@@ -140,6 +140,18 @@ void UGS_AresMovingSkill::StartDash()
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(DashTimerHandle, this, &UGS_AresMovingSkill::UpdateDash, 0.01f, true);
+	
+	// =======================
+	// VFX 재생 - 컴포넌트 RPC 사용
+	// =======================
+	if (OwningComp)
+	{
+		FVector SkillLocation = OwnerCharacter->GetActorLocation();
+		FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+
+		// 스킬 시전 VFX 재생
+		OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
+	}
 }
 
 void UGS_AresMovingSkill::UpdateDash()
@@ -177,6 +189,7 @@ void UGS_AresMovingSkill::UpdateDash()
 			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
 			{
 				ApplyEffectToGuardian(TargetGuardian);
+
 			}
 		}
 	}

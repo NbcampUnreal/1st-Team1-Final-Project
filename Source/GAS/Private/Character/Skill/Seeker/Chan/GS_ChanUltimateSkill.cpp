@@ -236,6 +236,20 @@ void UGS_ChanUltimateSkill::StartCharge()
 		{
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 		}
+
+		// =======================
+		// VFX 재생 - 컴포넌트 RPC 사용
+		// =======================
+		if (OwningComp)
+		{
+			FVector SkillLocation = OwnerCharacter->GetActorLocation();
+			//FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+			FRotator SkillRotation = FRotator(0.f, 0.f, 0.f);
+
+			// 스킬 시전 VFX 재생
+			OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
+		}
+
 	}
 }
 

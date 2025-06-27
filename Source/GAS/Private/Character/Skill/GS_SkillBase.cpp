@@ -84,7 +84,7 @@ void UGS_SkillBase::PlayCastVFX(FVector Location, FRotator Rotation)
 {
 	if (SkillCastVFX && OwnerCharacter)
 	{
-		UNiagaraFunctionLibrary::SpawnSystemAttached(
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
 			SkillCastVFX,
 			OwnerCharacter->GetRootComponent(),
 			NAME_None,
@@ -93,6 +93,15 @@ void UGS_SkillBase::PlayCastVFX(FVector Location, FRotator Rotation)
 			EAttachLocation::KeepRelativeOffset,
 			true
 		);
+
+		if (NiagaraComp)
+		{
+			FVector Forward = OwnerCharacter->GetActorForwardVector();
+			NiagaraComp->SetVectorParameter(FName("User.ForwardVector"), Forward);
+
+			NiagaraComp->SetVectorParameter(FName("User.FixedVector"), FVector(1,0,0));
+			
+		}
 	}
 }
 
