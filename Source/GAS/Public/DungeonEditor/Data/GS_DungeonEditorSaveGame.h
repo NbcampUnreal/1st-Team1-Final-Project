@@ -14,7 +14,7 @@ class GAS_API UGS_DungeonEditorSaveGame : public USaveGame
 	
 public:
 	UFUNCTION()
-	void ClearData() { SavedDungeonActorData.Empty(); }
+	void ClearData() { SavedDungeonActorData.Empty(); FloorOccupancyData.Empty(); CeilingOccupancyData.Empty(); }
 	UFUNCTION()
 	void AddSaveData(const FDESaveData& InSaveData) { SavedDungeonActorData.Add(InSaveData); }
 	UFUNCTION()
@@ -26,6 +26,13 @@ public:
 	TMap<FIntPoint,EDEditorCellType> FloorOccupancyData;
 	UPROPERTY()
 	TMap<FIntPoint,EDEditorCellType> CeilingOccupancyData;
+
+	// 직렬화 제외 플래그
+	UPROPERTY(Transient)
+	bool bExcludeDungeonEditingArrays = false;
+
+	// 직렬화 함수 오버라이드
+	virtual void Serialize(FArchive& Ar) override;
 	
 protected:
 	UPROPERTY()

@@ -102,3 +102,16 @@ struct FDESaveData
 
 	FDESaveData() {}
 };
+
+FORCEINLINE FArchive& operator<<(FArchive& Ar, FDESaveData& Data)
+{
+	// 구조체의 각 멤버 변수를 순서대로 직렬화합니다.
+	// 저장할 때와 불러올 때의 순서가 반드시 같아야 합니다.
+	Ar << Data.SpawnActorClass;
+	Ar << Data.SpawnTransform;
+	Ar << Data.CellCoord;
+	Ar << Data.ObjectType;
+	Ar << Data.TrapPlacement;
+
+	return Ar;
+}

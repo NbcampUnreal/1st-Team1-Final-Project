@@ -37,7 +37,21 @@ AGS_BuildManager::AGS_BuildManager()
 
 	CurrentSaveSlotName = TEXT("Preset_0");
 	
-	InitGrid();
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MatFinder(
+		TEXT("MaterialInstanceConstant'/Game/DungeonEditor/Materials/Grid/MI_Grid.MI_Grid'"));
+	if (MatFinder.Succeeded())
+	{
+		GridMaterial = MatFinder.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UTexture> TexFinder(
+		TEXT("Texture2D'/Game/DungeonEditor/Textures/T_Grid_Cell.T_Grid_Cell'"));
+	if (TexFinder.Succeeded())
+	{
+		GridTexture = TexFinder.Object; // GridTexture에 할당
+	}
+	
+	// InitGrid();
 }
 
 void AGS_BuildManager::OnConstruction(const FTransform& Transform)
@@ -97,20 +111,6 @@ void AGS_BuildManager::InitGrid()
 	
 	float UnrealCellSize = CellSize * 0.01f;
 	StaticMeshCompo->SetRelativeScale3D(FVector(GridSize.X * UnrealCellSize, GridSize.Y * UnrealCellSize, 1.0f));
-	
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MatFinder(
-		TEXT("MaterialInstanceConstant'/Game/DungeonEditor/Materials/Grid/MI_Grid.MI_Grid'"));
-	if (MatFinder.Succeeded())
-	{
-		GridMaterial = MatFinder.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UTexture> TexFinder(
-		TEXT("Texture2D'/Game/DungeonEditor/Textures/T_Grid_Cell.T_Grid_Cell'"));
-	if (TexFinder.Succeeded())
-	{
-		GridTexture = TexFinder.Object; // GridTexture에 할당
-	}
 	
 	if (nullptr != GridMaterial)
 	{
@@ -253,7 +253,11 @@ void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType 
 		case EObjectType::Monster:
 			if (IsValid(CellInfo.FloorOccupancyActor))
 			{
-				CellInfo.FloorOccupancyActor->Destroy();
+				if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(CellInfo.FloorOccupancyActor))
+				{
+					TargetMonster->DestroyAllWeapons();
+					CellInfo.FloorOccupancyActor->Destroy();
+				}
 			}
 			CellInfo.FloorOccupancyActor = nullptr;
 			break;
@@ -894,6 +898,22 @@ void AGS_BuildManager::LoadDungeonData()
 					}
 				}
 			}
+
+			// for (const auto& FloorData : LoadGameObject->FloorOccupancyData)
+			// {
+			// 	FIntPoint CellCoordinates = FloorData.Key;
+			// 	const EDEditorCellType& Data = FloorData.Value;
+			//
+			// 	OccupancyData.FindOrAdd(CellCoordinates).FloorOccupancyData = Data;
+			// }
+			//
+			// for (const auto& CeilingData : LoadGameObject->CeilingOccupancyData)
+			// {
+			// 	FIntPoint CellCoordinates = CeilingData.Key;
+			// 	const EDEditorCellType& Data = CeilingData.Value;
+			//
+			// 	OccupancyData.FindOrAdd(CellCoordinates).CeilingOccupancyData = Data;
+			// }
 		}
 	}
     
