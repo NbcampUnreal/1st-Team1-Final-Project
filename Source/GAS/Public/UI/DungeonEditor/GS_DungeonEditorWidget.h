@@ -28,4 +28,6 @@ class GAS_API UGS_DungeonEditorWidget : public UUserWidget
 	void OnLoadButtonClicked();
 	UFUNCTION()
 	void OnBackButtonClicked();
+	UFUNCTION()
+	void OnResetButtonClicked();
 };

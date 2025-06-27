@@ -12,6 +12,7 @@
 #include "Character/Component/GS_DebuffVFXComponent.h"
 #include "Props/Interactables/GS_BridgePiece.h"
 
+
 AGS_Guardian::AGS_Guardian()
 {
 	PrimaryActorTick.bCanEverTick = false;

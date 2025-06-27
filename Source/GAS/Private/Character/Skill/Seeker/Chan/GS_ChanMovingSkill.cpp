@@ -3,6 +3,7 @@
 
 #include "Character/Skill/Seeker/Chan/GS_ChanMovingSkill.h"
 #include "Character/Player/Seeker/GS_Chan.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Component/GS_DebuffComp.h"
@@ -50,9 +51,10 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			}
 			
 			// 무빙 스킬 사운드 재생
-			if (OwnerPlayer->MovingSkillSound)
+			const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+			if (SkillInfo && SkillInfo->SkillStartSound)
 			{
-				OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->MovingSkillSound);
+				OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
 			}
 
 			ExecuteSkillEffect();

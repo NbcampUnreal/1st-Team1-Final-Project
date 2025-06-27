@@ -8,6 +8,7 @@
 AGS_MainMenuPC::AGS_MainMenuPC()
 	: MainMenuWidgetInstance(nullptr)
 	, LoadingScreenWidgetInstance(nullptr)
+	, TutorialWidgetInstance(nullptr)
 {
 }
 
@@ -102,6 +103,37 @@ void AGS_MainMenuPC::HideLoadingScreen()
 	if (LoadingScreenWidgetInstance)
 	{
 		LoadingScreenWidgetInstance->RemoveFromParent();
+		LoadingScreenWidgetInstance = nullptr;
+
+		FInputModeUIOnly InputMode;
+		SetInputMode(InputMode);
+		bShowMouseCursor = true;
+	}
+}
+
+void AGS_MainMenuPC::ShowTutorialUI()
+{
+	if (!TutorialWidgetClass)
+	{
+		return;
+	}
+
+	TutorialWidgetInstance = CreateWidget<UUserWidget>(this, TutorialWidgetClass);
+	if (TutorialWidgetInstance)
+	{
+		TutorialWidgetInstance->AddToViewport();
+
+		FInputModeUIOnly InputMode;
+		SetInputMode(InputMode);
+		bShowMouseCursor = true;
+	}
+}
+
+void AGS_MainMenuPC::HideTutorialUI()
+{
+	if (TutorialWidgetInstance)
+	{
+		TutorialWidgetInstance->RemoveFromParent();
 		LoadingScreenWidgetInstance = nullptr;
 
 		FInputModeUIOnly InputMode;

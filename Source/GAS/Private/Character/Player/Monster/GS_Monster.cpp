@@ -82,6 +82,13 @@ void AGS_Monster::BeginPlay()
 	{
 		MonsterSkillComp->OnMonsterSkillCooldownChanged.AddDynamic(this, &AGS_Monster::HandleSkillCooldownChanged);
 	}
+	
+	// AkComponent Occlusion 비활성화
+	if (AkComponent)
+	{
+		AkComponent->OcclusionRefreshInterval = 0.0f;
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Monster: AkComponent occlusion DISABLED."));
+	}
 }
 
 void AGS_Monster::PostInitializeComponents()

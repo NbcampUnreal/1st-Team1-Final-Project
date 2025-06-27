@@ -53,9 +53,10 @@ void UGS_ChanAimingSkill::ActiveSkill()
 		}
 
 		// 에이밍 스킬 시작 사운드 재생
-		if (OwnerPlayer->AimingSkillStartSound)
+		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+		if (SkillInfo && SkillInfo->SkillStartSound)
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillStartSound);
+			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
 		}
 	
 		// =======================

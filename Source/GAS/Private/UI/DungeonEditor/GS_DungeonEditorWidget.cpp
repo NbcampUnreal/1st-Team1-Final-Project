@@ -31,6 +31,14 @@ void UGS_DungeonEditorWidget::NativeConstruct()
 			BackButtonBase->OnClicked().AddUObject(this, &UGS_DungeonEditorWidget::OnBackButtonClicked);
 		}
 	}
+	
+	if (ResetButton)
+	{
+		if (UCommonButtonBase* ResetButtonBase = Cast<UCommonButtonBase>(ResetButton))
+		{
+			ResetButtonBase->OnClicked().AddUObject(this, &UGS_DungeonEditorWidget::OnResetButtonClicked);
+		}
+	}
 }
 
 void UGS_DungeonEditorWidget::OnSaveButtonClicked()
@@ -62,6 +70,17 @@ void UGS_DungeonEditorWidget::OnBackButtonClicked()
 		if (AGS_CustomLobbyPC* CustomLobbyPC = Cast<AGS_CustomLobbyPC>(PC))
 		{
 			CustomLobbyPC->RequestDungeonEditorToLobby();
+		}
+	}
+}
+
+void UGS_DungeonEditorWidget::OnResetButtonClicked()
+{
+	if (APlayerController* PC = GetOwningPlayer())
+	{
+		if (AGS_DEController* DEPC = Cast<AGS_DEController>(PC))
+		{
+			DEPC->GetBuildManager()->ResetDungeonData();
 		}
 	}
 }

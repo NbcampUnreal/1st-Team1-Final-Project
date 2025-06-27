@@ -27,6 +27,8 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UUserWidget* CreditButton;
 	UPROPERTY(meta = (BindWidget))
+	UUserWidget* TutorialButton;
+	UPROPERTY(meta = (BindWidget))
 	UUserWidget* ExitButton;
 	UPROPERTY(meta = (BindWidget))
 	UScaleBox* PlayBtnPopUp;
@@ -61,6 +63,8 @@ public:
 	void OnExitPopupNoButtonClicked();
 	UFUNCTION()
 	void OnFriendListButtonClicked();
+
+	void OnTutorialButtonClicked();
 
 protected:
 	virtual void NativeConstruct() override;

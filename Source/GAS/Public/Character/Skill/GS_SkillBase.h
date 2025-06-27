@@ -94,4 +94,6 @@ protected:
 	
 	void StartCoolDown();
 	
+	// 데이터 테이블에서 현재 스킬 정보 가져오기
+	const FSkillInfo* GetCurrentSkillInfo() const;
 };

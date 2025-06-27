@@ -9,6 +9,7 @@
 #include "System/GameState/GS_CustomLobbyGS.h"
 #include "GS_CustomLobbyPC.generated.h"
 
+class ADirectionalLight;
 class UUserWidget;
 class AGS_PlayerState;
 class UGS_CustomLobbyUI;
@@ -41,6 +42,9 @@ protected:
 	AGS_PlayerState* CachedPlayerState;
 
 	AGS_PlayerState* GetCachedPlayerState();
+
+	UPROPERTY(VisibleAnywhere, Category = "Actors")
+	TObjectPtr<ADirectionalLight> LobbyDirectionalLight;
 	
 	//ui 관련
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -148,4 +152,20 @@ private:
 public:
 	UFUNCTION(Client, Reliable)
 	void Client_RequestLoadAndSendData();
+
+protected:
+	// 청크 크기 (예: 60KB, 네트워크 환경에 맞게 조절 필요)
+	const int32 ChunkSize = 60 * 1024;
+
+	/**
+	* @brief 서버에서 여러 RPC 호출에 걸쳐 수신된 데이터 청크를 재조립하기 위한 임시 버퍼입니다.
+	* 한 번에 한 명의 플레이어 데이터만 처리하므로 TMap이 아닌 단일 배열로 충분합니다.
+	*/
+	TArray<uint8> ReassembledDungeonData;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_ReceiveDungeonDataChunk(const TArray<uint8>& Chunk, bool bIsLast);
+
+	// 클라이언트에서 데이터를 청크로 나눠 보내는 함수
+	void SendDataInChunks(const TArray<uint8>& FullData);
 };

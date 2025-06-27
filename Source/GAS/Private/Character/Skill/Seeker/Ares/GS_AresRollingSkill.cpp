@@ -20,6 +20,13 @@ void UGS_AresRollingSkill::ActiveSkill()
 		
 		if (OwnerPlayer->HasAuthority())
 		{
+			// 구르기 시작 사운드 재생
+			const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+			if (SkillInfo && SkillInfo->SkillStartSound)
+			{
+				OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			}
+
 			OwnerPlayer->GetMesh()->GetAnimInstance()->StopAllMontages(0);
 			OwnerPlayer->ComboInputClose();
 			OwnerPlayer->CurrentComboIndex = 0;
@@ -54,7 +61,6 @@ void UGS_AresRollingSkill::DeactiveSkill()
 			OwnerPlayer->SetMoveControlValue(true, true);
 			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			
 		}
 		OwnerPlayer->CanChangeSeekerGait = false;
 	}
