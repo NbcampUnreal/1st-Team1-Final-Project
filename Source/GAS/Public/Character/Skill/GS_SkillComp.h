@@ -104,9 +104,13 @@ public:
 	void Multicast_PlayEndVFX(ESkillSlot Slot, FVector Location, FRotator Rotation);
 
 	// 쿨타임 변경
-	void ApplyCooldownModifier(ESkillSlot Slot, float Ratio);
-	void ResetCooldownModifier(ESkillSlot Slot);
+	void ApplyCooldownModifier(ESkillSlot SkillSlot, float Modifier);
 	
+	void ResetCooldownModifier(ESkillSlot Slot);
+
+	// 스킬 데이터 테이블 접근자
+	FORCEINLINE UDataTable* GetSkillDataTable() const { return SkillDataTable; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

@@ -180,3 +180,45 @@ void UGS_SkillBase::PlayEndVFX(FVector Location, FRotator Rotation)
 		);
 	}
 }
+
+const FSkillInfo* UGS_SkillBase::GetCurrentSkillInfo() const
+{
+	if (!OwningComp || !OwnerCharacter)
+	{
+		return nullptr;
+	}
+
+	UDataTable* SkillDataTable = OwningComp->GetSkillDataTable();
+	if (!SkillDataTable)
+	{
+		return nullptr;
+	}
+	
+	// 캐릭터 타입을 기반으로 RowName 구하기
+	FName RowName = FName(*UEnum::GetValueAsString(OwnerCharacter->GetCharacterType()).RightChop(
+		UEnum::GetValueAsString(OwnerCharacter->GetCharacterType()).Find(TEXT("::")) + 2));
+
+	FString Context;
+	const FGS_SkillSet* SkillSet = SkillDataTable->FindRow<FGS_SkillSet>(RowName, Context);
+	if (!SkillSet)
+	{
+		return nullptr;
+	}
+
+	// 현재 스킬 슬롯에 따라 적절한 스킬 정보 반환
+	switch (CurrentSkillType)
+	{
+	case ESkillSlot::Ready:
+		return &SkillSet->ReadySkill;
+	case ESkillSlot::Aiming:
+		return &SkillSet->AimingSkill;
+	case ESkillSlot::Moving:
+		return &SkillSet->MovingSkill;
+	case ESkillSlot::Ultimate:
+		return &SkillSet->UltimateSkill;
+	case ESkillSlot::Rolling:
+		return &SkillSet->RollingSkill;
+	default:
+		return nullptr;
+	}
+}

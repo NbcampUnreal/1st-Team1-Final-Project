@@ -35,13 +35,17 @@ struct GAS_API FSkillInfo
 	UAkAudioEvent* SkillStartSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
-	UAkAudioEvent* SkillCastSound;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
-	UAkAudioEvent* SkillImpactSound;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	UAkAudioEvent* SkillEndSound;
+
+	// 충돌별 특수 사운드 (주로 궁극기 스킬용)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Collision")
+	UAkAudioEvent* WallCollisionSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Collision")
+	UAkAudioEvent* MonsterCollisionSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Collision")
+	UAkAudioEvent* GuardianCollisionSound;
 
 	// 스킬 VFX 이벤트들
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")

@@ -246,6 +246,10 @@ public:
 	UNiagaraSystem* DraconicProjectileImpactVFX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Projectile Explosion VFX"))
 	UNiagaraSystem* DraconicProjectileExplosionVFX;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Fever Projectile Impact VFX"))
+	UNiagaraSystem* FeverDraconicProjectileImpactVFX;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Fever Projectile Explosion VFX"))
+	UNiagaraSystem* FeverDraconicProjectileExplosionVFX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever Footstep VFX"))
 	UNiagaraSystem* FeverFootstepVFX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Flying Dust VFX"))

@@ -77,6 +77,13 @@ void AGS_Player::BeginPlay()
 	if (IsLocalPlayer())
 	{
 		SetupLocalAudioListener();
+		
+		// 자체 AkComponent의 Occlusion도 비활성화
+		if (AkComponent)
+		{
+			AkComponent->OcclusionRefreshInterval = 0.0f;
+			UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Player AkComponent occlusion DISABLED."));
+		}
 	}
 }
 
@@ -263,23 +270,50 @@ FCharacterWantsToMove AGS_Player::GetWantsToMove()
 
 void AGS_Player::SetupLocalAudioListener()
 {
-	if (!AkComponent)
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC && PC->IsLocalPlayerController())
 	{
-		UE_LOG(LogAudio, Warning, TEXT("AkComponent is null in SetupLocalAudioListener"));
-		return;
-	}
+		// 카메라 매니저에서 기본 리스너 컴포넌트를 찾습니다.
+		APlayerCameraManager* CameraManager = PC->PlayerCameraManager;
+		if (CameraManager)
+		{
+			UAkComponent* ListenerComponent = nullptr;
+			TArray<UAkComponent*> AkComponents;
+			CameraManager->GetComponents<UAkComponent>(AkComponents);
 
-	// 로컬 플레이어 확인
-	if (!IsLocalPlayer())
-	{
-		UE_LOG(LogAudio, Warning, TEXT("SetupLocalAudioListener called on non-local player: %s"), *GetName());
-		return;
-	}
+			for (UAkComponent* Component : AkComponents)
+			{
+				if (Component && Component->IsDefaultListener)
+				{
+					ListenerComponent = Component;
+					break;
+				}
+			}
 
-	// 가장 기본적인 방법: AkComponent를 직접 사용 : 이 방법이 가장 안전하고 호환성이 좋다
-	UE_LOG(LogAudio, Log, TEXT("Setting up audio listener for local player: %s"), *GetName());
-    
-	// AkComponent가 자동으로 리스너 역할을 하도록 설정. 별도의 API 호출 없이 AkComponent 자체가 리스너가 된다
+			// 만약 카메라 매니저에 리스너가 없다면 새로 생성하여 추가합니다.
+			if (!ListenerComponent)
+			{
+				ListenerComponent = NewObject<UAkComponent>(CameraManager);
+				if (ListenerComponent)
+				{
+					ListenerComponent->AttachToComponent(CameraManager->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+					ListenerComponent->RegisterComponent();
+					FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+					if(AudioDevice)
+					{
+						AudioDevice->AddDefaultListener(ListenerComponent);
+					}
+				}
+			}
+
+			if (ListenerComponent)
+			{
+				// 가장 중요한 부분: 카메라 리스너의 Occlusion을 비활성화합니다.
+				ListenerComponent->OcclusionRefreshInterval = 0.0f;
+				UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Camera audio listener occlusion DISABLED for local player."));
+			}
+		}
+	}
 }
 
 // 로컬 플레이어 확인 함수
@@ -335,3 +369,4 @@ void AGS_Player::PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPos
 
 	AkComponent->PostAkEvent(SoundEvent, 0, Callback);
 }
+

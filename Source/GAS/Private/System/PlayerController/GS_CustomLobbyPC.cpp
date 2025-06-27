@@ -23,6 +23,8 @@
 #include "Character/Player/GS_PawnMappingDataAsset.h"
 #include <DungeonEditor/Data/GS_DungeonEditorSaveGame.h>
 
+#include "Engine/DirectionalLight.h"
+
 
 AGS_CustomLobbyPC::AGS_CustomLobbyPC()
 	: CachedPlayerState(nullptr)
@@ -50,6 +52,22 @@ void AGS_CustomLobbyPC::BeginPlay()
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("LobbyCamera 태그를 가진 CameraActor를 찾을 수 없습니다."));
+		}
+
+		TArray<AActor*> FoundDirectionalLights;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("DirectionalLight"), FoundDirectionalLights);
+		if (FoundDirectionalLights.Num() > 0)
+		{
+			if (Cast<ADirectionalLight>(FoundDirectionalLights[0]))
+			{
+				LobbyDirectionalLight = Cast<ADirectionalLight>(FoundDirectionalLights[0]);
+				// 디렉셔널 라이트를 꺼줍니다.
+				LobbyDirectionalLight->SetEnabled(false);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("DirectionalLight 태그를 가진 Light 찾을 수 없습니다."));
 		}
 		
 		CollectAndCacheSpawnSlots();
@@ -392,25 +410,6 @@ void AGS_CustomLobbyPC::RequestOpenPerkOrDungeonPopup()
 	}
 	else
 	{
-		//// WidgetToOpen = GuardianDungeonWidgetClass;
-		//CreateDEWidgets();
-		//CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
-		//LogMessage = TEXT("Guardian Dungeon UI Opened");
-
-		// 1. 던전 에디터 시작 위치를 찾습니다.
-		// TArray<AActor*> FoundActors;
-		// UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("DungeonEditorStart"), FoundActors);
-		//
-		// if (FoundActors.Num() > 0)
-		// {
-		// 	// 2. 에디터 모드 진입 함수를 호출합니다.
-		// 	EnterEditorMode(FoundActors[0]);
-		// }
-		// else
-		// {
-		// 	UE_LOG(LogTemp, Error, TEXT("DungeonEditorStart 태그를 가진 액터를 찾을 수 없습니다."));
-		// }
-
 		TArray<AActor*> FoundActors;
 		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("DungeonEditorStart"), FoundActors);
 		if (FoundActors.Num() > 0)
@@ -418,30 +417,6 @@ void AGS_CustomLobbyPC::RequestOpenPerkOrDungeonPopup()
 			EnterEditorMode(FoundActors[0]);
 		}
 	}
-
-	// UGS_CustomLobbyUI* LobbyUI = Cast<UGS_CustomLobbyUI>(CustomLobbyWidgetInstance);
-	// if (!LobbyUI) return;
-	// UOverlay* ModalOverlay = LobbyUI->GetModalOverlay();
-	// if (!ModalOverlay) return;
-	//
-	// if (WidgetToOpen)
-	// {
-	// 	CurrentModalWidget = CreateWidget<UUserWidget>(this, WidgetToOpen);
-	// 	if (CurrentModalWidget)
-	// 	{
-	// 		UOverlaySlot* OS = ModalOverlay->AddChildToOverlay(CurrentModalWidget);
-	// 		if (OS)
-	// 		{
-	// 			OS->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
-	// 			OS->SetVerticalAlignment(EVerticalAlignment::VAlign_Center);
-	// 		}
-	// 		UE_LOG(LogTemp, Log, TEXT("%s"), *LogMessage);
-	// 	}
-	// }
-	// else
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("Failed to create Perk/Dungeon widget"));
-	// }
 }
 
 void AGS_CustomLobbyPC::SelectSeekerJob(ESeekerJob NewJob)
@@ -632,6 +607,9 @@ void AGS_CustomLobbyPC::Client_OnEnteredEditorMode_Implementation()
 	{
 		CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 	}
+
+	// 라이트 켜주기
+	LobbyDirectionalLight->SetEnabled(true);
 }
 
 void AGS_CustomLobbyPC::Client_OnExitedEditorMode_Implementation()
@@ -658,6 +636,9 @@ void AGS_CustomLobbyPC::Client_OnExitedEditorMode_Implementation()
 		SetInputMode(InputModeData);
 		SetShowMouseCursor(true);
 	}
+
+	// 라이트 꺼주기
+	LobbyDirectionalLight->SetEnabled(false);
 }
 
 void AGS_CustomLobbyPC::RequestDungeonEditorToLobby()

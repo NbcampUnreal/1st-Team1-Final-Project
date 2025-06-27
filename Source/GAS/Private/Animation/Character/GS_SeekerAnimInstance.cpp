@@ -185,10 +185,15 @@ FVector2D UGS_SeekerAnimInstance::Get_AOValue()
 		
 		FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(ControllerRot, RootRot);
 
-		AO.X = DeltaRot.Pitch;
+		const float PitchMin = -80.f;
+		const float PitchMax = 60.f;
+
+		AO.X = FMath::GetMappedRangeValueClamped(FVector2D(PitchMin, PitchMax), FVector2D(-100.f, 100.f), DeltaRot.Pitch);
 		AO.Y = DeltaRot.Yaw;
+
+		/*AO.X = DeltaRot.Pitch;
+		AO.Y = DeltaRot.Yaw;*/
 	}
-	
 	return AO;
 }
 

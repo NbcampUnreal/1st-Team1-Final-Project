@@ -68,8 +68,10 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 	if (!GetDrawState())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("GetDrawState=false pass: %s"), GetDrawState()?TEXT("true") : TEXT("false"));
+		UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage()"))
 		Multicast_PlayDrawMontage(DrawMontage);
 		SetDrawState(true); // 상태 전환
+		Multicast_SetMustTurnInPlace(true);
 		
 		// 활 당기는 사운드 재생
 		PlaySound(BowPullSound);
@@ -78,6 +80,8 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("bIsDrawState true"));
 	}
+
+	SetSeekerGait(EGait::Walk);
 }
 
 void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
@@ -118,6 +122,8 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 
 	}
 	//Client_SetWidgetVisibility(false);
+
+	SetSeekerGait(EGait::Run);
 }
 
 void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)

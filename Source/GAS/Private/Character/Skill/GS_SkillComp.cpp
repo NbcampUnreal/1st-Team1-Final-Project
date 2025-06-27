@@ -93,6 +93,9 @@ void UGS_SkillComp::ResetCooldownModifier(ESkillSlot Slot)
 	case ESkillSlot::Ultimate:
 		OriginalCooltime = SkillSet->UltimateSkill.Cooltime;
 		break;
+	case ESkillSlot::Rolling:
+		OriginalCooltime = SkillSet->RollingSkill.Cooltime;
+		break;
 	default:
 		break;
 	}

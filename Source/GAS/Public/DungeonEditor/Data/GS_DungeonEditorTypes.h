@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "GS_DungeonEditorTypes.generated.h"
 
+enum class ETrapPlacement : uint8;
+
 UENUM(BlueprintType)
 enum class EDEditorCellType : uint8
 {
@@ -91,6 +93,12 @@ struct FDESaveData
 	TSubclassOf<AActor> SpawnActorClass;
 	UPROPERTY()
 	FTransform SpawnTransform;
+	UPROPERTY()
+	TArray<FIntPoint> CellCoord;
+	UPROPERTY()
+	EObjectType ObjectType;
+	UPROPERTY()
+	ETrapPlacement TrapPlacement;
 
 	FDESaveData() {}
 };

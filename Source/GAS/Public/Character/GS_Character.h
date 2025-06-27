@@ -93,6 +93,8 @@ public:
 
 	UFUNCTION()
 	virtual void OnDeath();
+	UFUNCTION()
+	void DestroyAllWeapons();
 	
 	//HP widget
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
@@ -154,7 +156,6 @@ private:
 	void OnRep_CharacterSpeed();
 
 	void SpawnAndAttachWeapons();
-	void DestroyAllWeapons();
 
 	UPROPERTY(Replicated)
 	bool bIsDead = false;
