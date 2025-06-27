@@ -88,10 +88,23 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 			if (ControlValues.bCanLookRight)
 			{
 				ControlledPawn->AddControllerYawInput(InputAxisVector.X * SensitivityMultiplier);
-			}
+			}			
+			
 			if (ControlValues.bCanLookUp)
 			{
-				ControlledPawn->AddControllerPitchInput(InputAxisVector.Y * SensitivityMultiplier);
+				FRotator CurrentRot = GetControlRotation();
+
+				// 위로 50, 아래로 80
+				const float PitchMin = -80.f;
+				const float PitchMax = 50.f;
+
+				float NewPitch = CurrentRot.Pitch + (-InputAxisVector.Y * SensitivityMultiplier);
+				NewPitch = FMath::ClampAngle(NewPitch, PitchMin, PitchMax);
+
+				CurrentRot.Pitch = NewPitch;
+				SetControlRotation(CurrentRot);
+				
+				//ControlledPawn->AddControllerPitchInput(InputAxisVector.Y * SensitivityMultiplier);
 			}
 		}
 	}

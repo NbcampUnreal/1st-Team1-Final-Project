@@ -429,6 +429,7 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, CanAcceptComboInput);
 	DOREPLIFETIME(AGS_Seeker, CurrentComboIndex);
 	DOREPLIFETIME(AGS_Seeker, bComboEnded);
+	DOREPLIFETIME(AGS_Seeker, SeekerState);
 }
 
 void AGS_Seeker::CallDeactiveSkill(ESkillSlot Slot)

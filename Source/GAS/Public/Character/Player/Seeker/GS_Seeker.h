@@ -156,7 +156,7 @@ public:
 	EGait LastSeekerGait;
 
 private :
-	UPROPERTY(VisibleAnywhere, Category="State")
+	UPROPERTY(VisibleAnywhere, Category="State", Replicated)
 	FSeekerState SeekerState;
 
 //====================================================================================
