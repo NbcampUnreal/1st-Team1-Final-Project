@@ -7,6 +7,7 @@
 #include "GS_Ares.generated.h"
 
 class AGS_SwordAuraProjectile;
+class UAkAudioEvent;
 
 UCLASS()
 class GAS_API AGS_Ares : public AGS_Seeker
@@ -32,6 +33,51 @@ public:
 	virtual void ServerAttackMontage() override;
 
 	virtual void MulticastPlayComboSection() override;
+
+	// ===============
+	// 전용 공격 사운드
+	// ===============
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
+	UAkAudioEvent* SwordSwingSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
+	UAkAudioEvent* SwordSwingStopEvent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
+	UAkAudioEvent* FinalAttackExtraSound;  // 4번째 공격 추가 사운드
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX|Attack")
+	class UNiagaraSystem* FinalAttackHitVFX; // 4번째 공격 추가 VFX
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Voice")
+	UAkAudioEvent* AttackVoiceSound;
+
+	// ===============
+	// 공격 사운드 리셋 관련
+	// ===============
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack", meta = (ClampMin = "0.1", ClampMax = "5.0"))
+	float AttackSoundResetTime = 1.0f;
+
+	FTimerHandle AttackSoundResetTimerHandle;
+
+	// 사운드 중첩 방지를 위한 현재 재생 중인 사운드 ID
+	UPROPERTY()
+	int32 CurrentSoundPlayingID = -1;
+
+	UFUNCTION()
+	void ResetAttackSoundSequence();
+
+	// ===============
+	// 타격 처리 관련
+	// ===============
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_OnAttackHit(int32 ComboIndex);
+
+	// ===============
+	// 사운드 멀티캐스트 관련
+	// ===============
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StopAttackSound();
 
 protected:
 	// Called when the game starts or when spawned
