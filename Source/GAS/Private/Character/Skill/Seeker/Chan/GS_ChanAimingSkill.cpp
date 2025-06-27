@@ -13,9 +13,9 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/GS_Player.h"
 #include "AkAudioEvent.h"
-#include "AI/GS_AIController.h"
+/*#include "AI/GS_AIController.h"
 #include "Navigation/PathFollowingComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"*/
 
 UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 {
@@ -283,10 +283,11 @@ void UGS_ChanAimingSkill::TickDrainStamina()
 	// UI 업데이트
 	UpdateProgressBar(CurrentStamina);
 
-	UE_LOG(LogTemp, Warning, TEXT("Stamina : %f"), CurrentStamina);
+	// UE_LOG(LogTemp, Warning, TEXT("Stamina : %f"), CurrentStamina); 신중은
+	
 	if (CurrentStamina <= 0.f)
 	{
-		//EndHoldUp();
+		EndHoldUp();
 	}
 }
 
@@ -311,17 +312,14 @@ void UGS_ChanAimingSkill::StartHoldUp()
 void UGS_ChanAimingSkill::EndHoldUp()
 {
 	bIsHoldingUp = false;
-	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
+
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	if (OwnerPlayer)
 	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
-		if (AGS_Chan* Chan = Cast<AGS_Chan>(OwnerCharacter))
-		{
-			Chan->ToIdle();
-		}
+		UE_LOG(LogTemp, Warning, TEXT("EndHoldUp")); // SJE
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("LoopEnd"));
 	}
-
-	OwnerCharacter->Server_SetCharacterSpeed(1.0f);
-
+	
 	// UI 숨기기
 	ShowProgressBar(false);
 	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
