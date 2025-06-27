@@ -96,8 +96,11 @@ void UGS_SkillBase::PlayCastVFX(FVector Location, FRotator Rotation)
 
 		if (NiagaraComp)
 		{
-			//FVector Forward = OwnerCharacter->GetActorForwardVector();
-			NiagaraComp->SetVectorParameter(FName("User.ForwardVector"), FVector(1,0,0));
+			FVector Forward = OwnerCharacter->GetActorForwardVector();
+			NiagaraComp->SetVectorParameter(FName("User.ForwardVector"), Forward);
+
+			NiagaraComp->SetVectorParameter(FName("User.FixedVector"), FVector(1,0,0));
+			
 		}
 	}
 }
