@@ -16,9 +16,12 @@ AGS_BuildManager::AGS_BuildManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
+	SetRootComponent(DefaultSceneRoot);
+	
 #if WITH_EDITORONLY_DATA
 	BillboardCompo = CreateDefaultSubobject<UBillboardComponent>("BillBoard");
-	SetRootComponent(BillboardCompo);
+	BillboardCompo->SetupAttachment(RootComponent);
 #endif
 	StaticMeshCompo = CreateDefaultSubobject<UStaticMeshComponent>("GridMesh");
 	StaticMeshCompo->SetupAttachment(RootComponent);

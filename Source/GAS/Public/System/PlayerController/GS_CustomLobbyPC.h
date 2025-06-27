@@ -153,6 +153,10 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_RequestLoadAndSendData();
 
+	/** 서버로부터 다음 데이터 청크를 보낼 준비가 되었다는 신호를 받습니다. */
+	UFUNCTION(Client, Reliable)
+	void Client_ReadyForNextChunk();
+
 protected:
 	// 청크 크기 (예: 60KB, 네트워크 환경에 맞게 조절 필요)
 	const int32 ChunkSize = 60 * 1024;
@@ -162,10 +166,22 @@ protected:
 	* 한 번에 한 명의 플레이어 데이터만 처리하므로 TMap이 아닌 단일 배열로 충분합니다.
 	*/
 	TArray<uint8> ReassembledDungeonData;
+
+	/** 전송할 전체 던전 데이터의 바이트 배열입니다. */
+	TArray<uint8> FullDungeonDataToSend;
+
+	/** 현재까지 보낸 데이터의 오프셋입니다. */
+	int32 SentDataOffset = 0;
 	
 	UFUNCTION(Server, Reliable)
 	void Server_ReceiveDungeonDataChunk(const TArray<uint8>& Chunk, bool bIsLast);
 
+	/**
+	 * @brief 데이터 청크 하나를 서버로 보냅니다.
+	 * 이 함수는 Client_ReadyForNextChunk 호출에 의해 트리거됩니다.
+	 */
+	void SendNextDataChunk();
+	
 	// 클라이언트에서 데이터를 청크로 나눠 보내는 함수
-	void SendDataInChunks(const TArray<uint8>& FullData);
+	//void SendDataInChunks(const TArray<uint8>& FullData);
 };

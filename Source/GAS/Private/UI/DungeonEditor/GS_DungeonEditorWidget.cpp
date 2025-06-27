@@ -67,6 +67,12 @@ void UGS_DungeonEditorWidget::OnBackButtonClicked()
 {
 	if (APlayerController* PC = GetOwningPlayer())
 	{
+		if (AGS_DEController* DEPC = Cast<AGS_DEController>(PC))
+		{
+			// Placer 제거
+			DEPC->GetBuildManager()->PressedRMB();
+		}
+		
 		if (AGS_CustomLobbyPC* CustomLobbyPC = Cast<AGS_CustomLobbyPC>(PC))
 		{
 			CustomLobbyPC->RequestDungeonEditorToLobby();
