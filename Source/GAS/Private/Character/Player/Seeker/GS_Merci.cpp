@@ -73,8 +73,8 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		SetDrawState(true); // 상태 전환
 		Multicast_SetMustTurnInPlace(true);
 		
-		// 활 당기는 사운드 재생
-		PlaySound(BowPullSound);
+		// 활 당기는 사운드 재생 (멀티캐스트로 변경)
+		Multicast_PlayBowPullSound();
 	}
 	else
 	{
@@ -111,8 +111,8 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	
 	if (bIsFullyDrawn)
 	{
-		// 활 놓는 사운드 재생
-		PlaySound(BowReleaseSound);
+		// 활 놓는 사운드 재생 (멀티캐스트로 변경)
+		Multicast_PlayBowReleaseSound();
 
 		Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 
@@ -702,6 +702,34 @@ void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
 	else if (!HitFeedbackSound)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Client_PlayHitFeedbackSound_Implementation: HitFeedbackSound is null"));
+	}
+}
+
+void AGS_Merci::Multicast_PlayBowPullSound_Implementation()
+{
+	// 데디케이티드 서버에서는 사운드 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	if (BowPullSound)
+	{
+		UAkGameplayStatics::PostEvent(BowPullSound, this, 0, FOnAkPostEventCallback());
+	}
+}
+
+void AGS_Merci::Multicast_PlayBowReleaseSound_Implementation()
+{
+	// 데디케이티드 서버에서는 사운드 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	if (BowReleaseSound)
+	{
+		UAkGameplayStatics::PostEvent(BowReleaseSound, this, 0, FOnAkPostEventCallback());
 	}
 }
 
