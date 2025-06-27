@@ -100,88 +100,220 @@ UClass* AGS_InGameGM::GetDefaultPawnClassForController_Implementation(AControlle
     return ResolvedPawnClass;
 }
 
-void AGS_InGameGM::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
+void AGS_InGameGM::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) // 여기부터 호출 순서대로 나열했음
 {
-    Super::HandleStartingNewPlayer_Implementation(NewPlayer);
+    //Super 함수 호출 X
+    if (NewPlayer)
+    {
+        PendingPlayers.Add(NewPlayer);
+        UE_LOG(LogTemp, Log, TEXT("Player %s added to pending list. Waiting for dungeon generation."), *NewPlayer->GetName());
+    }
 }
 
-// AActor* AGS_InGameGM::ChoosePlayerStart_Implementation(AController* Player)
-// {
-//     FString PlayerStartTagToFind = TEXT("");
-//
-//     if (Player)
-//     {
-//         AGS_PlayerState* PS = Player->GetPlayerState<AGS_PlayerState>();
-//         if (PS)
-//         {
-//             if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
-//             {
-//                 PlayerStartTagToFind = TEXT("SpawnPoint1");
-//             }
-//             else if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
-//             {
-//                 PlayerStartTagToFind = TEXT("SpawnPoint1");
-//                 
-//             }
-//         }
-//     }
-//
-//     AActor* FoundPlayerStart = FindPlayerStart_Implementation(Player, PlayerStartTagToFind);
-//
-//     if (FoundPlayerStart)
-//     {
-//         return FoundPlayerStart;
-//     }
-//
-//     //Super::ChoosePlayerStart_Implementation(Player) 호출과 유사한 효과를 내지만, 재귀 호출 위험을 줄임
-//     if (!PlayerStartTagToFind.IsEmpty())
-//     {
-//         FoundPlayerStart = FindPlayerStart_Implementation(Player, TEXT(""));
-//
-//         if (FoundPlayerStart)
-//         {
-//             return FoundPlayerStart;
-//         }
-//     }
-//     return nullptr;
-// }
+void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
+{
+    UE_LOG(LogTemp, Warning, TEXT("SpawnDungeonFromArray called with %d objects."), SaveData.Num());
+    CachedSaveData = SaveData;
+    if (SaveData.IsEmpty())
+    {
+        UE_LOG(LogTemp, Error, TEXT("There is no SaveData. Can't Spawn Dungeon."));
+        return;
+    }
+    // 받아온 데이터를 기반으로 "몬스터"를 제외한 액터 스폰
+    UWorld* World = GetWorld();
+    if (IsValid(World))
+    {
+        for (const FDESaveData& ObjectData : SaveData)
+        {
+            if (ObjectData.SpawnActorClass)
+            {
+                if (!Cast<AGS_Monster>(ObjectData.SpawnActorClass))
+                {
+                    FActorSpawnParameters SpawnParams;
+                    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+                    World->SpawnActor<AActor>(ObjectData.SpawnActorClass, ObjectData.SpawnTransform, SpawnParams);
+                }
+            }
+        }
+    }
+
+    // 내비메시 재빌드 요청
+    UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+    if (IsValid(NavSystem))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Requesting NavMesh rebuild..."));
+        // 모든 내비메시를 새로 빌드하도록 요청. 이 작업은 즉시 끝나지 않음
+        NavSystem->Build();
+
+        // 빌드가 완료되었는지 0.1초마다 확인하는 타이머 시작
+        GetWorld()->GetTimerManager().SetTimer(
+            NavMeshBuildTimerHandle,
+            this,
+            &AGS_InGameGM::CheckNavMeshBuildStatus,
+            0.1f,
+            true); // 반복 실행
+    }
+}
+
+void AGS_InGameGM::CheckNavMeshBuildStatus()
+{
+    UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+    // 내비메시 빌드가 진행 중이 아닌지(=완료되었는지) 확인
+    if (IsValid(NavSystem) && !NavSystem->IsNavigationBuildInProgress())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("NavMesh build is complete!"));
+        GetWorld()->GetTimerManager().ClearTimer(NavMeshBuildTimerHandle);
+        OnNavMeshBuildComplete();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("... Waiting for NavMesh build to finish ..."));
+    }
+}
+
+
+void AGS_InGameGM::OnNavMeshBuildComplete()
+{
+    if (CachedSaveData.IsEmpty())
+    {
+        UE_LOG(LogTemp, Error, TEXT("There is no CachedSaveData. Can't Spawn Monsters."));
+        return;
+    }
+
+    UWorld* World = GetWorld();
+    if (IsValid(World))
+    {
+        for (const FDESaveData& ObjectData : CachedSaveData)
+        {
+            if (ObjectData.SpawnActorClass)
+            {
+                if (Cast<AGS_Monster>(ObjectData.SpawnActorClass))
+                {
+                    FActorSpawnParameters SpawnParams;
+                    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+                    World->SpawnActor<AActor>(ObjectData.SpawnActorClass, ObjectData.SpawnTransform, SpawnParams);
+                }
+            }
+        }
+    }
+    FTimerHandle DelayedRestartPlayerHandle;
+    GetWorld()->GetTimerManager().SetTimer(DelayedRestartPlayerHandle, this, &AGS_InGameGM::DelayedRestartPlayer, 2.f, false);
+}
+
+void AGS_InGameGM::DelayedRestartPlayer()
+{
+    UE_LOG(LogTemp, Log, TEXT("DelayedRestartPlayer Executed!!! Dungeon generation complete. Restarting all players."));
+    if (GameState)
+    {
+        if (PendingPlayers.Num() > 0)
+        {
+            for (AController* PC : PendingPlayers)
+            {
+                AActor* FoundStart = FindPlayerStart(PC);
+                if (FoundStart)
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("Found valid PlayerStart '%s' with for %s at location: %s"),
+                        *FoundStart->GetName(),
+                        *PC->PlayerState->GetPlayerName(),
+                        *FoundStart->GetActorLocation().ToString()
+                    );
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Error, TEXT("FAILED to find any valid PlayerStart for %s. Player will spawn at origin."), *PC->PlayerState->GetPlayerName());
+                }
+
+                if (PC)
+                {
+                    RestartPlayer(PC);
+                }
+            }
+            PendingPlayers.Empty();
+        }
+    }
+}
+
+AActor* AGS_InGameGM::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
+{
+    UE_LOG(LogTemp, Warning, TEXT("Called FindPlayerStart_Implementation."));
+
+    for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
+    {
+        APlayerStart* PlayerStart = *It;
+        if (PlayerStart)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Found a valid PlayerStart '%s' at location %s via TActorIterator."), *PlayerStart->GetName(), *PlayerStart->GetActorLocation().ToString());
+            return PlayerStart;
+        }
+    }
+
+    UE_LOG(LogTemp, Error, TEXT("OVERRIDDEN FindPlayerStart FAILED to find any PlayerStart actors. Falling back to default behavior."));
+    return Super::FindPlayerStart_Implementation(Player, IncomingName);
+}
+
+ //AActor* AGS_InGameGM::ChoosePlayerStart_Implementation(AController* Player)
+ //{
+ //    FString PlayerStartTagToFind = TEXT("");
+
+ //    if (Player)
+ //    {
+ //        AGS_PlayerState* PS = Player->GetPlayerState<AGS_PlayerState>();
+ //        if (PS)
+ //        {
+ //            if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+ //            {
+ //                PlayerStartTagToFind = TEXT("SpawnPoint1");
+ //            }
+ //            else if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+ //            {
+ //                PlayerStartTagToFind = TEXT("SpawnPoint1");
+ //            }
+ //        }
+ //    }
+
+ //    AActor* FoundPlayerStart = FindPlayerStart_Implementation(Player, PlayerStartTagToFind);
+
+ //    if (!FoundPlayerStart && !PlayerStartTagToFind.IsEmpty())
+ //    {
+ //        UE_LOG(LogTemp, Warning, TEXT("Could not find a PlayerStart with tag '%s'. Searching for any available PlayerStart."), *PlayerStartTagToFind);
+ //        FoundPlayerStart = FindPlayerStart(Player, ""); // 태그 없이 다시 검색
+ //    }
+
+ //    if (FoundPlayerStart)
+ //    {
+ //        return FoundPlayerStart;
+ //    }
+ //    return nullptr;
+ //} // 여기까지 호출 순서대로 나열. 이후는 모름
 
 void AGS_InGameGM::StartPlay()
 {
     Super::StartPlay();
 
-    /*FString BossLevelName = TEXT("BossLevel");
-    FString ResultLevelName = TEXT("ResultLevel");
-    UGameplayStatics::LoadStreamLevel(this, FName(*BossLevelName), false, false, FLatentActionInfo());
-    UGameplayStatics::LoadStreamLevel(this, FName(*ResultLevelName), false, false, FLatentActionInfo());*/
-
-    FTimerHandle TempHandle;
-    GetWorldTimerManager().SetTimer(TempHandle, [this]() {
-        if (GameState)
+    if (GameState)
+    {
+        for (APlayerState* PS : GameState->PlayerArray)
         {
-            for (APlayerState* PS : GameState->PlayerArray)
+            if (APlayerController* PC = PS->GetPlayerController())
             {
-                if (APlayerController* PC = PS->GetPlayerController())
-                {
-                    BindToPlayerState(PC);
-                }
-                else if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
-                {
-                    GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
-                    GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_InGameGM::HandlePlayerAliveStatusChanged);
-                    UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Bound to existing player (No PC) %s"), *GS_PS->GetPlayerName());
-                    HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
-                }
-                AGS_PlayerState* GPS = Cast<AGS_PlayerState>(PS);
-                if (GPS && GPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("Guardian Player '%s' found in StartPlay. Spawning dungeon..."), *GPS->GetPlayerName());
-                    SpawnDungeonFromArray(GPS->ObjectData);
-                }
+                UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM::StartPlay - PlayerController: %s"), *PC->GetClass()->GetName())
+                BindToPlayerState(PC);
+            }
+            else if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
+            {
+                GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
+                GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_InGameGM::HandlePlayerAliveStatusChanged);
+                UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Bound to existing player (No PC) %s"), *GS_PS->GetPlayerName());
+                HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
+            }
+            AGS_PlayerState* GPS = Cast<AGS_PlayerState>(PS);
+            if (GPS && GPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Guardian Player '%s' found in StartPlay. Spawning dungeon..."), *GPS->GetPlayerName());
+                SpawnDungeonFromArray(GPS->ObjectData);
             }
         }
-    }, 0.2f, false);
-
+    }
 }
 
 void AGS_InGameGM::Logout(AController* Exiting)
@@ -205,25 +337,25 @@ void AGS_InGameGM::BindToPlayerState(APlayerController* PlayerController)
 {
     if (PlayerController)
     {
-        // [TODO] 플레이어 widget 업데이트
-        AGS_TpsController* TpsPC = Cast<AGS_TpsController>(PlayerController);
-        if (IsValid(TpsPC))
-        {
-            UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ TPS PC @@@@@@@@@@@@@@@@@@@@@"));
-            TpsPC->TestFunction();
-            
-            // UUserWidget* Widget = TpsPC->GetPlayerWidget();
-            // if (Widget)
-            // {
-            //     UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(Widget->GetWidgetFromName(TEXT("WBP_HPBoard")));
-            //     UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid widget"));
-            //     if (IsValid(HPBoardWidget))
-            //     {
-            //         UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid HPBoard Widget"));
-            //         HPBoardWidget->InitBoardWidget();
-            //     }
-            // }
-        }
+        //// [TODO] 플레이어 widget 업데이트
+        //AGS_TpsController* TpsPC = Cast<AGS_TpsController>(PlayerController);
+        //if (IsValid(TpsPC))
+        //{
+        //    UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ TPS PC @@@@@@@@@@@@@@@@@@@@@"));
+        //    TpsPC->TestFunction();
+        //    
+        //    // UUserWidget* Widget = TpsPC->GetPlayerWidget();
+        //    // if (Widget)
+        //    // {
+        //    //     UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(Widget->GetWidgetFromName(TEXT("WBP_HPBoard")));
+        //    //     UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid widget"));
+        //    //     if (IsValid(HPBoardWidget))
+        //    //     {
+        //    //         UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid HPBoard Widget"));
+        //    //         HPBoardWidget->InitBoardWidget();
+        //    //     }
+        //    // }
+        //}
         
         AGS_PlayerState* GS_PS = PlayerController->GetPlayerState<AGS_PlayerState>();
         if (GS_PS)
@@ -359,93 +491,5 @@ void AGS_InGameGM::CheckAllPlayersDead()
     else
     {
         UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Not all players are dead yet. (%d players checked)"), PlayerCount);
-    }
-}
-
-void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
-{
-    UE_LOG(LogTemp, Warning, TEXT("SpawnDungeonFromArray called with %d objects."), SaveData.Num());
-    CachedSaveData = SaveData;
-    if (SaveData.IsEmpty())
-    {
-        UE_LOG(LogTemp, Error, TEXT("There is no SaveData. Can't Spawn Dungeon."));
-        return;
-    }
-    // 받아온 데이터를 기반으로 "몬스터"를 제외한 액터 스폰
-    UWorld* World = GetWorld();
-    if (IsValid(World))
-    {
-        for (const FDESaveData& ObjectData : SaveData)
-        {
-            if (ObjectData.SpawnActorClass)
-            {
-                if (!Cast<AGS_Monster>(ObjectData.SpawnActorClass))
-                {
-                    FActorSpawnParameters SpawnParams;
-                    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-                    World->SpawnActor<AActor>(ObjectData.SpawnActorClass, ObjectData.SpawnTransform, SpawnParams);
-                }
-            }
-        }
-    }
-
-    // 내비메시 재빌드 요청
-    UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
-    if (IsValid(NavSystem))
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Requesting NavMesh rebuild..."));
-        // 모든 내비메시를 새로 빌드하도록 요청. 이 작업은 즉시 끝나지 않음
-        NavSystem->Build();
-
-        // 빌드가 완료되었는지 0.1초마다 확인하는 타이머 시작
-        GetWorld()->GetTimerManager().SetTimer(
-            NavMeshBuildTimerHandle,
-            this,
-            &AGS_InGameGM::CheckNavMeshBuildStatus,
-            0.1f,
-            true); // 반복 실행
-    }
-}
-
-void AGS_InGameGM::CheckNavMeshBuildStatus()
-{
-    UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
-    // 내비메시 빌드가 진행 중이 아닌지(=완료되었는지) 확인
-    if (IsValid(NavSystem) && !NavSystem->IsNavigationBuildInProgress())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("NavMesh build is complete!"));
-        GetWorld()->GetTimerManager().ClearTimer(NavMeshBuildTimerHandle);
-        OnNavMeshBuildComplete();
-    }
-    else
-    {
-        UE_LOG(LogTemp, Log, TEXT("... Waiting for NavMesh build to finish ..."));
-    }
-}
-
-
-void AGS_InGameGM::OnNavMeshBuildComplete()
-{
-    if (CachedSaveData.IsEmpty())
-    {
-        UE_LOG(LogTemp, Error, TEXT("There is no CachedSaveData. Can't Spawn Monsters."));
-        return;
-    }
-
-    UWorld* World = GetWorld();
-    if (IsValid(World))
-    {
-        for (const FDESaveData& ObjectData : CachedSaveData)
-        {
-            if (ObjectData.SpawnActorClass)
-            {
-                if (Cast<AGS_Monster>(ObjectData.SpawnActorClass))
-                {
-                    FActorSpawnParameters SpawnParams;
-                    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-                    World->SpawnActor<AActor>(ObjectData.SpawnActorClass, ObjectData.SpawnTransform, SpawnParams);
-                }
-            }
-        }
     }
 }

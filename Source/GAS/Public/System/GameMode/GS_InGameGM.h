@@ -17,19 +17,17 @@ class GAS_API AGS_InGameGM : public AGS_BaseGM
 	
 public:
 	AGS_InGameGM();
+
+protected:
 	virtual TSubclassOf<APlayerController> GetPlayerControllerClassToSpawnForSeamlessTravel(APlayerController* PreviousPC) override;
 	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
-
 	//virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 	virtual void StartPlay() override;
-
 	virtual void Logout(AController* Exiting) override;
-
-protected:
-	void StartMatchCheck();
-
+	void DelayedRestartPlayer();
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Configuration")
 	UGS_PawnMappingDataAsset* PawnMappingDataAsset;
 
@@ -68,6 +66,8 @@ public:
 
 private:
 	void SetGameResultOnAllPlayers(EGameResult Result);
+
+	TArray<AController*> PendingPlayers;
 
 	//던전 스폰
 protected:
