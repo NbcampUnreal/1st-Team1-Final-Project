@@ -9,6 +9,7 @@
 #include "System/GameState/GS_CustomLobbyGS.h"
 #include "GS_CustomLobbyPC.generated.h"
 
+class ADirectionalLight;
 class UUserWidget;
 class AGS_PlayerState;
 class UGS_CustomLobbyUI;
@@ -41,6 +42,9 @@ protected:
 	AGS_PlayerState* CachedPlayerState;
 
 	AGS_PlayerState* GetCachedPlayerState();
+
+	UPROPERTY(VisibleAnywhere, Category = "Actors")
+	TObjectPtr<ADirectionalLight> LobbyDirectionalLight;
 	
 	//ui 관련
 	UPROPERTY(EditDefaultsOnly, Category = "UI")

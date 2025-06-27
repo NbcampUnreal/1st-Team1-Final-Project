@@ -32,6 +32,8 @@ AGS_Chan::AGS_Chan()
 	UltimateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	UltimateCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	UltimateCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	UltimateCollision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
+	UltimateCollision->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	UltimateCollision->SetGenerateOverlapEvents(true);
 }
 
@@ -89,7 +91,7 @@ void AGS_Chan::OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	if (UGS_ChanUltimateSkill* Skill = Cast<UGS_ChanUltimateSkill>(
 		SkillComp->GetSkillFromSkillMap(ESkillSlot::Ultimate)))
 	{
-		Skill->HandleUltimateCollision(OtherActor);
+		Skill->HandleUltimateCollision(OtherActor, OtherComp);
 	
 	}
 }

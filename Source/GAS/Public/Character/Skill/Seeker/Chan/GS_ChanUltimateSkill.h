@@ -21,7 +21,7 @@ public:
 	virtual void DeactiveSkill() override;
 	virtual void InterruptSkill() override;
 
-	void HandleUltimateCollision(AActor* HitActor);
+	void HandleUltimateCollision(AActor* HitActor, UPrimitiveComponent* HitComp);
 
 protected:
 	// 공격
@@ -71,6 +71,8 @@ private:
 
 	void StartCharge();
 	void EndCharge();
+
+	bool bInStructureCrash = false;
 
 	// 가디언용 넉백 설정
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
