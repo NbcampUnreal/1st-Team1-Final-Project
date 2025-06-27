@@ -28,6 +28,11 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UUserWidget> LoadingScreenWidgetInstance;
 
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> TutorialWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UUserWidget> TutorialWidgetInstance;
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void ShowMainMenuUI();
@@ -35,4 +40,10 @@ public:
 	void ShowLoadingScreen();
 	UFUNCTION(BlueprintCallable, Category = "UI")
 	void HideLoadingScreen();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void ShowTutorialUI();
+
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	void HideTutorialUI();
 };

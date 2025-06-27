@@ -47,6 +47,14 @@ void UGS_MainMenuUI::NativeConstruct()
 			FriendListButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnFriendListButtonClicked);
 		}
 	}
+
+	if (TutorialButton)
+	{
+		if (UCommonButtonBase* TutorialButtonBase = Cast<UCommonButtonBase>(TutorialButton))
+		{
+			TutorialButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnTutorialButtonClicked);
+		}
+	}
 	
 	//텍스트 초기 설정
 	//if (PlayText) PlayText->SetText(FText::FromString(TEXT("Play")));
@@ -155,5 +163,14 @@ void UGS_MainMenuUI::OnFriendListButtonClicked()
 	else
 	{
 		FriendListOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void UGS_MainMenuUI::OnTutorialButtonClicked()
+{
+	AGS_MainMenuPC* PC = GetOwningPlayer<AGS_MainMenuPC>();
+	if (PC)
+	{
+		PC->ShowTutorialUI();
 	}
 }
