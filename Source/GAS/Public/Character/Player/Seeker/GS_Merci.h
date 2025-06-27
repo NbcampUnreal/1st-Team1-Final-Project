@@ -169,6 +169,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Feedback")
 	UAkAudioEvent* HitFeedbackSound; // 화살이 적을 맞췄을 때의 UI 피드백 사운드
 
+	// 멀티캐스트 사운드 함수들
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayBowPullSound();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayBowReleaseSound();
+
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 	// [화살 관리]

@@ -82,6 +82,12 @@ public:
 	void Multicast_OnAttackHit(int32 ComboIndex);
 
 	// ===============
+	// 사운드 멀티캐스트 관련
+	// ===============
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StopAttackSound();
+
+	// ===============
 	// 스킬 사운드
 	// ===============
 
