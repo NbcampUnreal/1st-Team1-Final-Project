@@ -17,6 +17,9 @@ public:
 	AGS_BuildManager();
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
+	TObjectPtr<USceneComponent> DefaultSceneRoot;
+	
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
 	TObjectPtr<UBillboardComponent> BillboardCompo;
