@@ -258,6 +258,11 @@ private:
 	UPROPERTY(EditAnywhere, Category="Cursor")
 	UTexture2D* ScrollCursorTexture;
 
+	bool bShowAttackCursor;
+
+	UPROPERTY()
+	FTimerHandle AttackCursorTimerHandle;
+
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
 	FVector2D GetFinalDirection() const;
@@ -276,4 +281,5 @@ private:
 
 	void UpdateCursorForCommand();
 	void UpdateCursorForEdgeScroll();
+	void ShowAttackCursor();
 };
