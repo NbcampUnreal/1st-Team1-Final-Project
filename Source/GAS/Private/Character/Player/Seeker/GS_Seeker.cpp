@@ -438,7 +438,6 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 void AGS_Seeker::CallDeactiveSkill(ESkillSlot Slot)
 {
 	GetSkillComp()->TryDeactiveSkill(Slot);
-	//GetSkillComp()->SetSkillActiveState(Slot, false);
 }
 
 void AGS_Seeker::OnRep_SeekerGait()
