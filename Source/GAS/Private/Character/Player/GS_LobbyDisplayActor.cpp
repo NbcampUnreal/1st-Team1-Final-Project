@@ -6,6 +6,7 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/Character/GS_LobbyAnimInstance.h"
 #include "Character/Player/GS_PawnMappingDataAsset.h"
+#include "Net/UnrealNetwork.h"
 
 AGS_LobbyDisplayActor::AGS_LobbyDisplayActor()
 {
@@ -17,29 +18,44 @@ AGS_LobbyDisplayActor::AGS_LobbyDisplayActor()
     NetUpdateFrequency = 1;
 }
 
-void AGS_LobbyDisplayActor::SetupDisplay_Implementation(USkeletalMesh* NewMesh, TSubclassOf<UAnimInstance> NewAnimClass,
-    const TArray<FWeaponMeshPair>& WeaponMeshList)
+void AGS_LobbyDisplayActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+    DOREPLIFETIME(AGS_LobbyDisplayActor, CurrentSkeletalMesh);
+    DOREPLIFETIME(AGS_LobbyDisplayActor, CurrentAnimClass);
+    DOREPLIFETIME(AGS_LobbyDisplayActor, CurrentWeaponMeshList);
+    DOREPLIFETIME(AGS_LobbyDisplayActor, bIsReady);
+}
+
+void AGS_LobbyDisplayActor::OnRep_SetupDisplay()
 {
     if (SkeletalMeshComponent)
     {
-        SkeletalMeshComponent->SetSkeletalMesh(NewMesh);
-        SkeletalMeshComponent->SetAnimInstanceClass(NewAnimClass);
+        SkeletalMeshComponent->SetSkeletalMesh(CurrentSkeletalMesh);
+        SkeletalMeshComponent->SetAnimInstanceClass(CurrentAnimClass);
 
-        for (const FWeaponMeshPair& WeaponPair : WeaponMeshList)
+        // 기존 무기 제거 (중복 스폰 방지)
+        TArray<USceneComponent*> AttachedComponents;
+        SkeletalMeshComponent->GetChildrenComponents(true, AttachedComponents);
+        for (USceneComponent* Child : AttachedComponents)
         {
-            UE_LOG(LogTemp, Warning, TEXT("Weapon SkeletalMesh class : %s | Socket Name : %s"), *WeaponPair.WeaponSkeletalMeshClass->GetName(), *WeaponPair.SocketName.ToString());
+            if (Child->IsA<USkeletalMeshComponent>())
+            {
+                Child->DestroyComponent();
+            }
+        }
+
+        for (const FWeaponMeshPair& WeaponPair : CurrentWeaponMeshList)
+        {
             USkeletalMeshComponent* WeaponComponent = NewObject<USkeletalMeshComponent>(this);
             WeaponComponent->RegisterComponent();
             WeaponComponent->SetSkeletalMesh(WeaponPair.WeaponSkeletalMeshClass);
-
-            WeaponComponent->AttachToComponent(SkeletalMeshComponent,
-                FAttachmentTransformRules::SnapToTargetIncludingScale,
-                WeaponPair.SocketName);
+            WeaponComponent->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, WeaponPair.SocketName);
         }
     }
 }
 
-void AGS_LobbyDisplayActor::SetReadyState_Implementation(bool bIsReady)
+void AGS_LobbyDisplayActor::OnRep_ReadyState()
 {
     if (SkeletalMeshComponent)
     {
