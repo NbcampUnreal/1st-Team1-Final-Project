@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{0F1F2101-2BD8-E7C4-9505-9252A7D8A913}",
+    "Hash": "{8CC685FC-588E-0096-56B7-9C35C3CED0C9}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -176,14 +176,6 @@
       "CachePath": "C5/{C5B87615-7A55-4059-BA7E-95EFE1009266}.wem"
      },
      {
-      "Id": "132193652",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_CH_fx_combat_punch_swing_gore_liquid_hit_05.wav",
-      "CachePath": "88/{88693564-D06A-47F8-C66E-B15FB06ABA6D}.wem"
-     },
-     {
       "Id": "134763393",
       "Language": "SFX",
       "Streaming": "false",
@@ -310,6 +302,14 @@
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.268.wav",
       "CachePath": "39/{3904409D-71D1-AB20-F48A-8D01663764A7}.wem"
+     },
+     {
+      "Id": "228289941",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Calvin_Growl_3_Male_Human_Voice_Over_Vocal_English_Middle_Age_Adult_Mature.wav",
+      "CachePath": "C0/{C079722B-B203-EDCA-7EEE-086EAD715BC7}.wem"
      },
      {
       "Id": "230669099",
@@ -496,6 +496,14 @@
       "CachePath": "C7/{C7AABDBE-738A-FE1B-4ED2-3876D9FBF42E}.wem"
      },
      {
+      "Id": "350943193",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_dagger_slash_quick.wav",
+      "CachePath": "E1/{E1037045-43EF-EF2A-7B9D-64BAC251F3F8}.wem"
+     },
+     {
       "Id": "356621308",
       "Language": "SFX",
       "Streaming": "false",
@@ -568,20 +576,12 @@
       "CachePath": "72/{72ECFA9B-8A1A-E6D7-D4FB-8A10A43EFD18}.wem"
      },
      {
-      "Id": "401627905",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "FootstepMetal2.wav",
-      "CachePath": "35/{3516BDE1-BB27-E85B-7BDA-66F412F8B807}.wem"
-     },
-     {
       "Id": "412889613",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Dying_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "C6/{C6901C1B-369F-C542-383C-8749E73B3371}.wem"
+      "CachePath": "58/{58BDAC71-C1E9-4D28-AA52-43202D24873F}.wem"
      },
      {
       "Id": "418165151",
@@ -688,6 +688,14 @@
       "CachePath": "4D/{4D3DE185-41C6-22A1-0252-ED8CD668A097}.wem"
      },
      {
+      "Id": "469044071",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "A7/{A7C1F8D0-6258-35B7-D178-A1BEDF4AB5A8}.wem"
+     },
+     {
       "Id": "477469204",
       "Language": "SFX",
       "Streaming": "false",
@@ -757,7 +765,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "0D/{0DF6D426-434B-4EE1-C244-CAF5550ACE60}.wem"
+      "CachePath": "A3/{A354056B-7F84-EC2E-1D8B-10CE91F8DE53}.wem"
      },
      {
       "Id": "525096005",
@@ -789,7 +797,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Coughing_1_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "48/{481FBE29-1B51-FBEF-7417-42500764286E}.wem"
+      "CachePath": "EF/{EF7B2267-EC60-11FE-43E9-BF9E1FFC9EDA}.wem"
      },
      {
       "Id": "542254204",
@@ -1136,12 +1144,20 @@
       "CachePath": "CE/{CE3C29A7-F253-129E-015E-D6A12C1CCE9F}.wem"
      },
      {
+      "Id": "797001805",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy.wav",
+      "CachePath": "65/{65E3CA70-E8EF-C65A-AB1C-F61119B09101}.wem"
+     },
+     {
       "Id": "802472056",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_FG_FX_one_shot_farming_axe_sword_swing_attack_1_tool_whoosh.wav",
-      "CachePath": "D1/{D127759B-FF91-9E2C-C1DB-E93E206CAD96}.wem"
+      "CachePath": "D2/{D2DBE40E-756B-8D6D-E7F6-2877AB98BFAA}.wem"
      },
      {
       "Id": "809366429",
@@ -1277,7 +1293,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_broadsword_impact_shield_metal.wav",
-      "CachePath": "80/{80DB1DA8-BC75-9443-4BA9-4BE803047724}.wem"
+      "CachePath": "73/{737A2E9B-3EDD-10DC-B951-3647748256D0}.wem"
      },
      {
       "Id": "872852181",
@@ -1326,6 +1342,14 @@
       "Location": "Memory",
       "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_cannon_explosion_blast_stone_gravel_debris_02.wav",
       "CachePath": "43/{430BAD71-34FE-3283-D7A7-8D68F071540F}.wem"
+     },
+     {
+      "Id": "899626115",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_hammer_impact_heavy_ring.wav",
+      "CachePath": "9B/{9BD71878-2526-D87D-F7F3-4E47B5415D4F}.wem"
      },
      {
       "Id": "900809544",
@@ -1805,12 +1829,28 @@
        "LibId": "8192003"
       },
       {
+       "Id": "2995775460",
+       "Name": "Room_Small",
+       "ObjectPath": "\\Effects\\Factory Effects\\RoomVerb\\Rooms\\Room_Small",
+       "GUID": "{577F1466-A63B-47F7-98BD-C56E433F8B5D}",
+       "LibName": "Wwise RoomVerb",
+       "LibId": "7733251"
+      },
+      {
        "Id": "3157398371",
        "Name": "Few_Odd_Harm_Notches",
        "ObjectPath": "\\Effects\\Factory Effects\\Flanger\\Static Comb Filtering\\Few_Odd_Harm_Notches",
        "GUID": "{3B5685A6-6274-4292-B5B9-32AFE28DB80B}",
        "LibName": "Wwise Flanger",
        "LibId": "8192003"
+      },
+      {
+       "Id": "3487820010",
+       "Name": "One_Tap_Half_Second",
+       "ObjectPath": "\\Effects\\Factory Effects\\Delay\\One_Tap_Half_Second",
+       "GUID": "{B8FE0D3B-7AAB-4344-89FE-177602B7BF19}",
+       "LibName": "Wwise Delay",
+       "LibId": "6946819"
       }
      ]
     },
@@ -1913,9 +1953,6 @@
           "Id": "199617062"
          },
          {
-          "Id": "377837800"
-         },
-         {
           "Id": "1069660761"
          }
         ],
@@ -1935,12 +1972,6 @@
          "GUID": "{AE6336BB-30DB-47DC-B64A-11CDF78AFD24}"
         },
         "MediaRefs": [
-         {
-          "Id": "290212776"
-         },
-         {
-          "Id": "401627905"
-         },
          {
           "Id": "809366429"
          }
@@ -2036,6 +2067,73 @@
         "Id": "606572947"
        }
       ]
+     },
+     {
+      "Id": "2323672825",
+      "Name": "EV_AresDashSkill",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_AresDashSkill",
+      "GUID": "{64BDB245-970D-40DB-B96E-C35613704729}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "1.0956666",
+      "DurationMax": "1.0956666",
+      "MediaRefs": [
+       {
+        "Id": "469044071"
+       },
+       {
+        "Id": "899626115"
+       }
+      ]
+     },
+     {
+      "Id": "2759536940",
+      "Name": "EV_AresSlashSkill",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_AresSlashSkill",
+      "GUID": "{AE1FDE02-250E-4DFA-8402-681C1B1B8785}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "1.1245878",
+      "DurationMax": "1.1245878",
+      "MediaRefs": [
+       {
+        "Id": "350943193"
+       },
+       {
+        "Id": "524623202"
+       },
+       {
+        "Id": "797001805"
+       },
+       {
+        "Id": "992284103"
+       }
+      ]
+     },
+     {
+      "Id": "231468510",
+      "Name": "EV_AresUltimateSkill",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_AresUltimateSkill",
+      "GUID": "{EC4AC91F-C6A2-41DA-966D-D75FCAB2E0D6}",
+      "MaxAttenuation": "880",
+      "DurationType": "OneShot",
+      "DurationMin": "1.3929672",
+      "DurationMax": "1.3929672",
+      "MediaRefs": [
+       {
+        "Id": "228289941"
+       }
+      ],
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "2995775460"
+        },
+        {
+         "Id": "3487820010"
+        }
+       ]
+      }
      },
      {
       "Id": "2897876713",
@@ -2492,9 +2590,6 @@
         "Id": "141516163"
        },
        {
-        "Id": "232330686"
-       },
-       {
         "Id": "457760460"
        },
        {
@@ -2720,12 +2815,9 @@
       "GUID": "{711FAB82-E203-463E-846A-2577FBDF70FA}",
       "MaxAttenuation": "720",
       "DurationType": "OneShot",
-      "DurationMin": "0.19974408",
+      "DurationMin": "0.37351164",
       "DurationMax": "0.502778",
       "MediaRefs": [
-       {
-        "Id": "132193652"
-       },
        {
         "Id": "275944875"
        },
@@ -4042,6 +4134,6 @@
     ]
    }
   ],
-  "FileHash": "{5897C340-0B62-AC5A-E60A-68ED0153ED65}"
+  "FileHash": "{08936048-9005-14F5-5150-BCF9E2F83F3C}"
  }
 }
