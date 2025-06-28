@@ -205,6 +205,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Cursor")
 	void SetRTSCursor(const FName& CursorPath);
 
+	UFUNCTION()
+	void HandleSeekerHover(bool bIsHover);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -242,7 +245,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="UI")
 	TSubclassOf<UUserWidget> RTSWidgetClass;
-	
+
+	bool bSeekerHovered;
 	bool bShowAttackCursor;
 	FName DefaultCursorPath;
 	FName CommandCursorPath;

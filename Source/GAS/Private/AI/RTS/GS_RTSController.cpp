@@ -35,6 +35,7 @@ AGS_RTSController::AGS_RTSController()
 	bShiftDown = false;
 	MaxSelectableUnits = 12;
 	bShowAttackCursor = false;
+	bSeekerHovered = false;
 
 	DefaultCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_RTSDefault"));
 	CommandCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_ETC"));
@@ -90,6 +91,7 @@ void AGS_RTSController::BeginPlay()
 		if (IsValid(Seeker))
 		{
 			Seeker->HPTextWidgetComp->SetVisibility(true);
+			Seeker->OnSeekerHover.AddDynamic(this, &AGS_RTSController::HandleSeekerHover);
 		}
 	}
 }
@@ -144,7 +146,10 @@ void AGS_RTSController::Tick(float DeltaTime)
 	// 마우스 엣지 감지
 	MouseEdgeDir = GetMouseEdgeDirection();
 	
-	UpdateCursorForEdgeScroll();
+	if (!bSeekerHovered)
+	{
+		UpdateCursorForEdgeScroll();
+	}
 	
 	FVector2D FinalDir = GetFinalDirection();
 	if (!FinalDir.IsNearlyZero())
@@ -519,6 +524,28 @@ void AGS_RTSController::ShowAttackCursor()
 		false
 	);
 }
+
+void AGS_RTSController::HandleSeekerHover(bool bIsHover)
+{
+	bSeekerHovered = bIsHover;
+	
+	if (bIsHover)
+	{
+		SetRTSCursor(SeekerAttackCursorPath);
+	}
+	else
+	{
+		if (!MouseEdgeDir.IsNearlyZero())
+		{
+			UpdateCursorForEdgeScroll();
+		}
+		else
+		{
+			UpdateCursorForCommand();
+		}
+	}
+}
+
 
 void AGS_RTSController::SelectOnCtrlClick()
 {	
