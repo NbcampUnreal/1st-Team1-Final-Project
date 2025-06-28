@@ -35,6 +35,15 @@ AGS_RTSController::AGS_RTSController()
 	bShiftDown = false;
 	MaxSelectableUnits = 12;
 	bShowAttackCursor = false;
+
+	DefaultCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_RTSDefault"));
+	CommandCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_ETC"));
+	AttackCommandCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_AttackCommand"));
+	SeekerAttackCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_SeekerAttack"));
+	ScrollUpCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_U"));
+	ScrollDownCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_D"));
+	ScrollLeftCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_L"));
+	ScrollRightCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_R"));
 }
 
 void AGS_RTSController::BeginPlay()
@@ -48,7 +57,7 @@ void AGS_RTSController::BeginPlay()
 		ViewportClient->SetHideCursorDuringCapture(false);
 		ViewportClient->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
-	SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_RTSDefault")));
+	SetRTSCursor(DefaultCursorPath);
 	bEnableMouseOverEvents = true; 
 	
 	if (!HasAuthority() && IsLocalController())
@@ -456,19 +465,19 @@ void AGS_RTSController::UpdateCursorForEdgeScroll()
 	{
 		if (MouseEdgeDir.Y > 0.5f) // 위
 		{
-			SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_U")));
+			SetRTSCursor(ScrollUpCursorPath);
 		}
 		else if (MouseEdgeDir.Y < -0.5f) // 아래
 		{
-			SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_D")));
+			SetRTSCursor(ScrollDownCursorPath);
 		}
 		else if (MouseEdgeDir.X < -0.5f) // 왼쪽
 		{
-			SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_L")));
+			SetRTSCursor(ScrollLeftCursorPath);
 		}
 		else if (MouseEdgeDir.X > 0.5f) // 오른쪽 
 		{
-			SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_R")));
+			SetRTSCursor(ScrollRightCursorPath);
 		}
 	}
 	else
@@ -487,13 +496,13 @@ void AGS_RTSController::UpdateCursorForCommand()
 	switch (CurrentCommand)
 	{
 	case ERTSCommand::Attack:
-		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_AttackCommand")));
+		SetRTSCursor(AttackCommandCursorPath);
 		break;
 	case ERTSCommand::Move:
-		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_ETC")));
+		SetRTSCursor(CommandCursorPath);
 		break;
 	default:
-		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_RTSDefault")));
+		SetRTSCursor(DefaultCursorPath);
 		break;
 	}
 }
@@ -501,7 +510,7 @@ void AGS_RTSController::UpdateCursorForCommand()
 void AGS_RTSController::ShowAttackCursor()
 {
 	bShowAttackCursor = true;
-	SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_SeekerAttack")));
+	SetRTSCursor(SeekerAttackCursorPath);
 	
 	GetWorldTimerManager().SetTimer(
 		AttackCursorTimerHandle,

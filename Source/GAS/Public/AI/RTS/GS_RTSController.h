@@ -242,23 +242,16 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="UI")
 	TSubclassOf<UUserWidget> RTSWidgetClass;
-
-	UPROPERTY(EditAnywhere, Category="Cursor")
-	UTexture2D* DefaultCursorTexture;
-    
-	UPROPERTY(EditAnywhere, Category="Cursor")
-	UTexture2D* CommandCursorTexture;
-    
-	UPROPERTY(EditAnywhere, Category="Cursor")
-	UTexture2D* AttackCursorTexture;
-
-	UPROPERTY(EditAnywhere, Category="Cursor")
-	UTexture2D* ClickCursorTexture;
-    
-	UPROPERTY(EditAnywhere, Category="Cursor")
-	UTexture2D* ScrollCursorTexture;
-
+	
 	bool bShowAttackCursor;
+	FName DefaultCursorPath;
+	FName CommandCursorPath;
+	FName AttackCommandCursorPath;
+	FName SeekerAttackCursorPath;
+	FName ScrollUpCursorPath;
+	FName ScrollDownCursorPath;
+	FName ScrollLeftCursorPath;
+	FName ScrollRightCursorPath;
 
 	UPROPERTY()
 	FTimerHandle AttackCursorTimerHandle;
