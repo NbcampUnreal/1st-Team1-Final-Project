@@ -1,7 +1,6 @@
 #include "UI/Character/GS_HPTextWidgetComp.h"
 
 #include "UI/Character/GS_HPText.h"
-#include "UI/Character/GS_SteamNameWidget.h"
 
 void UGS_HPTextWidgetComp::InitWidget()
 {
@@ -18,16 +17,16 @@ void UGS_HPTextWidgetComp::InitWidget()
 			if (IsValid(HPText))
 			{
 				HPText->SetOwningActor(GetOwner());
-				return;
+				//return;
 			}
 		}
-		if (GetWidget()->IsA<UGS_SteamNameWidget>())
-		{
-			UGS_SteamNameWidget* NameWidget = Cast<UGS_SteamNameWidget>(GetWidget());
-			if (IsValid(NameWidget))
-			{
-				NameWidget->SetOwningActor(GetOwner());
-			}
-		}
+		// if (GetWidget()->IsA<UGS_SteamNameWidget>())
+		// {
+		// 	UGS_SteamNameWidget* NameWidget = Cast<UGS_SteamNameWidget>(GetWidget());
+		// 	if (IsValid(NameWidget))
+		// 	{
+		// 		NameWidget->SetOwningActor(GetOwner());
+		// 	}
+		// }
 	}
 }

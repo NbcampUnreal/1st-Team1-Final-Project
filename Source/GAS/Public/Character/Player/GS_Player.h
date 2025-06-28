@@ -8,6 +8,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UGS_SteamNameWidgetComp;
 
 USTRUCT(BlueprintType)
 struct FCharacterWantsToMove
@@ -55,6 +56,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Components")
 	TObjectPtr<UCameraComponent> CameraComp;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TObjectPtr<UGS_SteamNameWidgetComp> SteamNameWidgetComp;
+	
 	// 시야방해
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Components", meta = (AllowPrivateAccess = "true"))
 	class UPostProcessComponent* PostProcessComponent;
@@ -151,4 +155,10 @@ private:
 	FTimeline ObscureTimeline;
 
 	bool bIsObscuring;
+
+	UPROPERTY()
+	FTimerHandle SteamNameWidgetRotationTimer;
+
+	void UpdateSteamNameWidgetRotation();
+
 };

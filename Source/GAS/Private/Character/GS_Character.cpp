@@ -67,8 +67,8 @@ void AGS_Character::BeginPlay()
 		}
 	}
 
-	//Set 3D widget
-	if (IsValid(HPTextWidgetComp) && !HPTextWidgetComp->GetOwner()->ActorHasTag("Guardian"))
+	//Set HP 3D widget (monster)
+	if (IsValid(HPTextWidgetComp) && HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
 	{
 		HPTextWidgetComp->SetVisibility(true);
 	}
