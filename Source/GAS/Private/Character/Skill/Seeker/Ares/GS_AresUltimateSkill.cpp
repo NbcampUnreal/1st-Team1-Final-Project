@@ -12,6 +12,7 @@ UGS_AresUltimateSkill::UGS_AresUltimateSkill()
 	CurrentSkillType = ESkillSlot::Ultimate;
 }
 
+
 void UGS_AresUltimateSkill::ActiveSkill()
 {
 	if (!CanActive()) return;
@@ -35,11 +36,22 @@ void UGS_AresUltimateSkill::ActiveSkill()
 	
 	bIsBerserker = true;
 	// 만약 일정 시간 후 효과 해제를 원하면, 타이머로 DeactiveSkill 호출
-	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UltimateSkillTimerHandle, this, &UGS_AresUltimateSkill::DeactiveSkill, 10.f, false);
+	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UltimateSkillTimerHandle, this, &UGS_AresUltimateSkill::DeactiveSkillEffect, 10.f, false);
 	ExecuteSkillEffect();
+
 }
 
 void UGS_AresUltimateSkill::DeactiveSkill()
+{
+	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+		OwnerPlayer->SetSkillInputControl(true, true, true);
+		OwnerPlayer->SetMoveControlValue(true, true);
+	}
+}
+
+void UGS_AresUltimateSkill::DeactiveSkillEffect()
 {
 	bIsBerserker = false;
 
@@ -49,12 +61,7 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 		StatComp->ResetStat(BuffAmount);
 	}
 
-	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
-	{
-		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->SetSkillInputControl(true, true, true);
-		OwnerPlayer->SetMoveControlValue(true, true);
-	}
+	
 
 	// 쿨타임 복원
 	if (UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp())

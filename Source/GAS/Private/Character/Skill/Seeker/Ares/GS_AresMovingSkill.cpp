@@ -147,7 +147,9 @@ void UGS_AresMovingSkill::StartDash()
 	if (OwningComp)
 	{
 		FVector SkillLocation = OwnerCharacter->GetActorLocation();
-		FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+		//FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+		FRotator SkillRotation = FRotator(0.f, 0.f, 0.f);
+
 
 		// 스킬 시전 VFX 재생
 		OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
