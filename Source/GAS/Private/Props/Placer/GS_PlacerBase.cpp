@@ -7,6 +7,7 @@
 #include "Props/GS_RoomBase.h"
 #include "RuneSystem/GS_EnumUtils.h"
 
+
 AGS_PlacerBase::AGS_PlacerBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -55,6 +56,26 @@ AGS_PlacerBase::AGS_PlacerBase()
 	{
 		BuildRejectedMaterial = BuildRejectedMatFinder.Object;
 	}
+
+	// 사운드 로드
+	PlaceSuccessSound = nullptr;
+	PlaceFailSound = nullptr;
+	
+	// 드래그 사운드 로드
+	static ConstructorHelpers::FObjectFinder<USoundBase> DragSoundFinder(
+		TEXT("SoundWave'/Game/WwiseAudio/Audio/SFX_DE_GridSnap.SFX_DE_GridSnap'"));
+	if (DragSoundFinder.Succeeded())
+	{
+		PlaceDragSound = DragSoundFinder.Object;
+	}
+	else
+	{
+		PlaceDragSound = nullptr;
+	}
+
+	// 드래그 사운드 관련 초기화
+	LastCellPosition = FIntPoint(-1, -1);
+	LastDragSoundTime = 0.0f;
 
 	bUpdatePlaceIndicators = false;
 	Direction = EPlacerDirectionType::Forward;
@@ -118,6 +139,12 @@ void AGS_PlacerBase::BuildObject()
 	DrawPlacementIndicators();
 	if (bCanBuild)
 	{
+		// 성공 사운드 재생
+		if (PlaceSuccessSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), PlaceSuccessSound);
+		}
+		
 		bUpdatePlaceIndicators = true;
 
 		FIntPoint CursorPoint = BuildManagerRef->GetCellUnderCursor();
@@ -164,6 +191,14 @@ void AGS_PlacerBase::BuildObject()
 		if (UPlaceInfoComponent* PlaceInfoCompo = NewActor->GetComponentByClass<UPlaceInfoComponent>())
 		{
 			PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapType, IntPointArray);
+		}
+	}
+	else
+	{
+		// 실패 사운드 재생
+		if (PlaceFailSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), PlaceFailSound);
 		}
 	}
 }
@@ -227,34 +262,53 @@ void AGS_PlacerBase::DrawPlacementIndicators()
 {
 	if (BuildManagerRef)
 	{
+		// 현재 커서 위치 가져오기
+		FIntPoint CurrentCellPosition = BuildManagerRef->GetCellUnderCursor();
+		
 		// 커서 위치가 변경되었거나 Indicator를 업데이트 해주어야 할 때만 동작
-		 if (bUpdatePlaceIndicators
-		 	|| BuildManagerRef->IsCellUnderSursorChanged())
-		 {
-		 	bUpdatePlaceIndicators = false;
-		 	bCanBuild = true;
+		if (bUpdatePlaceIndicators || BuildManagerRef->IsCellUnderSursorChanged())
+		{
+			// 드래그 사운드 재생 (셀 위치가 변경되었고 쿨다운이 지났을 때)
+			if (LastCellPosition != CurrentCellPosition && LastCellPosition != FIntPoint(-1, -1))
+			{
+				float CurrentTime = GetWorld()->GetTimeSeconds();
+				if (CurrentTime - LastDragSoundTime >= DragSoundCooldown)
+				{
+					if (PlaceDragSound)
+					{
+						UGameplayStatics::PlaySound2D(GetWorld(), PlaceDragSound, 0.3f); // 볼륨 조금 낮게
+					}
+					LastDragSoundTime = CurrentTime;
+				}
+			}
+			
+			// 현재 위치를 이전 위치로 저장
+			LastCellPosition = CurrentCellPosition;
+			
+			bUpdatePlaceIndicators = false;
+			bCanBuild = true;
 
 			TArray<FIntPoint> IntPointArray;
-		 	CalCellsInRectArea(IntPointArray);
+			CalCellsInRectArea(IntPointArray);
 
-		 	EDEditorCellType TargetType = BuildManagerRef->GetTargetCellType(ObjectData.ObjectType, ObjectData.TrapType);
-		 	for (int i = 0; i < IntPointArray.Num(); i++)
-		 	{
-		 		FVector CellLocation = BuildManagerRef->GetCellLocation(IntPointArray[i]);
-		 		PlaceIndicators[i]->SetWorldLocation(CellLocation);
-		 		
-		 		if (!BuildManagerRef->CheckOccupancyData(IntPointArray[i], TargetType))
-		 			//&& FMath::Abs(CellLocation.Z - BaseBuildLevel) < MaxHeightDifferenceforConstruction))
-		 		{
-		 			PlaceIndicators[i]->SetMaterial(0, PlaceAcceptedMaterial);
-		 		}
-			    else
-			    {
-			    	PlaceIndicators[i]->SetMaterial(0, PlaceRejectedMaterial);
-			    	bCanBuild = false;
-			    }
-		 	}
-		 }
+			EDEditorCellType TargetType = BuildManagerRef->GetTargetCellType(ObjectData.ObjectType, ObjectData.TrapType);
+			for (int i = 0; i < IntPointArray.Num(); i++)
+			{
+				FVector CellLocation = BuildManagerRef->GetCellLocation(IntPointArray[i]);
+				PlaceIndicators[i]->SetWorldLocation(CellLocation);
+				
+				if (!BuildManagerRef->CheckOccupancyData(IntPointArray[i], TargetType))
+					//&& FMath::Abs(CellLocation.Z - BaseBuildLevel) < MaxHeightDifferenceforConstruction))
+				{
+					PlaceIndicators[i]->SetMaterial(0, PlaceAcceptedMaterial);
+				}
+				else
+				{
+					PlaceIndicators[i]->SetMaterial(0, PlaceRejectedMaterial);
+					bCanBuild = false;
+				}
+			}
+		}
 	}
 }
 

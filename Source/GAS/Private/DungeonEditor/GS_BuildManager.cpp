@@ -54,6 +54,40 @@ AGS_BuildManager::AGS_BuildManager()
 		GridTexture = TexFinder.Object; // GridTexture에 할당
 	}
 	
+	// 던전 에디터 사운드 로드
+	static ConstructorHelpers::FObjectFinder<USoundBase> CancelSoundFinder(
+		TEXT("SoundWave'/Game/WwiseAudio/Audio/SFX_DE_Cancel.SFX_DE_Cancel'"));
+	if (CancelSoundFinder.Succeeded())
+	{
+		CancelSound = CancelSoundFinder.Object;
+	}
+	else
+	{
+		CancelSound = nullptr;
+	}
+	
+	static ConstructorHelpers::FObjectFinder<USoundBase> RotateSoundFinder(
+		TEXT("SoundWave'/Game/WwiseAudio/Audio/SFX_DE_Rotate.SFX_DE_Rotate'"));
+	if (RotateSoundFinder.Succeeded())
+	{
+		RotateSound = RotateSoundFinder.Object;
+	}
+	else
+	{
+		RotateSound = nullptr;
+	}
+	
+	static ConstructorHelpers::FObjectFinder<USoundBase> DeleteSoundFinder(
+		TEXT("SoundWave'/Game/WwiseAudio/Audio/SFX_DE_Delete.SFX_DE_Delete'"));
+	if (DeleteSoundFinder.Succeeded())
+	{
+		DeleteSound = DeleteSoundFinder.Object;
+	}
+	else
+	{
+		DeleteSound = nullptr;
+	}
+	
 	// InitGrid();
 }
 
@@ -590,6 +624,12 @@ void AGS_BuildManager::PressedRMB()
 
 	if (bBuildToolEnabled && bIsPlacementSelected)
 	{
+		// 우클릭 취소 사운드 재생
+		if (CancelSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), CancelSound, 0.5f);
+		}
+		
 		if (ActivePlacer)
 		{
 			ActivePlacer->Destroy();
@@ -609,6 +649,12 @@ void AGS_BuildManager::RotateProp()
 {
 	if (bBuildToolEnabled && bIsPlacementSelected)
 	{
+		// 회전 사운드 재생
+		if (RotateSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), RotateSound, 0.4f);
+		}
+		
 		if (ActivePlacer)
 		{
 			ActivePlacer->RotatePlacer();
@@ -629,6 +675,12 @@ void AGS_BuildManager::PressedDel()
 
 				if (UPlaceInfoComponent* PlaceInfoComp = DelActorUnderCursor->GetComponentByClass<UPlaceInfoComponent>())
 				{
+					// 삭제 사운드 재생
+					if (DeleteSound)
+					{
+						UGameplayStatics::PlaySound2D(GetWorld(), DeleteSound, 0.6f);
+					}
+					
 					TArray<FIntPoint> CellCoords = PlaceInfoComp->GetCellCoord();
 					EObjectType ObjectType = PlaceInfoComp->GetObjectType();
 					ETrapPlacement TrapPlacement = PlaceInfoComp->GetTrapPlacement();
