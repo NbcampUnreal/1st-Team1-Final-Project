@@ -98,6 +98,29 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 	}
 }
 
+void UGS_MerciSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instance)
+{
+	Super::OnRoll(Instance);
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	if (!MerciCharacter->GetSkillInputControl().CanInputRoll)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Roll Lock"));
+		return;
+	}
+
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+	
+	Super::OnRoll(Instance);
+	
+	if (MerciCharacter)
+	{
+		MerciCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Rolling);
+	}
+}
+
 void UGS_MerciSkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
 {
 	if (OwnerCharacter->IsDead())
