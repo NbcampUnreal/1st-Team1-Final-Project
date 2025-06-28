@@ -431,8 +431,9 @@ void AGS_InGameGM::EndGame(EGameResult Result)
     if (!NextLevelName.IsEmpty())
     {
         FTimerHandle TravelDelayHandle;
-        GetWorldTimerManager().SetTimer(TravelDelayHandle, [this, NextLevelName]() {
-            GetWorld()->ServerTravel(NextLevelName + "?listen", true);
+        TWeakObjectPtr<AGS_InGameGM> WeakThis = this;
+        GetWorldTimerManager().SetTimer(TravelDelayHandle, [WeakThis, NextLevelName]() {
+            WeakThis->GetWorld()->ServerTravel(NextLevelName + "?listen", true);
         }, 3.f, false);
     }
 }
