@@ -18,7 +18,7 @@ void UGS_ChanAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Super::NativeUpdateAnimation(DeltaSeconds);
 }
 
-void UGS_ChanAnimInstance::AnimNotify_ComboInput()
+/*void UGS_ChanAnimInstance::AnimNotify_ComboInput()
 {
 	if (APawn* OwnerPawn = TryGetPawnOwner())
 	{
@@ -27,4 +27,4 @@ void UGS_ChanAnimInstance::AnimNotify_ComboInput()
 			Chan->ComboInputOpen();
 		}
 	}
-}
+}*/

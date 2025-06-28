@@ -316,7 +316,6 @@ void UGS_ChanAimingSkill::EndHoldUp()
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	if (OwnerPlayer)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("EndHoldUp")); // SJE
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("LoopEnd"));
 	}
 	
