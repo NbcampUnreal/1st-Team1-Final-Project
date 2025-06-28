@@ -5,6 +5,9 @@
 #include "Components/VerticalBox.h"
 #include "Components/Image.h"
 #include "CommonButtonBase.h"
+#include "MediaPlayer.h"
+#include "MediaSource.h"
+#include "MediaTexture.h"
 #include "System/PlayerController/GS_MainMenuPC.h"
 
 UGS_TutorialWidget::UGS_TutorialWidget(const FObjectInitializer& ObjectInitializer)
@@ -163,10 +166,33 @@ void UGS_TutorialWidget::UpdateCurrPage()
 
 	if (TutorialImage && !CurrentData.TutorialImage.IsNull())
 	{
-		UTexture2D* LoadedTexture = CurrentData.TutorialImage.LoadSynchronous();
-		if (LoadedTexture)
+		// 영상일 경우
+		if (CurrentData.bUseMedia)
 		{
-			TutorialImage->SetBrushFromTexture(LoadedTexture);
+			UMediaTexture* LoadedMediaTexture = CurrentData.TutorialMediaTexture.LoadSynchronous();
+			if (!DynamicVideoMaterial)
+			{
+				if (VideoMaterial)
+				{
+					DynamicVideoMaterial = UMaterialInstanceDynamic::Create(VideoMaterial, this);
+				}
+			}
+			
+			DynamicVideoMaterial->SetTextureParameterValue("MediaTexture", LoadedMediaTexture);
+			TutorialImage->SetBrushFromMaterial(DynamicVideoMaterial);
+
+			UMediaPlayer* LoadMediaPlayer = CurrentData.TutorialMediaPlayer.LoadSynchronous();
+			UMediaSource* LoadMediaSource = CurrentData.TutorialMediaSource.LoadSynchronous();
+			LoadMediaPlayer->OpenSource(LoadMediaSource);
+			LoadMediaPlayer->Play();
+		}
+		else
+		{
+			UTexture2D* LoadedTexture = CurrentData.TutorialImage.LoadSynchronous();
+			if (LoadedTexture)
+			{
+				TutorialImage->SetBrushFromTexture(LoadedTexture);
+			}	
 		}
 	}
 

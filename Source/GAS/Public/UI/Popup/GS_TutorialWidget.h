@@ -74,6 +74,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tutorial")
 	TSubclassOf<UCommonButtonBase> PageButtonClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Tutorial")
+	TObjectPtr<UMaterialInterface> VideoMaterial;
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> DynamicVideoMaterial;
+	
 	UPROPERTY()
 	TArray<UCommonButtonBase*> PageButtons;
 
