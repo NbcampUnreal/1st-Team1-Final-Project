@@ -107,17 +107,20 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 {
 	FReply Reply = Super::NativeOnMouseMove(InGeometry, InMouseEvent);
 
-	// 스크린 좌표를 뷰포트 좌표로 변환
+	// 원본 스크린 좌표 사용
 	FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
+
+	// 툴팁용으로만 뷰포트 좌표 변환
+	FVector2D ViewportMousePos = MousePos;
 	if (APlayerController* PC = GetOwningPlayer())
 	{
 		FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
-		MousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
+		ViewportMousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
 	}
 
 	if (RuneTooltipWidget)
 	{
-		FVector2D TooltipPos = CalculateTooltipPosition(MousePos);
+		FVector2D TooltipPos = CalculateTooltipPosition(ViewportMousePos);
 		RuneTooltipWidget->SetPositionInViewport(TooltipPos, false);
 	}
 
@@ -126,11 +129,10 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 		return Reply;
 	}
 
-	//임시
-	FVector2D AdditionalOffset = GetRuneDragOffset();
+	FVector2D AdditionalOffset = FVector2D::ZeroVector;
+	SelectionVisualWidget->SetPositionInViewport(ViewportMousePos - AdditionalOffset, false);
 
-	SelectionVisualWidget->SetPositionInViewport(MousePos - AdditionalOffset, false);
-
+	// 스크린 좌표를 직접 전달
 	UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
 
 	if (CellUnderMouse)
@@ -148,32 +150,29 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 FReply UGS_ArcaneBoardWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	FReply Reply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-	
+
 	HideTooltip();
 
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		// 스크린 좌표를 뷰포트 좌표로 변환
+		// 원본 스크린 좌표 사용
 		FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
-		if (APlayerController* PC = GetOwningPlayer())
-		{
-			FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
-			MousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
-		}
 
 		UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
+
+		// 클릭한 셀 정보를 저장
+		LastClickedCell = CellUnderMouse;
 
 		if (CellUnderMouse)
 		{
 			uint8 RuneID = CellUnderMouse->GetPlacedRuneID();
 
-			//배치 로직
-			if(bIsInSelectionMode)
+			if (bIsInSelectionMode)
 			{
 				EndRuneSelection(true);
 				return FReply::Handled();
 			}
-			else if(RuneID > 0)
+			else if (RuneID > 0)
 			{
 				StartRuneReposition(RuneID);
 				return FReply::Handled();
@@ -182,7 +181,7 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseButtonDown(const FGeometry& InGeometr
 	}
 	else if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
 	{
-		// 우클릭으로 취소할 때는 EndRuneSelection에서 취소 사운드를 재생
+		LastClickedCell = nullptr;
 		EndRuneSelection(false);
 		return FReply::Handled();
 	}
@@ -363,10 +362,7 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 				FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
 				if (MousePos != FVector2D::ZeroVector)
 				{
-					//임시
-					FVector2D AdditionalOffset = GetRuneDragOffset();
-
-					SelectionVisualWidget->SetPositionInViewport(MousePos - AdditionalOffset, false);
+					SelectionVisualWidget->SetPositionInViewport(MousePos, false);
 				}
 			}
 
@@ -401,13 +397,8 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 	{
 		if (IsValid(BoardManager) && SelectedRuneID > 0)
 		{
-			FVector2D MousePos = FVector2D::ZeroVector;
-			if (GetWorld())
-			{
-				MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
-			}
-
-			UGS_RuneGridCellWidget* TargetCell = GetCellAtPos(MousePos);
+			// 저장된 클릭 셀 정보 사용
+			UGS_RuneGridCellWidget* TargetCell = LastClickedCell;
 
 			if (IsValid(TargetCell))
 			{
@@ -417,7 +408,6 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 				if (BoardManager->FindOptimalPlacementPos(SelectedRuneID, ClickedCellPos, OptimalPos))
 				{
 					// 연결 상태 미리 체크하여 보너스 사운드 여부 결정
-					bool bHadConnectionBefore = false;
 					int32 PreviousConnectedRuneCnt = 0;
 					if (BoardManager)
 					{
@@ -444,9 +434,9 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 								{
 									FTimerHandle ConnectionSoundTimer;
 									GetWorld()->GetTimerManager().SetTimer(ConnectionSoundTimer, [this]()
-									{
-										UGameplayStatics::PlaySound2D(this, RuneConnectionBonusSound);
-									}, 0.3f, false);
+										{
+											UGameplayStatics::PlaySound2D(this, RuneConnectionBonusSound);
+										}, 0.3f, false);
 								}
 							}
 						}
@@ -481,6 +471,7 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 				{
 					UGameplayStatics::PlaySound2D(this, RunePlaceFailSound);
 				}
+				UE_LOG(LogTemp, Warning, TEXT("클릭한 셀을 찾을 수 없음"));
 			}
 
 			if (IsValid(SelectionVisualWidget))
@@ -492,6 +483,7 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 		ClearPreview();
 	}
 
+	LastClickedCell = nullptr;
 	bIsInSelectionMode = false;
 	SelectedRuneID = 0;
 }
@@ -510,23 +502,20 @@ bool UGS_ArcaneBoardWidget::StartRuneReposition(uint8 RuneID)
 	return true;
 }
 
-UGS_RuneGridCellWidget* UGS_ArcaneBoardWidget::GetCellAtPos(const FVector2D& ViewportPos)
+UGS_RuneGridCellWidget* UGS_ArcaneBoardWidget::GetCellAtPos(const FVector2D& ScreenPos)
 {
-	// 뷰포트 좌표를 스크린 좌표로 변환
-	FVector2D ScreenPos = ViewportPos;
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
-		ScreenPos = ScreenGeometry.LocalToAbsolute(ViewportPos);
-	}
-
 	for (auto& CellPair : GridCells)
 	{
 		UGS_RuneGridCellWidget* CellWidget = CellPair.Value;
+		if (!IsValid(CellWidget))
+		{
+			continue;
+		}
+
 		FGeometry CellGeometry = CellWidget->GetCachedGeometry();
 		FVector2D LocalMousePos = CellGeometry.AbsoluteToLocal(ScreenPos);
-
 		FVector2D LocalSize = CellGeometry.GetLocalSize();
+
 		if (LocalMousePos.X >= 0 && LocalMousePos.Y >= 0 &&
 			LocalMousePos.X <= LocalSize.X && LocalMousePos.Y <= LocalSize.Y)
 		{
@@ -723,53 +712,6 @@ void UGS_ArcaneBoardWidget::UnbindFromLPS()
 	{
 		ArcaneBoardLPS->ClearCurrUIWidget();
 	}
-}
-
-FVector2D UGS_ArcaneBoardWidget::GetRuneDragOffset()
-{
-	FVector2D AdditionalOffset = { 0.f, 0.f };
-	FVector2D CellSize = GetGridCellSize();
-
-	if (SelectedRuneID == 1 || SelectedRuneID == 2 || SelectedRuneID == 3
-		|| SelectedRuneID == 4 || SelectedRuneID == 5 || SelectedRuneID == 14)
-	{
-		AdditionalOffset.X = CellSize.X * 0.2f;
-		AdditionalOffset.Y = CellSize.X * 0.2f;
-	}
-	else if (SelectedRuneID == 7)
-	{
-		AdditionalOffset.X = CellSize.X * 0.3f;
-		AdditionalOffset.Y = CellSize.X * 0.3f;
-	}
-	else if (SelectedRuneID == 8)
-	{
-		AdditionalOffset.X = CellSize.X * 0.2f;
-	}
-	else if (SelectedRuneID == 6 || SelectedRuneID == 9)
-	{
-		AdditionalOffset.X = CellSize.X * 0.2f;
-		AdditionalOffset.Y = CellSize.X * 0.3f;
-	}
-	else if (SelectedRuneID == 11)
-	{
-		AdditionalOffset.X = CellSize.X * 0.2f;
-		AdditionalOffset.Y = CellSize.X * 0.5f;
-	}
-	else if (SelectedRuneID == 10 || SelectedRuneID == 12)
-	{
-		AdditionalOffset.X = CellSize.X * 0.3f;
-	}
-	else if (SelectedRuneID == 13)
-	{
-		AdditionalOffset.X = CellSize.X * 0.4f;
-		AdditionalOffset.Y = CellSize.X * 0.4f;
-	}
-	else if (SelectedRuneID == 16)
-	{
-		AdditionalOffset.Y = CellSize.X * 0.3f;
-	}
-
-	return AdditionalOffset;
 }
 
 void UGS_ArcaneBoardWidget::ShowTooltip(uint8 RuneID, const FVector2D& MousePos)
