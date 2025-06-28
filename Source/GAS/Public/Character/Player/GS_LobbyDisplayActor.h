@@ -34,6 +34,9 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_SetupDisplay)
 	TArray<FWeaponMeshPair> CurrentWeaponMeshList;
 
+	UPROPERTY(ReplicatedUsing = OnRep_SetupDisplay)
+	TArray<USkeletalMesh*> CurrentSubMeshList;
+
 	UPROPERTY(ReplicatedUsing = OnRep_ReadyState)
 	bool bIsReady = false;
 
