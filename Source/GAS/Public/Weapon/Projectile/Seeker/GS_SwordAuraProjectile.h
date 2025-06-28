@@ -13,8 +13,10 @@ class UNiagaraSystem;
 UENUM(BlueprintType)
 enum class ESwordAuraEffectType : uint8
 {
-	Left,
-	Right
+	LeftNormal,
+	RightNormal,
+	LeftBuff,
+	RightBuff
 };
 
 UCLASS()
@@ -26,7 +28,7 @@ public:
 	AGS_SwordAuraProjectile();
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
-	ESwordAuraEffectType EffectType = ESwordAuraEffectType::Left;
+	ESwordAuraEffectType EffectType = ESwordAuraEffectType::LeftNormal;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_StartSwordSlashVFX();
@@ -40,10 +42,18 @@ protected:
 	UBoxComponent* SlashBox;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
-	UNiagaraSystem* LeftSlashVFX;
+	UNiagaraSystem* LeftNormalSlashVFX;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
-	UNiagaraSystem* RightSlashVFX;
+	UNiagaraSystem* RightNormalSlashVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
+	UNiagaraSystem* LeftBuffSlashVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
+	UNiagaraSystem* RightBuffSlashVFX;
+
+
 
 	UPROPERTY()
 	TSet<AActor*> HitActors;
