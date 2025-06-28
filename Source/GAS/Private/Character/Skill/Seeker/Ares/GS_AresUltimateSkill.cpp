@@ -26,6 +26,11 @@ void UGS_AresUltimateSkill::ActiveSkill()
 		{
 			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
 		}
+
+		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		OwnerPlayer->SetSkillInputControl(false, false, false);
+		OwnerPlayer->SetMoveControlValue(false, false);
 	}
 	
 	bIsBerserker = true;
@@ -42,6 +47,13 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 	{
 		StatComp->bIsInvincible = false;
 		StatComp->ResetStat(BuffAmount);
+	}
+
+	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+		OwnerPlayer->SetSkillInputControl(true, true, true);
+		OwnerPlayer->SetMoveControlValue(true, true);
 	}
 
 	// 쿨타임 복원
