@@ -15,6 +15,13 @@ void UGS_MerciRollingSkill::ActiveSkill()
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (MerciCharacter)
 	{
+		// 구르기 시작 사운드 재생
+		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+		if (SkillInfo && SkillInfo->SkillStartSound)
+		{
+			MerciCharacter->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+		}
+
 		MerciCharacter->SetDrawState(false);
 		MerciCharacter->SetAimState(false);
 		MerciCharacter->Multicast_SetIsFullBodySlot(true);
