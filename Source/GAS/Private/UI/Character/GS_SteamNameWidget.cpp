@@ -24,7 +24,7 @@ void UGS_SteamNameWidget::InitializeSteamNameWidget()
 			if (OwningPlayer->GetPlayerState())
 			{
 				SteamNameText->SetText(FText::FromString(OwningPlayer->GetPlayerState()->GetPlayerName()));
-				UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("$@@@@@@@@@@@@@@@@ %s"),*OwningPlayer->GetPlayerState()->GetPlayerName()), true, true, FLinearColor::Red, 5.f);
+				//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("$@@@@@@@@@@@@@@@@ %s"),*OwningPlayer->GetPlayerState()->GetPlayerName()), true, true, FLinearColor::Red, 5.f);
 			}
 		}
 	}

@@ -59,8 +59,8 @@ void AGS_Character::BeginPlay()
 		}
 	}
 
-	//[TODO] tag로 분리하기
-	//if (HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
+	//Set 3D widget
+	if (IsValid(HPTextWidgetComp) && !HPTextWidgetComp->GetOwner()->ActorHasTag("Guardian"))
 	{
 		HPTextWidgetComp->SetVisibility(true);
 	}
