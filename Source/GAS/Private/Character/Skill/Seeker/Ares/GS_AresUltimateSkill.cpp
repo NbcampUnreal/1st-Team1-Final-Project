@@ -26,6 +26,11 @@ void UGS_AresUltimateSkill::ActiveSkill()
 		{
 			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
 		}
+
+		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		OwnerPlayer->SetSkillInputControl(false, false, false);
+		OwnerPlayer->SetMoveControlValue(false, false);
 	}
 	
 	bIsBerserker = true;
@@ -40,8 +45,15 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
 	{
-		StatComp->bIsInvincible = false;
+		StatComp->SetInvincible(false);
 		StatComp->ResetStat(BuffAmount);
+	}
+
+	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+		OwnerPlayer->SetSkillInputControl(true, true, true);
+		OwnerPlayer->SetMoveControlValue(true, true);
 	}
 
 	// 쿨타임 복원
@@ -65,7 +77,7 @@ void UGS_AresUltimateSkill::ExecuteSkillEffect()
 	// 1. 데미지 무효화
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
 	{
-		StatComp->bIsInvincible = true;
+		StatComp->SetInvincible(true);
 	}
 
 	// 2~3. 스탯 변경

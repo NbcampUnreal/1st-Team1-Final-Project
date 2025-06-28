@@ -258,6 +258,11 @@ void UGS_StatComp::OnRep_CurrentHealth()
 	OnCurrentHPChanged.Broadcast(this);
 }
 
+void UGS_StatComp::SetInvincible(bool bEnable)
+{
+	bIsInvincible = bEnable;
+}
+
 void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());

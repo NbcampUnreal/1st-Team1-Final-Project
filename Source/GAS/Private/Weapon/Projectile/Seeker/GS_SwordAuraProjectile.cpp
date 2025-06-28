@@ -59,13 +59,10 @@ void AGS_SwordAuraProjectile::DestroySwordAura()
 	Destroy();
 }
 
-
-
 void AGS_SwordAuraProjectile::StartSwordSlashVFX()
 {
 
 }
-
 
 void AGS_SwordAuraProjectile::StopSwordSlashVFX()
 {

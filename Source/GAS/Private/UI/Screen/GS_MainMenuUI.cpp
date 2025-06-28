@@ -86,6 +86,10 @@ void UGS_MainMenuUI::OnPlayButtonClicked()
 		{
 			CreditButton->SetVisibility(ESlateVisibility::Hidden);
 		}
+		if (TutorialButton)
+		{
+			TutorialButton->SetVisibility(ESlateVisibility::Hidden);
+		}
 		bIsPlayButtonClicked = true;
 	}
 	else
@@ -101,6 +105,10 @@ void UGS_MainMenuUI::OnPlayButtonClicked()
 		if (CreditButton)
 		{
 			CreditButton->SetVisibility(ESlateVisibility::Visible);
+		}
+		if (TutorialButton)
+		{
+			TutorialButton->SetVisibility(ESlateVisibility::Visible);
 		}
 		bIsPlayButtonClicked = false;
 	}

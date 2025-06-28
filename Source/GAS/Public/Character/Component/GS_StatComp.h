@@ -38,9 +38,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound", meta = (ClampMin = "0.0", ClampMax = "5.0"))
 	float HitSoundCooldownTime = 1.75f;
 	
-	UPROPERTY(Replicated)
-	bool bIsInvincible = false;
-	
 	// 쿨다운 체크 함수
 	bool CanPlayHitSound() const;
 
@@ -82,6 +79,9 @@ public:
 	// heal system
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerRPCHeal(float InHealAmount);
+
+	// 무적 상태
+	void SetInvincible(bool bEnable);
 	
 protected:
 	float CharacterWalkSpeed;
@@ -110,4 +110,8 @@ private:
 	//Enum 통일 전 임시
 	UFUNCTION()
 	ECharacterClass MapCharacterTypeToCharacterClass(ECharacterType CharacterType);
+
+	// 무적 상태
+	UPROPERTY(Replicated)
+	bool bIsInvincible = false;
 };

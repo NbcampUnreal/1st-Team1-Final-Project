@@ -4,6 +4,7 @@
 #include "Character/Component/GS_HitReactComp.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/Skill/GS_SkillBase.h"
 
 
 // Sets default values for this component's properties
@@ -16,7 +17,6 @@ UGS_HitReactComp::UGS_HitReactComp()
 
 void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirection)
 {
-	
 	FName Section = CalculateHitDirection(HitDirection);
 	
 	if (AGS_Player* OwnerCharacter = Cast<AGS_Player>(GetOwner()))
@@ -25,11 +25,17 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 		{
 			if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 			{
+				OwnerSeeker->GetSkillComp()->SkillsInterrupt();
+				// HitReact 애니메이션의 조건.
 				OwnerSeeker->Multicast_SetIsFullBodySlot(true);
 				OwnerSeeker->Multicast_SetIsUpperBodySlot(false);
 				OwnerSeeker->SetMoveControlValue(false, false);
 				OwnerSeeker->SetSkillInputControl(false, false, false);
 			}
+		}
+		else if (ReactType == EHitReactType::Additive)
+		{
+			// ...
 		}
 		OwnerCharacter->Multicast_SetCanHitReact(false);
 		OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[ReactType], Section);
