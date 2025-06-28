@@ -335,8 +335,10 @@ void AGS_CustomLobbyGM::SpawnLobbyActorForPlayer(AGS_PlayerState* PlayerState, A
             NewDisplayActor->CurrentWeaponMeshList = SpawnInfo->WeaponMeshList;
             NewDisplayActor->CurrentSubMeshList = SpawnInfo->SubSkeletalMeshList;
             NewDisplayActor->bIsReady = PlayerState->bIsReady;
+            NewDisplayActor->AssociatedPlayerState = PlayerState;
             NewDisplayActor->OnRep_SetupDisplay();
             NewDisplayActor->OnRep_ReadyState();
+            NewDisplayActor->OnRep_PlayerState();
 
             SpawnedLobbyActors.Add(PlayerState, NewDisplayActor);
         }

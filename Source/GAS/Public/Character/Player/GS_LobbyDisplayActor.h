@@ -9,6 +9,8 @@
 
 class USkeletalMeshComponent;
 class UAnimInstance;
+class UWidgetComponent;
+class AGS_PlayerState;
 
 UCLASS()
 class GAS_API AGS_LobbyDisplayActor : public AActor
@@ -22,8 +24,14 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
 	
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UWidgetComponent> UserIDWidgetComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> UserIDWidgetClass;
 	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void BeginPlay() override;
 public:
 	UPROPERTY(ReplicatedUsing = OnRep_SetupDisplay)
 	TObjectPtr<USkeletalMesh> CurrentSkeletalMesh;
@@ -37,6 +45,9 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_SetupDisplay)
 	TArray<USkeletalMesh*> CurrentSubMeshList;
 
+	UPROPERTY(ReplicatedUsing = OnRep_PlayerState)
+	TObjectPtr<AGS_PlayerState> AssociatedPlayerState;
+
 	UPROPERTY(ReplicatedUsing = OnRep_ReadyState)
 	bool bIsReady = false;
 
@@ -47,4 +58,6 @@ public:
 	UFUNCTION()
 	void OnRep_ReadyState();
 	
+	UFUNCTION()
+	void OnRep_PlayerState();
 };
