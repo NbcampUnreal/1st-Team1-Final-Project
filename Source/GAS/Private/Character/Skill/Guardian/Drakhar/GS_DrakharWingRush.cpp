@@ -20,7 +20,13 @@ void UGS_DrakharWingRush::ActiveSkill()
 void UGS_DrakharWingRush::ExecuteSkillEffect()
 {
 	Super::ExecuteSkillEffect();
-	
+
+	if (!OwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	//server logic
 	if (OwnerCharacter)
 	{
 		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
@@ -29,10 +35,6 @@ void UGS_DrakharWingRush::ExecuteSkillEffect()
 	AGS_Guardian* Guardian = Cast<AGS_Guardian>(OwnerCharacter);
 	if (Guardian)
 	{
-		//[CHECK] other skills logic...
-		//6/26 -> server logic change to client logic
-		//need to change client variables...
-		Guardian->ClientGuardianDoSkillState = EGuardianDoSkill::Moving;	
 		Guardian->GuardianDoSkillState = EGuardianDoSkill::Moving;	
 	}
 }
