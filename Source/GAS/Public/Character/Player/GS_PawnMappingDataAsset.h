@@ -51,6 +51,9 @@ struct FAssetToSpawn
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
 	TArray<FWeaponMeshPair> WeaponMeshList;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+	TArray<USkeletalMesh*> SubSkeletalMeshList;
 };
 
 UCLASS(BlueprintType)
