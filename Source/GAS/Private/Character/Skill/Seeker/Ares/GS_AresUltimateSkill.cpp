@@ -35,6 +35,20 @@ void UGS_AresUltimateSkill::ActiveSkill()
 	}
 	
 	bIsBerserker = true;
+	
+	// =======================
+	// VFX 재생 - 컴포넌트 RPC 사용
+	// =======================
+	if (OwningComp)
+	{
+		FVector SkillLocation = OwnerCharacter->GetActorLocation();
+		//FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+		FRotator SkillRotation = FRotator(0.f, 0.f, 0.f);
+
+		// 스킬 시전 VFX 재생
+		OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
+	}
+
 	// 만약 일정 시간 후 효과 해제를 원하면, 타이머로 DeactiveSkill 호출
 	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UltimateSkillTimerHandle, this, &UGS_AresUltimateSkill::DeactiveSkillEffect, 10.f, false);
 	ExecuteSkillEffect();
