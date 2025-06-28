@@ -58,7 +58,7 @@ protected:
 		const FHitResult& SweepResult);
 
 	FTimerHandle DestorySwordAuraHandle;
-	float SwordAuraLifetime = 1.0f;
+	float SwordAuraLifetime = 0.8f;
 
 	UFUNCTION()
 	void DestroySwordAura();

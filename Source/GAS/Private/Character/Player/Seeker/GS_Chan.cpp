@@ -112,6 +112,18 @@ void AGS_Chan::MulticastPlayComboSection()
 
 void AGS_Chan::ResetAttackSoundSequence()
 {
+	// 멀티캐스트로 모든 클라이언트에서 Stop 이벤트 호출
+	Multicast_StopAttackSound();
+}
+
+void AGS_Chan::Multicast_StopAttackSound_Implementation()
+{
+	// 데디케이티드 서버에서는 사운드 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
 	// 사용자가 만든 Wwise Stop 이벤트 호출
 	if (AxeSwingStopEvent)
 	{

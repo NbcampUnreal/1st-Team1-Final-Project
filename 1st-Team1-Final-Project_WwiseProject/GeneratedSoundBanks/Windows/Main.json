@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{1DC1F164-6AE3-3EDE-213C-1936B3821DC3}",
+    "Hash": "{0F1F2101-2BD8-E7C4-9505-9252A7D8A913}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -93,7 +93,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_shield_whoosh_strike_dull.wav",
-      "CachePath": "F9/{F9E8E2B9-ED10-F979-B692-DCA98A5C8AA1}.wem"
+      "CachePath": "00/{00DEE970-6395-0330-1083-534CAC645E7D}.wem"
      },
      {
       "Id": "64058932",
@@ -117,7 +117,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Growling_Sequence_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "4F/{4F794983-DD51-9F3D-B64B-92D2CADAA24C}.wem"
+      "CachePath": "FA/{FA1EEA66-EEB8-676C-94BB-7844B1ABA954}.wem"
      },
      {
       "Id": "88352064",
@@ -488,14 +488,6 @@
       "CachePath": "7E/{7E0BDE7F-8A22-DB6D-27B4-972FAD8FCCC6}.wem"
      },
      {
-      "Id": "326406373",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "Footstep_Grass (5).wav",
-      "CachePath": "37/{37192E86-5D8B-4035-3025-E78DC8C1B07E}.wem"
-     },
-     {
       "Id": "330289750",
       "Language": "SFX",
       "Streaming": "false",
@@ -582,6 +574,14 @@
       "Location": "Memory",
       "ShortName": "FootstepMetal2.wav",
       "CachePath": "35/{3516BDE1-BB27-E85B-7BDA-66F412F8B807}.wem"
+     },
+     {
+      "Id": "412889613",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Dying_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "C6/{C6901C1B-369F-C542-383C-8749E73B3371}.wem"
      },
      {
       "Id": "418165151",
@@ -736,14 +736,6 @@
       "CachePath": "51/{51306F8C-9AAA-7323-6DAE-CC517A8E1BFB}.wem"
      },
      {
-      "Id": "518697165",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "Footstep_Dirt3.wav",
-      "CachePath": "03/{03F7A63B-0B42-C67B-9025-81840E7CAC95}.wem"
-     },
-     {
       "Id": "520127851",
       "Language": "SFX",
       "Streaming": "false",
@@ -758,6 +750,14 @@
       "Location": "Memory",
       "ShortName": "FF_HFFX_foley_footstep_creature_cyan.wav",
       "CachePath": "DA/{DAA1B564-B4F7-90E7-6561-D0353AE5B6BF}.wem"
+     },
+     {
+      "Id": "524623202",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "0D/{0DF6D426-434B-4EE1-C244-CAF5550ACE60}.wem"
      },
      {
       "Id": "525096005",
@@ -776,20 +776,20 @@
       "CachePath": "95/{955AE41D-CC3E-59A6-98A9-3872DEC979B3}.wem"
      },
      {
-      "Id": "536784950",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_DGF_fx_foley_footstep_slime_monster_run_fast_goo_squeeze_19.wav",
-      "CachePath": "C5/{C53549C6-B372-5C79-BA99-7BB62B266E55}.wem"
-     },
-     {
       "Id": "537148971",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FootSteps_Lava (2).wav",
       "CachePath": "91/{912767DB-5F82-1A47-0CF4-E5DCA29DF84B}.wem"
+     },
+     {
+      "Id": "539919823",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Coughing_1_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "48/{481FBE29-1B51-FBEF-7417-42500764286E}.wem"
      },
      {
       "Id": "542254204",
@@ -880,14 +880,6 @@
       "CachePath": "60/{609E8860-35DF-020B-4A9C-6857350771B1}.wem"
      },
      {
-      "Id": "591081456",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "FF_HFFX_foley_footstep_creature_teal.wav",
-      "CachePath": "53/{531E8491-6089-31B7-A652-5E669F54EAF0}.wem"
-     },
-     {
       "Id": "595941273",
       "Language": "SFX",
       "Streaming": "false",
@@ -902,14 +894,6 @@
       "Location": "Memory",
       "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_04.wav",
       "CachePath": "A9/{A995FC7A-1FF1-B21C-C0E6-E6F20D4C7319}.wem"
-     },
-     {
-      "Id": "602833371",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "FF_HFFX_foley_footstep_creature_loss.wav",
-      "CachePath": "42/{42266F89-C118-79C0-BB43-4528C772FF1D}.wem"
      },
      {
       "Id": "606572947",
@@ -1053,7 +1037,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_cannon_explosion_blast_stone_gravel_debris_02.wav",
-      "CachePath": "E9/{E9BDE673-2DA8-64B0-7C80-F2847D01F003}.wem"
+      "CachePath": "87/{8764FE14-89A4-96B2-CD1B-0B94ACBFB665}.wem"
      },
      {
       "Id": "696638021",
@@ -1062,14 +1046,6 @@
       "Location": "Memory",
       "ShortName": "ESM_Undead_Vocal_I_Hunger_.wav",
       "CachePath": "B2/{B2E7A119-4959-00D4-16AF-70D19B99744B}.wem"
-     },
-     {
-      "Id": "705384360",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "FF_HFFX_foley_footstep_creature_red.wav",
-      "CachePath": "B3/{B3AA8E39-4472-A583-C100-5A7D04E0780D}.wem"
      },
      {
       "Id": "710539305",
@@ -1158,6 +1134,14 @@
       "Location": "Memory",
       "ShortName": "BowSnap_BW.54387.wav",
       "CachePath": "CE/{CE3C29A7-F253-129E-015E-D6A12C1CCE9F}.wem"
+     },
+     {
+      "Id": "802472056",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_FG_FX_one_shot_farming_axe_sword_swing_attack_1_tool_whoosh.wav",
+      "CachePath": "D1/{D127759B-FF91-9E2C-C1DB-E93E206CAD96}.wem"
      },
      {
       "Id": "809366429",
@@ -1288,6 +1272,14 @@
       "CachePath": "FC/{FCDF9688-9D8E-BC19-28B7-8D15B75E8C0A}.wem"
      },
      {
+      "Id": "871056365",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_broadsword_impact_shield_metal.wav",
+      "CachePath": "80/{80DB1DA8-BC75-9443-4BA9-4BE803047724}.wem"
+     },
+     {
       "Id": "872852181",
       "Language": "SFX",
       "Streaming": "false",
@@ -1320,14 +1312,6 @@
       "CachePath": "7F/{7FBF39D6-FA64-790C-613B-C7910EC1D565}.wem"
      },
      {
-      "Id": "888212089",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_DGF_fx_foley_footstep_slime_monster_walk_suction_goo_13.wav",
-      "CachePath": "9C/{9C602FC6-B9E6-026D-39D8-6B7B783E7F02}.wem"
-     },
-     {
       "Id": "889173008",
       "Language": "SFX",
       "Streaming": "false",
@@ -1341,7 +1325,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_cannon_explosion_blast_stone_gravel_debris_02.wav",
-      "CachePath": "49/{4967DC08-30B8-890E-D214-2E8E45A201BD}.wem"
+      "CachePath": "43/{430BAD71-34FE-3283-D7A7-8D68F071540F}.wem"
      },
      {
       "Id": "900809544",
@@ -1731,6 +1715,14 @@
        "LibId": "8912899"
       },
       {
+       "Id": "596148375",
+       "Name": "Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Ares\\SFX_AresSick\\Heartbeat\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "GUID": "{8FE28FEB-C98B-4A71-8DDA-FEDE4462AE7F}",
+       "LibName": "Wwise Time Stretch",
+       "LibId": "8519683"
+      },
+      {
        "Id": "625034061",
        "Name": "Octave_Up (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_ShadowFang_RTS\\[Effect Slot [1]: (Pitch Shifter)]\\Octave_Up (Custom)",
@@ -1883,16 +1875,7 @@
           "Id": "523547018"
          },
          {
-          "Id": "591081456"
-         },
-         {
-          "Id": "602833371"
-         },
-         {
           "Id": "651266643"
-         },
-         {
-          "Id": "705384360"
          },
          {
           "Id": "843270474"
@@ -1930,13 +1913,7 @@
           "Id": "199617062"
          },
          {
-          "Id": "326406373"
-         },
-         {
           "Id": "377837800"
-         },
-         {
-          "Id": "1038282182"
          },
          {
           "Id": "1069660761"
@@ -1981,12 +1958,6 @@
           "Id": "316401524"
          },
          {
-          "Id": "536784950"
-         },
-         {
-          "Id": "888212089"
-         },
-         {
           "Id": "1006289215"
          },
          {
@@ -2010,6 +1981,59 @@
           "Id": "861411022"
          }
         ]
+       }
+      ]
+     },
+     {
+      "Id": "3895761501",
+      "Name": "EV_Ares_Attack",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack",
+      "GUID": "{04416426-2600-4113-9DCF-1F7794024FF1}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.43329397",
+      "DurationMax": "1.1392716",
+      "MediaRefs": [
+       {
+        "Id": "802472056"
+       },
+       {
+        "Id": "871056365"
+       }
+      ],
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "1724990773"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "809769072",
+      "Name": "EV_Ares_Attack_Stop",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack_Stop",
+      "GUID": "{E51BA9F0-CF36-4BDC-810B-0B6B9F44AB39}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
+     },
+     {
+      "Id": "87171391",
+      "Name": "EV_Ares_FinalAttack",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_FinalAttack",
+      "GUID": "{7D641009-3933-460E-B5D0-EE0F5B7D0CEA}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "2.0216794",
+      "DurationMax": "2.0216794",
+      "MediaRefs": [
+       {
+        "Id": "100862515"
+       },
+       {
+        "Id": "606572947"
        }
       ]
      },
@@ -2147,7 +2171,7 @@
      {
       "Id": "2754704106",
       "Name": "EV_Chan_Attack",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_Chan_Attack",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\EV_Chan_Attack",
       "GUID": "{241C638E-B089-4989-827A-E6D31828D946}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -2178,7 +2202,7 @@
      {
       "Id": "1442935897",
       "Name": "EV_Chan_Attack_Stop",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_Chan_Attack_Stop",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\EV_Chan_Attack_Stop",
       "GUID": "{FB36B935-9B69-40E0-8061-EB8614F2CA6A}",
       "MaxAttenuation": "0",
       "DurationType": "OneShot",
@@ -2188,7 +2212,7 @@
      {
       "Id": "694170222",
       "Name": "EV_Chan_FinalAttack",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_Chan_FinalAttack",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\EV_Chan_FinalAttack",
       "GUID": "{FE229EF2-B036-48BD-BFB8-FD28A465AC48}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -2206,7 +2230,7 @@
      {
       "Id": "680941589",
       "Name": "EV_Chan_Move",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_Chan_Move",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\EV_Chan_Move",
       "GUID": "{FA35E9E7-77DD-410B-83DE-BD9F2372CDE5}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -2227,7 +2251,7 @@
      {
       "Id": "1225088094",
       "Name": "EV_ChanAggroSkill",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanAggroSkill",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\EV_ChanAggroSkill",
       "GUID": "{28E1990D-73B5-403C-BA53-4DBAE2B3E962}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -2260,7 +2284,7 @@
      {
       "Id": "3746434199",
       "Name": "EV_ChanAimingSkill_Slam",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanAimingSkill_Slam",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\EV_ChanAimingSkill_Slam",
       "GUID": "{B5B5055B-9F50-45BF-8C07-B1DA58911028}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -2302,7 +2326,7 @@
      {
       "Id": "907956692",
       "Name": "EV_ChanAimingSkill_Start",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanAimingSkill_Start",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\EV_ChanAimingSkill_Start",
       "GUID": "{7C3AC2CE-3A77-4585-B3B8-C6EC25FF562B}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -2317,7 +2341,7 @@
      {
       "Id": "2022353529",
       "Name": "EV_ChanUltimateSkill",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_ChanUltimateSkill",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\EV_ChanUltimateSkill",
       "GUID": "{40E52A35-A7E0-4366-B089-96E381CC811A}",
       "DurationType": "OneShot",
       "DurationMin": "3.6073556",
@@ -3106,9 +3130,6 @@
           "Id": "112081368"
          },
          {
-          "Id": "518697165"
-         },
-         {
           "Id": "660206576"
          },
          {
@@ -3628,7 +3649,7 @@
      {
       "Id": "357367056",
       "Name": "SFX_ChanHitWall",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\SFX_ChanHitWall",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\SFX_ChanHitWall",
       "GUID": "{8151B500-BECD-4ED7-B5E7-B09771D5C0BC}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -3683,9 +3704,86 @@
       ]
      },
      {
+      "Id": "1545647172",
+      "Name": "Voice_Ares_Attack",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\Voice_Ares_Attack",
+      "GUID": "{DF6D56DF-DFD1-4F71-9A94-5517556CF4F3}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.35681438",
+      "DurationMax": "0.42876962",
+      "MediaRefs": [
+       {
+        "Id": "524623202"
+       },
+       {
+        "Id": "992284103"
+       }
+      ]
+     },
+     {
+      "Id": "2817304042",
+      "Name": "Voice_Ares_Die",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\Voice_Ares_Die",
+      "GUID": "{F0FCA463-FA24-4B51-9AD4-B1F6F233E9FA}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "2.3051646",
+      "DurationMax": "2.3051646",
+      "MediaRefs": [
+       {
+        "Id": "412889613"
+       }
+      ]
+     },
+     {
+      "Id": "2146890631",
+      "Name": "Voice_Ares_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\Voice_Ares_Hit",
+      "GUID": "{87F36914-441D-497C-A206-E42B977BF28F}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.58821356",
+      "DurationMax": "0.75236434",
+      "MediaRefs": [
+       {
+        "Id": "116836280"
+       },
+       {
+        "Id": "177115164"
+       },
+       {
+        "Id": "579496560"
+       }
+      ]
+     },
+     {
+      "Id": "326001922",
+      "Name": "Voice_Ares_Sick",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\Voice_Ares_Sick",
+      "GUID": "{D7B07F59-9755-4CF3-86F4-D2EF768F8E2F}",
+      "MaxAttenuation": "800",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "399735935"
+       },
+       {
+        "Id": "539919823"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "596148375"
+        }
+       ]
+      }
+     },
+     {
       "Id": "197987059",
       "Name": "Voice_Chan_Attack",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Attack",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\Voice_Chan_Attack",
       "GUID": "{EBADCE3E-03AD-4CE6-8FD3-AA2B341B5AF0}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -3703,7 +3801,7 @@
      {
       "Id": "2834051383",
       "Name": "Voice_Chan_Die",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Die",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\Voice_Chan_Die",
       "GUID": "{B5D9F3B7-56D1-4E7E-B266-A42C91017124}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -3718,7 +3816,7 @@
      {
       "Id": "3237405698",
       "Name": "Voice_Chan_Hit",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\Voice_Chan_Hit",
       "GUID": "{0473682A-3932-4A2B-B275-C5D3FFFCEDCC}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -3742,7 +3840,7 @@
      {
       "Id": "524349233",
       "Name": "Voice_Chan_Sick",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Chan_Sick",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\Voice_Chan_Sick",
       "GUID": "{E1DDF8F5-475F-4246-811D-FF8BB1D8636C}",
       "MaxAttenuation": "800",
       "DurationType": "Infinite",
@@ -3765,7 +3863,7 @@
      {
       "Id": "2779071563",
       "Name": "Voice_Merci_Die",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Die",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Merci\\Voice_Merci_Die",
       "GUID": "{169823F8-E7B9-4D5E-AE2E-003C93280F66}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -3780,7 +3878,7 @@
      {
       "Id": "2915263918",
       "Name": "Voice_Merci_Hit",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Merci\\Voice_Merci_Hit",
       "GUID": "{5098E2B9-90BA-4412-987D-8FC0FAE125C3}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
@@ -3817,7 +3915,7 @@
      {
       "Id": "108894333",
       "Name": "Voice_Merci_Sick",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Voice_Merci_Sick",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Merci\\Voice_Merci_Sick",
       "GUID": "{7573A416-C37E-4A3F-8DDC-F3B908D97302}",
       "MaxAttenuation": "800",
       "DurationType": "Infinite",
@@ -3944,6 +4042,6 @@
     ]
    }
   ],
-  "FileHash": "{F51A5D47-BBED-BF21-5616-37ED7C805554}"
+  "FileHash": "{B59BF3CD-2FC6-C23D-95F7-AD92628FDA8A}"
  }
 }

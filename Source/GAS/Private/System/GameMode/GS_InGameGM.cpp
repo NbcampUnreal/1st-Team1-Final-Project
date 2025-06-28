@@ -125,13 +125,13 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
     {
         for (const FDESaveData& ObjectData : SaveData)
         {
-            if (ObjectData.SpawnActorClass)
+            if (TSubclassOf<AActor> ActorClassToSpawn = LoadClass<AActor>(nullptr, *ObjectData.SpawnActorClassPath))
             {
-                if (!Cast<AGS_Monster>(ObjectData.SpawnActorClass))
+                if (!Cast<AGS_Monster>(ActorClassToSpawn))
                 {
                     FActorSpawnParameters SpawnParams;
                     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-                    World->SpawnActor<AActor>(ObjectData.SpawnActorClass, ObjectData.SpawnTransform, SpawnParams);
+                    World->SpawnActor<AActor>(ActorClassToSpawn, ObjectData.SpawnTransform, SpawnParams);
                 }
             }
         }
@@ -185,13 +185,13 @@ void AGS_InGameGM::OnNavMeshBuildComplete()
     {
         for (const FDESaveData& ObjectData : CachedSaveData)
         {
-            if (ObjectData.SpawnActorClass)
+            if (TSubclassOf<AActor> ActorClassToSpawn = LoadClass<AActor>(nullptr, *ObjectData.SpawnActorClassPath))
             {
-                if (Cast<AGS_Monster>(ObjectData.SpawnActorClass))
+                if (Cast<AGS_Monster>(ActorClassToSpawn))
                 {
                     FActorSpawnParameters SpawnParams;
                     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-                    World->SpawnActor<AActor>(ObjectData.SpawnActorClass, ObjectData.SpawnTransform, SpawnParams);
+                    World->SpawnActor<AActor>(ActorClassToSpawn, ObjectData.SpawnTransform, SpawnParams);
                 }
             }
         }

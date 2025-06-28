@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "UI/Character/GS_PlayerInfoWidget.h"
@@ -57,7 +57,7 @@ void UGS_PlayerInfoWidget::InitializePlayerInfoWidget(AGS_Player* InPlayer)
 		}
 		
 		const FAssetToSpawn* SpawnInfo = PawnMappingData->SeekerPawnClasses.Find(SeekerJob);
-		PlayerClass->SetBrushFromTexture(SpawnInfo->AvatarTexture);	
+		PlayerClass->SetBrushFromTexture(SpawnInfo->ClassIconTexture);
 	}
 }
 

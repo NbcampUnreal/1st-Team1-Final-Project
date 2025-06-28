@@ -21,24 +21,25 @@ void UGS_ChanRollingSkill::ActiveSkill()
 			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
 		}
 
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		OwnerPlayer->SetSkillInputControl(false, false, true);
-		OwnerPlayer->SetMoveControlValue(false, false);
-		OwnerPlayer->CanChangeSeekerGait = false;
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, true);
-		}
-		FName RollDirection = CalRollDirection();
-		if (RollDirection == FName("00"))
-		{
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
-		}
-		else
-		{
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
-		}
+			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+			OwnerPlayer->SetSkillInputControl(false, false, false);
+			OwnerPlayer->SetMoveControlValue(false, false);
+			OwnerPlayer->CanChangeSeekerGait = false;
+			if (OwnerCharacter->GetSkillComp())
+			{
+				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, true);
+			}
+			FName RollDirection = CalRollDirection();
+			if (RollDirection == FName("00"))
+			{
+				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
+			}
+			else
+			{
+				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
+			}
+
 	}
 }
 
@@ -48,16 +49,16 @@ void UGS_ChanRollingSkill::DeactiveSkill()
 
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		OwnerPlayer->SetSkillInputControl(true, true, true);
-		OwnerPlayer->SetMoveControlValue(true, true);
-		OwnerPlayer->CanChangeSeekerGait = true;
+			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
+			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+			OwnerPlayer->SetSkillInputControl(true, true, true);
+			OwnerPlayer->SetMoveControlValue(true, true);
+			OwnerPlayer->CanChangeSeekerGait = true;
 
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
-		}
+			if (OwnerCharacter->GetSkillComp())
+			{
+				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
+			}
+
 	}
 }

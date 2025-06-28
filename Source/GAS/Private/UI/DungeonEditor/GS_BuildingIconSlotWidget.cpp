@@ -30,7 +30,7 @@ void UGS_BuildingIconSlotWidget::SetButtonImage()
 	if (nullptr != RowPtr)
 	{
 		TObjectPtr<UTexture> Icon = *RowPtr->Icon;
-		FButtonStyle ButtonStyle;
+		FButtonStyle ButtonStyle = TempBtn->GetStyle();
 		ButtonStyle.Normal.SetResourceObject(Icon);
 		ButtonStyle.Normal.ImageSize = FVector2D(100, 100);
 		ButtonStyle.Normal.TintColor = FSlateColor(FLinearColor(0.495466,0.495466,0.495466, 1.000000));

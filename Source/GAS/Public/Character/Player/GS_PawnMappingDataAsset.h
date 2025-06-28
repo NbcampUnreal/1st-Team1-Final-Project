@@ -46,6 +46,9 @@ struct FAssetToSpawn
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
     TObjectPtr<UTexture2D> AvatarTexture;
 
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+    TObjectPtr<UTexture2D> ClassIconTexture;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
 	TArray<FWeaponMeshPair> WeaponMeshList;
 };

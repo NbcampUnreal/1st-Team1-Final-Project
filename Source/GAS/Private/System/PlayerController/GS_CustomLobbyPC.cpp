@@ -24,6 +24,7 @@
 #include <DungeonEditor/Data/GS_DungeonEditorSaveGame.h>
 
 #include "Engine/DirectionalLight.h"
+#include "Serialization/BufferArchive.h"
 
 
 AGS_CustomLobbyPC::AGS_CustomLobbyPC()
@@ -889,16 +890,170 @@ void AGS_CustomLobbyPC::Client_RequestLoadAndSendData_Implementation()
 
 		if (IsValid(LoadGameObject))
 		{
-			TArray<FDESaveData> LoadedData = LoadGameObject->GetSaveDatas();
-			UE_LOG(LogTemp, Warning, TEXT("Client: Loaded %d objects. Sending to server..."), LoadedData.Num());
-            
-			// 2. 읽어온 데이터를 담아 서버로 RPC를 보냅니다.
-			PS->Server_SetObjectData(LoadedData);
+			// 데이터를 보내기 전에 제외 플래그를 true로 설정
+			// true로 해줘야 던전 에디터 Load때 필요한 불필요한 데이터가 제외됩니다.
+			LoadGameObject->bExcludeDungeonEditingArrays = true;
+
+			// 1. 비어있는 FBufferArchive를 생성합니다.
+			FBufferArchive ToBinary;
+			ToBinary.SetIsSaving(true);
+			// 2. SaveGameObject의 내용을 ToBinary 아카이브에 직렬화하여 씁니다.
+			LoadGameObject->Serialize(ToBinary);
+			// 3. 직렬화된 데이터가 담긴 아카이브를 TArray<uint8>로 복사합니다.
+			FullDungeonDataToSend = ToBinary;
+
+			UE_LOG(LogTemp, Warning, TEXT("Client: Loaded and serialized %d bytes. Sending to server in chunks..."), ToBinary.Num());
+
+			SentDataOffset = 0;
+			
+			// 첫 번째 청크 전송을 시작합니다.
+			SendNextDataChunk();
 		}
 		else
 		{
 			UE_LOG(LogTemp, Error, TEXT("Client: Save file could not be loaded. Sending empty data."));
-			PS->Server_SetObjectData({}); // 로드 실패 시 빈 데이터를 보냅니다.
+			Server_ReceiveDungeonDataChunk({}, true); // 로드 실패 시 마지막 빈 청크 전송
 		}
 	}
+	
+	// AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+	// if (PS)
+	// {
+	// 	// 1. 클라이언트 PC에서 로컬 .sav 파일을 읽습니다.
+	// 	UGS_DungeonEditorSaveGame* LoadGameObject = Cast<UGS_DungeonEditorSaveGame>(UGameplayStatics::LoadGameFromSlot(PS->CurrentSaveSlotName, 0));
+	//
+	// 	if (IsValid(LoadGameObject))
+	// 	{
+	// 		TArray<FDESaveData> LoadedData = LoadGameObject->GetSaveDatas();
+	// 		UE_LOG(LogTemp, Warning, TEXT("Client: Loaded %d objects. Sending to server..."), LoadedData.Num());
+ //            
+	// 		// 2. 읽어온 데이터를 담아 서버로 RPC를 보냅니다.
+	// 		PS->Server_SetObjectData(LoadedData);
+	// 	}
+	// 	else
+	// 	{
+	// 		UE_LOG(LogTemp, Error, TEXT("Client: Save file could not be loaded. Sending empty data."));
+	// 		PS->Server_SetObjectData({}); // 로드 실패 시 빈 데이터를 보냅니다.
+	// 	}
+	// }
 }
+
+
+void AGS_CustomLobbyPC::Server_ReceiveDungeonDataChunk_Implementation(const TArray<uint8>& Chunk, bool bIsLast)
+{
+	// 수신된 청크를 재조립 버퍼에 추가합니다.
+    ReassembledDungeonData.Append(Chunk);
+
+    if (bIsLast)
+    {
+        // === 마지막 청크 수신 완료: 데이터 복원 및 처리 ===
+        UE_LOG(LogTemp, Warning, TEXT("Server: All chunks received. Total size: %d bytes. Reconstructing..."), ReassembledDungeonData.Num());
+        
+        if (ReassembledDungeonData.Num() > 0)
+        {
+            FMemoryReader FromBinary(ReassembledDungeonData, true);
+            FromBinary.Seek(0);
+
+            UGS_DungeonEditorSaveGame* LoadedSaveGame = Cast<UGS_DungeonEditorSaveGame>(UGameplayStatics::CreateSaveGameObject(UGS_DungeonEditorSaveGame::StaticClass()));
+            
+            if (IsValid(LoadedSaveGame))
+            {
+                LoadedSaveGame->bExcludeDungeonEditingArrays = true;
+                LoadedSaveGame->Serialize(FromBinary);
+
+                // 가디언 역할을 가진 플레이어 탐색
+                AGS_PlayerState* GuardianPlayerState = nullptr;
+                if (AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+                {
+                    for (APlayerState* PS : GM->GameState->PlayerArray)
+                    {
+                        AGS_PlayerState* CurrentPS = Cast<AGS_PlayerState>(PS);
+                        if (CurrentPS && CurrentPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+                        {
+                            GuardianPlayerState = CurrentPS;
+                            break;
+                        }
+                    }
+                }
+
+                // 가디언 PlayerState에 데이터 저장
+                if (GuardianPlayerState)
+                {
+                    GuardianPlayerState->ObjectData = LoadedSaveGame->GetSaveDatas();
+                    UE_LOG(LogTemp, Warning, TEXT("Server: Dungeon data successfully assigned to Guardian %s. Object count: %d"), *GuardianPlayerState->GetPlayerName(), GuardianPlayerState->ObjectData.Num());
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Error, TEXT("Server: Could not find a Guardian player to assign the dungeon data to."));
+                }
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("Server: Failed to create a new SaveGameObject for deserialization."));
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Server: Received an empty final chunk. No data to process."));
+        }
+        
+        // 데이터 처리 후 버퍼 초기화
+        ReassembledDungeonData.Empty();
+    }
+    else
+    {
+        // === 중간 청크 수신: 클라이언트에게 다음 청크 요청 ===
+        UE_LOG(LogTemp, Log, TEXT("Server: Chunk of size %d received. Requesting next chunk from client."), Chunk.Num());
+        
+        // 클라이언트에게 다음 청크를 보낼 준비가 되었다고 알립니다.
+        Client_ReadyForNextChunk();
+    }
+}
+
+void AGS_CustomLobbyPC::Client_ReadyForNextChunk_Implementation()
+{
+	// 서버가 준비되었으므로 다음 청크를 보냅니다.
+	UE_LOG(LogTemp, Log, TEXT("Client: Received 'ReadyForNextChunk' from server. Sending next chunk."));
+	SendNextDataChunk();
+}
+
+void AGS_CustomLobbyPC::SendNextDataChunk()
+{
+	if (SentDataOffset >= FullDungeonDataToSend.Num())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Client: All chunks have been sent."));
+		FullDungeonDataToSend.Empty(); // 메모리 정리
+		return;
+	}
+	
+	const int32 SizeToSend = FMath::Min(ChunkSize, FullDungeonDataToSend.Num() - SentDataOffset);
+    
+	TArray<uint8> Chunk;
+	Chunk.AddUninitialized(SizeToSend);
+	FMemory::Memcpy(Chunk.GetData(), FullDungeonDataToSend.GetData() + SentDataOffset, SizeToSend);
+
+	SentDataOffset += SizeToSend;
+	const bool bIsLastChunk = (SentDataOffset >= FullDungeonDataToSend.Num());
+
+	// 서버로 청크를 전송합니다.
+	Server_ReceiveDungeonDataChunk(Chunk, bIsLastChunk);
+}
+
+// void AGS_CustomLobbyPC::SendDataInChunks(const TArray<uint8>& FullData)
+// {
+// 	const int32 TotalSize = FullData.Num();
+// 	int32 SentSize = 0;
+//
+// 	while (SentSize < TotalSize)
+// 	{
+// 		const int32 SizeToSend = FMath::Min(ChunkSize, TotalSize - SentSize);
+// 		TArray<uint8> Chunk;
+// 		Chunk.Append(FullData.GetData() + SentSize, SizeToSend);
+//
+// 		SentSize += SizeToSend;
+// 		const bool bIsLastChunk = (SentSize >= TotalSize);
+//
+// 		// 서버로 청크 전송
+// 		Server_ReceiveDungeonDataChunk(Chunk, bIsLastChunk);
+// 	}
+// }
