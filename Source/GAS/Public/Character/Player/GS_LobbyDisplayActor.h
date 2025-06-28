@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Character/Player/GS_PawnMappingDataAsset.h"
 #include "GS_LobbyDisplayActor.generated.h"
 
 class USkeletalMeshComponent;
@@ -20,12 +21,27 @@ public:
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
-
+	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 public:
-    UFUNCTION(NetMulticast, Reliable)
-    void SetupDisplay(USkeletalMesh* NewMesh, TSubclassOf<UAnimInstance> NewAnimClass, const TArray<FWeaponMeshPair>& WeaponMeshList);
+	UPROPERTY(ReplicatedUsing = OnRep_SetupDisplay)
+	TObjectPtr<USkeletalMesh> CurrentSkeletalMesh;
 
-    UFUNCTION(NetMulticast, Reliable)
-    void SetReadyState(bool bIsReady);
+	UPROPERTY(ReplicatedUsing = OnRep_SetupDisplay)
+	TSubclassOf<UAnimInstance> CurrentAnimClass;
+    
+	UPROPERTY(ReplicatedUsing = OnRep_SetupDisplay)
+	TArray<FWeaponMeshPair> CurrentWeaponMeshList;
+
+	UPROPERTY(ReplicatedUsing = OnRep_ReadyState)
+	bool bIsReady = false;
+
+	// OnRep functions to apply replicated data on clients
+	UFUNCTION()
+	void OnRep_SetupDisplay();
+    
+	UFUNCTION()
+	void OnRep_ReadyState();
 	
 };

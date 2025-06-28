@@ -143,9 +143,9 @@ void AGS_CustomLobbyGM::UpdatePlayerReadyStatus(APlayerState* Player, bool bIsRe
         }
         if (TObjectPtr<AGS_LobbyDisplayActor>* FoundActor = SpawnedLobbyActors.Find(GSPlayer))
         {
-            if (*FoundActor)
+            if (AGS_LobbyDisplayActor* LobbyActor = FoundActor->Get())
             {
-                (*FoundActor)->SetReadyState(bIsReady);
+                LobbyActor->bIsReady = bIsReady;
             }
         }
         CheckAllPlayersReady();
@@ -330,8 +330,13 @@ void AGS_CustomLobbyGM::SpawnLobbyActorForPlayer(AGS_PlayerState* PlayerState, A
 
         if (NewDisplayActor)
         {
-            NewDisplayActor->SetupDisplay(SpawnInfo->SkeletalMeshClass, SpawnInfo->Lobby_AnimBlueprintClass, SpawnInfo->WeaponMeshList);
-            NewDisplayActor->SetReadyState(PlayerState->bIsReady);
+            NewDisplayActor->CurrentSkeletalMesh = SpawnInfo->SkeletalMeshClass;
+            NewDisplayActor->CurrentAnimClass = SpawnInfo->Lobby_AnimBlueprintClass;
+            NewDisplayActor->CurrentWeaponMeshList = SpawnInfo->WeaponMeshList;
+            NewDisplayActor->bIsReady = PlayerState->bIsReady;
+            NewDisplayActor->OnRep_SetupDisplay();
+            NewDisplayActor->OnRep_ReadyState();
+
             SpawnedLobbyActors.Add(PlayerState, NewDisplayActor);
         }
     }
