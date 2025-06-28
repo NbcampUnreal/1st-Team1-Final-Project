@@ -18,6 +18,7 @@
 #include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "Sound/GS_AudioManager.h"
+#include "System/GameMode/GS_InGameGM.h"
 
 
 AGS_RTSController::AGS_RTSController()
@@ -94,6 +95,8 @@ void AGS_RTSController::BeginPlay()
 			Seeker->OnSeekerHover.AddDynamic(this, &AGS_RTSController::HandleSeekerHover);
 		}
 	}
+	
+	Server_NotifyPlayerIsReady();
 }
 
 void AGS_RTSController::SetupInputComponent()
@@ -351,6 +354,19 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	TArray<AGS_Monster*> Units;
 	GatherCommandableUnits(Units);
 	Server_RTSMove(Units, GroundHit.Location);
+}
+
+void AGS_RTSController::Server_NotifyPlayerIsReady_Implementation()
+{
+	if (AGS_InGameGM* GM = GetWorld()->GetAuthGameMode<AGS_InGameGM>())
+	{
+		GM->NotifyPlayerIsReady(this);
+	}
+}
+
+void AGS_RTSController::Client_StartGame_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("준비 완료. TODO: 화면 가리개 제거."));
 }
 
 void AGS_RTSController::OnEscapeButtonClicked()

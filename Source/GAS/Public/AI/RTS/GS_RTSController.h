@@ -196,6 +196,13 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_RTSSkill(const TArray<AGS_Monster*>& Units);
 
+	UFUNCTION(Server, Reliable)
+	void Server_NotifyPlayerIsReady();
+
+	// Client
+	UFUNCTION(Client, Reliable)
+	void Client_StartGame();
+	
 	// UI 버튼 클릭 함수
 	UFUNCTION(BlueprintCallable, Category="RTS")
 	void OnEscapeButtonClicked();
