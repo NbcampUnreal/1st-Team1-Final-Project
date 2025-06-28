@@ -64,11 +64,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
 	UAkAudioEvent* AimingSkillSlamSound;
 
-	// ===============
+	/*// ===============
 	// 공격 사운드 리셋 관련
 	// ===============
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack", meta = (ClampMin = "0.1", ClampMax = "5.0"))
-	float AttackSoundResetTime = 1.0f;
+	float AttackSoundResetTime = 1.0f;*/ // Seeker 에 선언.
 
 	FTimerHandle AttackSoundResetTimerHandle;
 

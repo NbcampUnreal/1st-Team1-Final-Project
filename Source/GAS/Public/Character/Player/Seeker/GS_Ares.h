@@ -51,15 +51,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Voice")
 	UAkAudioEvent* AttackVoiceSound;
-
-	// ===============
-	// 공격 사운드 리셋 관련
-	// ===============
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack", meta = (ClampMin = "0.1", ClampMax = "5.0"))
-	float AttackSoundResetTime = 1.0f;
-
-	FTimerHandle AttackSoundResetTimerHandle;
-
+	
 	// 사운드 중첩 방지를 위한 현재 재생 중인 사운드 ID
 	UPROPERTY()
 	int32 CurrentSoundPlayingID = -1;

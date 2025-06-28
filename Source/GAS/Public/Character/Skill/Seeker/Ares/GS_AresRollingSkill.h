@@ -16,4 +16,5 @@ class GAS_API UGS_AresRollingSkill : public UGS_SeekerSkillBase
 public:
 	virtual void ActiveSkill() override;
 	virtual void DeactiveSkill() override;
+	virtual void InterruptSkill() override;
 };

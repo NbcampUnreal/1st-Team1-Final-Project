@@ -315,7 +315,8 @@ void AGS_Seeker::OnComboAttack()
 	{
 		if (CurrentComboIndex == 0)
 		{
-			ServerAttackMontage();
+			GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
+			ServerAttackMontage(); // 이게 두번 호출되는거 같은데...
 		}
 		else
 		{
