@@ -37,6 +37,8 @@ protected:
 	virtual void BeginPlay() override;
 	//virtual void SetupInputComponent() override; // 키보드 기능. 나중에 esc 넣을때 주석 해제
 	virtual void OnRep_PlayerState() override;
+	UFUNCTION(Server, Reliable)
+	void Server_NotifyPlayerReadyInLobby();
 
 	UPROPERTY()
 	AGS_PlayerState* CachedPlayerState;
@@ -125,28 +127,6 @@ protected:
 	// 서버가 클라이언트에게 모드 변경이 완료되었음을 알리는 RPC를 오버라이드
 	virtual void Client_OnEnteredEditorMode_Implementation() override;
 	virtual void Client_OnExitedEditorMode_Implementation() override;
-	
-	// 플레이어 스폰
-private:
-	UPROPERTY()
-	TMap<TWeakObjectPtr<APlayerState>, TObjectPtr<AGS_LobbyDisplayActor>> SpawnedLobbyActors;
-
-	// 스폰 슬롯 액터들을 캐싱하기 위한 배열
-	UPROPERTY()
-	TArray<TObjectPtr<AGS_SpawnSlot>> CachedGuardianSlots;
-
-	UPROPERTY()
-	TArray<TObjectPtr<AGS_SpawnSlot>> CachedSeekerSlots;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Lobby")
-	TObjectPtr<UGS_PawnMappingDataAsset> PawnMappingData;
-
-	// GameState의 플레이어 목록이 업데이트 될 때 호출될 함수
-	UFUNCTION()
-	void OnLobbyPlayerListUpdated();
-
-	void SpawnOrUpdateLobbyActor(const FLobbyPlayerInfo& PlayerInfo);
-	void CollectAndCacheSpawnSlots();
 
 	// 던전 정보 넘기기
 public:

@@ -70,15 +70,6 @@ void AGS_CustomLobbyPC::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("DirectionalLight 태그를 가진 Light 찾을 수 없습니다."));
 		}
-		
-		CollectAndCacheSpawnSlots();
-
-		AGS_CustomLobbyGS* LGS = GetWorld()->GetGameState<AGS_CustomLobbyGS>();
-		if (LGS)
-		{
-			LGS->OnPlayerListUpdated.AddDynamic(this, &AGS_CustomLobbyPC::OnLobbyPlayerListUpdated);
-			OnLobbyPlayerListUpdated();
-		}
 	}
 }
 
@@ -98,6 +89,7 @@ void AGS_CustomLobbyPC::OnRep_PlayerState()
 		TryBindToPlayerStateDelegates();
 
 		bHasInitializedUI = true;
+		Server_NotifyPlayerReadyInLobby(); // 서버에 접속하고 PlayerState까지 완전히 생성됐을 때 서버에 알림
 
 		if (!bHasSetInitialRichPresence)
 		{
@@ -110,6 +102,16 @@ void AGS_CustomLobbyPC::OnRep_PlayerState()
 	{
 		UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC::OnRep_PlayerState - PlayerState changed after initial setup for PC: %s. Re-evaluating bindings/UI."), *GetNameSafe(this));
 		TryBindToPlayerStateDelegates();
+	}
+}
+
+void AGS_CustomLobbyPC::Server_NotifyPlayerReadyInLobby_Implementation()
+{
+	AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>();
+	if (GM)
+	{
+		// GameMode에 이 PlayerController가 준비되었음을 알림
+		GM->HandlePlayerReadyInLobby(this);
 	}
 }
 
@@ -663,156 +665,6 @@ void AGS_CustomLobbyPC::RequestDungeonEditorToLobby()
 		
 		ShowCustomLobbyUI();
 	}
-}
-
-void AGS_CustomLobbyPC::OnLobbyPlayerListUpdated()
-{
-	if (!IsLocalController()) return;
-
-	AGS_CustomLobbyGS* LGS = GetWorld()->GetGameState<AGS_CustomLobbyGS>();
-	if (!LGS)
-	{
-		UE_LOG(LogTemp, Error, TEXT("PC::OnLobbyPlayerListUpdated - GameState가 유효하지 않습니다."));
-		return;
-	}
-	UE_LOG(LogTemp, Warning, TEXT("PC::OnLobbyPlayerListUpdated - 호출됨. PlayerList 수: %d"), LGS->PlayerList.Num());
-
-	TSet<TWeakObjectPtr<APlayerState>> PlayersInLobby;
-
-	// GameState의 최신 목록을 기반으로 액터 스폰 또는 업데이트
-	for (const FLobbyPlayerInfo& PlayerInfo : LGS->PlayerList)
-	{
-		if (PlayerInfo.PlayerState.IsValid())
-		{
-			PlayersInLobby.Add(PlayerInfo.PlayerState);
-			SpawnOrUpdateLobbyActor(PlayerInfo);
-		}
-	}
-
-	// 로컬에만 존재하고 GameState 목록에는 없는 액터(나간 플레이어) 정리
-	TArray<TWeakObjectPtr<APlayerState>> ActorsToRemove;
-	for (auto& Pair : SpawnedLobbyActors)
-	{
-		if (!PlayersInLobby.Contains(Pair.Key))
-		{
-			if (Pair.Value)
-			{
-				Pair.Value->Destroy();
-			}
-			ActorsToRemove.Add(Pair.Key);
-		}
-	}
-
-	for (TWeakObjectPtr<APlayerState> Key : ActorsToRemove)
-	{
-		SpawnedLobbyActors.Remove(Key);
-	}
-}
-
-void AGS_CustomLobbyPC::SpawnOrUpdateLobbyActor(const FLobbyPlayerInfo& PlayerInfo)
-{
-	if (!PlayerInfo.PlayerState.IsValid() || !PawnMappingData) return;
-	UE_LOG(LogTemp, Log, TEXT("====== SpawnOrUpdateLobbyActor 호출 시작: %s ======"), *PlayerInfo.PlayerName);
-
-	// TWeakObjectPtr를 키로 사용하므로 바로 찾기
-	TObjectPtr<AGS_LobbyDisplayActor>* FoundActorPtr = SpawnedLobbyActors.Find(PlayerInfo.PlayerState);
-
-	// 이미 스폰된 액터가 있는지 확인
-	if (FoundActorPtr && *FoundActorPtr)
-	{
-		(*FoundActorPtr)->Destroy();
-		SpawnedLobbyActors.Remove(PlayerInfo.PlayerState);
-		UE_LOG(LogTemp, Warning, TEXT("--> %s의 기존 액터를 파괴하고 새로 스폰합니다."), *PlayerInfo.PlayerName);
-	}
-
-	// 스폰할 위치 찾기
-	TArray<TObjectPtr<AGS_SpawnSlot>>& SlotsToSearch = (PlayerInfo.PlayerRole == EPlayerRole::PR_Guardian) ? CachedGuardianSlots : CachedSeekerSlots;
-	AGS_SpawnSlot* SpawnSlot = nullptr;
-	UE_LOG(LogTemp, Log, TEXT("--> 역할(%s)에 맞는 스폰 슬롯을 찾습니다. (요구 인덱스: %d)"), (PlayerInfo.PlayerRole == EPlayerRole::PR_Guardian) ? TEXT("가디언") : TEXT("시커"), PlayerInfo.SlotIndex);
-
-	for (AGS_SpawnSlot* Slot : SlotsToSearch)
-	{
-		if (Slot && Slot->GetSlotIndex() == PlayerInfo.SlotIndex)
-		{
-			SpawnSlot = Slot;
-			break;
-		}
-	}
-
-	if (!SpawnSlot)
-	{
-		UE_LOG(LogTemp, Error, TEXT("--> SpawnOrUpdateLobbyActor 실패 (%s): 인덱스 %d에 해당하는 스폰 슬롯을 찾지 못했습니다."), *PlayerInfo.PlayerName, PlayerInfo.SlotIndex);
-		return;
-	}
-	UE_LOG(LogTemp, Log, TEXT("--> 스폰 슬롯 찾음: %s (위치: %s)"), *SpawnSlot->GetName(), *SpawnSlot->GetActorLocation().ToString());
-
-	// 스폰할 에셋 정보 찾기
-	const FAssetToSpawn* SpawnAssetInfo = nullptr;
-	if (PlayerInfo.PlayerRole == EPlayerRole::PR_Guardian)
-	{
-		SpawnAssetInfo = PawnMappingData->GuardianPawnClasses.Find(PlayerInfo.GuardianJob);
-	}
-	else
-	{
-		SpawnAssetInfo = PawnMappingData->SeekerPawnClasses.Find(PlayerInfo.SeekerJob);
-	}
-
-	if (!SpawnAssetInfo || !SpawnAssetInfo->DisplayActorClass) return;
-	UE_LOG(LogTemp, Log, TEXT("--> 에셋 정보 찾음. 스폰할 DisplayActor 클래스: %s"), *SpawnAssetInfo->DisplayActorClass->GetName());
-
-	// 액터 스폰
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	FTransform SpawnTransform = SpawnSlot->GetActorTransform();
-
-	UE_LOG(LogTemp, Log, TEXT("--> LobbyDisplayActor 스폰 시도..."));
-	AGS_LobbyDisplayActor* NewDisplayActor = GetWorld()->SpawnActor<AGS_LobbyDisplayActor>(SpawnAssetInfo->DisplayActorClass, SpawnTransform, SpawnParams);
-
-	if (NewDisplayActor)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("--> 스폰 성공 (%s)! 외형 설정을 진행합니다."), *PlayerInfo.PlayerName);
-		NewDisplayActor->SetupDisplay(SpawnAssetInfo->SkeletalMeshClass, SpawnAssetInfo->Lobby_AnimBlueprintClass, SpawnAssetInfo->WeaponMeshList);
-		NewDisplayActor->SetReadyState(PlayerInfo.bIsReady);
-		SpawnedLobbyActors.Add(PlayerInfo.PlayerState, NewDisplayActor);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("--> 스폰 실패 (%s)!"), *PlayerInfo.PlayerName);
-	}
-}
-
-void AGS_CustomLobbyPC::CollectAndCacheSpawnSlots()
-{
-	CachedGuardianSlots.Empty();
-    CachedSeekerSlots.Empty();
-    
-    TArray<AActor*> FoundActors;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGS_SpawnSlot::StaticClass(), FoundActors);
-
-    for (AActor* Actor : FoundActors)
-    {
-        AGS_SpawnSlot* Slot = Cast<AGS_SpawnSlot>(Actor);
-        if (Slot)
-        {
-            if (Slot->GetRole() == EPlayerRole::PR_Guardian)
-            {
-                CachedGuardianSlots.Add(Slot);
-            }
-            else if (Slot->GetRole() == EPlayerRole::PR_Seeker)
-            {
-                CachedSeekerSlots.Add(Slot);
-            }
-        }
-    }
-
-    // 인덱스 순으로 정렬
-    auto SortSlots = [](const TObjectPtr<AGS_SpawnSlot>& A, const TObjectPtr<AGS_SpawnSlot>& B) {
-        if (!A || !B) return false;
-        return A->GetSlotIndex() < B->GetSlotIndex();
-    };
-    CachedGuardianSlots.Sort(SortSlots);
-    CachedSeekerSlots.Sort(SortSlots);
 }
 
 bool AGS_CustomLobbyPC::CheckAndShowUnsavedChangesConfirm()
