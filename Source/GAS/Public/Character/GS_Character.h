@@ -15,6 +15,7 @@ class UGS_PlayerInfoWidget;
 class UGS_HPText;
 class UGS_HPWidget;
 class AGS_Weapon;
+class UDecalComponent;
 class UAkAudioEvent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeath);
@@ -134,6 +135,9 @@ public:
 	FOnCharacterDeath OnDeathDelegate;
 	
 protected:
+	virtual void NotifyActorBeginCursorOver() override;
+	virtual void NotifyActorEndCursorOver() override;
+	
 	//component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_DebuffComp> DebuffComp;
@@ -146,18 +150,35 @@ protected:
 	
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TArray<FWeaponSlot> WeaponSlots;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="RTS")
+	TObjectPtr<UDecalComponent> SelectionDecal;
+
+	bool bIsHovered;
+	
+	virtual FLinearColor GetCurrentDecalColor();
+	virtual void UpdateDecal();
+	virtual bool ShowDecal();
+	void ShowDecalWithColor(const FLinearColor& Color);
+	virtual void OnHoverBegin();
+	virtual void OnHoverEnd();
 	
 private:
 	UPROPERTY(ReplicatedUsing = OnRep_CharacterSpeed)
 	float CharacterSpeed;
 	float DefaultCharacterSpeed;
+	
+	UPROPERTY(Replicated)
+	bool bIsDead;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynamicDecalMaterial;
 
 	UFUNCTION()
 	void OnRep_CharacterSpeed();
 
 	void SpawnAndAttachWeapons();
-
-	UPROPERTY(Replicated)
-	bool bIsDead = false;
+	
+	void SetHovered(bool bHovered);
 };
 

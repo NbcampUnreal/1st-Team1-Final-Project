@@ -15,6 +15,7 @@ class UMaterialInterface;
 class UGS_StatComp;
 class AGS_PlayerState;
 class UGS_DebuffVFXComponent;
+class AGS_Monster;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -35,6 +36,8 @@ struct FSeekerState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsEquip;
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSeekerHover, bool, bIsHover);
 
 UCLASS()
 class GAS_API AGS_Seeker : public AGS_Player
@@ -127,7 +130,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySkillSound(class UAkAudioEvent* SoundToPlay);
 
-public:
 	// Weapon
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	UChildActorComponent* Weapon;
@@ -135,7 +137,6 @@ public:
 	// State
 	UPROPERTY(Replicated)
 	bool CanChangeSeekerGait;
-
 	
 	// Combo
 	/*UPROPERTY(Replicated)
@@ -159,29 +160,9 @@ public:
 	UPROPERTY(Replicated)
 	EGait LastSeekerGait;
 
-private :
-	UPROPERTY(VisibleAnywhere, Category="State", Replicated)
-	FSeekerState SeekerState;
+	UPROPERTY(BlueprintAssignable, Category="RTS")
+	FOnSeekerHover OnSeekerHover;
 
-//====================================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	
-public:	
 	// ================
 	// LowHP 스크린 효과
 	// ================
@@ -221,10 +202,10 @@ public:
 	
 	// 몬스터가 전투 음악 시작/중지를 요청할 때 호출
 	UFUNCTION(BlueprintCallable)
-	void AddCombatMonster(class AGS_Monster* Monster);
+	void AddCombatMonster(AGS_Monster* Monster);
 	
 	UFUNCTION(BlueprintCallable)
-	void RemoveCombatMonster(class AGS_Monster* Monster);
+	void RemoveCombatMonster(AGS_Monster* Monster);
 
 	// 새로운 몬스터 감지 시스템 (시커의 CombatTrigger)
 	UFUNCTION()
@@ -232,21 +213,6 @@ public:
 	
 	UFUNCTION()
 	void OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-	
-private:
-	UPROPERTY()
-	TArray<class AGS_Monster*> NearbyMonsters;
-
-	void StartCombatMusic();
-	void StopCombatMusic();
-
-	UFUNCTION(Client, Unreliable)
-	void ClientRPCStopCombatMusic();
-
-	void UpdateCombatMusicState();
-
-	// 플레이어 상태 변경 처리
-	void HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive);
 
 protected:
 	virtual void BeginPlay() override;
@@ -306,4 +272,28 @@ protected:
 	// ================
 	UPROPERTY(EditDefaultsOnly, Category="Effects", meta=(ClampMin="0.0", ClampMax="1.0"))
 	float LowHealthThresholdRatio = 0.3f;
+	
+	virtual void OnHoverBegin() override;
+	virtual void OnHoverEnd() override;
+	virtual FLinearColor GetCurrentDecalColor() override;
+	virtual bool ShowDecal() override;
+
+private:
+	UPROPERTY(VisibleAnywhere, Category="State", Replicated)
+	FSeekerState SeekerState;
+	
+	UPROPERTY()
+	TArray<AGS_Monster*> NearbyMonsters;
+
+	void StartCombatMusic();
+	void StopCombatMusic();
+
+	UFUNCTION(Client, Unreliable)
+	void ClientRPCStopCombatMusic();
+
+	void UpdateCombatMusicState();
+
+	// 플레이어 상태 변경 처리
+	void HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive);
+	
 };

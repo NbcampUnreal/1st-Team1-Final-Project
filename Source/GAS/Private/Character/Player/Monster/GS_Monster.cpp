@@ -3,7 +3,6 @@
 
 #include "Character/Player/Monster/GS_Monster.h"
 #include "AI/GS_AIController.h"
-#include "Components/DecalComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "AkComponent.h"
@@ -19,6 +18,7 @@
 #include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "Sound/GS_MonsterAudioComponent.h"
 #include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Components/DecalComponent.h"
 #include "Components/WidgetComponent.h"
 
 
@@ -28,10 +28,6 @@ AGS_Monster::AGS_Monster()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	MonsterSkillComp = CreateDefaultSubobject<UGS_MonsterSkillComp>(TEXT("MonsterSkillComp"));
-
-	SelectionDecal = CreateDefaultSubobject<UDecalComponent>("SelectionDecal");
-	SelectionDecal->SetupAttachment(RootComponent);
-	SelectionDecal->SetVisibility(false);
 
 	SkillCooldownWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SkillCooldownWidgetComp"));
 	SkillCooldownWidgetComp->SetupAttachment(RootComponent);
@@ -66,18 +62,13 @@ AGS_Monster::AGS_Monster()
 	AvoidanceRadius = 200.0f;
 	bCommandLocked = false;
 	bSelectionLocked = false;
+	bIsSelected = false;
 }
 
 void AGS_Monster::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (SelectionDecal && SelectionDecal->GetDecalMaterial())
-	{
-		DynamicDecalMaterial = UMaterialInstanceDynamic::Create(SelectionDecal->GetDecalMaterial(), this);
-		SelectionDecal->SetDecalMaterial(DynamicDecalMaterial);
-	}
-	
 	if (IsValid(MonsterSkillComp))
 	{
 		MonsterSkillComp->OnMonsterSkillCooldownChanged.AddDynamic(this, &AGS_Monster::HandleSkillCooldownChanged);
@@ -104,20 +95,6 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 	DOREPLIFETIME(AGS_Monster, bCommandLocked);
 	DOREPLIFETIME(AGS_Monster, bSelectionLocked);
-}
-
-void AGS_Monster::NotifyActorBeginCursorOver()
-{
-	Super::NotifyActorBeginCursorOver();
-	
-	SetHovered(true);
-}
-
-void AGS_Monster::NotifyActorEndCursorOver()
-{
-	Super::NotifyActorEndCursorOver();
-	
-	SetHovered(false);
 }
 
 void AGS_Monster::OnDeath()
@@ -215,43 +192,53 @@ void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 }
 
 
-void AGS_Monster::SetSelected(bool bIsSelected, bool bPlaySound)
+void AGS_Monster::SetSelected(bool bSelected, bool bPlaySound)
 {
-	bIsRTSSelected = bIsSelected;
-	UpdateDecalColor();
+	bIsSelected = bSelected;
+	UpdateDecal();
 
 	// 선택되었고, 소리 재생이 허용된 경우에만 소리 재생
-	if (bIsSelected && bPlaySound && ClickSoundEvent)
+	if (bSelected && bPlaySound && ClickSoundEvent)
 	{
 		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
 	}
 }
 
-void AGS_Monster::SetHovered(bool bIsHovered)
+FLinearColor AGS_Monster::GetCurrentDecalColor()
 {
-	bIsRTSHovered = bIsHovered;
-	UpdateDecalColor();
+	if (bIsSelected)
+	{
+		return FLinearColor::Green;
+	}
+	else if (bIsHovered)
+	{
+		return FLinearColor::Yellow;
+	}
+	else
+	{
+		return FLinearColor::Yellow;
+	}
 }
 
-void AGS_Monster::UpdateDecalColor()
+void AGS_Monster::UpdateDecal()
 {
-	if (!DynamicDecalMaterial || !SelectionDecal)
+	if (!SelectionDecal || !ShowDecal())
 	{
+		SelectionDecal->SetVisibility(false);
 		return;
 	}
-    
-	if (bIsRTSSelected)
+
+	if (bIsSelected || bIsHovered)
 	{
-		SelectionDecal->SetVisibility(true);
-		DynamicDecalMaterial->SetVectorParameterValue("DecalColor", FLinearColor::Green);
-	}
-	else if (bIsRTSHovered)
-	{
-		SelectionDecal->SetVisibility(true);
-		DynamicDecalMaterial->SetVectorParameterValue("DecalColor", FLinearColor::Yellow);
+		ShowDecalWithColor(GetCurrentDecalColor());
 	}
 	else
 	{
 		SelectionDecal->SetVisibility(false);
 	}
+}
+
+bool AGS_Monster::ShowDecal()
+{
+	return true;
 }

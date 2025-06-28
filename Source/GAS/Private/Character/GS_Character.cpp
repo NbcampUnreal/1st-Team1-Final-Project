@@ -16,6 +16,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "Character/Player/GS_Player.h"
+#include "Components/DecalComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
 
 AGS_Character::AGS_Character()
@@ -31,6 +32,13 @@ AGS_Character::AGS_Character()
 	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HPTextWidgetComp->SetVisibility(false);
+
+	SelectionDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("SelectionDecal"));
+	SelectionDecal->SetupAttachment(RootComponent);
+	SelectionDecal->SetVisibility(false);
+
+	bIsDead = false;
+	bIsHovered = false;
 }
 
 void AGS_Character::BeginPlay()
@@ -62,6 +70,12 @@ void AGS_Character::BeginPlay()
 	if (HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
 	{
 		HPTextWidgetComp->SetVisibility(true);
+	}
+
+	if (SelectionDecal && SelectionDecal->GetDecalMaterial())
+	{
+		DynamicDecalMaterial = UMaterialInstanceDynamic::Create(SelectionDecal->GetDecalMaterial(), this);
+		SelectionDecal->SetDecalMaterial(DynamicDecalMaterial);
 	}
 	
 	DefaultCharacterSpeed = this->GetCharacterMovement()->MaxWalkSpeed;
@@ -331,8 +345,87 @@ void AGS_Character::DestroyAllWeapons()
 	}
 }
 
-
 void AGS_Character::OnRep_CharacterSpeed()
 {
 	GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
+}
+
+
+void AGS_Character::NotifyActorBeginCursorOver()
+{
+	Super::NotifyActorBeginCursorOver();
+	
+	SetHovered(true);
+}
+
+void AGS_Character::NotifyActorEndCursorOver()
+{
+	Super::NotifyActorEndCursorOver();
+
+	SetHovered(false);
+}
+
+
+void AGS_Character::SetHovered(bool bHovered)
+{
+	if (bIsHovered != bHovered)
+	{
+		bIsHovered = bHovered;
+		
+		if (bIsHovered)
+		{
+			OnHoverBegin(); 
+		}
+		else
+		{
+			OnHoverEnd();
+		}
+        
+		UpdateDecal();
+	}
+}
+
+void AGS_Character::UpdateDecal()
+{
+	if (!SelectionDecal || !ShowDecal())
+	{
+		SelectionDecal->SetVisibility(false);
+		return;
+	}
+
+	if (bIsHovered)
+	{
+		ShowDecalWithColor(GetCurrentDecalColor());
+	}
+	else
+	{
+		SelectionDecal->SetVisibility(false);
+	}
+}
+
+void AGS_Character::ShowDecalWithColor(const FLinearColor& Color)
+{
+	SelectionDecal->SetVisibility(true);
+	if (DynamicDecalMaterial)
+	{
+		DynamicDecalMaterial->SetVectorParameterValue(TEXT("DecalColor"), Color);
+	}
+}
+
+FLinearColor AGS_Character::GetCurrentDecalColor()
+{
+	return FLinearColor::White;
+}
+
+bool AGS_Character::ShowDecal()
+{
+	return false;
+}
+
+void AGS_Character::OnHoverBegin()
+{
+}
+
+void AGS_Character::OnHoverEnd()
+{
 }

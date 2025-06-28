@@ -32,7 +32,8 @@ public class GAS : ModuleRules
             "Chooser",
             "PoseSearch",
             "GeometryCollectionEngine",
-            "NavigationSystem"
+            "NavigationSystem",
+            "MediaAssets"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
