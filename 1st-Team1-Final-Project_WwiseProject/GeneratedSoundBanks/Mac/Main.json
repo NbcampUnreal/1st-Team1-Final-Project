@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{8CC685FC-588E-0096-56B7-9C35C3CED0C9}",
+    "Hash": "{EB8C9A75-DE88-0490-4B6F-9E6FFAE69DCF}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -309,7 +309,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Calvin_Growl_3_Male_Human_Voice_Over_Vocal_English_Middle_Age_Adult_Mature.wav",
-      "CachePath": "C0/{C079722B-B203-EDCA-7EEE-086EAD715BC7}.wem"
+      "CachePath": "8F/{8FF929ED-A99D-63C8-3CF2-45DE9A25DBFA}.wem"
      },
      {
       "Id": "230669099",
@@ -368,28 +368,12 @@
       "CachePath": "E4/{E4362B59-0A9A-4535-8495-A5FD31975BB3}.wem"
      },
      {
-      "Id": "268195963",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ButtonSFX_Disable.wav",
-      "CachePath": "28/{284B0DB1-117A-D6F5-E366-590734C0AC8D}.wem"
-     },
-     {
       "Id": "269881452",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MonsterSnarlGrowl_S08AN.269.wav",
       "CachePath": "D2/{D2C4446F-497F-10EB-0E32-84BC20DDF7B8}.wem"
-     },
-     {
-      "Id": "273427146",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ButtonSFX3_Select.wav",
-      "CachePath": "14/{14859412-C6E0-FCFF-F757-F08DBC124940}.wem"
      },
      {
       "Id": "275944875",
@@ -501,7 +485,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_dagger_slash_quick.wav",
-      "CachePath": "E1/{E1037045-43EF-EF2A-7B9D-64BAC251F3F8}.wem"
+      "CachePath": "86/{86296771-4C19-8802-2F6F-E739524F8383}.wem"
      },
      {
       "Id": "356621308",
@@ -534,6 +518,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian.wav",
       "CachePath": "22/{229A5453-4A62-EF27-EAA1-F84C2AEC156F}.wem"
+     },
+     {
+      "Id": "372981139",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_Jump_1_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "F7/{F7117DF6-ED74-986B-09C2-FBB104D7A9E6}.wem"
      },
      {
       "Id": "373316616",
@@ -693,7 +685,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "A7/{A7C1F8D0-6258-35B7-D178-A1BEDF4AB5A8}.wem"
+      "CachePath": "63/{63D72590-3161-7A93-8600-E791AC7F0409}.wem"
      },
      {
       "Id": "477469204",
@@ -894,14 +886,6 @@
       "Location": "Memory",
       "ShortName": "MA_POR_FX_Texture_One_Shot_Agitate.wav",
       "CachePath": "D9/{D916BA6B-7DBC-2E15-BC16-8012A9D27838}.wem"
-     },
-     {
-      "Id": "600873638",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_04.wav",
-      "CachePath": "A9/{A995FC7A-1FF1-B21C-C0E6-E6F20D4C7319}.wem"
      },
      {
       "Id": "606572947",
@@ -1149,7 +1133,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy.wav",
-      "CachePath": "65/{65E3CA70-E8EF-C65A-AB1C-F61119B09101}.wem"
+      "CachePath": "89/{893761AD-A594-26EE-9B43-B687EEADFE1B}.wem"
      },
      {
       "Id": "802472056",
@@ -1206,14 +1190,6 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Coughing_1_Male_Human_Voice_Over_Vocal_English_Russian.wav",
       "CachePath": "BA/{BA48F7C2-D46B-FF4C-E6A0-C9E691A87A03}.wem"
-     },
-     {
-      "Id": "831285636",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ButtonSFX_Able.wav",
-      "CachePath": "25/{25C57E73-5327-875E-E17C-144084CDC13B}.wem"
      },
      {
       "Id": "833357717",
@@ -1349,7 +1325,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_hammer_impact_heavy_ring.wav",
-      "CachePath": "9B/{9BD71878-2526-D87D-F7F3-4E47B5415D4F}.wem"
+      "CachePath": "63/{639E9740-5D1A-162C-B5FE-50EB3989E30D}.wem"
      },
      {
       "Id": "900809544",
@@ -1558,6 +1534,14 @@
       "Location": "Memory",
       "ShortName": "ESM_DGF_fx_foley_footstep_slime_monster_run_fast_goo_squeeze_08.wav",
       "CachePath": "6C/{6C255338-F597-3C27-CA16-E75965EA8A51}.wem"
+     },
+     {
+      "Id": "1040178103",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_Jump_5_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "BB/{BB1B9670-72DF-0DD9-BB99-9833AB7E64A3}.wem"
      },
      {
       "Id": "1052175375",
@@ -2217,13 +2201,10 @@
       "MaxAttenuation": "1000",
       "DurationType": "OneShot",
       "DurationMin": "0.54591566",
-      "DurationMax": "0.7596884",
+      "DurationMax": "0.6770234",
       "MediaRefs": [
        {
         "Id": "578835809"
-       },
-       {
-        "Id": "600873638"
        },
        {
         "Id": "848033451"
@@ -3759,13 +3740,8 @@
       "ObjectPath": "\\Events\\Default Work Unit\\UI_SOUND\\UI_ButtonSFX_Able",
       "GUID": "{4B543912-C03A-4EEC-96E4-B06A2F9B579A}",
       "DurationType": "OneShot",
-      "DurationMin": "0.9230839",
-      "DurationMax": "0.9230839",
-      "MediaRefs": [
-       {
-        "Id": "831285636"
-       }
-      ]
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "1277181590",
@@ -3773,13 +3749,8 @@
       "ObjectPath": "\\Events\\Default Work Unit\\UI_SOUND\\UI_ButtonSFX_Disable",
       "GUID": "{39B3734C-350B-4435-8668-E75DB82F1D5B}",
       "DurationType": "OneShot",
-      "DurationMin": "0.9230839",
-      "DurationMax": "0.9230839",
-      "MediaRefs": [
-       {
-        "Id": "268195963"
-       }
-      ]
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "1562823702",
@@ -3787,13 +3758,8 @@
       "ObjectPath": "\\Events\\Default Work Unit\\UI_SOUND\\UI_ButtonSFX_Select",
       "GUID": "{440A0D46-796D-4C69-9C71-5EEB6C876D51}",
       "DurationType": "OneShot",
-      "DurationMin": "0.9230839",
-      "DurationMax": "0.9230839",
-      "MediaRefs": [
-       {
-        "Id": "273427146"
-       }
-      ]
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "1545647172",
@@ -3922,9 +3888,6 @@
         "Id": "177115164"
        },
        {
-        "Id": "579496560"
-       },
-       {
         "Id": "844797285"
        }
       ]
@@ -4003,6 +3966,24 @@
         }
        ]
       }
+     },
+     {
+      "Id": "377653151",
+      "Name": "Voice_Merci_Jump",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Merci\\Voice_Merci_Jump",
+      "GUID": "{888AE5E5-0803-4DD0-A033-9B7BCE1C3B86}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.31510416",
+      "DurationMax": "0.32782814",
+      "MediaRefs": [
+       {
+        "Id": "372981139"
+       },
+       {
+        "Id": "1040178103"
+       }
+      ]
      },
      {
       "Id": "108894333",
@@ -4134,6 +4115,6 @@
     ]
    }
   ],
-  "FileHash": "{08936048-9005-14F5-5150-BCF9E2F83F3C}"
+  "FileHash": "{BCD47FA6-D245-631E-5F1E-D3BC6D3FF5ED}"
  }
 }

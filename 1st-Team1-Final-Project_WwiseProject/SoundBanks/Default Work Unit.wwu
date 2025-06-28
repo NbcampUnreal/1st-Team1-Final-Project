@@ -82,6 +82,7 @@
 						<ObjectRef Name="EV_Merci_ArrowZero" ID="{1A835349-0C17-4D22-AF35-BAFC0385C29C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Merci_Die" ID="{169823F8-E7B9-4D5E-AE2E-003C93280F66}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_CampFire" ID="{BCEA7046-966A-4D96-8341-33FB4002A3CD}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Merci_Jump" ID="{888AE5E5-0803-4DD0-A033-9B7BCE1C3B86}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_Hit" ID="{3E24D4DA-C114-4DD0-95F8-709C1A310631}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresSlashSkill" ID="{AE1FDE02-250E-4DFA-8402-681C1B1B8785}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_FeverMode" ID="{C93E5944-6465-4E0C-842D-D15DBFAF2833}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
