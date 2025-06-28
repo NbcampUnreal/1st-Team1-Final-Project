@@ -1,17 +1,20 @@
 #include "Character/Player/GS_Player.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Camera/CameraComponent.h"
-#include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/GS_TpsController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Components/WidgetComponent.h"
 #include "GameFramework/Controller.h"
 #include "System/GS_PlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Net/UnrealNetwork.h"
+#include "UI/Character/GS_SteamNameWidgetComp.h"
 
 AGS_Player::AGS_Player()
 {
@@ -33,6 +36,12 @@ AGS_Player::AGS_Player()
 	PostProcessComponent->bUnbound = true; // 시야 안 전체에만 적용할 경우 false
 	PostProcessComponent->BlendWeight = 0.f; // 기본은 비활성화
 
+	//steam name widget
+	SteamNameWidgetComp = CreateDefaultSubobject<UGS_SteamNameWidgetComp>(TEXT("SteamWidgetComp"));
+	SteamNameWidgetComp->SetupAttachment(RootComponent);
+	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
+	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BlurMat(TEXT("/Game/VFX/MI_AbscureDebuff"));
 	if (BlurMat.Succeeded())
 	{
@@ -84,6 +93,12 @@ void AGS_Player::BeginPlay()
 			AkComponent->OcclusionRefreshInterval = 0.0f;
 			UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Player AkComponent occlusion DISABLED."));
 		}
+	}
+
+	//steam widget rotate
+	if (IsValid(SteamNameWidgetComp) && !HasAuthority())
+	{
+		GetWorldTimerManager().SetTimer(SteamNameWidgetRotationTimer, this, &AGS_Player::UpdateSteamNameWidgetRotation, 0.1f, true);
 	}
 }
 
@@ -370,3 +385,21 @@ void AGS_Player::PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPos
 	AkComponent->PostAkEvent(SoundEvent, 0, Callback);
 }
 
+void AGS_Player::UpdateSteamNameWidgetRotation()
+{
+	if (!IsValid(SteamNameWidgetComp))
+	{
+		GetWorldTimerManager().ClearTimer(SteamNameWidgetRotationTimer);
+		return;
+	}
+    
+	if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
+	{
+		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+        
+		SteamNameWidgetComp->SetWorldRotation(WidgetRotation);
+	}
+}
