@@ -177,10 +177,11 @@ private:
 	void BindToLPS();
 	void UnbindFromLPS();
 
-	FVector2D GetRuneDragOffset();
-
 	UPROPERTY()
 	UGS_ArcaneBoardLPS* ArcaneBoardLPS;
+
+	UPROPERTY()
+	UGS_RuneGridCellWidget* LastClickedCell;
 
 	//툴팁
 	FVector2D TooltipSize;
