@@ -57,6 +57,17 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 	}
 }
 
+void UGS_MerciMovingSkill::InterruptSkill()
+{
+	Super::InterruptSkill();
+
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	if (MerciCharacter->GetSkillComp())
+	{
+		MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
+	}
+}
+
 bool UGS_MerciMovingSkill::CanActive() const
 {
 	return true;

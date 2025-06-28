@@ -67,6 +67,17 @@ void UGS_MerciUltimateSkill::ExecuteSkillEffect()
 	UE_LOG(LogTemp, Warning, TEXT("AutoAimingMode Start"));
 }
 
+void UGS_MerciUltimateSkill::InterruptSkill()
+{
+	Super::InterruptSkill();
+
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	if (MerciCharacter->GetSkillComp())
+	{
+		MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
+	}
+}
+
 bool UGS_MerciUltimateSkill::IsActive() const
 {
 	return bIsAutoAimingState;
