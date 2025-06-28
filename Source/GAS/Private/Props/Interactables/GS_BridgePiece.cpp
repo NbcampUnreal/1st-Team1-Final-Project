@@ -1,5 +1,8 @@
 #include "Props/Interactables/GS_BridgePiece.h"
 
+#include "Kismet/KismetSystemLibrary.h"
+#include "Net/UnrealNetwork.h"
+
 AGS_BridgePiece::AGS_BridgePiece()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -11,11 +14,16 @@ AGS_BridgePiece::AGS_BridgePiece()
 	MeshComponent->SetIsReplicated(true);
 }
 
-void AGS_BridgePiece::SetBridgeMesh(UStaticMesh* InMesh, float InValue)
+void AGS_BridgePiece::SetBridgeMesh(UStaticMesh* InMesh, UMaterialInterface* InMaterial, float InValue)
 {
 	if (MeshComponent && InMesh)
 	{
 		MeshComponent->SetStaticMesh(InMesh);
+
+		if (InMaterial)
+		{
+			BridgeMaterial = InMaterial;
+		}
 		MaxHealth = InValue;
 	}
 }
@@ -39,6 +47,14 @@ void AGS_BridgePiece::BrokeBridge(float InDamage)
 	}
 }
 
+void AGS_BridgePiece::OnRep_BridgeMaterial()
+{
+	if (MeshComponent && BridgeMaterial)
+	{
+		MeshComponent->SetMaterial(0, BridgeMaterial);
+	}
+}
+
 void AGS_BridgePiece::BeginPlay()
 {
 	Super::BeginPlay();
@@ -47,6 +63,13 @@ void AGS_BridgePiece::BeginPlay()
 
 	MeshComponent->SetSimulatePhysics(false);
 	MeshComponent->SetMassOverrideInKg(NAME_None, 70000.0f, true);
+}
+
+void AGS_BridgePiece::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, BridgeMaterial);
 }
 
 void AGS_BridgePiece::StopSimulate()
