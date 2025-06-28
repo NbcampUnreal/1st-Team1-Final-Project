@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "Data/GS_PlaceableObjectsRow.h"
 #include "GameFramework/Actor.h"
+#include "Sound/SoundBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "GS_BuildManager.generated.h"
 
 struct FGS_PlaceableObjectsRow;
@@ -54,6 +56,13 @@ public:
 	FLinearColor GridColor;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting|Grid")
 	float GridOpacity;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setting|Sound")
+	TObjectPtr<USoundBase> CancelSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setting|Sound")
+	TObjectPtr<USoundBase> RotateSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Setting|Sound")
+	TObjectPtr<USoundBase> DeleteSound;
 	
 	void ChangeDecalType(FDataTableRowHandle* Data);
 	void ClearDecalType();

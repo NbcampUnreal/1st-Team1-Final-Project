@@ -112,6 +112,16 @@ bool UGS_AresMovingSkill::CanActiveInternally() const
 	return OwnerCharacter && !bIsCoolingDown;
 }
 
+void UGS_AresMovingSkill::InterruptSkill()
+{
+	Super::InterruptSkill();
+	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	if (AresCharacter->GetSkillComp())
+	{
+		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
+	}
+}
+
 void UGS_AresMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
 	// 데미지
@@ -147,7 +157,9 @@ void UGS_AresMovingSkill::StartDash()
 	if (OwningComp)
 	{
 		FVector SkillLocation = OwnerCharacter->GetActorLocation();
-		FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+		//FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+		FRotator SkillRotation = FRotator(0.f, 0.f, 0.f);
+
 
 		// 스킬 시전 VFX 재생
 		OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);

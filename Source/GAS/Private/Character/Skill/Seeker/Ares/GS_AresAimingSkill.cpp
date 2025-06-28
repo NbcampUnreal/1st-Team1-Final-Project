@@ -2,6 +2,7 @@
 
 
 #include "Character/Skill/Seeker/Ares/GS_AresAimingSkill.h"
+#include "Character/Skill/Seeker/Ares/GS_AresUltimateSkill.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Weapon/Projectile/Seeker/GS_SwordAuraProjectile.h"
 #include "Kismet/GameplayStatics.h"
@@ -78,10 +79,24 @@ void UGS_AresAimingSkill::ExecuteSkillEffect()
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
 	);
 
+
+	UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp();
+
+
+	if (SkillComp)
+	{
+		if (UGS_AresUltimateSkill* UltimateSkill = Cast<UGS_AresUltimateSkill>(SkillComp->GetSkillFromSkillMap(ESkillSlot::Ultimate)))
+		{
+			bIsBerserker = UltimateSkill->IsActive();
+		}
+		
+	}
+
 	if (ProjectileA)
 	{
-		ProjectileA->EffectType = ESwordAuraEffectType::Left;
-		UGameplayStatics::FinishSpawningActor(ProjectileA, SpawnTransform);
+		ProjectileA->EffectType = bIsBerserker
+			? ESwordAuraEffectType::LeftBuff
+			: ESwordAuraEffectType::LeftNormal;
 		ProjectileA->Multicast_StartSwordSlashVFX();
 	}
 
@@ -94,6 +109,16 @@ void UGS_AresAimingSkill::ExecuteSkillEffect()
 		0.3f, // 지연 시간 (초)
 		false
 	);
+}
+
+void UGS_AresAimingSkill::InterruptSkill()
+{
+	Super::InterruptSkill();
+	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	if (AresCharacter->GetSkillComp())
+	{
+		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
+	}
 }
 
 bool UGS_AresAimingSkill::IsActive() const
@@ -142,7 +167,9 @@ void UGS_AresAimingSkill::SpawnSecondProjectile()
 
 	if (ProjectileB)
 	{
-		ProjectileB->EffectType = ESwordAuraEffectType::Right;
+		ProjectileB->EffectType = bIsBerserker
+			? ESwordAuraEffectType::RightBuff
+			: ESwordAuraEffectType::RightNormal;
 		UGameplayStatics::FinishSpawningActor(ProjectileB, SpawnTransform);
 		ProjectileB->Multicast_StartSwordSlashVFX();
 	}

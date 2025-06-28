@@ -19,10 +19,13 @@ public:
 
 	virtual void ActiveSkill() override;
 	virtual void DeactiveSkill() override;
+
+	void DeactiveSkillEffect();
 	virtual void ExecuteSkillEffect() override;
 	virtual bool IsActive() const override;
 
 private:
+	//UPROPERTY(Replicated)
 	bool bIsBerserker;
 
 	FTimerHandle UltimateSkillTimerHandle;

@@ -20,6 +20,8 @@
 #include "Character/Component/GS_DebuffVFXComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 AGS_Monster::AGS_Monster()
@@ -80,6 +82,17 @@ void AGS_Monster::BeginPlay()
 		AkComponent->OcclusionRefreshInterval = 0.0f;
 		UE_LOG(LogTemp, Warning, TEXT("AGS_Monster: AkComponent occlusion DISABLED."));
 	}
+	
+	if (IsValid(SkillCooldownWidgetComp) && !HasAuthority())
+	{
+		GetWorldTimerManager().SetTimer(
+			SkillCooldownWidgetTimer,
+			this,
+			&AGS_Monster::UpdateSkillCooldownWidget,
+			0.1f, 
+			true 
+		);
+	}
 }
 
 void AGS_Monster::PostInitializeComponents()
@@ -96,6 +109,13 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AGS_Monster, bCommandLocked);
 	DOREPLIFETIME(AGS_Monster, bSelectionLocked);
 }
+
+void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
+} 
 
 void AGS_Monster::OnDeath()
 {
@@ -241,4 +261,25 @@ void AGS_Monster::UpdateDecal()
 bool AGS_Monster::ShowDecal()
 {
 	return true;
+}
+
+void AGS_Monster::UpdateSkillCooldownWidget()
+{
+	if (!IsValid(SkillCooldownWidgetComp))
+	{
+		// 위젯이 유효하지 않으면 타이머를 정리하고 함수 종료
+		GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
+		return;
+	}
+	
+	if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
+	{
+		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+
+		SkillCooldownWidgetComp->SetWorldRotation(WidgetRotation);
+	}
+	
 }

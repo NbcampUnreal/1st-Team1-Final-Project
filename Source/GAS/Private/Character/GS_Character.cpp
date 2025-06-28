@@ -66,10 +66,22 @@ void AGS_Character::BeginPlay()
 			}
 		}
 	}
-	
-	if (HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
+
+	//Set HP 3D widget (monster)
+	if (IsValid(HPTextWidgetComp) && HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
 	{
 		HPTextWidgetComp->SetVisibility(true);
+	}
+
+	if (IsValid(HPTextWidgetComp) && !HasAuthority())
+	{
+		GetWorldTimerManager().SetTimer(
+			HPWidgetRotationTimer,
+			this,
+			&AGS_Character::UpdateHPWidgetRotation,
+			0.1f,  
+			true   
+		);
 	}
 
 	if (SelectionDecal && SelectionDecal->GetDecalMaterial())
@@ -90,18 +102,7 @@ void AGS_Character::BeginPlay()
 void AGS_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (IsValid(HPTextWidgetComp) && !HasAuthority())
-	{
-		APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
-		
-		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
-		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
-		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
-		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
-        
-		HPTextWidgetComp->SetWorldRotation(WidgetRotation);
-	}
+	
 }
 
 void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -112,6 +113,14 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
 }
+
+void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	GetWorldTimerManager().ClearTimer(HPWidgetRotationTimer);
+}
+
 
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
@@ -365,7 +374,6 @@ void AGS_Character::NotifyActorEndCursorOver()
 	SetHovered(false);
 }
 
-
 void AGS_Character::SetHovered(bool bHovered)
 {
 	if (bIsHovered != bHovered)
@@ -428,4 +436,24 @@ void AGS_Character::OnHoverBegin()
 
 void AGS_Character::OnHoverEnd()
 {
+}
+
+
+void AGS_Character::UpdateHPWidgetRotation()
+{
+	if (!IsValid(HPTextWidgetComp))
+	{
+		GetWorldTimerManager().ClearTimer(HPWidgetRotationTimer);
+		return;
+	}
+    
+	if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
+	{
+		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+        
+		HPTextWidgetComp->SetWorldRotation(WidgetRotation);
+	}
 }

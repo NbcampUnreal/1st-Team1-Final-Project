@@ -11,12 +11,7 @@ void UGS_AN_EndCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	Super::Notify(MeshComp, Animation, EventReference);
 	
 	if (AGS_Seeker* Character = Cast<AGS_Seeker>(MeshComp->GetOwner()))
-	{		
-		/*if (Character->bComboEnded) // 이미 끝난 상태
-		{
-			Character->CanChangeSeekerGait = false;
-			return;
-		};*/
+	{
 		if (Character->HasAuthority())
 		{
 			Character->Multicast_SetIsFullBodySlot(false);
@@ -24,7 +19,6 @@ void UGS_AN_EndCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 			Character->SetMoveControlValue(true, true);
 			Character->SetSkillInputControl(true, true, true);
 			Character->CanChangeSeekerGait = true;
-			//Character->bComboEnded = true;
 			Character->CurrentComboIndex = 0;
 			Character->ComboInputOpen();
 		}

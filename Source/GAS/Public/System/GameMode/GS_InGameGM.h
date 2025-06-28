@@ -50,9 +50,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "HUD Classes")
 	TSubclassOf<AHUD> RTSHUDClass;
 
-
-
-public:
 	void HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, bool bIsAlive);
 
 	void CheckAllPlayersDead();
@@ -64,11 +61,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void EndGame(EGameResult Result);
 
+	/** 개별 클라이언트가 완전히 준비되었을 때 호출되는 함수*/
+	void NotifyPlayerIsReady(AController* PlayerController);
+
 private:
 	void SetGameResultOnAllPlayers(EGameResult Result);
-
+	/**모든 플레이어 준비완료되면 게임 시작 브로드캐스트*/
+	void StartMatchWhenAllReady();
+	
 	TArray<AController*> PendingPlayers;
-
+	UPROPERTY()
+	TSet<TObjectPtr<APlayerState>> ReadyPlayers;
+	
 	//던전 스폰
 protected:
 	void SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData);

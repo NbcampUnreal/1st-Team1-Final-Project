@@ -251,14 +251,14 @@ void UGS_ChanAimingSkill::InterruptSkill()
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 
 	OwnerPlayer->SetLookControlValue(true, true);
-	if (OwnerCharacter->GetSkillComp())
+	if (OwnerPlayer->GetSkillComp())
 	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
+		OwnerPlayer->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
 	}
 
 	CurrentStamina = 0;
 	ShowProgressBar(false);
-	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+	OwnerPlayer->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 }
 
 
@@ -316,7 +316,6 @@ void UGS_ChanAimingSkill::EndHoldUp()
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	if (OwnerPlayer)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("EndHoldUp")); // SJE
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("LoopEnd"));
 	}
 	

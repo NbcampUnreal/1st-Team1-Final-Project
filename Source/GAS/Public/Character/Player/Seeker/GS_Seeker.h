@@ -130,6 +130,14 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySkillSound(class UAkAudioEvent* SoundToPlay);
 
+	// ===============
+	// 공격 사운드 리셋 관련
+	// ===============
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack", meta = (ClampMin = "0.1", ClampMax = "5.0"))
+	float AttackSoundResetTime = 1.0f;
+
+	FTimerHandle AttackSoundResetTimerHandle;
+
 	// Weapon
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	UChildActorComponent* Weapon;
@@ -285,6 +293,9 @@ private:
 	UPROPERTY()
 	TArray<AGS_Monster*> NearbyMonsters;
 
+	UPROPERTY()
+	FTimerHandle LowHealthEffectTimer;
+
 	void StartCombatMusic();
 	void StopCombatMusic();
 
@@ -292,6 +303,7 @@ private:
 	void ClientRPCStopCombatMusic();
 
 	void UpdateCombatMusicState();
+	void UpdateLowHealthEffect();
 
 	// 플레이어 상태 변경 처리
 	void HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive);
