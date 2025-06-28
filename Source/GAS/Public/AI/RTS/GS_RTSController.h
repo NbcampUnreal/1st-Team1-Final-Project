@@ -205,6 +205,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Cursor")
 	void SetRTSCursor(const FName& CursorPath);
 
+	UFUNCTION()
+	void HandleSeekerHover(bool bIsHover);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -243,20 +246,19 @@ private:
 	UPROPERTY(EditAnywhere, Category="UI")
 	TSubclassOf<UUserWidget> RTSWidgetClass;
 
-	UPROPERTY(EditAnywhere, Category="Cursor")
-	UTexture2D* DefaultCursorTexture;
-    
-	UPROPERTY(EditAnywhere, Category="Cursor")
-	UTexture2D* CommandCursorTexture;
-    
-	UPROPERTY(EditAnywhere, Category="Cursor")
-	UTexture2D* AttackCursorTexture;
+	bool bSeekerHovered;
+	bool bShowAttackCursor;
+	FName DefaultCursorPath;
+	FName CommandCursorPath;
+	FName AttackCommandCursorPath;
+	FName SeekerAttackCursorPath;
+	FName ScrollUpCursorPath;
+	FName ScrollDownCursorPath;
+	FName ScrollLeftCursorPath;
+	FName ScrollRightCursorPath;
 
-	UPROPERTY(EditAnywhere, Category="Cursor")
-	UTexture2D* ClickCursorTexture;
-    
-	UPROPERTY(EditAnywhere, Category="Cursor")
-	UTexture2D* ScrollCursorTexture;
+	UPROPERTY()
+	FTimerHandle AttackCursorTimerHandle;
 
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
@@ -276,4 +278,5 @@ private:
 
 	void UpdateCursorForCommand();
 	void UpdateCursorForEdgeScroll();
+	void ShowAttackCursor();
 };

@@ -731,3 +731,27 @@ UAkComponent* AGS_Seeker::GetOrCreateAkComponent()
 	return AkComp;
 }
 
+
+void AGS_Seeker::OnHoverBegin()
+{
+	Super::OnHoverBegin();
+
+	OnSeekerHover.Broadcast(true);
+}
+
+void AGS_Seeker::OnHoverEnd()
+{
+	Super::OnHoverEnd();
+
+	OnSeekerHover.Broadcast(false);
+}
+
+FLinearColor AGS_Seeker::GetCurrentDecalColor()
+{
+	return FLinearColor::Red;
+}
+
+bool AGS_Seeker::ShowDecal()
+{
+	return true;
+}

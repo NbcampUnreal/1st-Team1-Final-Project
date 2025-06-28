@@ -34,6 +34,17 @@ AGS_RTSController::AGS_RTSController()
 	bCtrlDown = false;
 	bShiftDown = false;
 	MaxSelectableUnits = 12;
+	bShowAttackCursor = false;
+	bSeekerHovered = false;
+
+	DefaultCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_RTSDefault"));
+	CommandCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_ETC"));
+	AttackCommandCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_AttackCommand"));
+	SeekerAttackCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_SeekerAttack"));
+	ScrollUpCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_U"));
+	ScrollDownCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_D"));
+	ScrollLeftCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_L"));
+	ScrollRightCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_R"));
 }
 
 void AGS_RTSController::BeginPlay()
@@ -47,7 +58,7 @@ void AGS_RTSController::BeginPlay()
 		ViewportClient->SetHideCursorDuringCapture(false);
 		ViewportClient->SetMouseLockMode(EMouseLockMode::LockAlways);
 	}
-	SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_GAS")));
+	SetRTSCursor(DefaultCursorPath);
 	bEnableMouseOverEvents = true; 
 	
 	if (!HasAuthority() && IsLocalController())
@@ -80,6 +91,7 @@ void AGS_RTSController::BeginPlay()
 		if (IsValid(Seeker))
 		{
 			Seeker->HPTextWidgetComp->SetVisibility(true);
+			Seeker->OnSeekerHover.AddDynamic(this, &AGS_RTSController::HandleSeekerHover);
 		}
 	}
 }
@@ -134,7 +146,10 @@ void AGS_RTSController::Tick(float DeltaTime)
 	// 마우스 엣지 감지
 	MouseEdgeDir = GetMouseEdgeDirection();
 	
-	UpdateCursorForEdgeScroll();
+	if (!bSeekerHovered)
+	{
+		UpdateCursorForEdgeScroll();
+	}
 	
 	FVector2D FinalDir = GetFinalDirection();
 	if (!FinalDir.IsNearlyZero())
@@ -279,6 +294,8 @@ void AGS_RTSController::OnLeftMousePressed()
 	case ERTSCommand::Attack:
 		if (bHit)
 		{
+			ShowAttackCursor();
+			
 			if (AGS_Character* Target = Cast<AGS_Character>(Hit.GetActor()))
 			{
 				Server_RTSAttack(Units, Target);
@@ -438,10 +455,10 @@ void AGS_RTSController::SetRTSCursor(const FName& CursorPath)
 	{
 		if (CursorPath.IsNone())
 		{
-			ViewportClient->SetHardwareCursor(EMouseCursor::Default, NAME_None, FIntPoint::ZeroValue);
+			ViewportClient->SetHardwareCursor(EMouseCursor::Default, NAME_None, FIntPoint(48, 48));
 			return;
 		}
-		ViewportClient->SetHardwareCursor(EMouseCursor::Default, CursorPath, FIntPoint::ZeroValue);
+		ViewportClient->SetHardwareCursor(EMouseCursor::Default, CursorPath, FIntPoint(48, 48));
 	}
 }
 
@@ -451,7 +468,22 @@ void AGS_RTSController::UpdateCursorForEdgeScroll()
     
 	if (bShouldShowEdgeCursor)
 	{
-		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_GAS")));
+		if (MouseEdgeDir.Y > 0.5f) // 위
+		{
+			SetRTSCursor(ScrollUpCursorPath);
+		}
+		else if (MouseEdgeDir.Y < -0.5f) // 아래
+		{
+			SetRTSCursor(ScrollDownCursorPath);
+		}
+		else if (MouseEdgeDir.X < -0.5f) // 왼쪽
+		{
+			SetRTSCursor(ScrollLeftCursorPath);
+		}
+		else if (MouseEdgeDir.X > 0.5f) // 오른쪽 
+		{
+			SetRTSCursor(ScrollRightCursorPath);
+		}
 	}
 	else
 	{
@@ -461,19 +493,59 @@ void AGS_RTSController::UpdateCursorForEdgeScroll()
 
 void AGS_RTSController::UpdateCursorForCommand()
 {
+	if (bShowAttackCursor)
+	{
+		return;
+	}
+	
 	switch (CurrentCommand)
 	{
-	case ERTSCommand::Move:
-		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_GAS")));
-		break;
 	case ERTSCommand::Attack:
-		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_GAS")));
+		SetRTSCursor(AttackCommandCursorPath);
+		break;
+	case ERTSCommand::Move:
+		SetRTSCursor(CommandCursorPath);
 		break;
 	default:
-		SetRTSCursor(FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Guardian")));
+		SetRTSCursor(DefaultCursorPath);
 		break;
 	}
 }
+
+void AGS_RTSController::ShowAttackCursor()
+{
+	bShowAttackCursor = true;
+	SetRTSCursor(SeekerAttackCursorPath);
+	
+	GetWorldTimerManager().SetTimer(
+		AttackCursorTimerHandle,
+		[this]() { bShowAttackCursor = false; },
+		0.3f,
+		false
+	);
+}
+
+void AGS_RTSController::HandleSeekerHover(bool bIsHover)
+{
+	bSeekerHovered = bIsHover;
+	
+	if (bIsHover)
+	{
+		SetRTSCursor(SeekerAttackCursorPath);
+	}
+	else
+	{
+		if (!MouseEdgeDir.IsNearlyZero())
+		{
+			UpdateCursorForEdgeScroll();
+		}
+		else
+		{
+			UpdateCursorForCommand();
+		}
+	}
+}
+
 
 void AGS_RTSController::SelectOnCtrlClick()
 {	
