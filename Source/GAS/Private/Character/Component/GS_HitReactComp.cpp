@@ -28,18 +28,10 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 			if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 			{
 				OwnerSeeker->GetSkillComp()->SkillsInterrupt();
+
+				OwnerSeeker->Multicast_SetIsFullBodySlot(true);
+				OwnerSeeker->Multicast_SetIsUpperBodySlot(false);
 				
-				if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerSeeker))
-				{
-					if (!SeekerAnim->IsPlayingFullBodyMontage)
-					{
-						OwnerSeeker->Multicast_SetIsFullBodySlot(true);
-					}
-					if (SeekerAnim->IsPlayingUpperBodyMontage)
-					{
-						OwnerSeeker->Multicast_SetIsUpperBodySlot(false);
-					}
-				}
 				OwnerSeeker->SetMoveControlValue(false, false);
 				OwnerSeeker->SetSkillInputControl(false, false, false);
 			}
