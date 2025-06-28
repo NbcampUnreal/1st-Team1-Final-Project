@@ -42,6 +42,9 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_SetupDisplay)
 	TArray<FWeaponMeshPair> CurrentWeaponMeshList;
 
+	UPROPERTY(ReplicatedUsing = OnRep_SetupDisplay)
+	TArray<USkeletalMesh*> CurrentSubMeshList;
+
 	UPROPERTY(ReplicatedUsing = OnRep_PlayerState)
 	TObjectPtr<AGS_PlayerState> AssociatedPlayerState;
 

@@ -34,6 +34,7 @@ void AGS_LobbyDisplayActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
     DOREPLIFETIME(AGS_LobbyDisplayActor, CurrentSkeletalMesh);
     DOREPLIFETIME(AGS_LobbyDisplayActor, CurrentAnimClass);
     DOREPLIFETIME(AGS_LobbyDisplayActor, CurrentWeaponMeshList);
+    DOREPLIFETIME(AGS_LobbyDisplayActor, CurrentSubMeshList);
     DOREPLIFETIME(AGS_LobbyDisplayActor, bIsReady);
     DOREPLIFETIME(AGS_LobbyDisplayActor, AssociatedPlayerState);
 }
@@ -71,6 +72,17 @@ void AGS_LobbyDisplayActor::OnRep_SetupDisplay()
             WeaponComponent->RegisterComponent();
             WeaponComponent->SetSkeletalMesh(WeaponPair.WeaponSkeletalMeshClass);
             WeaponComponent->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, WeaponPair.SocketName);
+        }
+
+        for (const USkeletalMesh* SubMesh : CurrentSubMeshList)
+        {
+            USkeletalMeshComponent* SubMeshComponent = NewObject<USkeletalMeshComponent>(this);
+            SubMeshComponent->RegisterComponent();
+            SubMeshComponent->SetSkeletalMesh(const_cast<USkeletalMesh*>(SubMesh));
+    
+            SubMeshComponent->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+    
+            SubMeshComponent->SetLeaderPoseComponent(SkeletalMeshComponent);
         }
     }
 }

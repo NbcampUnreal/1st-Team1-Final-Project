@@ -333,6 +333,7 @@ void AGS_CustomLobbyGM::SpawnLobbyActorForPlayer(AGS_PlayerState* PlayerState, A
             NewDisplayActor->CurrentSkeletalMesh = SpawnInfo->SkeletalMeshClass;
             NewDisplayActor->CurrentAnimClass = SpawnInfo->Lobby_AnimBlueprintClass;
             NewDisplayActor->CurrentWeaponMeshList = SpawnInfo->WeaponMeshList;
+            NewDisplayActor->CurrentSubMeshList = SpawnInfo->SubSkeletalMeshList;
             NewDisplayActor->bIsReady = PlayerState->bIsReady;
             NewDisplayActor->AssociatedPlayerState = PlayerState;
             NewDisplayActor->OnRep_SetupDisplay();
