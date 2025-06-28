@@ -18,14 +18,11 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 			Character->Multicast_SetMustTurnInPlace(false);
 			Character->Multicast_SetCanHitReact(true);
 			Character->CanChangeSeekerGait = true;
-		}
-		else
-		{
-			Character->bComboEnded = true;
 			Character->SetSkillInputControl(true, true, true);
 			Character->SetMoveControlValue(true, true);
 			Character->SetLookControlValue(true, true);
-			Character->bComboEnded = true;
+
+			UE_LOG(LogTemp, Warning, TEXT("Aiming Skill Active? %d"), Character->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming));
 		}
 	}
 }

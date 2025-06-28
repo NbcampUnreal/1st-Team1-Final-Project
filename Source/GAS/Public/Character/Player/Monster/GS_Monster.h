@@ -79,7 +79,7 @@ public:
 	FORCEINLINE bool IsCommandable() const { return !bCommandLocked; }
 	FORCEINLINE bool IsSelectable() const { return !bSelectionLocked; }
 	
-	void SetSelected(bool bIsSelected, bool bPlaySound = true);
+	void SetSelected(bool bSelected, bool bPlaySound = true);
 	
 	virtual void SetCanUseSkill(bool bCanUse) override;
 
@@ -111,17 +111,11 @@ protected:
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	virtual void NotifyActorBeginCursorOver() override;
-	virtual void NotifyActorEndCursorOver() override;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
 	TObjectPtr<UGS_MonsterSkillComp> MonsterSkillComp;
 	
 	UPROPERTY()
 	TObjectPtr<UGS_MonsterAnimInstance> MonsterAnim;
-	
-	UPROPERTY(VisibleAnywhere)
-	UDecalComponent* SelectionDecal;
 
 	UPROPERTY(VisibleAnywhere)
 	UAkComponent* AkComponent;
@@ -132,13 +126,10 @@ protected:
 	UFUNCTION()
 	void HandleSkillCooldownChanged(float InCurrentCoolTime, float InMaxCoolTime);
 
+	virtual FLinearColor GetCurrentDecalColor() override;
+	virtual void UpdateDecal() override;
+	virtual bool ShowDecal() override;
+	
 private:
-	UPROPERTY()
-	UMaterialInstanceDynamic* DynamicDecalMaterial;
-
-	bool bIsRTSSelected = false;
-	bool bIsRTSHovered = false;
-    
-	void UpdateDecalColor();
-	void SetHovered(bool bIsHovered);
+	bool bIsSelected;
 }; 

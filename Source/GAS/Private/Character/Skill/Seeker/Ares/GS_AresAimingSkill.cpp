@@ -6,6 +6,7 @@
 #include "Weapon/Projectile/Seeker/GS_SwordAuraProjectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/GS_Character.h"
+#include "Character/GS_TpsController.h"
 
 UGS_AresAimingSkill::UGS_AresAimingSkill()
 {
@@ -28,6 +29,9 @@ void UGS_AresAimingSkill::ActiveSkill()
 			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
 		}
 	}
+
+	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
+	Controller->SetLookControlValue(false, false);
 
 	ExecuteSkillEffect();
 }
@@ -57,7 +61,7 @@ void UGS_AresAimingSkill::ExecuteSkillEffect()
 	// 생성 위치: 캐릭터 정면 약간 앞 + 위
 	FVector SpawnLocation = OwnerCharacter->GetActorLocation()
 		+ FVector(0, 0, 0)
-		+ LaunchDirection * 1.f;
+		+ LaunchDirection * -300.f;
 
 	// 첫 번째 발사 (기본 방향)
 	FRotator SpawnRotationA = LaunchDirection.Rotation();
@@ -116,7 +120,7 @@ void UGS_AresAimingSkill::SpawnSecondProjectile()
 	// 생성 위치: 캐릭터 정면 약간 앞 + 위
 	FVector SpawnLocation = OwnerCharacter->GetActorLocation()
 		+ FVector(0, 0, 0)
-		+ LaunchDirection * 1.f;
+		+ LaunchDirection * -300.f;
 
 	// 첫 번째 발사 (기본 방향)
 	FRotator SpawnRotationB = LaunchDirection.Rotation();
@@ -132,6 +136,9 @@ void UGS_AresAimingSkill::SpawnSecondProjectile()
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
 	);
 
+	UE_LOG(LogTemp, Warning, TEXT("CharacterLocation: %s | SpawnLocation: %s"),
+		*OwnerCharacter->GetActorLocation().ToString(),
+		*SpawnLocation.ToString());
 
 	if (ProjectileB)
 	{
@@ -141,6 +148,8 @@ void UGS_AresAimingSkill::SpawnSecondProjectile()
 	}
 	
 	// 스킬 종료 처리
+	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
+	Controller->SetLookControlValue(true, true);
 	bIsActive = false;
 }
 	

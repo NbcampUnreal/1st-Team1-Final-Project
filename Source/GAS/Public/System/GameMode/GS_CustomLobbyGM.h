@@ -21,6 +21,7 @@ public:
 	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void RestartPlayer(AController* NewPlayer) override;
+	void HandlePlayerReadyInLobby(APlayerController* PlayerController);
 	virtual void Logout(AController* Exiting) override;
 	void UpdatePlayerReadyStatus(APlayerState* Player, bool bIsReady);
 
@@ -52,9 +53,9 @@ private:
 	TArray<AGS_SpawnSlot*> SeekerSlots;
 
 	UPROPERTY()
-	TMap<TObjectPtr<AGS_PlayerState>, TObjectPtr<AGS_LobbyDisplayActor>> SpawnedLobbyActors;
+	TMap<AGS_PlayerState*, TObjectPtr<AGS_LobbyDisplayActor>> SpawnedLobbyActors;
 	UPROPERTY()
-	TMap<TObjectPtr<AGS_PlayerState>, TObjectPtr<AGS_SpawnSlot>> PlayerToSlotMap;
+	TMap<AGS_PlayerState*, TObjectPtr<AGS_SpawnSlot>> PlayerToSlotMap;
 
 	void CollectSpawnSlots();
 	void SpawnLobbyActorForPlayer(AGS_PlayerState* PlayerState, AGS_SpawnSlot* SpawnSlot);

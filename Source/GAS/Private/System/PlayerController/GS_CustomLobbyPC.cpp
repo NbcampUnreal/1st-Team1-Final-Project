@@ -70,15 +70,6 @@ void AGS_CustomLobbyPC::BeginPlay()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("DirectionalLight 태그를 가진 Light 찾을 수 없습니다."));
 		}
-		
-		CollectAndCacheSpawnSlots();
-
-		AGS_CustomLobbyGS* LGS = GetWorld()->GetGameState<AGS_CustomLobbyGS>();
-		if (LGS)
-		{
-			LGS->OnPlayerListUpdated.AddDynamic(this, &AGS_CustomLobbyPC::OnLobbyPlayerListUpdated);
-			OnLobbyPlayerListUpdated();
-		}
 	}
 }
 
@@ -98,6 +89,7 @@ void AGS_CustomLobbyPC::OnRep_PlayerState()
 		TryBindToPlayerStateDelegates();
 
 		bHasInitializedUI = true;
+		Server_NotifyPlayerReadyInLobby(); // 서버에 접속하고 PlayerState까지 완전히 생성됐을 때 서버에 알림
 
 		if (!bHasSetInitialRichPresence)
 		{
@@ -110,6 +102,16 @@ void AGS_CustomLobbyPC::OnRep_PlayerState()
 	{
 		UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC::OnRep_PlayerState - PlayerState changed after initial setup for PC: %s. Re-evaluating bindings/UI."), *GetNameSafe(this));
 		TryBindToPlayerStateDelegates();
+	}
+}
+
+void AGS_CustomLobbyPC::Server_NotifyPlayerReadyInLobby_Implementation()
+{
+	AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>();
+	if (GM)
+	{
+		// GameMode에 이 PlayerController가 준비되었음을 알림
+		GM->HandlePlayerReadyInLobby(this);
 	}
 }
 
@@ -665,156 +667,6 @@ void AGS_CustomLobbyPC::RequestDungeonEditorToLobby()
 	}
 }
 
-void AGS_CustomLobbyPC::OnLobbyPlayerListUpdated()
-{
-	if (!IsLocalController()) return;
-
-	AGS_CustomLobbyGS* LGS = GetWorld()->GetGameState<AGS_CustomLobbyGS>();
-	if (!LGS)
-	{
-		UE_LOG(LogTemp, Error, TEXT("PC::OnLobbyPlayerListUpdated - GameState가 유효하지 않습니다."));
-		return;
-	}
-	UE_LOG(LogTemp, Warning, TEXT("PC::OnLobbyPlayerListUpdated - 호출됨. PlayerList 수: %d"), LGS->PlayerList.Num());
-
-	TSet<TWeakObjectPtr<APlayerState>> PlayersInLobby;
-
-	// GameState의 최신 목록을 기반으로 액터 스폰 또는 업데이트
-	for (const FLobbyPlayerInfo& PlayerInfo : LGS->PlayerList)
-	{
-		if (PlayerInfo.PlayerState.IsValid())
-		{
-			PlayersInLobby.Add(PlayerInfo.PlayerState);
-			SpawnOrUpdateLobbyActor(PlayerInfo);
-		}
-	}
-
-	// 로컬에만 존재하고 GameState 목록에는 없는 액터(나간 플레이어) 정리
-	TArray<TWeakObjectPtr<APlayerState>> ActorsToRemove;
-	for (auto& Pair : SpawnedLobbyActors)
-	{
-		if (!PlayersInLobby.Contains(Pair.Key))
-		{
-			if (Pair.Value)
-			{
-				Pair.Value->Destroy();
-			}
-			ActorsToRemove.Add(Pair.Key);
-		}
-	}
-
-	for (TWeakObjectPtr<APlayerState> Key : ActorsToRemove)
-	{
-		SpawnedLobbyActors.Remove(Key);
-	}
-}
-
-void AGS_CustomLobbyPC::SpawnOrUpdateLobbyActor(const FLobbyPlayerInfo& PlayerInfo)
-{
-	if (!PlayerInfo.PlayerState.IsValid() || !PawnMappingData) return;
-	UE_LOG(LogTemp, Log, TEXT("====== SpawnOrUpdateLobbyActor 호출 시작: %s ======"), *PlayerInfo.PlayerName);
-
-	// TWeakObjectPtr를 키로 사용하므로 바로 찾기
-	TObjectPtr<AGS_LobbyDisplayActor>* FoundActorPtr = SpawnedLobbyActors.Find(PlayerInfo.PlayerState);
-
-	// 이미 스폰된 액터가 있는지 확인
-	if (FoundActorPtr && *FoundActorPtr)
-	{
-		(*FoundActorPtr)->Destroy();
-		SpawnedLobbyActors.Remove(PlayerInfo.PlayerState);
-		UE_LOG(LogTemp, Warning, TEXT("--> %s의 기존 액터를 파괴하고 새로 스폰합니다."), *PlayerInfo.PlayerName);
-	}
-
-	// 스폰할 위치 찾기
-	TArray<TObjectPtr<AGS_SpawnSlot>>& SlotsToSearch = (PlayerInfo.PlayerRole == EPlayerRole::PR_Guardian) ? CachedGuardianSlots : CachedSeekerSlots;
-	AGS_SpawnSlot* SpawnSlot = nullptr;
-	UE_LOG(LogTemp, Log, TEXT("--> 역할(%s)에 맞는 스폰 슬롯을 찾습니다. (요구 인덱스: %d)"), (PlayerInfo.PlayerRole == EPlayerRole::PR_Guardian) ? TEXT("가디언") : TEXT("시커"), PlayerInfo.SlotIndex);
-
-	for (AGS_SpawnSlot* Slot : SlotsToSearch)
-	{
-		if (Slot && Slot->GetSlotIndex() == PlayerInfo.SlotIndex)
-		{
-			SpawnSlot = Slot;
-			break;
-		}
-	}
-
-	if (!SpawnSlot)
-	{
-		UE_LOG(LogTemp, Error, TEXT("--> SpawnOrUpdateLobbyActor 실패 (%s): 인덱스 %d에 해당하는 스폰 슬롯을 찾지 못했습니다."), *PlayerInfo.PlayerName, PlayerInfo.SlotIndex);
-		return;
-	}
-	UE_LOG(LogTemp, Log, TEXT("--> 스폰 슬롯 찾음: %s (위치: %s)"), *SpawnSlot->GetName(), *SpawnSlot->GetActorLocation().ToString());
-
-	// 스폰할 에셋 정보 찾기
-	const FAssetToSpawn* SpawnAssetInfo = nullptr;
-	if (PlayerInfo.PlayerRole == EPlayerRole::PR_Guardian)
-	{
-		SpawnAssetInfo = PawnMappingData->GuardianPawnClasses.Find(PlayerInfo.GuardianJob);
-	}
-	else
-	{
-		SpawnAssetInfo = PawnMappingData->SeekerPawnClasses.Find(PlayerInfo.SeekerJob);
-	}
-
-	if (!SpawnAssetInfo || !SpawnAssetInfo->DisplayActorClass) return;
-	UE_LOG(LogTemp, Log, TEXT("--> 에셋 정보 찾음. 스폰할 DisplayActor 클래스: %s"), *SpawnAssetInfo->DisplayActorClass->GetName());
-
-	// 액터 스폰
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	FTransform SpawnTransform = SpawnSlot->GetActorTransform();
-
-	UE_LOG(LogTemp, Log, TEXT("--> LobbyDisplayActor 스폰 시도..."));
-	AGS_LobbyDisplayActor* NewDisplayActor = GetWorld()->SpawnActor<AGS_LobbyDisplayActor>(SpawnAssetInfo->DisplayActorClass, SpawnTransform, SpawnParams);
-
-	if (NewDisplayActor)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("--> 스폰 성공 (%s)! 외형 설정을 진행합니다."), *PlayerInfo.PlayerName);
-		NewDisplayActor->SetupDisplay(SpawnAssetInfo->SkeletalMeshClass, SpawnAssetInfo->Lobby_AnimBlueprintClass, SpawnAssetInfo->WeaponMeshList);
-		NewDisplayActor->SetReadyState(PlayerInfo.bIsReady);
-		SpawnedLobbyActors.Add(PlayerInfo.PlayerState, NewDisplayActor);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("--> 스폰 실패 (%s)!"), *PlayerInfo.PlayerName);
-	}
-}
-
-void AGS_CustomLobbyPC::CollectAndCacheSpawnSlots()
-{
-	CachedGuardianSlots.Empty();
-    CachedSeekerSlots.Empty();
-    
-    TArray<AActor*> FoundActors;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGS_SpawnSlot::StaticClass(), FoundActors);
-
-    for (AActor* Actor : FoundActors)
-    {
-        AGS_SpawnSlot* Slot = Cast<AGS_SpawnSlot>(Actor);
-        if (Slot)
-        {
-            if (Slot->GetRole() == EPlayerRole::PR_Guardian)
-            {
-                CachedGuardianSlots.Add(Slot);
-            }
-            else if (Slot->GetRole() == EPlayerRole::PR_Seeker)
-            {
-                CachedSeekerSlots.Add(Slot);
-            }
-        }
-    }
-
-    // 인덱스 순으로 정렬
-    auto SortSlots = [](const TObjectPtr<AGS_SpawnSlot>& A, const TObjectPtr<AGS_SpawnSlot>& B) {
-        if (!A || !B) return false;
-        return A->GetSlotIndex() < B->GetSlotIndex();
-    };
-    CachedGuardianSlots.Sort(SortSlots);
-    CachedSeekerSlots.Sort(SortSlots);
-}
-
 bool AGS_CustomLobbyPC::CheckAndShowUnsavedChangesConfirm()
 {
 	if (CurrentModalWidget)
@@ -894,15 +746,20 @@ void AGS_CustomLobbyPC::Client_RequestLoadAndSendData_Implementation()
 			// true로 해줘야 던전 에디터 Load때 필요한 불필요한 데이터가 제외됩니다.
 			LoadGameObject->bExcludeDungeonEditingArrays = true;
 
-			// 세이브 데이터를 바이트 배열로 직렬화
+			// 1. 비어있는 FBufferArchive를 생성합니다.
 			FBufferArchive ToBinary;
 			ToBinary.SetIsSaving(true);
+			// 2. SaveGameObject의 내용을 ToBinary 아카이브에 직렬화하여 씁니다.
 			LoadGameObject->Serialize(ToBinary);
+			// 3. 직렬화된 데이터가 담긴 아카이브를 TArray<uint8>로 복사합니다.
+			FullDungeonDataToSend = ToBinary;
 
 			UE_LOG(LogTemp, Warning, TEXT("Client: Loaded and serialized %d bytes. Sending to server in chunks..."), ToBinary.Num());
 
-			// 데이터를 청크로 나눠 전송
-			SendDataInChunks(ToBinary);
+			SentDataOffset = 0;
+			
+			// 첫 번째 청크 전송을 시작합니다.
+			SendNextDataChunk();
 		}
 		else
 		{
@@ -939,82 +796,116 @@ void AGS_CustomLobbyPC::Server_ReceiveDungeonDataChunk_Implementation(const TArr
 	// 수신된 청크를 재조립 버퍼에 추가합니다.
     ReassembledDungeonData.Append(Chunk);
 
-    // 마지막 청크가 아니면 함수를 종료합니다.
-    if (!bIsLast)
+    if (bIsLast)
     {
-        UE_LOG(LogTemp, Log, TEXT("Server: Received a dungeon data chunk of size %d."), Chunk.Num());
-        return;
-    }
-
-    UE_LOG(LogTemp, Warning, TEXT("Server: Last dungeon data chunk received. Total size: %d bytes. Reconstructing data..."), ReassembledDungeonData.Num());
-
-    if (ReassembledDungeonData.Num() > 0)
-    {
-        FMemoryReader FromBinary(ReassembledDungeonData, true);
-        FromBinary.Seek(0);
-
-        UGS_DungeonEditorSaveGame* LoadedSaveGame = Cast<UGS_DungeonEditorSaveGame>(UGameplayStatics::CreateSaveGameObject(UGS_DungeonEditorSaveGame::StaticClass()));
+        // === 마지막 청크 수신 완료: 데이터 복원 및 처리 ===
+        UE_LOG(LogTemp, Warning, TEXT("Server: All chunks received. Total size: %d bytes. Reconstructing..."), ReassembledDungeonData.Num());
         
-        if (IsValid(LoadedSaveGame))
+        if (ReassembledDungeonData.Num() > 0)
         {
-            // *** 중요: 역직렬화 전에 클라이언트와 동일한 조건으로 플래그를 설정합니다. ***
-            LoadedSaveGame->bExcludeDungeonEditingArrays = true;
+            FMemoryReader FromBinary(ReassembledDungeonData, true);
+            FromBinary.Seek(0);
 
-            // 이제 Serialize 함수는 저장될 때와 동일한 로직으로 데이터를 읽어들입니다.
-            LoadedSaveGame->Serialize(FromBinary);
-
-            AGS_PlayerState* GuardianPlayerState = nullptr;
-            if (AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+            UGS_DungeonEditorSaveGame* LoadedSaveGame = Cast<UGS_DungeonEditorSaveGame>(UGameplayStatics::CreateSaveGameObject(UGS_DungeonEditorSaveGame::StaticClass()));
+            
+            if (IsValid(LoadedSaveGame))
             {
-                for (APlayerState* PS : GM->GameState->PlayerArray)
+                LoadedSaveGame->bExcludeDungeonEditingArrays = true;
+                LoadedSaveGame->Serialize(FromBinary);
+
+                // 가디언 역할을 가진 플레이어 탐색
+                AGS_PlayerState* GuardianPlayerState = nullptr;
+                if (AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
                 {
-                    AGS_PlayerState* CurrentPS = Cast<AGS_PlayerState>(PS);
-                    if (CurrentPS && CurrentPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+                    for (APlayerState* PS : GM->GameState->PlayerArray)
                     {
-                        GuardianPlayerState = CurrentPS;
-                        break;
+                        AGS_PlayerState* CurrentPS = Cast<AGS_PlayerState>(PS);
+                        if (CurrentPS && CurrentPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+                        {
+                            GuardianPlayerState = CurrentPS;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (GuardianPlayerState)
-            {
-                GuardianPlayerState->ObjectData = LoadedSaveGame->GetSaveDatas();
-                UE_LOG(LogTemp, Warning, TEXT("Server: Dungeon data successfully assigned to Guardian %s. Object count: %d"), *GuardianPlayerState->GetPlayerName(), GuardianPlayerState->ObjectData.Num());
+                // 가디언 PlayerState에 데이터 저장
+                if (GuardianPlayerState)
+                {
+                    GuardianPlayerState->ObjectData = LoadedSaveGame->GetSaveDatas();
+                    UE_LOG(LogTemp, Warning, TEXT("Server: Dungeon data successfully assigned to Guardian %s. Object count: %d"), *GuardianPlayerState->GetPlayerName(), GuardianPlayerState->ObjectData.Num());
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Error, TEXT("Server: Could not find a Guardian player to assign the dungeon data to."));
+                }
             }
             else
             {
-                UE_LOG(LogTemp, Error, TEXT("Server: Could not find a Guardian player to assign the dungeon data to."));
+                UE_LOG(LogTemp, Error, TEXT("Server: Failed to create a new SaveGameObject for deserialization."));
             }
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("Server: Failed to create a new SaveGameObject for deserialization."));
+            UE_LOG(LogTemp, Warning, TEXT("Server: Received an empty final chunk. No data to process."));
         }
+        
+        // 데이터 처리 후 버퍼 초기화
+        ReassembledDungeonData.Empty();
     }
     else
     {
-        UE_LOG(LogTemp, Warning, TEXT("Server: Received an empty final chunk. No data to process."));
+        // === 중간 청크 수신: 클라이언트에게 다음 청크 요청 ===
+        UE_LOG(LogTemp, Log, TEXT("Server: Chunk of size %d received. Requesting next chunk from client."), Chunk.Num());
+        
+        // 클라이언트에게 다음 청크를 보낼 준비가 되었다고 알립니다.
+        Client_ReadyForNextChunk();
     }
-
-    ReassembledDungeonData.Empty();
 }
 
-void AGS_CustomLobbyPC::SendDataInChunks(const TArray<uint8>& FullData)
+void AGS_CustomLobbyPC::Client_ReadyForNextChunk_Implementation()
 {
-	const int32 TotalSize = FullData.Num();
-	int32 SentSize = 0;
-
-	while (SentSize < TotalSize)
-	{
-		const int32 SizeToSend = FMath::Min(ChunkSize, TotalSize - SentSize);
-		TArray<uint8> Chunk;
-		Chunk.Append(FullData.GetData() + SentSize, SizeToSend);
-
-		SentSize += SizeToSend;
-		const bool bIsLastChunk = (SentSize >= TotalSize);
-
-		// 서버로 청크 전송
-		Server_ReceiveDungeonDataChunk(Chunk, bIsLastChunk);
-	}
+	// 서버가 준비되었으므로 다음 청크를 보냅니다.
+	UE_LOG(LogTemp, Log, TEXT("Client: Received 'ReadyForNextChunk' from server. Sending next chunk."));
+	SendNextDataChunk();
 }
+
+void AGS_CustomLobbyPC::SendNextDataChunk()
+{
+	if (SentDataOffset >= FullDungeonDataToSend.Num())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Client: All chunks have been sent."));
+		FullDungeonDataToSend.Empty(); // 메모리 정리
+		return;
+	}
+	
+	const int32 SizeToSend = FMath::Min(ChunkSize, FullDungeonDataToSend.Num() - SentDataOffset);
+    
+	TArray<uint8> Chunk;
+	Chunk.AddUninitialized(SizeToSend);
+	FMemory::Memcpy(Chunk.GetData(), FullDungeonDataToSend.GetData() + SentDataOffset, SizeToSend);
+
+	SentDataOffset += SizeToSend;
+	const bool bIsLastChunk = (SentDataOffset >= FullDungeonDataToSend.Num());
+
+	// 서버로 청크를 전송합니다.
+	Server_ReceiveDungeonDataChunk(Chunk, bIsLastChunk);
+}
+
+// void AGS_CustomLobbyPC::SendDataInChunks(const TArray<uint8>& FullData)
+// {
+// 	const int32 TotalSize = FullData.Num();
+// 	int32 SentSize = 0;
+//
+// 	while (SentSize < TotalSize)
+// 	{
+// 		const int32 SizeToSend = FMath::Min(ChunkSize, TotalSize - SentSize);
+// 		TArray<uint8> Chunk;
+// 		Chunk.Append(FullData.GetData() + SentSize, SizeToSend);
+//
+// 		SentSize += SizeToSend;
+// 		const bool bIsLastChunk = (SentSize >= TotalSize);
+//
+// 		// 서버로 청크 전송
+// 		Server_ReceiveDungeonDataChunk(Chunk, bIsLastChunk);
+// 	}
+// }

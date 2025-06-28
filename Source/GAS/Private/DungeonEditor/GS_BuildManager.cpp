@@ -16,9 +16,12 @@ AGS_BuildManager::AGS_BuildManager()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
+	SetRootComponent(DefaultSceneRoot);
+	
 #if WITH_EDITORONLY_DATA
 	BillboardCompo = CreateDefaultSubobject<UBillboardComponent>("BillBoard");
-	SetRootComponent(BillboardCompo);
+	BillboardCompo->SetupAttachment(RootComponent);
 #endif
 	StaticMeshCompo = CreateDefaultSubobject<UStaticMeshComponent>("GridMesh");
 	StaticMeshCompo->SetupAttachment(RootComponent);
@@ -787,7 +790,8 @@ void AGS_BuildManager::SaveDungeonData()
         	}
         	
             FDESaveData ObjectData;
-            ObjectData.SpawnActorClass = CurActor->GetClass();
+        	ObjectData.SpawnActorClassPath = CurActor->GetClass()->GetPathName();
+            //ObjectData.SpawnActorClass = CurActor->GetClass();
             ObjectData.SpawnTransform = CurActor->GetActorTransform();
             if (UPlaceInfoComponent* PlaceInfo = CurActor->FindComponentByClass<UPlaceInfoComponent>())
         	{
@@ -868,12 +872,12 @@ void AGS_BuildManager::LoadDungeonData()
 		
 		for (const FDESaveData& ObjectData : SortedObjectData)
 		{
-			if (ObjectData.SpawnActorClass)
+			if (TSubclassOf<AActor> ActorClassToSpawn = LoadClass<AActor>(nullptr, *ObjectData.SpawnActorClassPath))
 			{
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-				AActor* NewActor = World->SpawnActor<AActor>(ObjectData.SpawnActorClass, ObjectData.SpawnTransform, SpawnParams);
+				AActor* NewActor = World->SpawnActor<AActor>(ActorClassToSpawn, ObjectData.SpawnTransform, SpawnParams);
 
 				bool Is_Room = false;
 				if (NewActor)

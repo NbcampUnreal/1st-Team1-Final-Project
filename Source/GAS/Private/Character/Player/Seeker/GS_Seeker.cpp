@@ -431,14 +431,13 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, CanChangeSeekerGait);
 	DOREPLIFETIME(AGS_Seeker, CanAcceptComboInput);
 	DOREPLIFETIME(AGS_Seeker, CurrentComboIndex);
-	DOREPLIFETIME(AGS_Seeker, bComboEnded);
+	//DOREPLIFETIME(AGS_Seeker, bComboEnded);
 	DOREPLIFETIME(AGS_Seeker, SeekerState);
 }
 
 void AGS_Seeker::CallDeactiveSkill(ESkillSlot Slot)
 {
 	GetSkillComp()->TryDeactiveSkill(Slot);
-	GetSkillComp()->SetSkillActiveState(Slot, false);
 }
 
 void AGS_Seeker::OnRep_SeekerGait()
@@ -732,3 +731,27 @@ UAkComponent* AGS_Seeker::GetOrCreateAkComponent()
 	return AkComp;
 }
 
+
+void AGS_Seeker::OnHoverBegin()
+{
+	Super::OnHoverBegin();
+
+	OnSeekerHover.Broadcast(true);
+}
+
+void AGS_Seeker::OnHoverEnd()
+{
+	Super::OnHoverEnd();
+
+	OnSeekerHover.Broadcast(false);
+}
+
+FLinearColor AGS_Seeker::GetCurrentDecalColor()
+{
+	return FLinearColor::Red;
+}
+
+bool AGS_Seeker::ShowDecal()
+{
+	return true;
+}
