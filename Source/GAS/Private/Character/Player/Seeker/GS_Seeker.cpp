@@ -27,7 +27,6 @@
 #include "Animation/Character/Seeker/GS_ChooserInputObj.h"
 #include "Character/GS_TpsController.h"
 #include "Character/Skill/GS_SkillComp.h"
-#include "Character/Skill/GS_SkillBase.h"
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
 #include "AkAudioDevice.h"
@@ -89,6 +88,95 @@ AGS_Seeker::AGS_Seeker()
 	LastSeekerGait = SeekerGait;
 	CanChangeSeekerGait = true;
 }
+
+void AGS_Seeker::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// CombatTrigger 오버랩 이벤트 바인딩
+	if (CombatTrigger)
+	{
+		CombatTrigger->OnComponentBeginOverlap.AddDynamic(this, &AGS_Seeker::OnCombatTriggerBeginOverlap);
+		CombatTrigger->OnComponentEndOverlap.AddDynamic(this, &AGS_Seeker::OnCombatTriggerEndOverlap);
+	}
+
+	if (IsLocallyControlled())
+	{
+		InitializeCameraManager();
+		
+		// 스탯 컴포넌트 가져와서 델리게이트 바인딩
+		if (UGS_StatComp* FoundStatComp = FindComponentByClass<UGS_StatComp>())
+		{
+			FoundStatComp->OnCurrentHPChanged.AddUObject(this, &AGS_Seeker::HandleLowHealthEffect);
+		}
+
+		// PlayerState 생존 상태 변경 델리게이트 바인딩
+		AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+		if (PS)
+		{
+			PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_Seeker::HandleAliveStatusChanged);
+		}
+	}
+}
+
+void AGS_Seeker::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+}
+
+// Called to bind functionality to input
+void AGS_Seeker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{	
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (SkillInputHandlerComponent)
+	{
+		SkillInputHandlerComponent->SetupEnhancedInput(PlayerInputComponent);
+	}
+}
+
+void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AGS_Seeker, bIsLowHealthEffectActive);
+	DOREPLIFETIME(AGS_Seeker, CurrentEffectStrength);
+	DOREPLIFETIME(AGS_Seeker, LastSeekerGait);
+	DOREPLIFETIME(AGS_Seeker, SeekerGait);
+	DOREPLIFETIME(AGS_Seeker, CanChangeSeekerGait);
+	DOREPLIFETIME(AGS_Seeker, CanAcceptComboInput);
+	DOREPLIFETIME(AGS_Seeker, CurrentComboIndex);
+	//DOREPLIFETIME(AGS_Seeker, bComboEnded);
+	DOREPLIFETIME(AGS_Seeker, SeekerState);
+}
+
+void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorldTimerManager().IsTimerActive(LowHealthEffectTimer))
+	{
+		GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);
+	}
+	
+	if (IsLocallyControlled() && LowHealthPostProcessComp)
+	{
+		LowHealthPostProcessComp->bEnabled = false;
+		LowHealthPostProcessComp->Settings.WeightedBlendables.Array.Empty();
+	}
+
+	// PlayerState 생존 상태 변경 델리게이트 해제
+	if (IsLocallyControlled())
+	{
+		AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+		if (PS)
+		{
+			PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
 
 void AGS_Seeker::SetAimState(bool IsAim)
 {
@@ -165,36 +253,6 @@ EGait AGS_Seeker::GetSeekerGait()
 EGait AGS_Seeker::GetLastSeekerGait()
 {
 	return LastSeekerGait;
-}
-
-void AGS_Seeker::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// CombatTrigger 오버랩 이벤트 바인딩
-	if (CombatTrigger)
-	{
-		CombatTrigger->OnComponentBeginOverlap.AddDynamic(this, &AGS_Seeker::OnCombatTriggerBeginOverlap);
-		CombatTrigger->OnComponentEndOverlap.AddDynamic(this, &AGS_Seeker::OnCombatTriggerEndOverlap);
-	}
-
-	if (IsLocallyControlled())
-	{
-		InitializeCameraManager();
-		
-		// 스탯 컴포넌트 가져와서 델리게이트 바인딩
-		if (UGS_StatComp* FoundStatComp = FindComponentByClass<UGS_StatComp>())
-		{
-			FoundStatComp->OnCurrentHPChanged.AddUObject(this, &AGS_Seeker::HandleLowHealthEffect);
-		}
-
-		// PlayerState 생존 상태 변경 델리게이트 바인딩
-		AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
-		if (PS)
-		{
-			PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_Seeker::HandleAliveStatusChanged);
-		}
-	}
 }
 
 const FName AGS_Seeker::HPRatioParamName = TEXT("HPRatio");
@@ -337,6 +395,14 @@ void AGS_Seeker::HandleLowHealthEffect(UGS_StatComp* InStatComp)
 			CurrentEffectStrength = 0.0f;
 			bIsLowHealthEffectActive = true;
 			LowHealthPostProcessComp->bEnabled = true;
+			
+			GetWorldTimerManager().SetTimer(
+			   LowHealthEffectTimer,
+			   this,
+			   &AGS_Seeker::UpdateLowHealthEffect,
+			   0.1f,
+			   true
+			);
 		}
 		TargetEffectStrength = 1.0f - HealthRatio;
 	}
@@ -350,90 +416,52 @@ void AGS_Seeker::HandleLowHealthEffect(UGS_StatComp* InStatComp)
 			CurrentEffectStrength = 0.0f;
 			UpdatePostProcessEffect(0.0f);
 			LowHealthPostProcessComp->bEnabled = false;
+
+			GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);
 		}
 	}
 }
 
-void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AGS_Seeker::UpdateLowHealthEffect()
 {
-	if (IsLocallyControlled() && LowHealthPostProcessComp)
+	if (!bIsLowHealthEffectActive || !LowHealthDynamicMaterial)
 	{
-		LowHealthPostProcessComp->bEnabled = false;
-		LowHealthPostProcessComp->Settings.WeightedBlendables.Array.Empty();
+		GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);
+		return;
 	}
 
-	// PlayerState 생존 상태 변경 델리게이트 해제
-	if (IsLocallyControlled())
+	if (UGS_StatComp* OwnerStatComp = FindComponentByClass<UGS_StatComp>())
 	{
-		AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
-		if (PS)
+		float HealthRatio = OwnerStatComp->GetCurrentHealth() / FMath::Max(1.0f, OwnerStatComp->GetMaxHealth());
+		HealthRatio = FMath::Clamp(HealthRatio, 0.0f, 1.0f);
+       
+		// 목표 효과 강도 계산
+		TargetEffectStrength = 1.0f - HealthRatio;
+
+		// 부드러운 보간
+		CurrentEffectStrength = FMath::FInterpTo(
+			CurrentEffectStrength,
+			TargetEffectStrength,
+			0.1f,
+			EffectInterpSpeed
+		);
+       
+		UpdatePostProcessEffect(CurrentEffectStrength);
+
+		// 효과가 충분히 작아지면 PostProcess 비활성화
+		if (!bIsLowHealthEffectActive && CurrentEffectStrength < KINDA_SMALL_NUMBER)
 		{
-			PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
+			LowHealthPostProcessComp->bEnabled = false;
+			UpdatePostProcessEffect(0.0f); // 혹시 모를 잔상 방지
+			GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);
 		}
 	}
-
-	Super::EndPlay(EndPlayReason);
-}
-
-void AGS_Seeker::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (bIsLowHealthEffectActive && LowHealthDynamicMaterial)
+	else 
 	{
-		if (UGS_StatComp* OwnerStatComp = FindComponentByClass<UGS_StatComp>())
-		{
-			float HealthRatio = OwnerStatComp->GetCurrentHealth() / FMath::Max(1.0f, OwnerStatComp->GetMaxHealth());
-			HealthRatio = FMath::Clamp(HealthRatio, 0.0f, 1.0f);
-			
-			// 목표 효과 강도 계산
-			TargetEffectStrength = 1.0f - HealthRatio;
-			
-			// 부드러운 보간
-			CurrentEffectStrength = FMath::FInterpTo(
-				CurrentEffectStrength,
-				TargetEffectStrength,
-				DeltaTime,
-				EffectInterpSpeed
-			);
-			
-			UpdatePostProcessEffect(CurrentEffectStrength);
-
-			// 효과가 충분히 작아지면 PostProcess 비활성화
-			if (!bIsLowHealthEffectActive && CurrentEffectStrength < KINDA_SMALL_NUMBER)
-			{
-				LowHealthPostProcessComp->bEnabled = false;
-				UpdatePostProcessEffect(0.0f); // 혹시 모를 잔상 방지
-			}
-		}
+		GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);
 	}
 }
 
-// Called to bind functionality to input
-void AGS_Seeker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{	
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (SkillInputHandlerComponent)
-	{
-		SkillInputHandlerComponent->SetupEnhancedInput(PlayerInputComponent);
-	}
-}
-
-void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
-	DOREPLIFETIME(AGS_Seeker, bIsLowHealthEffectActive);
-	DOREPLIFETIME(AGS_Seeker, CurrentEffectStrength);
-	DOREPLIFETIME(AGS_Seeker, LastSeekerGait);
-	DOREPLIFETIME(AGS_Seeker, SeekerGait);
-	DOREPLIFETIME(AGS_Seeker, CanChangeSeekerGait);
-	DOREPLIFETIME(AGS_Seeker, CanAcceptComboInput);
-	DOREPLIFETIME(AGS_Seeker, CurrentComboIndex);
-	//DOREPLIFETIME(AGS_Seeker, bComboEnded);
-	DOREPLIFETIME(AGS_Seeker, SeekerState);
-}
 
 void AGS_Seeker::CallDeactiveSkill(ESkillSlot Slot)
 {

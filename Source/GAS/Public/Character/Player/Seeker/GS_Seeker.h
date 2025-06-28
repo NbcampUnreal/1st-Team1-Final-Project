@@ -285,6 +285,9 @@ private:
 	UPROPERTY()
 	TArray<AGS_Monster*> NearbyMonsters;
 
+	UPROPERTY()
+	FTimerHandle LowHealthEffectTimer;
+
 	void StartCombatMusic();
 	void StopCombatMusic();
 
@@ -292,6 +295,7 @@ private:
 	void ClientRPCStopCombatMusic();
 
 	void UpdateCombatMusicState();
+	void UpdateLowHealthEffect();
 
 	// 플레이어 상태 변경 처리
 	void HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive);
