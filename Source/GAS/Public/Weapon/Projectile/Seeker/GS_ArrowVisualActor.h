@@ -17,6 +17,9 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* ArrowMesh;
 
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* Root;
+
 	UPROPERTY(ReplicatedUsing = OnRep_SkeletalMesh)
 	USkeletalMesh* CurrentMesh;
 
@@ -28,9 +31,20 @@ public:
 	
 
 	void SetArrowMesh(USkeletalMesh* Mesh);
+	void SetAttachedTargetActor(AActor* Target);
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	virtual void Tick(float DeltaTime) override;
+
+private:
+	UPROPERTY()
+	AActor* AttachedTargetActor;
+
+	UFUNCTION()
+	void OnAttachedTargetDestroyed(AActor* DestroyedActor)
+	{
+		Destroy();
+	}
 };

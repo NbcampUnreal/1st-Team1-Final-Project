@@ -36,30 +36,39 @@ void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 
 void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
-	Super::OnLeftClick(Instance);
+	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
+	
+	if (!(Ares->GetSkillInputControl().CanInputLC))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Left Click Lock"));
+		return;
+	}
+	
 	if (OwnerCharacter->IsDead())
 	{
 		return;
 	}
-
-	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
-
-	if (!(Ares->GetSkillInputControl().CanInputLC))
-	{
-		return;
-	}
-
+	
 	if (!bCtrlHeld)
 	{
 		if (Ares)
 		{
-			if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
+			if (Ares->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 			{
-				OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+				Ares->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
 			}
 			else
 			{
-				Ares->OnComboAttack();
+				UE_LOG(LogTemp, Warning, TEXT("CanAcceptComboInput %d"), Ares->CanAcceptComboInput);
+				
+				if (Ares->CanAcceptComboInput)
+				{
+					Ares->OnComboAttack();
+				}
+				else
+				{
+					
+				}
 			}
 		}
 	}
@@ -67,7 +76,7 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	{
 		if (Ares)
 		{
-			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+			Ares->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
 		}
 	}
 }
@@ -89,15 +98,20 @@ void UGS_AresSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstanc
 
 void UGS_AresSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instance)
 {
-	Super::OnRoll(Instance);
-
-	if (OwnerCharacter->IsDead())
+	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
+	if (!Ares->GetSkillInputControl().CanInputRoll)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Roll Lock"));
+		return;
+	}
+	
+	if (Ares->IsDead())
 	{
 		return;
 	}
-	if (AGS_Ares* ChanCharacter = Cast<AGS_Ares>(OwnerCharacter))
+	if (Ares)
 	{
-		ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Rolling);
+		Ares->GetSkillComp()->TryActivateSkill(ESkillSlot::Rolling);
 	}
 
 	return;

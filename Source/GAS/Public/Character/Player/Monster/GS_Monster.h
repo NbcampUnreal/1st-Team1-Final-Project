@@ -110,6 +110,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
 	TObjectPtr<UGS_MonsterSkillComp> MonsterSkillComp;
@@ -132,4 +133,9 @@ protected:
 	
 private:
 	bool bIsSelected;
-}; 
+
+	UPROPERTY()
+	FTimerHandle SkillCooldownWidgetTimer;
+	
+	void UpdateSkillCooldownWidget();
+};

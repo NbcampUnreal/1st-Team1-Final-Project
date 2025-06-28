@@ -1095,7 +1095,7 @@
 								<ActiveSource Name="ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_01" ID="{A5DD1E72-24EE-48FD-AC1E-C5C2A739A9A9}" Platform="Linked"/>
 							</ActiveSourceList>
 						</Sound>
-						<Sound Name="ArrowImpact_Stone2" ID="{57D55AAF-940E-456B-B062-6604DB717A1D}" ShortID="602310312">
+						<Sound Name="ArrowImpact_Stone1" ID="{57D55AAF-940E-456B-B062-6604DB717A1D}" ShortID="602310312">
 							<PropertyList>
 								<Property Name="Highpass" Type="int16">
 									<ValueList>
@@ -1139,64 +1139,6 @@
 							</ChildrenList>
 							<ActiveSourceList>
 								<ActiveSource Name="ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_10" ID="{BFB4B9A3-04E8-41F8-BA85-B4D723334330}" Platform="Linked"/>
-							</ActiveSourceList>
-						</Sound>
-						<Sound Name="ArrowImpact_Stone1" ID="{7C4CFC54-737A-4EAB-AC1A-976CE78078D1}" ShortID="110408360">
-							<PropertyList>
-								<Property Name="Highpass" Type="int16">
-									<ValueList>
-										<Value>13</Value>
-									</ValueList>
-								</Property>
-								<Property Name="Lowpass" Type="int16">
-									<ValueList>
-										<Value>8</Value>
-									</ValueList>
-								</Property>
-								<Property Name="Pitch" Type="int32">
-									<ModifierList>
-										<ModifierInfo>
-											<Modifier Name="" ID="{A9B6F3A3-1C29-452B-ACC4-61BAA6CC4E8C}">
-												<PropertyList>
-													<Property Name="Enabled" Type="bool" Value="True"/>
-													<Property Name="Min" Type="Real64" Value="-100"/>
-												</PropertyList>
-											</Modifier>
-										</ModifierInfo>
-									</ModifierList>
-								</Property>
-								<Property Name="Volume" Type="Real64">
-									<ValueList>
-										<Value>-2</Value>
-									</ValueList>
-								</Property>
-							</PropertyList>
-							<ReferenceList>
-								<Reference Name="Conversion">
-									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-								</Reference>
-								<Reference Name="OutputBus">
-									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-								</Reference>
-							</ReferenceList>
-							<ChildrenList>
-								<AudioFileSource Name="ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_04" ID="{8D7FD9AB-02EB-4DF8-BFE8-743F2E8E9FAB}">
-									<PropertyList>
-										<Property Name="FadeInDuration" Type="Real64" Value="0.0121251788944304"/>
-										<Property Name="FadeOutDuration" Type="Real64" Value="0.104717454088263"/>
-										<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-										<Property Name="TrimBegin" Type="Real64" Value="0.0110228899040277"/>
-										<Property Name="TrimEnd" Type="Real64" Value="0.687828325719792"/>
-									</PropertyList>
-									<Language>SFX</Language>
-									<AudioFile>ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_04.wav</AudioFile>
-									<MediaIDList>
-										<MediaID ID="600873638"/>
-									</MediaIDList>
-								</AudioFileSource>
-							</ChildrenList>
-							<ActiveSourceList>
-								<ActiveSource Name="ESM_Fighting_Game_One_Shot_Designed_Destruction_Impact_Hit_Mixed_Surface_Stone_Dirt_Glass_Metal_Debris_04" ID="{8D7FD9AB-02EB-4DF8-BFE8-743F2E8E9FAB}" Platform="Linked"/>
 							</ActiveSourceList>
 						</Sound>
 					</ChildrenList>
@@ -11190,6 +11132,200 @@
 										</Sound>
 									</ChildrenList>
 								</BlendContainer>
+								<RandomSequenceContainer Name="Voice_MerciJump" ID="{685D775D-868D-46A8-AEF2-861D73182314}" ShortID="959499073">
+									<PropertyList>
+										<Property Name="3DPosition" Type="int16" Value="1"/>
+										<Property Name="3DSpatialization" Type="int16" Value="2"/>
+										<Property Name="GlobalOrPerObject" Type="int16" Value="0"/>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>6</Value>
+											</ValueList>
+										</Property>
+										<Property Name="HoldEmitterPositionOrientation" Type="bool" Value="True"/>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>6</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Pitch" Type="int32">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{B87663BE-46B1-4957-96AA-CA331877615F}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-5"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="RandomOrSequence" Type="int16" Value="0"/>
+										<Property Name="SpeakerPanning" Type="int16" Value="1"/>
+										<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-5</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{ED26D667-1E6D-4480-AE6D-B500EAD519B8}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="1"/>
+															<Property Name="Min" Type="Real64" Value="-4"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Attenuation">
+											<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+										</Reference>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="Merci_Jump0" ID="{C710CAD9-10D0-4EE6-B0F6-2C3363A71BE8}" ShortID="69592429">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="OverrideEffect" Type="bool" Value="True"/>
+												<Property Name="Pitch" Type="int32">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{BFC7699F-97D5-4D53-940F-8532BC2BC65C}"/>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-3</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{38F3A919-BCD0-44C5-B450-7449A86862A4}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Character_Sharon_Jump_5_Female_Adult_Mature_DJ_Woman" ID="{67C750B3-E801-4186-B68A-1C8065554C3C}">
+													<Language>SFX</Language>
+													<AudioFile>ESM_Character_Sharon_Jump_5_Female_Adult_Mature_DJ_Woman.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="1040178103"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Character_Sharon_Jump_5_Female_Adult_Mature_DJ_Woman" ID="{67C750B3-E801-4186-B68A-1C8065554C3C}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="Merci_Jump1" ID="{31C078E7-6760-49A7-A95C-2623D7AC020B}" ShortID="10453817">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{1980E6CF-C642-4FDE-920F-7E031BAA1A42}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-10"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-3</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{6B76927F-1C0C-48C5-9A94-DA0610D09961}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-2"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Character_Sharon_Jump_1_Female_Adult_Mature_DJ_Woman" ID="{94D95246-E2D2-4F08-BDD6-65509C0C2BDE}">
+													<Language>SFX</Language>
+													<AudioFile>ESM_Character_Sharon_Jump_1_Female_Adult_Mature_DJ_Woman.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="372981139"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Character_Sharon_Jump_1_Female_Adult_Mature_DJ_Woman" ID="{94D95246-E2D2-4F08-BDD6-65509C0C2BDE}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+									<PositioningInfo>
+										<Panner Name="" ID="{778B0781-BB60-468C-B601-591E0405B575}"/>
+										<Position Name="" ID="{7FB1F0A0-FF61-4E2C-8D11-B3C32F54E0AE}"/>
+									</PositioningInfo>
+									<ObjectLists>
+										<ObjectList Name="Playlist">
+											<Reference>
+												<ObjectRef Name="Merci_Jump0" ID="{C710CAD9-10D0-4EE6-B0F6-2C3363A71BE8}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+											<Reference>
+												<ObjectRef Name="Merci_Jump1" ID="{31C078E7-6760-49A7-A95C-2623D7AC020B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+											</Reference>
+										</ObjectList>
+									</ObjectLists>
+								</RandomSequenceContainer>
 							</ChildrenList>
 						</Folder>
 						<Folder Name="Chan" ID="{51207146-34BA-4509-A4DE-E3C35A48426C}" ShortID="451123922">
@@ -12480,33 +12616,6 @@
 													</ChildrenList>
 													<ActiveSourceList>
 														<ActiveSource Name="ESM_Character_Yury_Jump_4_Male_Human_Voice_Over_Vocal_English_Russian" ID="{D5012153-2D64-4239-81BF-27CEAFF65F1B}" Platform="Linked"/>
-													</ActiveSourceList>
-												</Sound>
-												<Sound Name="ESM_Character_Yury_Groan1" ID="{C2B1BCBE-4D46-4756-B0D9-9414B57B9270}" ShortID="658110936">
-													<ReferenceList>
-														<Reference Name="Conversion">
-															<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-														</Reference>
-														<Reference Name="OutputBus">
-															<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-														</Reference>
-													</ReferenceList>
-													<ChildrenList>
-														<AudioFileSource Name="ESM_Character_Yury_Groan_11_Male_Human_Voice_Over_Vocal_English_Russian" ID="{99A01963-6589-4736-98AF-008B25EE4345}">
-															<PropertyList>
-																<Property Name="FadeOutDuration" Type="Real64" Value="0.0640328322784811"/>
-																<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-																<Property Name="TrimEnd" Type="Real64" Value="0.786689082278481"/>
-															</PropertyList>
-															<Language>SFX</Language>
-															<AudioFile>ESM_Character_Yury_Groan_11_Male_Human_Voice_Over_Vocal_English_Russian.wav</AudioFile>
-															<MediaIDList>
-																<MediaID ID="579496560"/>
-															</MediaIDList>
-														</AudioFileSource>
-													</ChildrenList>
-													<ActiveSourceList>
-														<ActiveSource Name="ESM_Character_Yury_Groan_11_Male_Human_Voice_Over_Vocal_English_Russian" ID="{99A01963-6589-4736-98AF-008B25EE4345}" Platform="Linked"/>
 													</ActiveSourceList>
 												</Sound>
 												<Sound Name="ESM_Character_Yury_Groaning" ID="{95A5881C-20B3-4BD2-BE81-6B2428F25A0A}" ShortID="901073287">
@@ -15627,7 +15736,7 @@
 										</Property>
 										<Property Name="MakeUpGain" Type="Real64">
 											<ValueList>
-												<Value>-6</Value>
+												<Value>-5</Value>
 											</ValueList>
 										</Property>
 										<Property Name="Pitch" Type="int32">
@@ -17116,6 +17225,769 @@
 										</ObjectList>
 									</ObjectLists>
 								</BlendContainer>
+								<BlendContainer Name="EV_AresDashSkill" ID="{59013EA8-5F63-49CB-B523-4B3A3A5052CE}" ShortID="483881540">
+									<PropertyList>
+										<Property Name="3DSpatialization" Type="int16" Value="2"/>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>15</Value>
+											</ValueList>
+										</Property>
+										<Property Name="HoldEmitterPositionOrientation" Type="bool" Value="True"/>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>15</Value>
+											</ValueList>
+										</Property>
+										<Property Name="MakeUpGain" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{28F26A45-FA8B-415A-A75E-B0A6E94BEBB8}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-2"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Pitch" Type="int32">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{91273588-C89B-4A4D-8AF3-2D5310E9EDDD}">
+														<PropertyList>
+															<Property Name="Max" Type="Real64" Value="50"/>
+															<Property Name="Min" Type="Real64" Value="-50"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-4</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{57DDBD71-D3A2-44BB-A221-8A8C5B6183CB}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Attenuation">
+											<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+										</Reference>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="SkillAttackSound" ID="{57049CB9-ECF7-478B-B3A6-98AFF97E030B}" ShortID="832898059">
+											<PropertyList>
+												<Property Name="3DSpatialization" Type="int16" Value="2"/>
+												<Property Name="EnableDiffraction" Type="bool" Value="True"/>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="HoldEmitterPositionOrientation" Type="bool" Value="True"/>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>-3</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-3</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{959AC240-BD0F-489A-8DCB-D589289F4FE5}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Attenuation">
+													<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+												</Reference>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="FNF_ME_sfx_combat_hammer_impact_heavy_ring" ID="{85BEA7FA-8047-4E24-9E8D-45DBF253A4A8}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0653379193139732"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.761438059697456"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>FNF_ME_sfx_combat_hammer_impact_heavy_ring.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="899626115"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<PositioningInfo>
+												<Position Name="" ID="{FE7B43E9-4B3A-4494-8D2A-866EBEDEC313}"/>
+											</PositioningInfo>
+											<ActiveSourceList>
+												<ActiveSource Name="FNF_ME_sfx_combat_hammer_impact_heavy_ring" ID="{85BEA7FA-8047-4E24-9E8D-45DBF253A4A8}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="AttackVoice1" ID="{11BDB048-2458-4EBC-A915-9D78ABA25FC5}" ShortID="372648307">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>3</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>300</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{B2BB6B16-5CDB-4224-BFD3-5DF6C9258469}">
+																<PropertyList>
+																	<Property Name="Min" Type="Real64" Value="-10"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{33BA7AD3-B3FF-4013-9D27-940876E6139F}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-2"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="FNF_ME_sfx_combat_broadsword_impact_shield_metal" ID="{AA80AD85-3943-406C-8164-A785ECF454AA}">
+													<PropertyList>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.192489073826717"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.795621501335731"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>FNF_ME_sfx_combat_broadsword_impact_shield_metal.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="914961834"/>
+													</MediaIDList>
+												</AudioFileSource>
+												<AudioFileSource Name="ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian" ID="{7F155DD9-F34F-472E-93D0-B453F72C3C67}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0519889649920309"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.173955714764747"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.0783555566444309"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.482997657171812"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="469044071"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian" ID="{7F155DD9-F34F-472E-93D0-B453F72C3C67}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+									<PositioningInfo>
+										<Position Name="" ID="{F012AAF9-A4EE-47E9-A37D-F255413FF87E}"/>
+									</PositioningInfo>
+								</BlendContainer>
+								<BlendContainer Name="EV_AresSlashSkill" ID="{02888CE5-4CFB-4925-A702-ABA03A838DC6}" ShortID="280605324">
+									<PropertyList>
+										<Property Name="3DSpatialization" Type="int16" Value="2"/>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>15</Value>
+											</ValueList>
+										</Property>
+										<Property Name="HoldEmitterPositionOrientation" Type="bool" Value="True"/>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>15</Value>
+											</ValueList>
+										</Property>
+										<Property Name="MakeUpGain" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{555C5C9B-7D17-4470-8588-7AB589B33AA3}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-2"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Pitch" Type="int32">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{3F1C7A25-1341-427F-A761-DD80C1F7D571}">
+														<PropertyList>
+															<Property Name="Max" Type="Real64" Value="50"/>
+															<Property Name="Min" Type="Real64" Value="-50"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-4</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{8F01946F-311A-45DC-96D6-1B988B2B04AE}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Attenuation">
+											<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+										</Reference>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="AttackVoice0" ID="{B2904BBB-71BE-46E4-8C3F-06E4DF30A4D1}" ShortID="719663091">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>-1</Value>
+													</ValueList>
+												</Property>
+												<Property Name="OverrideEffect" Type="bool" Value="True"/>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>300</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{63D10AB4-EFF0-44EF-A662-989E246DAB30}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="3"/>
+																	<Property Name="Min" Type="Real64" Value="-3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_FG_FX_one_shot_farming_axe_sword_swing_attack_2_tool_whoosh" ID="{7FB7C23E-BADC-43BA-86CE-BA12F45278A8}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0131526440382004"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.0550019659779289"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.258270106120543"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_FG_FX_one_shot_farming_axe_sword_swing_attack_2_tool_whoosh.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="506727713"/>
+													</MediaIDList>
+												</AudioFileSource>
+												<AudioFileSource Name="ESM_FG2_FX_combat_one_shot_cinematic_weapons_melee_axe_hits_02" ID="{92209EC8-1A76-41BA-8780-36CD594D04BD}">
+													<PropertyList>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.192448034153118"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.699227800310665"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_FG2_FX_combat_one_shot_cinematic_weapons_melee_axe_hits_02.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="476493277"/>
+													</MediaIDList>
+												</AudioFileSource>
+												<AudioFileSource Name="ESM_PG_cinematic_fx_weapons_warefare_melee_sword_blade_slice_blood_squelch_cut_swing_06" ID="{96E1F2E3-D662-4188-AC8D-64999F8E50C1}">
+													<PropertyList>
+														<Property Name="LoopBegin" Type="Real64" Value="0.0138522728339775"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.0138522728339775"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_PG_cinematic_fx_weapons_warefare_melee_sword_blade_slice_blood_squelch_cut_swing_06.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="310652630"/>
+													</MediaIDList>
+												</AudioFileSource>
+												<AudioFileSource Name="FNF_ME_sfx_combat_broadsword_unsheathe_impact_quick" ID="{DC44A199-CEFC-4B56-ADBE-4B9FBDFEB8CF}">
+													<PropertyList>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.0944055944055944"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.765734265734266"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>FNF_ME_sfx_combat_broadsword_unsheathe_impact_quick.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="647807090"/>
+													</MediaIDList>
+												</AudioFileSource>
+												<AudioFileSource Name="ESM_Character_Yury_Jump_2_Male_Human_Voice_Over_Vocal_English_Russian" ID="{37A1EBA8-C75F-45E7-A9E2-D68DC6A8B7CA}">
+													<PropertyList>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.0805397711016915"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Character_Yury_Jump_2_Male_Human_Voice_Over_Vocal_English_Russian.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="229054574"/>
+													</MediaIDList>
+												</AudioFileSource>
+												<AudioFileSource Name="ESM_Character_Yury_Grunt_4_Male_Human_Voice_Over_Vocal_English_Russian" ID="{12401796-D045-498E-A2C4-C0106DF4D349}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0337958898577657"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.112652966192552"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Character_Yury_Grunt_4_Male_Human_Voice_Over_Vocal_English_Russian.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="992284103"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Character_Yury_Grunt_4_Male_Human_Voice_Over_Vocal_English_Russian" ID="{12401796-D045-498E-A2C4-C0106DF4D349}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="AttackVoice1" ID="{B6931813-1452-47CE-8916-429A6018492C}" ShortID="365204240">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="InitialDelay" Type="Real64">
+													<ValueList>
+														<Value>0.2</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>300</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{99DE4AF3-4057-420F-9EFE-A6F89BB72339}">
+																<PropertyList>
+																	<Property Name="Min" Type="Real64" Value="-10"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{F42367E0-3EF5-4268-A5F3-1B00383106C1}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Min" Type="Real64" Value="-2"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="FNF_ME_sfx_combat_broadsword_impact_shield_metal" ID="{B5E1F7C0-6D11-498A-B229-9EF6BE6012F4}">
+													<PropertyList>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.192489073826717"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.795621501335731"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>FNF_ME_sfx_combat_broadsword_impact_shield_metal.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="914961834"/>
+													</MediaIDList>
+												</AudioFileSource>
+												<AudioFileSource Name="ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian" ID="{92B9E1EE-84F1-4E93-AA93-0ABEBA080C52}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0695312537930229"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.159921883723953"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="524623202"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Character_Yury_Grunt_8_Male_Human_Voice_Over_Vocal_English_Russian" ID="{92B9E1EE-84F1-4E93-AA93-0ABEBA080C52}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="Slash_impact0" ID="{755995DA-07EB-4770-B5DB-0F6638098B6F}" ShortID="1064965265">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>5</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>-2</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>50</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-6</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy" ID="{A606B151-02E5-4601-A106-A80332CD9762}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.113360420037608"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.825405558398832"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="0.116902933163783"/>
+														<Property Name="TrimEnd" Type="Real64" Value="1.15485929757083"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="797001805"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy" ID="{A606B151-02E5-4601-A106-A80332CD9762}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+										<Sound Name="Slash_impact1" ID="{70D5251D-0459-41F8-A279-69FE5F1688E4}" ShortID="1044275051">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>12</Value>
+													</ValueList>
+												</Property>
+												<Property Name="InitialDelay" Type="Real64">
+													<ValueList>
+														<Value>0.2</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>12</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>-4</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>50</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Volume" Type="Real64">
+													<ValueList>
+														<Value>-6</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="FNF_ME_sfx_combat_dagger_slash_quick" ID="{BBBB9315-571A-4521-9341-441E032F3D24}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.0671309709010759"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.49755896079621"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimEnd" Type="Real64" Value="0.951680277136235"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>FNF_ME_sfx_combat_dagger_slash_quick.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="350943193"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="FNF_ME_sfx_combat_dagger_slash_quick" ID="{BBBB9315-571A-4521-9341-441E032F3D24}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+									<PositioningInfo>
+										<Position Name="" ID="{68DBD801-66B4-40E5-BFBB-A967ECC0E8A9}"/>
+									</PositioningInfo>
+								</BlendContainer>
+								<BlendContainer Name="EV_AresUltimateSkill" ID="{95ED4BC2-6507-4C50-962F-5EDD11160762}" ShortID="203776136">
+									<PropertyList>
+										<Property Name="3DSpatialization" Type="int16" Value="2"/>
+										<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.1"/>
+										<Property Name="Highpass" Type="int16">
+											<ValueList>
+												<Value>15</Value>
+											</ValueList>
+										</Property>
+										<Property Name="HoldEmitterPositionOrientation" Type="bool" Value="True"/>
+										<Property Name="Lowpass" Type="int16">
+											<ValueList>
+												<Value>15</Value>
+											</ValueList>
+										</Property>
+										<Property Name="MakeUpGain" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{3DC2EB61-ED97-4690-8CE6-B68F82B3ABCE}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-1"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Pitch" Type="int32">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{B8F88101-38D3-4FC7-950A-E11FE589E13E}">
+														<PropertyList>
+															<Property Name="Max" Type="Real64" Value="50"/>
+															<Property Name="Min" Type="Real64" Value="-50"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="Volume" Type="Real64">
+											<ValueList>
+												<Value>-2</Value>
+											</ValueList>
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{E449E869-5826-422F-8D12-7027ACC6DDFA}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Min" Type="Real64" Value="-3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Attenuation">
+											<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+										</Reference>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="AresGrowl" ID="{94D5C107-B1E1-45FA-B572-8A1A40ADFECA}" ShortID="571893563">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="InitialDelay" Type="Real64">
+													<ValueList>
+														<Value>0.2</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>100</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="ESM_Character_Calvin_Growl_3_Male_Human_Voice_Over_Vocal_English_Middle_Age_Adult_Mature" ID="{840852AF-0698-440A-A437-5742D8D688A4}">
+													<PropertyList>
+														<Property Name="FadeInDuration" Type="Real64" Value="0.196607416922893"/>
+														<Property Name="FadeOutDuration" Type="Real64" Value="0.438855841345743"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimEnd" Type="Real64" Value="1.26390481512845"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>ESM_Character_Calvin_Growl_3_Male_Human_Voice_Over_Vocal_English_Middle_Age_Adult_Mature.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="228289941"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="ESM_Character_Calvin_Growl_3_Male_Human_Voice_Over_Vocal_English_Middle_Age_Adult_Mature" ID="{840852AF-0698-440A-A437-5742D8D688A4}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+									<PositioningInfo>
+										<Position Name="" ID="{0AF690EA-ED9F-4CC7-8688-B2CE148EA160}"/>
+									</PositioningInfo>
+									<ObjectLists>
+										<ObjectList Name="Effects">
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{2990A095-BD3A-42E9-93F4-5C5740DF25F0}" ShortID="484486790">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Delay" CompanyID="0" PluginID="106" PluginType="3">
+																<ObjectRef Name="One_Tap_Half_Second" ID="{B8FE0D3B-7AAB-4344-89FE-177602B7BF19}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{0C9976EF-FCBE-4BFE-8279-A5AC9C197534}" ShortID="867008974">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise RoomVerb" CompanyID="0" PluginID="118" PluginType="3">
+																<ObjectRef Name="Room_Small" ID="{577F1466-A63B-47F7-98BD-C56E433F8B5D}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+										</ObjectList>
+									</ObjectLists>
+								</BlendContainer>
 							</ChildrenList>
 						</Folder>
 					</ChildrenList>
@@ -17800,35 +18672,6 @@
 										<ActiveSource Name="Footstep_Grass (2)" ID="{F7AB95DF-7B03-46EA-AA24-4EEA3BAF478A}" Platform="Linked"/>
 									</ActiveSourceList>
 								</Sound>
-								<Sound Name="Footstep_Grass (3)" ID="{F6074E16-4242-48A7-9C36-89D573E73D9E}" ShortID="799337263">
-									<ReferenceList>
-										<Reference Name="Conversion">
-											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-										</Reference>
-										<Reference Name="OutputBus">
-											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-										</Reference>
-									</ReferenceList>
-									<ChildrenList>
-										<AudioFileSource Name="Footstep_Grass (3)" ID="{AB3F0BE5-106A-44D8-B648-2755019CE2AB}">
-											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.0214777068727335"/>
-												<Property Name="FadeOutDuration" Type="Real64" Value="0.0393757959333448"/>
-												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimBegin" Type="Real64" Value="0.0804831008083841"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.412425613168911"/>
-											</PropertyList>
-											<Language>SFX</Language>
-											<AudioFile>Footstep_Grass (3).wav</AudioFile>
-											<MediaIDList>
-												<MediaID ID="377837800"/>
-											</MediaIDList>
-										</AudioFileSource>
-									</ChildrenList>
-									<ActiveSourceList>
-										<ActiveSource Name="Footstep_Grass (3)" ID="{AB3F0BE5-106A-44D8-B648-2755019CE2AB}" Platform="Linked"/>
-									</ActiveSourceList>
-								</Sound>
 							</ChildrenList>
 							<ObjectLists>
 								<ObjectList Name="Effects">
@@ -18074,64 +18917,6 @@
 								</Reference>
 							</ReferenceList>
 							<ChildrenList>
-								<Sound Name="FootstepMetal1" ID="{8F9226F0-B2C5-4344-BE06-FB1AF994E5D1}" ShortID="283185788">
-									<ReferenceList>
-										<Reference Name="Conversion">
-											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-										</Reference>
-										<Reference Name="OutputBus">
-											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-										</Reference>
-									</ReferenceList>
-									<ChildrenList>
-										<AudioFileSource Name="FootstepMetal1" ID="{0431FE04-3349-422F-AE24-8F7A78844E58}">
-											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.0201600976051039"/>
-												<Property Name="FadeOutDuration" Type="Real64" Value="0.0384874590642892"/>
-												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimBegin" Type="Real64" Value="0.0103098870488642"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.393524891731014"/>
-											</PropertyList>
-											<Language>SFX</Language>
-											<AudioFile>FootstepMetal1.wav</AudioFile>
-											<MediaIDList>
-												<MediaID ID="290212776"/>
-											</MediaIDList>
-										</AudioFileSource>
-									</ChildrenList>
-									<ActiveSourceList>
-										<ActiveSource Name="FootstepMetal1" ID="{0431FE04-3349-422F-AE24-8F7A78844E58}" Platform="Linked"/>
-									</ActiveSourceList>
-								</Sound>
-								<Sound Name="FootstepMetal2" ID="{D5DEA8A5-6B9F-408E-B8F2-73697613493D}" ShortID="895855360">
-									<ReferenceList>
-										<Reference Name="Conversion">
-											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-										</Reference>
-										<Reference Name="OutputBus">
-											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-										</Reference>
-									</ReferenceList>
-									<ChildrenList>
-										<AudioFileSource Name="FootstepMetal2" ID="{482408A5-AACE-4267-916D-FC776267544E}">
-											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.0274815111403253"/>
-												<Property Name="FadeOutDuration" Type="Real64" Value="0.0212357131538877"/>
-												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimBegin" Type="Real64" Value="0.00926290496164502"/>
-												<Property Name="TrimEnd" Type="Real64" Value="0.196903357233809"/>
-											</PropertyList>
-											<Language>SFX</Language>
-											<AudioFile>FootstepMetal2.wav</AudioFile>
-											<MediaIDList>
-												<MediaID ID="401627905"/>
-											</MediaIDList>
-										</AudioFileSource>
-									</ChildrenList>
-									<ActiveSourceList>
-										<ActiveSource Name="FootstepMetal2" ID="{482408A5-AACE-4267-916D-FC776267544E}" Platform="Linked"/>
-									</ActiveSourceList>
-								</Sound>
 								<Sound Name="FootstepMetal" ID="{755E6614-DBF2-42D7-B45D-E8E58C84313A}" ShortID="186754500">
 									<ReferenceList>
 										<Reference Name="Conversion">
@@ -18572,6 +19357,13 @@
 					</GroupingInfo>
 				</SwitchContainer>
 				<Folder Name="UI_SOUND" ID="{0FB31C22-AE90-4658-920D-0B50D76E3E1E}" ShortID="629491025">
+					<PropertyList>
+						<Property Name="Inclusion" Type="bool">
+							<ValueList>
+								<Value>False</Value>
+							</ValueList>
+						</Property>
+					</PropertyList>
 					<ChildrenList>
 						<Sound Name="ButtonSFX_Select" ID="{DE3B6A60-142A-48A1-A625-47EE131AA6C3}" ShortID="713191015">
 							<PropertyList>
@@ -18579,6 +19371,11 @@
 								<Property Name="Highpass" Type="int16">
 									<ValueList>
 										<Value>3</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Inclusion" Type="bool">
+									<ValueList>
+										<Value>False</Value>
 									</ValueList>
 								</Property>
 								<Property Name="ListenerRelativeRouting" Type="bool" Value="False"/>
@@ -18627,6 +19424,11 @@
 										<Value>5</Value>
 									</ValueList>
 								</Property>
+								<Property Name="Inclusion" Type="bool">
+									<ValueList>
+										<Value>False</Value>
+									</ValueList>
+								</Property>
 								<Property Name="ListenerRelativeRouting" Type="bool" Value="False"/>
 								<Property Name="Lowpass" Type="int16">
 									<ValueList>
@@ -18671,6 +19473,11 @@
 								<Property Name="Highpass" Type="int16">
 									<ValueList>
 										<Value>5</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Inclusion" Type="bool">
+									<ValueList>
+										<Value>False</Value>
 									</ValueList>
 								</Property>
 								<Property Name="ListenerRelativeRouting" Type="bool" Value="False"/>
@@ -18907,52 +19714,6 @@
 							</ChildrenList>
 							<ActiveSourceList>
 								<ActiveSource Name="ESM_CH_fx_combat_punch_swing_hit_bone_shatter_06" ID="{8C982A8F-35C7-40D3-84B0-C2D8234977D3}" Platform="Linked"/>
-							</ActiveSourceList>
-						</Sound>
-						<Sound Name="Hit03" ID="{296EEDDC-4508-4CE0-AFB0-6F2C1FAB1D22}" ShortID="975663830">
-							<PropertyList>
-								<Property Name="Highpass" Type="int16">
-									<ValueList>
-										<Value>5</Value>
-									</ValueList>
-								</Property>
-								<Property Name="Lowpass" Type="int16">
-									<ValueList>
-										<Value>5</Value>
-									</ValueList>
-								</Property>
-								<Property Name="Volume" Type="Real64">
-									<ValueList>
-										<Value>-6</Value>
-									</ValueList>
-								</Property>
-							</PropertyList>
-							<ReferenceList>
-								<Reference Name="Conversion">
-									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-								</Reference>
-								<Reference Name="OutputBus">
-									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-								</Reference>
-							</ReferenceList>
-							<ChildrenList>
-								<AudioFileSource Name="ESM_CH_fx_combat_punch_swing_gore_liquid_hit_05" ID="{C6DFF272-1B1F-45AD-B3D0-D4418FC07C47}">
-									<PropertyList>
-										<Property Name="FadeInDuration" Type="Real64" Value="0.0240137884506634"/>
-										<Property Name="FadeOutDuration" Type="Real64" Value="0.081046536020989"/>
-										<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-										<Property Name="TrimBegin" Type="Real64" Value="0.232633575615802"/>
-										<Property Name="TrimEnd" Type="Real64" Value="0.444255062177525"/>
-									</PropertyList>
-									<Language>SFX</Language>
-									<AudioFile>ESM_CH_fx_combat_punch_swing_gore_liquid_hit_05.wav</AudioFile>
-									<MediaIDList>
-										<MediaID ID="132193652"/>
-									</MediaIDList>
-								</AudioFileSource>
-							</ChildrenList>
-							<ActiveSourceList>
-								<ActiveSource Name="ESM_CH_fx_combat_punch_swing_gore_liquid_hit_05" ID="{C6DFF272-1B1F-45AD-B3D0-D4418FC07C47}" Platform="Linked"/>
 							</ActiveSourceList>
 						</Sound>
 						<Sound Name="Hit04" ID="{ABB766D7-F439-4007-B692-2DD115E58DD3}" ShortID="954328624">
@@ -21884,45 +22645,6 @@
 									</ChildrenList>
 									<ActiveSourceList>
 										<ActiveSource Name="ESM_PG_cinematic_fx_weapons_warefare_cannon_explosion_blast_stone_gravel_debris_02" ID="{7125CE33-2C61-4165-875E-57B70A963F07}" Platform="Linked"/>
-									</ActiveSourceList>
-								</Sound>
-								<Sound Name="Stone_Accent" ID="{FC1F6448-AF13-451D-B172-BA3827A844E7}" ShortID="558642256">
-									<PropertyList>
-										<Property Name="Lowpass" Type="int16">
-											<ValueList>
-												<Value>2</Value>
-											</ValueList>
-										</Property>
-										<Property Name="Volume" Type="Real64">
-											<ValueList>
-												<Value>-2</Value>
-											</ValueList>
-										</Property>
-									</PropertyList>
-									<ReferenceList>
-										<Reference Name="Conversion">
-											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
-										</Reference>
-										<Reference Name="OutputBus">
-											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{71E869E3-10BB-4F2B-81A9-112B85248612}"/>
-										</Reference>
-									</ReferenceList>
-									<ChildrenList>
-										<AudioFileSource Name="ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_4_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact" ID="{2F492DFB-A94A-41F4-9028-87C082D58E2C}">
-											<PropertyList>
-												<Property Name="FadeOutDuration" Type="Real64" Value="0.548047959014255"/>
-												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimEnd" Type="Real64" Value="1.08450391327888"/>
-											</PropertyList>
-											<Language>SFX</Language>
-											<AudioFile>ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_4_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact.wav</AudioFile>
-											<MediaIDList>
-												<MediaID ID="232330686"/>
-											</MediaIDList>
-										</AudioFileSource>
-									</ChildrenList>
-									<ActiveSourceList>
-										<ActiveSource Name="ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_4_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact" ID="{2F492DFB-A94A-41F4-9028-87C082D58E2C}" Platform="Linked"/>
 									</ActiveSourceList>
 								</Sound>
 								<Sound Name="Explode_Fiery_Loud" ID="{8DC6D2F9-85A9-46BE-AADB-52932F2032FC}" ShortID="886139747">

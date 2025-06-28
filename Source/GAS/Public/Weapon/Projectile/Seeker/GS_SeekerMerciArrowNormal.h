@@ -22,15 +22,11 @@ public:
 	float BaseDamage = 10.0f;
 
 	void ChangeArrowType(EArrowType Type);
-	virtual void OnBeginOverlap(
-		UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-		bool bFromSweep, const FHitResult& SweepResult) override;
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void ProcessDamageLogic(ETargetType TargetType, const FHitResult& SweepResult, AActor* HitActor) override;
+	virtual bool HandleTargetTypeGeneric(ETargetType TargetType, const FHitResult& SweepResult) override;
 private:
 	TSet<AActor*> DamagedActors;
-	
 };

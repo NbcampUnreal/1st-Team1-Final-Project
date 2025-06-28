@@ -77,11 +77,34 @@ void AGS_SwordAuraProjectile::Multicast_StartSwordSlashVFX_Implementation()
 		return;
 	}
 
-	UNiagaraSystem* SelectedVFX = (EffectType == ESwordAuraEffectType::Left) ? LeftSlashVFX : RightSlashVFX;
+	UNiagaraSystem* SelectedVFX = nullptr;
+	switch (EffectType)
+	{
+	case ESwordAuraEffectType::LeftNormal:
+		SelectedVFX = LeftNormalSlashVFX;
+		break;
+	case ESwordAuraEffectType::RightNormal:
+		SelectedVFX = RightNormalSlashVFX;
+		break;
+	case ESwordAuraEffectType::LeftBuff:
+		SelectedVFX = LeftBuffSlashVFX;
+		break;
+	case ESwordAuraEffectType::RightBuff:
+		SelectedVFX = RightBuffSlashVFX;
+		break;
+	}
+		
+		
+		
+	
 	if (!SelectedVFX)
 	{
 		return;
 	}
+	FString VFXName;
+	SelectedVFX->GetFName().ToString(VFXName);
+
+	UE_LOG(LogTemp, Warning, TEXT("SelectedVFX : %s"), *VFXName);
 
 	FVector LocalPos = FVector::ZeroVector; // 부모 위치 기준 (붙는 지점 기준)
 	FRotator LocalRot = FRotator::ZeroRotator; // 붙는 지점 기준 회전

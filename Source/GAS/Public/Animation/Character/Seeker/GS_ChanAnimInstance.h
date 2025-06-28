@@ -17,7 +17,7 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	// Combo Attack
+	/*// Combo Attack
 	UFUNCTION()
-	void AnimNotify_ComboInput();
+	void AnimNotify_ComboInput();*/
 };

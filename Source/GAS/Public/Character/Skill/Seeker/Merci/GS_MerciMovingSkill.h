@@ -18,6 +18,7 @@ public:
 	UGS_MerciMovingSkill();
 	virtual void ActiveSkill() override;
 	virtual void OnSkillCommand() override;
+	virtual void InterruptSkill() override;
 	virtual bool CanActive() const override;
 
 	virtual bool CanActiveInternally() const;

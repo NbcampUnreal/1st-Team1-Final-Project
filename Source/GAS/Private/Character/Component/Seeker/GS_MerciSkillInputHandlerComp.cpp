@@ -18,24 +18,39 @@ void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& In
 {
 	Super::OnRightClick(Instance);
 
-	if (OwnerCharacter->IsDead())
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	
+	if (!MerciCharacter->GetSkillInputControl().CanInputRC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Right Click Lock"));
+		return;
+	}
+
+
+	if (MerciCharacter->IsDead())
 	{
 		return;
 	}
 
 	if (!bCtrlHeld)
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+		MerciCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+		MerciCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
 	}
 }
 
 void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	Super::OnLeftClick(Instance);
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	if (!MerciCharacter->GetSkillInputControl().CanInputLC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Left Click Lock"));
+		return;
+	}
 
 	if (OwnerCharacter->IsDead())
 	{
@@ -44,7 +59,7 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 
 	if (!bCtrlHeld)
 	{
-		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+		
 		if(MerciCharacter->ComboSkillDrawMontage)
 		{
 			MerciCharacter->DrawBow(MerciCharacter->ComboSkillDrawMontage);
@@ -59,15 +74,23 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
 {
 	Super::OnRightClickRelease(Instance);
+
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	
-	if (OwnerCharacter->IsDead())
+	if (!MerciCharacter->GetSkillInputControl().CanInputRoll || !MerciCharacter->GetSkillInputControl().CanInputRC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Right Release Lock"));
+		return;
+	}
+	
+	if (MerciCharacter->IsDead())
 	{
 		return;
 	}
-
+	
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{
-		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+		MerciCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
 	}
 	else
 	{
@@ -79,14 +102,21 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 {
 	Super::OnLeftClickRelease(Instance);
 
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+
 	if (OwnerCharacter->IsDead())
 	{
+		return;
+	}
+	
+	if (!MerciCharacter->GetSkillInputControl().CanInputRoll || !MerciCharacter->GetSkillInputControl().CanInputLC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Left Release Lock"));
 		return;
 	}
 
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{
-		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 		if (MerciCharacter->NormalArrowClass)
 		{
 			MerciCharacter->ReleaseArrow(MerciCharacter->NormalArrowClass);

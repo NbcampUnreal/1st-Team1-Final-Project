@@ -8,7 +8,7 @@
 void UGS_AresAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
-	ChooserInputObj->CharacterType = ECharacterType::Merci;
+	ChooserInputObj->CharacterType = ECharacterType::Chan;
 }
 
 void UGS_AresAnimInstance::NativeUpdateAnimation(float DeltaSeconds)

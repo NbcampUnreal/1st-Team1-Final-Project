@@ -19,9 +19,13 @@ public:
 	virtual void ActiveSkill() override;
 	virtual void DeactiveSkill() override;	
 	virtual void ExecuteSkillEffect() override;
+	virtual void InterruptSkill() override;
 	virtual bool IsActive() const override;
 	
 private:
+	//UltimateSkill 활성화 되어 있는지 확인용
+	bool bIsBerserker = true;
+
 	UPROPERTY()
 	AGS_SwordAuraProjectile* CachedProjectile;
 
