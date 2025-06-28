@@ -54,10 +54,8 @@ void AGS_LobbyDisplayActor::OnRep_SetupDisplay()
             WeaponComponent->AttachToComponent(SkeletalMeshComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, WeaponPair.SocketName);
         }
 
-        UE_LOG(LogTemp, Warning, TEXT("....???")); // SJE
         for (const USkeletalMesh* SubMesh : CurrentSubMeshList)
         {
-            UE_LOG(LogTemp, Warning, TEXT("SubMesh : %s"), *SubMesh->GetName());
             USkeletalMeshComponent* SubMeshComponent = NewObject<USkeletalMeshComponent>(this);
             SubMeshComponent->RegisterComponent();
             SubMeshComponent->SetSkeletalMesh(const_cast<USkeletalMesh*>(SubMesh));
