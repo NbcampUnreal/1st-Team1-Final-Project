@@ -4,7 +4,12 @@
 #include "Weapon/Projectile/Guardian/GS_NeedleFangProjectile.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/GS_Character.h"
 #include "Engine/DamageEvents.h"
+#include "AkGameplayStatics.h"
+#include "AkAudioEvent.h"
+#include "Components/PrimitiveComponent.h"
+#include "Engine/HitResult.h"
 
 AGS_NeedleFangProjectile::AGS_NeedleFangProjectile()
 {
@@ -38,6 +43,10 @@ void AGS_NeedleFangProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
 	{
 		return;	
 	}
+	
+	// 히트 사운드 재생
+	Multicast_PlayHitSound(Hit.ImpactPoint);
+	
 	float Damage = DamagedStat->CalculateDamage(OwnerCharacter, DamagedCharacter);
 	FDamageEvent DamageEvent;
 	DamagedCharacter->TakeDamage(Damage, DamageEvent, GetOwner()->GetInstigatorController(), this);
@@ -48,4 +57,27 @@ void AGS_NeedleFangProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
 void AGS_NeedleFangProjectile::HandleProjectileDestroy()
 {
 	Destroy();
+}
+
+void AGS_NeedleFangProjectile::Multicast_PlayHitSound_Implementation(FVector HitLocation)
+{
+	// 데디케이티드 서버에서는 사운드 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	if (HitSoundEvent)
+	{
+		UAkGameplayStatics::PostEventAtLocation(
+			HitSoundEvent,
+			HitLocation,
+			FRotator::ZeroRotator,
+			GetWorld()
+		);
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NeedleFang HitSoundEvent is null"));
+	}
 }
