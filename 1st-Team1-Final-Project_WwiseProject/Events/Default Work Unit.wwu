@@ -643,6 +643,17 @@
 												</Action>
 											</ChildrenList>
 										</Event>
+										<Event Name="Voice_Merci_Jump" ID="{888AE5E5-0803-4DD0-A033-9B7BCE1C3B86}">
+											<ChildrenList>
+												<Action Name="" ID="{FB903240-A545-4B2B-B691-95973DD3F35B}" ShortID="691850546">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="Voice_MerciJump" ID="{685D775D-868D-46A8-AEF2-861D73182314}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
 									</ChildrenList>
 								</Folder>
 								<Folder Name="Ares" ID="{7942C9FC-4398-4E98-8724-CC169407C1E5}" ShortID="151693662">
