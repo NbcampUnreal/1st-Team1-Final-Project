@@ -43,6 +43,7 @@ void AGS_Bridge::SetUpBridge()
 		for (int32 i = 0; i < BridgeMeshAssets.Num(); ++i)
 		{
 			UStaticMesh* CurrentMesh = BridgeMeshAssets[i];
+			
 			if (!CurrentMesh)
 			{
 				continue;
@@ -54,7 +55,7 @@ void AGS_Bridge::SetUpBridge()
 				NewPieceComponent->SetChildActorClass(AGS_BridgePiece::StaticClass());
 				NewPieceComponent->AttachToComponent(RootComponent,FAttachmentTransformRules::KeepRelativeTransform);
 				NewPieceComponent->RegisterComponent();
-
+				
 				AGS_BridgePiece* PieceActor = Cast<AGS_BridgePiece>(NewPieceComponent->GetChildActor());
 				if (PieceActor)
 				{
@@ -62,12 +63,13 @@ void AGS_Bridge::SetUpBridge()
 					
 					FTransform Transform = FTransform::Identity;
 					PieceActor->SetActorRelativeTransform(Transform);
-					PieceActor->SetBridgeMesh(CurrentMesh, weight * 100.f + 100.f);
+					PieceActor->SetBridgeMesh(CurrentMesh, BridgeMaterial, weight * 100.f + 100.f);
 				}
 				BrokenPieces.Add(NewPieceComponent);
 			}
 		}
 	}
 }
+
 
 
