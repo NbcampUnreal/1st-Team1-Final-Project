@@ -57,7 +57,7 @@ public:
 	void OnStatsChanged(const FArcaneBoardStats& NewStats);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void UpdateGridPreview(uint8 RuneID, const FIntPoint& GridPos);
+	void UpdateGridPreview(uint8 RuneID, const FIntPoint& ReferenceCellPos);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void UpdateGridVisuals();
@@ -147,6 +147,12 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
 	UGS_DragVisualWidget* SelectionVisualWidget;
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void PositionDragVisualAtMouse();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	FVector2D GetArcaneBoardCellSize() const;
 
 	//툴팁
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ArcaneBoard")
