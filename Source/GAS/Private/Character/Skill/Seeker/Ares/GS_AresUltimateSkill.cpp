@@ -28,7 +28,7 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
 	{
-		StatComp->bIsInvincible = false;
+		StatComp->SetInvincible(false);
 		StatComp->ResetStat(BuffAmount);
 	}
 
@@ -53,7 +53,7 @@ void UGS_AresUltimateSkill::ExecuteSkillEffect()
 	// 1. 데미지 무효화
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
 	{
-		StatComp->bIsInvincible = true;
+		StatComp->SetInvincible(true);
 	}
 
 	// 2~3. 스탯 변경
