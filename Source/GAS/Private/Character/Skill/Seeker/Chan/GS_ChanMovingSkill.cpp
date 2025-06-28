@@ -191,7 +191,6 @@ void UGS_ChanMovingSkill::DeactiveDEFBuff()
 {
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
 	{
-		StatComp->bIsInvincible = false;
 		StatComp->ResetStat(BuffAmount);
 	}
 }
