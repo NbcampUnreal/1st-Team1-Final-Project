@@ -49,7 +49,7 @@ AGS_Monster::AGS_Monster()
 	TargetedUIComponent->SetupAttachment(RootComponent);
 	TargetedUIComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
-	TargetedUIComponent->SetDrawSize(FVector2D(100.f, 100.f));
+	TargetedUIComponent->SetDrawSize(FVector2D(50.0f, 50.f));
 	TargetedUIComponent->SetVisibility(false);
 
 	TeamId = FGenericTeamId(2);
