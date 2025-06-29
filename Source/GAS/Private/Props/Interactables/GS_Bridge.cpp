@@ -5,8 +5,7 @@
 AGS_Bridge::AGS_Bridge()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
-	//bReplicates = true;
+	
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
 	NotBrokenPieces1 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh1"));
@@ -63,7 +62,7 @@ void AGS_Bridge::SetUpBridge()
 					
 					FTransform Transform = FTransform::Identity;
 					PieceActor->SetActorRelativeTransform(Transform);
-					PieceActor->SetBridgeMesh(CurrentMesh, BridgeMaterial, weight * 100.f + 100.f);
+					PieceActor->SetBridgeMesh(CurrentMesh, weight * 100.f + 100.f);
 				}
 				BrokenPieces.Add(NewPieceComponent);
 			}
