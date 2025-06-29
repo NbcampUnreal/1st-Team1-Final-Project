@@ -239,7 +239,14 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params))
 	{
 		TargetLocation = Hit.ImpactPoint;
+
+		AActor* HitActor = Hit.GetActor();
+		UPrimitiveComponent* HitComponent = Hit.GetComponent();
+
+		UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), HitActor ? *HitActor->GetName() : TEXT("None"));
+		UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), HitComponent ? *HitComponent->GetName() : TEXT("None"));
 	}
+	
 
 	// 4. 무기의 소켓 위치에서 목표 위치로 향하는 방향 계산
 	FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");

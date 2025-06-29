@@ -23,6 +23,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "System/GameMode/GS_InGameGM.h"
 
 
 AGS_TpsController::AGS_TpsController()
@@ -199,6 +200,20 @@ void AGS_TpsController::InitControllerPerWorld()
 			false
 		);
 	}
+}
+
+void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
+{
+	if (AGS_InGameGM* GM = GetWorld()->GetAuthGameMode<AGS_InGameGM>())
+	{
+		GM->NotifyPlayerIsReady(this);
+	}
+}
+
+void AGS_TpsController::Client_StartGame_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("준비 완료. TODO: 화면 가리개 제거"));
+	//TODO: 로딩스크린 제거
 }
 
 void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
@@ -527,7 +542,7 @@ void AGS_TpsController::BeginPlayingState()
 	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s) --- BeginPlayingState CALLED ---"), *GetNameSafe(this));
 	if (IsLocalController())
 	{
-		//ServerRPCTestFunction();
-		TestFunction();
+		Server_NotifyPlayerIsReady();
+		TestFunction(); //TODO: 바로 윗줄 잘 작동하는 거 확인하면 이 함수 호출을 Client_StartGame_Implementation쪽으로 옮기기
 	}
 }

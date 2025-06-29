@@ -137,6 +137,7 @@ public:
 protected:
 	virtual void NotifyActorBeginCursorOver() override;
 	virtual void NotifyActorEndCursorOver() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	//component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -174,11 +175,16 @@ private:
 	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicDecalMaterial;
 
+	UPROPERTY()
+	FTimerHandle HPWidgetRotationTimer;
+
 	UFUNCTION()
 	void OnRep_CharacterSpeed();
 
 	void SpawnAndAttachWeapons();
 	
 	void SetHovered(bool bHovered);
+
+	void UpdateHPWidgetRotation();
 };
 

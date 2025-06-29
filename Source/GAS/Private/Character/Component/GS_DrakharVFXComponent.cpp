@@ -183,12 +183,15 @@ void UGS_DrakharVFXComponent::StopWingRushVFX()
 	{
 		ActiveWingRushVFXComponent->Deactivate();
 		FTimerHandle VFXCleanupTimer;
-		GetWorld()->GetTimerManager().SetTimer(VFXCleanupTimer, [this]() {
-			if (ActiveWingRushVFXComponent && IsValid(ActiveWingRushVFXComponent))
+		TWeakObjectPtr<UGS_DrakharVFXComponent> WeakThis = this;
+		GetWorld()->GetTimerManager().SetTimer(VFXCleanupTimer, [WeakThis]() {
+			if (!WeakThis.IsValid()) return;
+
+			if (WeakThis->ActiveWingRushVFXComponent && IsValid(WeakThis->ActiveWingRushVFXComponent))
 			{
-				ActiveWingRushVFXComponent->DestroyComponent();
+				WeakThis->ActiveWingRushVFXComponent->DestroyComponent();
 			}
-			ActiveWingRushVFXComponent = nullptr;
+			WeakThis->ActiveWingRushVFXComponent = nullptr;
 		}, 2.0f, false);
 	}
 }
@@ -239,12 +242,15 @@ void UGS_DrakharVFXComponent::StopDustVFX()
 	{
 		ActiveDustVFXComponent->Deactivate();
 		FTimerHandle DustVFXCleanupTimer;
-		GetWorld()->GetTimerManager().SetTimer(DustVFXCleanupTimer, [this]() {
-			if (ActiveDustVFXComponent && IsValid(ActiveDustVFXComponent))
+		TWeakObjectPtr<UGS_DrakharVFXComponent> WeakThis = this;
+		GetWorld()->GetTimerManager().SetTimer(DustVFXCleanupTimer, [WeakThis]() {
+			if (!WeakThis.IsValid()) return;
+
+			if (WeakThis->ActiveDustVFXComponent && IsValid(WeakThis->ActiveDustVFXComponent))
 			{
-				ActiveDustVFXComponent->DestroyComponent();
+				WeakThis->ActiveDustVFXComponent->DestroyComponent();
 			}
-			ActiveDustVFXComponent = nullptr;
+			WeakThis->ActiveDustVFXComponent = nullptr;
 		}, 1.5f, false);
 	}
 }
@@ -288,13 +294,16 @@ void UGS_DrakharVFXComponent::StopGroundCrackVFX()
 	{
 		ActiveGroundCrackVFXComponent->Deactivate();
 		FTimerHandle GroundCrackVFXCleanupTimer;
-		GetWorld()->GetTimerManager().SetTimer(GroundCrackVFXCleanupTimer, [this]() {
-			if (ActiveGroundCrackVFXComponent && IsValid(ActiveGroundCrackVFXComponent))
-			{
-				ActiveGroundCrackVFXComponent->DestroyComponent();
-			}
-			ActiveGroundCrackVFXComponent = nullptr;
-		}, 3.0f, false);
+		TWeakObjectPtr<UGS_DrakharVFXComponent> WeakThis = this;
+        GetWorld()->GetTimerManager().SetTimer(GroundCrackVFXCleanupTimer, [WeakThis]() {
+            if (!WeakThis.IsValid()) return;
+
+            if (WeakThis->ActiveGroundCrackVFXComponent && IsValid(WeakThis->ActiveGroundCrackVFXComponent))
+            {
+                WeakThis->ActiveGroundCrackVFXComponent->DestroyComponent();
+            }
+            WeakThis->ActiveGroundCrackVFXComponent = nullptr;
+        }, 3.0f, false);
 	}
 }
 
@@ -341,12 +350,15 @@ void UGS_DrakharVFXComponent::StopDustCloudVFX()
 	{
 		ActiveDustCloudVFXComponent->Deactivate();
 		FTimerHandle DustCloudVFXCleanupTimer;
-		GetWorld()->GetTimerManager().SetTimer(DustCloudVFXCleanupTimer, [this]() {
-			if (ActiveDustCloudVFXComponent && IsValid(ActiveDustCloudVFXComponent))
+		TWeakObjectPtr<UGS_DrakharVFXComponent> WeakThis = this;
+		GetWorld()->GetTimerManager().SetTimer(DustCloudVFXCleanupTimer, [WeakThis]() {
+			if (!WeakThis.IsValid()) return;
+
+			if (WeakThis->ActiveDustCloudVFXComponent && IsValid(WeakThis->ActiveDustCloudVFXComponent))
 			{
-				ActiveDustCloudVFXComponent->DestroyComponent();
+				WeakThis->ActiveDustCloudVFXComponent->DestroyComponent();
 			}
-			ActiveDustCloudVFXComponent = nullptr;
+			WeakThis->ActiveDustCloudVFXComponent = nullptr;
 		}, 1.5f, false);
 	}
 }

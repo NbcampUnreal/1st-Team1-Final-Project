@@ -23,6 +23,7 @@ public:
 	virtual void ExecuteSkillEffect() override;
 	virtual bool IsActive() const override;
 	virtual bool CanActiveInternally() const;
+	virtual void InterruptSkill() override;
 
 protected:
 	// 공격

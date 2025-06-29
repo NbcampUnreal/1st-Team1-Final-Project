@@ -96,12 +96,12 @@ void UGS_ChanMovingSkill::InterruptSkill()
 	Super::InterruptSkill();
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
-		}
+	if (OwnerPlayer->GetSkillComp())
+	{
+		OwnerPlayer->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
+	}
 
-		OwnerCharacter->GetWorldTimerManager().ClearTimer(DEFBuffHandle); // SJE To KCY
+	OwnerPlayer->GetWorldTimerManager().ClearTimer(DEFBuffHandle);
 
 }
 

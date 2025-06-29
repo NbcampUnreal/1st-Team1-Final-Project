@@ -54,6 +54,17 @@ void UGS_MerciAimingSkill::OnSkillCommand()
 	}
 }
 
+void UGS_MerciAimingSkill::InterruptSkill()
+{
+	Super::InterruptSkill();
+
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	if (MerciCharacter->GetSkillComp())
+	{
+		MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
+	}
+}
+
 bool UGS_MerciAimingSkill::CanActive() const
 {
 	return true;

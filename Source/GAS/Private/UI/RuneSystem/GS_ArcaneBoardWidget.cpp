@@ -129,10 +129,8 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 		return Reply;
 	}
 
-	FVector2D AdditionalOffset = FVector2D::ZeroVector;
-	SelectionVisualWidget->SetPositionInViewport(ViewportMousePos - AdditionalOffset, false);
+	PositionDragVisualAtMouse();
 
-	// 스크린 좌표를 직접 전달
 	UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
 
 	if (CellUnderMouse)
@@ -269,7 +267,7 @@ void UGS_ArcaneBoardWidget::OnStatsChanged(const FArcaneBoardStats& NewStats)
 	}
 }
 
-void UGS_ArcaneBoardWidget::UpdateGridPreview(uint8 RuneID, const FIntPoint& GridPos)
+void UGS_ArcaneBoardWidget::UpdateGridPreview(uint8 RuneID, const FIntPoint& ReferenceCellPos) 
 {
 	if (!IsValid(BoardManager))
 	{
@@ -278,47 +276,25 @@ void UGS_ArcaneBoardWidget::UpdateGridPreview(uint8 RuneID, const FIntPoint& Gri
 
 	ClearPreview();
 
-	FIntPoint OptimalPos;
-	if (BoardManager->FindOptimalPlacementPos(RuneID, GridPos, OptimalPos))
+	TArray<FIntPoint> AffectedCells;
+	bool bCanPlace = BoardManager->PreviewRunePlacement(RuneID, ReferenceCellPos, AffectedCells);
+
+	for (const FIntPoint& CellPos : AffectedCells)
 	{
-		TArray<FIntPoint> AffectedCells;
-		bool bCanPlace = BoardManager->PreviewRunePlacement(RuneID, OptimalPos, AffectedCells);
-
-		for (const FIntPoint& CellPos : AffectedCells)
+		if (GridCells.Contains(CellPos))
 		{
-			if (GridCells.Contains(CellPos))
+			UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
+			if(CellWidget)
 			{
-				UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
-				if (IsValid(CellWidget))
-				{
-					EGridCellVisualState PreviewState = bCanPlace ?
-						EGridCellVisualState::Valid : EGridCellVisualState::Invalid;
+				EGridCellVisualState  PreviewState = bCanPlace ?
+					EGridCellVisualState::Valid : EGridCellVisualState::Invalid;
 
-					CellWidget->SetPreviewVisualState(PreviewState);
-				}
+				CellWidget->SetPreviewVisualState(PreviewState);
 			}
 		}
-
-		PreviewCells = AffectedCells;
 	}
-	else
-	{
-		TArray<FIntPoint> AffectedCells;
-		bool bCanPlace = BoardManager->PreviewRunePlacement(RuneID, GridPos, AffectedCells);
 
-		for (const FIntPoint& CellPos : AffectedCells)
-		{
-			if (GridCells.Contains(CellPos))
-			{
-				UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
-				if (IsValid(CellWidget))
-				{
-					CellWidget->SetPreviewVisualState(EGridCellVisualState::Invalid);
-				}
-			}
-		}
-		PreviewCells = AffectedCells;
-	}
+	PreviewCells = AffectedCells;
 }
 
 void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
@@ -341,32 +317,23 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 	SelectedRuneID = RuneID;
 	bIsInSelectionMode = true;
 
-	if (IsValid(DragVisualWidgetClass))
+	if (IsValid(DragVisualWidgetClass) && IsValid(BoardManager))
 	{
 		SelectionVisualWidget = CreateWidget<UGS_DragVisualWidget>(this, DragVisualWidgetClass);
 		if (SelectionVisualWidget)
 		{
-			UTexture2D* RuneTexture = nullptr;
-			if (BoardManager)
-			{
-				RuneTexture = BoardManager->GetRuneTexture(RuneID);
-			}
+			UTexture2D* RuneTexture = BoardManager->GetRuneTexture(RuneID);
+			TMap<FIntPoint, UTexture2D*> RuneShape;
+			BoardManager->GetFragmentedRuneTexture(RuneID, RuneShape);
 
-			SelectionVisualWidget->Setup(RuneID, RuneTexture);
-
-			FVector2D ScaleFactors = CalculateDragVisualScale(RuneID);
-			SelectionVisualWidget->SetRenderScale(ScaleFactors);
-
-			if (GetWorld())
-			{
-				FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
-				if (MousePos != FVector2D::ZeroVector)
-				{
-					SelectionVisualWidget->SetPositionInViewport(MousePos, false);
-				}
-			}
-
+			FVector2D BoardCellSize = GetArcaneBoardCellSize();
+			float ScaleFactor = 0.5f;
+			
+			SelectionVisualWidget->Setup(RuneID, RuneTexture, RuneShape, BoardCellSize, ScaleFactor);
+			SelectionVisualWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 			SelectionVisualWidget->AddToViewport(3);
+
+			PositionDragVisualAtMouse();
 		}
 	}
 
@@ -402,19 +369,14 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 
 			if (IsValid(TargetCell))
 			{
-				FIntPoint ClickedCellPos = TargetCell->GetCellPos();
-				FIntPoint OptimalPos;
+				FIntPoint PlacementPos = TargetCell->GetCellPos();
 
-				if (BoardManager->FindOptimalPlacementPos(SelectedRuneID, ClickedCellPos, OptimalPos))
+				if (BoardManager->CanPlaceRuneAt(SelectedRuneID, PlacementPos))
 				{
 					// 연결 상태 미리 체크하여 보너스 사운드 여부 결정
-					int32 PreviousConnectedRuneCnt = 0;
-					if (BoardManager)
-					{
-						PreviousConnectedRuneCnt = BoardManager->ConnectedRuneCnt;
-					}
+					int32 PreviousConnectedRuneCnt = BoardManager->ConnectedRuneCnt;
 
-					bool bPlaceSuccess = BoardManager->PlaceRune(SelectedRuneID, OptimalPos);
+					bool bPlaceSuccess = BoardManager->PlaceRune(SelectedRuneID, PlacementPos);
 
 					if (bPlaceSuccess)
 					{
@@ -712,6 +674,40 @@ void UGS_ArcaneBoardWidget::UnbindFromLPS()
 	{
 		ArcaneBoardLPS->ClearCurrUIWidget();
 	}
+}
+
+void UGS_ArcaneBoardWidget::PositionDragVisualAtMouse()
+{
+	if (!IsValid(SelectionVisualWidget) || !GetWorld())
+	{
+		return;
+	}
+
+	FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
+
+	FVector2D ReferenceCellOffset = SelectionVisualWidget->GetReferenceCellOffset();
+	FVector2D AdjustedPos = MousePos - ReferenceCellOffset;
+
+	SelectionVisualWidget->SetPositionInViewport(AdjustedPos, false);
+}
+
+FVector2D UGS_ArcaneBoardWidget::GetArcaneBoardCellSize() const
+{
+	if (GridCells.Num() == 0)
+	{
+		return FVector2D(64.0f, 64.0f);
+	}
+
+	for (const auto& CellPair : GridCells)
+	{
+		if (IsValid(CellPair.Value))
+		{
+			FGeometry CellGeometry = CellPair.Value->GetCachedGeometry();
+			return CellGeometry.GetLocalSize();
+		}
+	}
+
+	return FVector2D(64.0f, 64.0f);
 }
 
 void UGS_ArcaneBoardWidget::ShowTooltip(uint8 RuneID, const FVector2D& MousePos)

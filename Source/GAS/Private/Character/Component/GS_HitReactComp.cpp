@@ -2,6 +2,8 @@
 
 
 #include "Character/Component/GS_HitReactComp.h"
+
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Skill/GS_SkillBase.h"
@@ -26,9 +28,10 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 			if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 			{
 				OwnerSeeker->GetSkillComp()->SkillsInterrupt();
-				// HitReact 애니메이션의 조건.
+
 				OwnerSeeker->Multicast_SetIsFullBodySlot(true);
 				OwnerSeeker->Multicast_SetIsUpperBodySlot(false);
+				
 				OwnerSeeker->SetMoveControlValue(false, false);
 				OwnerSeeker->SetSkillInputControl(false, false, false);
 			}
@@ -37,6 +40,7 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 		{
 			// ...
 		}
+		
 		OwnerCharacter->Multicast_SetCanHitReact(false);
 		OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[ReactType], Section);
 	}

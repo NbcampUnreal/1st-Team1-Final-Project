@@ -57,9 +57,6 @@ AGS_Drakhar::AGS_Drakhar()
 	//Guardian State Setting
 	ClientGuardianState = EGuardianState::CtrlEnd;
 	ClientGuardianDoSkillState = EGuardianDoSkill::None;
-	
-	//boss monster tag for user widget
-	Tags.Add("Guardian");
 
 	//fever mode
 	MaxFeverGauge = 100.f;

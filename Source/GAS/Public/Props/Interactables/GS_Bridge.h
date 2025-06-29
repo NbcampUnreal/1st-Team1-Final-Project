@@ -27,11 +27,13 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 	void SetUpBridge();
-
+	
 private:
 	UPROPERTY()
 	TArray<UChildActorComponent*> BrokenPieces;
-
+	
+	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess))
+	UMaterialInterface* BridgeMaterial;
 	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	TArray<UStaticMesh*> BridgeMeshAssets;

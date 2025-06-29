@@ -56,7 +56,7 @@ protected:
 	UPROPERTY()
 	AActor* HomingTarget = nullptr;
 
-	
+	FName FindClosestBoneName(USkeletalMeshComponent* MeshComp, const FVector& WorldLocation);
 
 	UFUNCTION()
 	virtual void OnBeginOverlap(
@@ -64,5 +64,23 @@ protected:
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult);
 	virtual ETargetType DetermineTargetType(AActor* OtherActor) const;
-	virtual void HandleTargetTypeGeneric(ETargetType TargetType, const FHitResult& SweepResult);
+	virtual bool HandleTargetTypeGeneric(ETargetType TargetType, const FHitResult& SweepResult);
+
+	virtual void ProcessHitEffects(ETargetType TargetType, const FHitResult& SweepResult);
+	virtual void ProcessDamageLogic(ETargetType TargetType, const FHitResult& SweepResult, AActor* HitActor);
+	void ProcessStickLogic(AActor* HitActor, ETargetType TargetType, const FHitResult& SweepResult);
+private:
+	bool bAlreadyStuck = false;
+	FHitResult CreateFallbackHitResult(USkeletalMeshComponent* TargetMesh, AActor* HitActor,
+		const FVector& ArrowLocation, const FVector& ArrowDirection,
+		const FHitResult& OriginalSweepResult);
+
+	UPROPERTY()
+	bool bAlreadyHit = false;
+
+	UFUNCTION(Client, Reliable)
+	void Client_DrawDebugLineTest(FVector Start, FVector End, FColor Color);
+
+	UFUNCTION(Client, Reliable)
+	void Client_DrawDebugSphereTest(FVector Location, FColor Color);
 };
