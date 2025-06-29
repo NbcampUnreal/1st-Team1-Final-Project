@@ -241,11 +241,12 @@ void AGS_Player::OnDeath()
 	}
 }
 
-void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick)
+void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick, bool CanCtrlClick)
 {
 	SkillInputControl.CanInputLC = CanLeftClick;
 	SkillInputControl.CanInputRC = CanRightClick;
 	SkillInputControl.CanInputRoll= CanRollClick;
+	SkillInputControl.CanInputCtrl = CanCtrlClick;
 }
 
 FSkillInputControl AGS_Player::GetSkillInputControl()
@@ -277,10 +278,10 @@ void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-FCharacterWantsToMove AGS_Player::GetWantsToMove()
+/*FCharacterWantsToMove AGS_Player::GetWantsToMove()
 {
 	return WantsToMove;
-}
+}*/
 
 void AGS_Player::SetupLocalAudioListener()
 {
