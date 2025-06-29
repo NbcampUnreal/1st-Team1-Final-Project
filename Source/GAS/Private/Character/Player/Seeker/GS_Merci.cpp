@@ -43,6 +43,63 @@ AGS_Merci::AGS_Merci()
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_MerciSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 }
 
+void AGS_Merci::Client_UpdateTargetUI_Implementation(AActor* NewTarget, AActor* OldTarget)
+{
+	// 이전 타겟 UI 숨기기
+	if (OldTarget)
+	{
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(OldTarget))
+		{
+			Monster->ShowTargetUI(false); // 일반 함수 호출
+		}
+		else if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(OldTarget))
+		{
+			Guardian->ShowTargetUI(false);
+		}
+	}
+
+	// 새 타겟 UI 표시
+	if (NewTarget)
+	{
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(NewTarget))
+		{
+			Monster->ShowTargetUI(true);
+		}
+		else if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(NewTarget))
+		{
+			Guardian->ShowTargetUI(true);
+		}
+	}
+}
+
+// Called when the game starts or when spawned
+void AGS_Merci::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CurrentArrowType = EArrowType::Normal;
+
+	if (HasAuthority())
+	{
+		CurrentAxeArrows = MaxAxeArrows;
+		CurrentChildArrows = MaxChildArrows;
+
+		// 일정 주기로 화살 재충전 타이머 시작
+		GetWorld()->GetTimerManager().SetTimer(AxeArrowRegenTimer, this, &AGS_Merci::RegenAxeArrow, RegenInterval, true);
+		GetWorld()->GetTimerManager().SetTimer(ChildArrowRegenTimer, this, &AGS_Merci::RegenChildArrow, RegenInterval, true);
+	}
+
+	Mesh = this->GetMesh();
+	UE_LOG(LogTemp, Warning, TEXT("AnimInstance: %s"), *GetNameSafe(GetMesh()->GetAnimInstance()));
+	if (ZoomCurve)
+	{
+		FOnTimelineFloat TimelineCallback;
+		TimelineCallback.BindUFunction(this, FName("UpdateZoom"));
+
+		ZoomTimeline.AddInterpFloat(ZoomCurve, TimelineCallback);
+	}
+}
+
 void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 {
 	if (IsLocallyControlled() && !GetDrawState())
@@ -370,34 +427,6 @@ void AGS_Merci::SetAutoAimTarget(AActor* Target)
 			UE_LOG(LogTemp, Warning, TEXT("Aiming Target: %s !!!!!!!!!!!!!!!!!!!!!!!!!"), *Target->GetName());
 			Client_DrawDebugSphere(Target->GetActorLocation(), 100.0f, FColor::Red, 0.2f);
 		}
-	}
-}
-
-// Called when the game starts or when spawned
-void AGS_Merci::BeginPlay()
-{
-	Super::BeginPlay();
-
-	CurrentArrowType = EArrowType::Normal;
-
-	if (HasAuthority())
-	{
-		CurrentAxeArrows = MaxAxeArrows;
-		CurrentChildArrows = MaxChildArrows;
-
-		// 일정 주기로 화살 재충전 타이머 시작
-		GetWorld()->GetTimerManager().SetTimer(AxeArrowRegenTimer, this, &AGS_Merci::RegenAxeArrow, RegenInterval, true);
-		GetWorld()->GetTimerManager().SetTimer(ChildArrowRegenTimer, this, &AGS_Merci::RegenChildArrow, RegenInterval, true);
-	}
-
-	Mesh = this->GetMesh();
-	UE_LOG(LogTemp, Warning, TEXT("AnimInstance: %s"), *GetNameSafe(GetMesh()->GetAnimInstance()));
-	if (ZoomCurve)
-	{
-		FOnTimelineFloat TimelineCallback;
-		TimelineCallback.BindUFunction(this, FName("UpdateZoom"));
-
-		ZoomTimeline.AddInterpFloat(ZoomCurve, TimelineCallback);
 	}
 }
 
