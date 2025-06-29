@@ -46,6 +46,7 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 
 		OwnerCharacter->GetWorldTimerManager().SetTimer(AutoAimingHandle, this, &UGS_MerciUltimateSkill::DeActiveAutoAimingState, AutoAimingStateTime, false);
 		OwnerCharacter->GetWorldTimerManager().SetTimer(AutoAimTickHandle, this, &UGS_MerciUltimateSkill::TickAutoAimTarget, AutoAimTickInterval, true);
+		OwnerCharacter->SetSkillInputControl(true, true, false, false);
 	}
 
 	UpdateMonsterList();
@@ -114,6 +115,7 @@ void UGS_MerciUltimateSkill::DeActiveAutoAimingState()
 
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimTickHandle);
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimingHandle);
+		OwnerCharacter->SetSkillInputControl(true, true, true);
 	}
 }
 

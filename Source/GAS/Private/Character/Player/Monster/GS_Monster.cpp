@@ -34,6 +34,7 @@ AGS_Monster::AGS_Monster()
 	SkillCooldownWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SkillCooldownWidgetComp"));
 	SkillCooldownWidgetComp->SetupAttachment(RootComponent);
 	SkillCooldownWidgetComp->SetVisibility(false);
+	SkillCooldownWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	AkComponent = CreateDefaultSubobject<UAkComponent>("AkComponent");
 	AkComponent->SetupAttachment(RootComponent);
@@ -43,23 +44,14 @@ AGS_Monster::AGS_Monster()
 	
 	// 디버프 VFX 컴포넌트 생성
 	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
-	
-	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-	if (MovementComponent)
-	{
-		MovementComponent->bUseRVOAvoidance = true;
-		MovementComponent->AvoidanceConsiderationRadius = AvoidanceRadius;
-		MovementComponent->AvoidanceWeight = 0.5f;
-	}
 
-	// UI 컴포넌트 생성
-	// 컴포넌트 생성 및 초기화
+	// UI 컴포넌트 생성 및 초기화
 	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));
-	TargetedUIComponent->SetupAttachment(RootComponent); // 또는 RootComponent
-	TargetedUIComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f)); // 머리 위 위치
-	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen); // 3D UI
-	TargetedUIComponent->SetDrawSize(FVector2D(100.f, 100.f));
-	TargetedUIComponent->SetVisibility(false); // 처음엔 꺼두기
+	TargetedUIComponent->SetupAttachment(RootComponent);
+	TargetedUIComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	TargetedUIComponent->SetDrawSize(FVector2D(50.0f, 50.f));
+	TargetedUIComponent->SetVisibility(false);
 
 	TeamId = FGenericTeamId(2);
 	Tags.Add("Monster");
@@ -69,8 +61,7 @@ AGS_Monster::AGS_Monster()
 	{
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block); // Interactable
 	}
-
-	AvoidanceRadius = 200.0f;
+	
 	bCommandLocked = false;
 	bSelectionLocked = false;
 	bIsSelected = false;
@@ -95,10 +86,16 @@ void AGS_Monster::BeginPlay()
 	
 	if (IsValid(SkillCooldownWidgetComp) && !HasAuthority())
 	{
+		TWeakObjectPtr<AGS_Monster> WeakThis = this;
 		GetWorldTimerManager().SetTimer(
 			SkillCooldownWidgetTimer,
-			this,
-			&AGS_Monster::UpdateSkillCooldownWidget,
+			[WeakThis]()
+			{
+				if (WeakThis.IsValid())
+				{
+					WeakThis->UpdateSkillCooldownWidget();
+				}
+			},
 			0.1f, 
 			true 
 		);
@@ -122,9 +119,9 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
-
 	GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
+	
+	Super::EndPlay(EndPlayReason);
 } 
 
 void AGS_Monster::OnDeath()
@@ -187,15 +184,9 @@ void AGS_Monster::UseSkill()
 
 void AGS_Monster::ShowTargetUI(bool bIsActive)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Client_ShowTargetUI "));
 	if (TargetedUIComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Client_ShowTargetUI SetVisibility %s"), bIsActive?TEXT("true"):TEXT("false"));
-		UE_LOG(LogTemp, Warning, TEXT("[Client_ShowTargetUI] Name: %s | Role: %s | LocalRole: %s"),
-			*GetName(),
-			*UEnum::GetValueAsString(GetLocalRole()),
-			*UEnum::GetValueAsString(GetRemoteRole()));
-		TargetedUIComponent->SetVisibility(bIsActive); // 혹은 위젯 내 애니메이션 재생
+		TargetedUIComponent->SetVisibility(bIsActive);
 	}
 }
 
@@ -291,7 +282,6 @@ void AGS_Monster::UpdateSkillCooldownWidget()
 {
 	if (!IsValid(SkillCooldownWidgetComp))
 	{
-		// 위젯이 유효하지 않으면 타이머를 정리하고 함수 종료
 		GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
 		return;
 	}

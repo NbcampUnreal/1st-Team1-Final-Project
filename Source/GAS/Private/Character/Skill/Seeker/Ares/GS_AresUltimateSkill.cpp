@@ -30,7 +30,7 @@ void UGS_AresUltimateSkill::ActiveSkill()
 
 		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-		OwnerPlayer->SetSkillInputControl(false, false, false);
+		OwnerPlayer->SetSkillInputControl(false, false, false, false);
 		OwnerPlayer->SetMoveControlValue(false, false);
 	}
 	

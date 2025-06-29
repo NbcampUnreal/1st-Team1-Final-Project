@@ -418,14 +418,14 @@ void AGS_Merci::SetAutoAimTarget(AActor* Target)
 { 
 	if (HasAuthority())
 	{
-		AutoAimTarget = Target;
-		OnRep_AutoAimTarget(); // 즉시 로컬 처리
-
-		// 스피어 표시
+		// 타겟 설정
 		if (Target)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Aiming Target: %s !!!!!!!!!!!!!!!!!!!!!!!!!"), *Target->GetName());
-			Client_DrawDebugSphere(Target->GetActorLocation(), 100.0f, FColor::Red, 0.2f);
+			AutoAimTarget = Target;
+			OnRep_AutoAimTarget(); // 즉시 로컬 처리
+
+			/*UE_LOG(LogTemp, Warning, TEXT("Aiming Target: %s !!!!!!!!!!!!!!!!!!!!!!!!!"), *Target->GetName());
+			Client_DrawDebugSphere(Target->GetActorLocation(), 100.0f, FColor::Red, 0.2f);*/
 		}
 	}
 }

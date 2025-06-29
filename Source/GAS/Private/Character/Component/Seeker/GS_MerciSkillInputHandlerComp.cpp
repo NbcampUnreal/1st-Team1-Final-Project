@@ -76,13 +76,7 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 	Super::OnRightClickRelease(Instance);
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-	
-	if (!MerciCharacter->GetSkillInputControl().CanInputRoll || !MerciCharacter->GetSkillInputControl().CanInputRC)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Right Release Lock"));
-		return;
-	}
-	
+
 	if (MerciCharacter->IsDead())
 	{
 		return;
@@ -94,7 +88,6 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 	}
 	else
 	{
-		
 	}
 }
 
@@ -109,7 +102,7 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 		return;
 	}
 	
-	if (!MerciCharacter->GetSkillInputControl().CanInputRoll || !MerciCharacter->GetSkillInputControl().CanInputLC)
+	if (!MerciCharacter->GetSkillInputControl().CanInputLC)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Left Release Lock"));
 		return;
