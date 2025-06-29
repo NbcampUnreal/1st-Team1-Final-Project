@@ -36,6 +36,7 @@ void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 
 void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
+	Super::OnLeftClick(Instance);
 	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
 	
 	if (!(Ares->GetSkillInputControl().CanInputLC))
@@ -58,9 +59,7 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 				Ares->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
 			}
 			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("CanAcceptComboInput %d"), Ares->CanAcceptComboInput);
-				
+			{				
 				if (Ares->CanAcceptComboInput)
 				{
 					Ares->OnComboAttack();
@@ -84,13 +83,13 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 void UGS_AresSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
 {
 	Super::OnLeftClickRelease(Instance);
-
+	
 	if (OwnerCharacter->IsDead())
 	{
 		return;
 	}
-
-	if (bWasCtrlHeldWhenLeftClicked)
+	
+	if (bWasCtrlHeldWhenLeftClicked && OwnerCharacter->GetSkillInputControl().CanInputCtrl)
 	{
 		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Moving);
 	}

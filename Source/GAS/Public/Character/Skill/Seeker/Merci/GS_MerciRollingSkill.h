@@ -17,5 +17,6 @@ public:
 	UGS_MerciRollingSkill();
 	virtual void ActiveSkill() override;
 	virtual void DeactiveSkill() override;
+	virtual void InterruptSkill() override;
 	virtual bool CanActive() const override;
 };

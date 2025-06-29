@@ -16,14 +16,8 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 		{
 			if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(Character->GetMesh()->GetAnimInstance()))
 			{
-				if (AnimInstance->IsPlayingFullBodyMontage)
-				{
-					Character->Multicast_SetIsFullBodySlot(false);
-				}
-				if (AnimInstance->IsPlayingFullBodyMontage)
-				{
-					Character->Multicast_SetIsUpperBodySlot(false);
-				}
+				Character->Multicast_SetIsFullBodySlot(false);
+				Character->Multicast_SetIsUpperBodySlot(false);
 			}
 
 			if (!Character->CanHitReact)
@@ -37,8 +31,6 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 			Character->SetLookControlValue(true, true);
 			Character->SetAimState(false);
 			Character->SetDrawState(false);
-
-			UE_LOG(LogTemp, Warning, TEXT("Aiming Skill Active? %d"), Character->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming));
-		}
+			}
 	}
 }
