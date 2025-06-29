@@ -31,6 +31,7 @@ AGS_Character::AGS_Character()
 	HPTextWidgetComp->SetupAttachment(RootComponent);
 	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HPTextWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	HPTextWidgetComp->SetVisibility(false);
 
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("SelectionDecal"));
@@ -122,7 +123,10 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 
 void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	GetWorldTimerManager().ClearTimer(HPWidgetRotationTimer);
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(HPWidgetRotationTimer);
+	}
 	
 	Super::EndPlay(EndPlayReason);	
 }

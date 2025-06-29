@@ -41,6 +41,7 @@ AGS_Player::AGS_Player()
 	SteamNameWidgetComp->SetupAttachment(RootComponent);
 	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SteamNameWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BlurMat(TEXT("/Game/VFX/MI_AbscureDebuff"));
 	if (BlurMat.Succeeded())
@@ -161,7 +162,10 @@ void AGS_Player::PossessedBy(AController* NewController)
 
 void AGS_Player::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	GetWorldTimerManager().ClearTimer(SteamNameWidgetRotationTimer);
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SteamNameWidgetRotationTimer);
+	}
 	
 	Super::EndPlay(EndPlayReason);
 }

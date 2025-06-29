@@ -35,6 +35,7 @@ AGS_Monster::AGS_Monster()
 	SkillCooldownWidgetComp->SetupAttachment(RootComponent);
 	SkillCooldownWidgetComp->SetVisibility(false);
 	SkillCooldownWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SkillCooldownWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 
 	AkComponent = CreateDefaultSubobject<UAkComponent>("AkComponent");
 	AkComponent->SetupAttachment(RootComponent);
@@ -119,7 +120,10 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SkillCooldownWidgetTimer);
+	}
 	
 	Super::EndPlay(EndPlayReason);
 } 
