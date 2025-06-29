@@ -102,6 +102,9 @@ void AGS_Merci::BeginPlay()
 
 void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 {
+	// 피격 애니메이션 제한
+	Server_SetCanHitReact(false);
+
 	if (IsLocallyControlled() && !GetDrawState())
 	{
 		if (WidgetCrosshair)
@@ -181,6 +184,12 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	//Client_SetWidgetVisibility(false);
 
 	SetSeekerGait(EGait::Run);
+	
+	// 피격 애니메이션 제한 해제
+	if(!this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
+	{
+		Server_SetCanHitReact(true); // 서버에 전달
+	}
 }
 
 void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)

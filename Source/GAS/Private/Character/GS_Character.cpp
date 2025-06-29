@@ -119,6 +119,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
+	DOREPLIFETIME(AGS_Character, CanHitReact);
 }
 
 void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -140,6 +141,7 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	//when damage input start -> for drakhar 6/24
 	OnDamageStart();
 	
+	UE_LOG(LogTemp, Warning, TEXT("CanHitReact : %s"), CanHitReact ? TEXT("true") : TEXT("false"));
 	// SJE
 	if (CanHitReact)
 	{
@@ -369,6 +371,11 @@ void AGS_Character::OnRep_CharacterSpeed()
 	GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
 }
 
+
+void AGS_Character::Server_SetCanHitReact_Implementation(bool bCanReact)
+{
+	CanHitReact = bCanReact;
+}
 
 void AGS_Character::NotifyActorBeginCursorOver()
 {

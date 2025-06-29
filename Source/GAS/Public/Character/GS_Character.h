@@ -54,7 +54,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetCanHitReact(bool CanReact);
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool CanHitReact = true;
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -134,6 +134,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnCharacterDeath OnDeathDelegate;
 	
+	UFUNCTION(Server, Reliable)
+	void Server_SetCanHitReact(bool bCanReact);
 protected:
 	virtual void NotifyActorBeginCursorOver() override;
 	virtual void NotifyActorEndCursorOver() override;
