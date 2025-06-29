@@ -5,6 +5,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
@@ -17,7 +18,8 @@ const FName AGS_AIController::DebuffLockedKey(TEXT("bDebuffLocked"));
 const FName AGS_AIController::CanAttackKey(TEXT("bCanAttack"));
 const FName AGS_AIController::LastAttackTimeKey(TEXT("LastAttackTime"));
 
-AGS_AIController::AGS_AIController()
+AGS_AIController::AGS_AIController(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>("PathFollowingComponent"))
 {
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
@@ -33,6 +35,22 @@ void AGS_AIController::BeginPlay()
 	Super::BeginPlay();
 
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AGS_AIController::TargetPerceptionUpdated);
+	
+	if (UCrowdFollowingComponent* CrowdComp = Cast<UCrowdFollowingComponent>(GetPathFollowingComponent()))
+	{
+		CrowdComp->SetCrowdSimulationState(ECrowdSimulationState::Enabled);
+		CrowdComp->SetCrowdAvoidanceQuality(ECrowdAvoidanceQuality::Low);
+		CrowdComp->SetAvoidanceGroup(1);
+		CrowdComp->SetGroupsToAvoid(1);
+		CrowdComp->SetCrowdCollisionQueryRange(200.0f);
+		CrowdComp->SetCrowdPathOptimizationRange(100.0f);
+		CrowdComp->SetCrowdSeparation(true);
+		CrowdComp->SetCrowdSeparationWeight(0.2f);
+		
+		CrowdComp->SetCrowdOptimizeVisibility(false);
+		CrowdComp->SetCrowdOptimizeTopology(false);
+		CrowdComp->SetCrowdRotateToVelocity(false);
+	}
 }
 
 void AGS_AIController::OnPossess(APawn* InPawn)
@@ -86,7 +104,11 @@ void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 
 	if (Targets.IsEmpty()) 
 	{
-		Blackboard->ClearValue(TargetActorKey);
+		if (Blackboard->GetValueAsObject(TargetActorKey) != nullptr)
+		{
+			ClearCurrentTarget();
+		}
+		
 		return;
 	}
 	
@@ -107,9 +129,56 @@ void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 
 	if (NearestTarget)
 	{
-		Blackboard->SetValueAsObject(TargetActorKey, NearestTarget);
+		SetNewTarget(NearestTarget);
 	}
 }
+
+void AGS_AIController::SetNewTarget(AActor* NewTarget)
+{
+	if (NewTarget)
+	{
+		Blackboard->SetValueAsObject(TargetActorKey, NewTarget);
+        
+		// 새 타겟인 경우 델리게이트 연결
+		AGS_Character* NewTargetCharacter = Cast<AGS_Character>(NewTarget);
+		if (NewTargetCharacter && TargetCharacter.Get() != NewTargetCharacter)
+		{
+			if (TargetCharacter.IsValid())
+			{
+				TargetCharacter->OnDeathDelegate.RemoveDynamic(this, &AGS_AIController::OnTargetDied);
+			}
+			
+			TargetCharacter = NewTargetCharacter;
+			if (!NewTargetCharacter->IsDead())
+			{
+				TargetCharacter->OnDeathDelegate.AddDynamic(this, &AGS_AIController::OnTargetDied);
+			}
+		}
+	}
+}
+
+void AGS_AIController::OnTargetDied()
+{
+	if (Blackboard)
+	{
+		Blackboard->ClearValue(TargetActorKey);
+		Blackboard->SetValueAsEnum(CommandKey, 0);
+	}
+	
+	TargetCharacter = nullptr;
+}
+
+void AGS_AIController::ClearCurrentTarget()
+{
+	Blackboard->ClearValue(TargetActorKey);
+	
+	if (TargetCharacter.IsValid())
+	{
+		TargetCharacter->OnDeathDelegate.RemoveDynamic(this, &AGS_AIController::OnTargetDied);
+		TargetCharacter = nullptr;
+	}
+}
+
 
 void AGS_AIController::LockTarget(AGS_Character* Target)
 {

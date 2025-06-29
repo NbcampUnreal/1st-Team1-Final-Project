@@ -3,7 +3,6 @@
 
 #include "Weapon/Projectile/Guardian/GS_NeedleFangProjectile.h"
 #include "Character/Component/GS_StatComp.h"
-#include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/GS_Character.h"
 #include "Engine/DamageEvents.h"
 #include "AkGameplayStatics.h"
@@ -28,7 +27,6 @@ void AGS_NeedleFangProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
 {
 	if (OtherComp && OtherComp->GetCollisionProfileName() == FName("SoundTrigger"))
 	{
-		UE_LOG(LogTemp, Error, TEXT("SoundTrigger NeedleFang Projectile"));
 		return;
 	}
 

@@ -24,10 +24,7 @@ class GAS_API AGS_Monster : public AGS_Character
 
 public:
 	AGS_Monster();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RVO")
-	float AvoidanceRadius;
-
+	
 	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
 	bool bCommandLocked;
 
