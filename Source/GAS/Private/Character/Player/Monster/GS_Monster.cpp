@@ -34,6 +34,7 @@ AGS_Monster::AGS_Monster()
 	SkillCooldownWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SkillCooldownWidgetComp"));
 	SkillCooldownWidgetComp->SetupAttachment(RootComponent);
 	SkillCooldownWidgetComp->SetVisibility(false);
+	SkillCooldownWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	AkComponent = CreateDefaultSubobject<UAkComponent>("AkComponent");
 	AkComponent->SetupAttachment(RootComponent);
@@ -85,10 +86,16 @@ void AGS_Monster::BeginPlay()
 	
 	if (IsValid(SkillCooldownWidgetComp) && !HasAuthority())
 	{
+		TWeakObjectPtr<AGS_Monster> WeakThis = this;
 		GetWorldTimerManager().SetTimer(
 			SkillCooldownWidgetTimer,
-			this,
-			&AGS_Monster::UpdateSkillCooldownWidget,
+			[WeakThis]()
+			{
+				if (WeakThis.IsValid())
+				{
+					WeakThis->UpdateSkillCooldownWidget();
+				}
+			},
 			0.1f, 
 			true 
 		);
@@ -112,9 +119,9 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
-
 	GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
+	
+	Super::EndPlay(EndPlayReason);
 } 
 
 void AGS_Monster::OnDeath()

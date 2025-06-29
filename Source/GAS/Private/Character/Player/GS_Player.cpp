@@ -98,7 +98,19 @@ void AGS_Player::BeginPlay()
 	//steam widget rotate
 	if (IsValid(SteamNameWidgetComp) && !HasAuthority())
 	{
-		GetWorldTimerManager().SetTimer(SteamNameWidgetRotationTimer, this, &AGS_Player::UpdateSteamNameWidgetRotation, 0.1f, true);
+		TWeakObjectPtr<AGS_Player> WeakThis = this;
+		GetWorldTimerManager().SetTimer(
+			SteamNameWidgetRotationTimer,
+			[WeakThis]()
+			{
+				if (WeakThis.IsValid())
+				{
+					WeakThis->UpdateSteamNameWidgetRotation();
+				}
+			},
+			0.1f,
+			true
+		);
 	}
 }
 
@@ -146,6 +158,14 @@ void AGS_Player::PossessedBy(AController* NewController)
 		if (!StatComp) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: StatComp is NULL!"), *GetName());
 	}
 }
+
+void AGS_Player::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	GetWorldTimerManager().ClearTimer(SteamNameWidgetRotationTimer);
+	
+	Super::EndPlay(EndPlayReason);
+}
+
 
 void AGS_Player::Client_StartVisionObscured_Implementation()
 {
