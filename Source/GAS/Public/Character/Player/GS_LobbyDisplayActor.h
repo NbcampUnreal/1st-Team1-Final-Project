@@ -25,10 +25,10 @@ protected:
     TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UWidgetComponent> UserIDWidgetComponent;
+	TObjectPtr<UWidgetComponent> UserInfoWidgetComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> UserIDWidgetClass;
+	TSubclassOf<UUserWidget> UserInfoWidgetClass;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
@@ -60,4 +60,9 @@ public:
 	
 	UFUNCTION()
 	void OnRep_PlayerState();
+
+private:
+	FTimerHandle InitWidgetTimerHandle;
+
+	void UpdateWidgetInfo();
 };
