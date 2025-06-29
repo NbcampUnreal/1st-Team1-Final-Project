@@ -30,11 +30,11 @@ AGS_Guardian::AGS_Guardian()
 
 	// 컴포넌트 생성 및 초기화
 	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));
-	TargetedUIComponent->SetupAttachment(RootComponent); // 또는 RootComponent
-	TargetedUIComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f)); // 머리 위 위치
-	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen); // 3D UI
+	TargetedUIComponent->SetupAttachment(RootComponent);
+	TargetedUIComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	TargetedUIComponent->SetDrawSize(FVector2D(100.f, 100.f));
-	TargetedUIComponent->SetVisibility(false); // 처음엔 꺼두기
+	TargetedUIComponent->SetVisibility(false);
 }
 
 void AGS_Guardian::BeginPlay()
@@ -214,7 +214,7 @@ void AGS_Guardian::ShowTargetUI(bool bIsActive)
 {
 	if (TargetedUIComponent)
 	{
-		TargetedUIComponent->SetVisibility(bIsActive); // 혹은 위젯 내 애니메이션 재생
+		TargetedUIComponent->SetVisibility(bIsActive);
 	}
 }
 

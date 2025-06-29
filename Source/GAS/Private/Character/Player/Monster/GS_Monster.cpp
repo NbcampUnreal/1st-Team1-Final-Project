@@ -52,14 +52,13 @@ AGS_Monster::AGS_Monster()
 		MovementComponent->AvoidanceWeight = 0.5f;
 	}
 
-	// UI 컴포넌트 생성
-	// 컴포넌트 생성 및 초기화
+	// UI 컴포넌트 생성 및 초기화
 	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));
-	TargetedUIComponent->SetupAttachment(RootComponent); // 또는 RootComponent
-	TargetedUIComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f)); // 머리 위 위치
-	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen); // 3D UI
+	TargetedUIComponent->SetupAttachment(RootComponent);
+	TargetedUIComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	TargetedUIComponent->SetDrawSize(FVector2D(100.f, 100.f));
-	TargetedUIComponent->SetVisibility(false); // 처음엔 꺼두기
+	TargetedUIComponent->SetVisibility(false);
 
 	TeamId = FGenericTeamId(2);
 	Tags.Add("Monster");
@@ -187,15 +186,9 @@ void AGS_Monster::UseSkill()
 
 void AGS_Monster::ShowTargetUI(bool bIsActive)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Client_ShowTargetUI "));
 	if (TargetedUIComponent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Client_ShowTargetUI SetVisibility %s"), bIsActive?TEXT("true"):TEXT("false"));
-		UE_LOG(LogTemp, Warning, TEXT("[Client_ShowTargetUI] Name: %s | Role: %s | LocalRole: %s"),
-			*GetName(),
-			*UEnum::GetValueAsString(GetLocalRole()),
-			*UEnum::GetValueAsString(GetRemoteRole()));
-		TargetedUIComponent->SetVisibility(bIsActive); // 혹은 위젯 내 애니메이션 재생
+		TargetedUIComponent->SetVisibility(bIsActive);
 	}
 }
 
