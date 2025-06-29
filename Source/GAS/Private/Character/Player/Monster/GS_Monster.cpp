@@ -43,14 +43,6 @@ AGS_Monster::AGS_Monster()
 	
 	// 디버프 VFX 컴포넌트 생성
 	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
-	
-	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-	if (MovementComponent)
-	{
-		MovementComponent->bUseRVOAvoidance = true;
-		MovementComponent->AvoidanceConsiderationRadius = AvoidanceRadius;
-		MovementComponent->AvoidanceWeight = 0.5f;
-	}
 
 	// UI 컴포넌트 생성 및 초기화
 	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));
@@ -68,8 +60,7 @@ AGS_Monster::AGS_Monster()
 	{
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block); // Interactable
 	}
-
-	AvoidanceRadius = 200.0f;
+	
 	bCommandLocked = false;
 	bSelectionLocked = false;
 	bIsSelected = false;
@@ -284,7 +275,6 @@ void AGS_Monster::UpdateSkillCooldownWidget()
 {
 	if (!IsValid(SkillCooldownWidgetComp))
 	{
-		// 위젯이 유효하지 않으면 타이머를 정리하고 함수 종료
 		GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
 		return;
 	}
