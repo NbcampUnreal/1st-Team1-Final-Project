@@ -146,7 +146,7 @@ void UGS_SkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& I
 	{
 		return;
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("Left Click Release"));
+	// UE_LOG(LogTemp, Warning, TEXT("Left Click Release"));
 }
 
 void UGS_SkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)

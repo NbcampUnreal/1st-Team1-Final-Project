@@ -36,6 +36,15 @@ void UGS_BTS_SenseEnemy::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 
 	TArray<AActor*> Targets;
 	AIController->PerceptionComponent->GetCurrentlyPerceivedActors(UAISense_Sight::StaticClass(), Targets);
+	if (Targets.IsEmpty()) 
+	{
+		if (Blackboard->GetValueAsObject(AGS_AIController::TargetActorKey) != nullptr)
+		{
+			AIController->ClearCurrentTarget();
+		}
+		
+		return;
+	}
 
 	// 가장 가까운 적 찾기
 	APawn* ControlledPawn = Cast<APawn>(AIController->GetPawn());
@@ -54,10 +63,6 @@ void UGS_BTS_SenseEnemy::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Node
 
 	if (NearestTarget)
 	{
-		Blackboard->SetValueAsObject(AGS_AIController::TargetActorKey, NearestTarget);
-	}
-	else
-	{
-		Blackboard->ClearValue(AGS_AIController::TargetActorKey);
+		AIController->SetNewTarget(NearestTarget);
 	}
 }

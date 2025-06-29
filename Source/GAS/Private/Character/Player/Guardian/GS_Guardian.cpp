@@ -11,7 +11,7 @@
 #include "Character/Component/GS_CameraShakeComponent.h"
 #include "Character/Component/GS_DebuffVFXComponent.h"
 #include "Props/Interactables/GS_BridgePiece.h"
-
+#include "Components/WidgetComponent.h"
 
 AGS_Guardian::AGS_Guardian()
 {
@@ -27,6 +27,14 @@ AGS_Guardian::AGS_Guardian()
 	
 	//디버프 VFX 컴포넌트 생성
 	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
+
+	// 컴포넌트 생성 및 초기화
+	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));
+	TargetedUIComponent->SetupAttachment(RootComponent);
+	TargetedUIComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	TargetedUIComponent->SetDrawSize(FVector2D(100.f, 100.f));
+	TargetedUIComponent->SetVisibility(false);
 }
 
 void AGS_Guardian::BeginPlay()
@@ -200,6 +208,14 @@ void AGS_Guardian::QuitGuardianSkill()
 void AGS_Guardian::FinishCtrlSkill()
 {
 	StopCtrl();
+}
+
+void AGS_Guardian::ShowTargetUI(bool bIsActive)
+{
+	if (TargetedUIComponent)
+	{
+		TargetedUIComponent->SetVisibility(bIsActive);
+	}
 }
 
 void AGS_Guardian::MulticastRPCApplyHitStop_Implementation(AGS_Character* InDamagedCharacter)

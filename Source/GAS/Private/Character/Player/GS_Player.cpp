@@ -98,7 +98,19 @@ void AGS_Player::BeginPlay()
 	//steam widget rotate
 	if (IsValid(SteamNameWidgetComp) && !HasAuthority())
 	{
-		GetWorldTimerManager().SetTimer(SteamNameWidgetRotationTimer, this, &AGS_Player::UpdateSteamNameWidgetRotation, 0.1f, true);
+		TWeakObjectPtr<AGS_Player> WeakThis = this;
+		GetWorldTimerManager().SetTimer(
+			SteamNameWidgetRotationTimer,
+			[WeakThis]()
+			{
+				if (WeakThis.IsValid())
+				{
+					WeakThis->UpdateSteamNameWidgetRotation();
+				}
+			},
+			0.1f,
+			true
+		);
 	}
 }
 
@@ -146,6 +158,14 @@ void AGS_Player::PossessedBy(AController* NewController)
 		if (!StatComp) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: StatComp is NULL!"), *GetName());
 	}
 }
+
+void AGS_Player::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	GetWorldTimerManager().ClearTimer(SteamNameWidgetRotationTimer);
+	
+	Super::EndPlay(EndPlayReason);
+}
+
 
 void AGS_Player::Client_StartVisionObscured_Implementation()
 {
@@ -241,11 +261,12 @@ void AGS_Player::OnDeath()
 	}
 }
 
-void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick)
+void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick, bool CanCtrlClick)
 {
 	SkillInputControl.CanInputLC = CanLeftClick;
 	SkillInputControl.CanInputRC = CanRightClick;
 	SkillInputControl.CanInputRoll= CanRollClick;
+	SkillInputControl.CanInputCtrl = CanCtrlClick;
 }
 
 FSkillInputControl AGS_Player::GetSkillInputControl()
@@ -277,10 +298,10 @@ void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-FCharacterWantsToMove AGS_Player::GetWantsToMove()
+/*FCharacterWantsToMove AGS_Player::GetWantsToMove()
 {
 	return WantsToMove;
-}
+}*/
 
 void AGS_Player::SetupLocalAudioListener()
 {
