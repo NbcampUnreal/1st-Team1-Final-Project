@@ -89,6 +89,16 @@ void UGS_MerciUltimateSkill::DeActiveAutoAimingState()
 
 	if (OwnerCharacter)
 	{
+		// 현재 표시된 타겟 UI 정리
+		if (CurrentTarget && OwnerCharacter->HasAuthority())
+		{
+			if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
+			{
+				MerciCharacter->Client_UpdateTargetUI(nullptr, CurrentTarget);
+			}
+			CurrentTarget = nullptr;
+		}
+
 		// Skill State
 		if (OwnerCharacter->GetSkillComp())
 		{
@@ -179,17 +189,21 @@ void UGS_MerciUltimateSkill::TickAutoAimTarget()
 		return;
 	}
 
-	AActor* Target = FindCloseTarget();
-	if (!OwnerCharacter->HasAuthority())
+	AActor* NewTarget = FindCloseTarget();
+
+	if (OwnerCharacter->HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("IsClient!!!!!!!!!!!!!!!!"));
-	}
-	if (Target && OwnerCharacter->HasAuthority())
-	{
+		// 화살에 타겟 전달
 		if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("TickAutoAimTarget"));
-			MerciCharacter->SetAutoAimTarget(Target);
+			MerciCharacter->SetAutoAimTarget(NewTarget);
+
+			if (NewTarget != CurrentTarget)
+			{
+				// 플레이어를 통해 클라이언트로 전송
+				MerciCharacter->Client_UpdateTargetUI(NewTarget, CurrentTarget);
+				CurrentTarget = NewTarget;
+			}
 		}
 	}
 }

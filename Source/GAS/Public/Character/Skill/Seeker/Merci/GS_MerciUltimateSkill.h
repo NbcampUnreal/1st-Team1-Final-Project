@@ -38,4 +38,6 @@ private:
 
 	void TickAutoAimTarget();
 	void UpdateMonsterList();
+
+	AActor* CurrentTarget;
 };
