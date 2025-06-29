@@ -62,3 +62,15 @@ void UGS_ChanRollingSkill::DeactiveSkill()
 
 	}
 }
+
+void UGS_ChanRollingSkill::InterruptSkill()
+{
+	Super::InterruptSkill();
+	AGS_Chan* AresCharacter = Cast<AGS_Chan>(OwnerCharacter);
+	if (AresCharacter->GetSkillComp())
+	{
+		AresCharacter->Multicast_SetIsFullBodySlot(false);
+		AresCharacter->SetMoveControlValue(true, true);
+		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
+	}
+}

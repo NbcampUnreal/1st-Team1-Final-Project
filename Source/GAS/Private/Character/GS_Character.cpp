@@ -75,10 +75,16 @@ void AGS_Character::BeginPlay()
 
 	if (IsValid(HPTextWidgetComp) && !HasAuthority())
 	{
+		TWeakObjectPtr<AGS_Character> WeakThis = this;
 		GetWorldTimerManager().SetTimer(
 			HPWidgetRotationTimer,
-			this,
-			&AGS_Character::UpdateHPWidgetRotation,
+			[WeakThis]()
+			{
+				if (WeakThis.IsValid())
+				{
+					WeakThis->UpdateHPWidgetRotation();
+				}
+			},
 			0.1f,  
 			true   
 		);
@@ -116,9 +122,9 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 
 void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
-
 	GetWorldTimerManager().ClearTimer(HPWidgetRotationTimer);
+	
+	Super::EndPlay(EndPlayReason);	
 }
 
 

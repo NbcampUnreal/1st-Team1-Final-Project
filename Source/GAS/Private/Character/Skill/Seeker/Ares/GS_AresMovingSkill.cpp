@@ -51,6 +51,7 @@ void UGS_AresMovingSkill::ActiveSkill()
 	// 일정 주기로 방향과 차징 시간 갱신
 	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(ChargingTimerHandle, this, &UGS_AresMovingSkill::UpdateCharging, 0.05f, true);
 
+	OwnerCharacter->SetSkillInputControl(false, false, false);
 }
 
 void UGS_AresMovingSkill::DeactiveSkill()
@@ -223,6 +224,7 @@ void UGS_AresMovingSkill::StopDash()
 
 	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
 	Controller->SetMoveControlValue(true, true);
+	OwnerCharacter->SetSkillInputControl(true, true, true);
 
 	// 원래대로 Block으로 되돌리기
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
