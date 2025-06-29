@@ -28,28 +28,22 @@ void AGS_NeedleFangProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
 {
 	if (OtherComp && OtherComp->GetCollisionProfileName() == FName("SoundTrigger"))
 	{
+		UE_LOG(LogTemp, Error, TEXT("SoundTrigger NeedleFang Projectile"));
 		return;
 	}
 
 	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-	if (!DamagedCharacter || !OwnerCharacter || !DamagedCharacter->IsEnemy(OwnerCharacter))
+	if (DamagedCharacter && OwnerCharacter && DamagedCharacter->IsEnemy(OwnerCharacter) && DamagedCharacter->GetStatComp())
 	{
-		return;
+		// 히트 사운드 재생
+		Multicast_PlayHitSound(Hit.ImpactPoint);
+        
+		UGS_StatComp* DamagedStat = DamagedCharacter->GetStatComp();
+		float Damage = DamagedStat->CalculateDamage(OwnerCharacter, DamagedCharacter);
+		FDamageEvent DamageEvent;
+		DamagedCharacter->TakeDamage(Damage, DamageEvent, GetOwner()->GetInstigatorController(), this);
 	}
-	
-	UGS_StatComp* DamagedStat = DamagedCharacter->GetStatComp();
-	if (!DamagedStat) 
-	{
-		return;	
-	}
-	
-	// 히트 사운드 재생
-	Multicast_PlayHitSound(Hit.ImpactPoint);
-	
-	float Damage = DamagedStat->CalculateDamage(OwnerCharacter, DamagedCharacter);
-	FDamageEvent DamageEvent;
-	DamagedCharacter->TakeDamage(Damage, DamageEvent, GetOwner()->GetInstigatorController(), this);
 	
 	Destroy();
 }
