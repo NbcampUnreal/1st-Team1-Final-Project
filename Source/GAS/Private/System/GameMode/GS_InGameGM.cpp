@@ -431,9 +431,50 @@ void AGS_InGameGM::EndGame(EGameResult Result)
     if (!NextLevelName.IsEmpty())
     {
         FTimerHandle TravelDelayHandle;
-        GetWorldTimerManager().SetTimer(TravelDelayHandle, [this, NextLevelName]() {
-            GetWorld()->ServerTravel(NextLevelName + "?listen", true);
+        TWeakObjectPtr<AGS_InGameGM> WeakThis = this;
+        GetWorldTimerManager().SetTimer(TravelDelayHandle, [WeakThis, NextLevelName]() {
+            WeakThis->GetWorld()->ServerTravel(NextLevelName + "?listen", true);
         }, 3.f, false);
+    }
+}
+
+void AGS_InGameGM::NotifyPlayerIsReady(AController* PlayerController)
+{
+    if (!PlayerController || !PlayerController->PlayerState)
+    {
+        return;
+    }
+
+    ReadyPlayers.Add(PlayerController->PlayerState);
+    UE_LOG(LogTemp, Log, TEXT("Player %s is ready. Total ready: %d/%d"), *PlayerController->PlayerState->GetPlayerName(), ReadyPlayers.Num(), GameState->PlayerArray.Num());
+
+    if (ReadyPlayers.Num() == GameState->PlayerArray.Num())
+    {
+        StartMatchWhenAllReady();
+    }
+}
+
+void AGS_InGameGM::StartMatchWhenAllReady()
+{
+    UE_LOG(LogTemp, Warning, TEXT("All players are ready! Broadcasting to clients to start the match."));
+
+    // 모든 플레이어 컨트롤러에게 게임 시작을 알리는 Client RPC 호출
+    for (APlayerState* PlayerState : GameState->PlayerArray)
+    {
+        if (PlayerState)
+        {
+            if (APlayerController* PC = PlayerState->GetPlayerController())
+            {
+                if (AGS_TpsController* SeekerPC = Cast<AGS_TpsController>(PC))
+                {
+                    SeekerPC->Client_StartGame();
+                }
+                else if (AGS_RTSController* GuardianPC = Cast<AGS_RTSController>(PC))
+                {
+                    GuardianPC->Client_StartGame();
+                }
+            }
+        }
     }
 }
 

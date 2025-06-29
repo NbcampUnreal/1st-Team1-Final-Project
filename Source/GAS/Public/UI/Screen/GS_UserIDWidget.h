@@ -8,6 +8,7 @@
 
 class UTextBlock;
 class UImage;
+class AGS_PlayerState;
 
 UCLASS()
 class GAS_API UGS_UserIDWidget : public UUserWidget
@@ -23,6 +24,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UImage* SteamAvatar;
 	
+	void SetupWidget(AGS_PlayerState* PlayerState);
 private:
 	FTimerHandle TimerHandle;
 

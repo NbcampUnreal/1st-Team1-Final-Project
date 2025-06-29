@@ -130,6 +130,14 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySkillSound(class UAkAudioEvent* SoundToPlay);
 
+	// ===============
+	// 공격 사운드 리셋 관련
+	// ===============
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack", meta = (ClampMin = "0.1", ClampMax = "5.0"))
+	float AttackSoundResetTime = 1.0f;
+
+	FTimerHandle AttackSoundResetTimerHandle;
+
 	// Weapon
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	UChildActorComponent* Weapon;

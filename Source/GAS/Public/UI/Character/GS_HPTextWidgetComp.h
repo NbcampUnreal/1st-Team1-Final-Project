@@ -4,9 +4,6 @@
 #include "Components/WidgetComponent.h"
 #include "GS_HPTextWidgetComp.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class GAS_API UGS_HPTextWidgetComp : public UWidgetComponent
 {
@@ -14,5 +11,4 @@ class GAS_API UGS_HPTextWidgetComp : public UWidgetComponent
 
 public:
 	virtual void InitWidget() override;
-	
 };

@@ -26,6 +26,9 @@ AGS_Ares::AGS_Ares()
 void AGS_Ares::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetReplicateMovement(true);
+	GetMesh()->SetIsReplicated(true);
 	
 	// 사운드 시스템 초기화 - 모든 클라이언트에서 사운드 정리
 	Multicast_StopAttackSound();
@@ -46,37 +49,15 @@ void AGS_Ares::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AGS_Ares::OnComboAttack()
 {
 	Super::OnComboAttack();
-	//bComboEnded = false;
-	CanChangeSeekerGait = false;
-
-	if (CanAcceptComboInput)
-	{
-		if (CurrentComboIndex == 0)
-		{
-			// 새로운 콤보 시작 시 이전 사운드 정리 (멀티캐스트)
-			GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
-			Multicast_StopAttackSound();
-			
-			ServerAttackMontage();
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("On Combo Attack CanAcceptComboInput : %d"), CanAcceptComboInput);
-			bNextCombo = true;
-			CanAcceptComboInput = false;
-		}
-	}
 }
 
 void AGS_Ares::ServerAttackMontage()
 {
 	Super::ServerAttackMontage();
-
-	this->MulticastPlayComboSection();
 }
 
 void AGS_Ares::MulticastPlayComboSection()
-{
+{	
 	// 1. 기존 타이머가 있다면 클리어하고 즉시 Stop 이벤트 호출 (멀티캐스트)
 	GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
 	Multicast_StopAttackSound();
