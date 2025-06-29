@@ -43,14 +43,14 @@ AGS_Monster::AGS_Monster()
 	
 	// 디버프 VFX 컴포넌트 생성
 	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
-	
-	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-	if (MovementComponent)
-	{
-		MovementComponent->bUseRVOAvoidance = true;
-		MovementComponent->AvoidanceConsiderationRadius = AvoidanceRadius;
-		MovementComponent->AvoidanceWeight = 0.5f;
-	}
+
+	// UI 컴포넌트 생성 및 초기화
+	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));
+	TargetedUIComponent->SetupAttachment(RootComponent);
+	TargetedUIComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	TargetedUIComponent->SetDrawSize(FVector2D(100.f, 100.f));
+	TargetedUIComponent->SetVisibility(false);
 
 	TeamId = FGenericTeamId(2);
 	Tags.Add("Monster");
@@ -60,11 +60,11 @@ AGS_Monster::AGS_Monster()
 	{
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block); // Interactable
 	}
-
-	AvoidanceRadius = 200.0f;
+	
 	bCommandLocked = false;
 	bSelectionLocked = false;
 	bIsSelected = false;
+	bReplicates = true;
 }
 
 void AGS_Monster::BeginPlay()
@@ -175,6 +175,14 @@ void AGS_Monster::UseSkill()
 {	
 }
 
+void AGS_Monster::ShowTargetUI(bool bIsActive)
+{
+	if (TargetedUIComponent)
+	{
+		TargetedUIComponent->SetVisibility(bIsActive);
+	}
+}
+
 void AGS_Monster::SetCanUseSkill(bool bCanUse)
 {
 	if (MonsterSkillComp)
@@ -267,7 +275,6 @@ void AGS_Monster::UpdateSkillCooldownWidget()
 {
 	if (!IsValid(SkillCooldownWidgetComp))
 	{
-		// 위젯이 유효하지 않으면 타이머를 정리하고 함수 종료
 		GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
 		return;
 	}

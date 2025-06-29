@@ -30,18 +30,6 @@ void AGS_BuffZone::BeginPlay()
 
 	if (HasAuthority())
 	{
-		DrawDebugSphere(
-			GetWorld(),
-			GetActorLocation(),
-			BuffRadius,
-			32,
-			FColor::Red,
-			false,
-			3.0f,
-			0,
-			3.0f
-		);
-		
 		ApplyBuffInZone();
 		
 		GetWorld()->GetTimerManager().SetTimer(

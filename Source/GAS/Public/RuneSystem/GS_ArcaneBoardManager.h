@@ -58,9 +58,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool CanPlaceRuneAt(uint8 RuneID, const FIntPoint& Pos);
 
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	bool FindOptimalPlacementPos(uint8 RuneID, const FIntPoint& ClickedCell, FIntPoint& OutBestPos);
-
 	UFUNCTION(BlueprintCallable)
 	bool PlaceRune(uint8 RuneID, const FIntPoint& Pos);
 

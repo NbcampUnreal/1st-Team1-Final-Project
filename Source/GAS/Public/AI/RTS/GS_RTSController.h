@@ -6,7 +6,6 @@
 #include "GameFramework/PlayerController.h"
 #include "RTSCommand.h"
 #include "AkGameplayStatics.h"
-#include "AkAudioEvent.h"
 #include "GS_RTSController.generated.h"
 
 struct FInputActionInstance;
