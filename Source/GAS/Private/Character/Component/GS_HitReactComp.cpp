@@ -14,7 +14,7 @@ UGS_HitReactComp::UGS_HitReactComp()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	AM_HitReacts.Init(nullptr, EHitReactType::TypeNum);
+	AM_HitReacts.Init(nullptr, static_cast<int>(EHitReactType::TypeNum));
 }
 
 void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirection)
@@ -42,7 +42,7 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 		}
 		
 		OwnerCharacter->Multicast_SetCanHitReact(false);
-		OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[ReactType], Section);
+		OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[static_cast<int>(ReactType)], Section);
 	}
 }
 

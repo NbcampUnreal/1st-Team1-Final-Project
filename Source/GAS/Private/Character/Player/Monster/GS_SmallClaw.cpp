@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
+#include "Character/F_GS_DamageEvent.h"
 
 AGS_SmallClaw::AGS_SmallClaw()
 {
@@ -76,7 +77,8 @@ void AGS_SmallClaw::OnAttackBiteboxOverlap(UPrimitiveComponent* OverlappedCompon
 		}
 		
 		float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
-		FDamageEvent DamageEvent;
+		FGS_DamageEvent DamageEvent;
+		DamageEvent.HitReactType = EHitReactType::Interrupt;
 		OtherActor->TakeDamage(Damage, DamageEvent, GetController(), this);
 	
 		BiteCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);

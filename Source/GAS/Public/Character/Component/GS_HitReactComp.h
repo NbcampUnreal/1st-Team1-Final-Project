@@ -4,17 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "E_HitReact.h"
 #include "GS_HitReactComp.generated.h"
-
-
-UENUM(BlueprintType)
-enum EHitReactType : uint8
-{
-	Interrupt,
-	Additive,
-	DamageOnly,
-	TypeNum,
-};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 

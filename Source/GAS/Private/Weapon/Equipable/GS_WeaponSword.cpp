@@ -13,6 +13,7 @@
 #include "AkGameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Engine/World.h"
+#include "Character/F_GS_DamageEvent.h"
 
 AGS_WeaponSword::AGS_WeaponSword()
 {
@@ -130,10 +131,12 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 
 	float Damage = DamagedStat->CalculateDamage(Attacker, Damaged);
 	FVector ShotDir = (Damaged->GetActorLocation() - OwnerChar->GetActorLocation()).GetSafeNormal();
-	FPointDamageEvent DamageEvent;
+	/*FPointDamageEvent DamageEvent;
 	DamageEvent.ShotDirection = ShotDir;
 	DamageEvent.HitInfo = SweepResult;
-	DamageEvent.DamageTypeClass = UDamageType::StaticClass();
+	DamageEvent.DamageTypeClass = UDamageType::StaticClass();*/
+	FGS_DamageEvent DamageEvent;
+	DamageEvent.HitReactType =  EHitReactType::Interrupt;
 	Damaged->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar);
 
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);

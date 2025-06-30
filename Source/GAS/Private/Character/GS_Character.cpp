@@ -18,6 +18,7 @@
 #include "Character/Player/GS_Player.h"
 #include "Components/DecalComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
+#include "Character/F_GS_DamageEvent.h"
 
 AGS_Character::AGS_Character()
 {
@@ -116,6 +117,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, CanHitReact);
 }
 
+
 void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (HPTextWidgetComp && HPTextWidgetComp->GetBodySetup())
@@ -134,16 +136,24 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	//when damage input start -> for drakhar 6/24
 	OnDamageStart();
+
+	// SJE
+	EHitReactType HitReactType = EHitReactType::DamageOnly;
+	if (DamageEvent.IsOfType(FGS_DamageEvent::ClassID))
+	{
+		const FGS_DamageEvent& MyDamageEvent = static_cast<const FGS_DamageEvent&>(DamageEvent);
+		HitReactType = MyDamageEvent.HitReactType;
+	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("CanHitReact : %s"), CanHitReact ? TEXT("true") : TEXT("false"));
-	// SJE
+
 	if (CanHitReact)
 	{
 		const FPointDamageEvent* PointEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		FVector HitDirection = -PointEvent->ShotDirection;
 		if(UGS_HitReactComp* HitReactComponent = GetComponentByClass<UGS_HitReactComp>())
 		{
-			HitReactComponent->PlayHitReact(EHitReactType::Interrupt, HitDirection);
+			HitReactComponent->PlayHitReact(HitReactType, HitDirection);
 		}
 	}
 
