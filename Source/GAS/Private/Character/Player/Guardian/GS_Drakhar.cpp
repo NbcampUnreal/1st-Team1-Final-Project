@@ -20,6 +20,7 @@
 #include "UI/Character/GS_DrakharFeverGauge.h"
 #include "Character/Component/GS_DrakharVFXComponent.h"
 #include "Character/Component/GS_DrakharSFXComponent.h"
+#include "Character/F_GS_DamageEvent.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
@@ -382,7 +383,8 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		float SkillCoefficient = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Moving)->Damage;
 		float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter, SkillCoefficient);
 
-		FDamageEvent DamageEvent;
+		FGS_DamageEvent DamageEvent;
+		DamageEvent.HitReactType = EHitReactType::Interrupt;
 		DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
 
 		if (IsFeverMode)
@@ -449,7 +451,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 		float SkillCoefficient = GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)->Damage;
 		float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter, SkillCoefficient);
 
-		FDamageEvent DamageEvent;
+		FGS_DamageEvent DamageEvent;
 		if (IsValid(DamagedCharacter))
 		{
 			if (IsFeverMode)
@@ -461,7 +463,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			{
 				MulticastPlayEarthquakeImpactVFX(DamagedCharacter->GetActorLocation());
 			}
-			
+			DamageEvent.HitReactType = EHitReactType::Interrupt;
 			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
 			// === 어스퀘이크 스킬 히트 사운드 재생 ===
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());

@@ -95,24 +95,6 @@ void AGS_Player::BeginPlay()
 			UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Player AkComponent occlusion DISABLED."));
 		}
 	}
-
-	//steam widget rotate
-	if (IsValid(SteamNameWidgetComp) && !HasAuthority())
-	{
-		TWeakObjectPtr<AGS_Player> WeakThis = this;
-		GetWorldTimerManager().SetTimer(
-			SteamNameWidgetRotationTimer,
-			[WeakThis]()
-			{
-				if (WeakThis.IsValid())
-				{
-					WeakThis->UpdateSteamNameWidgetRotation();
-				}
-			},
-			0.1f,
-			true
-		);
-	}
 }
 
 void AGS_Player::Tick(float DeltaSeconds)
@@ -122,6 +104,12 @@ void AGS_Player::Tick(float DeltaSeconds)
 	if (ObscureTimeline.IsPlaying())
 	{
 		ObscureTimeline.TickTimeline(DeltaSeconds);
+	}
+
+	//steam widget rotate
+	if (IsValid(SteamNameWidgetComp) && !HasAuthority())
+	{
+		UpdateSteamNameWidgetRotation();
 	}
 }
 
@@ -162,12 +150,7 @@ void AGS_Player::PossessedBy(AController* NewController)
 
 void AGS_Player::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (UWorld* World = GetWorld())
-	{
-		World->GetTimerManager().ClearTimer(SteamNameWidgetRotationTimer);
-	}
-
-	if (SteamNameWidgetComp->GetBodySetup())
+	if (SteamNameWidgetComp && SteamNameWidgetComp->GetBodySetup())
 	{
 		SteamNameWidgetComp->DestroyPhysicsState();
 	}
@@ -418,7 +401,6 @@ void AGS_Player::UpdateSteamNameWidgetRotation()
 {
 	if (!IsValid(SteamNameWidgetComp))
 	{
-		GetWorldTimerManager().ClearTimer(SteamNameWidgetRotationTimer);
 		return;
 	}
     
