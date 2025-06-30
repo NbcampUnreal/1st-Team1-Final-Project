@@ -555,40 +555,6 @@ FVector2D UGS_ArcaneBoardWidget::GetGridCellSize() const
 	return FVector2D::ZeroVector;
 }
 
-FVector2D UGS_ArcaneBoardWidget::CalculateDragVisualScale(uint8 RuneID) const
-{
-	if (!IsValid(BoardManager))
-	{
-		return FVector2D(1.0f, 1.0f);
-	}
-
-	FRuneTableRow RuneData;
-	if (!BoardManager->GetRuneData(RuneID, RuneData))
-	{
-		return FVector2D(1.0f, 1.0f);
-	}
-
-	FVector2D CellSize = GetGridCellSize();
-	if (CellSize.IsZero())
-	{
-		return FVector2D(1.0f, 1.0f);
-	}
-
-	FIntPoint RuneSize = RuneData.RuneSize;
-
-	FVector2D TargetSize = FVector2D(
-		CellSize.X * RuneSize.Y,
-		CellSize.Y * RuneSize.X
-	);
-
-	float BaseSize = 64.0f;
-
-	float ScaleX = TargetSize.X / BaseSize;
-	float ScaleY = TargetSize.Y / BaseSize;
-
-	return FVector2D(ScaleX * 0.8f, ScaleY * 0.8f);
-}
-
 void UGS_ArcaneBoardWidget::RequestShowTooltip(uint8 RuneID, const FVector2D& MousePos)
 {
 	if (!ShouldShowTooltip())

@@ -93,9 +93,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	FVector2D GetGridCellSize() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	FVector2D CalculateDragVisualScale(uint8 RuneID) const;
-
 	//툴팁
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void RequestShowTooltip(uint8 RuneID, const FVector2D& MousePos);
