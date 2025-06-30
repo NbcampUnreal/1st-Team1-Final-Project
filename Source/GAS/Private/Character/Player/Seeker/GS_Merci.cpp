@@ -102,6 +102,13 @@ void AGS_Merci::BeginPlay()
 
 void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 {
+	if (!HasAuthority())
+	{
+		// 서버에 요청
+		Server_DrawBow(DrawMontage);
+		return;
+	}
+
 	// 피격 애니메이션 제한
 	Server_SetCanHitReact(false);
 
@@ -111,18 +118,10 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		{
 			WidgetCrosshair->PlayAimAnim(true);
 		}
-
-		if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
+		if(!GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
 		{
 			Client_StartZoom();
 		}
-	}
-
-	if (!HasAuthority())
-	{
-		// 서버에 요청
-		Server_DrawBow(DrawMontage);
-		return;
 	}
 
 	if (!GetDrawState())
@@ -146,6 +145,12 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 
 void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
+	if (!HasAuthority())
+	{
+		Server_ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
+		return;
+	}
+
 	if (WidgetCrosshair)
 	{
 		WidgetCrosshair->PlayAimAnim(false);
@@ -154,12 +159,6 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
 	{
 		Client_StopZoom();
-	}
-
-	if (!HasAuthority())
-	{
-		Server_ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
-		return;
 	}
 
 	SetAimState(false);
