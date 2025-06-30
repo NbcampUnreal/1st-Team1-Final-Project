@@ -11,19 +11,22 @@ AGS_BridgePiece::AGS_BridgePiece()
 	bIsDestroyed = false;
 	
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BridgeMesh"));
+	MeshComponent->SetupAttachment(RootComponent);
 	MeshComponent->SetIsReplicated(true);
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BridgeMaterialAsset(TEXT("/Game/BossLevel/Materials/Props_Materials/Boss_Bridge/Boss_Bridege.Boss_Bridege"));
+
+	if (BridgeMaterialAsset.Succeeded())
+	{
+		MeshComponent->SetMaterial(0, BridgeMaterialAsset.Object);
+	}
 }
 
-void AGS_BridgePiece::SetBridgeMesh(UStaticMesh* InMesh, UMaterialInterface* InMaterial, float InValue)
+void AGS_BridgePiece::SetBridgeMesh(UStaticMesh* InMesh, float InValue)
 {
 	if (MeshComponent && InMesh)
 	{
 		MeshComponent->SetStaticMesh(InMesh);
-
-		if (InMaterial)
-		{
-			BridgeMaterial = InMaterial;
-		}
 		MaxHealth = InValue;
 	}
 }
@@ -47,14 +50,6 @@ void AGS_BridgePiece::BrokeBridge(float InDamage)
 	}
 }
 
-void AGS_BridgePiece::OnRep_BridgeMaterial()
-{
-	if (MeshComponent && BridgeMaterial)
-	{
-		MeshComponent->SetMaterial(0, BridgeMaterial);
-	}
-}
-
 void AGS_BridgePiece::BeginPlay()
 {
 	Super::BeginPlay();
@@ -63,13 +58,6 @@ void AGS_BridgePiece::BeginPlay()
 
 	MeshComponent->SetSimulatePhysics(false);
 	MeshComponent->SetMassOverrideInKg(NAME_None, 70000.0f, true);
-}
-
-void AGS_BridgePiece::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ThisClass, BridgeMaterial);
 }
 
 void AGS_BridgePiece::StopSimulate()

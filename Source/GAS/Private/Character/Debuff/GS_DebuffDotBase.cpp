@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatComp.h"
+#include "Character/F_GS_DamageEvent.h"
 
 void UGS_DebuffDotBase::OnApply()
 {
@@ -54,11 +55,15 @@ void UGS_DebuffDotBase::ApplyDotDamage()
 
     UE_LOG(LogTemp, Log, TEXT("DOT: Apply %f damage to %s"), Damage, *TargetCharacter->GetName());
 
-    UGameplayStatics::ApplyDamage(
+
+    FGS_DamageEvent DamageEvent;
+    DamageEvent.HitReactType = EHitReactType::DamageOnly;
+    TargetCharacter->TakeDamage(Damage, DamageEvent, nullptr, DamageCauser);
+   /* UGameplayStatics::ApplyDamage(
         TargetCharacter,
         Damage,
         InstigatorController,
         DamageCauser,
         UDamageType::StaticClass()
-    );
+    );*/
 }
