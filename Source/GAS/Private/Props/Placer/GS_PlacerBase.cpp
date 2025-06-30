@@ -182,6 +182,14 @@ void AGS_PlacerBase::BuildObject()
 				if (ObjectData.DoorAndWallType == EDoorAndWallType::Wall)
 				{
 					TargetType = EDEditorCellType::VerticalPlaceable;
+					UActorComponent* ActorCompo = NewActor->FindComponentByTag(UStaticMeshComponent::StaticClass(),"Wall");
+					if (ActorCompo)
+					{
+						if (UStaticMeshComponent* WallStaticMesh = Cast<UStaticMeshComponent>(ActorCompo))
+						{
+							WallStaticMesh->SetRenderCustomDepth(true);
+						}
+					}
 				}
 			}
 			BuildManagerRef->SetOccupancyData(IntPointArray[i], TargetType, ObjectData.ObjectType, NewActor, IsRoom);

@@ -102,7 +102,10 @@ void AGS_Merci::BeginPlay()
 
 void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 {
-	if (IsLocallyControlled() && !GetDrawState())
+	// 피격 애니메이션 제한
+	Server_SetCanHitReact(false);
+
+	if (!GetDrawState())
 	{
 		if (WidgetCrosshair)
 		{
@@ -143,17 +146,14 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 
 void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
-	if (IsLocallyControlled())
+	if (WidgetCrosshair)
 	{
-		if (WidgetCrosshair)
-		{
-			WidgetCrosshair->PlayAimAnim(false);
-		}
+		WidgetCrosshair->PlayAimAnim(false);
+	}
 
-		if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
-		{
-			Client_StopZoom();
-		}
+	if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
+	{
+		Client_StopZoom();
 	}
 
 	if (!HasAuthority())
@@ -181,6 +181,12 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	//Client_SetWidgetVisibility(false);
 
 	SetSeekerGait(EGait::Run);
+	
+	// 피격 애니메이션 제한 해제
+	if(!this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
+	{
+		Server_SetCanHitReact(true); // 서버에 전달
+	}
 }
 
 void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)

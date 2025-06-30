@@ -21,6 +21,7 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 
 	if(OwnerCharacter)
 	{
+		OwnerCharacter->Server_SetCanHitReact(false); // 서버에 전달
 		// 스킬 시작 사운드 재생
 		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 		if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
@@ -116,6 +117,8 @@ void UGS_MerciUltimateSkill::DeActiveAutoAimingState()
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimTickHandle);
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimingHandle);
 		OwnerCharacter->SetSkillInputControl(true, true, true);
+
+		OwnerCharacter->Server_SetCanHitReact(true); // 서버에 전달
 	}
 }
 
