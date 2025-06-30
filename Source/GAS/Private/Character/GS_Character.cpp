@@ -74,23 +74,6 @@ void AGS_Character::BeginPlay()
 		HPTextWidgetComp->SetVisibility(true);
 	}
 
-	if (IsValid(HPTextWidgetComp) && !HasAuthority())
-	{
-		TWeakObjectPtr<AGS_Character> WeakThis = this;
-		GetWorldTimerManager().SetTimer(
-			HPWidgetRotationTimer,
-			[WeakThis]()
-			{
-				if (WeakThis.IsValid())
-				{
-					WeakThis->UpdateHPWidgetRotation();
-				}
-			},
-			0.1f,  
-			true   
-		);
-	}
-
 	if (SelectionDecal && SelectionDecal->GetDecalMaterial())
 	{
 		DynamicDecalMaterial = UMaterialInstanceDynamic::Create(SelectionDecal->GetDecalMaterial(), this);
@@ -109,7 +92,18 @@ void AGS_Character::BeginPlay()
 void AGS_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
+	if (IsValid(HPTextWidgetComp) && !HasAuthority())
+	{
+		APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
+		
+		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+        
+		HPTextWidgetComp->SetWorldRotation(WidgetRotation);
+	}
 }
 
 void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -124,12 +118,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 
 void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (UWorld* World = GetWorld())
-	{
-		World->GetTimerManager().ClearTimer(HPWidgetRotationTimer);
-	}
-
-	if (HPTextWidgetComp->GetBodySetup())
+	if (HPTextWidgetComp && HPTextWidgetComp->GetBodySetup())
 	{
 		HPTextWidgetComp->DestroyPhysicsState();
 	}
@@ -458,24 +447,4 @@ void AGS_Character::OnHoverBegin()
 
 void AGS_Character::OnHoverEnd()
 {
-}
-
-
-void AGS_Character::UpdateHPWidgetRotation()
-{
-	if (!IsValid(HPTextWidgetComp))
-	{
-		GetWorldTimerManager().ClearTimer(HPWidgetRotationTimer);
-		return;
-	}
-    
-	if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
-	{
-		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
-		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
-		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
-		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
-        
-		HPTextWidgetComp->SetWorldRotation(WidgetRotation);
-	}
 }

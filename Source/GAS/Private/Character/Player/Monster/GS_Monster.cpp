@@ -22,7 +22,6 @@
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "UI/Character/GS_HPTextWidgetComp.h"
 
 
 AGS_Monster::AGS_Monster()
@@ -85,22 +84,15 @@ void AGS_Monster::BeginPlay()
 		AkComponent->OcclusionRefreshInterval = 0.0f;
 		UE_LOG(LogTemp, Warning, TEXT("AGS_Monster: AkComponent occlusion DISABLED."));
 	}
-	
+}
+
+void AGS_Monster::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
 	if (IsValid(SkillCooldownWidgetComp) && !HasAuthority())
 	{
-		TWeakObjectPtr<AGS_Monster> WeakThis = this;
-		GetWorldTimerManager().SetTimer(
-			SkillCooldownWidgetTimer,
-			[WeakThis]()
-			{
-				if (WeakThis.IsValid())
-				{
-					WeakThis->UpdateSkillCooldownWidget();
-				}
-			},
-			0.1f, 
-			true 
-		);
+		UpdateSkillCooldownWidget();
 	}
 }
 
@@ -121,19 +113,9 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (UWorld* World = GetWorld())
-	{
-		World->GetTimerManager().ClearTimer(SkillCooldownWidgetTimer);
-	}
-
-	if (SkillCooldownWidgetComp->GetBodySetup())
+	if (SkillCooldownWidgetComp && SkillCooldownWidgetComp->GetBodySetup())
 	{
 		SkillCooldownWidgetComp->DestroyPhysicsState();
-	}
-
-	if (HPTextWidgetComp)
-	{
-		HPTextWidgetComp->DestroyComponent();
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -297,7 +279,6 @@ void AGS_Monster::UpdateSkillCooldownWidget()
 {
 	if (!IsValid(SkillCooldownWidgetComp))
 	{
-		GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
 		return;
 	}
 	
@@ -310,5 +291,4 @@ void AGS_Monster::UpdateSkillCooldownWidget()
 
 		SkillCooldownWidgetComp->SetWorldRotation(WidgetRotation);
 	}
-	
 }

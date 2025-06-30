@@ -176,17 +176,12 @@ private:
 
 	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicDecalMaterial;
-
-	UPROPERTY()
-	FTimerHandle HPWidgetRotationTimer;
-
+	
 	UFUNCTION()
 	void OnRep_CharacterSpeed();
 
 	void SpawnAndAttachWeapons();
 	
 	void SetHovered(bool bHovered);
-
-	void UpdateHPWidgetRotation();
 };
 
