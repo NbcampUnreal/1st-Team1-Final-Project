@@ -13,6 +13,7 @@
 #include "AkGameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Engine/World.h"
+#include "Character/F_GS_DamageEvent.h"
 
 // Sets default values
 AGS_WeaponAxe::AGS_WeaponAxe()
@@ -108,7 +109,8 @@ void AGS_WeaponAxe::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 	}
 
 	float Damage = DamagedStat->CalculateDamage(Attacker, Damaged);
-	FDamageEvent DamageEvent;
+	FGS_DamageEvent DamageEvent;
+	DamageEvent.HitReactType = EHitReactType::Interrupt;
 	Damaged->TakeDamage(Damage, DamageEvent, OwnerChar->GetController(), OwnerChar);
 	
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
