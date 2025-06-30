@@ -9,6 +9,7 @@
 class UGS_DrakharAnimInstance;
 class UGS_DebuffVFXComponent;
 class UGS_CameraShakeComponent;
+class UWidgetComponent;
 
 //check ctrl input
 UENUM(BlueprintType)
@@ -107,10 +108,17 @@ public:
 	//skill state check - client logic
 	UFUNCTION()
 	void FinishCtrlSkill();
+
+	// 몬스터 조준 3D UI 관리
+	void ShowTargetUI(bool bIsActive);
 	
 protected:
 	float NormalMoveSpeed;
 	float SpeedUpMoveSpeed;
+
+	// 몬스터 조준 3D UI
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	UWidgetComponent* TargetedUIComponent;
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCApplyHitStop(AGS_Character* InDamagedCharacter);

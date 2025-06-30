@@ -34,6 +34,9 @@ AGS_Monster::AGS_Monster()
 	SkillCooldownWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SkillCooldownWidgetComp"));
 	SkillCooldownWidgetComp->SetupAttachment(RootComponent);
 	SkillCooldownWidgetComp->SetVisibility(false);
+	SkillCooldownWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
+	SkillCooldownWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SkillCooldownWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 
 	AkComponent = CreateDefaultSubobject<UAkComponent>("AkComponent");
 	AkComponent->SetupAttachment(RootComponent);
@@ -43,14 +46,14 @@ AGS_Monster::AGS_Monster()
 	
 	// 디버프 VFX 컴포넌트 생성
 	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
-	
-	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-	if (MovementComponent)
-	{
-		MovementComponent->bUseRVOAvoidance = true;
-		MovementComponent->AvoidanceConsiderationRadius = AvoidanceRadius;
-		MovementComponent->AvoidanceWeight = 0.5f;
-	}
+
+	// UI 컴포넌트 생성 및 초기화
+	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));
+	TargetedUIComponent->SetupAttachment(RootComponent);
+	TargetedUIComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	TargetedUIComponent->SetDrawSize(FVector2D(50.0f, 50.f));
+	TargetedUIComponent->SetVisibility(false);
 
 	TeamId = FGenericTeamId(2);
 	Tags.Add("Monster");
@@ -60,11 +63,11 @@ AGS_Monster::AGS_Monster()
 	{
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Block); // Interactable
 	}
-
-	AvoidanceRadius = 200.0f;
+	
 	bCommandLocked = false;
 	bSelectionLocked = false;
 	bIsSelected = false;
+	bReplicates = true;
 }
 
 void AGS_Monster::BeginPlay()
@@ -82,16 +85,15 @@ void AGS_Monster::BeginPlay()
 		AkComponent->OcclusionRefreshInterval = 0.0f;
 		UE_LOG(LogTemp, Warning, TEXT("AGS_Monster: AkComponent occlusion DISABLED."));
 	}
-	
+}
+
+void AGS_Monster::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
 	if (IsValid(SkillCooldownWidgetComp) && !HasAuthority())
 	{
-		GetWorldTimerManager().SetTimer(
-			SkillCooldownWidgetTimer,
-			this,
-			&AGS_Monster::UpdateSkillCooldownWidget,
-			0.1f, 
-			true 
-		);
+		UpdateSkillCooldownWidget();
 	}
 }
 
@@ -112,9 +114,27 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
+	// if (SkillCooldownWidgetComp && SkillCooldownWidgetComp->GetBodySetup())
+	// {
+	// 	SkillCooldownWidgetComp->DestroyPhysicsState();
+	// }
 
-	GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
+	// 1. Widget 내용 제거
+	SkillCooldownWidgetComp->SetWidget(nullptr);
+
+	// 2. 가시성 끄기
+	SkillCooldownWidgetComp->SetVisibility(false);
+
+	// 3. 콜리전 비활성화
+	SkillCooldownWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 4. BodySetup 정리
+	if (SkillCooldownWidgetComp->GetBodySetup())
+	{
+		SkillCooldownWidgetComp->DestroyPhysicsState();
+	}
+
+	Super::EndPlay(EndPlayReason);
 } 
 
 void AGS_Monster::OnDeath()
@@ -173,6 +193,14 @@ void AGS_Monster::Multicast_OnDeath_Implementation()
 
 void AGS_Monster::UseSkill()
 {	
+}
+
+void AGS_Monster::ShowTargetUI(bool bIsActive)
+{
+	if (TargetedUIComponent)
+	{
+		TargetedUIComponent->SetVisibility(bIsActive);
+	}
 }
 
 void AGS_Monster::SetCanUseSkill(bool bCanUse)
@@ -267,8 +295,6 @@ void AGS_Monster::UpdateSkillCooldownWidget()
 {
 	if (!IsValid(SkillCooldownWidgetComp))
 	{
-		// 위젯이 유효하지 않으면 타이머를 정리하고 함수 종료
-		GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
 		return;
 	}
 	
@@ -281,5 +307,4 @@ void AGS_Monster::UpdateSkillCooldownWidget()
 
 		SkillCooldownWidgetComp->SetWorldRotation(WidgetRotation);
 	}
-	
 }

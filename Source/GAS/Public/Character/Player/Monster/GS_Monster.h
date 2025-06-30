@@ -24,10 +24,7 @@ class GAS_API AGS_Monster : public AGS_Character
 
 public:
 	AGS_Monster();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RVO")
-	float AvoidanceRadius;
-
+	
 	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
 	bool bCommandLocked;
 
@@ -104,10 +101,13 @@ public:
 	FORCEINLINE UGS_MonsterSkillComp* GetMonsterSkillComp() const { return MonsterSkillComp; }
 
 	UFUNCTION(BlueprintCallable, Category = "Skill")
-	virtual void UseSkill(); 
+	virtual void UseSkill();
+
+	void ShowTargetUI(bool bIsActive);
 	
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -120,6 +120,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	UAkComponent* AkComponent;
+
+	// 몬스터 조준 3D UI
+	UPROPERTY(EditDefaultsOnly, Category="UI")
+	UWidgetComponent* TargetedUIComponent;
 
 	void HandleDelayedDestroy();
 	virtual void OnDeath() override;
@@ -134,8 +138,5 @@ protected:
 private:
 	bool bIsSelected;
 
-	UPROPERTY()
-	FTimerHandle SkillCooldownWidgetTimer;
-	
 	void UpdateSkillCooldownWidget();
 };

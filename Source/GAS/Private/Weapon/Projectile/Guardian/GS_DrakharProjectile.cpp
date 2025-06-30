@@ -7,6 +7,8 @@
 #include "Engine/DamageEvents.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Character/F_GS_DamageEvent.h"
+
 
 AGS_DrakharProjectile::AGS_DrakharProjectile()
 {
@@ -40,7 +42,8 @@ void AGS_DrakharProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherAct
 	if (IsValid(DamagedCharacter) && !DamagedCharacter->IsA<AGS_Guardian>())
 	{
 		bHitCharacter = true;
-		FDamageEvent DamageEvent;
+		FGS_DamageEvent DamageEvent;
+		DamageEvent.HitReactType = EHitReactType::Interrupt;
 		//UE_LOG(LogTemp, Warning, TEXT("DAMAGED!!!!"));
 		DamagedCharacter->TakeDamage(120.f, DamageEvent, GetOwner()->GetInstigatorController(), this);
 	}

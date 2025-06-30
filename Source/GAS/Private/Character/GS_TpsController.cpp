@@ -204,7 +204,7 @@ void AGS_TpsController::InitControllerPerWorld()
 
 void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
 {
-	if (AGS_InGameGM* GM = GetWorld()->GetAuthGameMode<AGS_InGameGM>())
+	if (AGS_BaseGM* GM = GetWorld()->GetAuthGameMode<AGS_BaseGM>())
 	{
 		GM->NotifyPlayerIsReady(this);
 	}
@@ -212,6 +212,7 @@ void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
 
 void AGS_TpsController::Client_StartGame_Implementation()
 {
+	TestFunction();
 	UE_LOG(LogTemp, Warning, TEXT("준비 완료. TODO: 화면 가리개 제거"));
 	//TODO: 로딩스크린 제거
 }
@@ -543,6 +544,5 @@ void AGS_TpsController::BeginPlayingState()
 	if (IsLocalController())
 	{
 		Server_NotifyPlayerIsReady();
-		TestFunction(); //TODO: 바로 윗줄 잘 작동하는 거 확인하면 이 함수 호출을 Client_StartGame_Implementation쪽으로 옮기기
 	}
 }

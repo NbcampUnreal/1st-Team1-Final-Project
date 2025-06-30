@@ -62,6 +62,18 @@ void UGS_MerciRollingSkill::DeactiveSkill()
 	}
 }
 
+void UGS_MerciRollingSkill::InterruptSkill()
+{
+	Super::InterruptSkill();
+	AGS_Merci* AresCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	if (AresCharacter->GetSkillComp())
+	{
+		AresCharacter->Multicast_SetIsFullBodySlot(false);
+		AresCharacter->SetMoveControlValue(true, true);
+		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
+	}
+}
+
 
 bool UGS_MerciRollingSkill::CanActive() const
 {

@@ -18,6 +18,7 @@
 #include "Character/Player/GS_Player.h"
 #include "Components/DecalComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
+#include "Character/F_GS_DamageEvent.h"
 
 AGS_Character::AGS_Character()
 {
@@ -31,6 +32,7 @@ AGS_Character::AGS_Character()
 	HPTextWidgetComp->SetupAttachment(RootComponent);
 	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HPTextWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	HPTextWidgetComp->SetVisibility(false);
 
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("SelectionDecal"));
@@ -73,17 +75,6 @@ void AGS_Character::BeginPlay()
 		HPTextWidgetComp->SetVisibility(true);
 	}
 
-	if (IsValid(HPTextWidgetComp) && !HasAuthority())
-	{
-		GetWorldTimerManager().SetTimer(
-			HPWidgetRotationTimer,
-			this,
-			&AGS_Character::UpdateHPWidgetRotation,
-			0.1f,  
-			true   
-		);
-	}
-
 	if (SelectionDecal && SelectionDecal->GetDecalMaterial())
 	{
 		DynamicDecalMaterial = UMaterialInstanceDynamic::Create(SelectionDecal->GetDecalMaterial(), this);
@@ -102,7 +93,21 @@ void AGS_Character::BeginPlay()
 void AGS_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
+	if (IsValid(HPTextWidgetComp) && !HasAuthority())
+	{
+		if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
+		{
+			FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+			FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+			FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+			FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+			
+			HPTextWidgetComp->SetWorldRotation(WidgetRotation);	
+		}
+		
+        
+	}
 }
 
 void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -112,13 +117,55 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
+	DOREPLIFETIME(AGS_Character, CanHitReact);
 }
+
 
 void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
+	// 2. 가시성 끄기
+	HPTextWidgetComp->SetVisibility(false);
 
-	GetWorldTimerManager().ClearTimer(HPWidgetRotationTimer);
+	// 3. 콜리전 비활성화
+	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 4. BodySetup 정리
+	if (HPTextWidgetComp->GetBodySetup())
+	{
+		HPTextWidgetComp->DestroyPhysicsState();
+	}
+	
+	if (IsValid(HPTextWidgetComp))
+	{
+		if (UUserWidget* Widget = HPTextWidgetComp->GetWidget())
+		{
+			Widget->RemoveFromParent();
+		}
+		HPTextWidgetComp->SetWidget(nullptr);
+		HPTextWidgetComp->DestroyComponent();
+	}
+	
+	Super::EndPlay(EndPlayReason);
+}
+
+void AGS_Character::BeginDestroy()
+{
+	// 1. 먼저 Super::BeginDestroy() 호출 (중요!)
+	Super::BeginDestroy();
+
+	// 2. IsValid() 체크와 함께 안전하게 정리
+	if (IsValid(HPTextWidgetComp) && !HPTextWidgetComp->IsBeingDestroyed())
+	{
+		HPTextWidgetComp->SetWidget(nullptr);
+		HPTextWidgetComp->SetVisibility(false);
+		HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// BodySetup 정리 (필요한 경우만)
+		if (HPTextWidgetComp->GetBodySetup())
+		{
+			HPTextWidgetComp->DestroyPhysicsState();
+		}
+	}
 }
 
 
@@ -129,15 +176,24 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	//when damage input start -> for drakhar 6/24
 	OnDamageStart();
-	
+
 	// SJE
+	EHitReactType HitReactType = EHitReactType::DamageOnly;
+	if (DamageEvent.IsOfType(FGS_DamageEvent::ClassID))
+	{
+		const FGS_DamageEvent& MyDamageEvent = static_cast<const FGS_DamageEvent&>(DamageEvent);
+		HitReactType = MyDamageEvent.HitReactType;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("CanHitReact : %s"), CanHitReact ? TEXT("true") : TEXT("false"));
+
 	if (CanHitReact)
 	{
 		const FPointDamageEvent* PointEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		FVector HitDirection = -PointEvent->ShotDirection;
 		if(UGS_HitReactComp* HitReactComponent = GetComponentByClass<UGS_HitReactComp>())
 		{
-			HitReactComponent->PlayHitReact(EHitReactType::Interrupt, HitDirection);
+			HitReactComponent->PlayHitReact(HitReactType, HitDirection);
 		}
 	}
 
@@ -360,6 +416,11 @@ void AGS_Character::OnRep_CharacterSpeed()
 }
 
 
+void AGS_Character::Server_SetCanHitReact_Implementation(bool bCanReact)
+{
+	CanHitReact = bCanReact;
+}
+
 void AGS_Character::NotifyActorBeginCursorOver()
 {
 	Super::NotifyActorBeginCursorOver();
@@ -436,24 +497,4 @@ void AGS_Character::OnHoverBegin()
 
 void AGS_Character::OnHoverEnd()
 {
-}
-
-
-void AGS_Character::UpdateHPWidgetRotation()
-{
-	if (!IsValid(HPTextWidgetComp))
-	{
-		GetWorldTimerManager().ClearTimer(HPWidgetRotationTimer);
-		return;
-	}
-    
-	if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
-	{
-		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
-		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
-		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
-		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
-        
-		HPTextWidgetComp->SetWorldRotation(WidgetRotation);
-	}
 }

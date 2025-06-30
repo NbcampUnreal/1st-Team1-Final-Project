@@ -3,11 +3,11 @@
 
 #include "Weapon/Projectile/Guardian/GS_NeedleFangProjectile.h"
 #include "Character/Component/GS_StatComp.h"
-#include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/GS_Character.h"
 #include "Engine/DamageEvents.h"
 #include "AkGameplayStatics.h"
 #include "AkAudioEvent.h"
+#include "Character/F_GS_DamageEvent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/HitResult.h"
 
@@ -33,23 +33,17 @@ void AGS_NeedleFangProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
 
 	AGS_Character* DamagedCharacter = Cast<AGS_Character>(OtherActor);
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-	if (!DamagedCharacter || !OwnerCharacter || !DamagedCharacter->IsEnemy(OwnerCharacter))
+	if (DamagedCharacter && OwnerCharacter && DamagedCharacter->IsEnemy(OwnerCharacter) && DamagedCharacter->GetStatComp())
 	{
-		return;
+		// 히트 사운드 재생
+		Multicast_PlayHitSound(Hit.ImpactPoint);
+        
+		UGS_StatComp* DamagedStat = DamagedCharacter->GetStatComp();
+		float Damage = DamagedStat->CalculateDamage(OwnerCharacter, DamagedCharacter);
+		FGS_DamageEvent DamageEvent;
+		DamageEvent.HitReactType = EHitReactType::Interrupt;
+		DamagedCharacter->TakeDamage(Damage, DamageEvent, GetOwner()->GetInstigatorController(), this);
 	}
-	
-	UGS_StatComp* DamagedStat = DamagedCharacter->GetStatComp();
-	if (!DamagedStat) 
-	{
-		return;	
-	}
-	
-	// 히트 사운드 재생
-	Multicast_PlayHitSound(Hit.ImpactPoint);
-	
-	float Damage = DamagedStat->CalculateDamage(OwnerCharacter, DamagedCharacter);
-	FDamageEvent DamageEvent;
-	DamagedCharacter->TakeDamage(Damage, DamageEvent, GetOwner()->GetInstigatorController(), this);
 	
 	Destroy();
 }

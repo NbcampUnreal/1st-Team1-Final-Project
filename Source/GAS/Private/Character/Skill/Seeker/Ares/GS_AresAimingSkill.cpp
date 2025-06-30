@@ -29,17 +29,22 @@ void UGS_AresAimingSkill::ActiveSkill()
 		{
 			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
 		}
+
+		if (AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController()))
+		{
+			Controller->SetLookControlValue(false, false);
+		}
+		
+		OwnerPlayer->SetSkillInputControl(false, false, false, false);
 	}
-
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->SetLookControlValue(false, false);
-
+	
 	ExecuteSkillEffect();
 }
 
 void UGS_AresAimingSkill::DeactiveSkill()
 {
 	Super::DeactiveSkill();
+	
 }
 
 void UGS_AresAimingSkill::ExecuteSkillEffect()
@@ -177,6 +182,7 @@ void UGS_AresAimingSkill::SpawnSecondProjectile()
 	// 스킬 종료 처리
 	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
 	Controller->SetLookControlValue(true, true);
+	AresCharacter->SetSkillInputControl(true, true, true);
 	bIsActive = false;
 }
 	

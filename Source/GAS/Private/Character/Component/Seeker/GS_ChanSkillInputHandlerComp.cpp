@@ -60,7 +60,6 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("CanAcceptComboInput %d"), ChanCharacter->CanAcceptComboInput);
 				if (ChanCharacter->CanAcceptComboInput)
 				{
 					ChanCharacter->OnComboAttack();

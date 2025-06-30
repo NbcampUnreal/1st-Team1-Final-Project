@@ -1,7 +1,4 @@
 #include "UI/Screen/GS_UserIDWidget.h"
-#include "Components/TextBlock.h"
-#include "Components/Image.h"
-#include "GameFramework/PlayerState.h"
 #include "GameFramework/PlayerController.h"
 #include "System/GS_PlayerState.h"
 
@@ -27,28 +24,5 @@ void UGS_UserIDWidget::DelayedUpdateUserID()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 		SetupWidget(PS);
-	}
-}
-
-void UGS_UserIDWidget::SetupWidget(AGS_PlayerState* PlayerState)
-{
-	if (PlayerState)
-	{
-		if (TEXT_UserID)
-		{
-			TEXT_UserID->SetText(FText::FromString(PlayerState->GetPlayerName()));
-		}
-		if (SteamAvatar && PlayerState->MySteamAvatar)
-		{
-			SteamAvatar->SetBrushFromTexture(PlayerState->MySteamAvatar);
-		}
-		else if (SteamAvatar)
-		{
-			PlayerState->FetchMySteamAvatar();
-			if (PlayerState->MySteamAvatar)
-			{
-				SteamAvatar->SetBrushFromTexture(PlayerState->MySteamAvatar);
-			}
-		}
 	}
 }

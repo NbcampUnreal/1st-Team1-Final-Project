@@ -4,6 +4,7 @@
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
 #include "Character/E_Character.h"
+#include "Component/GS_HitReactComp.h"
 #include "GS_Character.generated.h"
 
 class UGS_StatComp;
@@ -47,14 +48,14 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
+	virtual void BeginDestroy() override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void OnDamageStart();
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetCanHitReact(bool CanReact);
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool CanHitReact = true;
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -134,6 +135,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnCharacterDeath OnDeathDelegate;
 	
+	UFUNCTION(Server, Reliable)
+	void Server_SetCanHitReact(bool bCanReact);
 protected:
 	virtual void NotifyActorBeginCursorOver() override;
 	virtual void NotifyActorEndCursorOver() override;
@@ -174,17 +177,12 @@ private:
 
 	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicDecalMaterial;
-
-	UPROPERTY()
-	FTimerHandle HPWidgetRotationTimer;
-
+	
 	UFUNCTION()
 	void OnRep_CharacterSpeed();
 
 	void SpawnAndAttachWeapons();
 	
 	void SetHovered(bool bHovered);
-
-	void UpdateHPWidgetRotation();
 };
 

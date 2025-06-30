@@ -40,7 +40,9 @@ AGS_Player::AGS_Player()
 	SteamNameWidgetComp = CreateDefaultSubobject<UGS_SteamNameWidgetComp>(TEXT("SteamWidgetComp"));
 	SteamNameWidgetComp->SetupAttachment(RootComponent);
 	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
+	//SteamNameWidgetComp->GetBodyInstance()->TermBody();
 	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SteamNameWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BlurMat(TEXT("/Game/VFX/MI_AbscureDebuff"));
 	if (BlurMat.Succeeded())
@@ -94,12 +96,6 @@ void AGS_Player::BeginPlay()
 			UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Player AkComponent occlusion DISABLED."));
 		}
 	}
-
-	//steam widget rotate
-	if (IsValid(SteamNameWidgetComp) && !HasAuthority())
-	{
-		GetWorldTimerManager().SetTimer(SteamNameWidgetRotationTimer, this, &AGS_Player::UpdateSteamNameWidgetRotation, 0.1f, true);
-	}
 }
 
 void AGS_Player::Tick(float DeltaSeconds)
@@ -109,6 +105,12 @@ void AGS_Player::Tick(float DeltaSeconds)
 	if (ObscureTimeline.IsPlaying())
 	{
 		ObscureTimeline.TickTimeline(DeltaSeconds);
+	}
+
+	//steam widget rotate
+	if (IsValid(SteamNameWidgetComp) && !HasAuthority())
+	{
+		UpdateSteamNameWidgetRotation();
 	}
 }
 
@@ -145,6 +147,72 @@ void AGS_Player::PossessedBy(AController* NewController)
 		if (!PS) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: PlayerState is NULL!"), *GetName());
 		if (!StatComp) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: StatComp is NULL!"), *GetName());
 	}
+}
+
+void AGS_Player::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// 2. 가시성 끄기
+	SteamNameWidgetComp->SetVisibility(false);
+
+	// 3. 콜리전 비활성화
+	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 4. BodySetup 정리
+	if (SteamNameWidgetComp->GetBodySetup())
+	{
+		SteamNameWidgetComp->DestroyPhysicsState();
+	}
+	
+	if (IsValid(SteamNameWidgetComp))
+	{
+		if (UUserWidget* Widget = SteamNameWidgetComp->GetWidget())
+		{
+			Widget->RemoveFromParent();
+		}
+		SteamNameWidgetComp->SetWidget(nullptr);
+		SteamNameWidgetComp->DestroyComponent();
+	}
+	
+	Super::EndPlay(EndPlayReason);
+}
+
+void AGS_Player::BeginDestroy()
+{
+	// 1. 먼저 Super::BeginDestroy() 호출 (중요!)
+	Super::BeginDestroy();
+
+	// 2. IsValid() 체크와 함께 안전하게 정리
+	if (IsValid(SteamNameWidgetComp) && !SteamNameWidgetComp->IsBeingDestroyed())
+	{
+		SteamNameWidgetComp->SetWidget(nullptr);
+		SteamNameWidgetComp->SetVisibility(false);
+		SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// BodySetup 정리 (필요한 경우만)
+		if (SteamNameWidgetComp->GetBodySetup())
+		{
+			SteamNameWidgetComp->DestroyPhysicsState();
+		}
+
+		// DestroyComponent() 호출하지 않음! - 자동으로 소멸됨
+	}
+
+	// 3. 다른 참조들도 안전하게 정리
+	if (IsValid(AkComponent) && !AkComponent->IsBeingDestroyed())
+	{
+		AkComponent->Stop();
+	}
+
+	// 4. 타임라인 정리
+	if (ObscureTimeline.IsPlaying())
+	{
+		ObscureTimeline.Stop();
+	}
+
+	// 5. 다이나믹 머티리얼 참조 해제
+	BlurMID = nullptr;
+
+	UE_LOG(LogTemp, Warning, TEXT("AGS_Player::BeginDestroy() completed for %s"), *GetName());
 }
 
 void AGS_Player::Client_StartVisionObscured_Implementation()
@@ -241,11 +309,12 @@ void AGS_Player::OnDeath()
 	}
 }
 
-void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick)
+void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick, bool CanCtrlClick)
 {
 	SkillInputControl.CanInputLC = CanLeftClick;
 	SkillInputControl.CanInputRC = CanRightClick;
 	SkillInputControl.CanInputRoll= CanRollClick;
+	SkillInputControl.CanInputCtrl = CanCtrlClick;
 }
 
 FSkillInputControl AGS_Player::GetSkillInputControl()
@@ -277,10 +346,10 @@ void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-FCharacterWantsToMove AGS_Player::GetWantsToMove()
+/*FCharacterWantsToMove AGS_Player::GetWantsToMove()
 {
 	return WantsToMove;
-}
+}*/
 
 void AGS_Player::SetupLocalAudioListener()
 {
@@ -388,7 +457,6 @@ void AGS_Player::UpdateSteamNameWidgetRotation()
 {
 	if (!IsValid(SteamNameWidgetComp))
 	{
-		GetWorldTimerManager().ClearTimer(SteamNameWidgetRotationTimer);
 		return;
 	}
     

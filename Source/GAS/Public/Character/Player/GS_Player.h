@@ -10,7 +10,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UGS_SteamNameWidgetComp;
 
-USTRUCT(BlueprintType)
+/*USTRUCT(BlueprintType)
 struct FCharacterWantsToMove
 {
 	GENERATED_BODY()
@@ -26,7 +26,7 @@ struct FCharacterWantsToMove
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
 	bool WantsToStrafe = false;
-};
+};*/
 
 USTRUCT(BlueprintType)
 struct FSkillInputControl
@@ -39,7 +39,21 @@ struct FSkillInputControl
 	bool CanInputRC = true; // Right Click
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Control")
 	bool CanInputRoll = true; // SpaceBar;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Control")
+	bool CanInputCtrl = true; // Ctrl
 };
+
+/*UENUM(BlueprintType)
+enum class EInputFlag : uint8
+{
+	None = 0,
+	CanInputLC = (1 << 0),
+	CanInputRC = (1 << 1),
+	CanInputRoll = (1 << 2),
+	CanInputLeftClick = (1 << 3)
+};
+
+ENUM_CLASS_FLAGS(EInputFlag)*/
 
 UCLASS()
 class GAS_API AGS_Player : public AGS_Character
@@ -80,8 +94,8 @@ public:
 	float RunSpeed;
 
 	// Wants To Move
-	UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	FCharacterWantsToMove WantsToMove;
+	/*UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	FCharacterWantsToMove WantsToMove;*/
 
 	// 오디오 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
@@ -129,7 +143,7 @@ public:
 	virtual void OnDeath() override;
 	
 	// Skll Input Control
-	void SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick);
+	void SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick, bool CanCtrlClick = true);
 	FSkillInputControl GetSkillInputControl();
 	
 	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }
@@ -141,23 +155,19 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void BeginDestroy() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_SkillComp> SkillComp;
-	
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	FCharacterWantsToMove GetWantsToMove();
-
 private:
+	// Input Control Flag
 	UPROPERTY(Replicated)
 	FSkillInputControl SkillInputControl;
-
+	
 	FTimeline ObscureTimeline;
 
 	bool bIsObscuring;
-
-	UPROPERTY()
-	FTimerHandle SteamNameWidgetRotationTimer;
 
 	void UpdateSteamNameWidgetRotation();
 

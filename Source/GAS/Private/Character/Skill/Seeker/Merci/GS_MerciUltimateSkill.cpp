@@ -21,6 +21,7 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 
 	if(OwnerCharacter)
 	{
+		OwnerCharacter->Server_SetCanHitReact(false); // 서버에 전달
 		// 스킬 시작 사운드 재생
 		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 		if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
@@ -46,6 +47,7 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 
 		OwnerCharacter->GetWorldTimerManager().SetTimer(AutoAimingHandle, this, &UGS_MerciUltimateSkill::DeActiveAutoAimingState, AutoAimingStateTime, false);
 		OwnerCharacter->GetWorldTimerManager().SetTimer(AutoAimTickHandle, this, &UGS_MerciUltimateSkill::TickAutoAimTarget, AutoAimTickInterval, true);
+		OwnerCharacter->SetSkillInputControl(true, true, false, false);
 	}
 
 	UpdateMonsterList();
@@ -74,7 +76,7 @@ void UGS_MerciUltimateSkill::InterruptSkill()
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (MerciCharacter->GetSkillComp())
 	{
-		MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
+		//MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
 	}
 }
 
@@ -89,6 +91,16 @@ void UGS_MerciUltimateSkill::DeActiveAutoAimingState()
 
 	if (OwnerCharacter)
 	{
+		// 현재 표시된 타겟 UI 정리
+		if (CurrentTarget && OwnerCharacter->HasAuthority())
+		{
+			if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
+			{
+				MerciCharacter->Client_UpdateTargetUI(nullptr, CurrentTarget);
+			}
+			CurrentTarget = nullptr;
+		}
+
 		// Skill State
 		if (OwnerCharacter->GetSkillComp())
 		{
@@ -104,6 +116,9 @@ void UGS_MerciUltimateSkill::DeActiveAutoAimingState()
 
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimTickHandle);
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimingHandle);
+		OwnerCharacter->SetSkillInputControl(true, true, true);
+
+		OwnerCharacter->Server_SetCanHitReact(true); // 서버에 전달
 	}
 }
 
@@ -179,17 +194,21 @@ void UGS_MerciUltimateSkill::TickAutoAimTarget()
 		return;
 	}
 
-	AActor* Target = FindCloseTarget();
-	if (!OwnerCharacter->HasAuthority())
+	AActor* NewTarget = FindCloseTarget();
+
+	if (OwnerCharacter->HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("IsClient!!!!!!!!!!!!!!!!"));
-	}
-	if (Target && OwnerCharacter->HasAuthority())
-	{
+		// 화살에 타겟 전달
 		if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("TickAutoAimTarget"));
-			MerciCharacter->SetAutoAimTarget(Target);
+			MerciCharacter->SetAutoAimTarget(NewTarget);
+
+			if (NewTarget != CurrentTarget)
+			{
+				// 플레이어를 통해 클라이언트로 전송
+				MerciCharacter->Client_UpdateTargetUI(NewTarget, CurrentTarget);
+				CurrentTarget = NewTarget;
+			}
 		}
 	}
 }

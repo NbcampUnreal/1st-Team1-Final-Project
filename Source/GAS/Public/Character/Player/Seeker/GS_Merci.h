@@ -119,6 +119,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_PlayHitFeedbackSound();
 
+	UFUNCTION(Client, Reliable)
+	void Client_UpdateTargetUI(AActor* NewTarget, AActor* OldTarget);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -244,4 +247,6 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Client_DrawDebugSphere(FVector Loc, float Radius, FColor Color, float Duration);
+
+	bool Zooming = false;
 };
