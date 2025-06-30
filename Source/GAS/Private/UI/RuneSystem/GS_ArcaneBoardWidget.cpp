@@ -110,13 +110,19 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 
 	if (RuneTooltipWidget)
 	{
-		FVector2D ViewportMousePos = FVector2D::ZeroVector;
-		if (GetWorld())
+		if (IsMouseOverTooltipWidget(MousePos))
 		{
-			ViewportMousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
+			FVector2D ViewportMousePos = FVector2D::ZeroVector;
+			if (GetWorld())
+			{
+				ViewportMousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
+			}
+			RuneTooltipWidget->SetPositionInViewport(ViewportMousePos, false);
 		}
-
-		RuneTooltipWidget->SetPositionInViewport(ViewportMousePos, false);
+		else
+		{
+			HideTooltip();
+		}
 	}
 
 	if (!bIsInSelectionMode || !SelectionVisualWidget)
@@ -720,6 +726,30 @@ bool UGS_ArcaneBoardWidget::ShouldShowTooltip() const
 	}
 
 	return true;
+}
+
+bool UGS_ArcaneBoardWidget::IsMouseOverTooltipWidget(const FVector2D& ScreenPos)
+{
+	UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(ScreenPos);
+	if (CellUnderMouse && CellUnderMouse->GetPlacedRuneID() > 0)
+	{
+		return true;
+	}
+
+	if (IsValid(RuneInven))
+	{
+		FGeometry InvenGeometry = RuneInven->GetCachedGeometry();
+		FVector2D LocalMousePos = InvenGeometry.AbsoluteToLocal(ScreenPos);
+		FVector2D InvenSize = InvenGeometry.GetLocalSize();
+
+		if (LocalMousePos.X >= 0 && LocalMousePos.Y >= 0 &&
+			LocalMousePos.X <= InvenSize.X && LocalMousePos.Y <= InvenSize.Y)
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void UGS_ArcaneBoardWidget::UpdateGridVisuals()

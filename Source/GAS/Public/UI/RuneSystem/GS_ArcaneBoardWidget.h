@@ -33,7 +33,7 @@ public:
 	//마우스 이벤트
 	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-
+	
 	//기본 기능
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void SetBoardManager(UGS_ArcaneBoardManager* InBoardManager);
@@ -191,4 +191,5 @@ private:
 
 	void ShowTooltip(uint8 RuneID, const FVector2D& MousePos);
 	bool ShouldShowTooltip() const;
+	bool IsMouseOverTooltipWidget(const FVector2D& ScreenPos);
 };
