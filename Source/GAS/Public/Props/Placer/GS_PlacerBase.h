@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GS_PlacerBase.generated.h"
 
+class UNiagaraSystem;
 class AGS_BuildManager;
 
 UCLASS()
@@ -45,6 +46,9 @@ public:
 	TObjectPtr<USoundBase> PlaceDragSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting|Sound")
 	float DragSoundCooldown = 0.1f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Components")
+	TObjectPtr<UNiagaraSystem> DustEffectTemplate;
 	
 	// virtual void BuildObject() PURE_VIRTUAL(AGS_PlacerBase::BuildObject,);
 	void BuildObject();
