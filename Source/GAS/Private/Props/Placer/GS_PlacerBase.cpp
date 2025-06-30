@@ -1,5 +1,7 @@
 #include "Props/Placer/GS_PlacerBase.h"
 
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Character/Player/Monster/GS_IronFang.h"
 #include "DungeonEditor/GS_DEController.h"
 #include "DungeonEditor/Component/PlaceInfoComponent.h"
@@ -199,6 +201,30 @@ void AGS_PlacerBase::BuildObject()
 		if (UPlaceInfoComponent* PlaceInfoCompo = NewActor->GetComponentByClass<UPlaceInfoComponent>())
 		{
 			PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapType, IntPointArray);
+		}
+
+		// 먼지 이펙트 생성 DustEffectTemplate
+		if (DustEffectTemplate)
+		{
+			const FVector EffectSpawnLocation = NewActor->GetActorLocation();
+			const FRotator EffectSpawnRotation = NewActor->GetActorRotation();
+			
+			UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				DustEffectTemplate,
+				EffectSpawnLocation,
+				FRotator::ZeroRotator,
+				FVector(1.0f),
+				true,
+				true
+			);
+
+			if (SpawnedEffect)
+			{
+				float EffectScale = 0.25f * FMath::Max(ObjectData.ObjectSize.X , ObjectData.ObjectSize.Y);
+				SpawnedEffect->SetFloatParameter(FName("Scale_All"), EffectScale);
+				SpawnedEffect->SetRelativeRotation(EffectSpawnRotation);
+			}
 		}
 	}
 	else
