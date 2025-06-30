@@ -40,6 +40,7 @@ AGS_Player::AGS_Player()
 	SteamNameWidgetComp = CreateDefaultSubobject<UGS_SteamNameWidgetComp>(TEXT("SteamWidgetComp"));
 	SteamNameWidgetComp->SetupAttachment(RootComponent);
 	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
+	//SteamNameWidgetComp->GetBodyInstance()->TermBody();
 	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SteamNameWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	
@@ -150,14 +151,69 @@ void AGS_Player::PossessedBy(AController* NewController)
 
 void AGS_Player::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (SteamNameWidgetComp && SteamNameWidgetComp->GetBodySetup())
+	// 2. 가시성 끄기
+	SteamNameWidgetComp->SetVisibility(false);
+
+	// 3. 콜리전 비활성화
+	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 4. BodySetup 정리
+	if (SteamNameWidgetComp->GetBodySetup())
 	{
 		SteamNameWidgetComp->DestroyPhysicsState();
 	}
-
+	
+	if (IsValid(SteamNameWidgetComp))
+	{
+		if (UUserWidget* Widget = SteamNameWidgetComp->GetWidget())
+		{
+			Widget->RemoveFromParent();
+		}
+		SteamNameWidgetComp->SetWidget(nullptr);
+		SteamNameWidgetComp->DestroyComponent();
+	}
+	
 	Super::EndPlay(EndPlayReason);
 }
 
+void AGS_Player::BeginDestroy()
+{
+	// 1. 먼저 Super::BeginDestroy() 호출 (중요!)
+	Super::BeginDestroy();
+
+	// 2. IsValid() 체크와 함께 안전하게 정리
+	if (IsValid(SteamNameWidgetComp) && !SteamNameWidgetComp->IsBeingDestroyed())
+	{
+		SteamNameWidgetComp->SetWidget(nullptr);
+		SteamNameWidgetComp->SetVisibility(false);
+		SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// BodySetup 정리 (필요한 경우만)
+		if (SteamNameWidgetComp->GetBodySetup())
+		{
+			SteamNameWidgetComp->DestroyPhysicsState();
+		}
+
+		// DestroyComponent() 호출하지 않음! - 자동으로 소멸됨
+	}
+
+	// 3. 다른 참조들도 안전하게 정리
+	if (IsValid(AkComponent) && !AkComponent->IsBeingDestroyed())
+	{
+		AkComponent->Stop();
+	}
+
+	// 4. 타임라인 정리
+	if (ObscureTimeline.IsPlaying())
+	{
+		ObscureTimeline.Stop();
+	}
+
+	// 5. 다이나믹 머티리얼 참조 해제
+	BlurMID = nullptr;
+
+	UE_LOG(LogTemp, Warning, TEXT("AGS_Player::BeginDestroy() completed for %s"), *GetName());
+}
 
 void AGS_Player::Client_StartVisionObscured_Implementation()
 {
