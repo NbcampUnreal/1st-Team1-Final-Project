@@ -58,7 +58,6 @@ UGS_ArcaneBoardWidget::UGS_ArcaneBoardWidget(const FObjectInitializer& ObjectIni
 	bIsInSelectionMode = false;
 	SelectionVisualWidget = nullptr;
 	RuneTooltipWidget = nullptr;
-	TooltipSize = FVector2D(100.f, 100.f);
 	CurrTooltipRuneID = 0;
 }
 
@@ -107,21 +106,17 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseMove(const FGeometry& InGeometry, con
 {
 	FReply Reply = Super::NativeOnMouseMove(InGeometry, InMouseEvent);
 
-	// 원본 스크린 좌표 사용
 	FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
-
-	// 툴팁용으로만 뷰포트 좌표 변환
-	FVector2D ViewportMousePos = MousePos;
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
-		ViewportMousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
-	}
 
 	if (RuneTooltipWidget)
 	{
-		FVector2D TooltipPos = CalculateTooltipPosition(ViewportMousePos);
-		RuneTooltipWidget->SetPositionInViewport(TooltipPos, false);
+		FVector2D ViewportMousePos = FVector2D::ZeroVector;
+		if (GetWorld())
+		{
+			ViewportMousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
+		}
+
+		RuneTooltipWidget->SetPositionInViewport(ViewportMousePos, false);
 	}
 
 	if (!bIsInSelectionMode || !SelectionVisualWidget)
@@ -153,7 +148,6 @@ FReply UGS_ArcaneBoardWidget::NativeOnMouseButtonDown(const FGeometry& InGeometr
 
 	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		// 원본 스크린 좌표 사용
 		FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
 
 		UGS_RuneGridCellWidget* CellUnderMouse = GetCellAtPos(MousePos);
@@ -606,8 +600,13 @@ void UGS_ArcaneBoardWidget::RequestShowTooltip(uint8 RuneID, const FVector2D& Mo
 	{
 		if(CurrTooltipRuneID == RuneID)
 		{
-			FVector2D TooltipPos = CalculateTooltipPosition(MousePos);
-			RuneTooltipWidget->SetPositionInViewport(TooltipPos, false);
+			FVector2D ViewportMousePos = FVector2D::ZeroVector;
+			if (GetWorld())
+			{
+				ViewportMousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
+			}
+
+			RuneTooltipWidget->SetPositionInViewport(ViewportMousePos, false);
 			return;
 		}
 		else
@@ -624,7 +623,12 @@ void UGS_ArcaneBoardWidget::RequestShowTooltip(uint8 RuneID, const FVector2D& Mo
 			TooltipDelayTimer,
 			[this, RuneID, MousePos]()
 			{
-				ShowTooltip(RuneID, MousePos);
+				FVector2D ViewportMousePos = FVector2D::ZeroVector;
+				if (GetWorld())
+				{
+					ViewportMousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetWorld());
+				}
+				ShowTooltip(RuneID, ViewportMousePos);
 			},
 			0.5f,
 			false
@@ -735,50 +739,11 @@ void UGS_ArcaneBoardWidget::ShowTooltip(uint8 RuneID, const FVector2D& MousePos)
 	{
 		CurrTooltipRuneID = RuneID;
 		RuneTooltipWidget->SetRuneData(RuneData);
-		RuneTooltipWidget->SetVisibility(ESlateVisibility::Hidden);
+		
+		RuneTooltipWidget->SetPositionInViewport(MousePos, false);
+		RuneTooltipWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 		RuneTooltipWidget->AddToViewport(5);
-
-		if (GetWorld())
-		{
-			GetWorld()->GetTimerManager().SetTimerForNextTick([this, MousePos]()
-				{
-					if (IsValid(RuneTooltipWidget))
-					{
-						TooltipSize = RuneTooltipWidget->GetDesiredSize();
-						FVector2D TooltipPos = CalculateTooltipPosition(MousePos);
-						RuneTooltipWidget->SetPositionInViewport(TooltipPos, false);
-						RuneTooltipWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
-					}
-				});
-		}
 	}
-}
-
-FVector2D UGS_ArcaneBoardWidget::CalculateTooltipPosition(const FVector2D& MousePos)
-{
-	FVector2D TooltipPos = FVector2D(MousePos.X, MousePos.Y - TooltipSize.Y);
-
-	if (APlayerController* PC = GetOwningPlayer())
-	{
-		int32 ViewportWidth, ViewportHeight;
-		PC->GetViewportSize(ViewportWidth, ViewportHeight);
-		FVector2D ViewportSize = FVector2D(ViewportWidth, ViewportHeight);
-
-		if (TooltipPos.X + TooltipSize.X > ViewportSize.X)
-		{
-			TooltipPos.X = MousePos.X - TooltipSize.X;
-		}
-
-		if (TooltipPos.Y < 0)
-		{
-			TooltipPos.Y = MousePos.Y + 20;
-		}
-
-		TooltipPos.X = FMath::Clamp(TooltipPos.X, 0.0f, ViewportSize.X - TooltipSize.X);
-		TooltipPos.Y = FMath::Clamp(TooltipPos.Y, 0.0f, ViewportSize.Y - TooltipSize.Y);
-	}
-
-	return TooltipPos;
 }
 
 bool UGS_ArcaneBoardWidget::ShouldShowTooltip() const

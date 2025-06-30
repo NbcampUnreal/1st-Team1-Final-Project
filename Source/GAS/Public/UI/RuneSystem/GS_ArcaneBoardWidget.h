@@ -190,10 +190,8 @@ private:
 	UGS_RuneGridCellWidget* LastClickedCell;
 
 	//툴팁
-	FVector2D TooltipSize;
 	uint8 CurrTooltipRuneID;
 
 	void ShowTooltip(uint8 RuneID, const FVector2D& MousePos);
-	FVector2D CalculateTooltipPosition(const FVector2D& MousePos);
 	bool ShouldShowTooltip() const;
 };
