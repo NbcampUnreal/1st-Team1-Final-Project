@@ -4,7 +4,7 @@
 #include "Props/Trap/TrapMotion/GS_TrapMotionCompBase.h"
 #include "EngineUtils.h"
 #include "System/GameMode/GS_InGameGM.h"
-
+#include "Character/F_GS_DamageEvent.h"
 
 AGS_TrapBase::AGS_TrapBase()
 {
@@ -266,12 +266,18 @@ void AGS_TrapBase::Server_HandleTrapDamage_Implementation(AActor* OtherActor)
 	HandleTrapDamage(OtherActor);
 }
 
+EHitReactType AGS_TrapBase::GetHitReactType() const
+{
+	return EHitReactType::Interrupt;
+}
+
 
 void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("[Trap] HandleTrapDamage called by %s, Authority: %s"),
-	//	*GetNameSafe(OtherActor),
-	//	HasAuthority() ? TEXT("Server") : TEXT("Client"));
+	UE_LOG(LogTemp, Warning, TEXT("Trap: %s / Class: %s / HitReactType: %s"),
+		*GetName(),
+		*GetClass()->GetName(),
+		*UEnum::GetValueAsString(GetHitReactType()));
 	if (!OtherActor) return;
 	AGS_Seeker* DamagedSeeker = Cast<AGS_Seeker>(OtherActor);
 	if (!DamagedSeeker) return;
@@ -313,17 +319,10 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 	//기본 데미지 부여
 	if (TrapData.Effect.Damage <= 0.f) return;
 	
-	FDamageEvent DamageEvent;
+	FGS_DamageEvent DamageEvent;
+	DamageEvent.HitReactType = GetHitReactType();
 
-
-	/*if (TrapData.Effect.bDoT)
-	{
-		ApplyDotDamage(OtherActor);
-	}*/
-	//else
-	//{
 	DamagedSeeker->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
-	//}
 
 }
 
