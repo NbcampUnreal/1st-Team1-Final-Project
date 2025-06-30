@@ -22,3 +22,8 @@ void AGS_BearTrap::OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActo
 
 
 }
+
+EHitReactType AGS_BearTrap::GetHitReactType() const
+{
+	return EHitReactType::DamageOnly;
+}
