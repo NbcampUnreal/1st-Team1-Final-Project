@@ -32,9 +32,6 @@ private:
 	UPROPERTY()
 	TArray<UChildActorComponent*> BrokenPieces;
 	
-	UPROPERTY(EditAnywhere, meta=(AllowPrivateAccess))
-	UMaterialInterface* BridgeMaterial;
-	
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess))
 	TArray<UStaticMesh*> BridgeMeshAssets;
 
