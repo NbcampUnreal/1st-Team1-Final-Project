@@ -154,34 +154,18 @@ void UGS_ChanUltimateSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 	FVector KnockbackVelocity = KnockbackDirection * KnockbackForce;
 	KnockbackVelocity.Z = 300.0f;
 
+	// 몬스터 넉백 적용
 	if (Target->GetCharacterMovement())
 	{
-		if (AAIController* AICon = Cast<AAIController>(Target->GetController()))
+		/*if (AAIController* AICon = Cast<AAIController>(Target->GetController()))
 		{
 			AICon->StopMovement();
 		}
 
-		Target->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-
-		UE_LOG(LogTemp, Warning, TEXT("Monster %s knocked back | Velocity: %s | Mode: %d | RootMotion: %s"),
-			*Target->GetName(),
-			*KnockbackVelocity.ToString(),
-			(int32)Target->GetCharacterMovement()->MovementMode,
-			Target->IsPlayingRootMotion() ? TEXT("TRUE") : TEXT("FALSE")
-		);
+		Target->GetCharacterMovement()->SetMovementMode(MOVE_Walking);*/
 
 		Target->LaunchCharacter(KnockbackVelocity, true, true);
 	}
-
-	// 몬스터 넉백 적용
-	if (Target->GetCharacterMovement())
-	{
-		Target->LaunchCharacter(KnockbackVelocity, true, true);
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Monster %s knocked back to %s!"),
-		*Target->GetName(),
-		DotProduct > 0 ? TEXT("RIGHT") : TEXT("LEFT"));
 
 	//UGameplayStatics::ApplyDamage(Target, Damage, OwnerCharacter->GetController(), OwnerCharacter, UDamageType::StaticClass());
 }
