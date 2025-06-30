@@ -156,6 +156,7 @@ void AGS_PlacerBase::BuildObject()
 		//FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
 		FRotator SpawnRotator = GetActorRotation();
 		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator);
+		
 		NewActor->SetActorRotation(NewActor->GetActorRotation() + FRotator(0.0f, RotateYaw, 0.0f));
 		SpawnOffset = SpawnOffset.GetRotated(RotateYaw);
 		SpawnLocation = NewActor->GetActorLocation();
@@ -206,8 +207,11 @@ void AGS_PlacerBase::BuildObject()
 		// 먼지 이펙트 생성 DustEffectTemplate
 		if (DustEffectTemplate)
 		{
-			const FVector EffectSpawnLocation = NewActor->GetActorLocation();
+			FVector EffectSpawnLocation = NewActor->GetActorLocation();
 			const FRotator EffectSpawnRotation = NewActor->GetActorRotation();
+
+			// if (ObjectData.ObjectType == EObjectType::DoorAndWall)
+			EffectSpawnLocation.Z = 1100.0f;
 			
 			UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 				GetWorld(),
