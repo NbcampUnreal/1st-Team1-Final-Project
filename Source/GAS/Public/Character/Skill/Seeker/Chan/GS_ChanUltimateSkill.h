@@ -76,5 +76,5 @@ private:
 
 	// 가디언용 넉백 설정
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
-	float GuardianKnockbackForce = 300.0f; // 가디언 넉백 힘
+	float GuardianKnockbackForce = 1300.0f; // 가디언 넉백 힘
 };

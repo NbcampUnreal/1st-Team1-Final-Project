@@ -3,28 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "UI/Character/GS_UserInfo.h"
 #include "GS_UserIDWidget.generated.h"
 
-class UTextBlock;
-class UImage;
-class AGS_PlayerState;
-
 UCLASS()
-class GAS_API UGS_UserIDWidget : public UUserWidget
+class GAS_API UGS_UserIDWidget : public UGS_UserInfo
 {
 	GENERATED_BODY()
 	
 protected:
 	virtual void NativeConstruct() override;
 
-public:
-	UPROPERTY(meta = (BindWidget))
-	UTextBlock* TEXT_UserID;
-	UPROPERTY(meta = (BindWidget))
-	UImage* SteamAvatar;
-	
-	void SetupWidget(AGS_PlayerState* PlayerState);
 private:
 	FTimerHandle TimerHandle;
 
