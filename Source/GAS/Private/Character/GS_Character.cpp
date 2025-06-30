@@ -31,6 +31,7 @@ AGS_Character::AGS_Character()
 	HPTextWidgetComp->SetupAttachment(RootComponent);
 	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HPTextWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	HPTextWidgetComp->SetVisibility(false);
 
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("SelectionDecal"));
@@ -118,11 +119,20 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
+	DOREPLIFETIME(AGS_Character, CanHitReact);
 }
 
 void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	GetWorldTimerManager().ClearTimer(HPWidgetRotationTimer);
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(HPWidgetRotationTimer);
+	}
+
+	if (HPTextWidgetComp->GetBodySetup())
+	{
+		HPTextWidgetComp->DestroyPhysicsState();
+	}
 	
 	Super::EndPlay(EndPlayReason);	
 }
@@ -136,6 +146,7 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	//when damage input start -> for drakhar 6/24
 	OnDamageStart();
 	
+	UE_LOG(LogTemp, Warning, TEXT("CanHitReact : %s"), CanHitReact ? TEXT("true") : TEXT("false"));
 	// SJE
 	if (CanHitReact)
 	{
@@ -365,6 +376,11 @@ void AGS_Character::OnRep_CharacterSpeed()
 	GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
 }
 
+
+void AGS_Character::Server_SetCanHitReact_Implementation(bool bCanReact)
+{
+	CanHitReact = bCanReact;
+}
 
 void AGS_Character::NotifyActorBeginCursorOver()
 {

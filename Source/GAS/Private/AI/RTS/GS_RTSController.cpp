@@ -87,15 +87,6 @@ void AGS_RTSController::BeginPlay()
 		}
 	}
 	
-	for (AGS_Seeker* Seeker : TActorRange<AGS_Seeker>(GetWorld()))
-	{
-		if (IsValid(Seeker))
-		{
-			Seeker->HPTextWidgetComp->SetVisibility(true);
-			Seeker->OnSeekerHover.AddDynamic(this, &AGS_RTSController::HandleSeekerHover);
-		}
-	}
-	
 	Server_NotifyPlayerIsReady();
 }
 
@@ -358,7 +349,7 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 
 void AGS_RTSController::Server_NotifyPlayerIsReady_Implementation()
 {
-	if (AGS_InGameGM* GM = GetWorld()->GetAuthGameMode<AGS_InGameGM>())
+	if (AGS_BaseGM* GM = GetWorld()->GetAuthGameMode<AGS_BaseGM>())
 	{
 		GM->NotifyPlayerIsReady(this);
 	}
@@ -366,6 +357,15 @@ void AGS_RTSController::Server_NotifyPlayerIsReady_Implementation()
 
 void AGS_RTSController::Client_StartGame_Implementation()
 {
+	for (AGS_Seeker* Seeker : TActorRange<AGS_Seeker>(GetWorld()))
+	{
+		if (IsValid(Seeker))
+		{
+			Seeker->HPTextWidgetComp->SetVisibility(true);
+			Seeker->OnSeekerHover.AddDynamic(this, &AGS_RTSController::HandleSeekerHover);
+		}
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("준비 완료. TODO: 화면 가리개 제거."));
 }
 

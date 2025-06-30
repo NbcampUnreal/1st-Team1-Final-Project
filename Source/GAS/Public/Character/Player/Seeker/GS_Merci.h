@@ -247,4 +247,6 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Client_DrawDebugSphere(FVector Loc, float Radius, FColor Color, float Duration);
+
+	bool Zooming = false;
 };

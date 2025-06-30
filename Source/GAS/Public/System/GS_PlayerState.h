@@ -31,7 +31,7 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Avatar")
     void FetchMySteamAvatar();
 
-    UPROPERTY(BlueprintReadOnly, Category = "Avatar")
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Avatar")
     UTexture2D* MySteamAvatar;
 
     // 역할

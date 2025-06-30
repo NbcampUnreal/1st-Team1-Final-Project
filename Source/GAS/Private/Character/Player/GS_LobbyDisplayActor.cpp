@@ -8,7 +8,7 @@
 #include "Character/Player/GS_PawnMappingDataAsset.h"
 #include "Net/UnrealNetwork.h"
 #include "Components/WidgetComponent.h"
-#include "UI/Screen/GS_UserIDWidget.h"
+#include "UI/Character/GS_UserInfo.h"
 #include "System/GS_PlayerState.h"
 
 AGS_LobbyDisplayActor::AGS_LobbyDisplayActor()
@@ -20,12 +20,12 @@ AGS_LobbyDisplayActor::AGS_LobbyDisplayActor()
     bAlwaysRelevant = true;
     NetUpdateFrequency = 1;
 
-    UserIDWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("UserIDWidget"));
-    UserIDWidgetComponent->SetupAttachment(RootComponent);
-    UserIDWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen); // 위젯이 항상 카메라를 보도록 설정
-    UserIDWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, -10.f));
-    UserIDWidgetComponent->SetDrawSize(FVector2D(200, 40));
-    UserIDWidgetComponent->SetVisibility(true);
+    UserInfoWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("UserIDWidget"));
+    UserInfoWidgetComponent->SetupAttachment(RootComponent);
+    UserInfoWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen); // 위젯이 항상 카메라를 보도록 설정
+    UserInfoWidgetComponent->SetRelativeLocation(FVector(0.f, 0.f, -10.f));
+    UserInfoWidgetComponent->SetDrawSize(FVector2D(200, 40));
+    UserInfoWidgetComponent->SetVisibility(true);
 }
 
 void AGS_LobbyDisplayActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -42,9 +42,9 @@ void AGS_LobbyDisplayActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 void AGS_LobbyDisplayActor::BeginPlay()
 {
     Super::BeginPlay();
-    if (UserIDWidgetClass)
+    if (UserInfoWidgetClass)
     {
-        UserIDWidgetComponent->SetWidgetClass(UserIDWidgetClass);
+        UserInfoWidgetComponent->SetWidgetClass(UserInfoWidgetClass);
     }
 }
 
@@ -101,12 +101,33 @@ void AGS_LobbyDisplayActor::OnRep_ReadyState()
 
 void AGS_LobbyDisplayActor::OnRep_PlayerState()
 {
-    if (AssociatedPlayerState && UserIDWidgetComponent)
+    UpdateWidgetInfo();
+}
+
+void AGS_LobbyDisplayActor::UpdateWidgetInfo()
+{
+    if (AssociatedPlayerState && UserInfoWidgetComponent)
     {
-        UGS_UserIDWidget* UserIDWidget = Cast<UGS_UserIDWidget>(UserIDWidgetComponent->GetUserWidgetObject());
-        if (UserIDWidget)
+        UGS_UserInfo* UserInfoWidget = Cast<UGS_UserInfo>(UserInfoWidgetComponent->GetUserWidgetObject());
+
+        if (UserInfoWidget)
         {
-            UserIDWidget->SetupWidget(AssociatedPlayerState);
+            UserInfoWidget->SetupWidget(AssociatedPlayerState);
+            GetWorldTimerManager().ClearTimer(InitWidgetTimerHandle);
+        }
+        else
+        {
+            if (!GetWorldTimerManager().IsTimerActive(InitWidgetTimerHandle))
+            {
+                GetWorldTimerManager().SetTimer(
+                    InitWidgetTimerHandle,
+                    this,
+                    &AGS_LobbyDisplayActor::UpdateWidgetInfo,
+                    0.05f,
+                    true,
+                    0.0f
+                );
+            }
         }
     }
 }

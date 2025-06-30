@@ -487,11 +487,11 @@ void AGS_SeekerMerciArrow::ProcessStickLogic(AActor* HitActor, ETargetType Targe
 				*MeshHit.BoneName.ToString(),
 				*MeshHit.ImpactPoint.ToString());
 #if WITH_EDITOR
-			FVector CapsuleHitLocation = SweepResult.ImpactPoint;
+			/*FVector CapsuleHitLocation = SweepResult.ImpactPoint;
 			FVector MeshHitLocation = MeshHit.ImpactPoint;
 			Client_DrawDebugLineTest(CapsuleHitLocation, MeshHitLocation, FColor::Yellow);
 			Client_DrawDebugSphereTest(CapsuleHitLocation, FColor::Red);
-			Client_DrawDebugSphereTest(MeshHitLocation, FColor::Green);
+			Client_DrawDebugSphereTest(MeshHitLocation, FColor::Green);*/
 #endif
 
 			StickWithVisualOnly(MeshHit);

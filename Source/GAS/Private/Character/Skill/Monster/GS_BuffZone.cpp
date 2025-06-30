@@ -32,15 +32,35 @@ void AGS_BuffZone::BeginPlay()
 	{
 		ApplyBuffInZone();
 		
+		TWeakObjectPtr<AGS_BuffZone> WeakThis = this;
 		GetWorld()->GetTimerManager().SetTimer(
 			BuffRemovalTimer,
-			[this](){RemoveAllBuffs();},
+			[WeakThis]()
+			{
+				if (WeakThis.IsValid())
+				{
+					WeakThis->RemoveAllBuffs();
+				}
+			},
 			BuffDuration,
 			false
 		);
 		
 		SetLifeSpan(BuffDuration + 0.5f);
 	}
+}
+
+void AGS_BuffZone::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(BuffRemovalTimer);
+	}
+
+	RemoveAllBuffs();
+	BuffedMonsters.Empty();
+	
+	Super::EndPlay(EndPlayReason);
 }
 
 void AGS_BuffZone::ApplyBuffInZone()
@@ -100,7 +120,10 @@ void AGS_BuffZone::RemoveAllBuffs()
 		BuffedMonsters.RemoveAt(i);
 	}
 
-	GetWorld()->GetTimerManager().ClearTimer(BuffRemovalTimer);
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(BuffRemovalTimer);
+	}
 }
 
 FGS_StatRow AGS_BuffZone::GetBuffStatRow() const

@@ -30,6 +30,7 @@ void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
     DOREPLIFETIME(AGS_PlayerState, CurrentGameResult);
     DOREPLIFETIME(AGS_PlayerState, bIsReady);
     DOREPLIFETIME(AGS_PlayerState, bIsAlive);
+    DOREPLIFETIME(AGS_PlayerState, MySteamAvatar);
     DOREPLIFETIME(AGS_PlayerState, ObjectData);
 }
 

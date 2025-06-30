@@ -22,6 +22,7 @@
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "UI/Character/GS_HPTextWidgetComp.h"
 
 
 AGS_Monster::AGS_Monster()
@@ -35,6 +36,7 @@ AGS_Monster::AGS_Monster()
 	SkillCooldownWidgetComp->SetupAttachment(RootComponent);
 	SkillCooldownWidgetComp->SetVisibility(false);
 	SkillCooldownWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SkillCooldownWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 
 	AkComponent = CreateDefaultSubobject<UAkComponent>("AkComponent");
 	AkComponent->SetupAttachment(RootComponent);
@@ -119,8 +121,21 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	GetWorldTimerManager().ClearTimer(SkillCooldownWidgetTimer);
-	
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SkillCooldownWidgetTimer);
+	}
+
+	if (SkillCooldownWidgetComp->GetBodySetup())
+	{
+		SkillCooldownWidgetComp->DestroyPhysicsState();
+	}
+
+	if (HPTextWidgetComp)
+	{
+		HPTextWidgetComp->DestroyComponent();
+	}
+
 	Super::EndPlay(EndPlayReason);
 } 
 
