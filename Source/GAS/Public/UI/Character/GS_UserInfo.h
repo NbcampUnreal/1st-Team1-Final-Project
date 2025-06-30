@@ -14,13 +14,19 @@ class GAS_API UGS_UserInfo : public UUserWidget
 	GENERATED_BODY()
 
 protected:
-	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	
-public:
+	void PollAvatar();
+	
+	FTimerHandle FetchAvatarTimerHandle;
+
+	TWeakObjectPtr<AGS_PlayerState> AssociatedPlayerState;
+	
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Text_UserID;
 	UPROPERTY(meta = (BindWidget))
 	UImage* SteamAvatar;
 	
+public:
 	void SetupWidget(AGS_PlayerState* PlayerState);
 };
