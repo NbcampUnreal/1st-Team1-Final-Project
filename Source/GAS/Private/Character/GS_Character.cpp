@@ -128,6 +128,11 @@ void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		World->GetTimerManager().ClearTimer(HPWidgetRotationTimer);
 	}
+
+	if (HPTextWidgetComp->GetBodySetup())
+	{
+		HPTextWidgetComp->DestroyPhysicsState();
+	}
 	
 	Super::EndPlay(EndPlayReason);	
 }

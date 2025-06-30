@@ -166,7 +166,12 @@ void AGS_Player::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		World->GetTimerManager().ClearTimer(SteamNameWidgetRotationTimer);
 	}
-	
+
+	if (SteamNameWidgetComp->GetBodySetup())
+	{
+		SteamNameWidgetComp->DestroyPhysicsState();
+	}
+
 	Super::EndPlay(EndPlayReason);
 }
 

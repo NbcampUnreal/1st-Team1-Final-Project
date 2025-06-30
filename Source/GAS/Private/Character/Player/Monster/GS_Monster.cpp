@@ -22,6 +22,7 @@
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "UI/Character/GS_HPTextWidgetComp.h"
 
 
 AGS_Monster::AGS_Monster()
@@ -124,7 +125,17 @@ void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		World->GetTimerManager().ClearTimer(SkillCooldownWidgetTimer);
 	}
-	
+
+	if (SkillCooldownWidgetComp->GetBodySetup())
+	{
+		SkillCooldownWidgetComp->DestroyPhysicsState();
+	}
+
+	if (HPTextWidgetComp)
+	{
+		HPTextWidgetComp->DestroyComponent();
+	}
+
 	Super::EndPlay(EndPlayReason);
 } 
 
