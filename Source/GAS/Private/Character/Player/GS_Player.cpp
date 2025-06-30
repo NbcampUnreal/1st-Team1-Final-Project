@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Net/UnrealNetwork.h"
+#include "PhysicsEngine/BodySetup.h"
 #include "UI/Character/GS_SteamNameWidgetComp.h"
 
 AGS_Player::AGS_Player()
@@ -39,10 +40,9 @@ AGS_Player::AGS_Player()
 	//steam name widget
 	SteamNameWidgetComp = CreateDefaultSubobject<UGS_SteamNameWidgetComp>(TEXT("SteamWidgetComp"));
 	SteamNameWidgetComp->SetupAttachment(RootComponent);
-	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
-	//SteamNameWidgetComp->GetBodyInstance()->TermBody();
 	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SteamNameWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 	
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BlurMat(TEXT("/Game/VFX/MI_AbscureDebuff"));
 	if (BlurMat.Succeeded())
@@ -174,38 +174,37 @@ void AGS_Player::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AGS_Player::BeginDestroy()
 {
-	// 1. 먼저 Super::BeginDestroy() 호출 (중요!)
 	Super::BeginDestroy();
-
-	// 2. IsValid() 체크와 함께 안전하게 정리
+	
 	if (IsValid(SteamNameWidgetComp) && !SteamNameWidgetComp->IsBeingDestroyed())
 	{
+		// BodySetup 정리
+		if (UBodySetup* BodySetup = SteamNameWidgetComp->GetBodySetup())
+		{
+			BodySetup->AbortPhysicsMeshAsyncCreation();
+			BodySetup->ClearPhysicsMeshes();
+			
+			SteamNameWidgetComp->DestroyPhysicsState();
+		}
+		
 		SteamNameWidgetComp->SetWidget(nullptr);
 		SteamNameWidgetComp->SetVisibility(false);
 		SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-		// BodySetup 정리 (필요한 경우만)
-		if (SteamNameWidgetComp->GetBodySetup())
-		{
-			SteamNameWidgetComp->DestroyPhysicsState();
-		}
-
-		// DestroyComponent() 호출하지 않음! - 자동으로 소멸됨
 	}
 
-	// 3. 다른 참조들도 안전하게 정리
+	// 다른 참조들도 안전하게 정리
 	if (IsValid(AkComponent) && !AkComponent->IsBeingDestroyed())
 	{
 		AkComponent->Stop();
 	}
 
-	// 4. 타임라인 정리
+	// 타임라인 정리
 	if (ObscureTimeline.IsPlaying())
 	{
 		ObscureTimeline.Stop();
 	}
 
-	// 5. 다이나믹 머티리얼 참조 해제
+	// 다이나믹 머티리얼 참조 해제
 	BlurMID = nullptr;
 
 	UE_LOG(LogTemp, Warning, TEXT("AGS_Player::BeginDestroy() completed for %s"), *GetName());

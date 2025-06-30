@@ -19,6 +19,7 @@
 #include "Components/DecalComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
 #include "Character/F_GS_DamageEvent.h"
+#include "PhysicsEngine/BodySetup.h"
 
 AGS_Character::AGS_Character()
 {
@@ -30,10 +31,10 @@ AGS_Character::AGS_Character()
 	
 	HPTextWidgetComp = CreateDefaultSubobject<UGS_HPTextWidgetComp>(TEXT("TextWidgetComp"));
 	HPTextWidgetComp->SetupAttachment(RootComponent);
-	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HPTextWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	HPTextWidgetComp->SetVisibility(false);
+	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
 
 	SelectionDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("SelectionDecal"));
 	SelectionDecal->SetupAttachment(RootComponent);
@@ -139,17 +140,19 @@ void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		HPTextWidgetComp->SetVisibility(false);
 		HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+		if (UBodySetup* BodySetup = HPTextWidgetComp->GetBodySetup())
+		{
+			BodySetup->AbortPhysicsMeshAsyncCreation();
+			BodySetup->ClearPhysicsMeshes();
+			
+			HPTextWidgetComp->DestroyPhysicsState();
+		}
+		
 		if (UUserWidget* Widget = HPTextWidgetComp->GetWidget())
 		{
 			Widget->RemoveFromParent();
 		}
 		HPTextWidgetComp->SetWidget(nullptr);
-		
-		// BodySetup 정리
-		if (HPTextWidgetComp->GetBodySetup())
-		{
-			HPTextWidgetComp->DestroyPhysicsState();
-		}
 		
 		HPTextWidgetComp->DestroyComponent();
 	}
@@ -173,10 +176,16 @@ void AGS_Character::BeginDestroy()
 		// 위젯에서 델리게이트 제거
 		if (UUserWidget* Widget = HPTextWidgetComp->GetWidget())
 		{
-			if (IsValid(StatComp))
+			if (IsValid(StatComp) && !StatComp->IsBeingDestroyed())
 			{
 				StatComp->OnCurrentHPChanged.RemoveAll(Widget);
 			}
+		}
+
+		if (UBodySetup* BodySetup = HPTextWidgetComp->GetBodySetup())
+		{
+			BodySetup->AbortPhysicsMeshAsyncCreation();
+			BodySetup->ClearPhysicsMeshes();
 		}
 		
 		HPTextWidgetComp->SetWidget(nullptr);
