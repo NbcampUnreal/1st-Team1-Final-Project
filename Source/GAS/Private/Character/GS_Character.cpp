@@ -94,7 +94,7 @@ void AGS_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsValid(HPTextWidgetComp) && !HasAuthority())
+	if (IsValid(HPTextWidgetComp) && !HasAuthority() && HPTextWidgetComp->IsVisible())
 	{
 		if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
 		{
@@ -123,25 +123,34 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 
 void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	// 2. 가시성 끄기
-	HPTextWidgetComp->SetVisibility(false);
-
-	// 3. 콜리전 비활성화
-	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	// 4. BodySetup 정리
-	if (HPTextWidgetComp->GetBodySetup())
+	// 델리게이트 언바인딩
+	if (IsValid(StatComp))
 	{
-		HPTextWidgetComp->DestroyPhysicsState();
+		StatComp->OnCurrentHPChanged.RemoveAll(this);
+		
+		if (IsValid(HPTextWidgetComp) && HPTextWidgetComp->GetWidget())
+		{
+			StatComp->OnCurrentHPChanged.RemoveAll(HPTextWidgetComp->GetWidget());
+		}
 	}
 	
 	if (IsValid(HPTextWidgetComp))
 	{
+		HPTextWidgetComp->SetVisibility(false);
+		HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 		if (UUserWidget* Widget = HPTextWidgetComp->GetWidget())
 		{
 			Widget->RemoveFromParent();
 		}
 		HPTextWidgetComp->SetWidget(nullptr);
+		
+		// BodySetup 정리
+		if (HPTextWidgetComp->GetBodySetup())
+		{
+			HPTextWidgetComp->DestroyPhysicsState();
+		}
+		
 		HPTextWidgetComp->DestroyComponent();
 	}
 	
@@ -150,17 +159,31 @@ void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AGS_Character::BeginDestroy()
 {
-	// 1. 먼저 Super::BeginDestroy() 호출 (중요!)
 	Super::BeginDestroy();
+	
+	// 델리게이트 정리
+	if (IsValid(StatComp) && !StatComp->IsBeingDestroyed())
+	{
+		StatComp->OnCurrentHPChanged.RemoveAll(this);
+	}
 
-	// 2. IsValid() 체크와 함께 안전하게 정리
+	// HPTextWidgetComp 정리
 	if (IsValid(HPTextWidgetComp) && !HPTextWidgetComp->IsBeingDestroyed())
 	{
+		// 위젯에서 델리게이트 제거
+		if (UUserWidget* Widget = HPTextWidgetComp->GetWidget())
+		{
+			if (IsValid(StatComp))
+			{
+				StatComp->OnCurrentHPChanged.RemoveAll(Widget);
+			}
+		}
+		
 		HPTextWidgetComp->SetWidget(nullptr);
 		HPTextWidgetComp->SetVisibility(false);
 		HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-		// BodySetup 정리 (필요한 경우만)
+		// BodySetup 정리
 		if (HPTextWidgetComp->GetBodySetup())
 		{
 			HPTextWidgetComp->DestroyPhysicsState();
@@ -244,7 +267,10 @@ void AGS_Character::SetHPTextWidget(UGS_HPText* InHPTextWidget)
 	if (IsValid(HPTextWidget))
 	{
 		HPTextWidget->InitializeHPTextWidget(GetStatComp());
-		StatComp->OnCurrentHPChanged.AddUObject(HPTextWidget, &UGS_HPText::OnCurrentHPChanged);
+		if (IsValid(StatComp))
+		{
+			StatComp->OnCurrentHPChanged.AddUObject(HPTextWidget, &UGS_HPText::OnCurrentHPChanged);
+		}
 	}
 }
 

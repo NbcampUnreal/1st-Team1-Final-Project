@@ -151,20 +151,16 @@ void AGS_Player::PossessedBy(AController* NewController)
 
 void AGS_Player::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	// 2. 가시성 끄기
-	SteamNameWidgetComp->SetVisibility(false);
-
-	// 3. 콜리전 비활성화
-	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	// 4. BodySetup 정리
-	if (SteamNameWidgetComp->GetBodySetup())
-	{
-		SteamNameWidgetComp->DestroyPhysicsState();
-	}
-	
 	if (IsValid(SteamNameWidgetComp))
 	{
+		SteamNameWidgetComp->SetVisibility(false);
+		SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+		if (SteamNameWidgetComp->GetBodySetup())
+		{
+			SteamNameWidgetComp->DestroyPhysicsState();
+		}
+		
 		if (UUserWidget* Widget = SteamNameWidgetComp->GetWidget())
 		{
 			Widget->RemoveFromParent();
