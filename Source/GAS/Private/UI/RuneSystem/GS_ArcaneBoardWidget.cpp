@@ -327,7 +327,7 @@ void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
 			BoardManager->GetFragmentedRuneTexture(RuneID, RuneShape);
 
 			FVector2D BoardCellSize = GetArcaneBoardCellSize();
-			float ScaleFactor = 0.5f;
+			float ScaleFactor = 0.6f;
 			
 			SelectionVisualWidget->Setup(RuneID, RuneTexture, RuneShape, BoardCellSize, ScaleFactor);
 			SelectionVisualWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
