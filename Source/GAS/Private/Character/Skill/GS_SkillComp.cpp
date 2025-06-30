@@ -8,6 +8,7 @@
 #include "UI/Character/GS_SkillWidget.h"
 #include "Net/UnrealNetwork.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/E_Character.h"
 
 
 UGS_SkillComp::UGS_SkillComp()
@@ -370,7 +371,10 @@ void UGS_SkillComp::SkillsInterrupt()
 		if (Seeker->GetSkillComp()->IsSkillActive(slot.Key))
 		{
 			slot.Value->InterruptSkill();
-			Seeker->SetSkillInputControl(false, false, false);
+			if (Seeker->GetCharacterType() != ECharacterType::Merci)
+			{
+				Seeker->SetSkillInputControl(false, false, false);
+			}
 		}
 	}
 }

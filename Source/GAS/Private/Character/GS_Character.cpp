@@ -18,6 +18,7 @@
 #include "Character/Player/GS_Player.h"
 #include "Components/DecalComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
+#include "Character/F_GS_DamageEvent.h"
 
 AGS_Character::AGS_Character()
 {
@@ -74,23 +75,6 @@ void AGS_Character::BeginPlay()
 		HPTextWidgetComp->SetVisibility(true);
 	}
 
-	if (IsValid(HPTextWidgetComp) && !HasAuthority())
-	{
-		TWeakObjectPtr<AGS_Character> WeakThis = this;
-		GetWorldTimerManager().SetTimer(
-			HPWidgetRotationTimer,
-			[WeakThis]()
-			{
-				if (WeakThis.IsValid())
-				{
-					WeakThis->UpdateHPWidgetRotation();
-				}
-			},
-			0.1f,  
-			true   
-		);
-	}
-
 	if (SelectionDecal && SelectionDecal->GetDecalMaterial())
 	{
 		DynamicDecalMaterial = UMaterialInstanceDynamic::Create(SelectionDecal->GetDecalMaterial(), this);
@@ -109,7 +93,18 @@ void AGS_Character::BeginPlay()
 void AGS_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
+	if (IsValid(HPTextWidgetComp) && !HasAuthority())
+	{
+		APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
+		
+		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+        
+		HPTextWidgetComp->SetWorldRotation(WidgetRotation);
+	}
 }
 
 void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -122,14 +117,10 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, CanHitReact);
 }
 
+
 void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (UWorld* World = GetWorld())
-	{
-		World->GetTimerManager().ClearTimer(HPWidgetRotationTimer);
-	}
-
-	if (HPTextWidgetComp->GetBodySetup())
+	if (HPTextWidgetComp && HPTextWidgetComp->GetBodySetup())
 	{
 		HPTextWidgetComp->DestroyPhysicsState();
 	}
@@ -145,16 +136,24 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 
 	//when damage input start -> for drakhar 6/24
 	OnDamageStart();
+
+	// SJE
+	EHitReactType HitReactType = EHitReactType::DamageOnly;
+	if (DamageEvent.IsOfType(FGS_DamageEvent::ClassID))
+	{
+		const FGS_DamageEvent& MyDamageEvent = static_cast<const FGS_DamageEvent&>(DamageEvent);
+		HitReactType = MyDamageEvent.HitReactType;
+	}
 	
 	UE_LOG(LogTemp, Warning, TEXT("CanHitReact : %s"), CanHitReact ? TEXT("true") : TEXT("false"));
-	// SJE
+
 	if (CanHitReact)
 	{
 		const FPointDamageEvent* PointEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		FVector HitDirection = -PointEvent->ShotDirection;
 		if(UGS_HitReactComp* HitReactComponent = GetComponentByClass<UGS_HitReactComp>())
 		{
-			HitReactComponent->PlayHitReact(EHitReactType::Interrupt, HitDirection);
+			HitReactComponent->PlayHitReact(HitReactType, HitDirection);
 		}
 	}
 
@@ -458,24 +457,4 @@ void AGS_Character::OnHoverBegin()
 
 void AGS_Character::OnHoverEnd()
 {
-}
-
-
-void AGS_Character::UpdateHPWidgetRotation()
-{
-	if (!IsValid(HPTextWidgetComp))
-	{
-		GetWorldTimerManager().ClearTimer(HPWidgetRotationTimer);
-		return;
-	}
-    
-	if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
-	{
-		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
-		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
-		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
-		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
-        
-		HPTextWidgetComp->SetWorldRotation(WidgetRotation);
-	}
 }

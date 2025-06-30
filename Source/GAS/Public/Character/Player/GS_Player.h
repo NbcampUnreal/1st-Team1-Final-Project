@@ -168,9 +168,6 @@ private:
 
 	bool bIsObscuring;
 
-	UPROPERTY()
-	FTimerHandle SteamNameWidgetRotationTimer;
-
 	void UpdateSteamNameWidgetRotation();
 
 };

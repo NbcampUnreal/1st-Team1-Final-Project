@@ -7,6 +7,7 @@
 #include "Engine/DamageEvents.h"
 #include "AkGameplayStatics.h"
 #include "AkAudioEvent.h"
+#include "Character/F_GS_DamageEvent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/HitResult.h"
 
@@ -39,7 +40,8 @@ void AGS_NeedleFangProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
         
 		UGS_StatComp* DamagedStat = DamagedCharacter->GetStatComp();
 		float Damage = DamagedStat->CalculateDamage(OwnerCharacter, DamagedCharacter);
-		FDamageEvent DamageEvent;
+		FGS_DamageEvent DamageEvent;
+		DamageEvent.HitReactType = EHitReactType::Interrupt;
 		DamagedCharacter->TakeDamage(Damage, DamageEvent, GetOwner()->GetInstigatorController(), this);
 	}
 	
