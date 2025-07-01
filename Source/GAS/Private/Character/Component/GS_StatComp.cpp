@@ -152,7 +152,6 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 	
 	//update health
 	CurrentHealth = InHealth;
-	OnCurrentHPChanged.Broadcast(this);
 	
 	//healing
 	if (bIsHealing)
@@ -189,6 +188,8 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 			CurrentHealth = 0.f;
 		}
 	}
+	
+	OnCurrentHPChanged.Broadcast(this);
 }
 
 void UGS_StatComp::SetMaxHealth(float InMaxHealth)

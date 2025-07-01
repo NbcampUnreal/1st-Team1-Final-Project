@@ -18,13 +18,11 @@ public:
 	virtual TSubclassOf<APlayerController> GetPlayerControllerClassToSpawnForSeamlessTravel(APlayerController* PreviousPC) override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
-	virtual void StartPlay() override;
+	virtual void StartMatchWhenAllReady() override;
 	void BindToPlayerState(APlayerController* PlayerController);
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 	virtual void Logout(AController* Exiting) override;
-
-	void StartMatchCheck();
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	void OnTimerEnd();
 
 	void EndGame(EGameResult Result);
@@ -45,7 +43,4 @@ public:
 	UGS_PawnMappingDataAsset* PawnMappingDataAsset;
 	
 	FTimerHandle MatchStartTimerHandle;
-
-	bool bMatchHasStarted;
-	bool bGameEnded;
 };
