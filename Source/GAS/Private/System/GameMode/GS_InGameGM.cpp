@@ -132,7 +132,12 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
                 {
                     FActorSpawnParameters SpawnParams;
                     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-                    World->SpawnActor<AActor>(ActorClassToSpawn, ObjectData.SpawnTransform, SpawnParams);
+                    AActor* NewActor = World->SpawnActor<AActor>(ActorClassToSpawn, ObjectData.SpawnTransform, SpawnParams);
+
+                    if (IsValid(NewActor))
+                    {
+                        SpawnedDungeonActors.Add(NewActor);
+                    }
                 }
             }
         }
@@ -192,7 +197,12 @@ void AGS_InGameGM::OnNavMeshBuildComplete()
                 {
                     FActorSpawnParameters SpawnParams;
                     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-                    World->SpawnActor<AActor>(ActorClassToSpawn, ObjectData.SpawnTransform, SpawnParams);
+                    AActor* NewActor = World->SpawnActor<AActor>(ActorClassToSpawn, ObjectData.SpawnTransform, SpawnParams);
+
+                    if (IsValid(NewActor))
+                    {
+                        SpawnedDungeonActors.Add(NewActor);
+                    }
                 }
             }
         }
@@ -468,8 +478,24 @@ void AGS_InGameGM::EndGame(EGameResult Result)
             PC->DisableInput(nullptr);
         }
     }
+    
+    // **중요: Seamless Travel 전에 동적으로 스폰된 모든 던전 액터를 파괴합니다.**
+    for (TWeakObjectPtr<AActor> ActorPtr : SpawnedDungeonActors)
+    {
+        if (ActorPtr.IsValid())
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Destroying dynamically spawned dungeon actor: %s"), *ActorPtr->GetName());
+            ActorPtr->Destroy(); // 서버에서 액터 파괴
+        }
+        else
+        {
+            // 이미 유효하지 않은 포인터 (이미 파괴되었거나, 월드가 정리된 경우 등)
+            UE_LOG(LogTemp, Warning, TEXT("Attempted to destroy invalid dungeon actor pointer."));
+        }
+    }
+    SpawnedDungeonActors.Empty(); // 리스트 비우기
 
-    EndMatch();
+    // EndMatch();
 
     if (!NextLevelName.IsEmpty())
     {
