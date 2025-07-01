@@ -20,10 +20,10 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 				Character->Multicast_SetIsUpperBodySlot(false);
 			}
 
-			if (!Character->CanHitReact)
+			/*if (!Character->CanHitReact)
 			{
 				Character->Multicast_SetCanHitReact(true);
-			}
+			}*/
 			
 			Character->CanChangeSeekerGait = true;
 			Character->SetSkillInputControl(true, true, true);
