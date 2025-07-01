@@ -57,6 +57,10 @@ public:
 	
 	UPROPERTY(Replicated)
 	bool CanHitReact = true;
+
+	FTimerHandle HitReactTimerHandle;
+
+	void AllowHitReact();
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

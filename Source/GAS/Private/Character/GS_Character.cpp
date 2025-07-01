@@ -178,17 +178,17 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	OnDamageStart();
 
 	// SJE
-	EHitReactType HitReactType = EHitReactType::DamageOnly;
-	if (DamageEvent.IsOfType(FGS_DamageEvent::ClassID))
-	{
-		const FGS_DamageEvent& MyDamageEvent = static_cast<const FGS_DamageEvent&>(DamageEvent);
-		HitReactType = MyDamageEvent.HitReactType;
-	}
-	
 	UE_LOG(LogTemp, Warning, TEXT("CanHitReact : %s"), CanHitReact ? TEXT("true") : TEXT("false"));
 
 	if (CanHitReact)
 	{
+		EHitReactType HitReactType = EHitReactType::DamageOnly;
+		if (DamageEvent.IsOfType(FGS_DamageEvent::ClassID))
+		{
+			const FGS_DamageEvent& MyDamageEvent = static_cast<const FGS_DamageEvent&>(DamageEvent);
+			HitReactType = MyDamageEvent.HitReactType;
+		}
+		
 		const FPointDamageEvent* PointEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
 		FVector HitDirection = -PointEvent->ShotDirection;
 		if(UGS_HitReactComp* HitReactComponent = GetComponentByClass<UGS_HitReactComp>())
@@ -211,6 +211,14 @@ void AGS_Character::OnDamageStart()
 void AGS_Character::Multicast_SetCanHitReact_Implementation(bool CanReact)
 {
 	CanHitReact = CanReact;
+}
+
+void AGS_Character::AllowHitReact()
+{
+	GetWorld()->GetTimerManager().SetTimer(HitReactTimerHandle, [this]()
+	{
+		CanHitReact = true;
+	}, 3.0f, false);
 }
 
 void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

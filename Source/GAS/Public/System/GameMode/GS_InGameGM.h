@@ -75,6 +75,10 @@ private:
 	TArray<TObjectPtr<AGS_Monster>> SpawnedMonsters;
 	//던전 스폰
 protected:
+	// 동적으로 생성된 던전 액터들을 추적하는 배열
+	UPROPERTY()
+	TArray<TWeakObjectPtr<AActor>> SpawnedDungeonActors; 
+	
 	void SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData);
 
 	UPROPERTY()
