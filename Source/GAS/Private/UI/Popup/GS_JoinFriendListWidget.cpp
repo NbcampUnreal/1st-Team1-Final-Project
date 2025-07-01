@@ -94,12 +94,60 @@ void UGS_JoinFriendListWidget::OnFriendsListRead(const TArray<TSharedRef<FOnline
 
 	FriendsScrollBox->ClearChildren();
 
+	struct FSortableFriendData
+	{
+		TSharedRef<FOnlineFriend> Friend;
+		int32 SortCategory;
+		FString DisplayName;
+	};
+
+	TArray<FSortableFriendData> SortableList;
+	SortableList.Reserve(FriendsList.Num()); // 미리 메모리를 할당해 성능을 최적화
+
 	for (const TSharedRef<FOnlineFriend>& Friend : FriendsList)
+	{
+		// 이 시점의 Presence 정보를 단 한번만 읽어서 스냅샷 생성
+		const FOnlineUserPresence& Presence = Friend->GetPresence();
+
+		int32 Category = 2; // 기본값: 오프라인
+		if (Presence.bIsJoinable)
+		{
+			Category = 0; // 1순위: 참여 가능
+		}
+		else if (Presence.SessionId.IsValid() || Presence.Status.State != EOnlinePresenceState::Offline)
+		{
+			Category = 1; // 2순위: 온라인
+		}
+
+
+		const int32 PresenceStateInt = (int32)Presence.Status.State;
+		UE_LOG(LogTemp, Warning, TEXT("Snapshotting Friend: %s | Category: %d | bIsJoinable: %s | PresenceState(int): %d"),
+			*Friend->GetDisplayName(), Category, (Presence.bIsJoinable ? TEXT("True") : TEXT("False")), PresenceStateInt);
+
+
+		SortableList.Add({ Friend, Category, Friend->GetDisplayName() });
+	}
+
+	SortableList.Sort([](const FSortableFriendData& A, const FSortableFriendData& B)
+	{
+		if (A.SortCategory != B.SortCategory)
+		{
+			// 주 정렬 기준: 미리 계산된 카테고리
+			return A.SortCategory < B.SortCategory;
+		}
+		else
+		{
+			// 보조 정렬 기준: 이름순
+			return A.DisplayName < B.DisplayName;
+		}
+	});
+
+	for (const FSortableFriendData& SortedFriendData : SortableList)
 	{
 		UGS_JoinFriendEntryWidget* EntryWidget = CreateWidget<UGS_JoinFriendEntryWidget>(this, FriendListEntryWidgetClass);
 		if (EntryWidget)
 		{
-			EntryWidget->SetupFriendEntry(Friend);
+			EntryWidget->SetupFriendEntry(SortedFriendData.Friend);
 			EntryWidget->OnJoinRequest.AddDynamic(this, &UGS_JoinFriendListWidget::HandleJoinRequest);
 			FriendsScrollBox->AddChild(EntryWidget);
 		}

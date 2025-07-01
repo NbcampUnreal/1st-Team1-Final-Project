@@ -60,6 +60,12 @@ float AGS_BossLevelGS::GetRemainingBossTime() const
 
 void AGS_BossLevelGS::UpdateBossTime()
 {
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
 	BossCurrentTime += 1.0f;
 
 	if (BossCurrentTime >= BossTotalTime)
@@ -68,7 +74,7 @@ void AGS_BossLevelGS::UpdateBossTime()
 		{
 			UE_LOG(LogTemp, Error, TEXT("AGS_BossLevelGM: Game Over Time: %f. Notifying GameMode."), BossCurrentTime);
 
-			GetWorldTimerManager().ClearTimer(BossTimerHandle);
+			World->GetTimerManager().ClearTimer(BossTimerHandle);
 
 			AGS_BossLevelGM* GM = GetWorld()->GetAuthGameMode<AGS_BossLevelGM>();
 			if (GM)
@@ -81,5 +87,9 @@ void AGS_BossLevelGS::UpdateBossTime()
 
 void AGS_BossLevelGS::OnRep_BossCurrentTime()
 {
-	LastServerTimeUpdate = GetWorld()->GetTimeSeconds();
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		LastServerTimeUpdate = World->GetTimeSeconds();
+	}
 }

@@ -35,7 +35,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
 	FName NextLevelName = "InGameLevel";
-	//FName NextLevelName = "InGameTestLevel_v2"; // 테스트 후에 다시 LoadingLevel로 바꿔놔야함!!!!!!!!!!!!!!!!!!!
+	//FName NextLevelName = "InGameTestLevel_v2"; // 테스트 후에 다시 InGameLevel로 바꿔놔야함!!!!!!!!!!!!!!!!!!!
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
 	int32 MinPlayersToStart = 1;
