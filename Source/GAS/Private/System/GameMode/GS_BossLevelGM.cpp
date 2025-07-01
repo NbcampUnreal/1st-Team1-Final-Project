@@ -108,43 +108,27 @@ AActor* AGS_BossLevelGM::ChoosePlayerStart_Implementation(AController* Player)
     }
 }
 
-void AGS_BossLevelGM::StartPlay()
+void AGS_BossLevelGM::StartMatchWhenAllReady()
 {
-    Super::StartPlay();
-
-    bMatchHasStarted = false;
-    bGameEnded = false;
-
-    /*FString ResultLevelName = TEXT("ResultLevel");
-    UGameplayStatics::LoadStreamLevel(this, FName(*ResultLevelName), false, false, FLatentActionInfo());*/
-
-    FTimerHandle TempHandle;
-    GetWorldTimerManager().SetTimer(TempHandle, [this]() {
-        if (GameState)
+    for (APlayerState* PS : GameState->PlayerArray)
+    {
+        if (APlayerController* PC = PS->GetPlayerController())
         {
-            for (APlayerState* PS : GameState->PlayerArray)
-            {
-                if (APlayerController* PC = PS->GetPlayerController())
-                {
-                    BindToPlayerState(PC);
-                }
-                else if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
-                {
-                    GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
-                    GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_BossLevelGM::HandlePlayerAliveStatusChanged);
-                    UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Bound to existing player (No PC) %s"), *GS_PS->GetPlayerName());
-                    HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
-                }
-            }
-            GetWorldTimerManager().SetTimer(MatchStartTimerHandle, this, &AGS_BossLevelGM::StartMatchCheck, 2.0f, false);
+            BindToPlayerState(PC);
         }
-    }, 0.2f, false);
+        if (AGS_PlayerState* GPS = Cast<AGS_PlayerState>(PS))
+        {
+            if (GPS && GPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+            {
+                GPS->bIsAlive = true;
+            }
+        }
+    }
+    Super::StartMatchWhenAllReady();
 }
 
 void AGS_BossLevelGM::Logout(AController* Exiting)
 {
-    Super::Logout(Exiting);
-
     if (Exiting)
     {
         AGS_PlayerState* GS_PS = Exiting->GetPlayerState<AGS_PlayerState>();
@@ -160,6 +144,22 @@ void AGS_BossLevelGM::Logout(AController* Exiting)
     CheckAllPlayersDead();
 }
 
+void AGS_BossLevelGM::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    if (GameState)
+    {
+        for (APlayerState* PS : GameState->PlayerArray)
+        {
+            if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
+            {
+                GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
+            }
+        }
+    }
+
+    Super::EndPlay(EndPlayReason);
+}
+
 void AGS_BossLevelGM::BindToPlayerState(APlayerController* PlayerController)
 {
     if (PlayerController)
@@ -167,18 +167,11 @@ void AGS_BossLevelGM::BindToPlayerState(APlayerController* PlayerController)
         AGS_PlayerState* GS_PS = PlayerController->GetPlayerState<AGS_PlayerState>();
         if (GS_PS)
         {
-            GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
             GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_BossLevelGM::HandlePlayerAliveStatusChanged);
             UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Bound to player %s"), *GS_PS->GetPlayerName());
             HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
         }
     }
-}
-
-void AGS_BossLevelGM::StartMatchCheck()
-{
-    UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Match checks started. bMatchHasStarted = true"));
-    bMatchHasStarted = true;
 }
 
 void AGS_BossLevelGM::OnTimerEnd()
@@ -189,12 +182,6 @@ void AGS_BossLevelGM::OnTimerEnd()
 
 void AGS_BossLevelGM::EndGame(EGameResult Result)
 {
-    if (bGameEnded)
-    {
-        return;
-    }
-    bGameEnded = true;
-
     FString NextLevelName = TEXT("ResultLevel");
 
     if (Result == EGameResult::GR_SeekersLost)
@@ -211,8 +198,10 @@ void AGS_BossLevelGM::EndGame(EGameResult Result)
     if (!NextLevelName.IsEmpty())
     {
         FTimerHandle TravelDelayHandle;
-        GetWorldTimerManager().SetTimer(TravelDelayHandle, [this, NextLevelName]() {
-            GetWorld()->ServerTravel(NextLevelName + "?listen", true);
+        TWeakObjectPtr<AGS_BossLevelGM> WeakThis = this;
+
+        GetWorldTimerManager().SetTimer(TravelDelayHandle, [WeakThis, NextLevelName]() {
+            WeakThis->GetWorld()->ServerTravel(NextLevelName + "?listen", true);
         }, 3.f, false);
     }
 }
@@ -232,14 +221,11 @@ void AGS_BossLevelGM::SetGameResultOnAllPlayers(EGameResult Result)
 
 void AGS_BossLevelGM::HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, bool bIsAlive)
 {
-    UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Player %s alive status changed to %s"),
+    UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Player %s alive status changed to %s"),
         *PlayerState->GetPlayerName(),
         bIsAlive ? TEXT("True") : TEXT("False"));
 
-    if (!bIsAlive)
-    {
-        CheckAllPlayersDead();
-    }
+    CheckAllPlayersDead();
 }
 
 void AGS_BossLevelGM::CheckAllPlayersDead()
@@ -247,6 +233,7 @@ void AGS_BossLevelGM::CheckAllPlayersDead()
     if (!GameState) return;
 
     bool bAllSeekersDead = true;
+    bool bGuardianDead = true;
 
     for (APlayerState* PS : GameState->PlayerArray)
     {
@@ -260,7 +247,6 @@ void AGS_BossLevelGM::CheckAllPlayersDead()
             }
         }
     }
-    bool bGuardianDead = true;
     for (APlayerState* PS : GameState->PlayerArray)
     {
         AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
@@ -277,18 +263,12 @@ void AGS_BossLevelGM::CheckAllPlayersDead()
     if (bAllSeekersDead)
     {
         UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: All relevant players are dead!"));
-        if (bMatchHasStarted)
-        {
-            EndGame(EGameResult::GR_SeekersLost);
-        }
+        EndGame(EGameResult::GR_SeekersLost);
     }
     else if (bGuardianDead)
     {
 		UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Guardian is dead! Seekers Win."));
-		if (bMatchHasStarted)
-		{
-			EndGame(EGameResult::GR_SeekersWon);
-		}
+		EndGame(EGameResult::GR_SeekersWon);
     }
     else
     {

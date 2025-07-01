@@ -138,7 +138,8 @@ public:
 	virtual void HandleTrapDamage(AActor* OtherActor);
 	//범위 내의 여러 플레이어에게 한 번에 데미지 주는 함수
 	virtual void HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors);
-	
+	//HitReactType 결정하는 함수
+	virtual EHitReactType GetHitReactType() const;
 
 	//Trap Motion
 	class UGS_TrapMotionCompBase* GetValidMotionComponent() const;

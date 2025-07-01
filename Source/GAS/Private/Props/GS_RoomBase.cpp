@@ -32,6 +32,10 @@ void AGS_RoomBase::HideCeiling()
 	if (Ceiling)
 	{
 		Ceiling->SetVisibility(false);
+		for (int i = 0; i < Ceiling->GetNumChildrenComponents(); ++i)
+		{
+			Ceiling->GetChildComponent(i)->SetVisibility(false);
+		}
 	}
 }
 
@@ -40,6 +44,10 @@ void AGS_RoomBase::ShowCeiling()
 	if (Ceiling)
 	{
 		Ceiling->SetVisibility(true);
+		for (int i = 0; i < Ceiling->GetNumChildrenComponents(); ++i)
+		{
+			Ceiling->GetChildComponent(i)->SetVisibility(true);
+		}
 	}
 }
 
