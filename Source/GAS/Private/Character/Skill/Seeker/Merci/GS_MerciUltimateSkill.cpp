@@ -76,7 +76,7 @@ void UGS_MerciUltimateSkill::InterruptSkill()
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (MerciCharacter->GetSkillComp())
 	{
-		MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
+		//MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
 	}
 }
 

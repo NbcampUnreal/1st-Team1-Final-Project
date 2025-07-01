@@ -34,6 +34,7 @@ AGS_Monster::AGS_Monster()
 	SkillCooldownWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("SkillCooldownWidgetComp"));
 	SkillCooldownWidgetComp->SetupAttachment(RootComponent);
 	SkillCooldownWidgetComp->SetVisibility(false);
+	SkillCooldownWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	SkillCooldownWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SkillCooldownWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 
@@ -113,7 +114,22 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (SkillCooldownWidgetComp && SkillCooldownWidgetComp->GetBodySetup())
+	// if (SkillCooldownWidgetComp && SkillCooldownWidgetComp->GetBodySetup())
+	// {
+	// 	SkillCooldownWidgetComp->DestroyPhysicsState();
+	// }
+
+	// 1. Widget 내용 제거
+	SkillCooldownWidgetComp->SetWidget(nullptr);
+
+	// 2. 가시성 끄기
+	SkillCooldownWidgetComp->SetVisibility(false);
+
+	// 3. 콜리전 비활성화
+	SkillCooldownWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 4. BodySetup 정리
+	if (SkillCooldownWidgetComp->GetBodySetup())
 	{
 		SkillCooldownWidgetComp->DestroyPhysicsState();
 	}

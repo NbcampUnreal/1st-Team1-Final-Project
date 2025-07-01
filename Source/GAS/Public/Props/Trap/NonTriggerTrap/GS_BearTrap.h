@@ -15,4 +15,6 @@ class GAS_API AGS_BearTrap : public AGS_NonTrigTrapBase
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult) override;
 
+
+	virtual EHitReactType GetHitReactType() const override;
 };

@@ -96,14 +96,17 @@ void AGS_Character::Tick(float DeltaTime)
 
 	if (IsValid(HPTextWidgetComp) && !HasAuthority())
 	{
-		APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
+		if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
+		{
+			FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+			FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+			FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+			FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+			
+			HPTextWidgetComp->SetWorldRotation(WidgetRotation);	
+		}
 		
-		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
-		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
-		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
-		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
         
-		HPTextWidgetComp->SetWorldRotation(WidgetRotation);
 	}
 }
 
@@ -120,12 +123,49 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 
 void AGS_Character::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (HPTextWidgetComp && HPTextWidgetComp->GetBodySetup())
+	// 2. 가시성 끄기
+	HPTextWidgetComp->SetVisibility(false);
+
+	// 3. 콜리전 비활성화
+	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 4. BodySetup 정리
+	if (HPTextWidgetComp->GetBodySetup())
 	{
 		HPTextWidgetComp->DestroyPhysicsState();
 	}
 	
-	Super::EndPlay(EndPlayReason);	
+	if (IsValid(HPTextWidgetComp))
+	{
+		if (UUserWidget* Widget = HPTextWidgetComp->GetWidget())
+		{
+			Widget->RemoveFromParent();
+		}
+		HPTextWidgetComp->SetWidget(nullptr);
+		HPTextWidgetComp->DestroyComponent();
+	}
+	
+	Super::EndPlay(EndPlayReason);
+}
+
+void AGS_Character::BeginDestroy()
+{
+	// 1. 먼저 Super::BeginDestroy() 호출 (중요!)
+	Super::BeginDestroy();
+
+	// 2. IsValid() 체크와 함께 안전하게 정리
+	if (IsValid(HPTextWidgetComp) && !HPTextWidgetComp->IsBeingDestroyed())
+	{
+		HPTextWidgetComp->SetWidget(nullptr);
+		HPTextWidgetComp->SetVisibility(false);
+		HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		// BodySetup 정리 (필요한 경우만)
+		if (HPTextWidgetComp->GetBodySetup())
+		{
+			HPTextWidgetComp->DestroyPhysicsState();
+		}
+	}
 }
 
 
