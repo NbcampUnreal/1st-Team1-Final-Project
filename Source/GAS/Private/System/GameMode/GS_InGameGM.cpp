@@ -117,6 +117,7 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
     if (SaveData.IsEmpty())
     {
         UE_LOG(LogTemp, Error, TEXT("There is no SaveData. Can't Spawn Dungeon."));
+        DelayedRestartPlayer();//이거 나중에 반드시 빼야함
         return;
     }
     // 받아온 데이터를 기반으로 "몬스터"를 제외한 액터 스폰
@@ -301,7 +302,6 @@ void AGS_InGameGM::StartPlay()
             }
             else if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
             {
-                GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
                 GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_InGameGM::HandlePlayerAliveStatusChanged);
                 UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Bound to existing player (No PC) %s"), *GS_PS->GetPlayerName());
                 HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
@@ -314,6 +314,22 @@ void AGS_InGameGM::StartPlay()
             }
         }
     }
+}
+
+void AGS_InGameGM::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    if (GameState)
+    {
+        for (APlayerState* PS : GameState->PlayerArray)
+        {
+            if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
+            {
+                GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
+            }
+        }
+    }
+
+    Super::EndPlay(EndPlayReason);
 }
 
 void AGS_InGameGM::Logout(AController* Exiting)
@@ -333,34 +349,50 @@ void AGS_InGameGM::Logout(AController* Exiting)
     CheckAllPlayersDead();
 }
 
+void AGS_InGameGM::EndMatch()
+{
+    CleanupSpawnedMonsters();
+    Super::EndMatch();
+}
+
+void AGS_InGameGM::FindSpawnedMonsters()
+{
+    TArray<AActor*> FoundMonsters;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGS_Monster::StaticClass(), FoundMonsters);
+    for (AActor* MonsterActor : FoundMonsters)
+    {
+        if (AGS_Monster* Monster = Cast<AGS_Monster>(MonsterActor))
+        {
+            SpawnedMonsters.AddUnique(Monster);
+        }
+    }
+}
+
+void AGS_InGameGM::CleanupSpawnedMonsters()
+{
+    for (int32 i = SpawnedMonsters.Num() - 1; i >= 0; --i)
+    {
+        AGS_Monster* Monster = SpawnedMonsters[i];
+        if (IsValid(Monster))
+        {
+            // 몬스터를 조종하는 컨트롤러가 있다면 빙의를 해제합니다.
+            if (AController* MonsterController = Monster->GetController())
+            {
+                MonsterController->UnPossess();
+            }
+            Monster->Destroy();
+        }
+    }
+    SpawnedMonsters.Empty();
+}
+
 void AGS_InGameGM::BindToPlayerState(APlayerController* PlayerController)
 {
     if (PlayerController)
     {
-        //// [TODO] 플레이어 widget 업데이트
-        //AGS_TpsController* TpsPC = Cast<AGS_TpsController>(PlayerController);
-        //if (IsValid(TpsPC))
-        //{
-        //    UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ TPS PC @@@@@@@@@@@@@@@@@@@@@"));
-        //    TpsPC->TestFunction();
-        //    
-        //    // UUserWidget* Widget = TpsPC->GetPlayerWidget();
-        //    // if (Widget)
-        //    // {
-        //    //     UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(Widget->GetWidgetFromName(TEXT("WBP_HPBoard")));
-        //    //     UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid widget"));
-        //    //     if (IsValid(HPBoardWidget))
-        //    //     {
-        //    //         UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid HPBoard Widget"));
-        //    //         HPBoardWidget->InitBoardWidget();
-        //    //     }
-        //    // }
-        //}
-        
         AGS_PlayerState* GS_PS = PlayerController->GetPlayerState<AGS_PlayerState>();
         if (GS_PS)
         {
-            GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
             GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_InGameGM::HandlePlayerAliveStatusChanged);
             UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Bound to player %s"), *GS_PS->GetPlayerName());
             HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
@@ -428,12 +460,28 @@ void AGS_InGameGM::EndGame(EGameResult Result)
         }
     }
 
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        if (PC)
+        {
+            PC->DisableInput(nullptr);
+        }
+    }
+
+    EndMatch();
+
     if (!NextLevelName.IsEmpty())
     {
         FTimerHandle TravelDelayHandle;
         TWeakObjectPtr<AGS_InGameGM> WeakThis = this;
+        
         GetWorldTimerManager().SetTimer(TravelDelayHandle, [WeakThis, NextLevelName]() {
-            WeakThis->GetWorld()->ServerTravel(NextLevelName + "?listen", true);
+            if (WeakThis.IsValid())
+            {
+                WeakThis->GetWorld()->FlushLevelStreaming(EFlushLevelStreamingType::Full);
+                WeakThis->GetWorld()->ServerTravel(NextLevelName + "?listen", true);
+            }
         }, 3.f, false);
     }
 }
@@ -457,10 +505,7 @@ void AGS_InGameGM::HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, 
         *PlayerState->GetPlayerName(),
         bIsAlive ? TEXT("True") : TEXT("False"));
 
-    if (!bIsAlive)
-    {
-        CheckAllPlayersDead();
-    }
+    CheckAllPlayersDead();
 }
 
 void AGS_InGameGM::CheckAllPlayersDead()

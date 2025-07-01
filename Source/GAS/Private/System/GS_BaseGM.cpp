@@ -26,6 +26,13 @@ void AGS_BaseGM::Logout(AController* Exiting)
     Super::Logout(Exiting);
 }
 
+void AGS_BaseGM::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    GetWorldTimerManager().ClearAllTimersForObject(this);
+
+    Super::EndPlay(EndPlayReason);
+}
+
 void AGS_BaseGM::NotifyPlayerIsReady(AController* PlayerController)
 {
     if (!PlayerController || !PlayerController->PlayerState)

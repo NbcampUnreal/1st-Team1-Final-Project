@@ -9,6 +9,7 @@
 
 class AGS_PlayerState;
 struct FDESaveData;
+class AGS_Monster;
 
 UCLASS()
 class GAS_API AGS_InGameGM : public AGS_BaseGM
@@ -26,7 +27,11 @@ protected:
 	virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 	virtual void StartPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Logout(AController* Exiting) override;
+	virtual void EndMatch() override;
+	void FindSpawnedMonsters();
+	void CleanupSpawnedMonsters();
 	void DelayedRestartPlayer();
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Configuration")
 	UGS_PawnMappingDataAsset* PawnMappingDataAsset;
@@ -65,7 +70,9 @@ private:
 	void SetGameResultOnAllPlayers(EGameResult Result);
 	
 	TArray<AController*> PendingPlayers;
-	
+
+	UPROPERTY()
+	TArray<TObjectPtr<AGS_Monster>> SpawnedMonsters;
 	//던전 스폰
 protected:
 	void SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData);
