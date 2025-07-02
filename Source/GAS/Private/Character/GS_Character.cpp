@@ -4,8 +4,6 @@
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "UI/Character/GS_HPText.h"
 #include "Engine/DamageEvents.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_HPWidget.h"
 #include "System/GS_PlayerState.h"
@@ -15,6 +13,7 @@
 #include "Character/Component/GS_HitReactComp.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "AI/RTS/GS_RTSController.h"
 #include "Character/Player/GS_Player.h"
 #include "Components/DecalComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
@@ -30,7 +29,7 @@ AGS_Character::AGS_Character()
 	
 	HPTextWidgetComp = CreateDefaultSubobject<UGS_HPTextWidgetComp>(TEXT("TextWidgetComp"));
 	HPTextWidgetComp->SetupAttachment(RootComponent);
-	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
+	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HPTextWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	HPTextWidgetComp->SetVisibility(false);
@@ -72,7 +71,10 @@ void AGS_Character::BeginPlay()
 	//Set HP 3D widget (monster)
 	if (IsValid(HPTextWidgetComp) && HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
 	{
-		HPTextWidgetComp->SetVisibility(true);
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			HPTextWidgetComp->SetVisibility(PC->IsA<AGS_RTSController>());
+		}
 	}
 
 	if (SelectionDecal && SelectionDecal->GetDecalMaterial())
@@ -94,20 +96,6 @@ void AGS_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsValid(HPTextWidgetComp) && !HasAuthority())
-	{
-		if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
-		{
-			FVector CameraForward = CameraManager->GetCameraRotation().Vector();
-			FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
-			FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
-			FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
-			
-			HPTextWidgetComp->SetWorldRotation(WidgetRotation);	
-		}
-		
-        
-	}
 }
 
 void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
