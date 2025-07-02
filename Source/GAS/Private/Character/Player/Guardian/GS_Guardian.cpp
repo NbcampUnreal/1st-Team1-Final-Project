@@ -229,6 +229,10 @@ void AGS_Guardian::MulticastRPCApplyHitStop_Implementation(AGS_Character* InDama
 	}
 	if (!HasAuthority())
 	{
+		if (!IsValid(InDamagedCharacter))
+		{
+			return;
+		}
 		CustomTimeDilation = 0.1f;
 		InDamagedCharacter->CustomTimeDilation = 0.1f;
 
