@@ -77,7 +77,7 @@
 | 컨트롤러        | GuardianController / PlayerController | 입력 처리 및 UI 전환                    |
 | 던전 빌드 시스템 | BuildManager                  | 오브젝트 배치/삭제, 그리드 관리        |
 | 오디오 시스템   | AudioManager                  | BGM 전환, 3D 오디오 라우팅             |
-| 네트워크        | MatchGameMode, NetworkManager | 매칭, RPC, 서버/클라이언트 동기화        |
+| 네트워크        | GameInstance, OnlineGameSubsystem | 서버 생성, 참여, 초대        |
 
 ---
 
