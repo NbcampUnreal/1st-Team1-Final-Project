@@ -18,6 +18,7 @@ public:
 	virtual TSubclassOf<APlayerController> GetPlayerControllerClassToSpawnForSeamlessTravel(APlayerController* PreviousPC) override;
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
+	virtual void StartPlay() override;
 	virtual void StartMatchWhenAllReady() override;
 	void BindToPlayerState(APlayerController* PlayerController);
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;

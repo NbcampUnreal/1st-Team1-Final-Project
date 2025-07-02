@@ -5,6 +5,8 @@
 #include "System/GS_PlayerRole.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerStart.h"
+#include "Character/GS_Character.h"
+#include "Character/Component/GS_StatComp.h"
 
 AGS_BossLevelGM::AGS_BossLevelGM()
 {
@@ -108,19 +110,47 @@ AActor* AGS_BossLevelGM::ChoosePlayerStart_Implementation(AController* Player)
     }
 }
 
+void AGS_BossLevelGM::StartPlay()
+{
+    Super::StartPlay();
+
+    if (GameState)
+    {
+        for (APlayerState* PS : GameState->PlayerArray)
+        {
+            if (APlayerController* PC = PS->GetPlayerController())
+            {
+                UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM::StartPlay - PlayerController: %s"), *PC->GetClass()->GetName())
+                    BindToPlayerState(PC);
+            }
+            else if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
+            {
+                GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_BossLevelGM::HandlePlayerAliveStatusChanged);
+                UE_LOG(LogTemp, Log, TEXT("AGS_BossLevelGM: Bound to existing player (No PC) %s"), *GS_PS->GetPlayerName());
+                HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
+            }
+        }
+    }
+}
+
 void AGS_BossLevelGM::StartMatchWhenAllReady()
 {
     for (APlayerState* PS : GameState->PlayerArray)
     {
-        if (APlayerController* PC = PS->GetPlayerController())
-        {
-            BindToPlayerState(PC);
-        }
         if (AGS_PlayerState* GPS = Cast<AGS_PlayerState>(PS))
         {
             if (GPS && GPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
             {
-                GPS->bIsAlive = true;
+                if (AGS_Character* GuardianPawn = Cast<AGS_Character>(GPS->GetPawn()))
+                {
+                    if (UGS_StatComp* StatComp = GuardianPawn->GetStatComp())
+                    {
+                        const float MaxHP = StatComp->GetMaxHealth();
+                        StatComp->SetCurrentHealth(MaxHP, true);
+                        GPS->CurrentHealth = MaxHP;
+                        GPS->SetIsAlive(true);
+                    }
+                }
             }
         }
     }
@@ -232,43 +262,41 @@ void AGS_BossLevelGM::CheckAllPlayersDead()
 {
     if (!GameState) return;
 
-    bool bAllSeekersDead = true;
-    bool bGuardianDead = true;
+    int32 SeekerCount = 0;
+    int32 AliveSeekerCount = 0;
+    bool bIsGuardianAlive = false;
 
     for (APlayerState* PS : GameState->PlayerArray)
     {
-        AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
-        if (GS_PS && GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+        if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
         {
-            if (GS_PS->bIsAlive)
+            if (GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
             {
-                bAllSeekersDead = false;
-                break;
+                SeekerCount++;
+                if (GS_PS->bIsAlive)
+                {
+                    AliveSeekerCount++;
+                }
             }
-        }
-    }
-    for (APlayerState* PS : GameState->PlayerArray)
-    {
-        AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS);
-        if (GS_PS && GS_PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
-        {
-            if (GS_PS->bIsAlive)
+            else if (GS_PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
             {
-                bGuardianDead = false;
-                break;
+                if (GS_PS->bIsAlive)
+                {
+                    bIsGuardianAlive = true;
+                }
             }
         }
     }
 
-    if (bAllSeekersDead)
+    if (SeekerCount > 0 && AliveSeekerCount == 0)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: All relevant players are dead!"));
-        EndGame(EGameResult::GR_SeekersLost);
+        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: All Seekers are dead! Guardian wins."));
+        EndGame(EGameResult::GR_SeekersLost); // 씨커 패배
     }
-    else if (bGuardianDead)
+    else if (!bIsGuardianAlive)
     {
-		UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Guardian is dead! Seekers Win."));
-		EndGame(EGameResult::GR_SeekersWon);
+        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Guardian is dead! Seekers Win."));
+        EndGame(EGameResult::GR_SeekersWon); // 씨커 승리
     }
     else
     {

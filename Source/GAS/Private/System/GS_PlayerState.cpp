@@ -8,6 +8,8 @@
 #include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "DungeonEditor/Data/GS_DungeonEditorTypes.h"
+#include "System/GameMode/GS_BossLevelGM.h"
+#include "System/GameMode/GS_InGameGM.h"
 
 AGS_PlayerState::AGS_PlayerState()
     : CurrentPlayerRole(EPlayerRole::PR_Seeker)
@@ -138,6 +140,7 @@ void AGS_PlayerState::OnPawnStatInitialized()
             UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): OnPawnStatInitialized - Found StatComp: %s on Pawn %s"),
                 *GetName(), *StatComp->GetName(), *MyPawn->GetName());
 
+            StatComp->SetCurrentHealth(this->CurrentHealth, true);
             SetupStatCompBinding(StatComp);
             UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): StatComp binding successful! from OnPawnStatInitialized"), *GetName()); // 성공 로그
         }
@@ -181,9 +184,12 @@ void AGS_PlayerState::HandleCurrentHPChanged(UGS_StatComp* StatComp)
 
         if (HasAuthority())
         {
-            if (CurrentHealth <= 0.f && bIsAlive)
+            if (GetWorld()->GetAuthGameMode() && GetWorld()->GetAuthGameMode()->HasMatchStarted())
             {
-                SetIsAlive(false);
+                if (CurrentHealth <= 0.f && bIsAlive)
+                {
+                    SetIsAlive(false);
+                }
             }
         }
     }
@@ -202,6 +208,18 @@ void AGS_PlayerState::SetIsAlive(bool bNewIsAlive)
     if (HasAuthority() && bIsAlive != bNewIsAlive)
     {
         bIsAlive = bNewIsAlive;
+
+        if (AGameMode* GM = GetWorld()->GetAuthGameMode<AGameMode>())
+        {
+            if (AGS_BossLevelGM* BGM = Cast<AGS_BossLevelGM>(GM))
+            {
+                BGM->HandlePlayerAliveStatusChanged(this, bIsAlive);
+            }
+            else if (AGS_InGameGM* IGM = Cast<AGS_InGameGM>(GM))
+            {
+                IGM->HandlePlayerAliveStatusChanged(this, bIsAlive);
+            }
+        }
 
         OnPlayerAliveStatusChangedDelegate.Broadcast(this, bIsAlive);
 

@@ -70,8 +70,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Components")
 	TObjectPtr<UCameraComponent> CameraComp;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	TObjectPtr<UGS_SteamNameWidgetComp> SteamNameWidgetComp;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	//TObjectPtr<UGS_SteamNameWidgetComp> SteamNameWidgetComp;
 	
 	// 시야방해
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Components", meta = (AllowPrivateAccess = "true"))

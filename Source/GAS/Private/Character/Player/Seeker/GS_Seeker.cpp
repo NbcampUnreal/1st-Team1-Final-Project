@@ -30,6 +30,7 @@
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
 #include "AkAudioDevice.h"
+#include "UI/Character/GS_HPTextWidgetComp.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -539,6 +540,11 @@ void AGS_Seeker::OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp
 		if (AGS_Monster* Monster = Cast<AGS_Monster>(OtherActor))
 		{
 			AddCombatMonster(Monster);
+			
+			if (UGS_HPTextWidgetComp* HPWidgetComp = Monster->FindComponentByClass<UGS_HPTextWidgetComp>())
+			{
+				HPWidgetComp->SetVisibility(true);
+			}
 		}
 	}
 }
@@ -550,6 +556,11 @@ void AGS_Seeker::OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedCompon
 		if (AGS_Monster* Monster = Cast<AGS_Monster>(OtherActor))
 		{
 			RemoveCombatMonster(Monster);
+
+			if (UGS_HPTextWidgetComp* HPWidgetComp = Monster->FindComponentByClass<UGS_HPTextWidgetComp>())
+			{
+				HPWidgetComp->SetVisibility(false);
+			}
 		}
 	}
 }
