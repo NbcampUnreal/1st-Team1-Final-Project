@@ -88,7 +88,7 @@
 ---
 
 ## 📸 시연 영상
-
+[![Watch the video](https://img.youtube.com/vi/nD1t2hFG2AQ/0.jpg)](https://www.youtube.com/watch?v=nD1t2hFG2AQ)
 
 ---
 
