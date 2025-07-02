@@ -454,3 +454,16 @@ void AGS_Player::UpdateSteamNameWidgetRotation()
 	//	SteamNameWidgetComp->SetWorldRotation(WidgetRotation);
 	//}
 }
+
+/*
+void AGS_Player::Server_RestKey_Implementation()
+{
+	SetSkillInputControl(true, true, true, true);
+	UGS_SeekerAnimInstance * SeekerAnim = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
+	if (SeekerAnim)
+	{
+		SeekerAnim->IsPlayingUpperBodyMontage = false;
+		SeekerAnim->IsPlayingFullBodyMontage = false;
+	};
+}
+*/

@@ -24,7 +24,6 @@ void UGS_ChanMovingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 			OwnerPlayer->SetMoveControlValue(false, false);

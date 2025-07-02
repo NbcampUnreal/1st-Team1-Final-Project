@@ -718,6 +718,19 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 	}
 }
 
+void AGS_Seeker::Server_RestKey_Implementation()
+{
+	// SJE
+	SetSkillInputControl(true, true, true, true);
+	SetAimState(false);
+	SetDrawState(false);
+	CanAcceptComboInput = true;
+	CanChangeSeekerGait = true;
+	Multicast_SetIsFullBodySlot(true);
+	Multicast_SetIsUpperBodySlot(false);
+	SetMoveControlValue(true, true);
+}
+
 void AGS_Seeker::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
 {
 	// 데디케이티드 서버에서는 사운드 재생하지 않음
