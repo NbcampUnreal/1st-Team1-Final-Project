@@ -81,6 +81,12 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 	{
 		return;
 	}
+
+	if (!MerciCharacter->GetSkillInputControl().CanInputRC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Left Release Lock"));
+		return;
+	}
 	
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{
