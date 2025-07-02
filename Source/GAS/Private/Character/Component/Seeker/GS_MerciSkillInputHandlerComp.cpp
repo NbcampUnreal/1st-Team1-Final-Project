@@ -146,6 +146,8 @@ void UGS_MerciSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& I
 
 void UGS_MerciSkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
 {
+	Super::OnScroll(Instance);
+	
 	if (OwnerCharacter->IsDead())
 	{
 		return;
@@ -161,4 +163,9 @@ void UGS_MerciSkillInputHandlerComp::OnScroll(const FInputActionInstance& Instan
 	{
 		MerciCharacter->Server_ChangeArrowType(-1);
 	}
+}
+
+void UGS_MerciSkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& Instance)
+{
+	Super::OnKeyReset(Instance);
 }

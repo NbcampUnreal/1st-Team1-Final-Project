@@ -6,6 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Skill/GS_SkillComp.h"
 
 // Sets default values for this component's properties
@@ -57,6 +58,10 @@ void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputC
 		if (IA_Roll)
 		{
 			EnhancedInput->BindAction(IA_Roll, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnRoll);
+		}
+		if (IA_KeyReset)
+		{
+			EnhancedInput->BindAction(IA_KeyReset, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnKeyReset);
 		}
 	}
 }
@@ -161,5 +166,19 @@ void UGS_SkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
 void UGS_SkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instance)
 {
 	return;
+}
+
+void UGS_SkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& Instance)
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnKeyReset")); // SJE
+	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter);
+	Seeker->Server_RestKey();
+	
+	/*OwnerCharacter->SetSkillInputControl(true, true, true, true);
+	OwnerCharacter->Server_RestKey();
+	OwnerCharacter->Server_SetCanHitReact(true);*/
+
+	
+	
 }
 

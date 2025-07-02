@@ -104,3 +104,8 @@ void UGS_ChanSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& In
 	return;
 }
 
+void UGS_ChanSkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& Instance)
+{
+	Super::OnKeyReset(Instance);
+}
+

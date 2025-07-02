@@ -307,5 +307,8 @@ private:
 
 	// 플레이어 상태 변경 처리
 	void HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive);
-	
+
+public:
+	UFUNCTION(Server, Reliable)
+	void Server_RestKey();
 };

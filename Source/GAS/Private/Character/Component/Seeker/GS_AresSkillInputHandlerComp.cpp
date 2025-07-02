@@ -115,3 +115,8 @@ void UGS_AresSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& In
 
 	return;
 }
+
+void UGS_AresSkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& Instance)
+{
+	Super::OnKeyReset(Instance);
+}
