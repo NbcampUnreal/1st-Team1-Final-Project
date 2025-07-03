@@ -58,7 +58,7 @@ public:
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_SetGuardianJob(EGuardianJob NewJob);
 
-    UPROPERTY(Replicated)
+    UPROPERTY(/*Replicated*/)
     TArray<FDESaveData> ObjectData;
     UFUNCTION(Server, Reliable)
 	void Server_SetObjectData(const TArray<FDESaveData>& InObjectData);
