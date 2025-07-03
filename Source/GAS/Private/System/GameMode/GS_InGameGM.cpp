@@ -221,19 +221,6 @@ void AGS_InGameGM::DelayedRestartPlayer()
             for (AController* PC : PendingPlayers)
             {
                 AActor* FoundStart = FindPlayerStart(PC);
-                if (FoundStart)
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("Found valid PlayerStart '%s' with for %s at location: %s"),
-                        *FoundStart->GetName(),
-                        *PC->PlayerState->GetPlayerName(),
-                        *FoundStart->GetActorLocation().ToString()
-                    );
-                }
-                else
-                {
-                    UE_LOG(LogTemp, Error, TEXT("FAILED to find any valid PlayerStart for %s. Player will spawn at origin."), *PC->PlayerState->GetPlayerName());
-                }
-
                 if (PC)
                 {
                     RestartPlayer(PC);
