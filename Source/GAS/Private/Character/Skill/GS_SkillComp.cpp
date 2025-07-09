@@ -112,12 +112,6 @@ void UGS_SkillComp::BeginPlay()
 	Super::BeginPlay();
 	
 	SetIsReplicated(true);
-
-	/*if (GetOwner()->HasAuthority())
-	{
-		//ServerRPCInitSkills();
-		InitSkills();
-	}*/
 	InitSkills();
 }
 
@@ -192,17 +186,11 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 }
 
 
-void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
+void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
 {
 	if (!bCanUseSkill)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("TryActivateSkill failed: bCanUseSkill = false"));
-		return;
-	}
-
-	if (!GetOwner()->HasAuthority())
-	{		
-		Server_TryActiveSkill(Slot);
 		return;
 	}
 	
@@ -225,28 +213,16 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 	}
 }
 
-void UGS_SkillComp::TryDeactiveSkill(ESkillSlot Slot)
-{
-	if (!GetOwner()->HasAuthority())
-	{
-		Server_TryDeactiveSkill(Slot);
-		return;
-	}
-	
+void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
+{	
 	if (SkillMap.Contains(Slot))
 	{
 		SkillMap[Slot]->DeactiveSkill();
 	}
 }
 
-void UGS_SkillComp::TrySkillCommand(ESkillSlot Slot)
+void UGS_SkillComp::Server_TrySkillCommand_Implementation(ESkillSlot Slot)
 {
-	if (!GetOwner()->HasAuthority())
-	{
-		Server_TrySkillCommand(Slot);
-		return;
-	}
-
 	if (SkillMap.Contains(Slot))
 	{
 		if (UGS_SkillBase* Skill = SkillMap[Slot])
@@ -475,21 +451,6 @@ UGS_SkillBase* UGS_SkillComp::GetSkillFromSkillMap(ESkillSlot Slot)
 		return SkillMap[Slot];
 	}
 	return nullptr;
-}
-
-void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
-{
-	TryDeactiveSkill(Slot);
-}
-
-void UGS_SkillComp::Server_TryActiveSkill_Implementation(ESkillSlot Slot)
-{
-	TryActivateSkill(Slot);
-}
-
-void UGS_SkillComp::Server_TrySkillCommand_Implementation(ESkillSlot Slot)
-{
-	TrySkillCommand(Slot);
 }
 
 void UGS_SkillComp::Multicast_PlayCastVFX_Implementation(ESkillSlot Slot, FVector Location, FRotator Rotation)

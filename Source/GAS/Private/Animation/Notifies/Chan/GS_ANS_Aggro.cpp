@@ -18,6 +18,6 @@ void UGS_ANS_Aggro::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
 	if (AGS_Chan* Character = Cast<AGS_Chan>(MeshComp->GetOwner()))
 	{
-		Character->GetSkillComp()->TryDeactiveSkill(ESkillSlot::Moving);
+		Character->GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Moving);
 	}
 }
