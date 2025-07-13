@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{333E4309-D5E2-447D-9476-DB55C4F2C4BC}" SchemaVersion="123">
+	<Effects>
+		<WorkUnit Name="Default Work Unit" ID="{333E4309-D5E2-447D-9476-DB55C4F2C4BC}" PersistMode="Standalone">
+			<ChildrenList>
+				<Effect Name="New_Time_Stretch" ID="{7BC846C7-52C7-4F99-BE4C-668A26D5387A}" PluginName="Wwise Time Stretch" CompanyID="0" PluginID="130" PluginType="3">
+					<PropertyList>
+						<Property Name="PitchShift" Type="Real32" Value="-10"/>
+						<Property Name="TimeStretch" Type="Real32" Value="70"/>
+					</PropertyList>
+				</Effect>
+			</ChildrenList>
+		</WorkUnit>
+	</Effects>
+</WwiseDocument>

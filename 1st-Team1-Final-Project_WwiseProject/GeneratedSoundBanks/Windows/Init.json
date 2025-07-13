@@ -1,0 +1,253 @@
+{
+ "SoundBanksInfo": {
+  "Platform": "Windows",
+  "BasePlatform": "Windows",
+  "SchemaVersion": "16",
+  "SoundBankVersion": "154",
+  "SoundBanks": [
+   {
+    "Id": "1355168291",
+    "Type": "User",
+    "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
+    "Language": "SFX",
+    "Hash": "{9EB7A761-36A0-76FF-D5ED-9E37424D289F}",
+    "ObjectPath": "Init",
+    "ShortName": "Init",
+    "Path": "Init.bnk",
+    "Plugins": {
+     "ShareSets": [
+      {
+       "Id": "48620415",
+       "Name": "Have_U_Ever_Been_Outside",
+       "ObjectPath": "\\Effects\\Factory Effects\\RoomVerb\\Exteriors\\Have_U_Ever_Been_Outside",
+       "GUID": "{FE29AE8D-FD86-4652-A95D-68D32F5760EC}",
+       "LibName": "Wwise RoomVerb",
+       "LibId": "7733251"
+      },
+      {
+       "Id": "3442768367",
+       "Name": "Hall_Large_Dark",
+       "ObjectPath": "\\Effects\\Factory Effects\\RoomVerb\\Halls\\Hall_Large_Dark",
+       "GUID": "{0F6A7D6D-131C-4650-9561-FC05F5C7A37B}",
+       "LibName": "Wwise RoomVerb",
+       "LibId": "7733251"
+      }
+     ],
+     "AudioDevices": [
+      {
+       "Id": "2317455096",
+       "Name": "No_Output",
+       "ObjectPath": "\\Audio Devices\\Default Work Unit\\No_Output",
+       "GUID": "{3617E7D6-5921-44F2-9BA4-E5EFDD1C01FA}",
+       "LibName": "No Output",
+       "LibId": "11862023"
+      },
+      {
+       "Id": "3859886410",
+       "Name": "System",
+       "ObjectPath": "\\Audio Devices\\Default Work Unit\\System",
+       "GUID": "{AA1BF429-BE11-41DA-9D63-F90A0B1068FB}",
+       "LibName": "System",
+       "LibId": "11403271"
+      }
+     ]
+    },
+    "Busses": [
+     {
+      "Id": "3803692087",
+      "Name": "Master Audio Bus",
+      "ObjectPath": "\\Master-Mixer Hierarchy\\Default Work Unit\\Master Audio Bus",
+      "GUID": "{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}"
+     }
+    ],
+    "AuxBusses": [
+     {
+      "Id": "1617989505",
+      "Name": "Aux_HallReverb",
+      "ObjectPath": "\\Master-Mixer Hierarchy\\Default Work Unit\\Master Audio Bus\\Aux_HallReverb",
+      "GUID": "{23E2DC9E-EC48-446C-BDF6-FCEFCDF2BE61}",
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "3442768367"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "3063516785",
+      "Name": "Aux_ExteriorsReverb",
+      "ObjectPath": "\\Master-Mixer Hierarchy\\Default Work Unit\\Master Audio Bus\\Aux_ExteriorsReverb",
+      "GUID": "{B5240562-FC69-4E8B-A39B-64BAB46F241E}",
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "48620415"
+        }
+       ]
+      }
+     }
+    ],
+    "GameParameters": [
+     {
+      "Id": "181543522",
+      "Name": "LowHPSound",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
+      "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
+     },
+     {
+      "Id": "3561306875",
+      "Name": "MapBGMVolume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\MapBGMVolume",
+      "GUID": "{2F3E4FB8-0714-4169-BAB2-33AE6207B7C7}"
+     }
+    ],
+    "StateGroups": [
+     {
+      "Id": "1750343382",
+      "Name": "GameTheme",
+      "ObjectPath": "\\States\\Default Work Unit\\GameTheme",
+      "GUID": "{FFD09951-7D67-4226-84C5-E7A89E41F513}",
+      "States": [
+       {
+        "Id": "221232726",
+        "Name": "Lose",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Lose",
+        "GUID": "{CD8F9588-1DFB-4A53-A477-E69169C457B2}"
+       },
+       {
+        "Id": "748895195",
+        "Name": "None",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\None",
+        "GUID": "{979859DB-348B-4CDB-99E7-60D08A1C9ABA}"
+       },
+       {
+        "Id": "979765101",
+        "Name": "Win",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Win",
+        "GUID": "{81F47699-C275-4308-BF58-11F7741DB094}"
+       },
+       {
+        "Id": "1160234136",
+        "Name": "Normal",
+        "ObjectPath": "\\States\\Default Work Unit\\GameTheme\\Normal",
+        "GUID": "{BE7DC584-CBCD-4792-90E4-ECC03BDFDE72}"
+       }
+      ]
+     }
+    ],
+    "SwitchGroups": [
+     {
+      "Id": "2385628198",
+      "Name": "FootSteps",
+      "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps",
+      "GUID": "{0539FB0A-134D-4B40-896F-3535D04BFD6D}",
+      "Switches": [
+       {
+        "Id": "540301611",
+        "Name": "Lava",
+        "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Lava",
+        "GUID": "{9FA661EF-9442-48F6-B069-7B4141D21DE5}"
+       },
+       {
+        "Id": "1216965916",
+        "Name": "Stone",
+        "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Stone",
+        "GUID": "{A2E9AE84-5D39-47B8-B5E3-0D1F4E1AF642}"
+       },
+       {
+        "Id": "2195636714",
+        "Name": "Dirt",
+        "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Dirt",
+        "GUID": "{80BC437C-D31B-4E70-BC2A-67C9A3BE7E80}"
+       },
+       {
+        "Id": "2473969246",
+        "Name": "Metal",
+        "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Metal",
+        "GUID": "{829C7383-ED30-47D8-A302-C54566F2536C}"
+       },
+       {
+        "Id": "2654748154",
+        "Name": "Water",
+        "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Water",
+        "GUID": "{30B5ABC7-3DAC-4CD1-A105-B88EFD6E1BD1}"
+       },
+       {
+        "Id": "4248645337",
+        "Name": "Grass",
+        "ObjectPath": "\\Switches\\Default Work Unit\\FootSteps\\Grass",
+        "GUID": "{5EB68FE6-A580-4AC2-AB44-C54536ADFA61}"
+       }
+      ]
+     },
+     {
+      "Id": "4091656514",
+      "Name": "GameState",
+      "ObjectPath": "\\Switches\\Default Work Unit\\GameState",
+      "GUID": "{CCC9218E-CC79-4165-BB1C-EC62716FDE31}",
+      "Switches": [
+       {
+        "Id": "1160234136",
+        "Name": "Normal",
+        "ObjectPath": "\\Switches\\Default Work Unit\\GameState\\Normal",
+        "GUID": "{0209011D-830F-4311-8072-FE46FE3E3A93}"
+       },
+       {
+        "Id": "2764240573",
+        "Name": "Combat",
+        "ObjectPath": "\\Switches\\Default Work Unit\\GameState\\Combat",
+        "GUID": "{20D5D287-A504-4987-870C-9CBDAF27C23D}"
+       }
+      ]
+     },
+     {
+      "Id": "4110752327",
+      "Name": "BossFootSteps",
+      "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps",
+      "GUID": "{B6847FDB-A219-445B-8880-08AFD91F4E57}",
+      "Switches": [
+       {
+        "Id": "540301611",
+        "Name": "Lava",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Lava",
+        "GUID": "{8DA08B1B-F569-4C9E-9E1B-550EB1014C63}"
+       },
+       {
+        "Id": "1216965916",
+        "Name": "Stone",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Stone",
+        "GUID": "{84123A02-2536-438C-85FD-8ADE15207576}"
+       },
+       {
+        "Id": "2195636714",
+        "Name": "Dirt",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Dirt",
+        "GUID": "{5BFEB7D9-7BCB-4C93-9CCC-8BF538074FF2}"
+       },
+       {
+        "Id": "2473969246",
+        "Name": "Metal",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Metal",
+        "GUID": "{AE6336BB-30DB-47DC-B64A-11CDF78AFD24}"
+       },
+       {
+        "Id": "2654748154",
+        "Name": "Water",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Water",
+        "GUID": "{453275E6-3BE6-4F2F-979F-6F08536D1497}"
+       },
+       {
+        "Id": "4248645337",
+        "Name": "Grass",
+        "ObjectPath": "\\Switches\\Default Work Unit\\BossFootSteps\\Grass",
+        "GUID": "{D2AFE85C-F925-413C-ADEB-494001ED4CB4}"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "FileHash": "{B83A468E-E6EF-55A9-11E3-221A1EE834E0}"
+ }
+}
