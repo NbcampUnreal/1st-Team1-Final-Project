@@ -54,8 +54,13 @@ void UGS_AresMovingSkill::ActiveSkill()
 	OwnerCharacter->SetSkillInputControl(false, false, false);
 }
 
-void UGS_AresMovingSkill::DeactiveSkill()
+void UGS_AresMovingSkill::OnSkillCanceledByDebuff()
 {
+}
+
+void UGS_AresMovingSkill::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 }
 
 void UGS_AresMovingSkill::OnSkillCommand()

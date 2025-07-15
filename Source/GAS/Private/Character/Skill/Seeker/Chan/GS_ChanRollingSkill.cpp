@@ -43,22 +43,29 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	}
 }
 
-void UGS_ChanRollingSkill::DeactiveSkill()
+void UGS_ChanRollingSkill::OnSkillCanceledByDebuff()
 {
-	Super::DeactiveSkill();
+	Super::OnSkillCanceledByDebuff();
+
+	
+}
+
+void UGS_ChanRollingSkill::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-			OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-			OwnerPlayer->SetSkillInputControl(true, true, true);
-			OwnerPlayer->SetMoveControlValue(true, true);
-			OwnerPlayer->CanChangeSeekerGait = true;
+		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
+		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+		OwnerPlayer->SetSkillInputControl(true, true, true);
+		OwnerPlayer->SetMoveControlValue(true, true);
+		OwnerPlayer->CanChangeSeekerGait = true;
 
-			if (OwnerCharacter->GetSkillComp())
-			{
-				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
-			}
+		if (OwnerCharacter->GetSkillComp())
+		{
+			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
+		}
 
 	}
 }

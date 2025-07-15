@@ -49,9 +49,14 @@ void UGS_AresRollingSkill::ActiveSkill()
 	}
 }
 
-void UGS_AresRollingSkill::DeactiveSkill()
+void UGS_AresRollingSkill::OnSkillCanceledByDebuff()
 {
-	Super::DeactiveSkill();
+	Super::OnSkillCanceledByDebuff();
+}
+
+void UGS_AresRollingSkill::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
@@ -64,7 +69,6 @@ void UGS_AresRollingSkill::DeactiveSkill()
 		{
 			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
 		}
-
 	}
 }
 

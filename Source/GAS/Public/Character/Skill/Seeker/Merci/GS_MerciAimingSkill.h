@@ -19,6 +19,7 @@ public:
 	UGS_MerciAimingSkill();
 	virtual void ActiveSkill() override;
 	virtual void OnSkillCommand() override;
+	virtual void OnSkillAnimationEnd() override;
 	virtual void InterruptSkill() override;
 	virtual bool CanActive() const override;
 

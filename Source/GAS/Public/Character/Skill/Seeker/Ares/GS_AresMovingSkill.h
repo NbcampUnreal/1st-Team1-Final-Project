@@ -18,7 +18,8 @@ public:
 	UGS_AresMovingSkill();
 
 	virtual void ActiveSkill() override;
-	virtual void DeactiveSkill() override;
+	virtual void OnSkillCanceledByDebuff() override;
+	virtual void OnSkillAnimationEnd() override;
 	virtual void OnSkillCommand() override;
 	virtual void ExecuteSkillEffect() override;
 	virtual bool IsActive() const override;

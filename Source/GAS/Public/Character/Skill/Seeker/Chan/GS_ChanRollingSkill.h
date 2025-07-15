@@ -15,6 +15,7 @@ class GAS_API UGS_ChanRollingSkill : public UGS_SeekerSkillBase
 	GENERATED_BODY()
 public:
 	virtual void ActiveSkill() override;
-	virtual void DeactiveSkill() override;
+	virtual void OnSkillCanceledByDebuff() override;
+	virtual void OnSkillAnimationEnd() override;
 	virtual void InterruptSkill() override;
 };

@@ -18,7 +18,8 @@ public:
 	UGS_ChanUltimateSkill();
 	virtual void ActiveSkill() override;
 	virtual void ExecuteSkillEffect() override;
-	virtual void DeactiveSkill() override;
+	virtual void OnSkillCanceledByDebuff() override;
+	virtual void OnSkillAnimationEnd() override;
 	virtual void InterruptSkill() override;
 
 	void HandleUltimateCollision(AActor* HitActor, UPrimitiveComponent* HitComp);

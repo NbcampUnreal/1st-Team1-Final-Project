@@ -61,17 +61,17 @@ public:
 	
 	FOnSkillCooldownChanged OnSkillCooldownChanged;
 
-	UFUNCTION()
-	void TryActivateSkill(ESkillSlot Slot);
-
-	UFUNCTION()
-	void TryDeactiveSkill(ESkillSlot Slot);
-	
-	UFUNCTION()
-	void TrySkillCommand(ESkillSlot Slot);
+	UFUNCTION(Server, Reliable)
+	void Server_TryActivateSkill(ESkillSlot Slot);
 
 	UFUNCTION(Server, Reliable)
 	void Server_TryDeactiveSkill(ESkillSlot Slot);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_TrySkillCommand(ESkillSlot Slot);
+
+	UFUNCTION(Server, Reliable)
+	void Server_TrySkillAnimationEnd(ESkillSlot Slot);
 	
 	void SetSkill(ESkillSlot Slot, const FSkillInfo& Info);
 	void SetCanUseSkill(bool InCanUseSkill);
@@ -134,16 +134,14 @@ protected:
 
 	// cooldown 
 	UPROPERTY()
-	TMap<ESkillSlot, FSkillCooldownState> CooldownStates; 
+	TMap<ESkillSlot, FSkillCooldownState> CooldownStates;
     
 	UPROPERTY(ReplicatedUsing = OnRep_CooldownStates)
 	TArray<FSkillCooldownState> ReplicatedCooldownStates;
 	
-	UFUNCTION(Server, Reliable)
-	void Server_TryActiveSkill(ESkillSlot Slot);
+	
 
-	UFUNCTION(Server, Reliable)
-	void Server_TrySkillCommand(ESkillSlot Slot);
+	
 
 	UFUNCTION()
 	void InitSkills();
