@@ -147,6 +147,14 @@ void UGS_SkillComp::InitSkills()
 	}
 }
 
+void UGS_SkillComp::Server_TrySkillAnimationEnd_Implementation(ESkillSlot Slot)
+{
+	if (SkillMap.Contains(Slot))
+	{
+		SkillMap[Slot]->OnSkillAnimationEnd();
+	}
+}
+
 void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 {
 	if (!Info.SkillClass)
@@ -217,7 +225,7 @@ void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
 {	
 	if (SkillMap.Contains(Slot))
 	{
-		SkillMap[Slot]->DeactiveSkill();
+		SkillMap[Slot]->OnSkillCanceledByDebuff();
 	}
 }
 

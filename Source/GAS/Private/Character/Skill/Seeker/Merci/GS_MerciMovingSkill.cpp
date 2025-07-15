@@ -37,6 +37,10 @@ void UGS_MerciMovingSkill::ActiveSkill()
 	}
 }
 
+void UGS_MerciMovingSkill::OnSkillAnimationEnd()
+{
+}
+
 void UGS_MerciMovingSkill::OnSkillCommand()
 {
 	if (!CanActiveInternally() || bPressedDuringCooldown)

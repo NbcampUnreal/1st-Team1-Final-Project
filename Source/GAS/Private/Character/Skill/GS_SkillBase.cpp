@@ -34,11 +34,19 @@ void UGS_SkillBase::ActiveSkill()
 	StartCoolDown();
 }
 
-void UGS_SkillBase::DeactiveSkill()
+void UGS_SkillBase::OnSkillCanceledByDebuff()
+{
+}
+
+void UGS_SkillBase::OnSkillAnimationEnd()
 {
 }
 
 void UGS_SkillBase::ExecuteSkillEffect()
+{
+}
+
+void UGS_SkillBase::DeactiveSkill()
 {
 }
 

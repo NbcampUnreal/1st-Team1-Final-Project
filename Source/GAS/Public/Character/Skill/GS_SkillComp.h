@@ -69,6 +69,9 @@ public:
 	
 	UFUNCTION(Server, Reliable)
 	void Server_TrySkillCommand(ESkillSlot Slot);
+
+	UFUNCTION(Server, Reliable)
+	void Server_TrySkillAnimationEnd(ESkillSlot Slot);
 	
 	void SetSkill(ESkillSlot Slot, const FSkillInfo& Info);
 	void SetCanUseSkill(bool InCanUseSkill);

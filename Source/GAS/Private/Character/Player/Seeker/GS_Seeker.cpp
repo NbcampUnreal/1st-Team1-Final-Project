@@ -464,12 +464,6 @@ void AGS_Seeker::UpdateLowHealthEffect()
 	}
 }
 
-
-void AGS_Seeker::CallDeactiveSkill(ESkillSlot Slot)
-{
-	GetSkillComp()->Server_TryDeactiveSkill(Slot);
-}
-
 void AGS_Seeker::OnRep_SeekerGait()
 {
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))

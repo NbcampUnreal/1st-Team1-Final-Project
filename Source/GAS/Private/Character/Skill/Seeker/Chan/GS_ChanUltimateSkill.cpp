@@ -56,9 +56,16 @@ void UGS_ChanUltimateSkill::ExecuteSkillEffect()
 
 }
 
-void UGS_ChanUltimateSkill::DeactiveSkill()
+void UGS_ChanUltimateSkill::OnSkillCanceledByDebuff()
 {
-	Super::DeactiveSkill();
+	Super::OnSkillCanceledByDebuff();
+
+	
+}
+
+void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerPlayer->GetMesh()->GetAnimInstance()))

@@ -19,6 +19,7 @@ public:
 	
 	virtual void ActiveSkill() override;
 	virtual void ExecuteSkillEffect() override;
+	virtual void OnSkillAnimationEnd() override;
 	virtual void InterruptSkill() override;
 	virtual bool IsActive() const override;
 
