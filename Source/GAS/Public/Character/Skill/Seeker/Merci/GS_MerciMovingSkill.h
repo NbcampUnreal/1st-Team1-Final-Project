@@ -17,6 +17,7 @@ class GAS_API UGS_MerciMovingSkill : public UGS_SeekerSkillBase
 public:
 	UGS_MerciMovingSkill();
 	virtual void ActiveSkill() override;
+	virtual void OnSkillAnimationEnd() override;
 	virtual void OnSkillCommand() override;
 	virtual void InterruptSkill() override;
 	virtual bool CanActive() const override;

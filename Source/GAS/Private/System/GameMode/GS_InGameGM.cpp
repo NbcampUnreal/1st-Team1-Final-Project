@@ -359,43 +359,6 @@ void AGS_InGameGM::Logout(AController* Exiting)
     CheckAllPlayersDead();
 }
 
-void AGS_InGameGM::EndMatch()
-{
-    CleanupSpawnedMonsters();
-    Super::EndMatch();
-}
-
-void AGS_InGameGM::FindSpawnedMonsters()
-{
-    TArray<AActor*> FoundMonsters;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGS_Monster::StaticClass(), FoundMonsters);
-    for (AActor* MonsterActor : FoundMonsters)
-    {
-        if (AGS_Monster* Monster = Cast<AGS_Monster>(MonsterActor))
-        {
-            SpawnedMonsters.AddUnique(Monster);
-        }
-    }
-}
-
-void AGS_InGameGM::CleanupSpawnedMonsters()
-{
-    for (int32 i = SpawnedMonsters.Num() - 1; i >= 0; --i)
-    {
-        AGS_Monster* Monster = SpawnedMonsters[i];
-        if (IsValid(Monster))
-        {
-            // 몬스터를 조종하는 컨트롤러가 있다면 빙의를 해제합니다.
-            if (AController* MonsterController = Monster->GetController())
-            {
-                MonsterController->UnPossess();
-            }
-            Monster->Destroy();
-        }
-    }
-    SpawnedMonsters.Empty();
-}
-
 void AGS_InGameGM::BindToPlayerState(APlayerController* PlayerController)
 {
     if (PlayerController)
@@ -456,7 +419,7 @@ void AGS_InGameGM::EndGame(EGameResult Result)
     {
         UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: Not All Seekers dead. Traveling to BossLevel."));
         SetGameResultOnAllPlayers(EGameResult::GR_InProgress);
-        NextLevelName = TEXT("BossLevel");
+        NextLevelName = TEXT("testbosslevel");
 
         AGS_InGameGS* InGameGS = GetGameState<AGS_InGameGS>();
         if (InGameGS)
@@ -494,8 +457,6 @@ void AGS_InGameGM::EndGame(EGameResult Result)
         }
     }
     SpawnedDungeonActors.Empty(); // 리스트 비우기
-
-    // EndMatch();
 
     if (!NextLevelName.IsEmpty())
     {

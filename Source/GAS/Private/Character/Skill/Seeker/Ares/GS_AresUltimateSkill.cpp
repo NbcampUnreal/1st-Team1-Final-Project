@@ -55,8 +55,15 @@ void UGS_AresUltimateSkill::ActiveSkill()
 
 }
 
-void UGS_AresUltimateSkill::DeactiveSkill()
+void UGS_AresUltimateSkill::OnSkillCanceledByDebuff()
 {
+	
+}
+
+void UGS_AresUltimateSkill::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
+
 	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
 	{
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);

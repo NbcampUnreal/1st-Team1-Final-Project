@@ -25,12 +25,12 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	{
 		if (!ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
-			ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+			ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
 		}
 	}
 	else
 	{
-		ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+		ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	}
 }
 
@@ -56,7 +56,7 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 		{
 			if (ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 			{
-				ChanCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+				ChanCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Aiming);
 			}
 			else
 			{
@@ -75,7 +75,7 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	{
 		if (ChanCharacter)
 		{
-			ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+			ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
 		}
 	}
 }
@@ -98,9 +98,14 @@ void UGS_ChanSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& In
 	
 	if (ChanCharacter)
 	{
-		ChanCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Rolling);
+		ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Rolling);
 	}
 
 	return;
+}
+
+void UGS_ChanSkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& Instance)
+{
+	Super::OnKeyReset(Instance);
 }
 

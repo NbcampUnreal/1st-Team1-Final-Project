@@ -42,11 +42,6 @@ void UGS_RuneGridCellWidget::NativeOnMouseEnter(const FGeometry& InGeometry, con
 	}
 }
 
-void UGS_RuneGridCellWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
-{
-	Super::NativeOnMouseLeave(InMouseEvent);
-}
-
 void UGS_RuneGridCellWidget::InitCell(const FGridCellData& InCellData, UGS_ArcaneBoardWidget* InParentBoard)
 {
 	ParentBoardWidget = InParentBoard;

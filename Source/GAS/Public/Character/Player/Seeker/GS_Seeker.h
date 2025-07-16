@@ -123,9 +123,6 @@ public:
 	// Replication Set
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	// Notify
-	void CallDeactiveSkill(ESkillSlot Slot);
-
 	// 스킬 사운드 재생 (모든 시커 캐릭터에서 사용)
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySkillSound(class UAkAudioEvent* SoundToPlay);
@@ -307,5 +304,8 @@ private:
 
 	// 플레이어 상태 변경 처리
 	void HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive);
-	
+
+public:
+	UFUNCTION(Server, Reliable)
+	void Server_RestKey();
 };

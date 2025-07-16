@@ -42,10 +42,8 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 		}
 		else if (ReactType == EHitReactType::Additive)
 		{
-
 			OwnerCharacter->Multicast_SetCanHitReact(false);
 		}
-
 	}
 }
 

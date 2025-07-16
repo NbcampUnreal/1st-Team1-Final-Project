@@ -203,7 +203,7 @@ void AGS_Drakhar::Ctrl()
 			bIsFlying = true;
 			
 			//server logic
-			GetSkillComp()->TryActivateSkill(ESkillSlot::Ready);
+			GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ready);
 			ServerRPCStartCtrl();
 		}
 	}
@@ -231,7 +231,7 @@ void AGS_Drakhar::LeftMouse()
 		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready) && ClientGuardianDoSkillState == EGuardianDoSkill::None)
 		{
 			//check earthquake skill
-			GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+			GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
 		}
 		
 		//not flying & not using skills
@@ -261,7 +261,7 @@ void AGS_Drakhar::RightMouse()
 		else if (ClientGuardianState == EGuardianState::CtrlEnd && ClientGuardianDoSkillState == EGuardianDoSkill::None)
 		{
 			//dash skill check
-			GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+			GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
 		}
 	}
 }
@@ -492,7 +492,7 @@ void AGS_Drakhar::StopCtrl()
 	if (!HasAuthority())
 	{
 		ServerRPCStopCtrl();
-		GetSkillComp()->TryDeactiveSkill(ESkillSlot::Ready);
+		GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
 		
 		ClientGuardianState = EGuardianState::CtrlEnd;
 		ClientGuardianDoSkillState = EGuardianDoSkill::None;
@@ -801,7 +801,7 @@ void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
 		return;
 	}
 
-	GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+	GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	MulticastRPC_OnUltimateStart();
 
 	FTimerHandle DraconicFuryEndTimer;

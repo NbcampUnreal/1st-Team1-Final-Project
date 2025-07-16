@@ -30,6 +30,7 @@
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
 #include "AkAudioDevice.h"
+#include "UI/Character/GS_HPTextWidgetComp.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -463,12 +464,6 @@ void AGS_Seeker::UpdateLowHealthEffect()
 	}
 }
 
-
-void AGS_Seeker::CallDeactiveSkill(ESkillSlot Slot)
-{
-	GetSkillComp()->TryDeactiveSkill(Slot);
-}
-
 void AGS_Seeker::OnRep_SeekerGait()
 {
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
@@ -539,6 +534,11 @@ void AGS_Seeker::OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp
 		if (AGS_Monster* Monster = Cast<AGS_Monster>(OtherActor))
 		{
 			AddCombatMonster(Monster);
+			
+			if (UGS_HPTextWidgetComp* HPWidgetComp = Monster->FindComponentByClass<UGS_HPTextWidgetComp>())
+			{
+				HPWidgetComp->SetVisibility(true);
+			}
 		}
 	}
 }
@@ -550,6 +550,11 @@ void AGS_Seeker::OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedCompon
 		if (AGS_Monster* Monster = Cast<AGS_Monster>(OtherActor))
 		{
 			RemoveCombatMonster(Monster);
+
+			if (UGS_HPTextWidgetComp* HPWidgetComp = Monster->FindComponentByClass<UGS_HPTextWidgetComp>())
+			{
+				HPWidgetComp->SetVisibility(false);
+			}
 		}
 	}
 }
@@ -705,6 +710,19 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 		ClientRPCStopCombatMusic();
 		NearbyMonsters.Empty();
 	}
+}
+
+void AGS_Seeker::Server_RestKey_Implementation()
+{
+	// SJE
+	SetSkillInputControl(true, true, true, true);
+	SetAimState(false);
+	SetDrawState(false);
+	CanAcceptComboInput = true;
+	CanChangeSeekerGait = true;
+	Multicast_SetIsFullBodySlot(true);
+	Multicast_SetIsUpperBodySlot(false);
+	SetMoveControlValue(true, true);
 }
 
 void AGS_Seeker::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)

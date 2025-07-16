@@ -18,7 +18,8 @@ public:
 	UGS_AresUltimateSkill();
 
 	virtual void ActiveSkill() override;
-	virtual void DeactiveSkill() override;
+	virtual void OnSkillCanceledByDebuff() override;
+	virtual void OnSkillAnimationEnd() override;
 
 	void DeactiveSkillEffect();
 	virtual void ExecuteSkillEffect() override;

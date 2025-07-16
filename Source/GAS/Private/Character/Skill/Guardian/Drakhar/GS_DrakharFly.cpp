@@ -1,4 +1,4 @@
-﻿#include "Character/Skill/Guardian/Drakhar/GS_DrakharFly.h"
+#include "Character/Skill/Guardian/Drakhar/GS_DrakharFly.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Skill/GS_SkillComp.h"
@@ -37,7 +37,7 @@ void UGS_DrakharFly::ActiveSkill()
 	ExecuteSkillEffect();
 }
 
-void UGS_DrakharFly::DeactiveSkill()
+void UGS_DrakharFly::OnSkillCanceledByDebuff()
 {
 	bIsFlying = false;
 	

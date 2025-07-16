@@ -25,12 +25,12 @@ void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	{
 		if (!Ares->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 		{
-			Ares->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+			Ares->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
 		}
 	}
 	else
 	{
-		Ares->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+		Ares->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	}
 }
 
@@ -56,7 +56,7 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 		{
 			if (Ares->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 			{
-				Ares->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+				Ares->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Aiming);
 			}
 			else
 			{				
@@ -75,7 +75,7 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	{
 		if (Ares)
 		{
-			Ares->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+			Ares->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
 		}
 	}
 }
@@ -91,7 +91,7 @@ void UGS_AresSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstanc
 	
 	if (bWasCtrlHeldWhenLeftClicked && OwnerCharacter->GetSkillInputControl().CanInputCtrl)
 	{
-		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Moving);
+		OwnerCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Moving);
 	}
 }
 
@@ -110,8 +110,13 @@ void UGS_AresSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& In
 	}
 	if (Ares)
 	{
-		Ares->GetSkillComp()->TryActivateSkill(ESkillSlot::Rolling);
+		Ares->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Rolling);
 	}
 
 	return;
+}
+
+void UGS_AresSkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& Instance)
+{
+	Super::OnKeyReset(Instance);
 }

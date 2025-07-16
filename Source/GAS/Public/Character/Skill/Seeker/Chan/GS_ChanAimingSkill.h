@@ -18,7 +18,8 @@ public:
 	UGS_ChanAimingSkill();
 
 	virtual void ActiveSkill() override;
-	virtual void DeactiveSkill() override;
+	virtual void OnSkillCanceledByDebuff() override;
+	virtual void OnSkillAnimationEnd() override;
 	virtual void OnSkillCommand() override;
 	virtual void ExecuteSkillEffect() override;
 	virtual void InterruptSkill() override;

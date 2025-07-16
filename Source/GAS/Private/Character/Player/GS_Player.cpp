@@ -36,13 +36,13 @@ AGS_Player::AGS_Player()
 	PostProcessComponent->bUnbound = true; // 시야 안 전체에만 적용할 경우 false
 	PostProcessComponent->BlendWeight = 0.f; // 기본은 비활성화
 
-	//steam name widget
-	SteamNameWidgetComp = CreateDefaultSubobject<UGS_SteamNameWidgetComp>(TEXT("SteamWidgetComp"));
-	SteamNameWidgetComp->SetupAttachment(RootComponent);
-	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
-	//SteamNameWidgetComp->GetBodyInstance()->TermBody();
-	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	SteamNameWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	////steam name widget
+	//SteamNameWidgetComp = CreateDefaultSubobject<UGS_SteamNameWidgetComp>(TEXT("SteamWidgetComp"));
+	//SteamNameWidgetComp->SetupAttachment(RootComponent);
+	//SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
+	////SteamNameWidgetComp->GetBodyInstance()->TermBody();
+	//SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//SteamNameWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BlurMat(TEXT("/Game/VFX/MI_AbscureDebuff"));
 	if (BlurMat.Succeeded())
@@ -107,11 +107,11 @@ void AGS_Player::Tick(float DeltaSeconds)
 		ObscureTimeline.TickTimeline(DeltaSeconds);
 	}
 
-	//steam widget rotate
-	if (IsValid(SteamNameWidgetComp) && !HasAuthority())
-	{
-		UpdateSteamNameWidgetRotation();
-	}
+	////steam widget rotate
+	//if (IsValid(SteamNameWidgetComp) && !HasAuthority())
+	//{
+	//	UpdateSteamNameWidgetRotation();
+	//}
 }
 
 void AGS_Player::PossessedBy(AController* NewController)
@@ -122,25 +122,9 @@ void AGS_Player::PossessedBy(AController* NewController)
 
 	if (PS && StatComp)
 	{
-		float HealthToRestoreFromPS = PS->CurrentHealth;
-		bool bShouldBeAliveFromPS = PS->bIsAlive;
-
-		float ClampedHealthForStatComp = FMath::Clamp(HealthToRestoreFromPS, 0.f, StatComp->GetMaxHealth());
-
-		if (!bShouldBeAliveFromPS)
-		{
-			ClampedHealthForStatComp = 0.f;
-		}
-		else if (ClampedHealthForStatComp <= 0.f && StatComp->GetMaxHealth() > KINDA_SMALL_NUMBER)
-		{
-			ClampedHealthForStatComp = FMath::Min(1.f, StatComp->GetMaxHealth());
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Player (%s) PossessedBy: Restoring state from PlayerState. PS.Health: %f, PS.bIsAlive: %s. Setting StatComp Health to: %f"),
-			*GetName(), PS->CurrentHealth, PS->bIsAlive ? TEXT("True") : TEXT("False"), ClampedHealthForStatComp);
-
-		StatComp->SetCurrentHealth(ClampedHealthForStatComp, false);
+		StatComp->SetCurrentHealth(PS->CurrentHealth, true);
 		PS->OnPawnStatInitialized();
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Player::PossessedBy: Synced StatComp health from PlayerState. PS Health: %f, StatComp Health set to: %f"), PS->CurrentHealth, StatComp->GetCurrentHealth());
 	}
 	else
 	{
@@ -151,28 +135,28 @@ void AGS_Player::PossessedBy(AController* NewController)
 
 void AGS_Player::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	// 2. 가시성 끄기
-	SteamNameWidgetComp->SetVisibility(false);
+	//// 2. 가시성 끄기
+	//SteamNameWidgetComp->SetVisibility(false);
 
-	// 3. 콜리전 비활성화
-	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//// 3. 콜리전 비활성화
+	//SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	// 4. BodySetup 정리
-	if (SteamNameWidgetComp->GetBodySetup())
-	{
-		SteamNameWidgetComp->DestroyPhysicsState();
-	}
-	
-	if (IsValid(SteamNameWidgetComp))
-	{
-		if (UUserWidget* Widget = SteamNameWidgetComp->GetWidget())
-		{
-			Widget->RemoveFromParent();
-		}
-		SteamNameWidgetComp->SetWidget(nullptr);
-		SteamNameWidgetComp->DestroyComponent();
-	}
-	
+	//// 4. BodySetup 정리
+	//if (SteamNameWidgetComp->GetBodySetup())
+	//{
+	//	SteamNameWidgetComp->DestroyPhysicsState();
+	//}
+	//
+	//if (IsValid(SteamNameWidgetComp))
+	//{
+	//	if (UUserWidget* Widget = SteamNameWidgetComp->GetWidget())
+	//	{
+	//		Widget->RemoveFromParent();
+	//	}
+	//	SteamNameWidgetComp->SetWidget(nullptr);
+	//	SteamNameWidgetComp->DestroyComponent();
+	//}
+	//
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -181,21 +165,21 @@ void AGS_Player::BeginDestroy()
 	// 1. 먼저 Super::BeginDestroy() 호출 (중요!)
 	Super::BeginDestroy();
 
-	// 2. IsValid() 체크와 함께 안전하게 정리
-	if (IsValid(SteamNameWidgetComp) && !SteamNameWidgetComp->IsBeingDestroyed())
-	{
-		SteamNameWidgetComp->SetWidget(nullptr);
-		SteamNameWidgetComp->SetVisibility(false);
-		SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//// 2. IsValid() 체크와 함께 안전하게 정리
+	//if (IsValid(SteamNameWidgetComp) && !SteamNameWidgetComp->IsBeingDestroyed())
+	//{
+	//	SteamNameWidgetComp->SetWidget(nullptr);
+	//	SteamNameWidgetComp->SetVisibility(false);
+	//	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-		// BodySetup 정리 (필요한 경우만)
-		if (SteamNameWidgetComp->GetBodySetup())
-		{
-			SteamNameWidgetComp->DestroyPhysicsState();
-		}
+	//	// BodySetup 정리 (필요한 경우만)
+	//	if (SteamNameWidgetComp->GetBodySetup())
+	//	{
+	//		SteamNameWidgetComp->DestroyPhysicsState();
+	//	}
 
-		// DestroyComponent() 호출하지 않음! - 자동으로 소멸됨
-	}
+	//	// DestroyComponent() 호출하지 않음! - 자동으로 소멸됨
+	//}
 
 	// 3. 다른 참조들도 안전하게 정리
 	if (IsValid(AkComponent) && !AkComponent->IsBeingDestroyed())
@@ -300,7 +284,7 @@ void AGS_Player::OnDeath()
 	AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(GetPlayerState());
 	if (GS_PS)
 	{
-		GS_PS->bIsAlive = false;
+		GS_PS->SetIsAlive(false);
 	}
 	AGS_TpsController* GS_PC = Cast<AGS_TpsController>(GetController());
 	if (IsValid(GS_PC) && GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
@@ -455,18 +439,31 @@ void AGS_Player::PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPos
 
 void AGS_Player::UpdateSteamNameWidgetRotation()
 {
-	if (!IsValid(SteamNameWidgetComp))
-	{
-		return;
-	}
-    
-	if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
-	{
-		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
-		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
-		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
-		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
-        
-		SteamNameWidgetComp->SetWorldRotation(WidgetRotation);
-	}
+	//if (!IsValid(SteamNameWidgetComp))
+	//{
+	//	return;
+	//}
+ //   
+	//if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
+	//{
+	//	FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+	//	FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+	//	FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+	//	FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+ //       
+	//	SteamNameWidgetComp->SetWorldRotation(WidgetRotation);
+	//}
 }
+
+/*
+void AGS_Player::Server_RestKey_Implementation()
+{
+	SetSkillInputControl(true, true, true, true);
+	UGS_SeekerAnimInstance * SeekerAnim = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
+	if (SeekerAnim)
+	{
+		SeekerAnim->IsPlayingUpperBodyMontage = false;
+		SeekerAnim->IsPlayingFullBodyMontage = false;
+	};
+}
+*/

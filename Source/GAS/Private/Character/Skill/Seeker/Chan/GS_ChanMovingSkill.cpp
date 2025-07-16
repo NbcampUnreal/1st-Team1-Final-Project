@@ -24,7 +24,6 @@ void UGS_ChanMovingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 			OwnerPlayer->SetMoveControlValue(false, false);
@@ -61,34 +60,43 @@ void UGS_ChanMovingSkill::ActiveSkill()
 	}
 }
 
-void UGS_ChanMovingSkill::DeactiveSkill()
+void UGS_ChanMovingSkill::OnSkillCanceledByDebuff()
 {
-	Super::DeactiveSkill();
+	Super::OnSkillCanceledByDebuff();
+	
+}
+
+void UGS_ChanMovingSkill::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
+
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 
+	if(OwnerPlayer)
+	{
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->SetSkillInputControl(true, true, true);
 		OwnerPlayer->CanChangeSeekerGait = true;
+	}
 
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
-		}
-		
-		// =======================
+	if (OwnerCharacter->GetSkillComp())
+	{
+		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
+	}
+
+	// =======================
+	// 스킬 종료 VFX 재생
+	// =======================
+	if (OwningComp)
+	{
+		FVector SkillLocation = OwnerCharacter->GetActorLocation();
+		FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+
 		// 스킬 종료 VFX 재생
-		// =======================
-		if (OwningComp)
-		{
-			FVector SkillLocation = OwnerCharacter->GetActorLocation();
-			FRotator SkillRotation = OwnerCharacter->GetActorRotation();
-			
-			// 스킬 종료 VFX 재생
-			OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
-		}
-
+		OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
+	}
 }
 
 void UGS_ChanMovingSkill::InterruptSkill()

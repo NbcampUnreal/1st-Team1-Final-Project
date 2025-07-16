@@ -33,7 +33,7 @@ public:
 	//마우스 이벤트
 	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-
+	
 	//기본 기능
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void SetBoardManager(UGS_ArcaneBoardManager* InBoardManager);
@@ -92,9 +92,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	FVector2D GetGridCellSize() const;
-
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	FVector2D CalculateDragVisualScale(uint8 RuneID) const;
 
 	//툴팁
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -190,10 +187,9 @@ private:
 	UGS_RuneGridCellWidget* LastClickedCell;
 
 	//툴팁
-	FVector2D TooltipSize;
 	uint8 CurrTooltipRuneID;
 
 	void ShowTooltip(uint8 RuneID, const FVector2D& MousePos);
-	FVector2D CalculateTooltipPosition(const FVector2D& MousePos);
 	bool ShouldShowTooltip() const;
+	bool IsMouseOverTooltipWidget(const FVector2D& ScreenPos);
 };

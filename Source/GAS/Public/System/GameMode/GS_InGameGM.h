@@ -29,9 +29,6 @@ protected:
 	virtual void StartPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Logout(AController* Exiting) override;
-	virtual void EndMatch() override;
-	void FindSpawnedMonsters();
-	void CleanupSpawnedMonsters();
 	void DelayedRestartPlayer();
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Configuration")
 	UGS_PawnMappingDataAsset* PawnMappingDataAsset;

@@ -69,6 +69,10 @@ void UGS_MerciUltimateSkill::ExecuteSkillEffect()
 	UE_LOG(LogTemp, Warning, TEXT("AutoAimingMode Start"));
 }
 
+void UGS_MerciUltimateSkill::OnSkillAnimationEnd()
+{
+}
+
 void UGS_MerciUltimateSkill::InterruptSkill()
 {
 	Super::InterruptSkill();

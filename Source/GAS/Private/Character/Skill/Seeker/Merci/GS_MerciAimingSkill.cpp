@@ -54,6 +54,10 @@ void UGS_MerciAimingSkill::OnSkillCommand()
 	}
 }
 
+void UGS_MerciAimingSkill::OnSkillAnimationEnd()
+{
+}
+
 void UGS_MerciAimingSkill::InterruptSkill()
 {
 	Super::InterruptSkill();

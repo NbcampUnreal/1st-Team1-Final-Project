@@ -80,10 +80,15 @@ void UGS_ChanAimingSkill::ActiveSkill()
 	}
 }
 
-void UGS_ChanAimingSkill::DeactiveSkill()
+void UGS_ChanAimingSkill::OnSkillCanceledByDebuff()
 {
-	Super::DeactiveSkill();
-	
+	Super::OnSkillCanceledByDebuff();
+}
+
+void UGS_ChanAimingSkill::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
+
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		// Change Slot
@@ -92,7 +97,7 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 		// Change Slot
 		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		
+
 		OwnerPlayer->CanChangeSeekerGait = true;
 		OwnerPlayer->SetSkillInputControl(true, true, true);
 		OwnerPlayer->SetMoveControlValue(true, true);
@@ -109,11 +114,11 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 		{
 			FVector SkillLocation = OwnerCharacter->GetActorLocation();
 			FRotator SkillRotation = OwnerCharacter->GetActorRotation();
-			
+
 			// 스킬 종료 VFX 재생
 			OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
 		}
-	
+
 		ShowProgressBar(false);
 		OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 	}
@@ -155,8 +160,7 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		RangeVFXSpawnHandle,
 		FTimerDelegate::CreateUObject(this, &UGS_ChanAimingSkill::SpawnAimingSkillVFX),
 		0.93f,
-		false
-	);
+		false);
 
 		// End Skill
 		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(KnockbackHandle, this, &UGS_ChanAimingSkill::ExecuteSkillEffect, 0.8f, false);

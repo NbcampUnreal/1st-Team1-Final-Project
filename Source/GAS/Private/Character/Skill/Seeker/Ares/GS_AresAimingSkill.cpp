@@ -41,10 +41,15 @@ void UGS_AresAimingSkill::ActiveSkill()
 	ExecuteSkillEffect();
 }
 
-void UGS_AresAimingSkill::DeactiveSkill()
+void UGS_AresAimingSkill::OnSkillCanceledByDebuff()
 {
-	Super::DeactiveSkill();
+	Super::OnSkillCanceledByDebuff();
 	
+}
+
+void UGS_AresAimingSkill::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 }
 
 void UGS_AresAimingSkill::ExecuteSkillEffect()
