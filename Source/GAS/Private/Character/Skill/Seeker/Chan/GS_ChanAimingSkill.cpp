@@ -53,7 +53,7 @@ void UGS_ChanAimingSkill::ActiveSkill()
 			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
 		}
 
-		// 에이밍 스킬 시작 사운드 재생
+		// 스킬 시작 사운드 재생
 		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 		if (SkillInfo && SkillInfo->SkillStartSound)
 		{
@@ -120,13 +120,13 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 {
 	Super::OnSkillCommand();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OnSkillCommand IsActive : %d, | LocalRole : %s"), OwnerPlayer->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming), *UEnum::GetValueAsString(OwnerPlayer->GetLocalRole()) ); 
-		
+	{		
+		// 애니메이션 설정
 		OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 
+		// 입력 제한 설정
 		OwnerPlayer->SetLookControlValue(false, false);
 		OwnerPlayer->SetMoveControlValue(false, false);
 		OwnerPlayer->SetSkillInputControl(false, false, false);
@@ -190,6 +190,7 @@ void UGS_ChanAimingSkill::InterruptSkill()
 
 void UGS_ChanAimingSkill::OnShieldSlam()
 {
+	// 방패 충돌
 	TArray<FHitResult> HitResults;
 
 	const FVector Start = OwnerCharacter->GetActorLocation();
@@ -231,19 +232,19 @@ void UGS_ChanAimingSkill::OnShieldSlam()
 			HitActors.Add(HitActor);
 
 			// 충돌 효과 활성화
-			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
+			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor)) // 몬스터일 경우
 			{
 				ApplyEffectToDungeonMonster(TargetMonster);
 				// Impact VFX 재생
 				TargetMonster->Multicast_PlayImpactVFX(SkillImpactVFX, SkillVFXScale);
 			}
-			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
+			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor)) // 가디언일 경우
 			{
 				ApplyEffectToGuardian(TargetGuardian);
 				// Impact VFX 재생
 				TargetGuardian->Multicast_PlayImpactVFX(SkillImpactVFX, SkillVFXScale);
 			}
-			else if (AGS_Character* Target = Cast<AGS_Character>(HitActor))
+			else if (AGS_Character* Target = Cast<AGS_Character>(HitActor)) // 시커일 경우
 			{
 				// 넉백
 				const FVector LaunchDirection = (Target->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();

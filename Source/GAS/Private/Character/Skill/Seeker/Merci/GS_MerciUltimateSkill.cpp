@@ -15,7 +15,6 @@ UGS_MerciUltimateSkill::UGS_MerciUltimateSkill()
 
 void UGS_MerciUltimateSkill::ActiveSkill()
 {
-	// 스킬 상태 업데이트
 	Super::ActiveSkill();
 
 	// 쿨타임 측정 시작
@@ -34,18 +33,25 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 			}
 		}
 
+		// 줌인 효과
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 		if (MerciCharacter)
 		{
 			MerciCharacter->Client_StartZoom();
 		}
 
+		// 타이머 설정
 		OwnerCharacter->GetWorldTimerManager().SetTimer(AutoAimingHandle, this, &UGS_MerciUltimateSkill::DeactiveSkill, AutoAimingStateTime, false);
 		OwnerCharacter->GetWorldTimerManager().SetTimer(AutoAimTickHandle, this, &UGS_MerciUltimateSkill::TickAutoAimTarget, AutoAimTickInterval, true);
+
+		// 입력 제한 설정
 		OwnerCharacter->SetSkillInputControl(true, true, false, false);
 	}
 
+	// 몬스터 리스트 업데이트
 	UpdateMonsterList();
+
+	// 자동 조준 시작
 	AutoAimingStart();
 }
 
@@ -63,7 +69,10 @@ void UGS_MerciUltimateSkill::InterruptSkill()
 
 void UGS_MerciUltimateSkill::AutoAimingStart()
 {
+	// 타겟 찾기
 	AActor* Target = FindCloseTarget();
+
+	// 타겟 설정
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (Target && OwnerCharacter->HasAuthority())
 	{
@@ -76,10 +85,16 @@ void UGS_MerciUltimateSkill::AutoAimingStart()
 
 AActor* UGS_MerciUltimateSkill::FindCloseTarget()
 {
-	if (!OwnerCharacter) return nullptr;
+	if (!OwnerCharacter)
+	{
+		return nullptr;
+	}
 	
 	AController* Controller = OwnerCharacter->GetController();
-	if (!Controller) return nullptr;
+	if (!Controller) 
+	{
+		return nullptr;
+	}
 
 	FVector CamLoc;
 	FRotator CamRot;
@@ -146,6 +161,7 @@ void UGS_MerciUltimateSkill::TickAutoAimTarget()
 		return;
 	}
 
+	// 가까운 타겟 찾기
 	AActor* NewTarget = FindCloseTarget();
 
 	if (OwnerCharacter->HasAuthority())
@@ -153,6 +169,7 @@ void UGS_MerciUltimateSkill::TickAutoAimTarget()
 		// 화살에 타겟 전달
 		if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 		{
+			// 타겟 설정
 			MerciCharacter->SetAutoAimTarget(NewTarget);
 
 			if (NewTarget != CurrentTarget)

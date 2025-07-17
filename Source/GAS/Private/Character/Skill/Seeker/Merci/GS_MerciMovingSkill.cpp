@@ -25,6 +25,8 @@ void UGS_MerciMovingSkill::ActiveSkill()
 		}
 		
 		MerciCharacter->SetDrawState(false);
+
+		// 활 당기기
 		MerciCharacter->DrawBow(SkillAnimMontages[0]);
 	}
 }
@@ -40,6 +42,7 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 		return;
 	}
 
+	// 활 놓기
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
 
@@ -50,9 +53,11 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 	
 	if (IsFullyDrawn)
 	{
+		// 쿨타임 측정 시작
 		StartCoolDown();
 	}
 
+	// 스킬 종료
 	DeactiveSkill();
 }
 

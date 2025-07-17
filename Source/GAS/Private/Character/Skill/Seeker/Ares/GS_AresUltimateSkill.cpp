@@ -17,17 +17,20 @@ void UGS_AresUltimateSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
 
+	// 쿨타임 측정 시작
 	StartCoolDown();
 
-	// 스킬 시작 사운드 재생
+	
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
 	{
+		// 스킬 시작 사운드 재생
 		if (SkillInfo && SkillInfo->SkillStartSound)
 		{
 			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
 		}
 
+		// 입력 제한 설정
 		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 		OwnerPlayer->SetSkillInputControl(false, false, false, false);
@@ -47,8 +50,10 @@ void UGS_AresUltimateSkill::ActiveSkill()
 		OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
 	}
 
-	// 만약 일정 시간 후 효과 해제를 원하면, 타이머로 DeactiveSkill 호출
+	// DeactiveSkill 호출을 위한 타이머 설정
 	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UltimateSkillTimerHandle, this, &UGS_AresUltimateSkill::DeactiveSkill, 10.f, false);
+
+	// 광전사화
 	BecomeBerserker();
 }
 

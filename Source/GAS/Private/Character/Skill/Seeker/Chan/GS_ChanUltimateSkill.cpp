@@ -27,7 +27,6 @@ UGS_ChanUltimateSkill::UGS_ChanUltimateSkill()
 
 void UGS_ChanUltimateSkill::ActiveSkill()
 {
-	// 스킬 상태 업데이트
 	Super::ActiveSkill();
 
 	// 쿨타임 측정 시작
@@ -36,6 +35,7 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	// 구조물 충돌 확인 변수 초기화
 	bInStructureCrash = false;
 
+	// 입력 제한 설정
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerPlayer->SetSkillInputControl(false, false, false);
 
@@ -87,7 +87,7 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 	// 데이터 테이블에서 스킬 정보 가져오기
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 	
-	if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(HitActor))
+	if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(HitActor)) // 가디언일 경우
 	{
 		ApplyEffectToGuardian(Guardian);
 		
@@ -99,7 +99,7 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 		
 		EndCharge();
 	}
-	else if (AGS_Monster* Monster = Cast<AGS_Monster>(HitActor))
+	else if (AGS_Monster* Monster = Cast<AGS_Monster>(HitActor)) // 몬스터일 경우
 	{
 		if (!HitActors.Contains(Monster))
 		{
@@ -125,16 +125,23 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->WallCollisionSound);
 		}
 		
+		// 대시 종료
 		EndCharge();
 	}
 }
 
 void UGS_ChanUltimateSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
-	if (!Target) return;
+	if (!Target)
+	{
+		return;
+	}
 
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if (!OwnerPlayer) return;
+	if (!OwnerPlayer) 
+	{
+		return;
+	}
 
 	// 경직 디버프
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
@@ -183,10 +190,12 @@ void UGS_ChanUltimateSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 void UGS_ChanUltimateSkill::DeactiveSkill()
 {
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-
-	// EndCharge 안에서
-	OwnerPlayer->UltimateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+	if (OwnerPlayer)
+	{
+		// 넉백 Collision 설정
+		OwnerPlayer->UltimateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
 	// 속도 조절
 	OwnerCharacter->Server_SetCharacterSpeed(1.0f);
 
@@ -194,9 +203,11 @@ void UGS_ChanUltimateSkill::DeactiveSkill()
 	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
 	Controller->StopAutoMoveForward();
 
+	// 타이머 정리
 	GetWorld()->GetTimerManager().ClearTimer(ChargeTimerHandle);
 	GetWorld()->GetTimerManager().ClearTimer(ChargeUpdateTimerHandle);
 
+	// 충돌 이력 초기화
 	HitActors.Empty();
 
 	Super::DeactiveSkill();
@@ -204,7 +215,7 @@ void UGS_ChanUltimateSkill::DeactiveSkill()
 
 void UGS_ChanUltimateSkill::StartCharge()
 {	
-	// KnockBack Collision On
+	// 넉백 Collision 켜기
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerPlayer->UltimateCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
@@ -226,9 +237,11 @@ void UGS_ChanUltimateSkill::StartCharge()
 
 	if (OwnerPlayer)
 	{
+		// 애니메이션 설정
 		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		// 애니메이션 재생
+
+		// 스킬 애니메이션 재생
 		if (SkillAnimMontages[0])
 		{
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
@@ -253,7 +266,7 @@ void UGS_ChanUltimateSkill::StartCharge()
 void UGS_ChanUltimateSkill::EndCharge()
 {
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if(bInStructureCrash)
+	if(bInStructureCrash) // 구조물에 부딪혔을 때
 	{
 		if (OwnerPlayer && SkillAnimMontages[2])
 		{
@@ -261,7 +274,7 @@ void UGS_ChanUltimateSkill::EndCharge()
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[2]);
 		}
 	}
-	else
+	else // 구조물이 아닌 곳에 부딪혔을 때
 	{
 		if (OwnerPlayer && SkillAnimMontages[1])
 		{

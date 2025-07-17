@@ -14,7 +14,6 @@ void UGS_MerciAimingSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
 	
-	// 유효 입력이므로 무효 입력 플래그 해제
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (MerciCharacter)
 	{
@@ -26,6 +25,8 @@ void UGS_MerciAimingSkill::ActiveSkill()
 		}
 
 		MerciCharacter->SetDrawState(false);
+
+		// 활 당기기
 		MerciCharacter->DrawBow(SkillAnimMontages[0]);
 	}
 }
@@ -37,6 +38,7 @@ void UGS_MerciAimingSkill::OnSkillCommand()
 		return;
 	}
 
+	// 활 놓기
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
 	if(MerciCharacter->NormalArrowClass)
@@ -45,9 +47,11 @@ void UGS_MerciAimingSkill::OnSkillCommand()
 	}
 	if(IsFullyDrawn)
 	{
+		// 쿨타임 측정 시작
 		StartCoolDown();
 	}
 
+	// 스킬 종료
 	DeactiveSkill();
 }
 

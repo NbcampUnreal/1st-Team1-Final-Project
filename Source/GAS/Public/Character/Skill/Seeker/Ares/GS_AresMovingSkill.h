@@ -51,6 +51,4 @@ private:
 	FVector DashEndLocation;
 
 	TSet<AActor*> DamagedActors;
-
-	bool bPressedDuringCooldown = false;
 };
