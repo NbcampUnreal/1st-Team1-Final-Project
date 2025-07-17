@@ -4,6 +4,11 @@
 #include "Character/Skill/Seeker/Ares/GS_AresRollingSkill.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 
+UGS_AresRollingSkill::UGS_AresRollingSkill()
+{
+	CurrentSkillType = ESkillSlot::Rolling;
+}
+
 void UGS_AresRollingSkill::ActiveSkill()
 {
 	if (!CanActive())
@@ -36,10 +41,6 @@ void UGS_AresRollingSkill::ActiveSkill()
 			OwnerPlayer->SetSkillInputControl(false, false, false, false);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->CanChangeSeekerGait = false;
-			if (OwnerCharacter->GetSkillComp())
-			{
-				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, true);
-			}
 			FName RollDirection = CalRollDirection();
 			if (RollDirection == FName("00"))
 			{
@@ -83,6 +84,6 @@ void UGS_AresRollingSkill::InterruptSkill()
 		AresCharacter->SetSkillInputControl(true, true, true);
 		AresCharacter->SetMoveControlValue(true, true);
 		AresCharacter->CanChangeSeekerGait = true;
-		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
+		SetIsActive(false);
 	}
 }
