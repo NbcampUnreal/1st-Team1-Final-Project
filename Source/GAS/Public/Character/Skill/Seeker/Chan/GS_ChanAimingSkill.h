@@ -7,13 +7,13 @@
 #include "GS_ChanAimingSkill.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class GAS_API UGS_ChanAimingSkill : public UGS_SeekerSkillBase
 {
 	GENERATED_BODY()
-	
+
 public:
 	UGS_ChanAimingSkill();
 
@@ -21,11 +21,7 @@ public:
 	virtual void OnSkillCanceledByDebuff() override;
 	virtual void OnSkillAnimationEnd() override;
 	virtual void OnSkillCommand() override;
-	virtual void ExecuteSkillEffect() override;
 	virtual void InterruptSkill() override;
-
-	// 공격
-	void OnShieldSlam();
 
 	// 스테미나 관리
 	void TickDrainStamina();
@@ -34,38 +30,30 @@ public:
 protected:
 	// 스탠스 관리
 	void StartHoldUp();
-	void EndHoldUp();
 
 	// 공격
 	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target) override;
 	virtual void ApplyEffectToGuardian(AGS_Guardian* Target) override;
 
 private:
-	// 스탠스 관리
-	bool bIsHoldingUp;
+	virtual void DeactiveSkill() override;
+
+	// 공격
+	void OnShieldSlam();
 
 	// 스테미나 관리
-	float MaxStamina=20.0f;
+	float MaxStamina = 20.0f;
 	float CurrentStamina;
-	float StaminaDrainRate=1.0f; // 초당 소비량
-	float SlamStaminaCost=20.0f;
+	float StaminaDrainRate = 1.0f; // 초당 소비량
+	float SlamStaminaCost = 20.0f;
 	FTimerHandle StaminaDrainHandle;
-
-	// Slam 관리
-	// FTimerHandle SlamCooldownHandle;
-	/*bool bCanSlam = true;*/
-
-	/*UPROPERTY(EditDefaultsOnly, Category = "Skill")
-	float SlamCooldownTime = 1.5f; // 슬램 이후 재사용 대기 시간*/
-
-	//void ResetSlamCooldown();
 
 	// UI
 	void UpdateProgressBar(float InStamina);
 	void ShowProgressBar(bool bShow);
 
 	FTimerHandle KnockbackHandle;
-	
+
 	//Range VFX
 	FTimerHandle RangeVFXSpawnHandle;
 	void SpawnAimingSkillVFX();

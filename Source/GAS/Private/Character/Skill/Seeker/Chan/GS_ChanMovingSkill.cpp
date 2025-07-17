@@ -20,43 +20,56 @@ UGS_ChanMovingSkill::UGS_ChanMovingSkill()
 
 void UGS_ChanMovingSkill::ActiveSkill()
 {
-	if (!CanActive()) return;
+	if (!CanActive()) 
+	{
+		return;
+	}
+
+	// 스킬 상태 업데이트
 	Super::ActiveSkill();
+
+	// 스킬 쿨타임 측정 시작
+	StartCoolDown();
+
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->SetSkillInputControl(false, false, false);
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		OwnerPlayer->SetMoveControlValue(false, false);
+		OwnerPlayer->SetSkillInputControl(false, false, false);
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 			
-			if (OwnerCharacter->GetSkillComp())
-			{
-				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, true);
-			}
-			// =======================
-			// VFX 재생 - 컴포넌트 RPC 사용
-			// =======================
-			if (OwningComp)
-			{
-				FVector SkillLocation = OwnerCharacter->GetActorLocation();
-				FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+		if (OwnerCharacter->GetSkillComp())
+		{
+			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, true);
+		}
+		// =======================
+		// VFX 재생 - 컴포넌트 RPC 사용
+		// =======================
+		if (OwningComp)
+		{
+			FVector SkillLocation = OwnerCharacter->GetActorLocation();
+			FRotator SkillRotation = OwnerCharacter->GetActorRotation();
 			
-				// 스킬 시전 VFX 재생
-				OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
+			// 스킬 시전 VFX 재생
+			OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
 			
-				// 스킬 범위 표시 VFX 재생
-				OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, 800.0f);
-			}
+			// 스킬 범위 표시 VFX 재생
+			OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, 800.0f);
+		}
 			
-			// 무빙 스킬 사운드 재생
-			const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-			if (SkillInfo && SkillInfo->SkillStartSound)
-			{
-				OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
-			}
+		// 무빙 스킬 사운드 재생
+		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+		if (SkillInfo && SkillInfo->SkillStartSound)
+		{
+			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+		}
+	
+		// 방어력 강화
+		StrengthenDefense();
 
-			ExecuteSkillEffect();
+		// 어그로
+		AggroToOwner();
 	}
 }
 
@@ -113,7 +126,34 @@ void UGS_ChanMovingSkill::InterruptSkill()
 
 }
 
-void UGS_ChanMovingSkill::ExecuteSkillEffect()
+void UGS_ChanMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
+{
+	// 어그로 디버프
+	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
+	{
+		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Aggro, OwnerCharacter);
+	}
+}
+
+void UGS_ChanMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
+{
+	// 뮤트 디버프
+	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
+	{
+		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Mute, OwnerCharacter);
+	}
+}
+
+void UGS_ChanMovingSkill::DeactiveSkill()
+{
+	// 방어력 증가 디버프 해제
+	DeactiveDEFBuff();
+
+	// 스킬 상태 업데이트
+	Super::DeactiveSkill();
+}
+
+void UGS_ChanMovingSkill::AggroToOwner()
 {
 	TArray<FHitResult> HitResults;
 
@@ -165,34 +205,19 @@ void UGS_ChanMovingSkill::ExecuteSkillEffect()
 	}
 }
 
-void UGS_ChanMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
+void UGS_ChanMovingSkill::StrengthenDefense()
 {
 	// 방어력 증가
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
 	{
 		FGS_StatRow BuffStat;
-		BuffStat.DEF = 200.0f;     // 방어력 +50
+		BuffStat.DEF = ExtraDefense;     // 방어력 *2(+200.0f)
 
 		BuffAmount = BuffStat; // 나중에 되돌릴 때 사용할 변수
 		StatComp->ChangeStat(BuffStat);
 	}
 
-	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(DEFBuffHandle, this, &UGS_ChanMovingSkill::DeactiveDEFBuff, 20.0f, false);
-
-	// 어그로 디버프
-	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
-	{
-		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Aggro, OwnerCharacter);
-	}
-}
-
-void UGS_ChanMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
-{
-	// 뮤트 디버프
-	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
-	{
-		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Mute, OwnerCharacter);
-	}
+	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(DEFBuffHandle, this, &UGS_ChanMovingSkill::DeactiveSkill, StrengthenDefenseDuration, false);
 }
 
 void UGS_ChanMovingSkill::DeactiveDEFBuff()

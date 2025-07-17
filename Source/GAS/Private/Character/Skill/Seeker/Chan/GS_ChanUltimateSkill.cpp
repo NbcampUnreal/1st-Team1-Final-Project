@@ -27,17 +27,22 @@ UGS_ChanUltimateSkill::UGS_ChanUltimateSkill()
 
 void UGS_ChanUltimateSkill::ActiveSkill()
 {
-	if (!CanActive()) return;
+	if (!CanActive()) 
+	{
+		return;
+	}
+
+	// 스킬 상태 업데이트
 	Super::ActiveSkill();
+
+	// 쿨타임 측정 시작
+	StartCoolDown();
 	
+	// 구조물 충돌 확인 변수 초기화
 	bInStructureCrash = false;
 
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerPlayer->SetSkillInputControl(false, false, false);
-	if (OwnerCharacter->GetSkillComp())
-	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, true);
-	}
 
 	// 궁극기 사운드 재생
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
@@ -51,16 +56,10 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UGS_ChanUltimateSkill::StartCharge, 0.5f, false);
 }
 
-void UGS_ChanUltimateSkill::ExecuteSkillEffect()
-{
-
-}
-
 void UGS_ChanUltimateSkill::OnSkillCanceledByDebuff()
 {
 	Super::OnSkillCanceledByDebuff();
 
-	
 }
 
 void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
@@ -76,10 +75,9 @@ void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 		OwnerPlayer->SetSkillInputControl(true, true, true);
 		OwnerPlayer->CanChangeSeekerGait = true;
 	}
-	if (OwnerCharacter->GetSkillComp())
-	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
-	}
+
+	// 스킬 상태 업데이트
+	SetIsActive(false);
 }
 
 void UGS_ChanUltimateSkill::InterruptSkill()
@@ -164,13 +162,6 @@ void UGS_ChanUltimateSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 	// 몬스터 넉백 적용
 	if (Target->GetCharacterMovement())
 	{
-		/*if (AAIController* AICon = Cast<AAIController>(Target->GetController()))
-		{
-			AICon->StopMovement();
-		}
-
-		Target->GetCharacterMovement()->SetMovementMode(MOVE_Walking);*/
-
 		Target->LaunchCharacter(KnockbackVelocity, true, true);
 	}
 
@@ -194,10 +185,30 @@ void UGS_ChanUltimateSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
     }
 }
 
-void UGS_ChanUltimateSkill::StartCharge()
+void UGS_ChanUltimateSkill::DeactiveSkill()
 {
-	bIsCharging = true;
-	
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+
+	// EndCharge 안에서
+	OwnerPlayer->UltimateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 속도 조절
+	OwnerCharacter->Server_SetCharacterSpeed(1.0f);
+
+	// 자동 이동 종료
+	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
+	Controller->StopAutoMoveForward();
+
+	GetWorld()->GetTimerManager().ClearTimer(ChargeTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(ChargeUpdateTimerHandle);
+
+	HitActors.Empty();
+
+	Super::DeactiveSkill();
+}
+
+void UGS_ChanUltimateSkill::StartCharge()
+{	
 	// KnockBack Collision On
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerPlayer->UltimateCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -244,7 +255,6 @@ void UGS_ChanUltimateSkill::StartCharge()
 	}
 }
 
-
 void UGS_ChanUltimateSkill::EndCharge()
 {
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
@@ -265,20 +275,5 @@ void UGS_ChanUltimateSkill::EndCharge()
 		}
 	}
 
-	
-	// EndCharge 안에서
-	OwnerPlayer->UltimateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	// 속도 조절
-	OwnerCharacter->Server_SetCharacterSpeed(1.0f);
-
-	// 자동 이동 종료
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->StopAutoMoveForward();
-
-	GetWorld()->GetTimerManager().ClearTimer(ChargeTimerHandle);
-	GetWorld()->GetTimerManager().ClearTimer(ChargeUpdateTimerHandle);
-
-	HitActors.Empty();
-
-	bIsCharging = false;
+	DeactiveSkill();
 }
