@@ -10,7 +10,11 @@ void UGS_AresRollingSkill::ActiveSkill()
 	{
 		return;
 	}
+	
 	Super::ActiveSkill();
+
+	StartCoolDown();
+
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
 		if (!OwnerPlayer->GetSkillInputControl().CanInputRoll)
@@ -65,10 +69,7 @@ void UGS_AresRollingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->CanChangeSeekerGait = true;
 
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
-		}
+		SetIsActive(false);
 	}
 }
 

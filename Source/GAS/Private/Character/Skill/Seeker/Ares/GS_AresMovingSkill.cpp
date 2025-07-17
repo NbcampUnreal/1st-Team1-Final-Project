@@ -22,11 +22,13 @@ UGS_AresMovingSkill::UGS_AresMovingSkill()
 
 void UGS_AresMovingSkill::ActiveSkill()
 {
-	if (!CanActiveInternally())
+	if (!CanActive())
 	{
-		bPressedDuringCooldown = true;
 		return;
 	}
+
+	Super::ActiveSkill();
+
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
@@ -46,7 +48,6 @@ void UGS_AresMovingSkill::ActiveSkill()
 	// 차징 시작
 	ChargingStartTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
 	ChargingTime = 0.0f;
-	bIsCharging = true;
 
 	// 일정 주기로 방향과 차징 시간 갱신
 	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(ChargingTimerHandle, this, &UGS_AresMovingSkill::UpdateCharging, 0.05f, true);
@@ -65,7 +66,7 @@ void UGS_AresMovingSkill::OnSkillAnimationEnd()
 
 void UGS_AresMovingSkill::OnSkillCommand()
 {
-	if (!CanActiveInternally() || bPressedDuringCooldown)
+	if (!CanActive() || !bIsActive)
 	{
 		return;
 	}
@@ -78,7 +79,6 @@ void UGS_AresMovingSkill::OnSkillCommand()
 	Super::OnSkillCommand();
 
 	// 차징 종료
-	bIsCharging = false;
 	OwnerCharacter->GetWorld()->GetTimerManager().ClearTimer(ChargingTimerHandle);
 
 	// 돌진 거리 계산
@@ -100,22 +100,8 @@ void UGS_AresMovingSkill::OnSkillCommand()
 		StartDash();
 	}
 
+	// 쿨다운 시작
 	StartCoolDown();
-}
-
-void UGS_AresMovingSkill::ExecuteSkillEffect()
-{
-
-}
-
-bool UGS_AresMovingSkill::IsActive() const
-{
-	return bIsCharging;
-}
-
-bool UGS_AresMovingSkill::CanActiveInternally() const
-{
-	return OwnerCharacter && !bIsCoolingDown;
 }
 
 void UGS_AresMovingSkill::InterruptSkill()
@@ -163,7 +149,6 @@ void UGS_AresMovingSkill::StartDash()
 	if (OwningComp)
 	{
 		FVector SkillLocation = OwnerCharacter->GetActorLocation();
-		//FRotator SkillRotation = OwnerCharacter->GetActorRotation();
 		FRotator SkillRotation = FRotator(0.f, 0.f, 0.f);
 
 
@@ -219,11 +204,11 @@ void UGS_AresMovingSkill::UpdateDash()
 
 	if (DashInterpAlpha >= 1.f)
 	{
-		StopDash();
+		DeactiveSkill();
 	}
 }
 
-void UGS_AresMovingSkill::StopDash()
+void UGS_AresMovingSkill::DeactiveSkill()
 {
 	GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
 
@@ -234,4 +219,6 @@ void UGS_AresMovingSkill::StopDash()
 	// 원래대로 Block으로 되돌리기
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+
+	Super::DeactiveSkill();
 }

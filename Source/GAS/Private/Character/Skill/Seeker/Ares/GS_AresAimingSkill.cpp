@@ -17,7 +17,12 @@ UGS_AresAimingSkill::UGS_AresAimingSkill()
 void UGS_AresAimingSkill::ActiveSkill()
 {
 	if (!CanActive()) return;
+
+	// 스킬 상태 업데이트
 	Super::ActiveSkill();
+
+	// 쿨타임 측정 시작
+	StartCoolDown();
 
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
@@ -38,13 +43,12 @@ void UGS_AresAimingSkill::ActiveSkill()
 		OwnerPlayer->SetSkillInputControl(false, false, false, false);
 	}
 	
-	ExecuteSkillEffect();
+	SpawnFirstProjectile();
 }
 
 void UGS_AresAimingSkill::OnSkillCanceledByDebuff()
 {
 	Super::OnSkillCanceledByDebuff();
-	
 }
 
 void UGS_AresAimingSkill::OnSkillAnimationEnd()
@@ -52,17 +56,47 @@ void UGS_AresAimingSkill::OnSkillAnimationEnd()
 	Super::OnSkillAnimationEnd();
 }
 
-void UGS_AresAimingSkill::ExecuteSkillEffect()
+void UGS_AresAimingSkill::InterruptSkill()
 {
-	Super::ExecuteSkillEffect();
-
-	UE_LOG(LogTemp, Warning, TEXT("AresAimingSkill ExecuteSkillEffect"));
-
+	Super::InterruptSkill();
 	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
-	if (!OwnerCharacter || !AresCharacter || !AresCharacter->AresProjectileClass) return;
+	if (AresCharacter->GetSkillComp())
+	{
+		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
+	}
+}
+
+bool UGS_AresAimingSkill::IsActive() const
+{
+	Super::IsActive();
+	return bIsActive;
+}
+
+void UGS_AresAimingSkill::DeactiveSkill()
+{
+	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+
+	// 스킬 종료 처리
+	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
+	Controller->SetLookControlValue(true, true);
+	AresCharacter->SetSkillInputControl(true, true, true);
+
+	Super::DeactiveSkill();
+}
+
+void UGS_AresAimingSkill::SpawnFirstProjectile()
+{
+	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	if (!OwnerCharacter || !AresCharacter || !AresCharacter->AresProjectileClass)
+	{
+		return;
+	}
 
 	UWorld* World = OwnerCharacter->GetWorld();
-	if (!World) return;
+	if (!World)
+	{
+		return;
+	}
 
 	// 발사 방향: 카메라 정면, 위로 뜨지 않게 Z 제거
 	FVector LaunchDirection = OwnerCharacter->GetControlRotation().Vector();
@@ -99,7 +133,7 @@ void UGS_AresAimingSkill::ExecuteSkillEffect()
 		{
 			bIsBerserker = UltimateSkill->IsActive();
 		}
-		
+
 	}
 
 	if (ProjectileA)
@@ -119,22 +153,6 @@ void UGS_AresAimingSkill::ExecuteSkillEffect()
 		0.3f, // 지연 시간 (초)
 		false
 	);
-}
-
-void UGS_AresAimingSkill::InterruptSkill()
-{
-	Super::InterruptSkill();
-	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
-	if (AresCharacter->GetSkillComp())
-	{
-		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
-	}
-}
-
-bool UGS_AresAimingSkill::IsActive() const
-{
-	Super::IsActive();
-	return bIsActive;
 }
 
 void UGS_AresAimingSkill::SpawnSecondProjectile()
@@ -184,11 +202,9 @@ void UGS_AresAimingSkill::SpawnSecondProjectile()
 		ProjectileB->Multicast_StartSwordSlashVFX();
 	}
 	
-	// 스킬 종료 처리
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->SetLookControlValue(true, true);
-	AresCharacter->SetSkillInputControl(true, true, true);
-	bIsActive = false;
+	DeactiveSkill();
 }
+
+
 	
 	
