@@ -12,10 +12,6 @@ UGS_ChanRollingSkill::UGS_ChanRollingSkill()
 
 void UGS_ChanRollingSkill::ActiveSkill()
 {
-	if (!CanActive())
-	{
-		return;
-	}
 	Super::ActiveSkill();
 	StartCoolDown();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))

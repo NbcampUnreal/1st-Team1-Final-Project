@@ -21,11 +21,6 @@ UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 
 void UGS_ChanAimingSkill::ActiveSkill()
 {
-	if (!CanActive()) 
-	{
-		return;
-	}
-
 	// 스킬 상태 업데이트
 	Super::ActiveSkill();
 	

@@ -12,11 +12,6 @@ UGS_MerciAimingSkill::UGS_MerciAimingSkill()
 
 void UGS_MerciAimingSkill::ActiveSkill()
 {
-	if (!CanActive())
-	{
-		return;
-	}
-
 	Super::ActiveSkill();
 	
 	// 유효 입력이므로 무효 입력 플래그 해제

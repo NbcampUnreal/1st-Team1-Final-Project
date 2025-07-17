@@ -12,11 +12,6 @@ UGS_MerciMovingSkill::UGS_MerciMovingSkill()
 
 void UGS_MerciMovingSkill::ActiveSkill()
 {
-	if (!CanActive())
-	{
-		return;
-	}
-
 	Super::ActiveSkill();
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);

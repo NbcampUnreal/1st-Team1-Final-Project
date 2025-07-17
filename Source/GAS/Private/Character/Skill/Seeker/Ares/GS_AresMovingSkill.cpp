@@ -22,11 +22,6 @@ UGS_AresMovingSkill::UGS_AresMovingSkill()
 
 void UGS_AresMovingSkill::ActiveSkill()
 {
-	if (!CanActive())
-	{
-		return;
-	}
-
 	Super::ActiveSkill();
 
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))

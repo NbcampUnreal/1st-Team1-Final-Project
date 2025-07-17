@@ -27,11 +27,6 @@ UGS_ChanUltimateSkill::UGS_ChanUltimateSkill()
 
 void UGS_ChanUltimateSkill::ActiveSkill()
 {
-	if (!CanActive()) 
-	{
-		return;
-	}
-
 	// 스킬 상태 업데이트
 	Super::ActiveSkill();
 

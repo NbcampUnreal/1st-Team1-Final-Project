@@ -20,11 +20,6 @@ UGS_ChanMovingSkill::UGS_ChanMovingSkill()
 
 void UGS_ChanMovingSkill::ActiveSkill()
 {
-	if (!CanActive()) 
-	{
-		return;
-	}
-
 	// 스킬 상태 업데이트
 	Super::ActiveSkill();
 

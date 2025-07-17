@@ -11,11 +11,6 @@ UGS_MerciRollingSkill::UGS_MerciRollingSkill()
 
 void UGS_MerciRollingSkill::ActiveSkill()
 {
-	if (!CanActive())
-	{
-		return;
-	}
-
 	Super::ActiveSkill();
 	
 	StartCoolDown();

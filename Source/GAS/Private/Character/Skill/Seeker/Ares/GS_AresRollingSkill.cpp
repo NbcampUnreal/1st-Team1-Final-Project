@@ -10,12 +10,7 @@ UGS_AresRollingSkill::UGS_AresRollingSkill()
 }
 
 void UGS_AresRollingSkill::ActiveSkill()
-{
-	if (!CanActive())
-	{
-		return;
-	}
-	
+{	
 	Super::ActiveSkill();
 
 	StartCoolDown();

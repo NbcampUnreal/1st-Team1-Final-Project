@@ -15,13 +15,9 @@ UGS_AresUltimateSkill::UGS_AresUltimateSkill()
 
 void UGS_AresUltimateSkill::ActiveSkill()
 {
-	if (!CanActive()) 
-	{
-		return;
-	}
+	Super::ActiveSkill();
 
 	StartCoolDown();
-	Super::ActiveSkill();
 
 	// 스킬 시작 사운드 재생
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();

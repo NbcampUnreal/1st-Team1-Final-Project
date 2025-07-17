@@ -16,8 +16,6 @@ UGS_AresAimingSkill::UGS_AresAimingSkill()
 
 void UGS_AresAimingSkill::ActiveSkill()
 {
-	if (!CanActive()) return;
-
 	// 스킬 상태 업데이트
 	Super::ActiveSkill();
 

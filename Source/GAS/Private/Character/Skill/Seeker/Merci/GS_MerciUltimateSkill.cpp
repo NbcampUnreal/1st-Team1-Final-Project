@@ -15,11 +15,6 @@ UGS_MerciUltimateSkill::UGS_MerciUltimateSkill()
 
 void UGS_MerciUltimateSkill::ActiveSkill()
 {
-	if (!CanActive()) 
-	{
-		return;
-	}
-
 	// 스킬 상태 업데이트
 	Super::ActiveSkill();
 

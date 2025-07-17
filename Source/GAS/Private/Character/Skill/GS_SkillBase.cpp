@@ -29,6 +29,11 @@ void UGS_SkillBase::InitSkill(AGS_Player* InOwner, UGS_SkillComp* InOwningComp, 
 
 void UGS_SkillBase::ActiveSkill()
 {
+	if (!CanActive())
+	{
+		return;
+	}
+
 	SetIsActive(true);
 }
 
