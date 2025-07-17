@@ -180,10 +180,7 @@ void UGS_ChanAimingSkill::InterruptSkill()
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 
 	OwnerPlayer->SetLookControlValue(true, true);
-	if (OwnerPlayer->GetSkillComp())
-	{
-		OwnerPlayer->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
-	}
+	SetIsActive(false);
 
 	CurrentStamina = 0;
 	ShowProgressBar(false);

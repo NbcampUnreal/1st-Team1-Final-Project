@@ -103,10 +103,7 @@ void UGS_AresMovingSkill::InterruptSkill()
 {
 	Super::InterruptSkill();
 	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
-	if (AresCharacter->GetSkillComp())
-	{
-		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
-	}
+	SetIsActive(false);
 }
 
 void UGS_AresMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)

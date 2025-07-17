@@ -58,10 +58,7 @@ void UGS_AresAimingSkill::InterruptSkill()
 {
 	Super::InterruptSkill();
 	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
-	if (AresCharacter->GetSkillComp())
-	{
-		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
-	}
+	SetIsActive(false);
 }
 
 void UGS_AresAimingSkill::DeactiveSkill()

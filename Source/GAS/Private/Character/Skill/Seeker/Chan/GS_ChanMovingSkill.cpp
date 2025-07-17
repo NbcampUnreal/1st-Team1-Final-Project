@@ -89,10 +89,7 @@ void UGS_ChanMovingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->CanChangeSeekerGait = true;
 	}
 
-	if (OwnerCharacter->GetSkillComp())
-	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
-	}
+	SetIsActive(false);
 
 	// =======================
 	// 스킬 종료 VFX 재생
@@ -112,10 +109,7 @@ void UGS_ChanMovingSkill::InterruptSkill()
 	Super::InterruptSkill();
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 
-	if (OwnerPlayer->GetSkillComp())
-	{
-		OwnerPlayer->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
-	}
+	SetIsActive(false);
 
 	OwnerPlayer->GetWorldTimerManager().ClearTimer(DEFBuffHandle);
 
