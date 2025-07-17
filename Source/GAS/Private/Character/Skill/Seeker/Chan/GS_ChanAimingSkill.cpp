@@ -13,9 +13,6 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/GS_Player.h"
 #include "AkAudioEvent.h"
-/*#include "AI/GS_AIController.h"
-#include "Navigation/PathFollowingComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"*/
 
 UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 {
@@ -24,8 +21,12 @@ UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 
 void UGS_ChanAimingSkill::ActiveSkill()
 {
-	if (!CanActive()) return;
+	// 스킬 상태 업데이트
 	Super::ActiveSkill();
+	
+	// 쿨타임 측정 시작
+	StartCoolDown();
+
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		// Change Slot
@@ -52,7 +53,7 @@ void UGS_ChanAimingSkill::ActiveSkill()
 			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
 		}
 
-		// 에이밍 스킬 시작 사운드 재생
+		// 스킬 시작 사운드 재생
 		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 		if (SkillInfo && SkillInfo->SkillStartSound)
 		{
@@ -70,13 +71,9 @@ void UGS_ChanAimingSkill::ActiveSkill()
 			// 스킬 시전 VFX 재생
 			OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
 		}
-		// Skill Stat
-		CurrentStamina = MaxStamina;
-	
-		// UI
-		ShowProgressBar(true);
-		UpdateProgressBar(CurrentStamina);
-		OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 1.0f, true);
+
+		// 방패 들기
+		StartHoldUp();
 	}
 }
 
@@ -103,10 +100,8 @@ void UGS_ChanAimingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->SetLookControlValue(true, true);
 
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
-		}
+		SetIsActive(false);
+
 		// =======================
 		// 스킬 종료 VFX 재생
 		// =======================
@@ -118,9 +113,6 @@ void UGS_ChanAimingSkill::OnSkillAnimationEnd()
 			// 스킬 종료 VFX 재생
 			OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
 		}
-
-		ShowProgressBar(false);
-		OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 	}
 }
 
@@ -128,13 +120,13 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 {
 	Super::OnSkillCommand();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OnSkillCommand IsActive : %d, | LocalRole : %s"), OwnerPlayer->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming), *UEnum::GetValueAsString(OwnerPlayer->GetLocalRole()) ); 
-		
+	{		
+		// 애니메이션 설정
 		OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 
+		// 입력 제한 설정
 		OwnerPlayer->SetLookControlValue(false, false);
 		OwnerPlayer->SetMoveControlValue(false, false);
 		OwnerPlayer->SetSkillInputControl(false, false, false);
@@ -162,12 +154,8 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		0.93f,
 		false);
 
-		// End Skill
-		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(KnockbackHandle, this, &UGS_ChanAimingSkill::ExecuteSkillEffect, 0.8f, false);
-
-		ShowProgressBar(false);
-		OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
-
+		// 내려치기
+		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(KnockbackHandle, this, &UGS_ChanAimingSkill::OnShieldSlam, 0.8f, false);
 	}
 }
 
@@ -185,9 +173,24 @@ void UGS_ChanAimingSkill::SpawnAimingSkillVFX()
 	}
 }
 
-
-void UGS_ChanAimingSkill::ExecuteSkillEffect()
+void UGS_ChanAimingSkill::InterruptSkill()
 {
+	Super::InterruptSkill();
+
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+
+	OwnerPlayer->SetLookControlValue(true, true);
+	SetIsActive(false);
+
+	CurrentStamina = 0;
+	ShowProgressBar(false);
+	OwnerPlayer->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+}
+
+
+void UGS_ChanAimingSkill::OnShieldSlam()
+{
+	// 방패 충돌
 	TArray<FHitResult> HitResults;
 
 	const FVector Start = OwnerCharacter->GetActorLocation();
@@ -199,46 +202,49 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
 
+	// 스킬 범위 표시(테스트)
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerPlayer->Multicast_DrawSkillRange(SkillLocation, Radius, FColor::Red, 1.0f);
+
 	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitResults, SkillLocation, SkillLocation, FQuat::Identity, ECC_Pawn, Shape, Params))
 	{
 		TSet<AActor*> HitActors;
 
 		for (const FHitResult& Hit : HitResults)
 		{
+			// 충돌체
 			AActor* HitActor = Hit.GetActor();
 			UPrimitiveComponent* HitComponent = Hit.GetComponent();
 
+			// 중복된 충돌 액터 걸러내기
 			if (!HitActor || HitActors.Contains(HitActor))
 			{
 				continue;
 			}
 
+			// 사운드 트리거 무시
 			if (HitComponent && HitComponent->GetCollisionProfileName() == FName("SoundTrigger"))
 			{
 				continue;
 			}
 
+			// 충돌 액터 저장
 			HitActors.Add(HitActor);
 
-			UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s, Hit Component: %s"),
-				*HitActor->GetName(),
-				*HitComponent->GetName());
-
-			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
+			// 충돌 효과 활성화
+			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor)) // 몬스터일 경우
 			{
 				ApplyEffectToDungeonMonster(TargetMonster);
 				// Impact VFX 재생
 				TargetMonster->Multicast_PlayImpactVFX(SkillImpactVFX, SkillVFXScale);
 			}
-			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
+			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor)) // 가디언일 경우
 			{
 				ApplyEffectToGuardian(TargetGuardian);
 				// Impact VFX 재생
 				TargetGuardian->Multicast_PlayImpactVFX(SkillImpactVFX, SkillVFXScale);
 			}
-			else if(AGS_Character* Target = Cast<AGS_Character>(HitActor))
+			else if (AGS_Character* Target = Cast<AGS_Character>(HitActor)) // 시커일 경우
 			{
 				// 넉백
 				const FVector LaunchDirection = (Target->GetActorLocation() - OwnerCharacter->GetActorLocation()).GetSafeNormal();
@@ -246,38 +252,9 @@ void UGS_ChanAimingSkill::ExecuteSkillEffect()
 			}
 		}
 	}
-}
 
-void UGS_ChanAimingSkill::InterruptSkill()
-{
-	Super::InterruptSkill();
-
-	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-
-	OwnerPlayer->SetLookControlValue(true, true);
-	if (OwnerPlayer->GetSkillComp())
-	{
-		OwnerPlayer->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
-	}
-
-	CurrentStamina = 0;
-	ShowProgressBar(false);
-	OwnerPlayer->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
-}
-
-
-void UGS_ChanAimingSkill::OnShieldSlam()
-{
-	//UE_LOG(LogTemp, Warning, TEXT("Slam!!!!!!!"));
-	CurrentStamina -= SlamStaminaCost;
-	// UI 업데이트
-	UpdateProgressBar(CurrentStamina);
-	ExecuteSkillEffect();
-
-	if (CurrentStamina <= 0.f)
-	{
-		//EndHoldUp();
-	}
+	// 스킬 종료
+	DeactiveSkill();
 }
 
 void UGS_ChanAimingSkill::TickDrainStamina()
@@ -289,48 +266,40 @@ void UGS_ChanAimingSkill::TickDrainStamina()
 
 	// UE_LOG(LogTemp, Warning, TEXT("Stamina : %f"), CurrentStamina); 신중은
 	
+	// 스테미나가 0이 되었을 때
 	if (CurrentStamina <= 0.f)
 	{
-		EndHoldUp();
+		// 기본 포즈로 애니메이션 재생
+		AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+		if (OwnerPlayer)
+		{
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("LoopEnd"));
+		}
+
+		// 스킬 종료
+		DeactiveSkill();
 	}
 }
 
 void UGS_ChanAimingSkill::StartHoldUp()
 {
-	bIsHoldingUp = true;
-	/*if (OwnerCharacter && OwnerCharacter->GetSkillComp())
-	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
-	}*/
+	// 스테미나 초기화
 	CurrentStamina = MaxStamina;
 
-	//OwnerCharacter->Server_SetCharacterSpeed(0.3f);
 	// UI 표시
 	ShowProgressBar(true);
 	UpdateProgressBar(CurrentStamina);
 
-	UE_LOG(LogTemp, Warning, TEXT("Start Hold Up!!!!!!!"));
+	// 스테미나 감소 타이머
 	OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 1.0f, true);
-}
-
-void UGS_ChanAimingSkill::EndHoldUp()
-{
-	bIsHoldingUp = false;
-
-	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if (OwnerPlayer)
-	{
-		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("LoopEnd"));
-	}
-	
-	// UI 숨기기
-	ShowProgressBar(false);
-	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 }
 
 void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
-	if (!Target) return;
+	if (!Target) 
+	{
+		return;
+	}
 
 	// 경직 디버프
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
@@ -356,6 +325,16 @@ void UGS_ChanAimingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 	{
 		Target->GetDebuffComp()->ApplyDebuff(EDebuffType::Stun, OwnerCharacter);
 	}
+}
+
+void UGS_ChanAimingSkill::DeactiveSkill()
+{
+	// UI 숨기기
+	ShowProgressBar(false);
+	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+
+	// 스킬 상태 업데이트
+	Super::DeactiveSkill();
 }
 
 void UGS_ChanAimingSkill::UpdateProgressBar(float InStamina)
