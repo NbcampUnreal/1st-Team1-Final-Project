@@ -11,7 +11,15 @@ UGS_MerciRollingSkill::UGS_MerciRollingSkill()
 
 void UGS_MerciRollingSkill::ActiveSkill()
 {
+	if (!CanActive())
+	{
+		return;
+	}
+
 	Super::ActiveSkill();
+	
+	StartCoolDown();
+
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
 		if (MerciCharacter->HasAuthority())
@@ -22,11 +30,6 @@ void UGS_MerciRollingSkill::ActiveSkill()
 			MerciCharacter->SetSkillInputControl(false, false, false);
 			MerciCharacter->SetMoveControlValue(false, false);
 			MerciCharacter->CanChangeSeekerGait = false;
-
-			if (MerciCharacter->GetSkillComp())
-			{
-				MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, true);
-			}
 
 			FName RollDirection = CalRollDirection();
 			if (RollDirection == FName("00"))
@@ -41,9 +44,9 @@ void UGS_MerciRollingSkill::ActiveSkill()
 	}
 }
 
-void UGS_MerciRollingSkill::DeactiveSkill()
+void UGS_MerciRollingSkill::OnSkillAnimationEnd()
 {
-	Super::DeactiveSkill();
+	Super::OnSkillAnimationEnd();
 
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
@@ -54,10 +57,7 @@ void UGS_MerciRollingSkill::DeactiveSkill()
 			MerciCharacter->SetMoveControlValue(true, true);
 			MerciCharacter->CanChangeSeekerGait = true;
 
-			if (MerciCharacter->GetSkillComp())
-			{
-				MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
-			}
+			SetIsActive(false);
 		}
 	}
 }
@@ -70,12 +70,6 @@ void UGS_MerciRollingSkill::InterruptSkill()
 	{
 		AresCharacter->Multicast_SetIsFullBodySlot(false);
 		AresCharacter->SetMoveControlValue(true, true);
-		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
+		SetIsActive(false);
 	}
-}
-
-
-bool UGS_MerciRollingSkill::CanActive() const
-{
-	return Super::CanActive();
 }

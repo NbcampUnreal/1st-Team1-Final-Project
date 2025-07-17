@@ -15,9 +15,16 @@ UGS_MerciUltimateSkill::UGS_MerciUltimateSkill()
 
 void UGS_MerciUltimateSkill::ActiveSkill()
 {
-	if (!CanActive()) return;
+	if (!CanActive()) 
+	{
+		return;
+	}
 
+	// 스킬 상태 업데이트
 	Super::ActiveSkill();
+
+	// 쿨타임 측정 시작
+	StartCoolDown();
 
 	if(OwnerCharacter)
 	{
@@ -32,41 +39,19 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 			}
 		}
 
-		// Skill State
-		if (OwnerCharacter->GetSkillComp())
-		{
-			bIsAutoAimingState = true;
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, true);
-		}
-
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 		if (MerciCharacter)
 		{
 			MerciCharacter->Client_StartZoom();
 		}
 
-		OwnerCharacter->GetWorldTimerManager().SetTimer(AutoAimingHandle, this, &UGS_MerciUltimateSkill::DeActiveAutoAimingState, AutoAimingStateTime, false);
+		OwnerCharacter->GetWorldTimerManager().SetTimer(AutoAimingHandle, this, &UGS_MerciUltimateSkill::DeactiveSkill, AutoAimingStateTime, false);
 		OwnerCharacter->GetWorldTimerManager().SetTimer(AutoAimTickHandle, this, &UGS_MerciUltimateSkill::TickAutoAimTarget, AutoAimTickInterval, true);
 		OwnerCharacter->SetSkillInputControl(true, true, false, false);
 	}
 
 	UpdateMonsterList();
-	ExecuteSkillEffect();
-}
-
-void UGS_MerciUltimateSkill::ExecuteSkillEffect()
-{
-	AActor* Target = FindCloseTarget();
-	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-	if (Target && OwnerCharacter->HasAuthority())
-	{
-		if(MerciCharacter)
-		{
-			MerciCharacter->SetAutoAimTarget(Target);
-		}
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("AutoAimingMode Start"));
+	AutoAimingStart();
 }
 
 void UGS_MerciUltimateSkill::OnSkillAnimationEnd()
@@ -84,45 +69,16 @@ void UGS_MerciUltimateSkill::InterruptSkill()
 	}
 }
 
-bool UGS_MerciUltimateSkill::IsActive() const
+void UGS_MerciUltimateSkill::AutoAimingStart()
 {
-	return bIsAutoAimingState;
-}
-
-void UGS_MerciUltimateSkill::DeActiveAutoAimingState()
-{
-	UE_LOG(LogTemp, Warning, TEXT("AutoAimingMode End"));
-
-	if (OwnerCharacter)
+	AActor* Target = FindCloseTarget();
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	if (Target && OwnerCharacter->HasAuthority())
 	{
-		// 현재 표시된 타겟 UI 정리
-		if (CurrentTarget && OwnerCharacter->HasAuthority())
-		{
-			if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
-			{
-				MerciCharacter->Client_UpdateTargetUI(nullptr, CurrentTarget);
-			}
-			CurrentTarget = nullptr;
-		}
-
-		// Skill State
-		if (OwnerCharacter->GetSkillComp())
-		{
-			bIsAutoAimingState = false;
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
-		}
-
-		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 		if (MerciCharacter)
 		{
-			MerciCharacter->Client_StopZoom();
+			MerciCharacter->SetAutoAimTarget(Target);
 		}
-
-		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimTickHandle);
-		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimingHandle);
-		OwnerCharacter->SetSkillInputControl(true, true, true);
-
-		OwnerCharacter->Server_SetCanHitReact(true); // 서버에 전달
 	}
 }
 
@@ -239,4 +195,37 @@ void UGS_MerciUltimateSkill::UpdateMonsterList()
 	{
 		if (IsValid(Actor)) AllMonsterActors.Add(Actor);
 	}
+}
+
+void UGS_MerciUltimateSkill::DeactiveSkill()
+{
+	if (OwnerCharacter)
+	{
+		// 현재 표시된 타겟 UI 정리
+		if (CurrentTarget && OwnerCharacter->HasAuthority())
+		{
+			if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
+			{
+				MerciCharacter->Client_UpdateTargetUI(nullptr, CurrentTarget);
+			}
+			CurrentTarget = nullptr;
+		}
+
+		// 줌 아웃
+		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+		if (MerciCharacter)
+		{
+			MerciCharacter->Client_StopZoom();
+		}
+
+		// 타이머 정리
+		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimTickHandle);
+		OwnerCharacter->GetWorldTimerManager().ClearTimer(AutoAimingHandle);
+
+		// 스킬 Input 수정
+		OwnerCharacter->SetSkillInputControl(true, true, true);
+		OwnerCharacter->Server_SetCanHitReact(true); // 서버에 전달
+	}
+
+	Super::DeactiveSkill();
 }

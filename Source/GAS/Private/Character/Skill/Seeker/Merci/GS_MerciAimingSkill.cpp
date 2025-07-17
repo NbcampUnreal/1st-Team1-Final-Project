@@ -12,14 +12,14 @@ UGS_MerciAimingSkill::UGS_MerciAimingSkill()
 
 void UGS_MerciAimingSkill::ActiveSkill()
 {
-	if (!CanActiveInternally())
+	if (!CanActive())
 	{
-		bPressedDuringCooldown = true;
 		return;
 	}
+
+	Super::ActiveSkill();
 	
 	// 유효 입력이므로 무효 입력 플래그 해제
-	bPressedDuringCooldown = false;
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (MerciCharacter)
 	{
@@ -37,7 +37,7 @@ void UGS_MerciAimingSkill::ActiveSkill()
 
 void UGS_MerciAimingSkill::OnSkillCommand()
 {
-	if (!CanActiveInternally() || bPressedDuringCooldown)
+	if (!CanActive() || !IsActive())
 	{
 		return;
 	}
@@ -52,6 +52,8 @@ void UGS_MerciAimingSkill::OnSkillCommand()
 	{
 		StartCoolDown();
 	}
+
+	DeactiveSkill();
 }
 
 void UGS_MerciAimingSkill::OnSkillAnimationEnd()
@@ -63,18 +65,10 @@ void UGS_MerciAimingSkill::InterruptSkill()
 	Super::InterruptSkill();
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-	if (MerciCharacter->GetSkillComp())
-	{
-		MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
-	}
+	SetIsActive(false);
 }
 
-bool UGS_MerciAimingSkill::CanActive() const
+void UGS_MerciAimingSkill::DeactiveSkill()
 {
-	return true;
-}
-
-bool UGS_MerciAimingSkill::CanActiveInternally() const
-{
-	return OwnerCharacter && !bIsCoolingDown;
+	Super::DeactiveSkill();
 }
