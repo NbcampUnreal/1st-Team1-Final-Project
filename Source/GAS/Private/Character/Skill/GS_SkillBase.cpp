@@ -59,7 +59,7 @@ bool UGS_SkillBase::CanActive() const
 	return OwnerCharacter && !bIsCoolingDown;
 }
 
-bool UGS_SkillBase::IsActive() const
+bool UGS_SkillBase::GetIsActive() const
 {
 	return bIsActive;
 }

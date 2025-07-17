@@ -20,8 +20,6 @@ public:
 	virtual void OnSkillCanceledByDebuff() override;	
 	virtual void OnSkillAnimationEnd() override;
 	virtual void InterruptSkill() override;
-	virtual bool IsActive() const override;
-	
 	
 private:
 	//UltimateSkill 활성화 되어 있는지 확인용

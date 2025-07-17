@@ -80,7 +80,7 @@ public:
 	virtual void DeactiveSkill(); // 스킬 종료
 	virtual void OnSkillCommand(); // 보조 스킬 발동
 	virtual bool CanActive() const; // 사용 가능한지 반환
-	virtual bool IsActive() const; // 사용중인지 반환
+	virtual bool GetIsActive() const; // 사용중인지 반환
 	virtual void InterruptSkill(); // 다른 스킬 사용으로 인한 스킬 중단
 	virtual void SetIsActive(bool bInIsActive);
 

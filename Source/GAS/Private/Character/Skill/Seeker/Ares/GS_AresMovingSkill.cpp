@@ -66,7 +66,7 @@ void UGS_AresMovingSkill::OnSkillAnimationEnd()
 
 void UGS_AresMovingSkill::OnSkillCommand()
 {
-	if (!CanActive() || !IsActive())
+	if (!CanActive() || !GetIsActive())
 	{
 		return;
 	}

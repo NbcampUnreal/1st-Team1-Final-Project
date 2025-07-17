@@ -66,12 +66,6 @@ void UGS_AresAimingSkill::InterruptSkill()
 	}
 }
 
-bool UGS_AresAimingSkill::IsActive() const
-{
-	Super::IsActive();
-	return bIsActive;
-}
-
 void UGS_AresAimingSkill::DeactiveSkill()
 {
 	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
@@ -131,7 +125,7 @@ void UGS_AresAimingSkill::SpawnFirstProjectile()
 	{
 		if (UGS_AresUltimateSkill* UltimateSkill = Cast<UGS_AresUltimateSkill>(SkillComp->GetSkillFromSkillMap(ESkillSlot::Ultimate)))
 		{
-			bIsBerserker = UltimateSkill->IsActive();
+			bIsBerserker = UltimateSkill->GetIsActive();
 		}
 
 	}

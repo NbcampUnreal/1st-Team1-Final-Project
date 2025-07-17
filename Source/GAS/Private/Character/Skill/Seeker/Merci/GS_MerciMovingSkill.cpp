@@ -40,7 +40,7 @@ void UGS_MerciMovingSkill::OnSkillAnimationEnd()
 
 void UGS_MerciMovingSkill::OnSkillCommand()
 {
-	if (!CanActive() || !IsActive())
+	if (!CanActive() || !GetIsActive())
 	{
 		return;
 	}

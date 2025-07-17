@@ -37,7 +37,7 @@ void UGS_MerciAimingSkill::ActiveSkill()
 
 void UGS_MerciAimingSkill::OnSkillCommand()
 {
-	if (!CanActive() || !IsActive())
+	if (!CanActive() || !GetIsActive())
 	{
 		return;
 	}

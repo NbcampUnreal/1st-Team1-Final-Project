@@ -148,7 +148,7 @@ void UGS_MerciUltimateSkill::TickAutoAimTarget()
 		return;
 	}
 
-	if (!IsActive())
+	if (!GetIsActive())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("IsActive is false"));
 		return;
