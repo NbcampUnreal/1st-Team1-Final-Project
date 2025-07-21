@@ -276,25 +276,44 @@ void UGS_ArcaneBoardWidget::UpdateGridPreview(uint8 RuneID, const FIntPoint& Ref
 
 	ClearPreview();
 
-	TArray<FIntPoint> AffectedCells;
-	bool bCanPlace = BoardManager->PreviewRunePlacement(RuneID, ReferenceCellPos, AffectedCells);
-
-	for (const FIntPoint& CellPos : AffectedCells)
+	TArray<uint8> AffectedRuneIDs;
+	EPlacementResult PlacementResult = BoardManager->CheckRunePlacement(RuneID, ReferenceCellPos, AffectedRuneIDs);
+	
+	TArray<FIntPoint> RuneShape;
+	if (!BoardManager->GetRuneShape(RuneID, RuneShape))
 	{
+		return;
+	}
+
+	EGridCellVisualState PreviewState;
+	switch (PlacementResult)
+	{
+	case EPlacementResult::Valid:
+		PreviewState = EGridCellVisualState::Valid;
+		break;
+	case EPlacementResult::ReplaceExisting:
+		PreviewState = EGridCellVisualState::ReplaceExisting;
+		break;
+	case EPlacementResult::OutOfBounds:
+	default:
+		PreviewState = EGridCellVisualState::Invalid;
+		break;
+	}
+
+	for (const FIntPoint& Offset : RuneShape)
+	{
+		FIntPoint CellPos = ReferenceCellPos + Offset;
+
 		if (GridCells.Contains(CellPos))
 		{
 			UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
-			if(CellWidget)
+			if (CellWidget)
 			{
-				EGridCellVisualState  PreviewState = bCanPlace ?
-					EGridCellVisualState::Valid : EGridCellVisualState::Invalid;
-
 				CellWidget->SetPreviewVisualState(PreviewState);
+				PreviewCells.Add(CellPos);
 			}
 		}
 	}
-
-	PreviewCells = AffectedCells;
 }
 
 void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
@@ -371,59 +390,41 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 			{
 				FIntPoint PlacementPos = TargetCell->GetCellPos();
 
-				if (BoardManager->CanPlaceRuneAt(SelectedRuneID, PlacementPos))
+				int32 PreviousConnectedRuneCnt = BoardManager->ConnectedRuneCnt;
+				TArray<uint8> RemovedRunes;
+
+				bool bPlaceSuccess = BoardManager->PlaceRune(SelectedRuneID, PlacementPos, RemovedRunes);
+
+				if (bPlaceSuccess)
 				{
-					// 연결 상태 미리 체크하여 보너스 사운드 여부 결정
-					int32 PreviousConnectedRuneCnt = BoardManager->ConnectedRuneCnt;
-
-					bool bPlaceSuccess = BoardManager->PlaceRune(SelectedRuneID, PlacementPos);
-
-					if (bPlaceSuccess)
+					if (RunePlaceSuccessSound)
 					{
-						// 룬 배치 성공 사운드
-						if (RunePlaceSuccessSound)
-						{
-							UGameplayStatics::PlaySound2D(this, RunePlaceSuccessSound);
-						}
+						UGameplayStatics::PlaySound2D(this, RunePlaceSuccessSound);
+					}
 
-						// 연결 보너스 체크 및 사운드 재생
-						if (BoardManager && BoardManager->ConnectedRuneCnt > PreviousConnectedRuneCnt)
+					// 연결 보너스 체크
+					if (BoardManager->ConnectedRuneCnt > PreviousConnectedRuneCnt)
+					{
+						if (RuneConnectionBonusSound)
 						{
-							if (RuneConnectionBonusSound)
+							if (GetWorld())
 							{
-								// 약간의 딜레이 후 연결 보너스 사운드 재생
-								if (GetWorld())
-								{
-									FTimerHandle ConnectionSoundTimer;
-									GetWorld()->GetTimerManager().SetTimer(ConnectionSoundTimer, [this]()
-										{
-											UGameplayStatics::PlaySound2D(this, RuneConnectionBonusSound);
-										}, 0.3f, false);
-								}
+								FTimerHandle ConnectionSoundTimer;
+								GetWorld()->GetTimerManager().SetTimer(ConnectionSoundTimer, [this]()
+									{
+										UGameplayStatics::PlaySound2D(this, RuneConnectionBonusSound);
+									}, 0.3f, false);
 							}
 						}
+					}
 
-						UpdateGridVisuals();
-						RuneInven->UpdatePlacedStateOfRune(SelectedRuneID, true);
-					}
-					else
+					for (uint8 RemovedRuneID : RemovedRunes)
 					{
-						// 룸 배치 실패 사운드
-						if (RunePlaceFailSound)
-						{
-							UGameplayStatics::PlaySound2D(this, RunePlaceFailSound);
-						}
-						UE_LOG(LogTemp, Warning, TEXT("룬 배치 실패: ID=%d"), SelectedRuneID);
+						RuneInven->UpdatePlacedStateOfRune(RemovedRuneID, false);
 					}
-				}
-				else
-				{
-					// 룬 배치 실패 사운드
-					if (RunePlaceFailSound)
-					{
-						UGameplayStatics::PlaySound2D(this, RunePlaceFailSound);
-					}
-					UE_LOG(LogTemp, Warning, TEXT("배치 위치를 찾을 수 없음: ID=%d"), SelectedRuneID);
+
+					UpdateGridVisuals();
+					RuneInven->UpdatePlacedStateOfRune(SelectedRuneID, true);
 				}
 			}
 			else

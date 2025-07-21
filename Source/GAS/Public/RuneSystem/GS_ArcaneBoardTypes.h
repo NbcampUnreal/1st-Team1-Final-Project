@@ -30,6 +30,14 @@ enum class EPreviewState : uint8
 	Invalid		UMETA(DisplayName = "Invalid")
 };
 
+UENUM(BlueprintType)
+enum class EPlacementResult : uint8
+{
+	Valid           UMETA(DisplayName = "Valid"),
+	ReplaceExisting UMETA(DisplayName = "ReplaceExisting"),
+	OutOfBounds     UMETA(DisplayName = "OutOfBounds")
+};
+
 USTRUCT(Atomic, BlueprintType)
 struct FStatEffect
 {
