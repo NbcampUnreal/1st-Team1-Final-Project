@@ -18,4 +18,6 @@ class GAS_API UGS_ArcaneBoardSaveGame : public ULocalPlayerSaveGame
 public:
 	UPROPERTY()
 	TMap<ECharacterClass, FRunePlacementData> SavedRunesByClass;
+
+	TSet<uint8> OwnedRuneIDs;
 };

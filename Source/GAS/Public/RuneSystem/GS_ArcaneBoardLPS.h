@@ -59,6 +59,17 @@ public:
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     UGS_ArcaneBoardManager* GetOrCreateBoardManager();
 
+    // 룬 인벤 관련
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    TArray<uint8> GetOwnedRunes() const;
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void AddRuneToInventory(uint8 RuneID);
+
+    // 테스트용
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void InitializeTestRunes();
+
     // 위젯 등록/해제 함수 추가
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void SetCurrUIWidget(UGS_ArcaneBoardWidget* Widget);
@@ -72,4 +83,7 @@ public:
 private:
     UPROPERTY()
     TWeakObjectPtr<UGS_ArcaneBoardWidget> CurrentUIWidget;
+
+    UPROPERTY()
+    TSet<uint8> OwnedRuneIDs;
 };

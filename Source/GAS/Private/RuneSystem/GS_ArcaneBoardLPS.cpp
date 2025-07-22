@@ -130,6 +130,7 @@ void UGS_ArcaneBoardLPS::SaveBoardConfig()
     PlacementData.PlacedRunes = BoardManager->PlacedRunes;
 
     SaveGameInstance->SavedRunesByClass.Add(CurrentClass, PlacementData);
+    SaveGameInstance->OwnedRuneIDs = OwnedRuneIDs;
 
     bool bSaveSuccess = UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveSlotName, UserIdx);
 
@@ -185,6 +186,16 @@ void UGS_ArcaneBoardLPS::LoadBoardConfig()
         *UGS_EnumUtils::GetEnumAsString(CurrentClass),
         SavedPlacementData.PlacedRunes.Num());
 
+    if (LoadedSaveGame->OwnedRuneIDs.Num() > 0)
+    {
+        OwnedRuneIDs = LoadedSaveGame->OwnedRuneIDs;
+        UE_LOG(LogTemp, Log, TEXT("룬 인벤토리 로드 성공: %d개 룬"), OwnedRuneIDs.Num());
+    }
+    else
+    {
+        InitializeTestRunes();
+    }
+
     BoardManager->bHasUnsavedChanges = false;
 }
 
@@ -210,6 +221,32 @@ UGS_ArcaneBoardManager* UGS_ArcaneBoardLPS::GetOrCreateBoardManager()
     }
 
     return BoardManager;
+}
+
+TArray<uint8> UGS_ArcaneBoardLPS::GetOwnedRunes() const
+{
+    return OwnedRuneIDs.Array();
+}
+
+void UGS_ArcaneBoardLPS::AddRuneToInventory(uint8 RuneID)
+{
+    if (RuneID > 0)
+    {
+        OwnedRuneIDs.Add(RuneID);
+        UE_LOG(LogTemp, Log, TEXT("룬 획득: ID=%d, 총 소유 룬 개수: %d"), RuneID, OwnedRuneIDs.Num());
+
+        // 변경사항 저장
+        SaveBoardConfig();
+    }
+}
+
+void UGS_ArcaneBoardLPS::InitializeTestRunes()
+{
+    OwnedRuneIDs.Empty();
+    for (uint8 i = 1; i <= 8; ++i)
+    {
+        OwnedRuneIDs.Add(i);
+    }
 }
 
 void UGS_ArcaneBoardLPS::SetCurrUIWidget(UGS_ArcaneBoardWidget* Widget)
