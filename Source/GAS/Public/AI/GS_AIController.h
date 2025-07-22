@@ -45,6 +45,9 @@ public:
 	void EnterConfuseState();
 	void ExitConfuseState();
 
+	void SetNearPlayer(bool bNear);
+	void SetRtsControl(bool bActive); 
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
@@ -60,10 +63,16 @@ private:
 	UPROPERTY()
 	TWeakObjectPtr<AActor> PrevTargetActor;
 
+	bool bNearPlayer;
+	bool bRtsControl;
+	bool bAIActive;
+
 	UPROPERTY()
 	TWeakObjectPtr<AGS_Character> TargetCharacter;
 
 	UFUNCTION()
 	void TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
+	void UpdateAIState();
+	
 };
