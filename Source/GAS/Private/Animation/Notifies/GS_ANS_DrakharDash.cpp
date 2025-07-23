@@ -38,7 +38,7 @@ void UGS_ANS_DrakharDash::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeque
 		{
 			//damage
 			Drakhar->ServerRPCEndDash();
-			Drakhar->ClientGuardianDoSkillState = EGuardianDoSkill::None;
+			//Drakhar->ClientGuardianDoSkillState = EGuardianDoSkill::None;
 		}
 	}
 }
