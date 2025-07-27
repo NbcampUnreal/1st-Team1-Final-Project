@@ -21,13 +21,9 @@ public:
 	virtual void OnSkillCanceledByDebuff() override;
 	virtual void OnSkillAnimationEnd() override;
 
-	void DeactiveSkillEffect();
-	virtual void ExecuteSkillEffect() override;
-	virtual bool IsActive() const override;
-
 private:
-	//UPROPERTY(Replicated)
-	bool bIsBerserker;
+	virtual void DeactiveSkill() override;
+	void BecomeBerserker();
 
 	FTimerHandle UltimateSkillTimerHandle;
 	FGS_StatRow BuffAmount;

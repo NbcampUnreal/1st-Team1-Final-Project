@@ -18,19 +18,18 @@ public:
 	UGS_MerciUltimateSkill();
 	
 	virtual void ActiveSkill() override;
-	virtual void ExecuteSkillEffect() override;
 	virtual void OnSkillAnimationEnd() override;
 	virtual void InterruptSkill() override;
-	virtual bool IsActive() const override;
 
 private:
+	virtual void DeactiveSkill() override;
+
 	// 스탠스 관리
-	bool bIsAutoAimingState;
 	FTimerHandle AutoAimingHandle;
 	FTimerHandle AutoAimTickHandle;
 	float AutoAimTickInterval = 0.2f;
 
-	void DeActiveAutoAimingState();
+	void AutoAimingStart();
 	float AutoAimingStateTime = 20.0f;
 
 	AActor* FindCloseTarget();

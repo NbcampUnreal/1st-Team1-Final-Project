@@ -4,13 +4,17 @@
 #include "Character/Skill/Seeker/Ares/GS_AresRollingSkill.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 
-void UGS_AresRollingSkill::ActiveSkill()
+UGS_AresRollingSkill::UGS_AresRollingSkill()
 {
-	if (!CanActive())
-	{
-		return;
-	}
+	CurrentSkillType = ESkillSlot::Rolling;
+}
+
+void UGS_AresRollingSkill::ActiveSkill()
+{	
 	Super::ActiveSkill();
+
+	StartCoolDown();
+
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
 		if (!OwnerPlayer->GetSkillInputControl().CanInputRoll)
@@ -32,10 +36,6 @@ void UGS_AresRollingSkill::ActiveSkill()
 			OwnerPlayer->SetSkillInputControl(false, false, false, false);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->CanChangeSeekerGait = false;
-			if (OwnerCharacter->GetSkillComp())
-			{
-				OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, true);
-			}
 			FName RollDirection = CalRollDirection();
 			if (RollDirection == FName("00"))
 			{
@@ -65,10 +65,7 @@ void UGS_AresRollingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->CanChangeSeekerGait = true;
 
-		if (OwnerCharacter->GetSkillComp())
-		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
-		}
+		SetIsActive(false);
 	}
 }
 
@@ -82,6 +79,6 @@ void UGS_AresRollingSkill::InterruptSkill()
 		AresCharacter->SetSkillInputControl(true, true, true);
 		AresCharacter->SetMoveControlValue(true, true);
 		AresCharacter->CanChangeSeekerGait = true;
-		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
+		SetIsActive(false);
 	}
 }

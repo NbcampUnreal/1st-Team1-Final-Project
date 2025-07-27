@@ -19,9 +19,7 @@ public:
 	virtual void ActiveSkill() override;
 	virtual void OnSkillCanceledByDebuff() override;	
 	virtual void OnSkillAnimationEnd() override;
-	virtual void ExecuteSkillEffect() override;
 	virtual void InterruptSkill() override;
-	virtual bool IsActive() const override;
 	
 private:
 	//UltimateSkill 활성화 되어 있는지 확인용
@@ -31,6 +29,9 @@ private:
 	AGS_SwordAuraProjectile* CachedProjectile;
 
 	FTimerHandle DelaySecondProjectileHandle;
+	virtual void DeactiveSkill() override;
+
+	void SpawnFirstProjectile();
 	void SpawnSecondProjectile();
 
 };

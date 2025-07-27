@@ -20,12 +20,9 @@ public:
 	virtual void OnSkillAnimationEnd() override;
 	virtual void OnSkillCommand() override;
 	virtual void InterruptSkill() override;
-	virtual bool CanActive() const override;
-
-	virtual bool CanActiveInternally() const;
 
 	TSubclassOf<AGS_SeekerMerciArrow> ArrowClass;
 
 private:
-	bool bPressedDuringCooldown = false;
+	virtual void DeactiveSkill() override;
 };
