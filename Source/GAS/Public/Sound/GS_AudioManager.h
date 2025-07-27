@@ -125,4 +125,23 @@ private:
 
 	// RTPC 헬퍼 함수
 	void SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context, float InterpolationTime = 0.0f);
+
+	/**
+	* @brief 오디오 에셋의 유효성을 검사합니다.
+	* @return 모든 필수 에셋이 로드되었으면 true, 그렇지 않으면 false
+	*/
+	bool ValidateAudioAssets();
+
+	/**
+	* @brief 현재 환경에서 오디오 처리가 허용되는지 확인합니다.
+	* @return 전용 서버가 아닌 경우 true, 전용 서버인 경우 false
+	*/
+	bool IsAudioProcessingAllowed() const;
+
+	/**
+	* @brief 현재 게임 모드(TPS/RTS)에 따라 BGM을 재생하거나 정지할 대상 액터를 결정합니다.
+	* @param Context 컨텍스트로 제공된 액터 (옵셔널)
+	* @return 결정된 타겟 액터. RTS 모드이거나 적절한 Pawn이 없는 경우 nullptr을 반환할 수 있습니다.
+	*/
+	AActor* GetTargetActorForPlayback(AActor* Context = nullptr);
 };

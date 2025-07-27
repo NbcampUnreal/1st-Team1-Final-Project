@@ -5,7 +5,12 @@
 #include "Sound/GS_UIAudioSystem.h"
 #include "Sound/GS_EnvironmentAudioSystem.h"
 #include "AkAudioDevice.h"
-// #include "System/GS_PlayerState.h"
+
+// === 상수 정의 ===
+namespace AudioConstants
+{
+	static constexpr float RTPC_INTERPOLATION_MULTIPLIER = 1000.0f;
+}
 
 UGS_AudioManager::UGS_AudioManager()
 {
@@ -54,7 +59,6 @@ UGS_AudioManager::UGS_AudioManager()
 	if (CombatStopEventFinder.Succeeded())
 	{
 		DefaultCombatStopEvent = CombatStopEventFinder.Object;
-		UE_LOG(LogTemp, Warning, TEXT("기본 전투 BGM 정지 이벤트 로드 성공: EV_CombatStop"));
 	}
 	else
 	{
@@ -82,6 +86,12 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	// 맵 BGM 상태 초기화
 	bIsMapBGMPlaying = false;
+	
+	// 오디오 에셋 유효성 검사
+	if (!ValidateAudioAssets())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("일부 오디오 에셋이 누락되었지만 시스템을 계속 진행합니다."));
+	}
 }
 
 void UGS_AudioManager::Deinitialize()
@@ -105,21 +115,82 @@ void UGS_AudioManager::PlayEvent(UAkAudioEvent* Event, AActor* Context)
 {
 	if (!Event || !Context)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayEvent 호출 실패: Invalid Event or Context."));
 		return;
 	}
 	FOnAkPostEventCallback DummyCallback;
 	UAkGameplayStatics::PostEvent(Event, Context, 0, DummyCallback);
 }
 
-// === 맵 BGM 관리 시스템 ===
+// === 타겟 액터 결정 헬퍼 함수 ===
+AActor* UGS_AudioManager::GetTargetActorForPlayback(AActor* Context)
+{
+	// 컨텍스트가 명시적으로 제공된 경우, 해당 컨텍스트를 사용
+	if (Context)
+	{
+		return Context;
+	}
 
+	// 월드나 플레이어 컨트롤러가 유효하지 않으면 전역 재생 (nullptr)
+	if (!GetWorld() || !GetWorld()->GetFirstPlayerController())
+	{
+		return nullptr;
+	}
+
+	// 플레이어 컨트롤러로부터 Pawn을 가져옴
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	APawn* PlayerPawn = PC->GetPawn();
+
+	// Pawn이 유효하면 해당 Pawn을 타겟으로, 그렇지 않으면 전역 재생 (nullptr)
+	return PlayerPawn;
+}
+
+// === 오디오 에셋 유효성 검사 ===
+bool UGS_AudioManager::ValidateAudioAssets()
+{
+	bool bAllAssetsValid = true;
+	
+	if (!MapBGMEvent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("필수 에셋 누락: MapBGMEvent"));
+		bAllAssetsValid = false;
+	}
+	
+	if (!MapBGMStopEvent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("필수 에셋 누락: MapBGMStopEvent"));
+		bAllAssetsValid = false;
+	}
+	
+	if (!MapBGMVolumeRTPC)
+	{
+		UE_LOG(LogTemp, Error, TEXT("필수 에셋 누락: MapBGMVolumeRTPC"));
+		bAllAssetsValid = false;
+	}
+	
+	if (!bAllAssetsValid)
+	{
+		UE_LOG(LogTemp, Error, TEXT("오디오 시스템 초기화 실패 - 필수 에셋이 누락되었습니다."));
+		return false;
+	}
+	
+	UE_LOG(LogTemp, Log, TEXT("모든 오디오 에셋이 성공적으로 로드되었습니다."));
+	return true;
+}
+
+// === 멀티플레이어 지원 헬퍼 ===
+bool UGS_AudioManager::IsAudioProcessingAllowed() const
+{
+	// 전용 서버에서는 오디오를 처리하지 않음
+	return GetWorld() && GetWorld()->GetNetMode() != NM_DedicatedServer;
+}
+
+
+// === 맵 BGM 관리 시스템 ===
 void UGS_AudioManager::StartMapBGM(AActor* Context)
 {
 	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	if (!IsAudioProcessingAllowed())
 	{
-		UE_LOG(LogTemp, Log, TEXT("UGS_AudioManager::StartMapBGM - Skipping audio on dedicated server"));
 		return;
 	}
 
@@ -141,34 +212,7 @@ void UGS_AudioManager::StartMapBGM(AActor* Context)
 	}
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			// TPS 모드 (시커): Pawn이 있으므로 타겟 액터 기반 재생
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			// RTS 모드 (가디언): Pawn이 없으므로 전역 재생
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		// Context가 제공된 경우 이를 사용
-		TargetActor = Context;
-	}
-	else
-	{
-		// 기본값으로 전역 재생
-		TargetActor = nullptr;
-	}
+	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
 	// RTPC 볼륨을 먼저 1.0으로 설정
 	if (MapBGMVolumeRTPC)
@@ -185,7 +229,7 @@ void UGS_AudioManager::StartMapBGM(AActor* Context)
 void UGS_AudioManager::StopMapBGM(AActor* Context)
 {
 	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	if (!IsAudioProcessingAllowed())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UGS_AudioManager::StopMapBGM - Skipping audio on dedicated server"));
 		return;
@@ -197,34 +241,7 @@ void UGS_AudioManager::StopMapBGM(AActor* Context)
 	}
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			// TPS 모드 (시커): Pawn이 있으므로 타겟 액터 기반 정지
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			// RTS 모드 (가디언): Pawn이 없으므로 전역 정지
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		// Context가 제공된 경우 이를 사용
-		TargetActor = Context;
-	}
-	else
-	{
-		// 기본값으로 전역 정지
-		TargetActor = nullptr;
-	}
+	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
 	// Wwise Stop 이벤트를 사용한 부드러운 정지
 	if (MapBGMStopEvent)
@@ -262,36 +279,11 @@ void UGS_AudioManager::FadeMapBGMForCombat(AActor* Context, float FadeTime)
 	}
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			// TPS 모드 (시커): Pawn이 있으므로 타겟 액터 기반
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			// RTS 모드 (가디언): Pawn이 없으므로 전역
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		TargetActor = Context;
-	}
-	else
-	{
-		TargetActor = nullptr;
-	}
+	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
 	// 맵 BGM 볼륨을 30%로 감소
 	float CombatVolume = 0.3f;
-	SetRTPCValue(MapBGMVolumeRTPC, CombatVolume, TargetActor, FadeTime * 1000.0f);
+	SetRTPCValue(MapBGMVolumeRTPC, CombatVolume, TargetActor, FadeTime * AudioConstants::RTPC_INTERPOLATION_MULTIPLIER);
 }
 
 void UGS_AudioManager::RestoreMapBGMFromCombat(AActor* Context, float FadeTime)
@@ -302,35 +294,10 @@ void UGS_AudioManager::RestoreMapBGMFromCombat(AActor* Context, float FadeTime)
 	}
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			// TPS 모드 (시커): Pawn이 있으므로 타겟 액터 기반
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			// RTS 모드 (가디언): Pawn이 없으므로 전역
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		TargetActor = Context;
-	}
-	else
-	{
-		TargetActor = nullptr;
-	}
+	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
 	// 맵 BGM 볼륨을 100%로 복원
-	SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, FadeTime * 1000.0f);
+	SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, FadeTime * AudioConstants::RTPC_INTERPOLATION_MULTIPLIER);
 }
 
 void UGS_AudioManager::SetMapBGMVolume(float Volume, AActor* Context, float FadeTime)
@@ -342,7 +309,8 @@ void UGS_AudioManager::SetMapBGMVolume(float Volume, AActor* Context, float Fade
 		return;
 	}
 
-	SetRTPCValue(MapBGMVolumeRTPC, Volume, Context, FadeTime * 1000.0f);
+	AActor* TargetActor = GetTargetActorForPlayback(Context);
+	SetRTPCValue(MapBGMVolumeRTPC, Volume, TargetActor, FadeTime * AudioConstants::RTPC_INTERPOLATION_MULTIPLIER);
 }
 
 // === RTPC 헬퍼 함수 ===
@@ -360,7 +328,7 @@ void UGS_AudioManager::SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context,
 	// Wwise 오디오 디바이스를 통해 RTPC 값 설정
 	if (auto* AudioDevice = FAkAudioDevice::Get())
 	{
-		int32 InterpolationTimeMs = FMath::RoundToInt(InterpolationTime);
+		int32 InterpolationTimeMs = FMath::RoundToInt(InterpolationTime * AudioConstants::RTPC_INTERPOLATION_MULTIPLIER);
 		AKRESULT Result = AudioDevice->SetRTPCValue(RTPC, WwiseValue, InterpolationTimeMs, Context);
 		
 		if (Result != AK_Success)
@@ -385,7 +353,7 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 	}
 
 	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	if (!IsAudioProcessingAllowed())
 	{
 		CurrentCombatMusicStartEvent = CombatMusicStartEvent;
 		CurrentCombatMusicStopEvent = CombatMusicStopEvent;
@@ -403,26 +371,7 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 	}
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정 (맵 BGM 정지용)
-	AActor* MapBGMTargetActor;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			MapBGMTargetActor = PlayerPawn;
-		}
-		else
-		{
-			MapBGMTargetActor = nullptr;
-		}
-	}
-	else
-	{
-		MapBGMTargetActor = nullptr;
-	}
+	AActor* MapBGMTargetActor = GetTargetActorForPlayback();
 
 	// 멀티플레이어 환경에서는 맵 BGM을 즉시 강제 정지
 	if (GetWorld() && GetWorld()->GetNetMode() != NM_Standalone)
@@ -467,7 +416,7 @@ void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatM
 	}
 
 	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	if (!IsAudioProcessingAllowed())
 	{
 		CurrentCombatMusicStartEvent = nullptr;
 		CurrentCombatMusicStopEvent = nullptr;
@@ -475,30 +424,7 @@ void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatM
 	}
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		TargetActor = Context;
-	}
-	else
-	{
-		TargetActor = nullptr;
-	}
+	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
 	// 전투 BGM 정지 처리
 	if (CombatMusicStopEvent)
@@ -588,32 +514,7 @@ void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
 	}
 	
 	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			// TPS 모드 (시커): Pawn이 있으므로 타겟 액터 기반
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			// RTS 모드 (가디언): Pawn이 없으므로 전역
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		TargetActor = Context;
-	}
-	else
-	{
-		TargetActor = nullptr;
-	}
+	AActor* TargetActor = GetTargetActorForPlayback(Context);
 	
 	if (!MapBGMVolumeRTPC)
 	{
@@ -621,7 +522,7 @@ void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
 		return;
 	}
 	
-	SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, FadeTime * 1000.0f);
+	SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, FadeTime * AudioConstants::RTPC_INTERPOLATION_MULTIPLIER);
 	
 	if (FadeTime <= 0.0f)
 	{
@@ -629,7 +530,13 @@ void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
 		return;
 	}
 	
-	FTimerHandle FadeOutHandle;
+	// 기존 페이드아웃 타이머가 있다면 취소
+	static FTimerHandle FadeOutHandle;
+	if (GetWorld()->GetTimerManager().IsTimerActive(FadeOutHandle))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(FadeOutHandle);
+	}
+	
 	GetWorld()->GetTimerManager().SetTimer(FadeOutHandle, [this, TargetActor]()
 	{
 		StopMapBGM(TargetActor);
@@ -639,36 +546,13 @@ void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
 void UGS_AudioManager::FadeInAndStartMapBGM(AActor* Context, float FadeTime)
 {
 	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	if (!IsAudioProcessingAllowed())
 	{
 		return;
 	}
 
 	// 게임 모드에 따른 조건부 타겟 액터 결정
-	AActor* TargetActor;
-
-	if (GetWorld() && GetWorld()->GetFirstPlayerController())
-	{
-		APlayerController* PC = GetWorld()->GetFirstPlayerController();
-		APawn* PlayerPawn = PC->GetPawn();
-		
-		if (PlayerPawn)
-		{
-			TargetActor = PlayerPawn;
-		}
-		else
-		{
-			TargetActor = nullptr;
-		}
-	}
-	else if (Context)
-	{
-		TargetActor = Context;
-	}
-	else
-	{
-		TargetActor = nullptr;
-	}
+	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
 	// 맵 BGM이 이미 재생 중인지 확인
 	if (!bIsMapBGMPlaying)
@@ -691,7 +575,7 @@ void UGS_AudioManager::FadeInAndStartMapBGM(AActor* Context, float FadeTime)
 		{
 			if (MapBGMVolumeRTPC && bIsMapBGMPlaying)
 			{
-				SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, FadeTime * 1000.0f);
+				SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, FadeTime * AudioConstants::RTPC_INTERPOLATION_MULTIPLIER);
 			}
 		}, 0.1f, false);
 	}
