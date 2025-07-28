@@ -2,6 +2,7 @@
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Skill/GS_SkillSet.h"
@@ -91,10 +92,9 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 	{
 		ApplyEffectToGuardian(Guardian);
 		
-		// 가디언 충돌 사운드 재생
-		if (OwnerPlayer && SkillInfo && SkillInfo->GuardianCollisionSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->GuardianCollisionSound);
+			AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 2); // 2 = Guardian
 		}
 		
 		EndCharge();
@@ -106,10 +106,9 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 			HitActors.Add(Monster);
 			ApplyEffectToDungeonMonster(Monster);
 			
-			// 몬스터 충돌 사운드 재생
-			if (OwnerPlayer && SkillInfo && SkillInfo->MonsterCollisionSound)
+			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 			{
-				OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->MonsterCollisionSound);
+				AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 1); // 1 = Monster
 			}
 		}
 	}
@@ -119,10 +118,9 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 	{
 		bInStructureCrash = true;
 		
-		// 벽 충돌 사운드 재생
-		if (OwnerPlayer && SkillInfo && SkillInfo->WallCollisionSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->WallCollisionSound);
+			AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 0); // 0 = Wall
 		}
 		
 		// 대시 종료

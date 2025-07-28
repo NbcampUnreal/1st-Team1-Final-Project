@@ -2,6 +2,7 @@
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
@@ -140,9 +141,9 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		OwnerPlayer->LaunchCharacter(JumpVelocity, true, true);
 
 		// 방패 슬램 사운드 재생
-		if (OwnerPlayer->AimingSkillSlamSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillSlamSound);
+			AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 0); // 0 = Wall
 		}
 
 		// =======================

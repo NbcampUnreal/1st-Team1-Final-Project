@@ -6,6 +6,7 @@
 #include "Character/Component/GS_StatRow.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_AresUltimateSkill::UGS_AresUltimateSkill()
 {
@@ -19,7 +20,6 @@ void UGS_AresUltimateSkill::ActiveSkill()
 
 	// 쿨타임 측정 시작
 	StartCoolDown();
-
 	
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
@@ -125,7 +125,7 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 		}
 		OriginalMovingSkillCooltime = -1.f; // 초기화
 	}
-
+	
 	Super::DeactiveSkill();
 }
 

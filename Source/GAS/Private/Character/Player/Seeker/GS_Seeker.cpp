@@ -31,6 +31,7 @@
 #include "AkComponent.h"
 #include "AkAudioDevice.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -53,6 +54,11 @@ AGS_Seeker::AGS_Seeker()
 	// 디버프 VFX 컴포넌트 생성
 	// =======================
 	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
+
+	// =======================
+	// 캐릭터 오디오 컴포넌트 생성
+	// =======================
+	CharacterAudioComponent = CreateDefaultSubobject<UGS_CharacterAudioComponent>("CharacterAudioComponent");
 
 	// Fire Effect 생성 및 설정
 	FeetLavaVFX_L = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_L"));
