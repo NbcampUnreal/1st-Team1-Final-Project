@@ -16,4 +16,29 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Resource")
+	float CurrentAmount = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+	float MaxAmount = 100.f;
+	bool bIsInitialized = false;
+
+public:
+	UFUNCTION(Category = "Resource")
+	virtual void InitializeMaxAmount(float Amount);
+
+
+	UFUNCTION(Category = "Resource")
+	virtual float GetCurrentAmount() const;
+	UFUNCTION(Category = "Resource")
+	virtual float GetMaxAmount() const;
+
+
+	UFUNCTION(Category = "Resource")
+	virtual void AddResource(float Amount);
+	UFUNCTION(Category = "Resource")
+	virtual void SpendResource(float Amount);
+	UFUNCTION(Category = "Resource")
+	virtual bool CanAfford(float Amount) const;
+
+
 };

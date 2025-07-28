@@ -9,4 +9,8 @@ class GAS_API UGS_NectarComp : public UGS_ResourceBaseComp
 {
 	GENERATED_BODY()
 	
+public:
+	//virtual void AddResource(float Amount) override;
+	//virtual void SpendResource(float Amount) override;
+	//virtual bool CanAfford(float Amount) const override;
 };
