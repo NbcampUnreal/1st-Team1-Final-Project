@@ -44,18 +44,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio|Manager")
 	void PlayEvent(UAkAudioEvent* Event, AActor* Context);
 
-	// === 맵 BGM 관리 함수들 (기존 전투 BGM과 병행 운영) ===
+	// === 맵 BGM 관리 함수들 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "맵 BGM 시작"))
 	void StartMapBGM(AActor* Context);
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "전투 전환 (맵 BGM 감소)"))
-	void FadeMapBGMForCombat(AActor* Context, float FadeTime = 2.0f);
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "평상시 복귀 (맵 BGM 복원)"))
-	void RestoreMapBGMFromCombat(AActor* Context, float FadeTime = 3.0f);
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "맵 BGM 볼륨 설정"))
-	void SetMapBGMVolume(float Volume, AActor* Context = nullptr, float FadeTime = 1.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "맵 BGM 정지"))
 	void StopMapBGM(AActor* Context = nullptr);
@@ -77,12 +68,6 @@ public:
 	// === 멀티플레이어 지원 함수들 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio|Multiplayer", meta = (DisplayName = "모든 클라이언트 맵 BGM 시작"))
 	void StartMapBGMForAllClients();
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|Multiplayer", meta = (DisplayName = "클라이언트 상태 확인"))
-	bool IsClientReadyForAudio() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|Debug", meta = (DisplayName = "BGM 상태 로깅"))
-	void LogCurrentBGMStatus() const;
 	
 	// 현재 재생 중인 전투 BGM Stop Event 가져오기
 	UAkAudioEvent* GetCurrentCombatMusicStopEvent() const { return CurrentCombatMusicStopEvent; }
@@ -120,8 +105,9 @@ private:
 	UPROPERTY()
 	UAkAudioEvent* DefaultCombatStopEvent;
 
-	// 맵 BGM 페이드인 타이머 핸들
+	// 맵 BGM 페이드인/아웃 타이머 핸들
 	FTimerHandle MapBGMFadeInTimerHandle;
+	FTimerHandle MapBGMFadeOutTimerHandle;
 
 	// RTPC 헬퍼 함수
 	void SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context, float InterpolationTime = 0.0f);
