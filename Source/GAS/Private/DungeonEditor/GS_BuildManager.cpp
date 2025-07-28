@@ -28,6 +28,9 @@ AGS_BuildManager::AGS_BuildManager()
 	DecalCompo = CreateDefaultSubobject<UDecalComponent>("Decal");
 	DecalCompo->SetupAttachment(RootComponent);
 	
+	//NectarComp 추가 
+	NectarComp = CreateDefaultSubobject<UGS_NectarComp>("Nectar");
+
 	bTraceComplex = false;
 	StartTraceHeight = 3000;
 	EndTraceHeight = -3000;
@@ -125,6 +128,9 @@ void AGS_BuildManager::BeginPlay()
 			}
 		}
 	}
+
+	//Nectar 초기화(임시로 총 넥타르 양 100으로 설정 / 추후 변경 예정)
+	NectarComp->InitializeMaxAmount(100.f);
 }
 
 void AGS_BuildManager::Tick(float DeltaTime)
