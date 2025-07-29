@@ -56,20 +56,11 @@ public:
 	UPROPERTY()
 	int32 CurrentSoundPlayingID = -1;
 
-	UFUNCTION()
-	void ResetAttackSoundSequence();
-
 	// ===============
 	// 타격 처리 관련
 	// ===============
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnAttackHit(int32 ComboIndex);
-
-	// ===============
-	// 사운드 멀티캐스트 관련
-	// ===============
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_StopAttackSound();
 
 protected:
 	// Called when the game starts or when spawned

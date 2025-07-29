@@ -83,7 +83,6 @@ void AGS_Monster::BeginPlay()
 	if (AkComponent)
 	{
 		AkComponent->OcclusionRefreshInterval = 0.0f;
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Monster: AkComponent occlusion DISABLED."));
 	}
 }
 

@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "AkGameplayStatics.h"
 #include "GS_CharacterAudioComponent.generated.h"
 
+class UAkAudioEvent;
+class UAkComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAS_API UGS_CharacterAudioComponent : public UActorComponent
@@ -22,15 +23,70 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	// 기본 스킬 이벤트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Character")
-	class UAkAudioEvent* SkillEvent;
+	UAkAudioEvent* SkillEvent;
 
 	int32 SkillEventID;
 
 	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
 	void PlaySkill();
+	
 	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
 	void StopSkill();
+	
+	// AkComponent 헬퍼 함수
+	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
+	UAkComponent* GetOrCreateAkComponent();
 
-		
+	// 위치 기반 사운드 재생
+	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
+	void PlaySoundAtLocation(UAkAudioEvent* SoundEvent, const FVector& Location);
+
+	// 스킬 사운드 재생
+	UFUNCTION(BlueprintCallable, Category = "Sound|Skill")
+	void PlaySkillSoundFromDataTable(ESkillSlot SkillSlot, bool bIsSkillStart = true);
+
+	// 스킬 충돌 사운드 재생 (궁극기용)
+	UFUNCTION(BlueprintCallable, Category = "Sound|Skill")
+	void PlaySkillCollisionSoundFromDataTable(ESkillSlot SkillSlot, uint8 CollisionType);
+
+	// Event-Driven 오디오 시스템
+	UFUNCTION(BlueprintCallable, Category = "Sound|EventDriven")
+	void RequestSkillAudio(ESkillSlot SkillSlot, int32 AudioEventType, FVector Location = FVector::ZeroVector);
+
+	// 스킬셋 데이터 기반 사운드 재생 헬퍼 함수
+	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
+	void PlaySkillSoundFromSkillInfo(bool bIsSkillStart, UAkAudioEvent* SkillStartSound, UAkAudioEvent* SkillEndSound);
+
+public:
+	// 콤보 공격 사운드 재생 (근접 공격 시커)
+	UFUNCTION(BlueprintCallable, Category = "Sound|Combo")
+	void PlayComboAttackSound(UAkAudioEvent* SwingSound, UAkAudioEvent* VoiceSound, UAkAudioEvent* StopEvent, float ResetTime);
+	
+	// 콤보 마지막 타격 특별 사운드 (근접 공격 시커)
+	UFUNCTION(BlueprintCallable, Category = "Sound|Combo")
+	void PlayFinalAttackSound(UAkAudioEvent* ExtraSound);
+
+	// 단일 사운드 재생 (원거리 공격 시커)
+	UFUNCTION(BlueprintCallable, Category = "Sound|Generic")
+	void PlaySound(UAkAudioEvent* SoundToPlay, bool bPlayOnLocalOnly = false);
+
+private:
+	// 콤보 공격 사운드 중지 콜백
+	void ResetAttackSoundSequence();
+
+	// 콤보 사운드 중지 이벤트 (내부 사용)
+	UPROPERTY()
+	UAkAudioEvent* CurrentStopEvent;
+
+protected:
+	// DT_SkillSet에서 스킬 정보 조회
+	const struct FSkillInfo* GetSkillInfoFromDataTable(ESkillSlot SkillSlot) const;
+
+private:
+	UPROPERTY()
+	UAkComponent* CachedAkComponent;
+
+	FTimerHandle AttackSoundResetTimerHandle;
 };

@@ -6,8 +6,8 @@
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Weapon/Projectile/Seeker/GS_SwordAuraProjectile.h"
 #include "Kismet/GameplayStatics.h"
-#include "Character/GS_Character.h"
 #include "Character/GS_TpsController.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_AresAimingSkill::UGS_AresAimingSkill()
 {
@@ -23,15 +23,14 @@ void UGS_AresAimingSkill::ActiveSkill()
 
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
+		// 스킬 시작 사운드 재생
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
+
 		// 스킬 애니메이션 재생
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-
-		// 스킬 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
-		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
-		}
 
 		// 입력 제한
 		if (AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController()))

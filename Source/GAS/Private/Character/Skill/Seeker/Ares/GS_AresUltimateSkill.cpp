@@ -4,8 +4,8 @@
 #include "Character/Skill/Seeker/Ares/GS_AresUltimateSkill.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_StatRow.h"
-#include "Character/Player/GS_Player.h"
-#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Sound/GS_CharacterAudioComponent.h"
+ #include "Character/Player/Seeker/GS_Ares.h"
 
 UGS_AresUltimateSkill::UGS_AresUltimateSkill()
 {
@@ -19,15 +19,14 @@ void UGS_AresUltimateSkill::ActiveSkill()
 
 	// 쿨타임 측정 시작
 	StartCoolDown();
-
 	
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
 		// 스킬 시작 사운드 재생
-		if (SkillInfo && SkillInfo->SkillStartSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
 
 		// 입력 제한 설정
@@ -125,7 +124,7 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 		}
 		OriginalMovingSkillCooltime = -1.f; // 초기화
 	}
-
+	
 	Super::DeactiveSkill();
 }
 

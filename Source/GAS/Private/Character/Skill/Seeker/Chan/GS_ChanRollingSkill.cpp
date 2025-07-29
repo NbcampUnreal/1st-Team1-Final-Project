@@ -4,6 +4,7 @@
 #include "Character/Skill/Seeker/Chan/GS_ChanRollingSkill.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/GS_TpsController.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_ChanRollingSkill::UGS_ChanRollingSkill()
 {
@@ -15,15 +16,14 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	StartCoolDown();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{		
-		// 구르기 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
+	{
+		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
 
-			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
 			OwnerPlayer->SetSkillInputControl(false, false, false);
 			OwnerPlayer->SetMoveControlValue(false, false);
