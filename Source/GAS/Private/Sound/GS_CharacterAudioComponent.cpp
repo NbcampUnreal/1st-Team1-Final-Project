@@ -11,6 +11,8 @@
 #include "Character/Skill/ESkill.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Skill/GS_SkillSet.h"
+#include "Character/GS_Character.h"
+#include "Character/Component/GS_StatComp.h"
 
 UGS_CharacterAudioComponent::UGS_CharacterAudioComponent()
 {
@@ -330,6 +332,7 @@ void UGS_CharacterAudioComponent::PlaySound(UAkAudioEvent* SoundToPlay, bool bPl
 	// 모든 클라이언트 (멀티캐스트)
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("PlaySound: Multicast mode"));
 		if (AGS_Seeker* OwningSeeker = Cast<AGS_Seeker>(Owner))
 		{
 			// 멀티캐스트 RPC 호출 - 서버에서도 호출해야 클라이언트들이 받음
@@ -360,6 +363,37 @@ void UGS_CharacterAudioComponent::ResetAttackSoundSequence()
 			AkComp->PostAkEvent(CurrentStopEvent);
 		}
 		CurrentStopEvent = nullptr; // Stop 이벤트 사용 후 초기화
+	}
+}
+
+void UGS_CharacterAudioComponent::PlayHitSound()
+{
+	// 데디케이티드 서버에서는 사운드 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	// 쿨다운 체크 (인스턴스 변수 사용)
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	if (CurrentTime - LastHitSoundTime < HitSoundCooldownTime)
+	{
+		return;
+	}
+	LastHitSoundTime = CurrentTime;
+
+	if (!HitSoundEvent)
+	{
+		return;
+	}
+
+	// 죽은 상태가 아닐 때만 히트 사운드 재생
+	if (AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner()))
+	{
+		if (OwnerCharacter->GetStatComp() && OwnerCharacter->GetStatComp()->GetCurrentHealth() > KINDA_SMALL_NUMBER)
+		{
+			PlaySound(HitSoundEvent);
+		}
 	}
 }
 

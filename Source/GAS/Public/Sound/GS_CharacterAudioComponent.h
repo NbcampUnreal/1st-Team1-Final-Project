@@ -8,6 +8,8 @@
 
 class UAkAudioEvent;
 class UAkComponent;
+class UGS_StatComp;
+class AGS_Character;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAS_API UGS_CharacterAudioComponent : public UActorComponent
@@ -72,6 +74,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Sound|Generic")
 	void PlaySound(UAkAudioEvent* SoundToPlay, bool bPlayOnLocalOnly = false);
 
+	// 피격 사운드 재생
+	UFUNCTION(BlueprintCallable, Category = "Sound|Hit")
+	void PlayHitSound();
+
+public:
+	// 피격 사운드 이벤트
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound|Hit")
+	UAkAudioEvent* HitSoundEvent;
+	
+	// 히트 사운드 쿨다운 시간
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Hit", meta = (ClampMin = "0.0", ClampMax = "5.0"))
+	float HitSoundCooldownTime = 1.75f;
+
 private:
 	// 콤보 공격 사운드 중지 콜백
 	void ResetAttackSoundSequence();
@@ -79,6 +94,9 @@ private:
 	// 콤보 사운드 중지 이벤트 (내부 사용)
 	UPROPERTY()
 	UAkAudioEvent* CurrentStopEvent;
+
+	// 마지막 히트 사운드 재생 시간 (인스턴스별)
+	float LastHitSoundTime = 0.0f;
 
 protected:
 	// DT_SkillSet에서 스킬 정보 조회
