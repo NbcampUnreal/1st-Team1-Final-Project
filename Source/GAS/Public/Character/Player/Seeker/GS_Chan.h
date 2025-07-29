@@ -64,32 +64,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
 	UAkAudioEvent* AimingSkillSlamSound;
 
-	/*// ===============
-	// 공격 사운드 리셋 관련
-	// ===============
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack", meta = (ClampMin = "0.1", ClampMax = "5.0"))
-	float AttackSoundResetTime = 1.0f;*/ // Seeker 에 선언.
-
-	FTimerHandle AttackSoundResetTimerHandle;
-
-	UFUNCTION()
-	void ResetAttackSoundSequence();
-
 	// ===============
 	// 타격 처리 관련
 	// ===============
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnAttackHit(int32 ComboIndex);
-
-	// ===============
-	// 사운드 멀티캐스트 관련
-	// ===============
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_StopAttackSound();
-
-	// ===============
-	// 스킬 사운드
-	// ===============
 
 	// [Widget]
 	void SetChanAimingSkillBarWidget(UGS_ChanAimingSkillBar* Widget) { ChanAimingSkillBarWidget = Widget; }

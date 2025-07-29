@@ -2,6 +2,7 @@
 
 
 #include "Sound/GS_CharacterAudioComponent.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include "AkGameplayStatics.h"
 #include "AkComponent.h"
 #include "AkAudioEvent.h"
@@ -10,12 +11,10 @@
 #include "Character/Skill/ESkill.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Skill/GS_SkillSet.h"
-#include "Character/Player/Seeker/GS_Seeker.h"
 
 UGS_CharacterAudioComponent::UGS_CharacterAudioComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
-	CachedAkComponent = nullptr;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UGS_CharacterAudioComponent::BeginPlay()
@@ -35,7 +34,8 @@ void UGS_CharacterAudioComponent::PlaySkill()
 	SkillEventID = UAkGameplayStatics::PostEvent(SkillEvent,
 		GetOwner(), // Post the event to the owner of this component 
 		0, // No callback mask
-		DummyCallback // No callback
+		DummyCallback, // No callback
+		false // bStopWhenAttachedToDestroyed
 	);
 }
 
@@ -49,38 +49,21 @@ void UGS_CharacterAudioComponent::StopSkill()
 
 UAkComponent* UGS_CharacterAudioComponent::GetOrCreateAkComponent()
 {
-	if (!GetOwner())
+	AActor* Owner = GetOwner();
+	if (!Owner)
 	{
-		UE_LOG(LogTemp, Error, TEXT("UGS_CharacterAudioComponent::GetOrCreateAkComponent - Owner is null"));
 		return nullptr;
 	}
 
-	// 캐시된 컴포넌트가 유효한지 확인
-	if (CachedAkComponent && IsValid(CachedAkComponent))
+	UAkComponent* AkComp = Owner->FindComponentByClass<UAkComponent>();
+	if (!AkComp)
 	{
-		return CachedAkComponent;
+		AkComp = NewObject<UAkComponent>(Owner);
+		AkComp->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		AkComp->RegisterComponent();
 	}
 
-	// 기존 AkComponent 찾기
-	CachedAkComponent = GetOwner()->FindComponentByClass<UAkComponent>();
-	
-	if (!CachedAkComponent)
-	{
-		// AkComponent가 없으면 새로 생성
-		CachedAkComponent = NewObject<UAkComponent>(GetOwner(), TEXT("RuntimeAkAudioComponent"));
-		if (CachedAkComponent)
-		{
-			CachedAkComponent->SetupAttachment(GetOwner()->GetRootComponent());
-			CachedAkComponent->RegisterComponent();
-			UE_LOG(LogTemp, Log, TEXT("UGS_CharacterAudioComponent::GetOrCreateAkComponent - Created new AkComponent"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("UGS_CharacterAudioComponent::GetOrCreateAkComponent - Failed to create AkComponent"));
-		}
-	}
-	
-	return CachedAkComponent;
+	return AkComp;
 }
 
 void UGS_CharacterAudioComponent::PlaySoundAtLocation(UAkAudioEvent* SoundEvent, const FVector& Location)
@@ -132,10 +115,10 @@ void UGS_CharacterAudioComponent::PlaySkillSoundFromDataTable(ESkillSlot SkillSl
 	
 	if (SoundToPlay)
 	{
-		// AGS_Seeker의 Multicast_PlaySkillSound 호출
+		// AGS_Seeker의 Multicast_PlaySound 호출
 		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(GetOwner()))
 		{
-			OwnerSeeker->Multicast_PlaySkillSound(SoundToPlay);
+			OwnerSeeker->Multicast_PlaySound(SoundToPlay);
 		}
 	}
 }
@@ -174,10 +157,10 @@ void UGS_CharacterAudioComponent::PlaySkillCollisionSoundFromDataTable(ESkillSlo
 
 	if (SoundToPlay)
 	{
-		// AGS_Seeker의 Multicast_PlaySkillSound 호출
+		// AGS_Seeker의 Multicast_PlaySound 호출
 		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(GetOwner()))
 		{
-			OwnerSeeker->Multicast_PlaySkillSound(SoundToPlay);
+			OwnerSeeker->Multicast_PlaySound(SoundToPlay);
 		}
 	}
 }
@@ -263,15 +246,120 @@ void UGS_CharacterAudioComponent::RequestSkillAudio(ESkillSlot SkillSlot, int32 
 void UGS_CharacterAudioComponent::PlaySkillSoundFromSkillInfo(bool bIsSkillStart, UAkAudioEvent* SkillStartSound, UAkAudioEvent* SkillEndSound)
 {
 	UAkAudioEvent* SoundToPlay = bIsSkillStart ? SkillStartSound : SkillEndSound;
-	
-	if (SoundToPlay)
+	if (!SoundToPlay) return;
+
+	AActor* Owner = GetOwner();
+	// AGS_Seeker의 Multicast_PlaySound 호출
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(Owner))
 	{
-		// ActorComponent에서는 Multicast를 사용할 수 없으므로 직접 재생
+		OwnerSeeker->Multicast_PlaySound(SoundToPlay);
+	}
+}
+
+void UGS_CharacterAudioComponent::PlayComboAttackSound(UAkAudioEvent* SwingSound, UAkAudioEvent* VoiceSound, UAkAudioEvent* StopEvent, float ResetTime)
+{
+	// 1. 기존 타이머가 있다면 클리어하고 즉시 Stop 이벤트 호출
+	GetWorld()->GetTimerManager().ClearTimer(AttackSoundResetTimerHandle);
+	
+	if (CurrentStopEvent)
+	{
 		UAkComponent* AkComp = GetOrCreateAkComponent();
 		if (AkComp)
 		{
-			AkComp->PostAkEvent(SoundToPlay);
+			AkComp->PostAkEvent(CurrentStopEvent);
 		}
+	}
+
+	// 2. 새로운 Stop 이벤트를 저장
+	CurrentStopEvent = StopEvent;
+
+	// 3. 새로운 공격 사운드 재생
+	if (SwingSound)
+	{
+		PlaySound(SwingSound);
+	}
+	if (VoiceSound)
+	{
+		PlaySound(VoiceSound);
+	}
+
+	// 4. 공격 후 일정 시간 뒤 사운드 시퀀스 리셋을 위한 타이머 설정
+	GetWorld()->GetTimerManager().SetTimer(
+		AttackSoundResetTimerHandle,
+		this,
+		&UGS_CharacterAudioComponent::ResetAttackSoundSequence,
+		ResetTime,
+		false
+	);
+}
+
+void UGS_CharacterAudioComponent::PlayFinalAttackSound(UAkAudioEvent* ExtraSound)
+{
+	if (ExtraSound)
+	{
+		PlaySound(ExtraSound);
+	}
+}
+
+void UGS_CharacterAudioComponent::PlaySound(UAkAudioEvent* SoundToPlay, bool bPlayOnLocalOnly)
+{
+	AActor* Owner = GetOwner();
+	if (!SoundToPlay || !Owner)
+	{
+		return;
+	}
+
+	// 로컬 플레이어에서만 재생하는 경우 (UI 사운드 등)
+	if (bPlayOnLocalOnly)
+	{
+		// 데디케이티드 서버에서는 로컬 플레이어만 재생하는 사운드는 스킵
+		if (GetNetMode() == NM_DedicatedServer)
+		{
+			return;
+		}
+
+		// 로컬 컨트롤러 확인
+		if (APawn* OwnerPawn = Cast<APawn>(Owner))
+		{
+			if (OwnerPawn->IsLocallyControlled())
+			{
+				UAkGameplayStatics::PostEvent(SoundToPlay, Owner, 0, FOnAkPostEventCallback(), false);
+			}
+		}
+	}
+	// 모든 클라이언트 (멀티캐스트)
+	else
+	{
+		if (AGS_Seeker* OwningSeeker = Cast<AGS_Seeker>(Owner))
+		{
+			// 멀티캐스트 RPC 호출 - 서버에서도 호출해야 클라이언트들이 받음
+			OwningSeeker->Multicast_PlaySound(SoundToPlay);
+		}
+		else
+		{
+			// 데디케이티드 서버가 아닌 경우에만 직접 재생
+			if (Owner->GetWorld()->GetNetMode() != NM_DedicatedServer)
+			{
+				UAkComponent* AkComp = GetOrCreateAkComponent();
+				if (AkComp)
+				{
+					AkComp->PostAkEvent(SoundToPlay);
+				}
+			}
+		}
+	}
+}
+
+void UGS_CharacterAudioComponent::ResetAttackSoundSequence()
+{
+	if (CurrentStopEvent)
+	{
+		UAkComponent* AkComp = GetOrCreateAkComponent();
+		if (AkComp)
+		{
+			AkComp->PostAkEvent(CurrentStopEvent);
+		}
+		CurrentStopEvent = nullptr; // Stop 이벤트 사용 후 초기화
 	}
 }
 

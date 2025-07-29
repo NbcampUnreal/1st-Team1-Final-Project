@@ -56,9 +56,7 @@ class GAS_API AGS_Seeker : public AGS_Player
 
 public:
 	AGS_Seeker();
-
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Death
@@ -134,9 +132,9 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	// === Audio Functions ===
-	UFUNCTION(NetMulticast, Reliable, BlueprintCallable, Category = "Sound|Character")
-	void Multicast_PlaySkillSound(UAkAudioEvent* SoundToPlay);
-
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlaySound(class UAkAudioEvent* SoundToPlay);
+	
 	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
 	class UAkComponent* GetOrCreateAkComponent();
 

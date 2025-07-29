@@ -3,16 +3,13 @@
 
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
 #include "Sound/GS_CharacterAudioComponent.h"
-#include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Skill/GS_SkillSet.h"
-#include "AkAudioEvent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Engine/StaticMeshActor.h"
-#include "Kismet/GameplayStatics.h"
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/GS_TpsController.h"
@@ -35,16 +32,17 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	
 	// 구조물 충돌 확인 변수 초기화
 	bInStructureCrash = false;
-
-	// 입력 제한 설정
-	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	OwnerPlayer->SetSkillInputControl(false, false, false);
-
-	// 궁극기 사운드 재생
-	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-	if (SkillInfo && SkillInfo->SkillStartSound)
+	
+	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+		// 궁극기 사운드 재생
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
+		
+		// 입력 제한 설정
+		OwnerPlayer->SetSkillInputControl(false, false, false);
 	}
 
 	// 돌진 시작 (약간 딜레이)

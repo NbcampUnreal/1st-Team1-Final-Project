@@ -3,6 +3,7 @@
 
 #include "Character/Skill/Seeker/Ares/GS_AresRollingSkill.h"
 #include "Character/Player/Seeker/GS_Ares.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_AresRollingSkill::UGS_AresRollingSkill()
 {
@@ -24,11 +25,10 @@ void UGS_AresRollingSkill::ActiveSkill()
 		
 		if (OwnerPlayer->HasAuthority())
 		{
-			// 구르기 시작 사운드 재생
-			const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-			if (SkillInfo && SkillInfo->SkillStartSound)
+			// 스킬 시작 사운드 재생
+			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 			{
-				OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 			}
 
 			OwnerPlayer->Multicast_SetIsFullBodySlot(true);

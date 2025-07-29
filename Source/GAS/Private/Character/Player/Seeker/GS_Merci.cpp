@@ -2,6 +2,7 @@
 
 
 #include "Character/Player/Seeker/GS_Merci.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -597,7 +598,10 @@ void AGS_Merci::OnRep_CurrentArrowType()
 	// 화살 타입 변경 사운드 재생
 	if (ArrowTypeChangeSound && IsLocallyControlled())
 	{
-		UAkGameplayStatics::PostEvent(ArrowTypeChangeSound, this, 0, FOnAkPostEventCallback());
+		if (CharacterAudioComponent)
+		{
+			CharacterAudioComponent->PlaySound(ArrowTypeChangeSound, true);
+		}
 	}
 }
 
@@ -714,63 +718,41 @@ void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRot
 
 void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 {
-	if (ArrowShotSound)
+	if (CharacterAudioComponent)
 	{
-		UAkGameplayStatics::PostEvent(ArrowShotSound, this, 0, FOnAkPostEventCallback());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayArrowShotSound_Implementation: ArrowShotSound is null"));
+		CharacterAudioComponent->PlaySound(ArrowShotSound);
 	}
 }
 
 void AGS_Merci::Multicast_PlayArrowEmptySound_Implementation()
 {
-	// 로컬 플레이어에게만 사운드 재생 (화살 부족은 개인적인 피드백)
-	if (ArrowEmptySound && IsLocallyControlled())
+	if (CharacterAudioComponent)
 	{
-		UAkGameplayStatics::PostEvent(ArrowEmptySound, this, 0, FOnAkPostEventCallback());
+		CharacterAudioComponent->PlaySound(ArrowEmptySound, true); // 로컬 플레이어에게만 재생
 	}
 }
 
 void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
 {
-	// 타격 피드백 사운드는 화살을 쏜 플레이어에게만 재생
-	if (HitFeedbackSound && IsLocallyControlled())
+	if (CharacterAudioComponent)
 	{
-		UAkGameplayStatics::PostEvent(HitFeedbackSound, this, 0, FOnAkPostEventCallback());
-	}
-	else if (!HitFeedbackSound)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Client_PlayHitFeedbackSound_Implementation: HitFeedbackSound is null"));
+		CharacterAudioComponent->PlaySound(HitFeedbackSound, true); // 로컬 플레이어에게만 재생
 	}
 }
 
 void AGS_Merci::Multicast_PlayBowPullSound_Implementation()
 {
-	// 데디케이티드 서버에서는 사운드 재생하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	if (CharacterAudioComponent)
 	{
-		return;
-	}
-
-	if (BowPullSound)
-	{
-		UAkGameplayStatics::PostEvent(BowPullSound, this, 0, FOnAkPostEventCallback());
+		CharacterAudioComponent->PlaySound(BowPullSound);
 	}
 }
 
 void AGS_Merci::Multicast_PlayBowReleaseSound_Implementation()
 {
-	// 데디케이티드 서버에서는 사운드 재생하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	if (CharacterAudioComponent)
 	{
-		return;
-	}
-
-	if (BowReleaseSound)
-	{
-		UAkGameplayStatics::PostEvent(BowReleaseSound, this, 0, FOnAkPostEventCallback());
+		CharacterAudioComponent->PlaySound(BowReleaseSound);
 	}
 }
 

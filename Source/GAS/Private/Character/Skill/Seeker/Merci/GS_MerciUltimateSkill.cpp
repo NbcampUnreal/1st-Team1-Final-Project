@@ -7,6 +7,7 @@
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_MerciUltimateSkill::UGS_MerciUltimateSkill()
 {
@@ -23,14 +24,17 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 	if(OwnerCharacter)
 	{
 		OwnerCharacter->Server_SetCanHitReact(false); // 서버에 전달
-		// 스킬 시작 사운드 재생
+		
 		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
+		if (AGS_Merci* OwnerPlayer = Cast<AGS_Merci>(OwnerCharacter))
 		{
-			if (SkillInfo && SkillInfo->SkillStartSound)
+			// 스킬 시작 사운드 재생
+			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 			{
-				OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 			}
+
+			OwnerPlayer->SetAutoAimTarget(nullptr);
 		}
 
 		// 줌인 효과

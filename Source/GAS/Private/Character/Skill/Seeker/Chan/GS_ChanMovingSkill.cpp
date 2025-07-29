@@ -3,6 +3,7 @@
 
 #include "Character/Skill/Seeker/Chan/GS_ChanMovingSkill.h"
 #include "Character/Player/Seeker/GS_Chan.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
@@ -53,13 +54,12 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, 800.0f);
 		}
 			
-		// 무빙 스킬 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
+		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
-	
+
 		// 방어력 강화
 		StrengthenDefense();
 

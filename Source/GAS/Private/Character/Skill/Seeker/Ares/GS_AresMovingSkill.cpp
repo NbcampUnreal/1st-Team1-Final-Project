@@ -13,6 +13,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Character/GS_TpsController.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 
 UGS_AresMovingSkill::UGS_AresMovingSkill()
@@ -30,10 +31,9 @@ void UGS_AresMovingSkill::ActiveSkill()
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 
 		// 스킬 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
 	}
 

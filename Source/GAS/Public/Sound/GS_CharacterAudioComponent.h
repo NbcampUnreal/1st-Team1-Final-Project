@@ -59,6 +59,27 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
 	void PlaySkillSoundFromSkillInfo(bool bIsSkillStart, UAkAudioEvent* SkillStartSound, UAkAudioEvent* SkillEndSound);
 
+public:
+	// 콤보 공격 사운드 재생 (근접 공격 시커)
+	UFUNCTION(BlueprintCallable, Category = "Sound|Combo")
+	void PlayComboAttackSound(UAkAudioEvent* SwingSound, UAkAudioEvent* VoiceSound, UAkAudioEvent* StopEvent, float ResetTime);
+	
+	// 콤보 마지막 타격 특별 사운드 (근접 공격 시커)
+	UFUNCTION(BlueprintCallable, Category = "Sound|Combo")
+	void PlayFinalAttackSound(UAkAudioEvent* ExtraSound);
+
+	// 단일 사운드 재생 (원거리 공격 시커)
+	UFUNCTION(BlueprintCallable, Category = "Sound|Generic")
+	void PlaySound(UAkAudioEvent* SoundToPlay, bool bPlayOnLocalOnly = false);
+
+private:
+	// 콤보 공격 사운드 중지 콜백
+	void ResetAttackSoundSequence();
+
+	// 콤보 사운드 중지 이벤트 (내부 사용)
+	UPROPERTY()
+	UAkAudioEvent* CurrentStopEvent;
+
 protected:
 	// DT_SkillSet에서 스킬 정보 조회
 	const struct FSkillInfo* GetSkillInfoFromDataTable(ESkillSlot SkillSlot) const;
@@ -66,4 +87,6 @@ protected:
 private:
 	UPROPERTY()
 	UAkComponent* CachedAkComponent;
+
+	FTimerHandle AttackSoundResetTimerHandle;
 };
