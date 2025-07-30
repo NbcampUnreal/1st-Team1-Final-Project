@@ -30,10 +30,10 @@ void UGS_AresMovingSkill::ActiveSkill()
 		// 스킬 애니메이션 재생
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 
-		// 스킬 시작 사운드 재생
+		// 차징 루프 사운드 재생 (준비 동작)
 		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			AudioComp->PlaySkillLoopSoundFromDataTable(CurrentSkillType);
 		}
 	}
 
@@ -74,6 +74,15 @@ void UGS_AresMovingSkill::OnSkillCommand()
 
 	Super::OnSkillCommand();
 
+	// 차징 루프 사운드 정지 및 돌진 사운드 재생
+	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		// 차징 사운드 정지
+		AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
+		// 돌진 사운드 재생
+		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+	}
+
 	// 차징 종료
 	OwnerCharacter->GetWorld()->GetTimerManager().ClearTimer(ChargingTimerHandle);
 
@@ -112,12 +121,24 @@ void UGS_AresMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
 	// 데미지
 	UGameplayStatics::ApplyDamage(Target, 50.0f, OwnerCharacter->GetController(), OwnerCharacter, nullptr);
+	
+	// 몬스터 충돌 사운드 재생
+	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 1); // 1: Monster
+	}
 }
 
 void UGS_AresMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
 	// 데미지
 	UGameplayStatics::ApplyDamage(Target, 50.0f, OwnerCharacter->GetController(), OwnerCharacter, nullptr);
+	
+	// 가디언 충돌 사운드 재생
+	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 2); // 2: Guardian
+	}
 }
 
 void UGS_AresMovingSkill::UpdateCharging()
@@ -222,6 +243,12 @@ void UGS_AresMovingSkill::DeactiveSkill()
 	// 원래대로 Block으로 되돌리기
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+
+	// 스킬 종료 사운드 재생
+	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+	}
 
 	Super::DeactiveSkill();
 }

@@ -23,10 +23,13 @@ void UGS_AresUltimateSkill::ActiveSkill()
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		// 스킬 시작 사운드 재생
+		// 스킬 시작 사운드 재생 (데이터 테이블 기반)
 		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
 			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			
+			// 궁극기 가동 사운드 재생 (루프)
+			AudioComp->PlaySkillLoopSoundFromDataTable(CurrentSkillType);
 		}
 
 		// 입력 제한 설정
@@ -108,6 +111,13 @@ void UGS_AresUltimateSkill::BecomeBerserker()
 
 void UGS_AresUltimateSkill::DeactiveSkill()
 {
+	// 궁극기 종료 사운드 재생
+	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType); // 루프 사운드 중지
+	}
+
 	// 스탯 복원
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
 	{

@@ -37,6 +37,12 @@ struct GAS_API FSkillInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	UAkAudioEvent* SkillEndSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	UAkAudioEvent* SkillLoopSound; // 스킬 가동 중 루프 사운드 (궁극기용)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	UAkAudioEvent* SkillLoopStopSound; // 스킬 루프 사운드 정지 이벤트 (궁극기용)
+
 	// 충돌별 특수 사운드 (주로 궁극기 스킬용)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound|Collision")
 	UAkAudioEvent* WallCollisionSound;

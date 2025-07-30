@@ -49,6 +49,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Sound|Skill")
 	void PlaySkillSoundFromDataTable(ESkillSlot SkillSlot, bool bIsSkillStart = true);
 
+	// 스킬 루프 사운드 재생/정지 (궁극기용)
+	UFUNCTION(BlueprintCallable, Category = "Sound|Skill")
+	void PlaySkillLoopSoundFromDataTable(ESkillSlot SkillSlot);
+
+	UFUNCTION(BlueprintCallable, Category = "Sound|Skill")
+	void StopSkillLoopSoundFromDataTable(ESkillSlot SkillSlot);
+
 	// 스킬 충돌 사운드 재생 (궁극기용)
 	UFUNCTION(BlueprintCallable, Category = "Sound|Skill")
 	void PlaySkillCollisionSoundFromDataTable(ESkillSlot SkillSlot, uint8 CollisionType);
@@ -65,6 +72,14 @@ public:
 	// 콤보 공격 사운드 재생 (근접 공격 시커)
 	UFUNCTION(BlueprintCallable, Category = "Sound|Combo")
 	void PlayComboAttackSound(UAkAudioEvent* SwingSound, UAkAudioEvent* VoiceSound, UAkAudioEvent* StopEvent, float ResetTime);
+	
+	// 콤보 인덱스별 공격 사운드 재생 (개선된 버전)
+	UFUNCTION(BlueprintCallable, Category = "Sound|Combo")
+	void PlayComboAttackSoundByIndex(int32 ComboIndex, const TArray<UAkAudioEvent*>& SwingSounds, const TArray<UAkAudioEvent*>& VoiceSounds, UAkAudioEvent* StopEvent, float ResetTime);
+
+	// 콤보 인덱스별 공격 사운드 재생 (추가 사운드 포함)
+	UFUNCTION(BlueprintCallable, Category = "Sound|Combo")
+	void PlayComboAttackSoundByIndexWithExtra(int32 ComboIndex, const TArray<UAkAudioEvent*>& SwingSounds, const TArray<UAkAudioEvent*>& VoiceSounds, const TArray<UAkAudioEvent*>& ExtraSounds, UAkAudioEvent* StopEvent, float ResetTime);
 	
 	// 콤보 마지막 타격 특별 사운드 (근접 공격 시커)
 	UFUNCTION(BlueprintCallable, Category = "Sound|Combo")
