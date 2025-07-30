@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{EB8C9A75-DE88-0490-4B6F-9E6FFAE69DCF}",
+    "Hash": "{3DC088CC-CDD0-7F41-BD72-4B9DD2803082}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -88,6 +88,14 @@
       "CachePath": "D4/{D468E696-B651-282D-0B5D-16825AE1B90F}.wem"
      },
      {
+      "Id": "57487011",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Grunt_3_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "38/{38FB5F7C-BBD4-84F8-6F72-73A4258B1E48}.wem"
+     },
+     {
       "Id": "63023961",
       "Language": "SFX",
       "Streaming": "false",
@@ -112,6 +120,22 @@
       "CachePath": "2B/{2BF6526B-0EB6-B99D-1A11-32A26653FF1C}.wem"
      },
      {
+      "Id": "70445201",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_FG_FX_one_shot_farming_axe_sword_swing_attack_1_tool_whoosh.wav",
+      "CachePath": "67/{67167EED-DFD0-2C39-9DE5-6A1BDBB0D0E6}.wem"
+     },
+     {
+      "Id": "76746133",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "DORIANELECTRA_fx_sword_whoosh.wav",
+      "CachePath": "E5/{E543F5B1-B365-9623-B18A-A3041B16BC9A}.wem"
+     },
+     {
       "Id": "82395722",
       "Language": "SFX",
       "Streaming": "false",
@@ -120,12 +144,36 @@
       "CachePath": "FA/{FA1EEA66-EEB8-676C-94BB-7844B1ABA954}.wem"
      },
      {
+      "Id": "87964147",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy.wav",
+      "CachePath": "88/{8871F5B5-ECDC-29EB-EEB7-6A7A3B2BDDD0}.wem"
+     },
+     {
       "Id": "88352064",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_hammer_impact_heavy_ring.wav",
       "CachePath": "E2/{E2E88F70-4C9C-3BE1-0DF8-25DC7A319975}.wem"
+     },
+     {
+      "Id": "90466359",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_iron_fight_duel_clash_metal_swipe_02.wav",
+      "CachePath": "BA/{BA583B8B-467A-F0D7-CB86-6601D4207E19}.wem"
+     },
+     {
+      "Id": "91323249",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_blade_slice_blood_squelch_cut_swing_03.wav",
+      "CachePath": "36/{3639BF15-FE93-C243-E683-9D2D4DC7E276}.wem"
      },
      {
       "Id": "100862515",
@@ -158,6 +206,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Jump_4_Male_Human_Voice_Over_Vocal_English_Russian.wav",
       "CachePath": "4A/{4A407617-B43F-5B87-A827-F98465A68FC9}.wem"
+     },
+     {
+      "Id": "120891545",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Growl_3_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "D5/{D568B4BE-4819-CFF1-6A82-A86CF8FAAE45}.wem"
      },
      {
       "Id": "120977185",
@@ -304,14 +360,6 @@
       "CachePath": "39/{3904409D-71D1-AB20-F48A-8D01663764A7}.wem"
      },
      {
-      "Id": "228289941",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_Character_Calvin_Growl_3_Male_Human_Voice_Over_Vocal_English_Middle_Age_Adult_Mature.wav",
-      "CachePath": "8F/{8FF929ED-A99D-63C8-3CF2-45DE9A25DBFA}.wem"
-     },
-     {
       "Id": "230669099",
       "Language": "SFX",
       "Streaming": "false",
@@ -368,6 +416,14 @@
       "CachePath": "E4/{E4362B59-0A9A-4535-8495-A5FD31975BB3}.wem"
      },
      {
+      "Id": "259888318",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Calvin_Growl_4_Male_Human_Voice_Over_Vocal_English_Middle_Age_Adult_Mature.wav",
+      "CachePath": "4A/{4A7D640B-5CC8-4051-A9C3-17449586287E}.wem"
+     },
+     {
       "Id": "269881452",
       "Language": "SFX",
       "Streaming": "false",
@@ -382,6 +438,14 @@
       "Location": "Memory",
       "ShortName": "ESM_CH_fx_combat_kick_gore_bone_breaks_01.wav",
       "CachePath": "5E/{5E5C5F90-A6CC-63AF-A1B2-08F036C23DF3}.wem"
+     },
+     {
+      "Id": "276033827",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Growl_6_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "6F/{6FDBBF07-E078-668D-F701-E9D72AA2B8BB}.wem"
      },
      {
       "Id": "278485591",
@@ -576,6 +640,14 @@
       "CachePath": "58/{58BDAC71-C1E9-4D28-AA52-43202D24873F}.wem"
      },
      {
+      "Id": "415800878",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_FG2_FX_magic_one_shot_water_ESM_FG2_FX_magic_one_shot_fire_power_ramp_flare_buff_swells_3.wav",
+      "CachePath": "68/{68F14940-BBC0-50DF-5237-C5FEA7E28B67}.wem"
+     },
+     {
       "Id": "418165151",
       "Language": "SFX",
       "Streaming": "false",
@@ -670,6 +742,14 @@
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_inflammation_light_02_burn_fire_flame.wav",
       "CachePath": "CF/{CF033A5A-9518-C199-7D3C-067465945448}.wem"
+     },
+     {
+      "Id": "460161604",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_FG2_FX_combat_one_shot_cinematic_weapons_melee_axe_hits_04.wav",
+      "CachePath": "66/{669C7BD8-7986-5479-C08D-0125F758C1F9}.wem"
      },
      {
       "Id": "460690503",
@@ -856,6 +936,14 @@
       "CachePath": "62/{62B0B2BE-46A4-E6EA-AABA-1C3934FDF197}.wem"
      },
      {
+      "Id": "584199073",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_blade_slice_blood_squelch_cut_swing_06.wav",
+      "CachePath": "6F/{6F16A549-64C6-9B2E-7266-02CEBFDBED68}.wem"
+     },
+     {
       "Id": "586361417",
       "Language": "SFX",
       "Streaming": "false",
@@ -1040,6 +1128,14 @@
       "CachePath": "B2/{B2E7A119-4959-00D4-16AF-70D19B99744B}.wem"
      },
      {
+      "Id": "699157515",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_quick.wav",
+      "CachePath": "85/{85416B79-40F2-5B76-CFD4-5F8E2829E641}.wem"
+     },
+     {
       "Id": "710539305",
       "Language": "SFX",
       "Streaming": "false",
@@ -1070,6 +1166,14 @@
       "Location": "Memory",
       "ShortName": "BowPullString_BW.54386.wav",
       "CachePath": "8E/{8EF503AA-1052-CFE7-517F-492C0B0B8CEF}.wem"
+     },
+     {
+      "Id": "745584547",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_iron_fight_duel_clash_metal_swipe_02.wav",
+      "CachePath": "7D/{7DB9B8FE-DA93-C5A7-97A1-3FF97ABEF59D}.wem"
      },
      {
       "Id": "749540455",
@@ -1120,6 +1224,14 @@
       "CachePath": "E6/{E64AECED-BB04-A7BE-043C-1E66BA96AB9F}.wem"
      },
      {
+      "Id": "778302191",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_iron_sharp_slash_grind_scrape_strike_impact_04.wav",
+      "CachePath": "A3/{A37EE72C-3E41-4FA8-B586-131335E4737A}.wem"
+     },
+     {
       "Id": "797000384",
       "Language": "SFX",
       "Streaming": "false",
@@ -1136,12 +1248,20 @@
       "CachePath": "89/{893761AD-A594-26EE-9B43-B687EEADFE1B}.wem"
      },
      {
-      "Id": "802472056",
+      "Id": "800715076",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
-      "ShortName": "ESM_FG_FX_one_shot_farming_axe_sword_swing_attack_1_tool_whoosh.wav",
-      "CachePath": "D2/{D2DBE40E-756B-8D6D-E7F6-2877AB98BFAA}.wem"
+      "ShortName": "ESM_Character_Yury_Grunt_6_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "A9/{A9556425-5E0C-7657-BFCC-9DCAC0359942}.wem"
+     },
+     {
+      "Id": "808253480",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Growl_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "0D/{0D3CED72-8178-9C0F-4BAA-1B46DF894D07}.wem"
      },
      {
       "Id": "809366429",
@@ -1264,12 +1384,12 @@
       "CachePath": "FC/{FCDF9688-9D8E-BC19-28B7-8D15B75E8C0A}.wem"
      },
      {
-      "Id": "871056365",
+      "Id": "869833067",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
-      "ShortName": "FNF_ME_sfx_combat_broadsword_impact_shield_metal.wav",
-      "CachePath": "73/{737A2E9B-3EDD-10DC-B951-3647748256D0}.wem"
+      "ShortName": "ESM_FG2_FX_combat_one_shot_cinematic_weapons_melee_axe_hits_04.wav",
+      "CachePath": "29/{29F4A933-402F-320F-2AB8-8D4F641A7AA1}.wem"
      },
      {
       "Id": "872852181",
@@ -1304,12 +1424,28 @@
       "CachePath": "7F/{7FBF39D6-FA64-790C-613B-C7910EC1D565}.wem"
      },
      {
+      "Id": "887831765",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy.wav",
+      "CachePath": "B3/{B37446A5-91AC-7D87-7B82-554236EBC405}.wem"
+     },
+     {
       "Id": "889173008",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_GETOVERHERE_Male_Human_Voice_Over_Vocal_English_Russian.wav",
       "CachePath": "AC/{AC484B33-FD56-57B1-1090-C35FD545DF32}.wem"
+     },
+     {
+      "Id": "890261292",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Yury_Growl_1_Male_Human_Voice_Over_Vocal_English_Russian.wav",
+      "CachePath": "B7/{B700D8F2-F6D8-DF2D-F085-C1C29625E46B}.wem"
      },
      {
       "Id": "894430010",
@@ -1400,6 +1536,14 @@
       "CachePath": "6F/{6F59C5A8-D7F3-608C-5288-32ED5C69510D}.wem"
      },
      {
+      "Id": "951256613",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy.wav",
+      "CachePath": "59/{595F0799-5098-C8DD-9833-DB0A694A58BF}.wem"
+     },
+     {
       "Id": "957899954",
       "Language": "SFX",
       "Streaming": "false",
@@ -1446,6 +1590,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Grunt_4_Male_Human_Voice_Over_Vocal_English_Russian.wav",
       "CachePath": "3E/{3EDE4200-BC9D-C236-1B10-7BD0E0BD4236}.wem"
+     },
+     {
+      "Id": "993356452",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_iron_fight_duel_clash_metal_swipe_01.wav",
+      "CachePath": "FD/{FD348C57-0C66-C7B7-5FC5-DDE2903260D8}.wem"
      },
      {
       "Id": "995426383",
@@ -1504,6 +1656,14 @@
       "CachePath": "BC/{BC63EFE6-7C3B-9623-E40A-BDC627B86D9C}.wem"
      },
      {
+      "Id": "1027760390",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_blade_slice_blood_squelch_cut_swing_06.wav",
+      "CachePath": "58/{584EDAB3-C40D-A84F-033D-FB7796EFE98E}.wem"
+     },
+     {
       "Id": "1030029664",
       "Language": "SFX",
       "Streaming": "false",
@@ -1542,6 +1702,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Jump_5_Female_Adult_Mature_DJ_Woman.wav",
       "CachePath": "BB/{BB1B9670-72DF-0DD9-BB99-9833AB7E64A3}.wem"
+     },
+     {
+      "Id": "1047394447",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_sword_slash_slow_gore.wav",
+      "CachePath": "49/{49C4A22C-A92E-4AD6-6A7F-3B490549A3FF}.wem"
      },
      {
       "Id": "1052175375",
@@ -1611,6 +1779,14 @@
        "LibId": "8519683"
       },
       {
+       "Id": "60855020",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_MeleeHit_Sword\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{6B6113D9-2E4E-4D5C-9CE9-52FA3AE7B3D9}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
+      },
+      {
        "Id": "132011161",
        "Name": "Pitch Shifter (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Guardian\\EV_Drakhar_Flying\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
@@ -1633,6 +1809,14 @@
        "GUID": "{32B310AD-36DE-4D7E-8E52-27707418671F}",
        "LibName": "Wwise Flanger",
        "LibId": "8192003"
+      },
+      {
+       "Id": "152896965",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Ares\\EV_AresUltimateEnd\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{BF380EB3-4894-4381-BFC4-28247A143B91}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
       },
       {
        "Id": "188849779",
@@ -1723,6 +1907,14 @@
        "LibId": "8912899"
       },
       {
+       "Id": "528065253",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Ares\\EV_AresUltimateSkill\\[Effect Slot [2]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{54029FF8-3A97-48EB-99B3-10F934D428C9}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
+      },
+      {
        "Id": "596148375",
        "Name": "Time Stretch (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Ares\\SFX_AresSick\\Heartbeat\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
@@ -1767,6 +1959,14 @@
        "Name": "Pitch Shifter (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_Monster\\SFX_Mon_IronFang_RTS\\[Effect Slot [1]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
        "GUID": "{30E3210D-1A3F-4B49-A940-0E14020D0E47}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
+      },
+      {
+       "Id": "1030367423",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Ares\\EV_AresUltimateLoop\\[Effect Slot [1]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{01A449ED-13AA-4559-A4C4-28F2AF9DD6A6}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
       }
@@ -2000,20 +2200,20 @@
       ]
      },
      {
-      "Id": "3895761501",
-      "Name": "EV_Ares_Attack",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack",
+      "Id": "4201754105",
+      "Name": "EV_Ares_Attack_01",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack_01",
       "GUID": "{04416426-2600-4113-9DCF-1F7794024FF1}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
-      "DurationMin": "0.43329397",
-      "DurationMax": "1.1392716",
+      "DurationMin": "0.34937403",
+      "DurationMax": "0.43511724",
       "MediaRefs": [
        {
-        "Id": "802472056"
+        "Id": "70445201"
        },
        {
-        "Id": "871056365"
+        "Id": "1027760390"
        }
       ],
       "PluginRefs": {
@@ -2023,6 +2223,57 @@
         }
        ]
       }
+     },
+     {
+      "Id": "4201754106",
+      "Name": "EV_Ares_Attack_02",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack_02",
+      "GUID": "{1E0C93ED-3671-4D14-AA2C-4874F9BA328B}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.4159577",
+      "DurationMax": "1.1269805",
+      "MediaRefs": [
+       {
+        "Id": "584199073"
+       },
+       {
+        "Id": "699157515"
+       }
+      ]
+     },
+     {
+      "Id": "4201754107",
+      "Name": "EV_Ares_Attack_03",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack_03",
+      "GUID": "{E8AD266E-E28A-47B1-A47E-BC51CAD1987C}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "1.4268351",
+      "DurationMax": "1.4734945",
+      "MediaRefs": [
+       {
+        "Id": "90466359"
+       },
+       {
+        "Id": "745584547"
+       }
+      ]
+     },
+     {
+      "Id": "4201754108",
+      "Name": "EV_Ares_Attack_04",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack_04",
+      "GUID": "{CBCB0FEC-1611-466C-B646-871135F8D9DD}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "1.5196469",
+      "DurationMax": "1.5234635",
+      "MediaRefs": [
+       {
+        "Id": "951256613"
+       }
+      ]
      },
      {
       "Id": "809769072",
@@ -2041,14 +2292,14 @@
       "GUID": "{7D641009-3933-460E-B5D0-EE0F5B7D0CEA}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
-      "DurationMin": "2.0216794",
-      "DurationMax": "2.0216794",
+      "DurationMin": "1.4022646",
+      "DurationMax": "1.4022646",
       "MediaRefs": [
        {
-        "Id": "100862515"
+        "Id": "87964147"
        },
        {
-        "Id": "606572947"
+        "Id": "1047394447"
        }
       ]
      },
@@ -2067,6 +2318,36 @@
        },
        {
         "Id": "899626115"
+       }
+      ]
+     },
+     {
+      "Id": "964148363",
+      "Name": "EV_AresDashSkill_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_AresDashSkill_Hit",
+      "GUID": "{E12A0AAA-CF00-4078-82C1-13250F174C22}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "1.130515",
+      "DurationMax": "1.130515",
+      "MediaRefs": [
+       {
+        "Id": "887831765"
+       }
+      ]
+     },
+     {
+      "Id": "3592577305",
+      "Name": "EV_AresDashSkill_Ready",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_AresDashSkill_Ready",
+      "GUID": "{7C331407-0104-4B4D-8344-CCAC7CD0DA05}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.7662848",
+      "DurationMax": "0.7662848",
+      "MediaRefs": [
+       {
+        "Id": "76746133"
        }
       ]
      },
@@ -2095,20 +2376,108 @@
       ]
      },
      {
-      "Id": "231468510",
-      "Name": "EV_AresUltimateSkill",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_AresUltimateSkill",
-      "GUID": "{EC4AC91F-C6A2-41DA-966D-D75FCAB2E0D6}",
-      "MaxAttenuation": "880",
+      "Id": "1042614370",
+      "Name": "EV_AresUltimateEnd",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_AresUltimateEnd",
+      "GUID": "{7F3B4958-9FDC-491C-956A-B4F02A7846AB}",
+      "MaxAttenuation": "800",
       "DurationType": "OneShot",
-      "DurationMin": "1.3929672",
-      "DurationMax": "1.3929672",
+      "DurationMin": "2.040877",
+      "DurationMax": "2.040877",
       "MediaRefs": [
        {
-        "Id": "228289941"
+        "Id": "259888318"
+       },
+       {
+        "Id": "460161604"
        }
       ],
       "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "152896965"
+        }
+       ],
+       "ShareSets": [
+        {
+         "Id": "2995775460"
+        },
+        {
+         "Id": "3487820010"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "283403029",
+      "Name": "EV_AresUltimateLoop",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_AresUltimateLoop",
+      "GUID": "{FE979811-406E-40BA-AEC5-17C733A46C5A}",
+      "MaxAttenuation": "800",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "120891545"
+       },
+       {
+        "Id": "276033827"
+       },
+       {
+        "Id": "808253480"
+       },
+       {
+        "Id": "890261292"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "1030367423"
+        }
+       ],
+       "ShareSets": [
+        {
+         "Id": "2995775460"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "1113111800",
+      "Name": "EV_AresUltimateLoop_Stop",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_AresUltimateLoop_Stop",
+      "GUID": "{C85E49F3-F106-4B58-A5F9-683E0BD078EA}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
+     },
+     {
+      "Id": "2640857217",
+      "Name": "EV_AresUltimateStart",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_AresUltimateStart",
+      "GUID": "{EC4AC91F-C6A2-41DA-966D-D75FCAB2E0D6}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "3.1271255",
+      "DurationMax": "3.1271255",
+      "MediaRefs": [
+       {
+        "Id": "57487011"
+       },
+       {
+        "Id": "415800878"
+       },
+       {
+        "Id": "869833067"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "528065253"
+        }
+       ],
        "ShareSets": [
         {
          "Id": "2995775460"
@@ -2816,6 +3185,34 @@
        "Custom": [
         {
          "Id": "956691143"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "1315079743",
+      "Name": "EV_MeleeAttack_Sword",
+      "ObjectPath": "\\Events\\Default Work Unit\\EV_MeleeAttack_Sword",
+      "GUID": "{A67DE738-BB1A-4729-B91D-5E4BB5B7BB89}",
+      "MaxAttenuation": "720",
+      "DurationType": "OneShot",
+      "DurationMin": "0.42777082",
+      "DurationMax": "0.6666667",
+      "MediaRefs": [
+       {
+        "Id": "91323249"
+       },
+       {
+        "Id": "778302191"
+       },
+       {
+        "Id": "993356452"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "60855020"
         }
        ]
       }
@@ -3769,13 +4166,31 @@
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
       "DurationMin": "0.35681438",
-      "DurationMax": "0.42876962",
+      "DurationMax": "0.4800117",
       "MediaRefs": [
        {
         "Id": "524623202"
        },
        {
+        "Id": "800715076"
+       },
+       {
         "Id": "992284103"
+       }
+      ]
+     },
+     {
+      "Id": "1156357401",
+      "Name": "Voice_Ares_Attack_Final",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\Voice_Ares_Attack_Final",
+      "GUID": "{F9E4E007-BB21-433B-B984-9BD2A6D80544}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.51962245",
+      "DurationMax": "0.51962245",
+      "MediaRefs": [
+       {
+        "Id": "556077238"
        }
       ]
      },
@@ -4115,6 +4530,6 @@
     ]
    }
   ],
-  "FileHash": "{EC48B75F-2D60-2445-8B0D-8E30103BA66D}"
+  "FileHash": "{8460A5A0-D9C1-6BFD-2030-EE7031A17E2D}"
  }
 }

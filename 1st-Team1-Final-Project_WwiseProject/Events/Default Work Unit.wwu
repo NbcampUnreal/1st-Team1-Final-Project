@@ -658,12 +658,12 @@
 								</Folder>
 								<Folder Name="Ares" ID="{7942C9FC-4398-4E98-8724-CC169407C1E5}" ShortID="151693662">
 									<ChildrenList>
-										<Event Name="EV_Ares_Attack" ID="{04416426-2600-4113-9DCF-1F7794024FF1}">
+										<Event Name="EV_Ares_Attack_01" ID="{04416426-2600-4113-9DCF-1F7794024FF1}">
 											<ChildrenList>
 												<Action Name="" ID="{D8D8FBA1-F433-4504-9262-BDF3F1EC7319}" ShortID="464769978">
 													<ReferenceList>
 														<Reference Name="Target">
-															<ObjectRef Name="EV_AresAttackSound" ID="{843A9D11-85D1-4586-9B48-4F8DD0E5614F}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+															<ObjectRef Name="EV_AresAttackSound_1" ID="{843A9D11-85D1-4586-9B48-4F8DD0E5614F}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 														</Reference>
 													</ReferenceList>
 												</Action>
@@ -677,7 +677,7 @@
 													</PropertyList>
 													<ReferenceList>
 														<Reference Name="Target">
-															<ObjectRef Name="EV_AresAttackSound" ID="{843A9D11-85D1-4586-9B48-4F8DD0E5614F}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+															<ObjectRef Name="EV_AresAttackSound_1" ID="{843A9D11-85D1-4586-9B48-4F8DD0E5614F}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 														</Reference>
 													</ReferenceList>
 												</Action>
@@ -760,12 +760,114 @@
 												</Action>
 											</ChildrenList>
 										</Event>
-										<Event Name="EV_AresUltimateSkill" ID="{EC4AC91F-C6A2-41DA-966D-D75FCAB2E0D6}">
+										<Event Name="EV_AresUltimateStart" ID="{EC4AC91F-C6A2-41DA-966D-D75FCAB2E0D6}">
 											<ChildrenList>
 												<Action Name="" ID="{2D4FE8EB-492D-4793-A325-60C3732BFBC4}" ShortID="681484940">
 													<ReferenceList>
 														<Reference Name="Target">
 															<ObjectRef Name="EV_AresUltimateSkill" ID="{95ED4BC2-6507-4C50-962F-5EDD11160762}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="EV_Ares_Attack_02" ID="{1E0C93ED-3671-4D14-AA2C-4874F9BA328B}">
+											<ChildrenList>
+												<Action Name="" ID="{50241C3B-6EA4-4AB2-A199-F892217130C3}" ShortID="147779640">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="EV_AresAttackSound_2" ID="{146936CF-9258-4E7D-BD45-03477F596A22}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="EV_Ares_Attack_03" ID="{E8AD266E-E28A-47B1-A47E-BC51CAD1987C}">
+											<ChildrenList>
+												<Action Name="" ID="{6B3550BB-EF2D-4826-A590-A71F03901E9C}" ShortID="9243009">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="EV_AresAttackSound_3" ID="{101D4819-3511-4D9F-B841-76AE4A7CBDFE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="EV_Ares_Attack_04" ID="{CBCB0FEC-1611-466C-B646-871135F8D9DD}">
+											<ChildrenList>
+												<Action Name="" ID="{3B0607DD-0F9E-4988-AD62-8C9345321A74}" ShortID="724324751">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="EV_AresAttackSound_4" ID="{9972B16A-F12C-4C41-B44F-CA27AF84FE1D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Voice_Ares_Attack_Final" ID="{F9E4E007-BB21-433B-B984-9BD2A6D80544}">
+											<ChildrenList>
+												<Action Name="" ID="{43327080-1730-41C7-8EBF-59EED6164CE4}" ShortID="357088728">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="Voice_AresFinalAttackSound" ID="{772E9493-6A5A-479B-B7F0-7220B3925FF0}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="EV_AresUltimateLoop" ID="{FE979811-406E-40BA-AEC5-17C733A46C5A}">
+											<ChildrenList>
+												<Action Name="" ID="{7E2136E0-AA1A-46EA-BC22-CAE01F1E1313}" ShortID="1036681525">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="EV_AresUltimateLoop" ID="{42212185-8318-4C50-ABB9-E09C594CE2AC}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="EV_AresUltimateEnd" ID="{7F3B4958-9FDC-491C-956A-B4F02A7846AB}">
+											<ChildrenList>
+												<Action Name="" ID="{4B897BA7-DA4B-4A81-B6B2-94E45CD82200}" ShortID="15598470">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="EV_AresUltimateEnd" ID="{98A7579B-FCA7-4D0D-9D80-B07C45A8D2A8}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="EV_AresUltimateLoop_Stop" ID="{C85E49F3-F106-4B58-A5F9-683E0BD078EA}">
+											<ChildrenList>
+												<Action Name="" ID="{A7968E41-5090-4FAC-BECC-B397C02C1CA6}" ShortID="155106380">
+													<PropertyList>
+														<Property Name="ActionType" Type="int16" Value="2"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="EV_AresUltimateLoop" ID="{42212185-8318-4C50-ABB9-E09C594CE2AC}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="EV_AresDashSkill_Hit" ID="{E12A0AAA-CF00-4078-82C1-13250F174C22}">
+											<ChildrenList>
+												<Action Name="" ID="{2A026EFB-C9B8-42EA-9116-2D0B70C65A4A}" ShortID="846271281">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="EV_AresDashSkill_Hit" ID="{160AA9A9-0661-48E0-B121-B2983FBFAB11}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="EV_AresDashSkill_Ready" ID="{7C331407-0104-4B4D-8344-CCAC7CD0DA05}">
+											<ChildrenList>
+												<Action Name="" ID="{CE1515AF-F279-4D53-9188-211BF859C40A}" ShortID="712185714">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="EV_AresDashSkill_Ready" ID="{78652D25-E43B-417E-B7B5-176DB17F31A6}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 														</Reference>
 													</ReferenceList>
 												</Action>
@@ -1097,6 +1199,17 @@
 							<ReferenceList>
 								<Reference Name="Target">
 									<ObjectRef Name="SFX_MeleeHit" ID="{903F1C7F-7380-44A5-8CE5-F4126AF4F991}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="EV_MeleeAttack_Sword" ID="{A67DE738-BB1A-4729-B91D-5E4BB5B7BB89}">
+					<ChildrenList>
+						<Action Name="" ID="{3BFAE52B-38AF-4F02-BDA6-BA90C3EFEA01}" ShortID="925927761">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_MeleeHit_Sword" ID="{4D8A780C-6708-48EC-A15C-60AB91CA2774}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 								</Reference>
 							</ReferenceList>
 						</Action>

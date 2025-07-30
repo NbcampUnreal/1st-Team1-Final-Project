@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{EB8C9A75-DE88-0490-4B6F-9E6FFAE69DCF}",
+    "Hash": "{911419DD-D51C-7F26-F5E2-92B6F1CAC5EE}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -110,6 +110,14 @@
       "Location": "Memory",
       "ShortName": "SFX_Lava_Hit0.wav",
       "CachePath": "2B/{2BF6526B-0EB6-B99D-1A11-32A26653FF1C}.wem"
+     },
+     {
+      "Id": "70445201",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_FG_FX_one_shot_farming_axe_sword_swing_attack_1_tool_whoosh.wav",
+      "CachePath": "67/{67167EED-DFD0-2C39-9DE5-6A1BDBB0D0E6}.wem"
      },
      {
       "Id": "82395722",
@@ -856,6 +864,14 @@
       "CachePath": "62/{62B0B2BE-46A4-E6EA-AABA-1C3934FDF197}.wem"
      },
      {
+      "Id": "584199073",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_blade_slice_blood_squelch_cut_swing_06.wav",
+      "CachePath": "6F/{6F16A549-64C6-9B2E-7266-02CEBFDBED68}.wem"
+     },
+     {
       "Id": "586361417",
       "Language": "SFX",
       "Streaming": "false",
@@ -1040,6 +1056,14 @@
       "CachePath": "B2/{B2E7A119-4959-00D4-16AF-70D19B99744B}.wem"
      },
      {
+      "Id": "699157515",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_quick.wav",
+      "CachePath": "85/{85416B79-40F2-5B76-CFD4-5F8E2829E641}.wem"
+     },
+     {
       "Id": "710539305",
       "Language": "SFX",
       "Streaming": "false",
@@ -1134,14 +1158,6 @@
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy.wav",
       "CachePath": "89/{893761AD-A594-26EE-9B43-B687EEADFE1B}.wem"
-     },
-     {
-      "Id": "802472056",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "ESM_FG_FX_one_shot_farming_axe_sword_swing_attack_1_tool_whoosh.wav",
-      "CachePath": "D2/{D2DBE40E-756B-8D6D-E7F6-2877AB98BFAA}.wem"
      },
      {
       "Id": "809366429",
@@ -1262,14 +1278,6 @@
       "Location": "Memory",
       "ShortName": "FootstepsConcrete1.wav",
       "CachePath": "FC/{FCDF9688-9D8E-BC19-28B7-8D15B75E8C0A}.wem"
-     },
-     {
-      "Id": "871056365",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "FNF_ME_sfx_combat_broadsword_impact_shield_metal.wav",
-      "CachePath": "73/{737A2E9B-3EDD-10DC-B951-3647748256D0}.wem"
      },
      {
       "Id": "872852181",
@@ -2000,20 +2008,20 @@
       ]
      },
      {
-      "Id": "3895761501",
-      "Name": "EV_Ares_Attack",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack",
+      "Id": "4201754105",
+      "Name": "EV_Ares_Attack_01",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack_01",
       "GUID": "{04416426-2600-4113-9DCF-1F7794024FF1}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
-      "DurationMin": "0.43329397",
-      "DurationMax": "1.1392716",
+      "DurationMin": "0.37057617",
+      "DurationMax": "0.43511724",
       "MediaRefs": [
        {
-        "Id": "802472056"
+        "Id": "70445201"
        },
        {
-        "Id": "871056365"
+        "Id": "584199073"
        }
       ],
       "PluginRefs": {
@@ -2023,6 +2031,60 @@
         }
        ]
       }
+     },
+     {
+      "Id": "4201754106",
+      "Name": "EV_Ares_Attack_02",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack_02",
+      "GUID": "{1E0C93ED-3671-4D14-AA2C-4874F9BA328B}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.4159577",
+      "DurationMax": "1.1269805",
+      "MediaRefs": [
+       {
+        "Id": "584199073"
+       },
+       {
+        "Id": "699157515"
+       }
+      ]
+     },
+     {
+      "Id": "4201754107",
+      "Name": "EV_Ares_Attack_03",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack_03",
+      "GUID": "{E8AD266E-E28A-47B1-A47E-BC51CAD1987C}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.4159577",
+      "DurationMax": "1.1269805",
+      "MediaRefs": [
+       {
+        "Id": "584199073"
+       },
+       {
+        "Id": "699157515"
+       }
+      ]
+     },
+     {
+      "Id": "4201754108",
+      "Name": "EV_Ares_Attack_04",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\EV_Ares_Attack_04",
+      "GUID": "{CBCB0FEC-1611-466C-B646-871135F8D9DD}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.4159577",
+      "DurationMax": "1.1269805",
+      "MediaRefs": [
+       {
+        "Id": "584199073"
+       },
+       {
+        "Id": "699157515"
+       }
+      ]
      },
      {
       "Id": "809769072",
@@ -4115,6 +4177,6 @@
     ]
    }
   ],
-  "FileHash": "{BCD47FA6-D245-631E-5F1E-D3BC6D3FF5ED}"
+  "FileHash": "{DC3B776A-6F95-C627-FA32-36E946A7E413}"
  }
 }
