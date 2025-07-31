@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{3DC088CC-CDD0-7F41-BD72-4B9DD2803082}",
+    "Hash": "{97519FE5-D3ED-28C5-5947-C7D6005BE547}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -54,6 +54,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
       "CachePath": "69/{69283A98-7A63-273F-A660-E7C5A5D74086}.wem"
+     },
+     {
+      "Id": "25611372",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_On_It_1_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "39/{39CA94DD-FC30-8751-BD14-942A3079A118}.wem"
      },
      {
       "Id": "33319739",
@@ -125,7 +133,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_FG_FX_one_shot_farming_axe_sword_swing_attack_1_tool_whoosh.wav",
-      "CachePath": "67/{67167EED-DFD0-2C39-9DE5-6A1BDBB0D0E6}.wem"
+      "CachePath": "98/{98CF732E-8BE3-4BDE-E88E-A619C2A2925E}.wem"
      },
      {
       "Id": "76746133",
@@ -133,7 +141,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "DORIANELECTRA_fx_sword_whoosh.wav",
-      "CachePath": "E5/{E543F5B1-B365-9623-B18A-A3041B16BC9A}.wem"
+      "CachePath": "35/{35C0A8C8-84CB-B0D2-E0F0-DA7DF0CB1D33}.wem"
      },
      {
       "Id": "82395722",
@@ -149,7 +157,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy.wav",
-      "CachePath": "88/{8871F5B5-ECDC-29EB-EEB7-6A7A3B2BDDD0}.wem"
+      "CachePath": "21/{21EE4639-6961-8553-ECF7-55F76E5DC3A4}.wem"
      },
      {
       "Id": "88352064",
@@ -165,7 +173,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_iron_fight_duel_clash_metal_swipe_02.wav",
-      "CachePath": "BA/{BA583B8B-467A-F0D7-CB86-6601D4207E19}.wem"
+      "CachePath": "86/{86EA6F6C-C369-8D09-3827-B6B9DA0A0CC5}.wem"
      },
      {
       "Id": "91323249",
@@ -213,7 +221,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Growl_3_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "D5/{D568B4BE-4819-CFF1-6A82-A86CF8FAAE45}.wem"
+      "CachePath": "A0/{A0AC067B-197D-5090-1082-69D927549123}.wem"
      },
      {
       "Id": "120977185",
@@ -328,6 +336,14 @@
       "CachePath": "D4/{D4997C74-C868-E958-1836-37F645D77735}.wem"
      },
      {
+      "Id": "209945099",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_Yes_3_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "E6/{E6B25424-E0E5-FCC4-4FFA-D648F526ACEC}.wem"
+     },
+     {
       "Id": "213946712",
       "Language": "SFX",
       "Streaming": "false",
@@ -416,12 +432,20 @@
       "CachePath": "E4/{E4362B59-0A9A-4535-8495-A5FD31975BB3}.wem"
      },
      {
+      "Id": "258681612",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_I_Sense_Danger_2_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "3C/{3C04A095-DC87-3AF7-A3DD-6D289DE702FB}.wem"
+     },
+     {
       "Id": "259888318",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Calvin_Growl_4_Male_Human_Voice_Over_Vocal_English_Middle_Age_Adult_Mature.wav",
-      "CachePath": "4A/{4A7D640B-5CC8-4051-A9C3-17449586287E}.wem"
+      "CachePath": "8A/{8A474FBA-B766-7FB7-7D59-ED8CF723C908}.wem"
      },
      {
       "Id": "269881452",
@@ -645,7 +669,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_FG2_FX_magic_one_shot_water_ESM_FG2_FX_magic_one_shot_fire_power_ramp_flare_buff_swells_3.wav",
-      "CachePath": "68/{68F14940-BBC0-50DF-5237-C5FEA7E28B67}.wem"
+      "CachePath": "C2/{C228484C-4660-A60D-3F49-254831F9D7FA}.wem"
      },
      {
       "Id": "418165151",
@@ -749,7 +773,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_FG2_FX_combat_one_shot_cinematic_weapons_melee_axe_hits_04.wav",
-      "CachePath": "66/{669C7BD8-7986-5479-C08D-0125F758C1F9}.wem"
+      "CachePath": "16/{16CCB984-3774-0DF2-0D88-4A98DFBB1665}.wem"
      },
      {
       "Id": "460690503",
@@ -1016,6 +1040,14 @@
       "CachePath": "2B/{2BC1B7F3-EBC8-2288-87A2-954F2A010074}.wem"
      },
      {
+      "Id": "624811098",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_Ok_3_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "FA/{FAF43156-B67C-5602-7987-4C89C8384199}.wem"
+     },
+     {
       "Id": "631777347",
       "Language": "SFX",
       "Streaming": "false",
@@ -1136,6 +1168,14 @@
       "CachePath": "85/{85416B79-40F2-5B76-CFD4-5F8E2829E641}.wem"
      },
      {
+      "Id": "703596636",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_I_ll_Kill_You_3_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "3B/{3B3C0E37-FA06-10EC-3577-679948A2CFB9}.wem"
+     },
+     {
       "Id": "710539305",
       "Language": "SFX",
       "Streaming": "false",
@@ -1173,7 +1213,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_iron_fight_duel_clash_metal_swipe_02.wav",
-      "CachePath": "7D/{7DB9B8FE-DA93-C5A7-97A1-3FF97ABEF59D}.wem"
+      "CachePath": "63/{63D7D3AB-E716-D2EE-F6ED-57EB4B682E89}.wem"
      },
      {
       "Id": "749540455",
@@ -1256,12 +1296,20 @@
       "CachePath": "A9/{A9556425-5E0C-7657-BFCC-9DCAC0359942}.wem"
      },
      {
+      "Id": "805980651",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Character_Sharon_Fire_1_Female_Adult_Mature_DJ_Woman.wav",
+      "CachePath": "A0/{A0927422-1139-BDB2-B5C0-DC6AAC2AFA55}.wem"
+     },
+     {
       "Id": "808253480",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Growl_2_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "0D/{0D3CED72-8178-9C0F-4BAA-1B46DF894D07}.wem"
+      "CachePath": "28/{287D5D4F-B35E-FB39-44EF-09FB2258053D}.wem"
      },
      {
       "Id": "809366429",
@@ -1389,7 +1437,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_FG2_FX_combat_one_shot_cinematic_weapons_melee_axe_hits_04.wav",
-      "CachePath": "29/{29F4A933-402F-320F-2AB8-8D4F641A7AA1}.wem"
+      "CachePath": "C1/{C146135E-E7F9-DF8B-D034-7EF65E7E8CD4}.wem"
      },
      {
       "Id": "872852181",
@@ -1429,7 +1477,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy.wav",
-      "CachePath": "B3/{B37446A5-91AC-7D87-7B82-554236EBC405}.wem"
+      "CachePath": "F7/{F72F5ADA-9F1F-7BE1-91CA-57BB537758AD}.wem"
      },
      {
       "Id": "889173008",
@@ -1445,7 +1493,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Character_Yury_Growl_1_Male_Human_Voice_Over_Vocal_English_Russian.wav",
-      "CachePath": "B7/{B700D8F2-F6D8-DF2D-F085-C1C29625E46B}.wem"
+      "CachePath": "54/{54EC3DE7-475C-1334-5B67-A1E722EC871D}.wem"
      },
      {
       "Id": "894430010",
@@ -1541,7 +1589,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_broadsword_unsheathe_impact_heavy.wav",
-      "CachePath": "59/{595F0799-5098-C8DD-9833-DB0A694A58BF}.wem"
+      "CachePath": "9E/{9E219CCD-9A53-5C24-0704-B791E13F5438}.wem"
      },
      {
       "Id": "957899954",
@@ -1661,7 +1709,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_PG_cinematic_fx_weapons_warefare_melee_sword_blade_slice_blood_squelch_cut_swing_06.wav",
-      "CachePath": "58/{584EDAB3-C40D-A84F-033D-FB7796EFE98E}.wem"
+      "CachePath": "56/{56BCB635-8652-2767-7724-D06B1C7AA8A8}.wem"
      },
      {
       "Id": "1030029664",
@@ -1709,7 +1757,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "FNF_ME_sfx_combat_sword_slash_slow_gore.wav",
-      "CachePath": "49/{49C4A22C-A92E-4AD6-6A7F-3B490549A3FF}.wem"
+      "CachePath": "29/{292263AC-C45A-24AB-C6E6-77512BF125E0}.wem"
      },
      {
       "Id": "1052175375",
@@ -1945,6 +1993,14 @@
        "GUID": "{90895E04-6C77-4899-B5E6-4F5F9A428296}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
+      },
+      {
+       "Id": "823386282",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Seeker\\Merci\\Voice_Merci_FogArrow\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{F7369FAA-9A2D-4766-AB0C-7C06802A1D71}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
       },
       {
        "Id": "956691143",
@@ -4346,14 +4402,36 @@
       ]
      },
      {
+      "Id": "1773660564",
+      "Name": "Voice_Merci_FogArrow",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Merci\\Voice_Merci_FogArrow",
+      "GUID": "{9BD57FF9-A12E-42CC-B094-B13239741389}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.8655437",
+      "DurationMax": "0.8655437",
+      "MediaRefs": [
+       {
+        "Id": "805980651"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "823386282"
+        }
+       ]
+      }
+     },
+     {
       "Id": "2915263918",
       "Name": "Voice_Merci_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Merci\\Voice_Merci_Hit",
       "GUID": "{5098E2B9-90BA-4412-987D-8FC0FAE125C3}",
       "MaxAttenuation": "800",
       "DurationType": "OneShot",
-      "DurationMin": "0.36159804",
-      "DurationMax": "0.89162403",
+      "DurationMin": "0.37219372",
+      "DurationMax": "0.91775066",
       "MediaRefs": [
        {
         "Id": "147470122"
@@ -4422,6 +4500,33 @@
         }
        ]
       }
+     },
+     {
+      "Id": "447907810",
+      "Name": "Voice_Merci_Ultimate",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Merci\\Voice_Merci_Ultimate",
+      "GUID": "{5CB23B2A-6717-4157-A1D5-3AE30E879A21}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.77708334",
+      "DurationMax": "1.5369312",
+      "MediaRefs": [
+       {
+        "Id": "25611372"
+       },
+       {
+        "Id": "209945099"
+       },
+       {
+        "Id": "258681612"
+       },
+       {
+        "Id": "624811098"
+       },
+       {
+        "Id": "703596636"
+       }
+      ]
      }
     ],
     "GameParameters": [
@@ -4530,6 +4635,6 @@
     ]
    }
   ],
-  "FileHash": "{8460A5A0-D9C1-6BFD-2030-EE7031A17E2D}"
+  "FileHash": "{0AAB097C-2A8B-030C-E2AE-FECC8B5B8ED1}"
  }
 }
