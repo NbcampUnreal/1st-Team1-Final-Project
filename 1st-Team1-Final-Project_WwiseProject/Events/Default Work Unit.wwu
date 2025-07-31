@@ -654,6 +654,28 @@
 												</Action>
 											</ChildrenList>
 										</Event>
+										<Event Name="Voice_Merci_FogArrow" ID="{9BD57FF9-A12E-42CC-B094-B13239741389}">
+											<ChildrenList>
+												<Action Name="" ID="{A152C382-D87B-443E-BA3F-625691411A76}" ShortID="671496853">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="Voice_Merci_FogArrow" ID="{FB29B10F-5229-434A-BE85-B12EFF958E44}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Voice_Merci_Ultimate" ID="{5CB23B2A-6717-4157-A1D5-3AE30E879A21}">
+											<ChildrenList>
+												<Action Name="" ID="{E83E5FBC-B5A7-47BE-84A9-3FB2687EB695}" ShortID="528835132">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="Voice_MerciUltimate" ID="{5693D984-2E16-4AF5-8992-B317604393E2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
 									</ChildrenList>
 								</Folder>
 								<Folder Name="Ares" ID="{7942C9FC-4398-4E98-8724-CC169407C1E5}" ShortID="151693662">
