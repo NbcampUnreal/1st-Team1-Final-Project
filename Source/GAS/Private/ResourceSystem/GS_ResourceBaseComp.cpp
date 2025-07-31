@@ -45,6 +45,7 @@ float UGS_ResourceBaseComp::GetMaxAmount() const
 void UGS_ResourceBaseComp::AddResource(float Amount)
 {
 	CurrentAmount = FMath::Clamp(CurrentAmount + Amount, 0.0f, MaxAmount);
+	UE_LOG(LogTemp, Warning, TEXT("[add] Amount : %.2f"), Amount);
 	UE_LOG(LogTemp, Warning, TEXT("Current Amount : %.2f"), CurrentAmount);
 }
 

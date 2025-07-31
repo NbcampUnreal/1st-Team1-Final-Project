@@ -7,6 +7,7 @@
 #include "DungeonEditor/Component/PlaceInfoComponent.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
 #include "Props/GS_RoomBase.h"
+#include "UI/DungeonEditor/GS_NectarWidget.h"
 #include "RuneSystem/GS_EnumUtils.h"
 
 
@@ -157,6 +158,12 @@ void AGS_PlacerBase::BuildObject()
 		FRotator SpawnRotator = GetActorRotation();
 		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator);
 		
+		//Nectar 차감
+		UGS_NectarComp* NectarComp = BuildManagerRef->FindComponentByClass<UGS_NectarComp>();
+		NectarComp->SpendResource(ObjectData.ConstructionCost);
+
+
+
 		NewActor->SetActorRotation(NewActor->GetActorRotation() + FRotator(0.0f, RotateYaw, 0.0f));
 		SpawnOffset = SpawnOffset.GetRotated(RotateYaw);
 		SpawnLocation = NewActor->GetActorLocation();
