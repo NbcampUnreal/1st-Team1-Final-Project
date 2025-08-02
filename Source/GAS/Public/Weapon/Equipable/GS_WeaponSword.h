@@ -58,12 +58,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
 	UAkAudioEvent* HitStructureSoundEvent;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	UAkAudioEvent* HitSeekerSoundEvent;
+
 	// 히트 VFX 에셋들
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
 	UNiagaraSystem* HitPawnVFX;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
 	UNiagaraSystem* HitStructureVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
+	UNiagaraSystem* HitSeekerVFX;
 
 	UPROPERTY()
 	class AGS_Character* OwnerChar;
@@ -85,6 +91,9 @@ private:
 	virtual ESwordHitTargetType DetermineTargetType(AActor* OtherActor) const;
 	virtual void PlayHitSound(ESwordHitTargetType TargetType, const FHitResult& SweepResult);
 	virtual void PlayHitVFX(ESwordHitTargetType TargetType, const FHitResult& SweepResult);
+	
+	// 히트 포인트 계산
+	virtual FHitResult CalculateMoreAccurateHitPoint(AActor* OtherActor) const;
 
 	// 멀티캐스트 함수들
 	UFUNCTION(NetMulticast, Reliable)
