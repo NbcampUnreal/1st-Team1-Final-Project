@@ -129,8 +129,8 @@ void AGS_BuildManager::BeginPlay()
 		}
 	}
 
-	//Nectar 초기화(임시로 총 넥타르 양 100으로 설정 / 추후 변경 예정)
-	NectarComp->InitializeMaxAmount(100.f);
+	//Nectar 초기화(BP에서 Nectar Max값 변경하기)
+	NectarComp->InitializeMaxAmount(NectarComp->GetMaxAmount());
 }
 
 void AGS_BuildManager::Tick(float DeltaTime)
