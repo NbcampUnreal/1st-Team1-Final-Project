@@ -10,7 +10,7 @@ class GAS_API UGS_AetherComp : public UGS_ResourceBaseComp
 	GENERATED_BODY()
 
 public:
-	//virtual void AddResource(float Amount) override;
+	virtual void AddResource(float Amount) override;
 	//virtual void SpendResource(float Amount) override;
-	//virtual bool CanAfford(float Amount) const override;
+	bool CanAddResource(float Amount) const;
 };

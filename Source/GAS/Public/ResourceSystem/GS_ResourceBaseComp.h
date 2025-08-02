@@ -19,7 +19,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Resource")
 	float CurrentAmount = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-	float MaxAmount = 100.f;
+	float MaxAmount = 600.f;
 	bool bIsInitialized = false;
 
 public:
@@ -37,8 +37,9 @@ public:
 	virtual void AddResource(float Amount);
 	UFUNCTION(Category = "Resource")
 	virtual void SpendResource(float Amount);
-	UFUNCTION(Category = "Resource")
-	virtual bool CanAfford(float Amount) const;
+	//UFUNCTION(Category = "Resource")
+	//virtual bool CanSpend(float Amount) const;
 
+	bool IsResourceInBound(float Amount, bool bIsSpending) const;
 
 };

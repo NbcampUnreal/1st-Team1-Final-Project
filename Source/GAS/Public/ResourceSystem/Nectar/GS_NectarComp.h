@@ -20,5 +20,5 @@ public:
 	//virtual void InitializeMaxAmount(float Amount) override;
 	virtual void AddResource(float Amount) override;
 	virtual void SpendResource(float Amount) override;
-	//virtual bool CanAfford(float Amount) const override;
+	bool CanSpendResource(float Amount) const;
 };

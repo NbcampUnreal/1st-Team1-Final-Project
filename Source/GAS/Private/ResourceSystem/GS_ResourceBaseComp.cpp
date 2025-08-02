@@ -56,14 +56,24 @@ void UGS_ResourceBaseComp::SpendResource(float Amount)
 
 }
 
-bool UGS_ResourceBaseComp::CanAfford(float Amount) const
+//bool UGS_ResourceBaseComp::CanSpend(float Amount) const
+//{
+//	if (CurrentAmount - Amount < 0)
+//	{
+//		return false;
+//	}
+//	else
+//	{
+//		return true;
+//	}
+//}
+
+bool UGS_ResourceBaseComp::IsResourceInBound(float Amount, bool bIsSpending) const
 {
-	if (CurrentAmount - Amount < 0)
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
+	//계산 결과가 범위 내라면 true 반환 아닌 경우 false 반환
+	//전자는 소모 했을 때 0 이하인지 확인해야하는 경우 
+	//후자는 얻었을 때 MaxAmount를 넘는지 확인해야하는 경우
+	return bIsSpending
+		? (CurrentAmount - Amount >= 0)
+		: (CurrentAmount + Amount <= MaxAmount);
 }

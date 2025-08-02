@@ -21,7 +21,7 @@ void UGS_NectarComp::SpendResource(float Amount)
 	OnNectarChanged.Broadcast(GetCurrentAmount());
 }
 
-//bool UGS_NectarComp::CanAfford(float Amount) const
-//{
-//	return false;
-//}
+bool UGS_NectarComp::CanSpendResource(float Amount) const
+{
+	return IsResourceInBound(Amount, true);
+}

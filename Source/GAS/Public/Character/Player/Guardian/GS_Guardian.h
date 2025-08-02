@@ -4,6 +4,7 @@
 #include "Character/Player/GS_Player.h"
 #include "CollisionShape.h"
 #include "Character/Component/GS_CameraShakeTypes.h"
+#include "ResourceSystem/Aether/GS_AetherComp.h"
 #include "GS_Guardian.generated.h"
 
 class UGS_DrakharAnimInstance;
@@ -71,6 +72,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (DisplayName = "HitStop Camera Shake Info"))
 	FGS_CameraShakeInfo HitStopShakeInfo;
 	
+	//AetherComp 추가 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	TObjectPtr<UGS_AetherComp> AetherComp;
+
+
 	virtual void LeftMouse();
 	virtual void Ctrl();
 	virtual void CtrlStop();
