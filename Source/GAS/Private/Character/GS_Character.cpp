@@ -201,12 +201,12 @@ void AGS_Character::Multicast_SetCanHitReact_Implementation(bool CanReact)
 	CanHitReact = CanReact;
 }
 
-void AGS_Character::AllowHitReact()
+void AGS_Character::AllowHitReact(float CooldownTime)
 {
 	GetWorld()->GetTimerManager().SetTimer(HitReactTimerHandle, [this]()
 	{
 		CanHitReact = true;
-	}, 3.0f, false);
+	}, CooldownTime, false);
 }
 
 void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

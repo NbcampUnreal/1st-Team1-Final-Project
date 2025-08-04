@@ -11,6 +11,15 @@ class UChooserTable;
 class UGS_ChooserInputObj;
 struct UPoseSearchDatabase;
 
+UENUM(BlueprintType)
+enum class ESeekerMontageSlot : uint8
+{
+	None UMETA(DisplayName = "None"),
+	FullBody UMETA(DisplayName = "Full Body"),
+	UpperBody UMETA(DisplayName = "Upper Body"),
+	End UMETA(DisplayName = "End"),
+};
+
 UCLASS()
 class GAS_API UGS_SeekerAnimInstance : public UGS_CharacterAnimInstance
 {
@@ -56,6 +65,9 @@ public:
 	UFUNCTION(BlueprintPure, meta=(NotBlueprintThreadSafe="ture"), Category = "AimOffset")
 	bool Enable_AO();
 
+	UFUNCTION(BlueprintCallable, Category = "Montage")
+	void SetCurMontageSlot(ESeekerMontageSlot InputMontageSlot);
+
 	// Slot Change Control Value
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingUpperBodyMontage = false;
@@ -65,6 +77,9 @@ public:
 
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingLeftArmMontage = false;
+
+	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
+	uint8 CurMontageSlot = 0;
 	
 	// Chooser
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Motion Matching")
@@ -92,4 +107,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trajectory")
 	float PreviousDesiredController;
+
+	UFUNCTION(BlueprintPure, Category = "Montage")
+	bool IsMonstageSlotActive(ESeekerMontageSlot InputMontageSlot);
 };

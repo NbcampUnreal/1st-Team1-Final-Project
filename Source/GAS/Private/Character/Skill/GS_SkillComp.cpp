@@ -14,7 +14,7 @@
 UGS_SkillComp::UGS_SkillComp()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	
+	CurAllowedSkillsMask = DefaultAllowedSkillsMask;
 }
 
 void UGS_SkillComp::ApplyCooldownModifier(ESkillSlot Slot, float Ratio)
@@ -115,6 +115,17 @@ void UGS_SkillComp::BeginPlay()
 	InitSkills();
 }
 
+bool UGS_SkillComp::IsSkillAllowed(ESkillSlot CompareSkillType)
+{
+	uint8 BitFlag = 0;
+	BitFlag |= (1 << static_cast<int32>(CompareSkillType));
+	return CurAllowedSkillsMask & BitFlag;
+}  // SJE
+
+void UGS_SkillComp::SetCurAllowedSkillsMask(int8 BitMask)
+{
+	CurAllowedSkillsMask = BitMask;	
+} // SJE
 
 void UGS_SkillComp::InitSkills()
 {
@@ -144,14 +155,32 @@ void UGS_SkillComp::InitSkills()
 		SetSkill(ESkillSlot::Moving, SkillSet->MovingSkill);
 		SetSkill(ESkillSlot::Ultimate, SkillSet->UltimateSkill);
 		SetSkill(ESkillSlot::Rolling, SkillSet->RollingSkill);
+		SetSkill(ESkillSlot::Combo, SkillSet->ComboSkill);
 	}
 }
+
+void UGS_SkillComp::ResetAllowedSkillsMask()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ResetAllowedSkillsMask"));
+	CurAllowedSkillsMask = DefaultAllowedSkillsMask;
+}  // SJE
 
 void UGS_SkillComp::Server_TrySkillAnimationEnd_Implementation(ESkillSlot Slot)
 {
 	if (SkillMap.Contains(Slot))
 	{
 		SkillMap[Slot]->OnSkillAnimationEnd();
+	}
+}
+
+void UGS_SkillComp::TrySkillAnimationEnd(ESkillSlot Slot)
+{
+	if (GetOwner()->HasAuthority())
+	{
+		if (SkillMap.Contains(Slot))
+		{
+			SkillMap[Slot]->OnSkillAnimationEnd();
+		}
 	}
 }
 
@@ -175,6 +204,35 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 	Skill->Damage = Info.Damage;
 	Skill->SkillAnimMontages = Info.Montages;
 	Skill->SkillImage = Info.Image;
+
+
+	for (const FSkillAllow& Entry : Info.AllowSkillList)
+	{
+		const int32 Index = static_cast<int32>(Entry.Slot);
+
+		if (Index >= 0 && Index < 8) // uint8 제한
+		{
+			if (Entry.bAllow)
+			{
+				Skill->AllowSkillsMask |= (1 << Index);
+			}
+		}
+	} // SJE
+
+	
+	UE_LOG(LogTemp, Log, TEXT("Skill Name : %s / Flag (Binary): %s"), *UEnum::GetValueAsString(Slot), 
+		*([](uint8 Value)
+		{
+			FString Result;
+			for (int8 i = 7; i >= 0; --i)
+			{
+				Result.AppendChar((Value & (1 << i)) ? '1' : '0');
+			}
+			return Result;
+		})(Skill->AllowSkillsMask)
+	); // SJE
+	
+	Skill-> AllowControlValue = Info.AllowControlValue; // SJE
 	
 	// VFX 정보 설정
 	Skill->SkillCastVFX = Info.SkillCastVFX;
@@ -202,13 +260,30 @@ void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
 		return;
 	}
 	
+	// IsSkillActive 는?
 	if (SkillMap.Contains(Slot))
 	{
-		if (SkillMap[Slot]->CanActive())
+		if (SkillMap[Slot]->CanActive()) // 지금 쿨다운 중이 아닌 경우 true
 		{
-			SkillsInterrupt();
-			SkillMap[Slot]->ActiveSkill();
-			
+			// 여기에서 검사해야 하네 지금 자신의 스킬은 사용할 수 있지만 이게 다른 스킬 도중에 호출된 건지는 알 수 없기 때문에
+
+			// 여기에서 Control flag 들 검사. 
+			AGS_Player* OwnerPlayer = Cast<AGS_Player>(GetOwner());
+			if(OwnerPlayer)
+			{
+				if (IsSkillAllowed(Slot)) // 현재 내가 허용하고 있는 스킬인지 검색.
+				{
+					UE_LOG(LogTemp, Warning, TEXT("허용된 스킬이 Active 되기를 원한다."));
+					
+					SkillsInterrupt();
+					SkillMap[Slot]->ActiveSkill();
+					SetCurAllowedSkillsMask(SkillMap[Slot]->AllowSkillsMask);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Active 되기를 원하는 스킬이 불허되었다."));
+				}
+			} // SJE
 		}
 		else
 		{
@@ -275,6 +350,7 @@ bool UGS_SkillComp::IsSkillActive(ESkillSlot Slot) const
 	{
 		return State->bIsActive;
 	}
+	
 	return false;
 }
 
@@ -354,13 +430,16 @@ void UGS_SkillComp::SkillsInterrupt()
 
 		if (Seeker->GetSkillComp()->IsSkillActive(slot.Key))
 		{
-			slot.Value->InterruptSkill();
-			if (Seeker->GetCharacterType() != ECharacterType::Merci)
+			slot.Value->InterruptSkill(); // 모든 스킬 interruptSkill()
+			/*if (Seeker->GetCharacterType() != ECharacterType::Merci)
 			{
-				Seeker->SetSkillInputControl(false, false, false);
-			}
+				//Seeker->SetSkillInputControl(false, false, false);
+				
+			}*/
 		}
 	}
+
+	//Seeker->GetSkillComp()->ResetAllowedSkillsMask(); // 모든 입력 가능 상태.
 }
 
 void UGS_SkillComp::HandleCooldownComplete(ESkillSlot Slot)

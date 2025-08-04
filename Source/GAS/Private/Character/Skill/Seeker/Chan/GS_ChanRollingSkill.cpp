@@ -2,6 +2,8 @@
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanRollingSkill.h"
+
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/GS_TpsController.h"
 
@@ -16,36 +18,31 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	StartCoolDown();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{		
-		// 구르기 시작 사운드 재생
+		// 구르기 시작 사운드 재생 // 구르기 사운드를 Server 에서 처리하는게 맞은가..? // SJE
 		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 		if (SkillInfo && SkillInfo->SkillStartSound)
 		{
 			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
 		}
-
-			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			OwnerPlayer->SetSkillInputControl(false, false, false);
-			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->CanChangeSeekerGait = false;
-			FName RollDirection = CalRollDirection();
-			if (RollDirection == FName("00"))
-			{
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
-			}
-			else
-			{
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
-			}
-
+		
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+	
+		OwnerPlayer->CanChangeSeekerGait = false;
+		FName RollDirection = CalRollDirection();
+		if (RollDirection == FName("00"))
+		{
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
+		}
+		else
+		{
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
+		}
 	}
 }
 
 void UGS_ChanRollingSkill::OnSkillCanceledByDebuff()
 {
 	Super::OnSkillCanceledByDebuff();
-
-	
 }
 
 void UGS_ChanRollingSkill::OnSkillAnimationEnd()
@@ -55,9 +52,7 @@ void UGS_ChanRollingSkill::OnSkillAnimationEnd()
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->SetSkillInputControl(true, true, true);
-		OwnerPlayer->SetMoveControlValue(true, true);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 		OwnerPlayer->CanChangeSeekerGait = true;
 
 		SetIsActive(false);

@@ -37,7 +37,7 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 
 	// 입력 제한 설정
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	OwnerPlayer->SetSkillInputControl(false, false, false);
+	//OwnerPlayer->SetSkillInputControl(false, false, false);
 
 	// 궁극기 사운드 재생
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
