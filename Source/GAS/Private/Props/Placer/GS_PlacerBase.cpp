@@ -140,8 +140,13 @@ void AGS_PlacerBase::BuildObject()
 	bUpdatePlaceIndicators = true;
 
 	DrawPlacementIndicators();
-	if (bCanBuild)
+	UGS_NectarComp* NectarComp = BuildManagerRef->FindComponentByClass<UGS_NectarComp>();
+
+	if (bCanBuild && NectarComp->CanSpendResource(ObjectData.ConstructionCost))
 	{
+		//Nectar 차감
+		NectarComp->SpendResource(ObjectData.ConstructionCost);
+
 		// 성공 사운드 재생
 		if (PlaceSuccessSound)
 		{
@@ -157,10 +162,6 @@ void AGS_PlacerBase::BuildObject()
 		//FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
 		FRotator SpawnRotator = GetActorRotation();
 		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator);
-		
-		//Nectar 차감
-		UGS_NectarComp* NectarComp = BuildManagerRef->FindComponentByClass<UGS_NectarComp>();
-		NectarComp->SpendResource(ObjectData.ConstructionCost);
 
 
 
