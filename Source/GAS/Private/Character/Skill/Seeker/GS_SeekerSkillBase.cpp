@@ -17,6 +17,7 @@ void UGS_SeekerSkillBase::OnSkillCanceledByDebuff()
 
 void UGS_SeekerSkillBase::OnSkillAnimationEnd()
 {
+	Super::OnSkillAnimationEnd();
 }
 
 void UGS_SeekerSkillBase::ApplyEffectToGuardian(AGS_Guardian* Target)

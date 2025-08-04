@@ -323,7 +323,7 @@ void AGS_Seeker::OnComboAttack()
 		if (CurrentComboIndex == 0)
 		{
 			GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
-			ServerAttackMontage(); // 이게 두번 호출되는거 같은데...
+			ServerAttackMontage();
 		}
 		else
 		{
@@ -370,9 +370,7 @@ void AGS_Seeker::MulticastPlayComboSection_Implementation()
 	{
 		if (HasAuthority())
 		{
-			Multicast_SetIsFullBodySlot(true);
-			Multicast_SetIsUpperBodySlot(false); // Montage_Play 의 slot 에 직접적 영향. Replicated 대신 Multicast 사용.
-			SetMoveControlValue(false, false);
+			Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 			CurrentComboIndex++;
 			CanAcceptComboInput = false;
 			bNextCombo = false;
@@ -480,6 +478,14 @@ void AGS_Seeker::OnRep_SeekerGait()
 		}
 	}
 }
+
+void AGS_Seeker::Multicast_SetMontageSlot_Implementation(ESeekerMontageSlot InputMontageSlot)
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->SetCurMontageSlot(InputMontageSlot);
+	}
+} // SJE
 
 void AGS_Seeker::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 {
