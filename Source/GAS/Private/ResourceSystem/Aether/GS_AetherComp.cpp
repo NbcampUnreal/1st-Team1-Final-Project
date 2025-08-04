@@ -3,7 +3,7 @@
 void UGS_AetherComp::AddResource(float Amount)
 {
 	//여기에서 초과한 경우 0.5를 곱하도록 
-	float ActualAmount = CanAddResource(Amount) ? Amount * 0.5f : Amount;
+	float ActualAmount = CanAddResource(Amount) ? Amount : Amount * 0.5f;
 	Super::AddResource(ActualAmount);
 }
 
