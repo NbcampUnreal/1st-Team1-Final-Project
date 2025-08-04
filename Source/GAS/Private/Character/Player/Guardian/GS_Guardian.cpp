@@ -35,9 +35,6 @@ AGS_Guardian::AGS_Guardian()
 	TargetedUIComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	TargetedUIComponent->SetDrawSize(FVector2D(100.f, 100.f));
 	TargetedUIComponent->SetVisibility(false);
-
-	//AetherComp 연결
-	AetherComp = CreateDefaultSubobject<UGS_AetherComp>(TEXT("Aether"));
 }
 
 void AGS_Guardian::BeginPlay()

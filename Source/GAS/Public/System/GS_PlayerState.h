@@ -4,6 +4,7 @@
 #include "GameFramework/PlayerState.h"
 #include "System/GS_PlayerRole.h"
 #include "DungeonEditor/Data/GS_DungeonEditorTypes.h"
+#include "ResourceSystem/Aether/GS_AetherComp.h"
 #include "GS_PlayerState.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoleChangedSignature, EPlayerRole, NewRole);
@@ -63,6 +64,13 @@ public:
     UFUNCTION(Server, Reliable)
 	void Server_SetObjectData(const TArray<FDESaveData>& InObjectData);
     FString CurrentSaveSlotName = TEXT("Preset_0");
+
+    //AetherComp 추가 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+    TObjectPtr<UGS_AetherComp> AetherComp;
+
+    UGS_AetherComp* GetAetherComp() const;
+
 
     // 준비
     UPROPERTY(ReplicatedUsing = OnRep_IsReady, BlueprintReadOnly, Category = "Lobby")
