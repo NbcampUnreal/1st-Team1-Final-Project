@@ -18,42 +18,25 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	StartCoolDown();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-<<<<<<< HEAD
 	{
 		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
 		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-=======
-	{		
-		// 구르기 시작 사운드 재생 // 구르기 사운드를 Server 에서 처리하는게 맞은가..? // SJE
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
->>>>>>> Feature/Charater
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			// 구르기 시작 사운드 재생 // 구르기 사운드를 Server 에서 처리하는게 맞은가..? // SJE
+			const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+			if (SkillInfo && SkillInfo->SkillStartSound)
+			{
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			}
 		}
-<<<<<<< HEAD
 
 		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			OwnerPlayer->SetSkillInputControl(false, false, false);
-			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->CanChangeSeekerGait = false;
-			FName RollDirection = CalRollDirection();
-			if (RollDirection == FName("00"))
-			{
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
-			}
-			else
-			{
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
-			}
-
-=======
-		
-		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
-	
+		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		OwnerPlayer->SetSkillInputControl(false, false, false);
+		OwnerPlayer->SetMoveControlValue(false, false);
 		OwnerPlayer->CanChangeSeekerGait = false;
-		FName RollDirection = CalRollDirection();
+		
+		const FName RollDirection = CalRollDirection();
 		if (RollDirection == FName("00"))
 		{
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
@@ -62,7 +45,7 @@ void UGS_ChanRollingSkill::ActiveSkill()
 		{
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
 		}
->>>>>>> Feature/Charater
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 	}
 }
 
@@ -88,11 +71,13 @@ void UGS_ChanRollingSkill::OnSkillAnimationEnd()
 void UGS_ChanRollingSkill::InterruptSkill()
 {
 	Super::InterruptSkill();
-	AGS_Chan* AresCharacter = Cast<AGS_Chan>(OwnerCharacter);
-	if (AresCharacter->GetSkillComp())
+	if (AGS_Chan* AresCharacter = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		AresCharacter->Multicast_SetIsFullBodySlot(false);
-		AresCharacter->SetMoveControlValue(true, true);
-		SetIsActive(false);
+		if (AresCharacter->GetSkillComp())
+		{
+			AresCharacter->Multicast_SetIsFullBodySlot(false);
+			AresCharacter->SetMoveControlValue(true, true);
+			SetIsActive(false);
+		}
 	}
 }
