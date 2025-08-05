@@ -23,14 +23,6 @@ enum class EGridCellState : uint8
 };
 
 UENUM(BlueprintType)
-enum class EPreviewState : uint8
-{
-	None		UMETA(DisplayName = "None"),
-	Valid		UMETA(DisplayName = "Valid"),
-	Invalid		UMETA(DisplayName = "Invalid")
-};
-
-UENUM(BlueprintType)
 enum class EPlacementResult : uint8
 {
 	Valid           UMETA(DisplayName = "Valid"),
