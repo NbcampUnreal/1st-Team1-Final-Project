@@ -856,6 +856,7 @@ void AGS_BuildManager::SaveDungeonData()
         		ObjectData.CellCoord = PlaceInfo->GetCellCoord();
         		ObjectData.ObjectType = PlaceInfo->GetObjectType();
         		ObjectData.TrapPlacement = PlaceInfo->GetTrapPlacement();
+				ObjectData.ConstructionCost = PlaceInfo->ConstructionCost;
         	}
 
             SaveGameObject->AddSaveData(ObjectData);
@@ -950,7 +951,7 @@ void AGS_BuildManager::LoadDungeonData()
 
 				if (UPlaceInfoComponent* PlaceInfoCompo = NewActor->FindComponentByClass<UPlaceInfoComponent>())
 				{
-					PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapPlacement, ObjectData.CellCoord);
+					PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapPlacement, ObjectData.CellCoord, ObjectData.ConstructionCost);
 					for (int i = 0; i < ObjectData.CellCoord.Num(); ++i)
 					{
 						EDEditorCellType TargetType = GetTargetCellType(ObjectData.ObjectType, ObjectData.TrapPlacement);

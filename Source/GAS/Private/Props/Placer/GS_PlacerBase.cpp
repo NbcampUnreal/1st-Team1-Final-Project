@@ -209,7 +209,7 @@ void AGS_PlacerBase::BuildObject()
 		// Cell Info를 Component에 전달 및 저장
 		if (UPlaceInfoComponent* PlaceInfoCompo = NewActor->GetComponentByClass<UPlaceInfoComponent>())
 		{
-			PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapType, IntPointArray);
+			PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapType, IntPointArray, ObjectData.ConstructionCost);
 		}
 
 		// 먼지 이펙트 생성 DustEffectTemplate
