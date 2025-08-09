@@ -21,5 +21,5 @@ public:
 	virtual void ExecuteSkillEffect() override;
 
 protected:
-	bool bIsEarthquaking;
+	//bool bIsEarthquaking;
 };

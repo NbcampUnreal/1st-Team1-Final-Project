@@ -2,6 +2,7 @@
 
 
 #include "Character/Skill/Seeker/Merci/GS_MerciMovingSkill.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/Player/Seeker/GS_Merci.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
 
@@ -17,11 +18,9 @@ void UGS_MerciMovingSkill::ActiveSkill()
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (MerciCharacter)
 	{
-		// 스킬 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			MerciCharacter->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
 		
 		MerciCharacter->SetDrawState(false);

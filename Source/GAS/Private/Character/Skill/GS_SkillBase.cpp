@@ -33,8 +33,10 @@ void UGS_SkillBase::ActiveSkill()
 	{
 		return;
 	}
-
+	
 	SetIsActive(true);
+	
+	return;
 }
 
 void UGS_SkillBase::OnSkillCanceledByDebuff()
@@ -43,6 +45,11 @@ void UGS_SkillBase::OnSkillCanceledByDebuff()
 
 void UGS_SkillBase::OnSkillAnimationEnd()
 {
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	if(OwnerPlayer)
+	{
+		OwnerPlayer->GetSkillComp()->ResetAllowedSkillsMask();
+	} // SJE
 }
 
 void UGS_SkillBase::ExecuteSkillEffect()
@@ -75,7 +82,7 @@ void UGS_SkillBase::InterruptSkill()
 	
 	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerCharacter->GetMesh()->GetAnimInstance()))
 	{
-		Seeker->SetSkillInputControl(true, true, true);
+		//Seeker->SetSkillInputControl(true, true, true);
 		Seeker->SetSeekerGait(EGait::Run);
 		Seeker->CanChangeSeekerGait = true;
 	}

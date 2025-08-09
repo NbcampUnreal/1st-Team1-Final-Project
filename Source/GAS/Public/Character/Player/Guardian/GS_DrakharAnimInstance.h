@@ -38,8 +38,8 @@ private:
 	void AnimNotify_DraconicFury();
 
 	//[skill check]
-	UFUNCTION()
-	void AnimNotify_CtrlSkillEnd();
+	// UFUNCTION()
+	// void AnimNotify_CtrlSkillEnd();
 
 	UFUNCTION()
 	void AnimNotify_FinishCtrlSkill();

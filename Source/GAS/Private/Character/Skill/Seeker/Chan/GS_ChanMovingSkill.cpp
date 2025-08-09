@@ -3,6 +3,7 @@
 
 #include "Character/Skill/Seeker/Chan/GS_ChanMovingSkill.h"
 #include "Character/Player/Seeker/GS_Chan.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
@@ -10,6 +11,7 @@
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Player/GS_Player.h"
 #include "AkAudioEvent.h"
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_StatRow.h"
 
@@ -28,12 +30,9 @@ void UGS_ChanMovingSkill::ActiveSkill()
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		// 애니메이션 설정
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 
 		// 입력 제한 설정
-		OwnerPlayer->SetMoveControlValue(false, false);
-		OwnerPlayer->SetSkillInputControl(false, false, false);
 
 		// 스킬 애니메이션 재생
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
@@ -53,13 +52,12 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, 800.0f);
 		}
 			
-		// 무빙 스킬 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
+		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
-	
+
 		// 방어력 강화
 		StrengthenDefense();
 
@@ -71,7 +69,6 @@ void UGS_ChanMovingSkill::ActiveSkill()
 void UGS_ChanMovingSkill::OnSkillCanceledByDebuff()
 {
 	Super::OnSkillCanceledByDebuff();
-	
 }
 
 void UGS_ChanMovingSkill::OnSkillAnimationEnd()
@@ -82,10 +79,8 @@ void UGS_ChanMovingSkill::OnSkillAnimationEnd()
 
 	if(OwnerPlayer)
 	{
-		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 		OwnerPlayer->SetMoveControlValue(true, true);
-		OwnerPlayer->SetSkillInputControl(true, true, true);
 		OwnerPlayer->CanChangeSeekerGait = true;
 	}
 
@@ -112,7 +107,6 @@ void UGS_ChanMovingSkill::InterruptSkill()
 	SetIsActive(false);
 
 	OwnerPlayer->GetWorldTimerManager().ClearTimer(DEFBuffHandle);
-
 }
 
 void UGS_ChanMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)

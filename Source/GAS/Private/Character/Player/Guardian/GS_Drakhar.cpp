@@ -41,7 +41,6 @@ AGS_Drakhar::AGS_Drakhar()
 	DefaultComboAttackSectionName = FName("Combo1");
 	ComboAttackSectionName = DefaultComboAttackSectionName;
 	bCanCombo = true;
-	bClientCanCombo = true;
 
 	//dash skill variables
 	DashPower = 1500.f;
@@ -56,9 +55,9 @@ AGS_Drakhar::AGS_Drakhar()
 	DraconicAttackPersistenceTime = 5.f;
 
 	//Guardian State Setting
-	ClientGuardianState = EGuardianState::CtrlEnd;
-	ClientGuardianDoSkillState = EGuardianDoSkill::None;
-
+	GuardianState = EGuardianCtrlState::CtrlEnd;
+	GuardianDoSkillState = EGuardianDoSkill::None;
+	
 	//fever mode
 	MaxFeverGauge = 100.f;
 	CurrentFeverGauge = 0.f;
@@ -127,9 +126,7 @@ AGS_Drakhar::AGS_Drakhar()
 void AGS_Drakhar::BeginPlay()
 {
 	Super::BeginPlay();
-
-	GuardianState = EGuardianState::CtrlEnd;
-
+	
 	UGS_DrakharAnimInstance* Anim = Cast<UGS_DrakharAnimInstance>(GetMesh()->GetAnimInstance());
 	if (IsValid(Anim))
 	{
@@ -141,7 +138,6 @@ void AGS_Drakhar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("@@@@@@@@@@@@@@@@@@@@@@@@@@@ %d | %d"),ClientGuardianDoSkillState, GuardianDoSkillState));
 	if (SpringArmComp && bIsFlying)
 	{
 		if (FMath::IsNearlyEqual(SpringArmComp->TargetArmLength, TargetSpringArmLength, 1.0f))
@@ -187,35 +183,35 @@ void AGS_Drakhar::OnDamageStart()
 
 void AGS_Drakhar::Ctrl()
 {
+	Super::Ctrl();
+	
 	if (!HasAuthority() && IsLocallyControlled())
 	{
 		//not flying
-		if (ClientGuardianState == EGuardianState::CtrlEnd)
+		if (GuardianState == EGuardianCtrlState::CtrlEnd)
 		{
 			//if execute flying skill, prevent change state
-			if (ClientGuardianDoSkillState != EGuardianDoSkill::None)
+			if (GuardianDoSkillState != EGuardianDoSkill::None)
 			{
 				return;
 			}
-			
-			ClientGuardianState = EGuardianState::CtrlUp;
-			TargetSpringArmLength = 800.f;
-			bIsFlying = true;
-			
-			//server logic
-			GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ready);
-			ServerRPCStartCtrl();
+
+			GuardianState = EGuardianCtrlState::CtrlUp;
+			StartCtrl();
 		}
 	}
 }
 
 void AGS_Drakhar::CtrlStop()
 {
+	Super::CtrlStop();
+	
 	if (!HasAuthority() && IsLocallyControlled())
 	{
 		//stop flying
-		if (ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		if (GuardianDoSkillState == EGuardianDoSkill::None)
 		{
+			GuardianState = EGuardianCtrlState::CtrlEnd;
 			StopCtrl();
 		}
 	}
@@ -228,20 +224,20 @@ void AGS_Drakhar::LeftMouse()
 	if (!HasAuthority() && IsLocallyControlled())
 	{
 		//flying & not using flying skill
-		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready) && ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		if (GuardianState == EGuardianCtrlState::CtrlUp && GuardianDoSkillState == EGuardianDoSkill::None)
 		{
 			//check earthquake skill
 			GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
 		}
 		
 		//not flying & not using skills
-		else if (ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		else if (GuardianDoSkillState == EGuardianDoSkill::None)
 		{
-			if (bClientCanCombo)
+			if (bCanCombo)
 			{
+				bCanCombo = false;
 				PlayComboAttackMontage();
 				ServerRPCNewComboAttack();
-				bClientCanCombo = false;
 			}
 		}
 	}
@@ -252,13 +248,13 @@ void AGS_Drakhar::RightMouse()
 	if (!HasAuthority() && IsLocallyControlled())
 	{
 		//flying & not using flying skill
-		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready) && ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		if (GuardianState == EGuardianCtrlState::CtrlUp && GuardianDoSkillState == EGuardianDoSkill::None)
 		{
 			//ultimate skill check
-			ServerRPC_BeginDraconicFury();
+			GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 		}
 		//not flying & not using flying skills
-		else if (ClientGuardianState == EGuardianState::CtrlEnd && ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		else if (GuardianState == EGuardianCtrlState::CtrlEnd && GuardianDoSkillState == EGuardianDoSkill::None)
 		{
 			//dash skill check
 			GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
@@ -285,15 +281,11 @@ void AGS_Drakhar::OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNo
 {
 	if (NotifyName == "None")
 	{
-		bClientCanCombo = true;
+		bCanCombo = true;
 		ServerRPCResetValue();
 	}
 }
 
-void AGS_Drakhar::OnRep_CanCombo()
-{
-	bClientCanCombo = bCanCombo;
-}
 
 void AGS_Drakhar::ComboLastAttack()
 {
@@ -324,15 +316,12 @@ void AGS_Drakhar::ComboLastAttack()
 void AGS_Drakhar::ServerRPCResetValue_Implementation()
 {
 	bCanCombo = true;
-	//GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 }
 
 void AGS_Drakhar::ServerRPCNewComboAttack_Implementation()
 {
-	MulticastRPCComboAttack();
-	//GetCharacterMovement()->SetMovementMode(MOVE_None);
 	bCanCombo = false;
-
+	MulticastRPCComboAttack();
 	MulticastPlayComboAttackSound();
 }
 
@@ -480,10 +469,30 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 
 void AGS_Drakhar::ServerRPCStartCtrl_Implementation()
 {
-	GuardianState = EGuardianState::CtrlUp;
-
+	GuardianState = EGuardianCtrlState::CtrlUp;
 	MoveSpeed = SpeedUpMoveSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+}
+
+void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
+{
+	GuardianState = EGuardianCtrlState::CtrlEnd;
+	GuardianDoSkillState = EGuardianDoSkill::None;
+	
+	MoveSpeed = NormalMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+}
+
+void AGS_Drakhar::StartCtrl()
+{
+	if (!HasAuthority())
+	{
+		ServerRPCStartCtrl();
+		GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ready);
+		
+		TargetSpringArmLength = 800.f;
+		bIsFlying = true;
+	}
 }
 
 void AGS_Drakhar::StopCtrl()
@@ -494,18 +503,9 @@ void AGS_Drakhar::StopCtrl()
 		ServerRPCStopCtrl();
 		GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
 		
-		ClientGuardianState = EGuardianState::CtrlEnd;
-		ClientGuardianDoSkillState = EGuardianDoSkill::None;
 		TargetSpringArmLength = 500.f;
 		bIsFlying = true;
 	}
-}
- 
-void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
-{
-	GuardianState = EGuardianState::CtrlEnd;
-	MoveSpeed = NormalMoveSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
@@ -537,6 +537,37 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 			MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
 		}
 	}
+}
+
+void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
+{
+	if (GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
+	{
+		return;
+	}
+
+	GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
+	MulticastRPC_OnUltimateStart();
+
+	FTimerHandle DraconicFuryEndTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		DraconicFuryEndTimer,
+		this,
+		&AGS_Drakhar::EndDraconicFury,
+		DraconicAttackPersistenceTime,
+		false);
+}
+
+void AGS_Drakhar::EndDraconicFury()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Draconic Fury Skill End"));
+	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT] Draconic Fury Skill End")));
+	
+	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+	GuardianState = EGuardianCtrlState::CtrlEnd;
+
+	MoveSpeed = NormalMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
 void AGS_Drakhar::SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGaugeWidget)
@@ -792,37 +823,6 @@ void AGS_Drakhar::MulticastStartDustVFX_Implementation()
 void AGS_Drakhar::MulticastStopDustVFX_Implementation()
 {
 	if (VFXComponent) VFXComponent->StopDustVFX();
-}
-
-void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
-{
-	if (GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
-	{
-		return;
-	}
-
-	GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
-	MulticastRPC_OnUltimateStart();
-
-	FTimerHandle DraconicFuryEndTimer;
-	GetWorld()->GetTimerManager().SetTimer(
-		DraconicFuryEndTimer,
-		this,
-		&AGS_Drakhar::EndDraconicFury,
-		DraconicAttackPersistenceTime,
-		false);
-}
-
-void AGS_Drakhar::EndDraconicFury()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Draconic Fury Skill End"));
-	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT] Draconic Fury Skill End")));
-	
-	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
-	GuardianState = EGuardianState::CtrlEnd;
-
-	MoveSpeed = NormalMoveSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
 // === 어스퀘이크 지면 균열 VFX 제어 함수 ===
