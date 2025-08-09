@@ -1,11 +1,11 @@
 #include "ResourceSystem/Nectar/GS_NectarComp.h"
 #include "DungeonEditor/Component/PlaceInfoComponent.h"
 
-//void UGS_NectarComp::InitializeMaxAmount(float Amount)
-//{
-//	Super::InitializeMaxAmount(Amount);
-//	OnNectarChanged.Broadcast(GetCurrentAmount());
-//}
+void UGS_NectarComp::InitializeMaxAmount(float Amount)
+{
+	Super::InitializeMaxAmount(Amount);
+	OnNectarChanged.Broadcast(GetCurrentAmount());
+}
 
 
 void UGS_NectarComp::AddResource(float Amount)

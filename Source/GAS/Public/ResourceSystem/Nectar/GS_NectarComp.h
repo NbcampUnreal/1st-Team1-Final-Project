@@ -17,7 +17,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category="Nectar")
 	FOnNectarChanged OnNectarChanged;
 
-	//virtual void InitializeMaxAmount(float Amount) override;
+	virtual void InitializeMaxAmount(float Amount) override;
 	virtual void AddResource(float Amount) override;
 	virtual void SpendResource(float Amount) override;
 	bool CanSpendResource(float Amount) const;

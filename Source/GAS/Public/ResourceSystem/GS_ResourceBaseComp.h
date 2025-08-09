@@ -20,7 +20,7 @@ protected:
 	float CurrentAmount = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
 	float MaxAmount = 600.f;
-	bool bIsInitialized = false;
+	/*bool bIsInitialized = false;*/
 
 public:
 	UFUNCTION(Category = "Resource")

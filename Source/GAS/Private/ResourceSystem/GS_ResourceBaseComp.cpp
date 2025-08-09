@@ -17,16 +17,16 @@ void UGS_ResourceBaseComp::BeginPlay()
 
 void UGS_ResourceBaseComp::InitializeMaxAmount(float Amount)
 {
-	if (bIsInitialized)
-	{
-		//후에 가디언 종류 바꿀 떄마다 Initialize 제대로 되는지 확인 필요
-		UE_LOG(LogTemp, Warning, TEXT("[Nectar] Already Initialized. Can only be initialized once"));
-		return;
-	}
+	//if (bIsInitialized)
+	//{
+	//	//후에 가디언 종류 바꿀 떄마다 Initialize 제대로 되는지 확인 필요
+	//	UE_LOG(LogTemp, Warning, TEXT("[Nectar] Already Initialized. Can only be initialized once"));
+	//	return;
+	//}
 
 	MaxAmount = Amount;
 	CurrentAmount = MaxAmount;
-	bIsInitialized = true;
+	//bIsInitialized = true;
 }
 
 float UGS_ResourceBaseComp::GetCurrentAmount() const

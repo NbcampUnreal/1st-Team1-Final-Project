@@ -28,7 +28,7 @@ AGS_BuildManager::AGS_BuildManager()
 	DecalCompo = CreateDefaultSubobject<UDecalComponent>("Decal");
 	DecalCompo->SetupAttachment(RootComponent);
 	
-	//NectarComp 추가 
+	//넥타르_NectarComp 추가 
 	NectarComp = CreateDefaultSubobject<UGS_NectarComp>("Nectar");
 
 	bTraceComplex = false;
@@ -129,7 +129,7 @@ void AGS_BuildManager::BeginPlay()
 		}
 	}
 
-	//Nectar 초기화(BP에서 Nectar Max값 변경하기)
+	//넥타르_Nectar 초기화(BP에서 Nectar Max값 변경하기)
 	NectarComp->InitializeMaxAmount(NectarComp->GetMaxAmount());
 }
 
@@ -783,6 +783,9 @@ void AGS_BuildManager::ResetDungeonData()
 	}
 	
 	OccupancyData.Empty();
+
+	//넥타르 리셋
+	NectarComp->InitializeMaxAmount(NectarComp->GetMaxAmount());
 }
 
 void AGS_BuildManager::ChangeDecalType(FDataTableRowHandle* Data)
@@ -1006,6 +1009,8 @@ void AGS_BuildManager::LoadDungeonData()
 						OccupancyData.FindOrAdd(ObjectData.CellCoord[i]).FloorOccupancyData = LoadGameObject->FloorOccupancyData.FindOrAdd(ObjectData.CellCoord[i]);
 						OccupancyData.FindOrAdd(ObjectData.CellCoord[i]).CeilingOccupancyData = LoadGameObject->CeilingOccupancyData.FindOrAdd(ObjectData.CellCoord[i]);
 					}
+					//넥타르 소모
+					NectarComp->SpendResource(PlaceInfoCompo->ConstructionCost);
 				}
 			}
 
