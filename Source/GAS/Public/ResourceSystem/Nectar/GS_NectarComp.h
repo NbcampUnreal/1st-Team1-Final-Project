@@ -21,4 +21,5 @@ public:
 	virtual void AddResource(float Amount) override;
 	virtual void SpendResource(float Amount) override;
 	bool CanSpendResource(float Amount) const;
+	void RetrieveNectar(AActor* TargetActor);
 };

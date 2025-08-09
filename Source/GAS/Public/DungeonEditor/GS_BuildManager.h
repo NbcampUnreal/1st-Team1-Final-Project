@@ -84,9 +84,6 @@ public:
 	FVector2d GetCenterOfRectArea(FIntPoint InAreaCenterCell, FIntPoint AreaSize, float RotateDegree = 0.0f);
 	void GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FIntPoint InCenterAreaCell, FIntPoint InAreaSize, float RotateDegree = 0.0f);
 
-	//엑터 삭제 시 넥타르 증가 함수
-	void RetriveNectar(AActor* TargetActor);
-
 	// 나중에 배치한 애들의 타입을 넣어주어야 할 때 이용하면 괜찮을 것 같다.
 	void SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType, EObjectType InObjectType, AActor* InActor, bool InIsRoom = false, bool InDeleteMode = false);
 	bool CheckOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType);
