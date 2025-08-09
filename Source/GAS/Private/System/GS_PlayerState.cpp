@@ -48,6 +48,9 @@ void AGS_PlayerState::BeginPlay()
     {
         FetchMySteamAvatar();
     }
+    //에테르 값 초기화
+    AetherComp->InitializeMaxAmount(250.f);
+
 }
 
 void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)

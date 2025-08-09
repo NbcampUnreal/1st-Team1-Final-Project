@@ -1,5 +1,11 @@
 #include "ResourceSystem/Aether/GS_AetherComp.h"
 
+void UGS_AetherComp::InitializeMaxAmount(float Amount)
+{
+	Super::InitializeMaxAmount(Amount);
+	CurrentAmount = 0.0f;
+}
+
 void UGS_AetherComp::AddResource(float Amount)
 {
 	//여기에서 초과한 경우 0.5를 곱하도록 

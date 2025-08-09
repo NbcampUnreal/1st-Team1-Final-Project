@@ -4,6 +4,7 @@
 void UGS_NectarComp::InitializeMaxAmount(float Amount)
 {
 	Super::InitializeMaxAmount(Amount);
+	CurrentAmount = Amount;
 	OnNectarChanged.Broadcast(GetCurrentAmount());
 }
 
