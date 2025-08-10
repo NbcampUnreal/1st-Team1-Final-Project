@@ -8,11 +8,11 @@
 void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
 	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
-	if (!ChanCharacter->GetSkillInputControl().CanInputRC)
+	/*if (!ChanCharacter->GetSkillInputControl().CanInputRC)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Right Click Lock"));
 		return;
-	}
+	}*/
 
 	if (OwnerCharacter->IsDead())
 	{
@@ -20,10 +20,23 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	}
 	
 	Super::OnRightClick(Instance);
-	
+
 	if (!bCtrlHeld)
 	{
-		if (!ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
+		ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
+		/*if (!ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming)) // 해당 Skill 이 Stat 에 없거나 bIsActive 가 false 라면 
+		{
+			ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
+		}*/
+	}
+	else
+	{
+		ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
+	}
+	
+	/*if (!bCtrlHeld)
+	{
+		if (!ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming)) // 해당 Skill 이 Stat 에 없거나 bIsActive 가 false 라면 
 		{
 			ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
 		}
@@ -31,17 +44,12 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 	else
 	{
 		ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
-	}
+	}*/
 }
 
 void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
-	if (!ChanCharacter->GetSkillInputControl().CanInputLC)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Left Click Lock"));
-		return;
-	}
 
 	if (OwnerCharacter->IsDead())
 	{
@@ -83,16 +91,6 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 void UGS_ChanSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instance)
 {
 	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
-	if (!ChanCharacter->GetSkillInputControl().CanInputRoll)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Roll Lock"));
-		return;
-	}
-
-	if (OwnerCharacter->IsDead())
-	{
-		return;
-	}
 	
 	Super::OnRoll(Instance);
 	

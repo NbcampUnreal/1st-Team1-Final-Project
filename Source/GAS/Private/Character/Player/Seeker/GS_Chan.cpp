@@ -122,8 +122,7 @@ void AGS_Chan::OffJumpAttackSkill()
 void AGS_Chan::ToIdle()
 {
 	Multicast_StopSkillMontage(GetCurrentMontage());
-	Multicast_SetIsUpperBodySlot(false);
-	Multicast_SetIsFullBodySlot(false);
+	Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 	SetMoveControlValue(true, true);
 	SetLookControlValue(true, true);
 }

@@ -10,6 +10,9 @@ UGS_DrakharEarthquake::UGS_DrakharEarthquake()
 
 void UGS_DrakharEarthquake::ActiveSkill()
 {
+	Super::ActiveSkill();
+
+	//cool time check
 	if (!CanActive())
 	{
 		return;
@@ -20,23 +23,25 @@ void UGS_DrakharEarthquake::ActiveSkill()
 
 void UGS_DrakharEarthquake::ExecuteSkillEffect()
 {
+	Super::ExecuteSkillEffect();
+	
 	if (!OwnerCharacter->HasAuthority())
 	{
 		return;
 	}
+
 	//server logic
-	bIsEarthquaking = true;
+	AGS_Guardian* Guardian =Cast<AGS_Guardian>(OwnerCharacter);
+	if (Guardian)
+	{
+		Guardian->GuardianDoSkillState = EGuardianDoSkill::Aiming;
+	}
 	
 	StartCoolDown();
 	
 	if (OwnerCharacter)
 	{
+		//play montage, except server
 		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
-	}
-	
-	AGS_Guardian* Guardian =Cast<AGS_Guardian>(OwnerCharacter);
-	if (Guardian)
-	{
-		Guardian->GuardianDoSkillState = EGuardianDoSkill::Aiming;
 	}
 }

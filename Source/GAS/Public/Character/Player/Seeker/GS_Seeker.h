@@ -96,6 +96,9 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetMontageSlot(ESeekerMontageSlot InputMontageSlot);
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetMustTurnInPlace(bool MustTurn);

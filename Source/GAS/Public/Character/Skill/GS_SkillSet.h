@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Character/GS_Character.h"
 //#include "Character/Skill/GS_SkillBase.h"
+#include "ESkill.h"
 #include "NiagaraSystem.h"
 #include "GS_SkillSet.generated.h"
 
@@ -11,12 +12,36 @@ class UImage;
 class UAkAudioEvent;
 
 USTRUCT(BlueprintType)
+struct FSkillAllow
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, Category = "Skill")
+	ESkillSlot Slot;
+
+	UPROPERTY(EditAnywhere, Category = "Skill")
+	bool bAllow = false;
+};
+
+
+USTRUCT(BlueprintType)
 struct GAS_API FSkillInfo
 {
 	GENERATED_BODY()
+
+	FSkillInfo()
+	{
+		AllowSkillList.Empty();
+		for (int32 i =0; i < static_cast<int32>(ESkillSlot::End); i++)
+		{
+			FSkillAllow AllowSkill;
+			AllowSkill.Slot = static_cast<ESkillSlot>(i);
+			AllowSkillList.Add(AllowSkill);
+		}
+	}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UGS_SkillBase> SkillClass;
+	TSubclassOf<UGS_SkillBase> SkillClass = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Cooltime;
@@ -30,6 +55,14 @@ struct GAS_API FSkillInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* Image;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FSkillAllow> AllowSkillList; // SJE
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FControlValue AllowControlValue; // SJE
+	// 움직임이나 시선에 관한 flag 도 여기에서 관리해야하는거 아닌가 결국?
+
+	
 	// 스킬 사운드 이벤트들
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	UAkAudioEvent* SkillStartSound;
@@ -93,7 +126,7 @@ struct GAS_API FGS_SkillSet : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ECharacterType CharacterType;
+	ECharacterType CharacterType = ECharacterType::Chan;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FSkillInfo ReadySkill;
@@ -110,13 +143,16 @@ struct GAS_API FGS_SkillSet : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FSkillInfo RollingSkill;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FSkillInfo ComboSkill; // SJE
+
 	FGS_SkillSet()
-		: CharacterType(ECharacterType::Chan)
+		/*: CharacterType(ECharacterType::Chan)
 		, ReadySkill(nullptr)
 		, AimingSkill(nullptr)
 		, MovingSkill(nullptr)
 		, UltimateSkill(nullptr)
-		, RollingSkill(nullptr) 
+		, RollingSkill(nullptr)*/
 	{
 	}
 };

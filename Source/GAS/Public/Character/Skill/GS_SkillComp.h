@@ -72,6 +72,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_TrySkillAnimationEnd(ESkillSlot Slot);
+
+	UFUNCTION()
+	void TrySkillAnimationEnd(ESkillSlot Slot);
 	
 	void SetSkill(ESkillSlot Slot, const FSkillInfo& Info);
 	void SetCanUseSkill(bool InCanUseSkill);
@@ -139,13 +142,26 @@ protected:
 	UPROPERTY(ReplicatedUsing = OnRep_CooldownStates)
 	TArray<FSkillCooldownState> ReplicatedCooldownStates;
 	
-	
+	//Skill Flag
+	UPROPERTY() // 오직 서버에서 판단.
+	int8 CurAllowedSkillsMask = 0; // SJE
 
+	UPROPERTY()
+	int8 DefaultAllowedSkillsMask = -1; // SJE
 	
-
 	UFUNCTION()
 	void InitSkills();
+	
+public:
+	UFUNCTION()
+	void ResetAllowedSkillsMask(); // SJE
 
+	UFUNCTION()
+	bool IsSkillAllowed(ESkillSlot CompareSkillsMask); // SJE
+
+	UFUNCTION()
+	void SetCurAllowedSkillsMask(int8 BitMask);
+	
 private:
 	UFUNCTION()
 	void OnRep_SkillStates();

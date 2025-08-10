@@ -60,7 +60,7 @@ public:
 
 	FTimerHandle HitReactTimerHandle;
 
-	void AllowHitReact();
+	void AllowHitReact(float CooldownTime);
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
