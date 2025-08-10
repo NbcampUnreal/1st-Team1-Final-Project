@@ -229,6 +229,12 @@ void AGS_Monster::Attack()
 {
 	if (HasAuthority())
 	{
+		// 공격 모션 시작 시 전투/스윙 사운드 트리거 (서버)
+		if (MonsterAudioComponent)
+		{
+			MonsterAudioComponent->PlaySound(EMonsterAudioState::Combat, /*bForcePlay=*/false);
+			MonsterAudioComponent->PlaySwingSound();
+		}
 		Multicast_PlayAttackMontage();
 	}
 }

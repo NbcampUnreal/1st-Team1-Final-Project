@@ -75,8 +75,6 @@ protected:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-    // virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
     // ==========
     // 사운드 설정
     // ==========
@@ -94,10 +92,13 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio")
     int32 MonsterSoundVariant = 0;
 
-    // ========
-    // 공용 함수
-    // ========
-    
+    // 스윙 사운드
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio|Swing")
+    UAkAudioEvent* SwingSound = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio|Swing", meta=(ClampMin="0.0"))
+    float SwingResetTime = 0.2f;
+
     /** 몬스터 상태 변경 시 호출 */
     UFUNCTION(BlueprintCallable, Category = "Monster Audio")
     void SetMonsterAudioState(EMonsterAudioState NewState);
@@ -118,14 +119,14 @@ public:
     UFUNCTION(BlueprintPure, Category = "Monster Audio")
     EMonsterAudioState GetCurrentAudioState() const { return CurrentAudioState; }
 
-    // Replication
+    // 스윙 사운드 재생
+    UFUNCTION(BlueprintCallable, Category = "Monster Audio|Swing")
+    void PlaySwingSound();
+
+    // Replication 설정
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-    // ======================
-    // 내부 변수
-    // ======================
-    
     UPROPERTY()
     TObjectPtr<AGS_Monster> OwnerMonster;
 
@@ -144,10 +145,6 @@ private:
     
     // 현재 재생 중인 사운드 ID
     AkPlayingID CurrentPlayingID;
-
-    // ========
-    // 내부 함수
-    // ========
     
     /** 가장 가까운 시커 찾기 */
     AGS_Seeker* FindNearestSeeker() const;
@@ -169,7 +166,7 @@ private:
 
     /** Wwise 이벤트 실제 재생 (Wwise가 거리 감쇠 자동 처리) */
     UAkAudioEvent* GetSoundEvent(EMonsterAudioState SoundType) const;
-    
+
     /** 몬스터 상태 변화 감지 */
     void CheckForStateChanges();
     
@@ -179,15 +176,23 @@ private:
     UFUNCTION()
     void OnRep_CurrentAudioState();
 
-    // New RPC for triggering sound check on clients
+    // 클라이언트 사운드 재생 트리거용 멀티캐스트 RPC
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_TriggerSound(EMonsterAudioState SoundTypeToTrigger, bool bIsImmediate);
 
-    // Client-side map to track the last play time for each sound type to manage cooldowns locally
+    // 스윙 사운드 멀티캐스트 RPC
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_PlaySwingSound();
+
     TMap<EMonsterAudioState, float> LocalLastSoundPlayTimes;
 
-    // Server-side map to track the last time a timed sound broadcast was made
-    // Not replicated, used by server authority only.
     UPROPERTY(Transient) 
     TMap<EMonsterAudioState, float> ServerLastBroadcastTime;
+
+    // 스윙 사운드 쿨다운 기록용 변수
+    UPROPERTY(Transient)
+    float ServerLastSwingBroadcastTime = -1000.0f;
+
+    UPROPERTY(Transient)
+    float LocalLastSwingPlayTime = -1000.0f;
 }; 
