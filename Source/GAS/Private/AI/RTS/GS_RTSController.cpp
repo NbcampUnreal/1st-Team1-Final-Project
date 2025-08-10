@@ -884,11 +884,14 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, false);
 
-				// 첫 번째 유닛만 이동 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                // 첫 번째 유닛만 이동 사운드 재생
+                if (i == 0)
+                {
+                    if (Unit->MonsterAudioComponent)
+                    {
+                        Unit->MonsterAudioComponent->PlayRTSMoveCommandSound();
+                    }
+                }
 			}
 		}
 	}
@@ -910,11 +913,14 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 				BlackboardComp->SetValueAsVector (AGS_AIController::MoveLocationKey, Dest);
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, false);
 
-				// 첫 번째 유닛만 공격 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                // 첫 번째 유닛만 공격 사운드 재생
+                if (i == 0)
+                {
+                    if (Unit->MonsterAudioComponent)
+                    {
+                        Unit->MonsterAudioComponent->PlayRTSAttackCommandSound();
+                    }
+                }
 			}
 		}
 	}
@@ -937,11 +943,14 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 				BlackboardComp->ClearValue(AGS_AIController::MoveLocationKey);
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, true);
 
-				// 첫 번째 유닛만 공격 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                // 첫 번째 유닛만 공격 사운드 재생
+                if (i == 0)
+                {
+                    if (Unit->MonsterAudioComponent)
+                    {
+                        Unit->MonsterAudioComponent->PlayRTSAttackCommandSound();
+                    }
+                }
 			}
 		}
 	}
@@ -964,11 +973,14 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::None));
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, false);
 
-				// 첫 번째 유닛만 정지 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                // 첫 번째 유닛만 정지 소리 재생
+                if (i == 0)
+                {
+                    if (Unit->MonsterAudioComponent)
+                    {
+                        Unit->MonsterAudioComponent->PlayRTSMoveCommandSound();
+                    }
+                }
 			}
 		}
 	}
@@ -989,11 +1001,14 @@ void AGS_RTSController::Server_RTSHold_Implementation(const TArray<AGS_Monster*>
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Hold));
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, false);
 
-				// 첫 번째 유닛만 정지 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                // 첫 번째 유닛만 정지 소리 재생
+                if (i == 0)
+                {
+                    if (Unit->MonsterAudioComponent)
+                    {
+                        Unit->MonsterAudioComponent->PlayRTSMoveCommandSound();
+                    }
+                }
 			}
 		}
 	}
@@ -1014,10 +1029,10 @@ void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Skill));
 
 				// 첫 번째 유닛만 스킬 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                if (i == 0 && Unit->MonsterAudioComponent)
+                {
+                    Unit->MonsterAudioComponent->PlayRTSMoveCommandSound();
+                }
 			}
 		}
 	}
@@ -1068,5 +1083,12 @@ bool AGS_RTSController::IsSelectable(AGS_Monster* Monster) const
 
 void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)
 {
-	RemoveUnitFromSelection(Monster);
+    if (IsValid(Monster))
+    {
+        if (Monster->MonsterAudioComponent)
+        {
+            Monster->MonsterAudioComponent->PlayRTSUnitDeathSound();
+        }
+    }
+    RemoveUnitFromSelection(Monster);
 }

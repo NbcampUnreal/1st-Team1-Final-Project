@@ -40,12 +40,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackMontage;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* ClickSoundEvent;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* MoveSoundEvent;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Data")
 	UMonsterDataAsset* MonsterData;
 
@@ -111,6 +105,7 @@ protected:
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+  
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
 	TObjectPtr<UGS_MonsterSkillComp> MonsterSkillComp;

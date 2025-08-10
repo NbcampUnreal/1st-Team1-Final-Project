@@ -344,6 +344,34 @@ void UGS_MonsterAudioComponent::Multicast_PlaySwingSound_Implementation()
     }
 }
 
+void UGS_MonsterAudioComponent::PlaySelectionClickSound()
+{
+    if (!OwnerMonster || !SelectionClickSound) return;
+    UAkGameplayStatics::PostEvent(SelectionClickSound, OwnerMonster, 0, FOnAkPostEventCallback());
+}
+
+void UGS_MonsterAudioComponent::PlayRTSMoveCommandSound()
+{
+    if (!OwnerMonster || !RTSMoveCommandSound) return;
+    UAkGameplayStatics::PostEvent(RTSMoveCommandSound, OwnerMonster, 0, FOnAkPostEventCallback());
+}
+
+void UGS_MonsterAudioComponent::PlayRTSAttackCommandSound()
+{
+    if (!OwnerMonster) return;
+    UAkAudioEvent* EventToPost = RTSAttackCommandSound ? RTSAttackCommandSound : RTSMoveCommandSound;
+    if (EventToPost)
+    {
+        UAkGameplayStatics::PostEvent(EventToPost, OwnerMonster, 0, FOnAkPostEventCallback());
+    }
+}
+
+void UGS_MonsterAudioComponent::PlayRTSUnitDeathSound()
+{
+    if (!OwnerMonster || !RTSUnitDeathSound) return;
+    UAkGameplayStatics::PostEvent(RTSUnitDeathSound, OwnerMonster, 0, FOnAkPostEventCallback());
+}
+
 void UGS_MonsterAudioComponent::StartSoundTimer()
 {
     if (!GetOwner() || !GetOwner()->HasAuthority() || !GetWorld())
@@ -396,7 +424,6 @@ UAkAudioEvent* UGS_MonsterAudioComponent::GetSoundEvent(EMonsterAudioState Sound
         case EMonsterAudioState::Hurt:    return AudioConfig.HurtSound;
         case EMonsterAudioState::Death:   return AudioConfig.DeathSound;
         default:
-            // ensureMsgf(false, TEXT("GetSoundEvent: Unknown SoundType %s requested for monster %s"), *UEnum::GetValueAsString(SoundType), OwnerMonster ? *OwnerMonster->GetName() : TEXT("UnknownMonster"));
             return nullptr;
     }
 }

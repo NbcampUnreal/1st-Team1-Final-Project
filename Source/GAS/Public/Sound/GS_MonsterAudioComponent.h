@@ -99,6 +99,19 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio|Swing", meta=(ClampMin="0.0"))
     float SwingResetTime = 0.2f;
 
+    // RTS 사운드
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS")
+    UAkAudioEvent* SelectionClickSound = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS")
+    UAkAudioEvent* RTSMoveCommandSound = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS")
+    UAkAudioEvent* RTSAttackCommandSound = nullptr;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS")
+    UAkAudioEvent* RTSUnitDeathSound = nullptr;
+
     /** 몬스터 상태 변경 시 호출 */
     UFUNCTION(BlueprintCallable, Category = "Monster Audio")
     void SetMonsterAudioState(EMonsterAudioState NewState);
@@ -122,6 +135,19 @@ public:
     // 스윙 사운드 재생
     UFUNCTION(BlueprintCallable, Category = "Monster Audio|Swing")
     void PlaySwingSound();
+
+    // RTS 커맨드 사운드
+    UFUNCTION(BlueprintCallable, Category = "Monster Audio|RTS")
+    void PlaySelectionClickSound();
+
+    UFUNCTION(BlueprintCallable, Category = "Monster Audio|RTS")
+    void PlayRTSMoveCommandSound();
+
+    UFUNCTION(BlueprintCallable, Category = "Monster Audio|RTS")
+    void PlayRTSAttackCommandSound();
+
+    UFUNCTION(BlueprintCallable, Category = "Monster Audio|RTS")
+    void PlayRTSUnitDeathSound();
 
     // Replication 설정
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

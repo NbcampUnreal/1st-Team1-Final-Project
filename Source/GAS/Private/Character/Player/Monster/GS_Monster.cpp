@@ -178,6 +178,7 @@ void AGS_Monster::OnDeath()
 		false
 	);
 }
+ 
 
 void AGS_Monster::HandleDelayedDestroy()
 {
@@ -250,11 +251,10 @@ void AGS_Monster::SetSelected(bool bSelected, bool bPlaySound)
 	bIsSelected = bSelected;
 	UpdateDecal();
 
-	// 선택되었고, 소리 재생이 허용된 경우에만 소리 재생
-	if (bSelected && bPlaySound && ClickSoundEvent)
-	{
-		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
-	}
+    if (bSelected && bPlaySound && MonsterAudioComponent)
+    {
+        MonsterAudioComponent->PlaySelectionClickSound();
+    }
 }
 
 FLinearColor AGS_Monster::GetCurrentDecalColor()
