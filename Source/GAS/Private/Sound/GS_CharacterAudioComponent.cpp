@@ -11,6 +11,8 @@
 #include "Character/Skill/ESkill.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Skill/GS_SkillSet.h"
+#include "Character/GS_Character.h"
+#include "Character/Component/GS_StatComp.h"
 
 UGS_CharacterAudioComponent::UGS_CharacterAudioComponent()
 {
@@ -119,6 +121,55 @@ void UGS_CharacterAudioComponent::PlaySkillSoundFromDataTable(ESkillSlot SkillSl
 		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(GetOwner()))
 		{
 			OwnerSeeker->Multicast_PlaySound(SoundToPlay);
+		}
+	}
+}
+
+void UGS_CharacterAudioComponent::PlaySkillLoopSoundFromDataTable(ESkillSlot SkillSlot)
+{
+	const FSkillInfo* TargetSkillInfo = GetSkillInfoFromDataTable(SkillSlot);
+
+	if (!TargetSkillInfo || !TargetSkillInfo->SkillLoopSound)
+	{
+		return;
+	}
+
+	// 루프 사운드 재생
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(GetOwner()))
+	{
+		OwnerSeeker->Multicast_PlaySound(TargetSkillInfo->SkillLoopSound);
+	}
+}
+
+void UGS_CharacterAudioComponent::StopSkillLoopSoundFromDataTable(ESkillSlot SkillSlot)
+{
+	const FSkillInfo* TargetSkillInfo = GetSkillInfoFromDataTable(SkillSlot);
+
+	if (!TargetSkillInfo)
+	{
+		return;
+	}
+
+	// Wwise Stop 이벤트 사용 (더 정확한 제어)
+	if (TargetSkillInfo->SkillLoopStopSound)
+	{
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(GetOwner()))
+		{
+			OwnerSeeker->Multicast_PlaySound(TargetSkillInfo->SkillLoopStopSound);
+		}
+	}
+	// Stop 이벤트가 없는 경우 폴백: 액터의 모든 사운드 정지
+	else
+	{
+		// 데디케이티드 서버에서는 사운드 재생하지 않음
+		if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+		{
+			return;
+		}
+
+		if (GetOwner())
+		{
+			UAkGameplayStatics::StopActor(GetOwner());
 		}
 	}
 }
@@ -293,6 +344,61 @@ void UGS_CharacterAudioComponent::PlayComboAttackSound(UAkAudioEvent* SwingSound
 	);
 }
 
+void UGS_CharacterAudioComponent::PlayComboAttackSoundByIndex(int32 ComboIndex, const TArray<UAkAudioEvent*>& SwingSounds, const TArray<UAkAudioEvent*>& VoiceSounds, UAkAudioEvent* StopEvent, float ResetTime)
+{
+	// 1. 기존 타이머가 있다면 클리어하고 즉시 Stop 이벤트 호출
+	GetWorld()->GetTimerManager().ClearTimer(AttackSoundResetTimerHandle);
+	
+	if (CurrentStopEvent)
+	{
+		UAkComponent* AkComp = GetOrCreateAkComponent();
+		if (AkComp)
+		{
+			AkComp->PostAkEvent(CurrentStopEvent);
+		}
+	}
+
+	// 2. 새로운 Stop 이벤트를 저장
+	CurrentStopEvent = StopEvent;
+
+	// 3. 콤보 인덱스에 따른 사운드 재생 (1-based index이므로 1을 빼서 0-based로 변환)
+	int32 ArrayIndex = ComboIndex - 1;
+	
+	// 검 휘두르기 사운드 재생
+	if (SwingSounds.IsValidIndex(ArrayIndex) && SwingSounds[ArrayIndex])
+	{
+		PlaySound(SwingSounds[ArrayIndex]);
+	}
+	
+	// 보이스 사운드 재생
+	if (VoiceSounds.IsValidIndex(ArrayIndex) && VoiceSounds[ArrayIndex])
+	{
+		PlaySound(VoiceSounds[ArrayIndex]);
+	}
+
+	// 4. 공격 후 일정 시간 뒤 사운드 시퀀스 리셋을 위한 타이머 설정
+	GetWorld()->GetTimerManager().SetTimer(
+		AttackSoundResetTimerHandle,
+		this,
+		&UGS_CharacterAudioComponent::ResetAttackSoundSequence,
+		ResetTime,
+		false
+	);
+}
+
+void UGS_CharacterAudioComponent::PlayComboAttackSoundByIndexWithExtra(int32 ComboIndex, const TArray<UAkAudioEvent*>& SwingSounds, const TArray<UAkAudioEvent*>& VoiceSounds, const TArray<UAkAudioEvent*>& ExtraSounds, UAkAudioEvent* StopEvent, float ResetTime)
+{
+	// 기본 콤보 사운드 재생
+	PlayComboAttackSoundByIndex(ComboIndex, SwingSounds, VoiceSounds, StopEvent, ResetTime);
+
+	// 추가 특별 사운드 재생
+	int32 ArrayIndex = ComboIndex - 1; // 1-based에서 0-based로 변환
+	if (ExtraSounds.IsValidIndex(ArrayIndex) && ExtraSounds[ArrayIndex])
+	{
+		PlaySound(ExtraSounds[ArrayIndex]);
+	}
+}
+
 void UGS_CharacterAudioComponent::PlayFinalAttackSound(UAkAudioEvent* ExtraSound)
 {
 	if (ExtraSound)
@@ -330,6 +436,7 @@ void UGS_CharacterAudioComponent::PlaySound(UAkAudioEvent* SoundToPlay, bool bPl
 	// 모든 클라이언트 (멀티캐스트)
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("PlaySound: Multicast mode"));
 		if (AGS_Seeker* OwningSeeker = Cast<AGS_Seeker>(Owner))
 		{
 			// 멀티캐스트 RPC 호출 - 서버에서도 호출해야 클라이언트들이 받음
@@ -360,6 +467,37 @@ void UGS_CharacterAudioComponent::ResetAttackSoundSequence()
 			AkComp->PostAkEvent(CurrentStopEvent);
 		}
 		CurrentStopEvent = nullptr; // Stop 이벤트 사용 후 초기화
+	}
+}
+
+void UGS_CharacterAudioComponent::PlayHitSound()
+{
+	// 데디케이티드 서버에서는 사운드 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	// 쿨다운 체크 (인스턴스 변수 사용)
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	if (CurrentTime - LastHitSoundTime < HitSoundCooldownTime)
+	{
+		return;
+	}
+	LastHitSoundTime = CurrentTime;
+
+	if (!HitSoundEvent)
+	{
+		return;
+	}
+
+	// 죽은 상태가 아닐 때만 히트 사운드 재생
+	if (AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner()))
+	{
+		if (OwnerCharacter->GetStatComp() && OwnerCharacter->GetStatComp()->GetCurrentHealth() > KINDA_SMALL_NUMBER)
+		{
+			PlaySound(HitSoundEvent);
+		}
 	}
 }
 
