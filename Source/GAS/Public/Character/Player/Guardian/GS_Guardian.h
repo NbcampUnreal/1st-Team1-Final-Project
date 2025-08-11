@@ -63,7 +63,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (DisplayName = "HitStop Camera Shake Info"))
 	FGS_CameraShakeInfo HitStopShakeInfo;
-	
+
 	virtual void LeftMouse();
 	virtual void Ctrl();
 	virtual void CtrlStop();
