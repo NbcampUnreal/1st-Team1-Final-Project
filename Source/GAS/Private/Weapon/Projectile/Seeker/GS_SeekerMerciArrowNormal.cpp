@@ -135,13 +135,19 @@ bool AGS_SeekerMerciArrowNormal::HandleTargetTypeGeneric(ETargetType TargetType,
 		break;
 
 	case EArrowType::Child:
-		if (TargetType == ETargetType::Guardian)
+		if (HomingTarget && HomingTarget == SweepResult.GetActor())
+		{
+			// 유도화살 상태면서 지정한 타겟이 맞은 것이라면 삭제
+			// 타겟이 아니라면 아래로
+		}
+		else if (TargetType == ETargetType::Guardian)
 		{
 			// 가디언에게는 박힘
 		}
 		else if (TargetType == ETargetType::DungeonMonster)
 		{
 			// 던전 몬스터에게는 관통 - 아무것도 하지 않음 (박히지도 않고 파괴되지도 않음)
+			// 유도 화살 상태이면서 지정한 타겟이 아니라면 아무것도 하지 않음(통과)
 			return true; // 관통: 이동 계속
 		}
 		break;
