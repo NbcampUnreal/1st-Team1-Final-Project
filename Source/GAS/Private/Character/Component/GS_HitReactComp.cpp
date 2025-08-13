@@ -33,12 +33,11 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 
 				OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[static_cast<int>(ReactType)], Section);
 			}
-			OwnerCharacter->AllowHitReact(3.0f);
-			OwnerCharacter->Multicast_SetCanHitReact(false);
+			OwnerCharacter->DisableHitReact(4.0f);
 		}
 		else if (ReactType == EHitReactType::Additive)
 		{
-			OwnerCharacter->Multicast_SetCanHitReact(false);
+			
 		}
 	}
 }

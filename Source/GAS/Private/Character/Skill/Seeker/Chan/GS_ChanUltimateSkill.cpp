@@ -42,7 +42,9 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 		}
 		
 		// 입력 제한 설정
-		OwnerPlayer->SetSkillInputControl(false, false, false);
+		//OwnerPlayer->SetSkillInputControl(false, false, false);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+		OwnerPlayer->SetMoveControlValue(false, false);
 	}
 
 	// 돌진 시작 (약간 딜레이)
@@ -53,7 +55,6 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 void UGS_ChanUltimateSkill::OnSkillCanceledByDebuff()
 {
 	Super::OnSkillCanceledByDebuff();
-
 }
 
 void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
@@ -61,14 +62,10 @@ void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 	Super::OnSkillAnimationEnd();
 
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerPlayer->GetMesh()->GetAnimInstance()))
-	{
-		SeekerAnim->IsPlayingFullBodyMontage = false;
-		SeekerAnim->IsPlayingUpperBodyMontage = false;
-		OwnerPlayer->SetMoveControlValue(true, true);
-		OwnerPlayer->SetSkillInputControl(true, true, true);
-		OwnerPlayer->CanChangeSeekerGait = true;
-	}
+	
+	OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+	OwnerPlayer->SetMoveControlValue(true, true);
+	OwnerPlayer->CanChangeSeekerGait = true;
 
 	// 스킬 상태 업데이트
 	SetIsActive(false);
