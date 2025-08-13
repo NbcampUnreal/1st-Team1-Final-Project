@@ -10,6 +10,7 @@
 #include "UI/RuneSystem/GS_RuneInventoryWidget.h"
 #include "UI/RuneSystem/GS_StatPanelWidget.h"
 #include "UI/RuneSystem/GS_DragVisualWidget.h"
+#include "UI/Common/GS_CommonTwoBtnPopup.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "UI/RuneSystem/GS_RuneTooltipWidget.h"
 #include "Kismet/GameplayStatics.h"
@@ -59,6 +60,9 @@ UGS_ArcaneBoardWidget::UGS_ArcaneBoardWidget(const FObjectInitializer& ObjectIni
 	SelectionVisualWidget = nullptr;
 	RuneTooltipWidget = nullptr;
 	CurrTooltipRuneID = 0;
+
+	PendingPresetIndex = -1;
+	PresetSaveConfirmPopup = nullptr;
 }
 
 void UGS_ArcaneBoardWidget::NativeConstruct()
@@ -73,6 +77,21 @@ void UGS_ArcaneBoardWidget::NativeConstruct()
 	if (ResetButton)
 	{
 		ResetButton->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnResetButtonClicked);
+	}
+
+	if (PresetButton1)
+	{
+		PresetButton1->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnPresetButton1Clicked);
+	}
+
+	if (PresetButton2)
+	{
+		PresetButton2->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnPresetButton2Clicked);
+	}
+
+	if (PresetButton3)
+	{
+		PresetButton3->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnPresetButton3Clicked);
 	}
 
 	BindToLPS();
@@ -92,6 +111,12 @@ void UGS_ArcaneBoardWidget::NativeDestruct()
 	{
 		RuneTooltipWidget->RemoveFromParent();
 		RuneTooltipWidget = nullptr;
+	}
+
+	if (IsValid(PresetSaveConfirmPopup))
+	{
+		PresetSaveConfirmPopup->RemoveFromParent();
+		PresetSaveConfirmPopup = nullptr;
 	}
 
 	if (GetWorld())
@@ -210,6 +235,7 @@ void UGS_ArcaneBoardWidget::RefreshForCurrCharacter()
 		UpdateGridVisuals();
 		InitInventory();
 		InitStatPanel();
+		UpdatePresetButtonVisuals();
 	}
 }
 
@@ -536,10 +562,7 @@ void UGS_ArcaneBoardWidget::OnApplyButtonClicked()
 {
 	if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
 	{
-		if (HasUnsavedChanges())
-		{
-			LPS->ApplyBoardChanges();
-		}
+		LPS->ApplyBoardChanges();
 	}
 }
 
@@ -626,6 +649,73 @@ void UGS_ArcaneBoardWidget::CancelTooltipRequest()
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(TooltipDelayTimer);
+	}
+}
+
+void UGS_ArcaneBoardWidget::OnPresetButton1Clicked()
+{
+	if (HasUnsavedChanges())
+	{
+		ShowPresetSaveConfirmPopup(1);
+	}
+	else
+	{
+		SwitchToPreset(1);
+	}
+}
+
+void UGS_ArcaneBoardWidget::OnPresetButton2Clicked()
+{
+	if (HasUnsavedChanges())
+	{
+		ShowPresetSaveConfirmPopup(2);
+	}
+	else
+	{
+		SwitchToPreset(2);
+	}
+}
+
+void UGS_ArcaneBoardWidget::OnPresetButton3Clicked()
+{
+	if (HasUnsavedChanges())
+	{
+		ShowPresetSaveConfirmPopup(3);
+	}
+	else
+	{
+		SwitchToPreset(3);
+	}
+}
+
+void UGS_ArcaneBoardWidget::UpdatePresetButtonVisuals()
+{
+	if (!IsValid(ArcaneBoardLPS))
+	{
+		return;
+	}
+
+	int32 CurrentPresetIndex = ArcaneBoardLPS->GetCurrentPresetIndex();
+
+	if (IsValid(PresetButton1))
+	{
+		FLinearColor ButtonColor = (CurrentPresetIndex == 1) ?
+			FLinearColor::Green : FLinearColor::Gray;
+		PresetButton1->SetBackgroundColor(ButtonColor);
+	}
+
+	if (IsValid(PresetButton2))
+	{
+		FLinearColor ButtonColor = (CurrentPresetIndex == 2) ?
+			FLinearColor::Green : FLinearColor::Gray;
+		PresetButton2->SetBackgroundColor(ButtonColor);
+	}
+
+	if (IsValid(PresetButton3))
+	{
+		FLinearColor ButtonColor = (CurrentPresetIndex == 3) ?
+			FLinearColor::Green : FLinearColor::Gray;
+		PresetButton3->SetBackgroundColor(ButtonColor);
 	}
 }
 
@@ -751,6 +841,71 @@ bool UGS_ArcaneBoardWidget::IsMouseOverTooltipWidget(const FVector2D& ScreenPos)
 	}
 
 	return false;
+}
+
+void UGS_ArcaneBoardWidget::ShowPresetSaveConfirmPopup(int32 TargetPresetIndex)
+{
+	if (!IsValid(PresetSaveConfirmPopupClass))
+	{
+		return;
+	}
+
+	PendingPresetIndex = TargetPresetIndex;
+
+	if (IsValid(PresetSaveConfirmPopup))
+	{
+		PresetSaveConfirmPopup->RemoveFromParent();
+	}
+
+	PresetSaveConfirmPopup = CreateWidget<UGS_CommonTwoBtnPopup>(this, PresetSaveConfirmPopupClass);
+	if (PresetSaveConfirmPopup)
+	{
+		PresetSaveConfirmPopup->SetDescription(FText::FromString(TEXT("변경사항을\n저장하시겠습니까?")));
+		PresetSaveConfirmPopup->OnYesClicked.BindUObject(this, &UGS_ArcaneBoardWidget::OnPresetSaveYes);
+		PresetSaveConfirmPopup->OnNoClicked.BindUObject(this, &UGS_ArcaneBoardWidget::OnPresetSaveNo);
+
+		PresetSaveConfirmPopup->AddToViewport(10);
+	}
+}
+
+void UGS_ArcaneBoardWidget::SwitchToPreset(int32 PresetIndex)
+{
+	if (!IsValid(ArcaneBoardLPS))
+	{
+		return;
+	}
+	ArcaneBoardLPS->LoadBoardConfig(PresetIndex);
+	RefreshForCurrCharacter();
+	UpdatePresetButtonVisuals();
+}
+
+void UGS_ArcaneBoardWidget::OnPresetSaveYes()
+{
+	if (IsValid(ArcaneBoardLPS))
+	{
+		ArcaneBoardLPS->ApplyBoardChanges();
+	}
+
+	SwitchToPreset(PendingPresetIndex);
+
+	if (IsValid(PresetSaveConfirmPopup))
+	{
+		PresetSaveConfirmPopup->RemoveFromParent();
+		PresetSaveConfirmPopup = nullptr;
+	}
+	PendingPresetIndex = -1;
+}
+
+void UGS_ArcaneBoardWidget::OnPresetSaveNo()
+{
+	SwitchToPreset(PendingPresetIndex);
+
+	if (IsValid(PresetSaveConfirmPopup))
+	{
+		PresetSaveConfirmPopup->RemoveFromParent();
+		PresetSaveConfirmPopup = nullptr;
+	}
+	PendingPresetIndex = -1;
 }
 
 void UGS_ArcaneBoardWidget::UpdateGridVisuals()
