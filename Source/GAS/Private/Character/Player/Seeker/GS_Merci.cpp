@@ -110,6 +110,8 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		return;
 	}
 
+	// DrawBow 가 Client 외에 Server 에서 호출될 일이 있나? Client 에서 해당 함수가 호출되었다면 이미 쥐에서 Return 으로 막히는 거 아닌가?
+
 	// 피격 애니메이션 제한
 	Server_SetCanHitReact(false);
 

@@ -7,6 +7,7 @@
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/GS_TpsController.h"
 #include "Sound/GS_CharacterAudioComponent.h"
+#include "Components/CapsuleComponent.h"
 
 UGS_ChanRollingSkill::UGS_ChanRollingSkill()
 {
@@ -18,37 +19,12 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	StartCoolDown();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-<<<<<<< HEAD
 	{
 		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
 		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-=======
-	{		
-		// 구르기 시작 사운드 재생 // 구르기 사운드를 Server 에서 처리하는게 맞은가..? // SJE
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
->>>>>>> Feature/Charater
 		{
 			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
-<<<<<<< HEAD
-
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			OwnerPlayer->SetSkillInputControl(false, false, false);
-			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->CanChangeSeekerGait = false;
-			FName RollDirection = CalRollDirection();
-			if (RollDirection == FName("00"))
-			{
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
-			}
-			else
-			{
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
-			}
-
-=======
 		
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 	
@@ -62,7 +38,8 @@ void UGS_ChanRollingSkill::ActiveSkill()
 		{
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
 		}
->>>>>>> Feature/Charater
+
+		OwnerPlayer->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	}
 }
 
@@ -82,6 +59,8 @@ void UGS_ChanRollingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->CanChangeSeekerGait = true;
 
 		SetIsActive(false);
+
+		OwnerPlayer->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	}
 }
 

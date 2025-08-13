@@ -33,6 +33,7 @@ void UGS_ChanMovingSkill::ActiveSkill()
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 
 		// 입력 제한 설정
+		OwnerPlayer->SetMoveControlValue(false, false);
 
 		// 스킬 애니메이션 재생
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
