@@ -23,8 +23,8 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 
 	if(OwnerCharacter)
 	{
-		OwnerCharacter->Server_SetCanHitReact(false); // 서버에 전달
-		
+		//OwnerCharacter->Server_SetCanHitReact(false); // 서버에 전달
+		// 스킬 시작 사운드 재생
 		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 		if (AGS_Merci* OwnerPlayer = Cast<AGS_Merci>(OwnerCharacter))
 		{
@@ -237,7 +237,7 @@ void UGS_MerciUltimateSkill::DeactiveSkill()
 
 		// 스킬 Input 수정
 		OwnerCharacter->SetSkillInputControl(true, true, true);
-		OwnerCharacter->Server_SetCanHitReact(true); // 서버에 전달
+		//OwnerCharacter->Server_SetCanHitReact(true); // 서버에 전달
 	}
 
 	Super::DeactiveSkill();
