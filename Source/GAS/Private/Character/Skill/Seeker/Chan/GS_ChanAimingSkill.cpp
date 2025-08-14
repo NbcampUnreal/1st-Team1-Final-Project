@@ -79,8 +79,6 @@ void UGS_ChanAimingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 		OwnerPlayer->SetSeekerGait(OwnerPlayer->GetLastSeekerGait());
 		// Change Slot
-		/*OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);*/
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 
 		OwnerPlayer->CanChangeSeekerGait = true;
@@ -108,8 +106,15 @@ void UGS_ChanAimingSkill::OnSkillAnimationEnd()
 void UGS_ChanAimingSkill::OnSkillCommand()
 {
 	Super::OnSkillCommand();
+	UE_LOG(LogTemp, Warning, TEXT("Aiming Skill, OnSkillCommand"));
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{		
+	{
+		if (!OwnerPlayer->GetSkillComp()->IsSkillAllowed(ESkillSlot::Aiming))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Aiming Skill, OnSkillCommand, IsSkillAllowd is false"));
+			return;
+		}
+		
 		// 애니메이션 설정
 		OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
@@ -117,6 +122,9 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		// 입력 제한 설정
 		OwnerPlayer->SetLookControlValue(false, false);
 		OwnerPlayer->SetMoveControlValue(false, false);
+
+		// bitmask flag
+		OwnerPlayer->GetSkillComp()->SetCurAllowedSkillsMask(0);
 		
 		// Play Montage
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);

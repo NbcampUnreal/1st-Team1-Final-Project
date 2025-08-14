@@ -77,10 +77,10 @@ void AGS_Chan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AGS_Chan::OnComboAttack()
+/*void AGS_Chan::OnComboAttack()
 {
 	Super::OnComboAttack();	
-}
+}*/
 
 void AGS_Chan::MulticastPlayComboSection()
 {

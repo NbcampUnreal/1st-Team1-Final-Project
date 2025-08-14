@@ -62,7 +62,7 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 			{				
 				if (Ares->CanAcceptComboInput)
 				{
-					Ares->OnComboAttack();
+					Ares->Server_OnComboAttack();
 				}
 				else
 				{

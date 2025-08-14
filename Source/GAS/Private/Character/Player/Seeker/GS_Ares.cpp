@@ -40,10 +40,10 @@ void AGS_Ares::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AGS_Ares::OnComboAttack()
+/*void AGS_Ares::OnComboAttack()
 {
 	Super::OnComboAttack();
-}
+}*/
 
 void AGS_Ares::ServerAttackMontage()
 {
