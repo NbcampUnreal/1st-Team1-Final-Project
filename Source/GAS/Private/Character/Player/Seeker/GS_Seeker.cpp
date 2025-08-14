@@ -181,7 +181,9 @@ void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AGS_Seeker::SetAimState(bool IsAim)
 {
-	SeekerState.IsAim = IsAim;
+	FSeekerState NewState = SeekerState;
+	NewState.IsAim = IsAim;
+	SeekerState = NewState;
 }
 
 bool AGS_Seeker::GetAimState()
@@ -191,7 +193,9 @@ bool AGS_Seeker::GetAimState()
 
 void AGS_Seeker::SetDrawState(bool IsDraw)
 {
-	SeekerState.IsDraw = IsDraw;
+	FSeekerState NewState = SeekerState;
+	NewState.IsDraw = IsDraw;
+	SeekerState = NewState;
 }
 
 bool AGS_Seeker::GetDrawState()
