@@ -6,6 +6,8 @@
 #include "Components/PanelWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 
 UGS_SkillWidget::UGS_SkillWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -35,6 +37,16 @@ void UGS_SkillWidget::Initialize(UGS_SkillBase* Skill)
 	}
 }
 
+void UGS_SkillWidget::OnSkillActivated(ESkillSlot InSkillSlot)
+{
+	if (InSkillSlot == SkillSlot)
+	{
+		PlayHeartbeatAnimation();
+		PlayGlowEffect();
+		PlaySkillActivationSound();
+	}
+}
+
 void UGS_SkillWidget::OnSkillCoolTimeChanged(ESkillSlot InSkillSlot, float InCurrentCoolTime) const
 {
 	if (InSkillSlot != SkillSlot)
@@ -57,5 +69,31 @@ void UGS_SkillWidget::OnSkillCoolTimeChanged(ESkillSlot InSkillSlot, float InCur
 		CoolTimeBar->SetVisibility(ESlateVisibility::Visible);
 		CurrentCoolTimeText->SetText(FText::FromString(FString::Printf(TEXT("%d"),FMath::RoundToInt(InCurrentCoolTime))));
 		CoolTimeBar->SetPercent(InCurrentCoolTime/CoolTime);
+	}
+}
+
+void UGS_SkillWidget::PlaySkillActivationSound()
+{
+	if (bEnableAudio && SkillActivationSound)
+	{
+		UGameplayStatics::PlaySound2D(this, SkillActivationSound, AudioVolume);
+	}
+}
+
+void UGS_SkillWidget::OnSkillCooldownBlocked(ESkillSlot InSkillSlot)
+{
+	if (InSkillSlot == SkillSlot)
+	{
+		PlayCooldownBlockedAnimation();
+		PlayRedFlashEffect();
+		PlaySkillCooldownSound();
+	}
+}
+
+void UGS_SkillWidget::PlaySkillCooldownSound()
+{
+	if (bEnableAudio && SkillCooldownSound)
+	{
+		UGameplayStatics::PlaySound2D(this, SkillCooldownSound, AudioVolume);
 	}
 }

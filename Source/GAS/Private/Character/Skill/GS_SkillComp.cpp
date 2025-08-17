@@ -278,6 +278,12 @@ void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
 					SkillsInterrupt();
 					SkillMap[Slot]->ActiveSkill();
 					SetCurAllowedSkillsMask(SkillMap[Slot]->AllowSkillsMask);
+
+					// 스킬 활성화 알림
+					if (GetOwner()->GetLocalRole() == ROLE_Authority)
+					{
+						Client_BroadcastSkillActivation(Slot);
+					}
 				}
 				else
 				{
@@ -288,12 +294,27 @@ void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("CanActive() = false"));
+			// 쿨타임 중이거나 사용할 수 없는 상태일 때 알림
+			if (GetOwner()->GetLocalRole() == ROLE_Authority)
+			{
+				Client_BroadcastSkillCooldownBlocked(Slot);
+			}
 		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SkillMap does not contain slot"));
 	}
+}
+
+void UGS_SkillComp::Client_BroadcastSkillActivation_Implementation(ESkillSlot Slot)
+{
+	OnSkillActivated.Broadcast(Slot);
+}
+
+void UGS_SkillComp::Client_BroadcastSkillCooldownBlocked_Implementation(ESkillSlot Slot)
+{
+	OnSkillCooldownBlocked.Broadcast(Slot);
 }
 
 void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
@@ -526,6 +547,8 @@ void UGS_SkillComp::InitializeSkillWidget(UGS_SkillWidget* InSkillWidget)
 			InSkillWidget->Initialize(SkillMap[Slot]);
 			
 			OnSkillCooldownChanged.AddUObject(InSkillWidget, &UGS_SkillWidget::OnSkillCoolTimeChanged);
+			OnSkillActivated.AddDynamic(InSkillWidget, &UGS_SkillWidget::OnSkillActivated);
+			OnSkillCooldownBlocked.AddDynamic(InSkillWidget, &UGS_SkillWidget::OnSkillCooldownBlocked);
 		}
 	}
 }

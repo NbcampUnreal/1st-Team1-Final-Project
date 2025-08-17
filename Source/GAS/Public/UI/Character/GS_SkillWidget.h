@@ -25,6 +25,30 @@ public:
 
 	UFUNCTION()
 	void OnSkillCoolTimeChanged(ESkillSlot InSkillSlot, float InCurrentCoolTime) const;
+
+	UFUNCTION()
+	void OnSkillActivated(ESkillSlot InSkillSlot);
+
+	UFUNCTION()
+	void OnSkillCooldownBlocked(ESkillSlot InSkillSlot);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayHeartbeatAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayGlowEffect();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayCooldownBlockedAnimation();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayRedFlashEffect();
+
+	UFUNCTION(BlueprintCallable)
+	void PlaySkillActivationSound();
+
+	UFUNCTION(BlueprintCallable)
+	void PlaySkillCooldownSound();
 	
 	FORCEINLINE AGS_Player* GetOwningActor()const { return OwningCharacter; }
 	FORCEINLINE ESkillSlot GetSkillSlot() const {return SkillSlot;}
@@ -43,6 +67,19 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UImage> SkillImage;
+
+	// 오디오 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	TObjectPtr<USoundBase> SkillActivationSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	TObjectPtr<USoundBase> SkillCooldownSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	bool bEnableAudio = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float AudioVolume = 0.5f;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget,AllowPrivateAccess))
