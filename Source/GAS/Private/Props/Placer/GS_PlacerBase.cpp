@@ -7,6 +7,7 @@
 #include "DungeonEditor/Component/PlaceInfoComponent.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
 #include "Props/GS_RoomBase.h"
+#include "UI/DungeonEditor/GS_NectarWidget.h"
 #include "RuneSystem/GS_EnumUtils.h"
 
 
@@ -139,8 +140,13 @@ void AGS_PlacerBase::BuildObject()
 	bUpdatePlaceIndicators = true;
 
 	DrawPlacementIndicators();
-	if (bCanBuild)
+	UGS_NectarComp* NectarComp = BuildManagerRef->FindComponentByClass<UGS_NectarComp>();
+
+	if (bCanBuild && NectarComp->CanSpendResource(ObjectData.ConstructionCost))
 	{
+		//Nectar 차감
+		NectarComp->SpendResource(ObjectData.ConstructionCost);
+
 		// 성공 사운드 재생
 		if (PlaceSuccessSound)
 		{
@@ -156,7 +162,9 @@ void AGS_PlacerBase::BuildObject()
 		//FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
 		FRotator SpawnRotator = GetActorRotation();
 		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator);
-		
+
+
+
 		NewActor->SetActorRotation(NewActor->GetActorRotation() + FRotator(0.0f, RotateYaw, 0.0f));
 		SpawnOffset = SpawnOffset.GetRotated(RotateYaw);
 		SpawnLocation = NewActor->GetActorLocation();
@@ -201,7 +209,7 @@ void AGS_PlacerBase::BuildObject()
 		// Cell Info를 Component에 전달 및 저장
 		if (UPlaceInfoComponent* PlaceInfoCompo = NewActor->GetComponentByClass<UPlaceInfoComponent>())
 		{
-			PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapType, IntPointArray);
+			PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapType, IntPointArray, ObjectData.ConstructionCost);
 		}
 
 		// 먼지 이펙트 생성 DustEffectTemplate

@@ -62,6 +62,9 @@ struct GAS_API FSkillInfo
 	FControlValue AllowControlValue; // SJE
 	// 움직임이나 시선에 관한 flag 도 여기에서 관리해야하는거 아닌가 결국?
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bAllowHitReacct; // SJE
+
 	
 	// 스킬 사운드 이벤트들
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")

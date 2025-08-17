@@ -7,6 +7,7 @@
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/GS_TpsController.h"
 #include "Sound/GS_CharacterAudioComponent.h"
+#include "Components/CapsuleComponent.h"
 
 UGS_ChanRollingSkill::UGS_ChanRollingSkill()
 {
@@ -29,11 +30,7 @@ void UGS_ChanRollingSkill::ActiveSkill()
 				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 			}
 		}
-
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		OwnerPlayer->SetSkillInputControl(false, false, false);
-		OwnerPlayer->SetMoveControlValue(false, false);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 		OwnerPlayer->CanChangeSeekerGait = false;
 		
 		const FName RollDirection = CalRollDirection();
@@ -45,7 +42,8 @@ void UGS_ChanRollingSkill::ActiveSkill()
 		{
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
 		}
-		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+
+		OwnerPlayer->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	}
 }
 
@@ -65,6 +63,8 @@ void UGS_ChanRollingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->CanChangeSeekerGait = true;
 
 		SetIsActive(false);
+
+		OwnerPlayer->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	}
 }
 

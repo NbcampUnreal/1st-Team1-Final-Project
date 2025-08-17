@@ -117,10 +117,12 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		// 입력 제한 설정
 		OwnerPlayer->SetLookControlValue(false, false);
 		OwnerPlayer->SetMoveControlValue(false, false);
-		//OwnerPlayer->SetSkillInputControl(false, false, false);
 		
 		// Play Montage
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+
+		// Set HitReact
+		OwnerPlayer->SetCanHitReact(false);
 		
 		// Forward Jump
 		const FVector Forward = OwnerPlayer->GetActorForwardVector();
@@ -240,6 +242,9 @@ void UGS_ChanAimingSkill::OnShieldSlam()
 			}
 		}
 	}
+
+	// Set HitReact
+	OwnerPlayer->SetCanHitReact(true);
 
 	// 스킬 종료
 	DeactiveSkill();
