@@ -165,11 +165,19 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 		}
 	}
 	//damaged
-	else
-	{
-		// 피격 사운드는 항상 재생
-		UE_LOG(LogTemp, Warning, TEXT("SetCurrentHealth: Character took damage, calling MulticastRPCPlayTakeDamageMontage"));
-		MulticastRPCPlayTakeDamageMontage();
+    else
+    {
+        // 피격 사운드는 항상 재생
+        MulticastRPCPlayTakeDamageMontage();
+
+        // 몬스터인 경우 Hurt 사운드 즉시 재생(서버 권한에서만 멀티캐스트 트리거)
+        if (AGS_Monster* DamagedMonster = Cast<AGS_Monster>(GetOwner()))
+        {
+            if (IsValid(DamagedMonster) && IsValid(DamagedMonster->MonsterAudioComponent))
+            {
+                DamagedMonster->MonsterAudioComponent->PlayHurtSound();
+            }
+        }
 
 		//dead
 		if (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER)
