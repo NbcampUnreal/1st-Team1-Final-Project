@@ -346,6 +346,7 @@ void AGS_Seeker::SetMoveControlValue(bool bMoveForward, bool bMoveRight)
 {
 	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("SetMoveControlValue"));
 		TPSController->SetMoveControlValue(bMoveRight, bMoveForward);
 	}
 }

@@ -161,7 +161,6 @@ void UGS_SkillComp::InitSkills()
 
 void UGS_SkillComp::ResetAllowedSkillsMask()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ResetAllowedSkillsMask"));
 	CurAllowedSkillsMask = DefaultAllowedSkillsMask;
 }  // SJE
 
@@ -218,9 +217,8 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 			}
 		}
 	} // SJE
-
 	
-	UE_LOG(LogTemp, Log, TEXT("Skill Name : %s / Flag (Binary): %s"), *UEnum::GetValueAsString(Slot), 
+	/*UE_LOG(LogTemp, Log, TEXT("Skill Name : %s / Flag (Binary): %s"), *UEnum::GetValueAsString(Slot), 
 		*([](uint8 Value)
 		{
 			FString Result;
@@ -230,7 +228,7 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 			}
 			return Result;
 		})(Skill->AllowSkillsMask)
-	); // SJE
+	); // SJE*/
 	
 	Skill-> AllowControlValue = Info.AllowControlValue; // SJE
 	

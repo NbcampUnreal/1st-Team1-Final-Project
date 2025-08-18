@@ -35,12 +35,9 @@ void UGS_AresMovingSkill::ActiveSkill()
 		{
 			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
-	}
 
-	// 입력 제한
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->SetMoveControlValue(false, false);
-	OwnerCharacter->SetSkillInputControl(false, false, false);
+		OwnerPlayer->SetMoveControlValue(false, false);
+	}
 
 	// 차징 시작
 	ChargingStartTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
@@ -104,7 +101,7 @@ void UGS_AresMovingSkill::OnSkillCommand()
 void UGS_AresMovingSkill::InterruptSkill()
 {
 	Super::InterruptSkill();
-	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	//AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
 	SetIsActive(false);
 }
 
@@ -215,9 +212,11 @@ void UGS_AresMovingSkill::DeactiveSkill()
 	GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
 
 	// 입력 제한 설정
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->SetMoveControlValue(true, true);
-	OwnerCharacter->SetSkillInputControl(true, true, true);
+	/*AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
+	Controller->SetMoveControlValue(true, true);*/
+	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	AresCharacter->SetMoveControlValue(true, true);
+	//OwnerCharacter->SetSkillInputControl(true, true, true);
 
 	// 원래대로 Block으로 되돌리기
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);

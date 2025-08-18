@@ -2,6 +2,8 @@
 
 
 #include "Character/Skill/Seeker/Ares/GS_AresRollingSkill.h"
+
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Sound/GS_CharacterAudioComponent.h"
 
@@ -18,10 +20,10 @@ void UGS_AresRollingSkill::ActiveSkill()
 
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		if (!OwnerPlayer->GetSkillInputControl().CanInputRoll)
+		/*if (!OwnerPlayer->GetSkillInputControl().CanInputRoll)
 		{
 			return;
-		}
+		}*/
 		
 		if (OwnerPlayer->HasAuthority())
 		{
@@ -31,9 +33,10 @@ void UGS_AresRollingSkill::ActiveSkill()
 				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 			}
 
-			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			OwnerPlayer->SetSkillInputControl(false, false, false, false);
+			//OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+			//OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+			OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+			//OwnerPlayer->SetSkillInputControl(false, false, false, false);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->CanChangeSeekerGait = false;
 			FName RollDirection = CalRollDirection();
@@ -60,8 +63,8 @@ void UGS_AresRollingSkill::OnSkillAnimationEnd()
 
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->SetSkillInputControl(true, true, true);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+		//OwnerPlayer->SetSkillInputControl(true, true, true);
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->CanChangeSeekerGait = true;
 
