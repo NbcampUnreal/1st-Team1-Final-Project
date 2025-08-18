@@ -122,8 +122,8 @@ public:
 	UFUNCTION()
 	void ComboInputClose();
 
-	UFUNCTION()
-	virtual void OnComboAttack();
+	UFUNCTION(Server, Reliable)
+	virtual void Server_OnComboAttack();
 
 	// Control
 	UFUNCTION()

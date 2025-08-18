@@ -28,7 +28,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Projectile")
 	TSubclassOf<AGS_SwordAuraProjectile> AresProjectileClass;
 
-	virtual void OnComboAttack() override;
+	/*virtual void OnComboAttack() override;*/
 
 	virtual void ServerAttackMontage() override;
 

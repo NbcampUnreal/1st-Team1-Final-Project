@@ -7,19 +7,15 @@
 void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
 	Super::OnRightClick(Instance);
-	UE_LOG(LogTemp, Warning, TEXT("Right Click Ares"));
+
+	// UE_LOG(LogTemp, Warning, TEXT("Right Click Ares"));
+	
 	if (OwnerCharacter->IsDead())
 	{
 		return;
 	}
 
 	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
-
-	if (!(Ares->GetSkillInputControl().CanInputRC))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Right Click Lock"));
-		return;
-	}
 
 	if (!bCtrlHeld)
 	{
@@ -37,6 +33,7 @@ void UGS_AresSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	Super::OnLeftClick(Instance);
+	
 	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
 	
 	if (!(Ares->GetSkillInputControl().CanInputLC))
@@ -62,7 +59,7 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 			{				
 				if (Ares->CanAcceptComboInput)
 				{
-					Ares->OnComboAttack();
+					Ares->Server_OnComboAttack();
 				}
 				else
 				{

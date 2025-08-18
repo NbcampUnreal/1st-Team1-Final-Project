@@ -11,6 +11,8 @@ void UGS_AN_CheckAimSkillReady::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 
 	if (AGS_Chan* Character = Cast<AGS_Chan>(MeshComp->GetOwner()))
 	{
-		Character->SetSkillInputControl(true, false, true);
+		uint8 BitFlag = 0;
+		BitFlag |= (1 << static_cast<int32>(ESkillSlot::Aiming));
+		Character->GetSkillComp()->SetCurAllowedSkillsMask(BitFlag);
 	}
 }

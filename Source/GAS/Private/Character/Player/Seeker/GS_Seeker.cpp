@@ -320,20 +320,29 @@ void AGS_Seeker::ComboInputClose()
 	}
 }
 
-void AGS_Seeker::OnComboAttack()
-{	
-	if (CanAcceptComboInput)
+void AGS_Seeker::Server_OnComboAttack_Implementation()
+{
+	if (!CanAcceptComboInput) // Handler 에서도 검사하고 있었는데 서버에서도 검사한다. 이중검사가 필요한가?
 	{
-		if (CurrentComboIndex == 0)
-		{
-			GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
-			ServerAttackMontage();
-		}
-		else
-		{
-			Server_SetNextComboFlag(true);
-			Server_SetComboInputFlag(false);
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, CanAcceptComboInput == false"));
+		return;
+	}
+
+	if (!GetSkillComp()->IsSkillAllowed(ESkillSlot::Combo))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, IsSkillAllowed == false"));
+		return;
+	}
+		
+	if (CurrentComboIndex == 0)
+	{
+		GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
+		ServerAttackMontage();
+	}
+	else
+	{
+		Server_SetNextComboFlag(true);
+		Server_SetComboInputFlag(false); // server 함수의 호출을 막기 위해서 합친 함수를 만들어야 하나?
 	}
 }
 
@@ -341,6 +350,7 @@ void AGS_Seeker::SetMoveControlValue(bool bMoveForward, bool bMoveRight)
 {
 	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("SetMoveControlValue"));
 		TPSController->SetMoveControlValue(bMoveRight, bMoveForward);
 	}
 }
@@ -363,6 +373,7 @@ void AGS_Seeker::UpdatePostProcessEffect(float EffectStrength)
 
 void AGS_Seeker::ServerAttackMontage_Implementation()
 {
+	Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 	MulticastPlayComboSection();
 }
 
@@ -374,7 +385,6 @@ void AGS_Seeker::MulticastPlayComboSection_Implementation()
 	{
 		if (HasAuthority())
 		{
-			Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 			CurrentComboIndex++;
 			CanAcceptComboInput = false;
 			bNextCombo = false;
