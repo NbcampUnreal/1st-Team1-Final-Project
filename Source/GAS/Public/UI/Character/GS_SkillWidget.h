@@ -49,6 +49,17 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void PlaySkillCooldownSound();
+
+	// 궁극기 전용 사운드 재생 함수들 추가
+	UFUNCTION(BlueprintCallable)
+	void PlayUltimateSkillActivationSound();
+
+	UFUNCTION(BlueprintCallable)
+	void PlayUltimateSkillCooldownSound();
+
+	// 궁극기 슬롯 확인 헬퍼 함수
+	UFUNCTION(BlueprintCallable)
+	bool IsUltimateSkillSlot() const;
 	
 	FORCEINLINE AGS_Player* GetOwningActor()const { return OwningCharacter; }
 	FORCEINLINE ESkillSlot GetSkillSlot() const {return SkillSlot;}
@@ -74,6 +85,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
 	TObjectPtr<USoundBase> SkillCooldownSound;
+
+	// 궁극기 전용 오디오 설정 추가
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	TObjectPtr<USoundBase> UltimateSkillActivationSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	TObjectPtr<USoundBase> UltimateSkillCooldownSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
 	bool bEnableAudio = true;

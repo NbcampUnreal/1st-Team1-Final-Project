@@ -43,7 +43,15 @@ void UGS_SkillWidget::OnSkillActivated(ESkillSlot InSkillSlot)
 	{
 		PlayHeartbeatAnimation();
 		PlayGlowEffect();
-		PlaySkillActivationSound();
+		
+		if (IsUltimateSkillSlot())
+		{
+			PlayUltimateSkillActivationSound();
+		}
+		else
+		{
+			PlaySkillActivationSound();
+		}
 	}
 }
 
@@ -86,7 +94,15 @@ void UGS_SkillWidget::OnSkillCooldownBlocked(ESkillSlot InSkillSlot)
 	{
 		PlayCooldownBlockedAnimation();
 		PlayRedFlashEffect();
-		PlaySkillCooldownSound();
+		
+		if (IsUltimateSkillSlot())
+		{
+			PlayUltimateSkillCooldownSound();
+		}
+		else
+		{
+			PlaySkillCooldownSound();
+		}
 	}
 }
 
@@ -95,5 +111,26 @@ void UGS_SkillWidget::PlaySkillCooldownSound()
 	if (bEnableAudio && SkillCooldownSound)
 	{
 		UGameplayStatics::PlaySound2D(this, SkillCooldownSound, AudioVolume);
+	}
+}
+
+bool UGS_SkillWidget::IsUltimateSkillSlot() const
+{
+	return SkillSlot == ESkillSlot::Ultimate;
+}
+
+void UGS_SkillWidget::PlayUltimateSkillActivationSound()
+{
+	if (bEnableAudio && UltimateSkillActivationSound)
+	{
+		UGameplayStatics::PlaySound2D(this, UltimateSkillActivationSound, AudioVolume);
+	}
+}
+
+void UGS_SkillWidget::PlayUltimateSkillCooldownSound()
+{
+	if (bEnableAudio && UltimateSkillCooldownSound)
+	{
+		UGameplayStatics::PlaySound2D(this, UltimateSkillCooldownSound, AudioVolume);
 	}
 }
