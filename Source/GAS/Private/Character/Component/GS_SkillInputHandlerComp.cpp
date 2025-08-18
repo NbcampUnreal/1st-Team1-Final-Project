@@ -86,6 +86,7 @@ void UGS_SkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instanc
 	{
 		return;
 	}
+	
 	if (!OwnerCharacter || !OwnerCharacter->GetSkillComp())
 	{
 		return;

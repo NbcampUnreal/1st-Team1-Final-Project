@@ -27,6 +27,6 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 			
 			Character->SetAimState(false);
 			Character->SetDrawState(false);
-			}
+		}
 	}
 }
