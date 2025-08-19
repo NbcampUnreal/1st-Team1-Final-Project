@@ -253,7 +253,7 @@ void AGS_Monster::SetSelected(bool bSelected, bool bPlaySound)
 
     if (bSelected && bPlaySound && MonsterAudioComponent)
     {
-        MonsterAudioComponent->PlaySelectionClickSound();
+        MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Selection);
     }
 }
 

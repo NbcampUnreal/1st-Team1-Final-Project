@@ -90,13 +90,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Selection")
 	FOnSelectedUnitsSkillChanged OnSelectedUnitsSkillChanged;
 
-	// UI 반응 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandButtonSound; 
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandCancelSound;
-
+	virtual AActor* GetViewTarget() const override;
+	
 	// 현재 선택된 유닛들
 	UFUNCTION(BlueprintCallable)
 	const TArray<AGS_Monster*>& GetUnitSelection() const { return UnitSelection; }
