@@ -56,14 +56,13 @@ struct GAS_API FSkillInfo
 	UTexture2D* Image;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FSkillAllow> AllowSkillList; // SJE
+	TArray<FSkillAllow> AllowSkillList;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FControlValue AllowControlValue; // SJE
-	// 움직임이나 시선에 관한 flag 도 여기에서 관리해야하는거 아닌가 결국?
+	FControlValue AllowControlValue;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bAllowHitReacct; // SJE
+	bool bAllowHitReacct;
 
 	
 	// 스킬 사운드 이벤트들
@@ -147,15 +146,9 @@ struct GAS_API FGS_SkillSet : public FTableRowBase
 	FSkillInfo RollingSkill;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FSkillInfo ComboSkill; // SJE
+	FSkillInfo ComboSkill;
 
 	FGS_SkillSet()
-		/*: CharacterType(ECharacterType::Chan)
-		, ReadySkill(nullptr)
-		, AimingSkill(nullptr)
-		, MovingSkill(nullptr)
-		, UltimateSkill(nullptr)
-		, RollingSkill(nullptr)*/
 	{
 	}
 };

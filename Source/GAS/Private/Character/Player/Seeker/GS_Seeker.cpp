@@ -499,7 +499,7 @@ void AGS_Seeker::Multicast_SetMontageSlot_Implementation(ESeekerMontageSlot Inpu
 	{
 		AnimInstance->SetCurMontageSlot(InputMontageSlot);
 	}
-} // SJE
+}
 
 void AGS_Seeker::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 {
@@ -740,7 +740,6 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 
 void AGS_Seeker::Server_RestKey_Implementation()
 {
-	// SJE
 	SetSkillInputControl(true, true, true, true);
 	SetAimState(false);
 	SetDrawState(false);

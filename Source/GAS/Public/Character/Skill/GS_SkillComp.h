@@ -164,20 +164,20 @@ protected:
 	
 	//Skill Flag
 	UPROPERTY() // 오직 서버에서 판단.
-	int8 CurAllowedSkillsMask = 0; // SJE
+	int8 CurAllowedSkillsMask = 0;
 
 	UPROPERTY()
-	int8 DefaultAllowedSkillsMask = -1; // SJE
+	int8 DefaultAllowedSkillsMask = -1;
 	
 	UFUNCTION()
 	void InitSkills();
 	
 public:
 	UFUNCTION()
-	void ResetAllowedSkillsMask(); // SJE
+	void ResetAllowedSkillsMask();
 
 	UFUNCTION()
-	bool IsSkillAllowed(ESkillSlot CompareSkillsMask); // SJE
+	bool IsSkillAllowed(ESkillSlot CompareSkillsMask);
 
 	UFUNCTION()
 	void SetCurAllowedSkillsMask(int8 BitMask);
