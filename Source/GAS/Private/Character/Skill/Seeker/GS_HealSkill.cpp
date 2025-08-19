@@ -57,6 +57,12 @@ void UGS_HealSkill::ActiveSkill()
 	int32 OldPotionCount = CurrentHealCount;
 	CurrentHealCount = FMath::Max(0, CurrentHealCount - 1);
 	
+	// UI 업데이트를 위해 즉시 클라이언트에 알림 (서버에서만 실행)
+	if (OwningComp && OwnerCharacter->HasAuthority())
+	{
+		OwningComp->Client_BroadcastHealCountChanged(CurrentSkillType, CurrentHealCount, MaxHealCount);
+	}
+	
 	// 스킬 사용 후 비활성화
 	DeactiveSkill();
 }
@@ -84,6 +90,12 @@ void UGS_HealSkill::SetCurrentHealCount(int32 NewCount)
 	{
 		bIsPotionDepletedOrHealthFull = false;
 		SetCoolingDown(false);
+	}
+	
+	// UI 업데이트를 위해 클라이언트에 알림 (서버에서만 실행)
+	if (OwningComp && OwnerCharacter && OwnerCharacter->HasAuthority())
+	{
+		OwningComp->Client_BroadcastHealCountChanged(CurrentSkillType, CurrentHealCount, MaxHealCount);
 	}
 }
 
@@ -174,6 +186,11 @@ void UGS_HealSkill::OnRep_CurrentHealCount()
 	{
 		bIsPotionDepletedOrHealthFull = false;
 		SetCoolingDown(false);
+	}
+
+	if (OwningComp)
+	{
+		OwningComp->Client_BroadcastHealCountChanged(CurrentSkillType, CurrentHealCount, MaxHealCount);
 	}
 }
 

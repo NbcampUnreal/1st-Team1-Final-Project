@@ -2,6 +2,7 @@
 #include "Character/Player/GS_Player.h"
 #include "Character/Skill/GS_SkillBase.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Character/Skill/Seeker/GS_HealSkill.h"
 #include "Components/Image.h"
 #include "Components/PanelWidget.h"
 #include "Components/ProgressBar.h"
@@ -34,6 +35,24 @@ void UGS_SkillWidget::Initialize(UGS_SkillBase* Skill)
 		OnSkillCoolTimeChanged(SkillSlot, 0.f);
 		CurrentCoolTimeText->SetVisibility(ESlateVisibility::Hidden);
 		SkillImage->SetBrushFromTexture(Skill->GetSkillImage());
+
+		if (SkillSlot == ESkillSlot::Ready)
+		{
+			HealCountText->SetVisibility(ESlateVisibility::Visible);
+			CoolTimeBar->SetVisibility(ESlateVisibility::Hidden);
+			
+			// 힐 스킬의 초기 횟수 표시
+			if (UGS_HealSkill* HealSkill = Cast<UGS_HealSkill>(Skill))
+			{
+				int32 CurrentCount = HealSkill->GetCurrentHealCount();
+				int32 MaxCount = HealSkill->GetMaxHealCount();
+				HealCountText->SetText(FText::FromString(FString::Printf(TEXT("%d"), CurrentCount)));
+			}
+		}
+		else
+		{
+			HealCountText->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 }
 
@@ -77,6 +96,20 @@ void UGS_SkillWidget::OnSkillCoolTimeChanged(ESkillSlot InSkillSlot, float InCur
 		CoolTimeBar->SetVisibility(ESlateVisibility::Visible);
 		CurrentCoolTimeText->SetText(FText::FromString(FString::Printf(TEXT("%d"),FMath::RoundToInt(InCurrentCoolTime))));
 		CoolTimeBar->SetPercent(InCurrentCoolTime/CoolTime);
+	}
+}
+
+void UGS_SkillWidget::OnHealCountChanged(ESkillSlot InSkillSlot, int32 CurrentCount, int32 MaxCount)
+{
+	if (SkillSlot != InSkillSlot) return;
+
+	HealCountText->SetText(FText::FromString(FString::Printf(TEXT("%d"), CurrentCount)));
+
+	if (CurrentCount <= 0)
+	{
+		PlayCooldownBlockedAnimation();
+		PlayRedFlashEffect();
+		PlaySkillCooldownSound();
 	}
 }
 

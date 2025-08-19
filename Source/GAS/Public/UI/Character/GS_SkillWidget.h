@@ -27,6 +27,9 @@ public:
 	void OnSkillCoolTimeChanged(ESkillSlot InSkillSlot, float InCurrentCoolTime) const;
 
 	UFUNCTION()
+	void OnHealCountChanged(ESkillSlot InSkillSlot, int32 CurrentCount, int32 MaxCount);
+
+	UFUNCTION()
 	void OnSkillActivated(ESkillSlot InSkillSlot);
 
 	UFUNCTION()
@@ -77,6 +80,9 @@ protected:
 	TObjectPtr<UProgressBar> CoolTimeBar;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr<UTextBlock> HealCountText;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UImage> SkillImage;
 
 	// 오디오 설정

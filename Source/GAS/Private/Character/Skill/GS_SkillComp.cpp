@@ -310,6 +310,11 @@ void UGS_SkillComp::Client_BroadcastSkillActivation_Implementation(ESkillSlot Sl
 	OnSkillActivated.Broadcast(Slot);
 }
 
+void UGS_SkillComp::Client_BroadcastHealCountChanged_Implementation(ESkillSlot Slot, int32 CurrentCount, int32 MaxCount)
+{
+	OnHealCountChanged.Broadcast(Slot, CurrentCount, MaxCount);
+}
+
 void UGS_SkillComp::Client_BroadcastSkillCooldownBlocked_Implementation(ESkillSlot Slot)
 {
 	OnSkillCooldownBlocked.Broadcast(Slot);
@@ -545,6 +550,7 @@ void UGS_SkillComp::InitializeSkillWidget(UGS_SkillWidget* InSkillWidget)
 			InSkillWidget->Initialize(SkillMap[Slot]);
 			
 			OnSkillCooldownChanged.AddUObject(InSkillWidget, &UGS_SkillWidget::OnSkillCoolTimeChanged);
+			OnHealCountChanged.AddUObject(InSkillWidget, &UGS_SkillWidget::OnHealCountChanged);
 			OnSkillActivated.AddDynamic(InSkillWidget, &UGS_SkillWidget::OnSkillActivated);
 			OnSkillCooldownBlocked.AddDynamic(InSkillWidget, &UGS_SkillWidget::OnSkillCooldownBlocked);
 		}

@@ -52,6 +52,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Heal")
 	int32 GetCurrentHealCount() const { return CurrentHealCount; }
 
+	// 최대 포션 개수 확인
+	UFUNCTION(BlueprintCallable, Category = "Heal")
+	int32 GetMaxHealCount() const { return MaxHealCount; }
+
 	// 포션 개수 설정
 	UFUNCTION(BlueprintCallable, Category = "Heal")
 	void SetCurrentHealCount(int32 NewCount);

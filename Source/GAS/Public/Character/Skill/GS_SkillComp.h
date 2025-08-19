@@ -53,6 +53,7 @@ struct FSkillRuntimeState
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSkillCooldownChanged, ESkillSlot, float);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSkillActivated, ESkillSlot, SkillSlot);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSkillCooldownBlocked, ESkillSlot, SkillSlot);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnHealCountChanged, ESkillSlot, int32, int32);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class GAS_API UGS_SkillComp : public UActorComponent
@@ -63,6 +64,7 @@ public:
 	UGS_SkillComp();
 	
 	FOnSkillCooldownChanged OnSkillCooldownChanged;
+	FOnHealCountChanged OnHealCountChanged;
 	UPROPERTY(BlueprintAssignable)
 	FOnSkillActivated OnSkillActivated;
 	UPROPERTY(BlueprintAssignable)
@@ -76,6 +78,9 @@ public:
 	
 	UFUNCTION(Server, Reliable)
 	void Server_TrySkillCommand(ESkillSlot Slot);
+
+	UFUNCTION(Client, Reliable)
+	void Client_BroadcastHealCountChanged(ESkillSlot Slot, int32 CurrentCount, int32 MaxCount);
 
 	UFUNCTION(Client, Reliable)
 	void Client_BroadcastSkillActivation(ESkillSlot Slot);
