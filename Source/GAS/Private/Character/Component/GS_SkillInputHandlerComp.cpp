@@ -8,6 +8,7 @@
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Character/Skill/Seeker/GS_HealSkill.h"
 
 // Sets default values for this component's properties
 UGS_SkillInputHandlerComp::UGS_SkillInputHandlerComp()
@@ -62,6 +63,10 @@ void UGS_SkillInputHandlerComp::SetupEnhancedInput(UInputComponent* PlayerInputC
 		if (IA_KeyReset)
 		{
 			EnhancedInput->BindAction(IA_KeyReset, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnKeyReset);
+		}
+		if (IA_HealSkill)
+		{
+			EnhancedInput->BindAction(IA_HealSkill, ETriggerEvent::Started, this, &UGS_SkillInputHandlerComp::OnHealSkill);
 		}
 	}
 }
@@ -178,8 +183,27 @@ void UGS_SkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& In
 	/*OwnerCharacter->SetSkillInputControl(true, true, true, true);
 	OwnerCharacter->Server_RestKey();
 	OwnerCharacter->Server_SetCanHitReact(true);*/
+}
 
-	
-	
+void UGS_SkillInputHandlerComp::OnHealSkill(const FInputActionInstance& Instance)
+{
+    if (!OwnerCharacter || OwnerCharacter->IsDead()) return;
+
+    UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp();
+    if (!SkillComp) return;
+
+    // Ready 슬롯(힐 스킬)의 스킬 객체 가져옴
+    UGS_HealSkill* HealSkill = Cast<UGS_HealSkill>(SkillComp->GetSkillFromSkillMap(ESkillSlot::Ready));
+    if (!HealSkill) return;
+
+    // 클라이언트에서 먼저 스킬 사용 가능 여부 검사
+    if (HealSkill->CanActivateHealSkill())
+    {
+        SkillComp->Server_TryActivateSkill(ESkillSlot::Ready);
+    }
+    else
+    {
+        HealSkill->ShowPotionDepletedEffect();
+    }
 }
 
