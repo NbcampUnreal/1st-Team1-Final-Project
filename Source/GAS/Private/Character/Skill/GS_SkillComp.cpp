@@ -120,12 +120,12 @@ bool UGS_SkillComp::IsSkillAllowed(ESkillSlot CompareSkillType)
 	uint8 BitFlag = 0;
 	BitFlag |= (1 << static_cast<int32>(CompareSkillType));
 	return CurAllowedSkillsMask & BitFlag;
-}  // SJE
+}
 
 void UGS_SkillComp::SetCurAllowedSkillsMask(int8 BitMask)
 {
 	CurAllowedSkillsMask = BitMask;	
-} // SJE
+}
 
 void UGS_SkillComp::InitSkills()
 {
@@ -162,7 +162,7 @@ void UGS_SkillComp::InitSkills()
 void UGS_SkillComp::ResetAllowedSkillsMask()
 {
 	CurAllowedSkillsMask = DefaultAllowedSkillsMask;
-}  // SJE
+}
 
 void UGS_SkillComp::Server_TrySkillAnimationEnd_Implementation(ESkillSlot Slot)
 {
@@ -216,21 +216,9 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 				Skill->AllowSkillsMask |= (1 << Index);
 			}
 		}
-	} // SJE
+	}
 	
-	/*UE_LOG(LogTemp, Log, TEXT("Skill Name : %s / Flag (Binary): %s"), *UEnum::GetValueAsString(Slot), 
-		*([](uint8 Value)
-		{
-			FString Result;
-			for (int8 i = 7; i >= 0; --i)
-			{
-				Result.AppendChar((Value & (1 << i)) ? '1' : '0');
-			}
-			return Result;
-		})(Skill->AllowSkillsMask)
-	); // SJE*/
-	
-	Skill-> AllowControlValue = Info.AllowControlValue; // SJE
+	Skill-> AllowControlValue = Info.AllowControlValue;
 	
 	// VFX 정보 설정
 	Skill->SkillCastVFX = Info.SkillCastVFX;
@@ -287,7 +275,7 @@ void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("Active 되기를 원하는 스킬이 불허되었다."));
 				}
-			} // SJE
+			}
 		}
 		else
 		{

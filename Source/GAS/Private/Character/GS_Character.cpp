@@ -198,7 +198,6 @@ void AGS_Character::DisableHitReact(float CooldownTime)
 	{
 		CanHitReact = true;
 	}, CooldownTime, false);
-	// SJE
 }
 
 void AGS_Character::DisableHitReact(bool bAllowHitReact)
