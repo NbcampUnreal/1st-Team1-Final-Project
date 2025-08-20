@@ -29,7 +29,6 @@ void AGS_TrigTrapBase::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	//change it to Player Character later
 	if (OtherActor && OtherActor != this && !bIsTriggered)
 	{
 		AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
@@ -38,26 +37,44 @@ void AGS_TrigTrapBase::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp
 			if (!HasAuthority())
 			{
 				//클라이언트
-				Server_ApplyTrapEffect(OtherActor);
+				Server_DelayTrapEffect(OtherActor);
 			}
 			else
 			{
-				//서버
-				ApplyTrapEffect(OtherActor);
+				DelayTrapEffect(OtherActor);
 			}
 		}
 		
 	}
 }
 
-void AGS_TrigTrapBase::Server_ApplyTrapEffect_Implementation(AActor* TargetActor)
+void AGS_TrigTrapBase::Server_DelayTrapEffect_Implementation(AActor* TargetActor)
 {
-	ApplyTrapEffect(TargetActor);
+	DelayTrapEffect(TargetActor);
 }
 
 void AGS_TrigTrapBase::ApplyTrapEffect_Implementation(AActor* TargetActor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("TrapEffect Applied"));
+	UE_LOG(LogTemp, Warning, TEXT("ApplyTrapEffect_Implementation Applied"));
+}
+
+void AGS_TrigTrapBase::DelayTrapEffect(AActor* TargetActor)
+{
+	//Trigger Delay가 0보다 큰 경우, TriggerDelay초 후 함정 발동
+	//(사운드 또는 위젯으로 함정 발동 예정임을 알리는 위치)
+	if (TriggerDelay > 0.0f)
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			DelayHandle,
+			FTimerDelegate::CreateUObject(this, &AGS_TrigTrapBase::ApplyTrapEffect, TargetActor),
+			TriggerDelay,
+			false
+		);
+	}
+	else
+	{
+		ApplyTrapEffect(TargetActor);
+	}
 }
 
 //만약 함정의 동작이 끝났는데 플레이어가 남아 있다면 함정 동작 다시 실행
@@ -70,7 +87,7 @@ void AGS_TrigTrapBase::TrapEffectComplete()
 	{
 		if (IsValid(Actor) && Actor->IsA<AGS_Player>())
 		{
-			Server_ApplyTrapEffect(Actor);
+			Server_DelayTrapEffect(Actor);
 			return;
 		}
 	}
@@ -82,7 +99,6 @@ void AGS_TrigTrapBase::TrapEffectComplete()
 void AGS_TrigTrapBase::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	//change it to Player Character later
 	if (OtherActor && OtherActor != this && !bIsTriggered)
 	{
 		AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
