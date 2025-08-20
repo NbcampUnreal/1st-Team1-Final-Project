@@ -180,6 +180,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 		bIsFullyDrawn = false;  // 상태 초기화
 
+		GetSkillComp()->ResetAllowedSkillsMask(); // SJE
 	}
 
 	// 달리기 상태 설정

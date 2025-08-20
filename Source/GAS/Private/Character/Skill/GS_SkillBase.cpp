@@ -49,7 +49,7 @@ void UGS_SkillBase::OnSkillAnimationEnd()
 	if(OwnerPlayer)
 	{
 		OwnerPlayer->GetSkillComp()->ResetAllowedSkillsMask();
-	} // SJE
+	}
 }
 
 void UGS_SkillBase::ExecuteSkillEffect()

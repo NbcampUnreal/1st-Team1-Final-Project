@@ -176,13 +176,8 @@ void UGS_SkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instan
 
 void UGS_SkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& Instance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnKeyReset")); // SJE
 	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter);
 	Seeker->Server_RestKey();
-	
-	/*OwnerCharacter->SetSkillInputControl(true, true, true, true);
-	OwnerCharacter->Server_RestKey();
-	OwnerCharacter->Server_SetCanHitReact(true);*/
 }
 
 void UGS_SkillInputHandlerComp::OnHealSkill(const FInputActionInstance& Instance)
