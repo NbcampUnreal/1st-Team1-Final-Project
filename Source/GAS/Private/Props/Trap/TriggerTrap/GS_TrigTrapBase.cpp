@@ -34,24 +34,33 @@ void AGS_TrigTrapBase::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp
 		AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
 		if (Seeker)
 		{
+			//함정 트리거 이후, 동작 전 경고 사운드 함수(BP에서 구현)
+			PlayTrapAlertSound(Seeker);
+
 			if (!HasAuthority())
 			{
 				//클라이언트
-				Server_DelayTrapEffect(OtherActor);
+
+				Server_DelayTrapEffect(Seeker);
 			}
 			else
 			{
-				DelayTrapEffect(OtherActor);
+				DelayTrapEffect(Seeker);
 			}
 		}
 		
 	}
 }
 
+void AGS_TrigTrapBase::PlayTrapAlertSound_Implementation(AActor* TargetActor)
+{
+}
+
 void AGS_TrigTrapBase::Server_DelayTrapEffect_Implementation(AActor* TargetActor)
 {
 	DelayTrapEffect(TargetActor);
 }
+
 
 void AGS_TrigTrapBase::ApplyTrapEffect_Implementation(AActor* TargetActor)
 {

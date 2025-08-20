@@ -51,6 +51,10 @@ protected:
 	void Server_DelayTrapEffect(AActor* TargetActor);
 	void Server_DelayTrapEffect_Implementation(AActor* TargetActor);
 
+	UFUNCTION(BlueprintNativeEvent, Category="Trap")
+	void PlayTrapAlertSound(AActor* TargetActor);
+	void PlayTrapAlertSound_Implementation(AActor* TargetActor);
+
 
 	// - 함정 동작 적용
 	UFUNCTION(BlueprintCallable, Category="Trap")
