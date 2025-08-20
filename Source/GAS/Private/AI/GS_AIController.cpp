@@ -5,7 +5,6 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Player/Monster/GS_Monster.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -29,10 +28,6 @@ AGS_AIController::AGS_AIController(const FObjectInitializer& ObjectInitializer)
     SightConfig->DetectionByAffiliation.bDetectEnemies   = true;
     SightConfig->DetectionByAffiliation.bDetectNeutrals  = false;
     SightConfig->DetectionByAffiliation.bDetectFriendlies= false;
-
-	bNearPlayer = false;
-	bRtsControl = false;
-	bAIActive = true;
 }
 
 void AGS_AIController::BeginPlay()
@@ -80,13 +75,6 @@ void AGS_AIController::OnPossess(APawn* InPawn)
 	}
 
 	SetGenericTeamId(GetGenericTeamId());
-	
-	// 지연 후 AI 상태 업데이트
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
-	{
-		UpdateAIState();
-	}, 0.1f, false); // 0.1초 후 실행 
 }
 
 FGenericTeamId AGS_AIController::GetGenericTeamId() const
@@ -225,137 +213,4 @@ void AGS_AIController::ExitConfuseState()
 		PerceptionComponent->RequestStimuliListenerUpdate();
 	}
 	PrevTargetActor.Reset();
-}
-
-
-void AGS_AIController::SetNearPlayer(bool bNear)
-{
-	bNearPlayer = bNear;
-	UE_LOG(LogTemp, Warning, TEXT("SetNearPlayer: %s"), bNear ? TEXT("true") : TEXT("false"));
-	UpdateAIState();
-}
-
-void AGS_AIController::SetRtsControl(bool bActive)
-{
-	bRtsControl = bActive;
-	UpdateAIState();
-}
-
-void AGS_AIController::UpdateAIState()
-{
-	bool bShouldBeActive = bNearPlayer || bRtsControl;
-	UE_LOG(LogTemp, Warning, TEXT("bShouldBeActive: %s"), bShouldBeActive ? TEXT("true") : TEXT("false"));
-	UE_LOG(LogTemp, Warning, TEXT("bAIActive: %s"), bAIActive ? TEXT("true") : TEXT("false"));
-    
-	if (bShouldBeActive != bAIActive)
-	{
-		if (bShouldBeActive)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("!!! 활성화"));
-			APawn* ControlledPawn = GetPawn();
-			if (!ControlledPawn)
-			{
-				return;
-			}
-
-			AGS_Monster* Monster = Cast<AGS_Monster>(ControlledPawn);
-			if (!Monster)
-			{
-				return;
-			}
-
-			// AI Controller 틱 활성화
-			SetActorTickEnabled(true);
-    
-			// Behavior Tree 활성화
-			if (BTAsset)
-			{
-				if (!GetBrainComponent() || !GetBrainComponent()->IsRunning())
-				{
-					RunBehaviorTree(BTAsset);
-					UE_LOG(LogTemp, Warning, TEXT("BT Started/Restarted"));
-				}
-				else
-				{
-					GetBrainComponent()->ResumeLogic(TEXT("Player Nearby"));
-					UE_LOG(LogTemp, Warning, TEXT("BT Resumed"));
-				}
-			}
-    
-			// Perception 활성화
-			if (PerceptionComponent)
-			{
-				PerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), true);
-				PerceptionComponent->SetComponentTickEnabled(true);
-			}
-
-			// 이동 
-			if (UCharacterMovementComponent* Movement = Monster->GetCharacterMovement())
-			{
-				Movement->SetMovementMode(MOVE_Walking);
-				Movement->SetComponentTickEnabled(true);  
-			}
-
-			// 애니메이션 
-			if (USkeletalMeshComponent* Mesh = Monster->GetMesh())
-			{
-				Mesh->SetComponentTickEnabled(true);   
-				Mesh->bPauseAnims = false;
-			}
-			
-			UE_LOG(LogTemp, Warning, TEXT("AI ACTIVATED: %s"), *ControlledPawn->GetName());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("!!! 비활성화"));
-			
-			APawn* ControlledPawn = GetPawn();
-			if (!ControlledPawn)
-			{
-				return;
-			}
-			
-			AGS_Monster* Monster = Cast<AGS_Monster>(ControlledPawn);
-			if (!Monster)
-			{
-				return;
-			}
-						
-			// 이동 
-			if (UCharacterMovementComponent* Movement = Monster->GetCharacterMovement())
-			{
-				Movement->StopMovementImmediately();
-				Movement->SetMovementMode(MOVE_None);
-				Movement->SetComponentTickEnabled(false);  
-			}
-			
-			// Behavior Tree pause
-			if (GetBrainComponent())
-			{
-				GetBrainComponent()->StopLogic(TEXT("Player Far Away")); 
-				UE_LOG(LogTemp, Warning, TEXT("BT Stopped"));
-			}
-    
-			// Perception 비활성화
-			if (PerceptionComponent)
-			{
-				PerceptionComponent->SetSenseEnabled(UAISense_Sight::StaticClass(), false);
-				PerceptionComponent->SetComponentTickEnabled(false);
-			}
-			
-			// AI Controller 비활성화
-			SetActorTickEnabled(false);
-
-			// 애니메이션 
-			if (USkeletalMeshComponent* Mesh = Monster->GetMesh())
-			{
-				Mesh->SetComponentTickEnabled(false);   
-				Mesh->bPauseAnims = true;
-			}
-
-			UE_LOG(LogTemp, Warning, TEXT("AI DEACTIVATED: %s"), *ControlledPawn->GetName());
-		}
-        
-		bAIActive = bShouldBeActive;
-	}
 }

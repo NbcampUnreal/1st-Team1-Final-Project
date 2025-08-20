@@ -11,7 +11,6 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
 #include "NiagaraComponent.h"
-#include "AI/GS_AIController.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Engine/GameInstance.h"
 #include "Sound/GS_AudioManager.h"
@@ -534,11 +533,6 @@ void AGS_Seeker::OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp
 	{
 		if (AGS_Monster* Monster = Cast<AGS_Monster>(OtherActor))
 		{
-			if (AGS_AIController* AIController = Cast<AGS_AIController>(Monster->GetController()))
-			{
-				AIController->SetNearPlayer(true);
-			}
-
 			AddCombatMonster(Monster);
 			
 			if (UGS_HPTextWidgetComp* HPWidgetComp = Monster->FindComponentByClass<UGS_HPTextWidgetComp>())
@@ -555,11 +549,6 @@ void AGS_Seeker::OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedCompon
 	{
 		if (AGS_Monster* Monster = Cast<AGS_Monster>(OtherActor))
 		{
-			if (AGS_AIController* AIController = Cast<AGS_AIController>(Monster->GetController()))
-			{
-				AIController->SetNearPlayer(false);
-			}
-
 			RemoveCombatMonster(Monster);
 
 			if (UGS_HPTextWidgetComp* HPWidgetComp = Monster->FindComponentByClass<UGS_HPTextWidgetComp>())
