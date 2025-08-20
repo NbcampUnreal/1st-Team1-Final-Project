@@ -52,10 +52,11 @@ AGS_TrapBase::AGS_TrapBase()
 	DamageBoxComp->SetupAttachment(MeshParentSceneComp);
 	// DamageBox 콜리전 설정
 	DamageBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	//DamageBoxComp->SetCollisionObjectType(ECC_WorldDynamic);
+	//ECC_GameTraceChannel4 : Trap 전용 콜리전
 	DamageBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
 	DamageBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	DamageBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	//"OptimizedCollision" 태그가 있는 경우, 플레이어가 근접한 경우에만 콜리전 활성화됨
 	DamageBoxComp->ComponentTags.Add("OptimizedCollision");
 
 

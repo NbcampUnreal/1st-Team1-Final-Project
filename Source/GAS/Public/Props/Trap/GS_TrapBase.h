@@ -35,7 +35,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
 	UBoxComponent* DamageBoxComp;
 
-	//함정 활성화
+	//플레이어가 해당 SphereComp 오버랩 시, 함정 활성화
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Trap")
 	USphereComponent* ActivateSphereComp;
 
