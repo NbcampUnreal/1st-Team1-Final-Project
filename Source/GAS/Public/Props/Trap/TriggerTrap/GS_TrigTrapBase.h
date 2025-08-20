@@ -24,6 +24,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
 	UBoxComponent* TriggerBoxComp;
 
+	//트리거 후 발동까지 딜레이
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
+	float TriggerDelay = 0.0f;
+
+	UPROPERTY()
+	FTimerHandle DelayHandle;
+
+
 	UFUNCTION()
 	void OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
@@ -35,19 +43,24 @@ protected:
 
 
 	//BeginOverlap with TriggerBoxComp
-	UFUNCTION(Server, Reliable)
-	void Server_ApplyTrapEffect(AActor* TargetActor);
-	void Server_ApplyTrapEffect_Implementation(AActor* TargetActor);
+	
+	// - 딜레이 부여 
+	void DelayTrapEffect(AActor* TargetActor);
 
+	UFUNCTION(Server, Reliable)
+	void Server_DelayTrapEffect(AActor* TargetActor);
+	void Server_DelayTrapEffect_Implementation(AActor* TargetActor);
+
+
+	// - 함정 동작 적용
 	UFUNCTION(BlueprintCallable, Category="Trap")
 	void TrapEffectComplete();
-
 
 	UFUNCTION(BlueprintNativeEvent)
 	void ApplyTrapEffect(AActor* TargetActor);
 	void ApplyTrapEffect_Implementation(AActor* TargetActor);
 
-
+	
 
 	//EndOverlap with TriggerBoxComp
 	UFUNCTION(Server, Reliable)
