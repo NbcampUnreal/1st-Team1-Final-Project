@@ -277,6 +277,7 @@ UStaticMeshComponent* AGS_PlacerBase::CreateIndicatorMesh()
 	{
 		// 월드에 등록
 		NewStaticMeshCompo->RegisterComponent();
+		NewStaticMeshCompo->ComponentTags.Add(FName("PlacementIndicator"));
 		
 		PlaceIndicators.Add(NewStaticMeshCompo);
 		if (PlaneMesh)
@@ -344,6 +345,48 @@ void AGS_PlacerBase::DrawPlacementIndicators()
 				{
 					PlaceIndicators[i]->SetMaterial(0, PlaceRejectedMaterial);
 					bCanBuild = false;
+				}
+				// if (!BuildManagerRef->CheckOccupancyData(IntPointArray[i], TargetType))
+				// {
+				// 	bCanBuild = false;
+				// 	break;
+				// }
+			}
+
+			TArray<UMeshComponent*> AllMeshComponents;
+			GetComponents<UMeshComponent>(AllMeshComponents);
+			
+			for (UMeshComponent* MeshComponent : AllMeshComponents)
+			{
+				if (MeshComponent)
+				{
+					if (MeshComponent->ComponentHasTag(FName("PlacementIndicator")))
+					{
+						if (bCanBuild)
+						{
+							MeshComponent->SetMaterial(0, PlaceAcceptedMaterial);
+						}
+						else
+						{
+							MeshComponent->SetMaterial(0, PlaceRejectedMaterial);
+						}
+						
+						continue; 
+					}
+					
+					int32 NumMaterials = MeshComponent->GetNumMaterials();
+
+					for (int32 i = 0; i < NumMaterials; ++i)
+					{					
+						if (bCanBuild)
+						{
+							MeshComponent->SetMaterial(i, BuildAcceptedMaterial);
+						}
+						else
+						{
+							MeshComponent->SetMaterial(i, BuildRejectedMaterial);
+						}
+					}
 				}
 			}
 		}
