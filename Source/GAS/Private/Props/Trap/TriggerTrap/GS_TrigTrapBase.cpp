@@ -9,10 +9,11 @@ AGS_TrigTrapBase::AGS_TrigTrapBase()
 	
 	//Trigger Box 설정
 	TriggerBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	//TriggerBoxComp->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	//ECC_GameTraceChannel4 : Trap
 	TriggerBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
 	TriggerBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	TriggerBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	//"OptimizedCollision" 태그가 있는 경우, 플레이어가 근접한 경우에만 콜리전 활성화됨
 	TriggerBoxComp->ComponentTags.Add("OptimizedCollision");
 }
 
