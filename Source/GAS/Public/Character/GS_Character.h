@@ -52,15 +52,12 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void OnDamageStart();
 	
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetCanHitReact(bool CanReact);
-	
-	UPROPERTY(Replicated)
+	// HitReact
 	bool CanHitReact = true;
-
 	FTimerHandle HitReactTimerHandle;
-
-	void AllowHitReact();
+	
+	void DisableHitReact(float CooldownTime);
+	void DisableHitReact(bool bAllowHitReact);
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -138,9 +135,13 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCharacterDeath OnDeathDelegate;
-	
+
+	// HitReact
 	UFUNCTION(Server, Reliable)
 	void Server_SetCanHitReact(bool bCanReact);
+
+	UFUNCTION()
+	void SetCanHitReact(bool bCanReact);
 protected:
 	virtual void NotifyActorBeginCursorOver() override;
 	virtual void NotifyActorEndCursorOver() override;

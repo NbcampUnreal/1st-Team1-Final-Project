@@ -3,6 +3,7 @@
 
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Component/Seeker/GS_ChanSkillInputHandlerComp.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Weapon/Equipable/GS_WeaponAxe.h"
 #include "Weapon/Equipable/GS_WeaponShield.h"
 #include "Net/UnrealNetwork.h"
@@ -76,71 +77,28 @@ void AGS_Chan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AGS_Chan::OnComboAttack()
+/*void AGS_Chan::OnComboAttack()
 {
 	Super::OnComboAttack();	
-}
+}*/
 
 void AGS_Chan::MulticastPlayComboSection()
 {
-	// 기존 타이머가 있다면 클리어 (Stop 이벤트는 호출하지 않음)
-	GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
-	
-	// 부모 클래스의 콤보 로직 실행 (CurrentComboIndex++ 포함)
 	Super::MulticastPlayComboSection();
-	
-	// 공격 사운드 재생
-	if (AxeSwingSound)
-	{
-		Multicast_PlaySkillSound(AxeSwingSound);
-	}
-	
-	if (AttackVoiceSound)
-	{
-		Multicast_PlaySkillSound(AttackVoiceSound);
-	}
-	
-	// 공격 후 일정 시간 뒤 사운드 시퀀스 리셋을 위한 타이머 설정
-	GetWorldTimerManager().SetTimer(
-		AttackSoundResetTimerHandle,
-		this,
-		&AGS_Chan::ResetAttackSoundSequence,
-		1.0f,  // 1초로 고정
-		false
-	);
-}
 
-void AGS_Chan::ResetAttackSoundSequence()
-{
-	// 멀티캐스트로 모든 클라이언트에서 Stop 이벤트 호출
-	Multicast_StopAttackSound();
-}
-
-void AGS_Chan::Multicast_StopAttackSound_Implementation()
-{
-	// 데디케이티드 서버에서는 사운드 재생하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	// 오디오 컴포넌트를 통해 콤보 공격 사운드 재생
+	if (CharacterAudioComponent)
 	{
-		return;
-	}
-
-	// 사용자가 만든 Wwise Stop 이벤트 호출
-	if (AxeSwingStopEvent)
-	{
-		UAkComponent* AkComp = GetOrCreateAkComponent();
-		if (AkComp)
-		{
-			AkComp->PostAkEvent(AxeSwingStopEvent);
-		}
+		CharacterAudioComponent->PlayComboAttackSound(AxeSwingSound, AttackVoiceSound, AxeSwingStopEvent, 1.0f);
 	}
 }
 
 void AGS_Chan::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
 {
 	// 4번째 공격일 때 특별한 사운드 재생
-	if (ComboIndex == 4 && FinalAttackExtraSound)
+	if (ComboIndex == 4 && CharacterAudioComponent)
 	{
-		Multicast_PlaySkillSound(FinalAttackExtraSound);
+		CharacterAudioComponent->PlayFinalAttackSound(FinalAttackExtraSound);
 	}
 }
 
@@ -164,8 +122,7 @@ void AGS_Chan::OffJumpAttackSkill()
 void AGS_Chan::ToIdle()
 {
 	Multicast_StopSkillMontage(GetCurrentMontage());
-	Multicast_SetIsUpperBodySlot(false);
-	Multicast_SetIsFullBodySlot(false);
+	Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 	SetMoveControlValue(true, true);
 	SetLookControlValue(true, true);
 }

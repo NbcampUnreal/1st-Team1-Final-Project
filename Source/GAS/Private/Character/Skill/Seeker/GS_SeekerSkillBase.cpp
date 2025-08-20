@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Character/Skill/Seeker/GS_SeekerSkillBase.h"
@@ -10,9 +10,14 @@ void UGS_SeekerSkillBase::ActiveSkill()
 	Super::ActiveSkill();
 }
 
-void UGS_SeekerSkillBase::DeactiveSkill()
+void UGS_SeekerSkillBase::OnSkillCanceledByDebuff()
 {
-	Super::DeactiveSkill();
+	Super::OnSkillCanceledByDebuff();
+}
+
+void UGS_SeekerSkillBase::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 }
 
 void UGS_SeekerSkillBase::ApplyEffectToGuardian(AGS_Guardian* Target)

@@ -2,6 +2,7 @@
 
 
 #include "Character/Skill/Seeker/Merci/GS_MerciMovingSkill.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/Player/Seeker/GS_Merci.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
 
@@ -12,37 +13,35 @@ UGS_MerciMovingSkill::UGS_MerciMovingSkill()
 
 void UGS_MerciMovingSkill::ActiveSkill()
 {
-	if (!CanActiveInternally())
-	{
-		// 누른 시점에 쿨타임 중이었다면 무효 입력 플래그 설정
-		bPressedDuringCooldown = true;
-		return;
-	}
-
-	// 유효 입력이므로 무효 입력 플래그 해제
-	bPressedDuringCooldown = false;
+	Super::ActiveSkill();
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (MerciCharacter)
 	{
-		// 스킬 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			MerciCharacter->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
 		
 		MerciCharacter->SetDrawState(false);
+
+		// 활 당기기
 		MerciCharacter->DrawBow(SkillAnimMontages[0]);
 	}
 }
 
+void UGS_MerciMovingSkill::OnSkillAnimationEnd()
+{
+}
+
 void UGS_MerciMovingSkill::OnSkillCommand()
 {
-	if (!CanActiveInternally() || bPressedDuringCooldown)
+	if (!CanActive() || !GetIsActive())
 	{
 		return;
 	}
+
+	// 활 놓기
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
 
@@ -53,8 +52,12 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 	
 	if (IsFullyDrawn)
 	{
+		// 쿨타임 측정 시작
 		StartCoolDown();
 	}
+
+	// 스킬 종료
+	DeactiveSkill();
 }
 
 void UGS_MerciMovingSkill::InterruptSkill()
@@ -62,19 +65,11 @@ void UGS_MerciMovingSkill::InterruptSkill()
 	Super::InterruptSkill();
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-	if (MerciCharacter->GetSkillComp())
-	{
-		MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
-	}
+	SetIsActive(false);
 }
 
-bool UGS_MerciMovingSkill::CanActive() const
+void UGS_MerciMovingSkill::DeactiveSkill()
 {
-	return true;
-}
-
-bool UGS_MerciMovingSkill::CanActiveInternally() const
-{
-	return OwnerCharacter && !bIsCoolingDown;
+	Super::DeactiveSkill();
 }
 

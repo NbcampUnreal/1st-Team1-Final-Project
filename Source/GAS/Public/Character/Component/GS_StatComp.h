@@ -8,6 +8,8 @@
 class AGS_Character;
 class UAkAudioEvent;
 class UGS_StatComp;
+class AGS_Seeker;
+class UGS_CharacterAudioComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentHPChangedDelegate, UGS_StatComp*);
 
@@ -30,16 +32,6 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TArray<UAnimMontage*> TakeDamageMontages;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* HitSoundEvent;
-	
-	// 히트 사운드 쿨다운 시간
-	UPROPERTY(EditDefaultsOnly, Category = "Sound", meta = (ClampMin = "0.0", ClampMax = "5.0"))
-	float HitSoundCooldownTime = 1.75f;
-	
-	// 쿨다운 체크 함수
-	bool CanPlayHitSound() const;
 
 	void InitStat(FName RowName);
 
@@ -101,9 +93,6 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float AttackSpeed;
 	
-	// 마지막 히트 사운드 재생 시간
-	float LastHitSoundTime = 0.0f;
-
 	UFUNCTION()
 	void OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 

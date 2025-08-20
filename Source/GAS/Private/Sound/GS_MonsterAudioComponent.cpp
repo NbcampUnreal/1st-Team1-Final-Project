@@ -13,15 +13,16 @@
 #include "AkAudioEvent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "AI/RTS/GS_RTSController.h"
 
-// RTPC 이름을 상수로 정의 (클래스 외부)
+// RTPC 이름을 상수로 정의
 const FName UGS_MonsterAudioComponent::DistanceToPlayerRTPCName = TEXT("Distance_to_Player");
 const FName UGS_MonsterAudioComponent::MonsterVariantRTPCName = TEXT("Monster_Variant");
+const FName UGS_MonsterAudioComponent::AttenuationModeRTPCName = TEXT("Attenuation_Mode");
 
 UGS_MonsterAudioComponent::UGS_MonsterAudioComponent()
 {
     PrimaryComponentTick.bCanEverTick = false; // 틱 비활성화
-    //PrimaryComponentTick.TickInterval = 0.5f; // 0.5초마다 틱
     
     CurrentAudioState = EMonsterAudioState::Idle;
     PreviousAudioState = EMonsterAudioState::Idle;
@@ -29,9 +30,9 @@ UGS_MonsterAudioComponent::UGS_MonsterAudioComponent()
     
     // 기본 설정값
     AudioConfig.AlertDistance = 800.0f;
-    AudioConfig.MaxAudioDistance = 1000.0f;
+    AudioConfig.MaxAudioDistance = 2000.0f; // TPS 모드 기준 (20미터)
     IdleSoundInterval = 6.0f;
-    CombatSoundInterval = 4.0f;
+    CombatSoundInterval = 1.0f;
     
     MonsterSoundVariant = 1;
 
@@ -69,6 +70,10 @@ void UGS_MonsterAudioComponent::BeginPlay()
         {
             AkAudioDevice->SetRTPCValue(*MonsterVariantRTPCName.ToString(), MonsterSoundVariant, 0, OwnerMonster);
         }
+        
+        // 초기 Distance Scaling 설정 (TPS 모드 기본값)
+        const float InitialScalingValue = 0.0f; // TPS 모드 기본값 (100% = 20m)
+        AkAudioDevice->SetRTPCValue(*AttenuationModeRTPCName.ToString(), InitialScalingValue, 0, OwnerMonster);
     }
     
     if (GetOwner()->HasAuthority())
@@ -98,35 +103,6 @@ void UGS_MonsterAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason
     Super::EndPlay(EndPlayReason);
 }
 
-/*
-void UGS_MonsterAudioComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-    
-    if (!OwnerMonster)
-        return;
-        
-    if (GetOwner()->HasAuthority())
-    {
-        CheckForStateChanges();
-    }
-
-    APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (LocalPC && LocalPC->GetPawn())
-    {
-        float DistanceToLocalPlayer = FVector::Dist(OwnerMonster->GetActorLocation(), LocalPC->GetPawn()->GetActorLocation());
-        
-        if (DistanceToLocalPlayer <= AudioConfig.MaxAudioDistance) 
-        {
-            if (FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get())
-            {
-                AkAudioDevice->SetRTPCValue(*DistanceToPlayerRTPCName.ToString(), DistanceToLocalPlayer, 0, OwnerMonster);
-            }
-        }
-    }
-}
-*/
-
 void UGS_MonsterAudioComponent::SetMonsterAudioState(EMonsterAudioState NewState)
 {
     // 서버에서만 상태 변경 가능
@@ -138,32 +114,25 @@ void UGS_MonsterAudioComponent::SetMonsterAudioState(EMonsterAudioState NewState
         
     PreviousAudioState = CurrentAudioState; // 상태 변경 직전에 이전 상태 기록
     CurrentAudioState = NewState;
-    // CurrentAudioState가 복제 변수이므로, 서버에서 변경되면 OnRep_CurrentAudioState가 클라이언트에서 자동 호출됨
     
     // 서버에서 상태 변화에 따른 타이머 업데이트
     UpdateSoundTimer();
-    
-    // Combat 상태로 변경 시 즉시 사운드 재생
-    if (NewState == EMonsterAudioState::Combat && CurrentAudioState != PreviousAudioState) // 중복 방지
-    {
-        PlaySound(NewState, true);
-    }
 }
 
 void UGS_MonsterAudioComponent::UpdateDistanceRTPC()
 {
     if (!OwnerMonster) return;
 
-    APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (LocalPC && LocalPC->GetPawn())
+    FVector ListenerLocation;
+    if (GetListenerLocation(ListenerLocation))
     {
-        float DistanceToLocalPlayer = FVector::Dist(OwnerMonster->GetActorLocation(), LocalPC->GetPawn()->GetActorLocation());
+        float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
 
-        if (DistanceToLocalPlayer <= AudioConfig.MaxAudioDistance)
+        if (DistanceToListener <= AudioConfig.MaxAudioDistance)
         {
             if (FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get())
             {
-                AkAudioDevice->SetRTPCValue(*DistanceToPlayerRTPCName.ToString(), DistanceToLocalPlayer, 0, OwnerMonster);
+                AkAudioDevice->SetRTPCValue(*DistanceToPlayerRTPCName.ToString(), DistanceToListener, 0, OwnerMonster);
             }
         }
     }
@@ -205,19 +174,18 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
         return;
     }
 
-    APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (!LocalPC)
-    {
-        return; 
-    }
-    if (!LocalPC->GetPawn())
+    FVector ListenerLocation;
+    if (!GetListenerLocation(ListenerLocation))
     {
         return;
     }
 
-    float DistanceToLocalPlayer = FVector::Dist(OwnerMonster->GetActorLocation(), LocalPC->GetPawn()->GetActorLocation());
-
-    if (DistanceToLocalPlayer > AudioConfig.MaxAudioDistance)
+    // RTS 모드와 TPS 모드에 따른 거리 체크
+    const bool bRTS = IsRTSMode();
+    const float MaxDistance = bRTS ? 8000.0f : AudioConfig.MaxAudioDistance; // RTS: 80m, TPS: 20m
+    
+    float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
+    if (DistanceToListener > MaxDistance)
     {
         return;
     }
@@ -226,6 +194,13 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
     if (!SoundEvent)
     {
         return;
+    }
+
+    // RTS 모드에 따른 Distance Scaling 설정
+    if (FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get())
+    {
+        const float ScalingValue = bRTS ? 1.0f : 0.0f; // RTS: 1.0 (400% = 80m), TPS: 0.0 (100% = 20m)
+        AkAudioDevice->SetRTPCValue(*AttenuationModeRTPCName.ToString(), ScalingValue, 0, OwnerMonster);
     }
 
     if (!bIsImmediate)
@@ -262,6 +237,23 @@ void UGS_MonsterAudioComponent::PlayDeathSound()
         SetMonsterAudioState(EMonsterAudioState::Death);
         PlaySound(EMonsterAudioState::Death, true);
     }
+}
+
+void UGS_MonsterAudioComponent::PlaySwingSound()
+{
+    if (!GetOwner() || !GetOwner()->HasAuthority())
+    {
+        return;
+    }
+
+    const float CurrentTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    if (CurrentTime - ServerLastSwingBroadcastTime < SwingResetTime)
+    {
+        return;
+    }
+    ServerLastSwingBroadcastTime = CurrentTime;
+
+    Multicast_PlaySwingSound();
 }
 
 AGS_Seeker* UGS_MonsterAudioComponent::FindNearestSeeker() const
@@ -331,6 +323,78 @@ void UGS_MonsterAudioComponent::PlayCombatSound()
     }
 }
 
+void UGS_MonsterAudioComponent::Multicast_PlaySwingSound_Implementation()
+{
+    if (!OwnerMonster || !GetWorld())
+    {
+        return;
+    }
+
+    FVector ListenerLocation;
+    if (!GetListenerLocation(ListenerLocation))
+    {
+        return;
+    }
+
+    // RTS 모드와 TPS 모드에 따른 거리 체크
+    const bool bRTS = IsRTSMode();
+    const float MaxDistance = bRTS ? 8000.0f : AudioConfig.MaxAudioDistance; // RTS: 80m, TPS: 20m
+    
+    const float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
+    if (DistanceToListener > MaxDistance)
+    {
+        return;
+    }
+
+    const float CurrentTime = GetWorld()->GetTimeSeconds();
+    const float LastTime = LocalLastSwingPlayTime;
+    if (CurrentTime - LastTime < SwingResetTime * 0.9f)
+    {
+        return;
+    }
+    LocalLastSwingPlayTime = CurrentTime;
+
+    UAkAudioEvent* SoundToPlay = bRTS ? RTS_SwingSound : SwingSound;
+    if (SoundToPlay)
+    {
+        // RTS 모드에 따른 Distance Scaling 설정
+        if (FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get())
+        {
+            const float ScalingValue = bRTS ? 1.0f : 0.0f; // RTS: 1.0 (400% = 80m), TPS: 0.0 (100% = 20m)
+            AkAudioDevice->SetRTPCValue(*AttenuationModeRTPCName.ToString(), ScalingValue, 0, OwnerMonster);
+        }
+        
+        UAkGameplayStatics::PostEvent(SoundToPlay, OwnerMonster, 0, FOnAkPostEventCallback());
+    }
+}
+
+void UGS_MonsterAudioComponent::PlayRTSCommandSound(ERTSCommandSoundType CommandType)
+{
+    UAkAudioEvent* SoundToPlay = nullptr;
+    switch(CommandType)
+    {
+    case ERTSCommandSoundType::Selection:
+        SoundToPlay = SelectionClickSound;
+        break;
+    case ERTSCommandSoundType::Move:
+        SoundToPlay = RTSMoveCommandSound;
+        break;
+    case ERTSCommandSoundType::Attack:
+        SoundToPlay = RTSAttackCommandSound ? RTSAttackCommandSound : RTSMoveCommandSound;
+        break;
+    case ERTSCommandSoundType::Death:
+        // Death 커맨드는 RTS_DeathSound 사용 (AudioConfig에서)
+        SoundToPlay = AudioConfig.RTS_DeathSound;
+        break;
+    }
+
+    if (SoundToPlay)
+    {
+        // RTS 커맨드 사운드는 2D로 재생 (UI 피드백)
+        UAkGameplayStatics::PostEvent(SoundToPlay, GetOwner(), 0, FOnAkPostEventCallback());
+    }
+}
+
 void UGS_MonsterAudioComponent::StartSoundTimer()
 {
     if (!GetOwner() || !GetOwner()->HasAuthority() || !GetWorld())
@@ -350,9 +414,6 @@ void UGS_MonsterAudioComponent::StartSoundTimer()
             break;
             
         case EMonsterAudioState::Combat:
-            Interval = CombatSoundInterval;
-            TimerDelegate.BindUObject(this, &UGS_MonsterAudioComponent::PlayCombatSound);
-            GetWorld()->GetTimerManager().SetTimer(CombatSoundTimer, TimerDelegate, Interval, true);
             break;
             
         default: // Hurt, Death 등은 타이머로 소리내지 않음
@@ -377,16 +438,48 @@ void UGS_MonsterAudioComponent::UpdateSoundTimer()
     StartSoundTimer();
 }
 
+bool UGS_MonsterAudioComponent::IsRTSMode() const
+{
+    APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    return LocalPC && Cast<AGS_RTSController>(LocalPC) != nullptr;
+}
+
+bool UGS_MonsterAudioComponent::GetListenerLocation(FVector& OutLocation) const
+{
+    APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (!LocalPC)
+    {
+        return false;
+    }
+
+    if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(LocalPC))
+    {
+        if (RTSController->GetViewTarget())
+        {
+            OutLocation = RTSController->GetViewTarget()->GetActorLocation();
+            return true;
+        }
+    }
+    else if (LocalPC->GetPawn())
+    {
+        OutLocation = LocalPC->GetPawn()->GetActorLocation();
+        return true;
+    }
+
+    return false;
+}
+
 UAkAudioEvent* UGS_MonsterAudioComponent::GetSoundEvent(EMonsterAudioState SoundType) const
 {
+    const bool bRTS = IsRTSMode();
+
     switch (SoundType)
     {
-        case EMonsterAudioState::Idle:    return AudioConfig.IdleSound;
-        case EMonsterAudioState::Combat:  return AudioConfig.CombatSound;
-        case EMonsterAudioState::Hurt:    return AudioConfig.HurtSound;
-        case EMonsterAudioState::Death:   return AudioConfig.DeathSound;
+        case EMonsterAudioState::Idle:    return bRTS ? nullptr : AudioConfig.IdleSound; // RTS 모드에서는 idle 사운드 제거
+        case EMonsterAudioState::Combat:  return bRTS && AudioConfig.RTS_CombatSound ? AudioConfig.RTS_CombatSound : AudioConfig.CombatSound;
+        case EMonsterAudioState::Hurt:    return bRTS && AudioConfig.RTS_HurtSound ? AudioConfig.RTS_HurtSound : AudioConfig.HurtSound;
+        case EMonsterAudioState::Death:   return bRTS && AudioConfig.RTS_DeathSound ? AudioConfig.RTS_DeathSound : AudioConfig.DeathSound;
         default:
-            // ensureMsgf(false, TEXT("GetSoundEvent: Unknown SoundType %s requested for monster %s"), *UEnum::GetValueAsString(SoundType), OwnerMonster ? *OwnerMonster->GetName() : TEXT("UnknownMonster"));
             return nullptr;
     }
 }

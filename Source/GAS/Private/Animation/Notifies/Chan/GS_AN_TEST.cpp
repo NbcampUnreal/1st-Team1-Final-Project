@@ -12,6 +12,6 @@ void UGS_AN_TEST::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* An
 
 	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(MeshComp->GetOwner()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AN_TEST : %s | GetName : %s"), *UEnum::GetValueAsString(Seeker->GetLocalRole()), *Seeker->GetName()); // SJE
+		UE_LOG(LogTemp, Warning, TEXT("AN_TEST : %s | GetName : %s"), *UEnum::GetValueAsString(Seeker->GetLocalRole()), *Seeker->GetName());
 	}
 }

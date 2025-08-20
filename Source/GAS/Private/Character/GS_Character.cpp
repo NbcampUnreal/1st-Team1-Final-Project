@@ -4,8 +4,6 @@
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "UI/Character/GS_HPText.h"
 #include "Engine/DamageEvents.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_HPWidget.h"
 #include "System/GS_PlayerState.h"
@@ -15,6 +13,7 @@
 #include "Character/Component/GS_HitReactComp.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "AI/RTS/GS_RTSController.h"
 #include "Character/Player/GS_Player.h"
 #include "Components/DecalComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
@@ -30,7 +29,7 @@ AGS_Character::AGS_Character()
 	
 	HPTextWidgetComp = CreateDefaultSubobject<UGS_HPTextWidgetComp>(TEXT("TextWidgetComp"));
 	HPTextWidgetComp->SetupAttachment(RootComponent);
-	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
+	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HPTextWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	HPTextWidgetComp->SetVisibility(false);
@@ -72,7 +71,10 @@ void AGS_Character::BeginPlay()
 	//Set HP 3D widget (monster)
 	if (IsValid(HPTextWidgetComp) && HPTextWidgetComp->GetOwner()->ActorHasTag("Monster"))
 	{
-		HPTextWidgetComp->SetVisibility(true);
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+		{
+			HPTextWidgetComp->SetVisibility(PC->IsA<AGS_RTSController>());
+		}
 	}
 
 	if (SelectionDecal && SelectionDecal->GetDecalMaterial())
@@ -93,21 +95,6 @@ void AGS_Character::BeginPlay()
 void AGS_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (IsValid(HPTextWidgetComp) && !HasAuthority())
-	{
-		if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
-		{
-			FVector CameraForward = CameraManager->GetCameraRotation().Vector();
-			FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
-			FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
-			FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
-			
-			HPTextWidgetComp->SetWorldRotation(WidgetRotation);	
-		}
-		
-        
-	}
 }
 
 void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -117,7 +104,6 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
-	DOREPLIFETIME(AGS_Character, CanHitReact);
 }
 
 
@@ -177,9 +163,6 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	//when damage input start -> for drakhar 6/24
 	OnDamageStart();
 
-	// SJE
-	UE_LOG(LogTemp, Warning, TEXT("CanHitReact : %s"), CanHitReact ? TEXT("true") : TEXT("false"));
-
 	if (CanHitReact)
 	{
 		EHitReactType HitReactType = EHitReactType::DamageOnly;
@@ -208,17 +191,18 @@ void AGS_Character::OnDamageStart()
 	//
 }
 
-void AGS_Character::Multicast_SetCanHitReact_Implementation(bool CanReact)
+void AGS_Character::DisableHitReact(float CooldownTime)
 {
-	CanHitReact = CanReact;
-}
-
-void AGS_Character::AllowHitReact()
-{
+	SetCanHitReact(false);
 	GetWorld()->GetTimerManager().SetTimer(HitReactTimerHandle, [this]()
 	{
 		CanHitReact = true;
-	}, 3.0f, false);
+	}, CooldownTime, false);
+}
+
+void AGS_Character::DisableHitReact(bool bAllowHitReact)
+{
+	CanHitReact = bAllowHitReact;
 }
 
 void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -425,6 +409,11 @@ void AGS_Character::OnRep_CharacterSpeed()
 
 
 void AGS_Character::Server_SetCanHitReact_Implementation(bool bCanReact)
+{
+	CanHitReact = bCanReact;
+}
+
+void AGS_Character::SetCanHitReact(bool bCanReact)
 {
 	CanHitReact = bCanReact;
 }

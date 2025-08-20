@@ -212,7 +212,6 @@ void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
 
 void AGS_TpsController::Client_StartGame_Implementation()
 {
-	TestFunction();
 	UE_LOG(LogTemp, Warning, TEXT("준비 완료. TODO: 화면 가리개 제거"));
 	//TODO: 로딩스크린 제거
 }
@@ -544,5 +543,6 @@ void AGS_TpsController::BeginPlayingState()
 	if (IsLocalController())
 	{
 		Server_NotifyPlayerIsReady();
+		TestFunction();
 	}
 }

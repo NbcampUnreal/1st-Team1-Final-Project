@@ -48,6 +48,12 @@ protected:
 	UFUNCTION()
 	virtual void OnRoll(const struct FInputActionInstance& Instance);
 
+	UFUNCTION()
+	virtual void OnKeyReset(const struct FInputActionInstance& Instance);
+
+	UFUNCTION()
+	virtual void OnHealSkill(const struct FInputActionInstance& Instance);
+
 	TObjectPtr<AGS_Player> OwnerCharacter;
 
 	bool bCtrlHeld = false;
@@ -72,6 +78,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> IA_Roll;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_KeyReset;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> IA_HealSkill;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	int32 MappingPriority = 1;

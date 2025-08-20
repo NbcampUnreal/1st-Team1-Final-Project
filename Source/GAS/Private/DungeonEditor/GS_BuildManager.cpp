@@ -28,6 +28,9 @@ AGS_BuildManager::AGS_BuildManager()
 	DecalCompo = CreateDefaultSubobject<UDecalComponent>("Decal");
 	DecalCompo->SetupAttachment(RootComponent);
 	
+	//넥타르_NectarComp 추가 
+	NectarComp = CreateDefaultSubobject<UGS_NectarComp>("Nectar");
+
 	bTraceComplex = false;
 	StartTraceHeight = 3000;
 	EndTraceHeight = -3000;
@@ -125,6 +128,9 @@ void AGS_BuildManager::BeginPlay()
 			}
 		}
 	}
+
+	//넥타르_Nectar 초기화(BP에서 Nectar Max값 변경하기)
+	NectarComp->InitializeMaxAmount(NectarComp->GetMaxAmount());
 }
 
 void AGS_BuildManager::Tick(float DeltaTime)
@@ -270,10 +276,11 @@ void AGS_BuildManager::GetCellsInRectArea(TArray<FIntPoint>& InIntPointArray, FI
 	}
 }
 
+
 void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType InTargetType, EObjectType InObjectType, AActor* InActor, bool InIsRoom, bool InDeleteMode)
 {
 	FDEOccupancyData& CellInfo = OccupancyData.FindOrAdd(InCellPoint);
-
+	
 	if ((InIsRoom && InTargetType == EDEditorCellType::HorizontalPlaceable)
 		|| InTargetType == EDEditorCellType::CeilingPlace
 		|| InTargetType == EDEditorCellType::HorizontalPlaceable)
@@ -293,6 +300,12 @@ void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType 
 				if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(CellInfo.FloorOccupancyActor))
 				{
 					TargetMonster->DestroyAllWeapons();
+
+					//넥타르 증가(몬스터)
+					if (NectarComp)
+					{
+						NectarComp->RetrieveNectar(TargetMonster);
+					}
 					CellInfo.FloorOccupancyActor->Destroy();
 				}
 			}
@@ -302,18 +315,38 @@ void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType 
 		case EObjectType::Room:
 			if (IsValid(CellInfo.FloorOccupancyActor))
 			{
+				//넥타르 증가(방_바닥)
+				if (NectarComp)
+				{
+					NectarComp->RetrieveNectar(CellInfo.FloorOccupancyActor);
+				}
 				CellInfo.FloorOccupancyActor->Destroy();
 			}
 			if (IsValid(CellInfo.CeilingOccupancyActor))
 			{
+				//넥타르 증가(방_천장)
+				if (NectarComp)
+				{
+					NectarComp->RetrieveNectar(CellInfo.CeilingOccupancyActor);
+				}
 				CellInfo.CeilingOccupancyActor->Destroy();
 			}
 			if (IsValid(CellInfo.RoomOccupancyActor))
 			{
+				//넥타르 증가(방_방)
+				if (NectarComp)
+				{
+					NectarComp->RetrieveNectar(CellInfo.RoomOccupancyActor);
+				}
 				CellInfo.RoomOccupancyActor->Destroy();
 			}
 			if (IsValid(CellInfo.WallAndDoorOccupancyActor))
 			{
+				//넥타르 증가(방_벽,문)
+				if (NectarComp)
+				{
+					NectarComp->RetrieveNectar(CellInfo.WallAndDoorOccupancyActor);
+				}
 				CellInfo.WallAndDoorOccupancyActor->Destroy();
 				TArray<FIntPoint> Coord = CellInfo.WallAndDoorOccupancyActor->GetComponentByClass<UPlaceInfoComponent>()->GetCellCoord();
 				for (int i = 0; i < Coord.Num(); i++)
@@ -341,6 +374,11 @@ void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType 
 			{
 				if (IsValid(CellInfo.CeilingOccupancyActor))
 				{
+					//넥타르 증가(함정_천장)
+					if (NectarComp)
+					{
+						NectarComp->RetrieveNectar(CellInfo.CeilingOccupancyActor);
+					}
 					CellInfo.CeilingOccupancyActor->Destroy();
 				}
 				
@@ -350,6 +388,11 @@ void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType 
 			{
 				if (IsValid(CellInfo.FloorOccupancyActor))
 				{
+					//넥타르 증가(함정_바닥)
+					if (NectarComp)
+					{
+						NectarComp->RetrieveNectar(CellInfo.FloorOccupancyActor);
+					}
 					CellInfo.FloorOccupancyActor->Destroy();
 				}
 				CellInfo.FloorOccupancyActor = nullptr;
@@ -359,10 +402,20 @@ void AGS_BuildManager::SetOccupancyData(FIntPoint InCellPoint, EDEditorCellType 
 		case EObjectType::DoorAndWall:
 			if (IsValid(CellInfo.FloorOccupancyActor))
 			{
+				//넥타르 증가(문,벽_바닥)
+				if (NectarComp)
+				{
+					NectarComp->RetrieveNectar(CellInfo.FloorOccupancyActor);
+				}
 				CellInfo.FloorOccupancyActor->Destroy();
 			}
 			if (IsValid(CellInfo.WallAndDoorOccupancyActor))
 			{
+				//넥타르 증가(문,벽_문,벽)
+				if (NectarComp)
+				{
+					NectarComp->RetrieveNectar(CellInfo.WallAndDoorOccupancyActor);
+				}
 				CellInfo.WallAndDoorOccupancyActor->Destroy();
 			}
 			CellInfo.FloorOccupancyActor = nullptr;
@@ -684,7 +737,7 @@ void AGS_BuildManager::PressedDel()
 					TArray<FIntPoint> CellCoords = PlaceInfoComp->GetCellCoord();
 					EObjectType ObjectType = PlaceInfoComp->GetObjectType();
 					ETrapPlacement TrapPlacement = PlaceInfoComp->GetTrapPlacement();
-					
+
 					EDEditorCellType TargetCellType = GetTargetCellType(ObjectType, TrapPlacement);
 					EDEditorCellType ConvertTargetCellType;
 					ConvertFindOccupancyData(TargetCellType, ConvertTargetCellType);
@@ -730,6 +783,9 @@ void AGS_BuildManager::ResetDungeonData()
 	}
 	
 	OccupancyData.Empty();
+
+	//넥타르 리셋
+	NectarComp->InitializeMaxAmount(NectarComp->GetMaxAmount());
 }
 
 void AGS_BuildManager::ChangeDecalType(FDataTableRowHandle* Data)
@@ -850,6 +906,7 @@ void AGS_BuildManager::SaveDungeonData()
         		ObjectData.CellCoord = PlaceInfo->GetCellCoord();
         		ObjectData.ObjectType = PlaceInfo->GetObjectType();
         		ObjectData.TrapPlacement = PlaceInfo->GetTrapPlacement();
+				ObjectData.ConstructionCost = PlaceInfo->ConstructionCost;
         	}
 
             SaveGameObject->AddSaveData(ObjectData);
@@ -944,7 +1001,7 @@ void AGS_BuildManager::LoadDungeonData()
 
 				if (UPlaceInfoComponent* PlaceInfoCompo = NewActor->FindComponentByClass<UPlaceInfoComponent>())
 				{
-					PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapPlacement, ObjectData.CellCoord);
+					PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapPlacement, ObjectData.CellCoord, ObjectData.ConstructionCost);
 					for (int i = 0; i < ObjectData.CellCoord.Num(); ++i)
 					{
 						EDEditorCellType TargetType = GetTargetCellType(ObjectData.ObjectType, ObjectData.TrapPlacement);
@@ -952,6 +1009,8 @@ void AGS_BuildManager::LoadDungeonData()
 						OccupancyData.FindOrAdd(ObjectData.CellCoord[i]).FloorOccupancyData = LoadGameObject->FloorOccupancyData.FindOrAdd(ObjectData.CellCoord[i]);
 						OccupancyData.FindOrAdd(ObjectData.CellCoord[i]).CeilingOccupancyData = LoadGameObject->CeilingOccupancyData.FindOrAdd(ObjectData.CellCoord[i]);
 					}
+					//넥타르 소모
+					NectarComp->SpendResource(PlaceInfoCompo->ConstructionCost);
 				}
 			}
 

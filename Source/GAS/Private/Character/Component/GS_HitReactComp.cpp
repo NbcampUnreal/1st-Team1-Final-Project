@@ -29,23 +29,16 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 			{
 				OwnerSeeker->GetSkillComp()->SkillsInterrupt();
 
-				OwnerSeeker->Multicast_SetIsFullBodySlot(true);
-				OwnerSeeker->Multicast_SetIsUpperBodySlot(false);
-
-				OwnerSeeker->SetMoveControlValue(false, false);
-				OwnerSeeker->SetSkillInputControl(false, false, false);
+				OwnerSeeker->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 
 				OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[static_cast<int>(ReactType)], Section);
 			}
-			OwnerCharacter->AllowHitReact();
-			OwnerCharacter->Multicast_SetCanHitReact(false);
+			OwnerCharacter->DisableHitReact(4.0f);
 		}
 		else if (ReactType == EHitReactType::Additive)
 		{
-
-			OwnerCharacter->Multicast_SetCanHitReact(false);
+			
 		}
-
 	}
 }
 

@@ -16,21 +16,17 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 		{
 			if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(Character->GetMesh()->GetAnimInstance()))
 			{
-				Character->Multicast_SetIsFullBodySlot(false);
-				Character->Multicast_SetIsUpperBodySlot(false);
+				Character->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 			}
 
-			/*if (!Character->CanHitReact)
-			{
-				Character->Multicast_SetCanHitReact(true);
-			}*/
-			
 			Character->CanChangeSeekerGait = true;
-			Character->SetSkillInputControl(true, true, true);
 			Character->SetMoveControlValue(true, true);
 			Character->SetLookControlValue(true, true);
+
+			Character->GetSkillComp()->ResetAllowedSkillsMask();
+			
 			Character->SetAimState(false);
 			Character->SetDrawState(false);
-			}
+		}
 	}
 }

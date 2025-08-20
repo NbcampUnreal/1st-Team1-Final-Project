@@ -73,9 +73,12 @@ void AGS_Guardian::RightMouse()
 {
 }
 
+void AGS_Guardian::StartCtrl()
+{
+}
+
 void AGS_Guardian::StopCtrl()
 {
-	
 }
 
 void AGS_Guardian::OnRep_MoveSpeed()
@@ -87,7 +90,7 @@ void AGS_Guardian::MeleeAttackCheck()
 {
 	if (HasAuthority())
 	{
-		GuardianState = EGuardianState::CtrlEnd;
+		GuardianState = EGuardianCtrlState::CtrlEnd;
 
 		const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 		const float MeleeAttackRange = 200.f;
@@ -180,20 +183,20 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 }
 
 
-void AGS_Guardian::OnRep_GuardianState()
-{
-	ClientGuardianState = GuardianState;
-}
+// void AGS_Guardian::OnRep_GuardianState()
+// {
+// 	ClientGuardianState = GuardianState;
+// }
 
-void AGS_Guardian::OnRep_GuardianDoSkillState()
-{
-	ClientGuardianDoSkillState = GuardianDoSkillState;
-}
+// void AGS_Guardian::OnRep_GuardianDoSkillState()
+// {
+// 	ClientGuardianDoSkillState = GuardianDoSkillState;
+// }
 
 void AGS_Guardian::QuitGuardianSkill()
 {
 	//reset skill state
-	GuardianState = EGuardianState::CtrlEnd;
+	GuardianState = EGuardianCtrlState::CtrlEnd;
 	GuardianDoSkillState = EGuardianDoSkill::None;
 	
 	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
@@ -229,6 +232,10 @@ void AGS_Guardian::MulticastRPCApplyHitStop_Implementation(AGS_Character* InDama
 	}
 	if (!HasAuthority())
 	{
+		if (!IsValid(InDamagedCharacter))
+		{
+			return;
+		}
 		CustomTimeDilation = 0.1f;
 		InDamagedCharacter->CustomTimeDilation = 0.1f;
 

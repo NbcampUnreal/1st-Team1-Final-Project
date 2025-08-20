@@ -14,7 +14,7 @@
 UGS_SkillComp::UGS_SkillComp()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	
+	CurAllowedSkillsMask = DefaultAllowedSkillsMask;
 }
 
 void UGS_SkillComp::ApplyCooldownModifier(ESkillSlot Slot, float Ratio)
@@ -112,15 +112,20 @@ void UGS_SkillComp::BeginPlay()
 	Super::BeginPlay();
 	
 	SetIsReplicated(true);
-
-	/*if (GetOwner()->HasAuthority())
-	{
-		//ServerRPCInitSkills();
-		InitSkills();
-	}*/
 	InitSkills();
 }
 
+bool UGS_SkillComp::IsSkillAllowed(ESkillSlot CompareSkillType)
+{
+	uint8 BitFlag = 0;
+	BitFlag |= (1 << static_cast<int32>(CompareSkillType));
+	return CurAllowedSkillsMask & BitFlag;
+}
+
+void UGS_SkillComp::SetCurAllowedSkillsMask(int8 BitMask)
+{
+	CurAllowedSkillsMask = BitMask;	
+}
 
 void UGS_SkillComp::InitSkills()
 {
@@ -150,6 +155,31 @@ void UGS_SkillComp::InitSkills()
 		SetSkill(ESkillSlot::Moving, SkillSet->MovingSkill);
 		SetSkill(ESkillSlot::Ultimate, SkillSet->UltimateSkill);
 		SetSkill(ESkillSlot::Rolling, SkillSet->RollingSkill);
+		SetSkill(ESkillSlot::Combo, SkillSet->ComboSkill);
+	}
+}
+
+void UGS_SkillComp::ResetAllowedSkillsMask()
+{
+	CurAllowedSkillsMask = DefaultAllowedSkillsMask;
+}
+
+void UGS_SkillComp::Server_TrySkillAnimationEnd_Implementation(ESkillSlot Slot)
+{
+	if (SkillMap.Contains(Slot))
+	{
+		SkillMap[Slot]->OnSkillAnimationEnd();
+	}
+}
+
+void UGS_SkillComp::TrySkillAnimationEnd(ESkillSlot Slot)
+{
+	if (GetOwner()->HasAuthority())
+	{
+		if (SkillMap.Contains(Slot))
+		{
+			SkillMap[Slot]->OnSkillAnimationEnd();
+		}
 	}
 }
 
@@ -173,6 +203,22 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 	Skill->Damage = Info.Damage;
 	Skill->SkillAnimMontages = Info.Montages;
 	Skill->SkillImage = Info.Image;
+
+
+	for (const FSkillAllow& Entry : Info.AllowSkillList)
+	{
+		const int32 Index = static_cast<int32>(Entry.Slot);
+
+		if (Index >= 0 && Index < 8) // uint8 제한
+		{
+			if (Entry.bAllow)
+			{
+				Skill->AllowSkillsMask |= (1 << Index);
+			}
+		}
+	}
+	
+	Skill-> AllowControlValue = Info.AllowControlValue;
 	
 	// VFX 정보 설정
 	Skill->SkillCastVFX = Info.SkillCastVFX;
@@ -192,31 +238,53 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 }
 
 
-void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
+void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
 {
 	if (!bCanUseSkill)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("TryActivateSkill failed: bCanUseSkill = false"));
 		return;
 	}
-
-	if (!GetOwner()->HasAuthority())
-	{		
-		Server_TryActiveSkill(Slot);
-		return;
-	}
 	
+	// IsSkillActive 는?
 	if (SkillMap.Contains(Slot))
 	{
-		if (SkillMap[Slot]->CanActive())
+		if (SkillMap[Slot]->CanActive()) // 지금 쿨다운 중이 아닌 경우 true
 		{
-			SkillsInterrupt();
-			SkillMap[Slot]->ActiveSkill();
-			
+			// 여기에서 검사해야 하네 지금 자신의 스킬은 사용할 수 있지만 이게 다른 스킬 도중에 호출된 건지는 알 수 없기 때문에
+
+			// 여기에서 Control flag 들 검사. 
+			AGS_Player* OwnerPlayer = Cast<AGS_Player>(GetOwner());
+			if(OwnerPlayer)
+			{
+				if (IsSkillAllowed(Slot)) // 현재 내가 허용하고 있는 스킬인지 검색.
+				{
+					UE_LOG(LogTemp, Warning, TEXT("허용된 스킬이 Active 되기를 원한다."));
+					
+					SkillsInterrupt();
+					SkillMap[Slot]->ActiveSkill();
+					SetCurAllowedSkillsMask(SkillMap[Slot]->AllowSkillsMask);
+
+					// 스킬 활성화 알림
+					if (GetOwner()->GetLocalRole() == ROLE_Authority)
+					{
+						Client_BroadcastSkillActivation(Slot);
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Active 되기를 원하는 스킬이 불허되었다."));
+				}
+			}
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("CanActive() = false"));
+			// 쿨타임 중이거나 사용할 수 없는 상태일 때 알림
+			if (GetOwner()->GetLocalRole() == ROLE_Authority)
+			{
+				Client_BroadcastSkillCooldownBlocked(Slot);
+			}
 		}
 	}
 	else
@@ -225,28 +293,31 @@ void UGS_SkillComp::TryActivateSkill(ESkillSlot Slot)
 	}
 }
 
-void UGS_SkillComp::TryDeactiveSkill(ESkillSlot Slot)
+void UGS_SkillComp::Client_BroadcastSkillActivation_Implementation(ESkillSlot Slot)
 {
-	if (!GetOwner()->HasAuthority())
-	{
-		Server_TryDeactiveSkill(Slot);
-		return;
-	}
-	
+	OnSkillActivated.Broadcast(Slot);
+}
+
+void UGS_SkillComp::Client_BroadcastHealCountChanged_Implementation(ESkillSlot Slot, int32 CurrentCount, int32 MaxCount)
+{
+	OnHealCountChanged.Broadcast(Slot, CurrentCount, MaxCount);
+}
+
+void UGS_SkillComp::Client_BroadcastSkillCooldownBlocked_Implementation(ESkillSlot Slot)
+{
+	OnSkillCooldownBlocked.Broadcast(Slot);
+}
+
+void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
+{	
 	if (SkillMap.Contains(Slot))
 	{
-		SkillMap[Slot]->DeactiveSkill();
+		SkillMap[Slot]->OnSkillCanceledByDebuff();
 	}
 }
 
-void UGS_SkillComp::TrySkillCommand(ESkillSlot Slot)
+void UGS_SkillComp::Server_TrySkillCommand_Implementation(ESkillSlot Slot)
 {
-	if (!GetOwner()->HasAuthority())
-	{
-		Server_TrySkillCommand(Slot);
-		return;
-	}
-
 	if (SkillMap.Contains(Slot))
 	{
 		if (UGS_SkillBase* Skill = SkillMap[Slot])
@@ -291,6 +362,7 @@ bool UGS_SkillComp::IsSkillActive(ESkillSlot Slot) const
 	{
 		return State->bIsActive;
 	}
+	
 	return false;
 }
 
@@ -370,13 +442,16 @@ void UGS_SkillComp::SkillsInterrupt()
 
 		if (Seeker->GetSkillComp()->IsSkillActive(slot.Key))
 		{
-			slot.Value->InterruptSkill();
-			if (Seeker->GetCharacterType() != ECharacterType::Merci)
+			slot.Value->InterruptSkill(); // 모든 스킬 interruptSkill()
+			/*if (Seeker->GetCharacterType() != ECharacterType::Merci)
 			{
-				Seeker->SetSkillInputControl(false, false, false);
-			}
+				//Seeker->SetSkillInputControl(false, false, false);
+				
+			}*/
 		}
 	}
+
+	//Seeker->GetSkillComp()->ResetAllowedSkillsMask(); // 모든 입력 가능 상태.
 }
 
 void UGS_SkillComp::HandleCooldownComplete(ESkillSlot Slot)
@@ -463,6 +538,9 @@ void UGS_SkillComp::InitializeSkillWidget(UGS_SkillWidget* InSkillWidget)
 			InSkillWidget->Initialize(SkillMap[Slot]);
 			
 			OnSkillCooldownChanged.AddUObject(InSkillWidget, &UGS_SkillWidget::OnSkillCoolTimeChanged);
+			OnHealCountChanged.AddUObject(InSkillWidget, &UGS_SkillWidget::OnHealCountChanged);
+			OnSkillActivated.AddDynamic(InSkillWidget, &UGS_SkillWidget::OnSkillActivated);
+			OnSkillCooldownBlocked.AddDynamic(InSkillWidget, &UGS_SkillWidget::OnSkillCooldownBlocked);
 		}
 	}
 }
@@ -475,21 +553,6 @@ UGS_SkillBase* UGS_SkillComp::GetSkillFromSkillMap(ESkillSlot Slot)
 		return SkillMap[Slot];
 	}
 	return nullptr;
-}
-
-void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
-{
-	TryDeactiveSkill(Slot);
-}
-
-void UGS_SkillComp::Server_TryActiveSkill_Implementation(ESkillSlot Slot)
-{
-	TryActivateSkill(Slot);
-}
-
-void UGS_SkillComp::Server_TrySkillCommand_Implementation(ESkillSlot Slot)
-{
-	TrySkillCommand(Slot);
 }
 
 void UGS_SkillComp::Multicast_PlayCastVFX_Implementation(ESkillSlot Slot, FVector Location, FRotator Rotation)

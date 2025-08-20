@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Character/Skill/GS_SkillBase.h"
@@ -14,7 +14,7 @@ public:
 	UGS_DrakharFly();
 	
 	virtual void ActiveSkill() override;
-	virtual void DeactiveSkill() override;
+	virtual void OnSkillCanceledByDebuff() override;
 	virtual void ExecuteSkillEffect() override;
 
 private:

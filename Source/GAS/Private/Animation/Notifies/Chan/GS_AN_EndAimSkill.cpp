@@ -9,14 +9,14 @@
 void UGS_AN_EndAimSkill::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                 const FAnimNotifyEventReference& EventReference)
 {
-	Super::Notify(MeshComp, Animation, EventReference);
+	/*Super::Notify(MeshComp, Animation, EventReference);
 
 	if (AGS_Chan* Character = Cast<AGS_Chan>(MeshComp->GetOwner()))
 	{
 		if (Character->HasAuthority())
 		{
 			Character->Multicast_StopSkillMontage(Character->GetCurrentMontage());
-			Character->GetSkillComp()->TryDeactiveSkill(ESkillSlot::Aiming);
+			Character->GetSkillComp()->Server_TrySkillAnimationEnd(ESkillSlot::Aiming);
 		}
-	}
-}
+	}*/
+} // 더는 사용되지 않음.

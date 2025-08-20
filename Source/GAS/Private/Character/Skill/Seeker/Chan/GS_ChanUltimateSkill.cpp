@@ -2,16 +2,14 @@
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
-#include "Character/Player/GS_Player.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Skill/GS_SkillSet.h"
-#include "AkAudioEvent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Engine/StaticMeshActor.h"
-#include "Kismet/GameplayStatics.h"
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/GS_TpsController.h"
@@ -27,23 +25,26 @@ UGS_ChanUltimateSkill::UGS_ChanUltimateSkill()
 
 void UGS_ChanUltimateSkill::ActiveSkill()
 {
-	if (!CanActive()) return;
 	Super::ActiveSkill();
+
+	// 쿨타임 측정 시작
+	StartCoolDown();
 	
+	// 구조물 충돌 확인 변수 초기화
 	bInStructureCrash = false;
-
-	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	OwnerPlayer->SetSkillInputControl(false, false, false);
-	if (OwnerCharacter->GetSkillComp())
+	
+	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, true);
-	}
-
-	// 궁극기 사운드 재생
-	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-	if (SkillInfo && SkillInfo->SkillStartSound)
-	{
-		OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+		// 궁극기 사운드 재생
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
+		
+		// 입력 제한 설정
+		//OwnerPlayer->SetSkillInputControl(false, false, false);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+		OwnerPlayer->SetMoveControlValue(false, false);
 	}
 
 	// 돌진 시작 (약간 딜레이)
@@ -51,28 +52,23 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	GetWorld()->GetTimerManager().SetTimer(DelayHandle, this, &UGS_ChanUltimateSkill::StartCharge, 0.5f, false);
 }
 
-void UGS_ChanUltimateSkill::ExecuteSkillEffect()
+void UGS_ChanUltimateSkill::OnSkillCanceledByDebuff()
 {
-
+	Super::OnSkillCanceledByDebuff();
 }
 
-void UGS_ChanUltimateSkill::DeactiveSkill()
+void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 {
-	Super::DeactiveSkill();
+	Super::OnSkillAnimationEnd();
 
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerPlayer->GetMesh()->GetAnimInstance()))
-	{
-		SeekerAnim->IsPlayingFullBodyMontage = false;
-		SeekerAnim->IsPlayingUpperBodyMontage = false;
-		OwnerPlayer->SetMoveControlValue(true, true);
-		OwnerPlayer->SetSkillInputControl(true, true, true);
-		OwnerPlayer->CanChangeSeekerGait = true;
-	}
-	if (OwnerCharacter->GetSkillComp())
-	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ultimate, false);
-	}
+	
+	OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+	OwnerPlayer->SetMoveControlValue(true, true);
+	OwnerPlayer->CanChangeSeekerGait = true;
+
+	// 스킬 상태 업데이트
+	SetIsActive(false);
 }
 
 void UGS_ChanUltimateSkill::InterruptSkill()
@@ -87,29 +83,27 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 	// 데이터 테이블에서 스킬 정보 가져오기
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 	
-	if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(HitActor))
+	if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(HitActor)) // 가디언일 경우
 	{
 		ApplyEffectToGuardian(Guardian);
 		
-		// 가디언 충돌 사운드 재생
-		if (OwnerPlayer && SkillInfo && SkillInfo->GuardianCollisionSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->GuardianCollisionSound);
+			AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 2); // 2 = Guardian
 		}
 		
 		EndCharge();
 	}
-	else if (AGS_Monster* Monster = Cast<AGS_Monster>(HitActor))
+	else if (AGS_Monster* Monster = Cast<AGS_Monster>(HitActor)) // 몬스터일 경우
 	{
 		if (!HitActors.Contains(Monster))
 		{
 			HitActors.Add(Monster);
 			ApplyEffectToDungeonMonster(Monster);
 			
-			// 몬스터 충돌 사운드 재생
-			if (OwnerPlayer && SkillInfo && SkillInfo->MonsterCollisionSound)
+			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 			{
-				OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->MonsterCollisionSound);
+				AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 1); // 1 = Monster
 			}
 		}
 	}
@@ -119,22 +113,28 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 	{
 		bInStructureCrash = true;
 		
-		// 벽 충돌 사운드 재생
-		if (OwnerPlayer && SkillInfo && SkillInfo->WallCollisionSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->WallCollisionSound);
+			AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 0); // 0 = Wall
 		}
 		
+		// 대시 종료
 		EndCharge();
 	}
 }
 
 void UGS_ChanUltimateSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
-	if (!Target) return;
+	if (!Target)
+	{
+		return;
+	}
 
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if (!OwnerPlayer) return;
+	if (!OwnerPlayer) 
+	{
+		return;
+	}
 
 	// 경직 디버프
 	if (UGS_DebuffComp* DebuffComp = Target->FindComponentByClass<UGS_DebuffComp>())
@@ -157,13 +157,6 @@ void UGS_ChanUltimateSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 	// 몬스터 넉백 적용
 	if (Target->GetCharacterMovement())
 	{
-		/*if (AAIController* AICon = Cast<AAIController>(Target->GetController()))
-		{
-			AICon->StopMovement();
-		}
-
-		Target->GetCharacterMovement()->SetMovementMode(MOVE_Walking);*/
-
 		Target->LaunchCharacter(KnockbackVelocity, true, true);
 	}
 
@@ -187,11 +180,35 @@ void UGS_ChanUltimateSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
     }
 }
 
-void UGS_ChanUltimateSkill::StartCharge()
+void UGS_ChanUltimateSkill::DeactiveSkill()
 {
-	bIsCharging = true;
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	if (OwnerPlayer)
+	{
+		// 넉백 Collision 설정
+		OwnerPlayer->UltimateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 	
-	// KnockBack Collision On
+	// 속도 조절
+	OwnerCharacter->Server_SetCharacterSpeed(1.0f);
+
+	// 자동 이동 종료
+	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
+	Controller->StopAutoMoveForward();
+
+	// 타이머 정리
+	GetWorld()->GetTimerManager().ClearTimer(ChargeTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(ChargeUpdateTimerHandle);
+
+	// 충돌 이력 초기화
+	HitActors.Empty();
+
+	Super::DeactiveSkill();
+}
+
+void UGS_ChanUltimateSkill::StartCharge()
+{	
+	// 넉백 Collision 켜기
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerPlayer->UltimateCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
@@ -213,9 +230,11 @@ void UGS_ChanUltimateSkill::StartCharge()
 
 	if (OwnerPlayer)
 	{
+		// 애니메이션 설정
 		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-		// 애니메이션 재생
+
+		// 스킬 애니메이션 재생
 		if (SkillAnimMontages[0])
 		{
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
@@ -237,11 +256,10 @@ void UGS_ChanUltimateSkill::StartCharge()
 	}
 }
 
-
 void UGS_ChanUltimateSkill::EndCharge()
 {
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if(bInStructureCrash)
+	if(bInStructureCrash) // 구조물에 부딪혔을 때
 	{
 		if (OwnerPlayer && SkillAnimMontages[2])
 		{
@@ -249,7 +267,7 @@ void UGS_ChanUltimateSkill::EndCharge()
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[2]);
 		}
 	}
-	else
+	else // 구조물이 아닌 곳에 부딪혔을 때
 	{
 		if (OwnerPlayer && SkillAnimMontages[1])
 		{
@@ -258,20 +276,5 @@ void UGS_ChanUltimateSkill::EndCharge()
 		}
 	}
 
-	
-	// EndCharge 안에서
-	OwnerPlayer->UltimateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	// 속도 조절
-	OwnerCharacter->Server_SetCharacterSpeed(1.0f);
-
-	// 자동 이동 종료
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->StopAutoMoveForward();
-
-	GetWorld()->GetTimerManager().ClearTimer(ChargeTimerHandle);
-	GetWorld()->GetTimerManager().ClearTimer(ChargeUpdateTimerHandle);
-
-	HitActors.Empty();
-
-	bIsCharging = false;
+	DeactiveSkill();
 }
