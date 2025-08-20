@@ -35,6 +35,8 @@ public:
 	virtual void LeftClickPressed_Implementation() override;
 	virtual void LeftClickRelease_Implementation() override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	// 화살 발사 VFX
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayArrowShotVFX(FVector Location, FRotator Rotation, int32 NumArrows);
@@ -52,6 +54,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Arrow")
 	int32 GetMaxChildArrows();
 
+	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;
 

@@ -6,8 +6,8 @@
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Weapon/Projectile/Seeker/GS_SwordAuraProjectile.h"
 #include "Kismet/GameplayStatics.h"
-#include "Character/GS_Character.h"
 #include "Character/GS_TpsController.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_AresAimingSkill::UGS_AresAimingSkill()
 {
@@ -21,24 +21,19 @@ void UGS_AresAimingSkill::ActiveSkill()
 	// 쿨타임 측정 시작
 	StartCoolDown();
 
-	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
+	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
+		// 스킬 시작 사운드 재생
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
+
 		// 스킬 애니메이션 재생
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 
-		// 스킬 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
-		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
-		}
-
 		// 입력 제한
-		if (AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController()))
-		{
-			Controller->SetLookControlValue(false, false);
-		}
-		OwnerPlayer->SetSkillInputControl(false, false, false, false);
+		OwnerPlayer->SetMoveControlValue(false, false);
 	}
 	
 	// 투사체 1차 발사
@@ -64,12 +59,9 @@ void UGS_AresAimingSkill::InterruptSkill()
 
 void UGS_AresAimingSkill::DeactiveSkill()
 {
+	/*AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
 	// 입력 제한 설정
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->SetLookControlValue(true, true);
-
-	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
-	AresCharacter->SetSkillInputControl(true, true, true);
+	AresCharacter->SetLookControlValue(true, true);*/
 
 	Super::DeactiveSkill();
 }

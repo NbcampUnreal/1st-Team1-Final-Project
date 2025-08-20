@@ -14,6 +14,11 @@ void UGS_DrakharWingRush::ActiveSkill()
 {
 	Super::ActiveSkill();
 	
+	if (!CanActive())
+	{
+		return;
+	}
+	
 	ExecuteSkillEffect();
 }
 
@@ -27,15 +32,19 @@ void UGS_DrakharWingRush::ExecuteSkillEffect()
 	}
 
 	//server logic
-	if (OwnerCharacter)
-	{
-		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
-	}
-	
 	AGS_Guardian* Guardian = Cast<AGS_Guardian>(OwnerCharacter);
 	if (Guardian)
 	{
 		Guardian->GuardianDoSkillState = EGuardianDoSkill::Moving;	
 	}
+	
+	StartCoolDown();
+	
+	if (OwnerCharacter)
+	{
+		//play montage, except server
+		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
+	}
+	
 }
 

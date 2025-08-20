@@ -13,7 +13,7 @@ class UWidgetComponent;
 
 //check ctrl input
 UENUM(BlueprintType)
-enum class EGuardianState : uint8
+enum class EGuardianCtrlState : uint8
 {
 	None,
 	CtrlUp,
@@ -45,16 +45,11 @@ public:
 	UPROPERTY()
 	TObjectPtr<UGS_DrakharAnimInstance> GuardianAnim;
 
-	UPROPERTY(ReplicatedUsing=OnRep_GuardianState)
-	EGuardianState GuardianState;
+	UPROPERTY(Replicated)
+	EGuardianCtrlState GuardianState;
 
-	UPROPERTY(ReplicatedUsing=OnRep_GuardianDoSkillState)
+	UPROPERTY(Replicated)
 	EGuardianDoSkill GuardianDoSkillState;
-
-	UPROPERTY()
-	EGuardianState ClientGuardianState;
-	UPROPERTY()
-	EGuardianDoSkill ClientGuardianDoSkillState;
 	
 	UPROPERTY(ReplicatedUsing=OnRep_MoveSpeed)
 	float MoveSpeed;
@@ -66,8 +61,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UGS_CameraShakeComponent> CameraShakeComponent;
 	
-	FORCEINLINE UGS_CameraShakeComponent* GetCameraShakeComponent() const { return CameraShakeComponent; }
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (DisplayName = "HitStop Camera Shake Info"))
 	FGS_CameraShakeInfo HitStopShakeInfo;
 
@@ -75,7 +68,8 @@ public:
 	virtual void Ctrl();
 	virtual void CtrlStop();
 	virtual void RightMouse();
-	
+
+	virtual void StartCtrl();
 	virtual void StopCtrl();
 	
 	UFUNCTION()
@@ -90,12 +84,6 @@ public:
 	
 	//damage player in TSet
 	void ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& DamagedCharacters, float PlusDamge);
-	
-	UFUNCTION()
-	void OnRep_GuardianState();
-	
-	UFUNCTION()
-	void OnRep_GuardianDoSkillState();
 
 	//[quit skill - server logic]
 	UFUNCTION(BlueprintCallable)
@@ -111,6 +99,8 @@ public:
 
 	// 몬스터 조준 3D UI 관리
 	void ShowTargetUI(bool bIsActive);
+
+	FORCEINLINE UGS_CameraShakeComponent* GetCameraShakeComponent() const { return CameraShakeComponent; }
 	
 protected:
 	float NormalMoveSpeed;
@@ -134,7 +124,4 @@ private:
 	//set world time (default -> 1.f)
 	UPROPERTY()
 	float HitStopTimeDilation = 0.1f;
-	
-	UPROPERTY()
-	TArray<AGS_Character*> EndHitStopDamagedCharacters;
 };

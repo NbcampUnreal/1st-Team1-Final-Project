@@ -42,10 +42,10 @@ void UGS_DrakharAnimInstance::AnimNotify_DraconicFury()
 	Drakhar->ServerRPCSpawnDraconicFury();
 }
 
-void UGS_DrakharAnimInstance::AnimNotify_CtrlSkillEnd()
-{
-	Drakhar->ServerRPCStopCtrl();
-}
+// void UGS_DrakharAnimInstance::AnimNotify_CtrlSkillEnd()
+// {
+// 	Drakhar->ServerRPCStopCtrl();
+// }
 
 void UGS_DrakharAnimInstance::AnimNotify_FinishCtrlSkill()
 {

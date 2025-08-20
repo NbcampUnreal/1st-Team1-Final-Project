@@ -14,6 +14,7 @@
 #include "System/GS_PlayerRole.h"
 #include "UI/Character/GS_DrakharFeverGauge.h"
 #include "UI/Character/GS_HPWidget.h"
+#include "UI/Component/GS_WidgetShakeHelper.h"
 
 void UGS_BossHP::NativeConstruct()
 {
@@ -26,6 +27,22 @@ void UGS_BossHP::NativeConstruct()
 	// 피버모드 상태 초기화
 	bLastFeverMode = false;
 	
+	// 흔들림 효과 초기화
+	LastHPPercent = 1.0f;
+	
+	// 흔들림 헬퍼 생성 및 설정
+	if (!ShakeHelper)
+	{
+		ShakeHelper = NewObject<UGS_WidgetShakeHelper>(this);
+		ShakeHelper->Initialize(GetWorld());
+	}
+	
+	// BossHPBar가 있으면 흔들림 헬퍼에 타겟으로 설정
+	if (ShakeHelper && BossHPBar)
+	{
+		ShakeHelper->SetTargetWidget(BossHPBar);
+	}
+	
 	// 즉시 Guardian 위젯 초기화 시도
 	InitGuardianHPWidget();
 }
@@ -37,6 +54,12 @@ void UGS_BossHP::NativeDestruct()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(FeverModeCheckTimer);
 		GetWorld()->GetTimerManager().ClearTimer(GuardianInitRetryTimer);
+	}
+	
+	// 흔들림 헬퍼 정리
+	if (ShakeHelper)
+	{
+		ShakeHelper->Cleanup();
 	}
 	
 	Super::NativeDestruct();
@@ -214,6 +237,23 @@ void UGS_BossHP::OnBossHPChanged(UGS_StatComp* InStatComp)
 	float CurrentHP = InStatComp->GetCurrentHealth();
 	float MaxHP = InStatComp->GetMaxHealth();
 	float HPPercent = CurrentHP / MaxHP;
+
+	// 피해 감지 및 흔들림 효과
+	if (HPPercent < LastHPPercent)
+	{
+		// 데미지를 받은 경우
+		float DamageRatio = LastHPPercent - HPPercent; // 피해 비율 계산
+		float ActualDamage = DamageRatio * MaxHP; // 실제 피해량 계산
+		
+		// 흔들림 헬퍼를 사용한 피해 효과 시작
+		if (IsValid(ShakeHelper) && ActualDamage > 1.0f)
+		{
+			ShakeHelper->StartShakeEffect(DamageRatio, ActualDamage);
+		}
+	}
+	
+	// HP 비율 업데이트
+	LastHPPercent = HPPercent;
 
 	// Progress Bar 업데이트
 	if (IsValid(BossHPBar))

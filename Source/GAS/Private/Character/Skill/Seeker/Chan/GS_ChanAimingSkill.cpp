@@ -2,6 +2,7 @@
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
@@ -30,36 +31,22 @@ void UGS_ChanAimingSkill::ActiveSkill()
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		// Change Slot
-		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(true);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::UpperBody);
+		
 		OwnerPlayer->Multicast_SetMustTurnInPlace(true);
 		OwnerPlayer->SetSeekerGait(EGait::Walk);
-
-		// Control Input Key
-		OwnerPlayer->SetSkillInputControl(false, false, true);
-
 		OwnerPlayer->CanChangeSeekerGait = false;
-		OwnerPlayer->SetSkillInputControl(false, false, false);
-		OwnerPlayer->SetMoveControlValue(true, true);
-		OwnerPlayer->SetLookControlValue(true, true);
 
 		// Play Montage
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 		OwnerPlayer->CanChangeSeekerGait = false;
 
-		// Skill State
-		if (OwnerCharacter->GetSkillComp())
+		// 스킬 시작 사운드 재생
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, true);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
 
-		// 스킬 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
-		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
-		}
-	
 		// =======================
 		// VFX 재생 - 컴포넌트 RPC 사용
 		// =======================
@@ -92,19 +79,19 @@ void UGS_ChanAimingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->Multicast_SetMustTurnInPlace(false);
 		OwnerPlayer->SetSeekerGait(OwnerPlayer->GetLastSeekerGait());
 		// Change Slot
-		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 
 		OwnerPlayer->CanChangeSeekerGait = true;
-		OwnerPlayer->SetSkillInputControl(true, true, true);
+		
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->SetLookControlValue(true, true);
 
-		SetIsActive(false);
+		SetIsActive(false); // 이걸 할 필요가 있나?
 
 		// =======================
 		// 스킬 종료 VFX 재생
 		// =======================
+		
 		if (OwningComp)
 		{
 			FVector SkillLocation = OwnerCharacter->GetActorLocation();
@@ -119,20 +106,31 @@ void UGS_ChanAimingSkill::OnSkillAnimationEnd()
 void UGS_ChanAimingSkill::OnSkillCommand()
 {
 	Super::OnSkillCommand();
+	UE_LOG(LogTemp, Warning, TEXT("Aiming Skill, OnSkillCommand"));
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{		
+	{
+		if (!OwnerPlayer->GetSkillComp()->IsSkillAllowed(ESkillSlot::Aiming))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Aiming Skill, OnSkillCommand, IsSkillAllowd is false"));
+			return;
+		}
+		
 		// 애니메이션 설정
 		OwnerPlayer->Multicast_SetMustTurnInPlace(false);
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 
 		// 입력 제한 설정
 		OwnerPlayer->SetLookControlValue(false, false);
 		OwnerPlayer->SetMoveControlValue(false, false);
-		OwnerPlayer->SetSkillInputControl(false, false, false);
+
+		// bitmask flag
+		OwnerPlayer->GetSkillComp()->SetCurAllowedSkillsMask(0);
 		
 		// Play Montage
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+
+		// Set HitReact
+		OwnerPlayer->SetCanHitReact(false);
 		
 		// Forward Jump
 		const FVector Forward = OwnerPlayer->GetActorForwardVector();
@@ -140,9 +138,9 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		OwnerPlayer->LaunchCharacter(JumpVelocity, true, true);
 
 		// 방패 슬램 사운드 재생
-		if (OwnerPlayer->AimingSkillSlamSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(OwnerPlayer->AimingSkillSlamSound);
+			AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 0); // 0 = Wall
 		}
 
 		// =======================
@@ -252,6 +250,9 @@ void UGS_ChanAimingSkill::OnShieldSlam()
 			}
 		}
 	}
+
+	// Set HitReact
+	OwnerPlayer->SetCanHitReact(true);
 
 	// 스킬 종료
 	DeactiveSkill();

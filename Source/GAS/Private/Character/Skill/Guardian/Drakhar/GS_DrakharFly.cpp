@@ -13,6 +13,8 @@ UGS_DrakharFly::UGS_DrakharFly()
 
 void UGS_DrakharFly::ActiveSkill()
 {
+	Super::ActiveSkill();
+	
 	if (!CanActive())
 	{
 		return;
@@ -23,11 +25,6 @@ void UGS_DrakharFly::ActiveSkill()
 	}
 
 	bIsFlying = true;
-	
-	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
-	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ready, true);
-	}
 	
 	if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter))
 	{
@@ -41,16 +38,11 @@ void UGS_DrakharFly::OnSkillCanceledByDebuff()
 {
 	bIsFlying = false;
 	
-	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
-	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ready, false);
-	}
-	
 	if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter))
 	{
 		Drakhar->MulticastRPC_OnFlyEnd();
-		Drakhar->ClientGuardianDoSkillState = EGuardianDoSkill::None;
 		Drakhar->GuardianDoSkillState = EGuardianDoSkill::None;
+		Drakhar->GuardianState = EGuardianCtrlState::CtrlEnd;
 	}
 	
 	ExecuteSkillEffect();

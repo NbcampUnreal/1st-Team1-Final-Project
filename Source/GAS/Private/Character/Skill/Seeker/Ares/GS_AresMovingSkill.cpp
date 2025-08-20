@@ -13,6 +13,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Character/GS_TpsController.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 
 UGS_AresMovingSkill::UGS_AresMovingSkill()
@@ -29,18 +30,14 @@ void UGS_AresMovingSkill::ActiveSkill()
 		// 스킬 애니메이션 재생
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 
-		// 스킬 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
+		// 차징 루프 사운드 재생 (준비 동작)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			AudioComp->PlaySkillLoopSoundFromDataTable(CurrentSkillType);
 		}
-	}
 
-	// 입력 제한
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->SetMoveControlValue(false, false);
-	OwnerCharacter->SetSkillInputControl(false, false, false);
+		OwnerPlayer->SetMoveControlValue(false, false);
+	}
 
 	// 차징 시작
 	ChargingStartTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
@@ -74,6 +71,15 @@ void UGS_AresMovingSkill::OnSkillCommand()
 
 	Super::OnSkillCommand();
 
+	// 차징 루프 사운드 정지 및 돌진 사운드 재생
+	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		// 차징 사운드 정지
+		AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
+		// 돌진 사운드 재생
+		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+	}
+
 	// 차징 종료
 	OwnerCharacter->GetWorld()->GetTimerManager().ClearTimer(ChargingTimerHandle);
 
@@ -104,7 +110,7 @@ void UGS_AresMovingSkill::OnSkillCommand()
 void UGS_AresMovingSkill::InterruptSkill()
 {
 	Super::InterruptSkill();
-	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	//AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
 	SetIsActive(false);
 }
 
@@ -112,12 +118,24 @@ void UGS_AresMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
 	// 데미지
 	UGameplayStatics::ApplyDamage(Target, 50.0f, OwnerCharacter->GetController(), OwnerCharacter, nullptr);
+	
+	// 몬스터 충돌 사운드 재생
+	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 1); // 1: Monster
+	}
 }
 
 void UGS_AresMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
 	// 데미지
 	UGameplayStatics::ApplyDamage(Target, 50.0f, OwnerCharacter->GetController(), OwnerCharacter, nullptr);
+	
+	// 가디언 충돌 사운드 재생
+	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 2); // 2: Guardian
+	}
 }
 
 void UGS_AresMovingSkill::UpdateCharging()
@@ -215,13 +233,21 @@ void UGS_AresMovingSkill::DeactiveSkill()
 	GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
 
 	// 입력 제한 설정
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->SetMoveControlValue(true, true);
-	OwnerCharacter->SetSkillInputControl(true, true, true);
+	/*AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
+	Controller->SetMoveControlValue(true, true);*/
+	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	AresCharacter->SetMoveControlValue(true, true);
+	//OwnerCharacter->SetSkillInputControl(true, true, true);
 
 	// 원래대로 Block으로 되돌리기
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+
+	// 스킬 종료 사운드 재생
+	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+	}
 
 	Super::DeactiveSkill();
 }

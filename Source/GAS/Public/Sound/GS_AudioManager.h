@@ -44,18 +44,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio|Manager")
 	void PlayEvent(UAkAudioEvent* Event, AActor* Context);
 
-	// === 맵 BGM 관리 함수들 (기존 전투 BGM과 병행 운영) ===
+	// === 맵 BGM 관리 함수들 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "맵 BGM 시작"))
 	void StartMapBGM(AActor* Context);
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "전투 전환 (맵 BGM 감소)"))
-	void FadeMapBGMForCombat(AActor* Context, float FadeTime = 2.0f);
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "평상시 복귀 (맵 BGM 복원)"))
-	void RestoreMapBGMFromCombat(AActor* Context, float FadeTime = 3.0f);
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "맵 BGM 볼륨 설정"))
-	void SetMapBGMVolume(float Volume, AActor* Context = nullptr, float FadeTime = 1.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "맵 BGM 정지"))
 	void StopMapBGM(AActor* Context = nullptr);
@@ -77,12 +68,6 @@ public:
 	// === 멀티플레이어 지원 함수들 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio|Multiplayer", meta = (DisplayName = "모든 클라이언트 맵 BGM 시작"))
 	void StartMapBGMForAllClients();
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|Multiplayer", meta = (DisplayName = "클라이언트 상태 확인"))
-	bool IsClientReadyForAudio() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|Debug", meta = (DisplayName = "BGM 상태 로깅"))
-	void LogCurrentBGMStatus() const;
 	
 	// 현재 재생 중인 전투 BGM Stop Event 가져오기
 	UAkAudioEvent* GetCurrentCombatMusicStopEvent() const { return CurrentCombatMusicStopEvent; }
@@ -120,9 +105,29 @@ private:
 	UPROPERTY()
 	UAkAudioEvent* DefaultCombatStopEvent;
 
-	// 맵 BGM 페이드인 타이머 핸들
+	// 맵 BGM 페이드인/아웃 타이머 핸들
 	FTimerHandle MapBGMFadeInTimerHandle;
+	FTimerHandle MapBGMFadeOutTimerHandle;
 
 	// RTPC 헬퍼 함수
 	void SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context, float InterpolationTime = 0.0f);
+
+	/**
+	* @brief 오디오 에셋의 유효성을 검사합니다.
+	* @return 모든 필수 에셋이 로드되었으면 true, 그렇지 않으면 false
+	*/
+	bool ValidateAudioAssets();
+
+	/**
+	* @brief 현재 환경에서 오디오 처리가 허용되는지 확인합니다.
+	* @return 전용 서버가 아닌 경우 true, 전용 서버인 경우 false
+	*/
+	bool IsAudioProcessingAllowed() const;
+
+	/**
+	* @brief 현재 게임 모드(TPS/RTS)에 따라 BGM을 재생하거나 정지할 대상 액터를 결정합니다.
+	* @param Context 컨텍스트로 제공된 액터 (옵셔널)
+	* @return 결정된 타겟 액터. RTS 모드이거나 적절한 Pawn이 없는 경우 nullptr을 반환할 수 있습니다.
+	*/
+	AActor* GetTargetActorForPlayback(AActor* Context = nullptr);
 };

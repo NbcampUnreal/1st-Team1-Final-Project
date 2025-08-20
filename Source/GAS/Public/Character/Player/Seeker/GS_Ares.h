@@ -28,48 +28,51 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Projectile")
 	TSubclassOf<AGS_SwordAuraProjectile> AresProjectileClass;
 
-	virtual void OnComboAttack() override;
+	/*virtual void OnComboAttack() override;*/
 
 	virtual void ServerAttackMontage() override;
 
 	virtual void MulticastPlayComboSection() override;
 
 	// ===============
-	// 전용 공격 사운드
+	// 전용 공격 사운드 (레거시)
 	// ===============
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Legacy")
 	UAkAudioEvent* SwordSwingSound;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Legacy")
 	UAkAudioEvent* SwordSwingStopEvent;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Legacy")
 	UAkAudioEvent* FinalAttackExtraSound;  // 4번째 공격 추가 사운드
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Voice|Legacy")
+	UAkAudioEvent* AttackVoiceSound;
+
+	// ===============
+	// 콤보별 공격 사운드 (개선된 시스템)
+	// ===============
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Combo", meta = (ToolTip = "각 콤보별 검 휘두르기 사운드 (Attack1, Attack2, Attack3, Attack4)"))
+	TArray<UAkAudioEvent*> ComboSwingSounds;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Combo", meta = (ToolTip = "각 콤보별 공격 보이스 사운드 (Attack1, Attack2, Attack3, Attack4)"))
+	TArray<UAkAudioEvent*> ComboVoiceSounds;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Combo", meta = (ToolTip = "각 콤보별 추가 특별 사운드 (선택사항)"))
+	TArray<UAkAudioEvent*> ComboExtraSounds;
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX|Attack")
 	class UNiagaraSystem* FinalAttackHitVFX; // 4번째 공격 추가 VFX
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Voice")
-	UAkAudioEvent* AttackVoiceSound;
 	
 	// 사운드 중첩 방지를 위한 현재 재생 중인 사운드 ID
 	UPROPERTY()
 	int32 CurrentSoundPlayingID = -1;
-
-	UFUNCTION()
-	void ResetAttackSoundSequence();
 
 	// ===============
 	// 타격 처리 관련
 	// ===============
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnAttackHit(int32 ComboIndex);
-
-	// ===============
-	// 사운드 멀티캐스트 관련
-	// ===============
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_StopAttackSound();
 
 protected:
 	// Called when the game starts or when spawned

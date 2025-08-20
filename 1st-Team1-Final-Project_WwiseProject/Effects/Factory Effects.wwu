@@ -590,7 +590,7 @@
 								<Effect Name="High_Pass_60Hz" ID="{F9627628-0B10-4272-BC30-D4C20423CB38}" PluginName="Wwise Parametric EQ" CompanyID="0" PluginID="105" PluginType="3">
 									<PropertyList>
 										<Property Name="FilterTypeBand1" Type="int32" Value="1"/>
-										<Property Name="FrequencyBand1" Type="Real32" Value="60"/>
+										<Property Name="FrequencyBand1" Type="Real32" Value="80"/>
 										<Property Name="OnOffBand2" Type="bool" Value="False"/>
 										<Property Name="OnOffBand3" Type="bool" Value="False"/>
 									</PropertyList>
@@ -1292,7 +1292,7 @@
 										<Property Name="PreDelay" Type="Real32" Value="12"/>
 										<Property Name="ReverbLevel" Type="Real32" Value="-10"/>
 										<Property Name="RoomShape" Type="Real32" Value="55"/>
-										<Property Name="RoomSize" Type="Real32" Value="20"/>
+										<Property Name="RoomSize" Type="Real32" Value="10"/>
 										<Property Name="StereoWidth" Type="Real32" Value="90"/>
 									</PropertyList>
 								</Effect>
@@ -1545,11 +1545,12 @@
 								<Effect Name="Standard" ID="{1A2EAB31-6283-4C0D-89B2-F050DF89D421}" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
 									<PropertyList>
 										<Property Name="DelayTime" Type="Real32" Value="1"/>
-										<Property Name="FeedBackLevel" Type="Real32" Value="0.7"/>
+										<Property Name="FeedBackLevel" Type="Real32" Value="0.5"/>
 										<Property Name="FeedForwardLevel" Type="Real32" Value="0.7"/>
-										<Property Name="ModDepth" Type="Real32" Value="65"/>
+										<Property Name="ModDepth" Type="Real32" Value="70"/>
 										<Property Name="ModPWM" Type="Real32" Value="0"/>
-										<Property Name="ModWaveform" Type="int32" Value="1"/>
+										<Property Name="ModWaveform" Type="int32" Value="3"/>
+										<Property Name="WetDryMix" Type="Real32" Value="20"/>
 									</PropertyList>
 								</Effect>
 								<Effect Name="Deep" ID="{76753DA8-3DCF-4812-A726-2745812F6C1B}" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
@@ -1627,6 +1628,7 @@
 								<Effect Name="Few_Odd_Harm_Notches" ID="{3B5685A6-6274-4292-B5B9-32AFE28DB80B}" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
 									<PropertyList>
 										<Property Name="DelayTime" Type="Real32" Value="1"/>
+										<Property Name="DryLevel" Type="Real32" Value="0.6"/>
 										<Property Name="EnableLFO" Type="bool" Value="False"/>
 										<Property Name="WetDryMix" Type="Real32" Value="80"/>
 									</PropertyList>

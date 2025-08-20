@@ -2,16 +2,14 @@
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
-#include "Character/Player/GS_Player.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Skill/GS_SkillSet.h"
-#include "AkAudioEvent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Engine/StaticMeshActor.h"
-#include "Kismet/GameplayStatics.h"
 #include "Character/Debuff/EDebuffType.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/GS_TpsController.h"
@@ -34,16 +32,19 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	
 	// 구조물 충돌 확인 변수 초기화
 	bInStructureCrash = false;
-
-	// 입력 제한 설정
-	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	OwnerPlayer->SetSkillInputControl(false, false, false);
-
-	// 궁극기 사운드 재생
-	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-	if (SkillInfo && SkillInfo->SkillStartSound)
+	
+	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+		// 궁극기 사운드 재생
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
+		
+		// 입력 제한 설정
+		//OwnerPlayer->SetSkillInputControl(false, false, false);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+		OwnerPlayer->SetMoveControlValue(false, false);
 	}
 
 	// 돌진 시작 (약간 딜레이)
@@ -54,7 +55,6 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 void UGS_ChanUltimateSkill::OnSkillCanceledByDebuff()
 {
 	Super::OnSkillCanceledByDebuff();
-
 }
 
 void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
@@ -62,14 +62,10 @@ void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 	Super::OnSkillAnimationEnd();
 
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
-	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerPlayer->GetMesh()->GetAnimInstance()))
-	{
-		SeekerAnim->IsPlayingFullBodyMontage = false;
-		SeekerAnim->IsPlayingUpperBodyMontage = false;
-		OwnerPlayer->SetMoveControlValue(true, true);
-		OwnerPlayer->SetSkillInputControl(true, true, true);
-		OwnerPlayer->CanChangeSeekerGait = true;
-	}
+	
+	OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+	OwnerPlayer->SetMoveControlValue(true, true);
+	OwnerPlayer->CanChangeSeekerGait = true;
 
 	// 스킬 상태 업데이트
 	SetIsActive(false);
@@ -91,10 +87,9 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 	{
 		ApplyEffectToGuardian(Guardian);
 		
-		// 가디언 충돌 사운드 재생
-		if (OwnerPlayer && SkillInfo && SkillInfo->GuardianCollisionSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->GuardianCollisionSound);
+			AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 2); // 2 = Guardian
 		}
 		
 		EndCharge();
@@ -106,10 +101,9 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 			HitActors.Add(Monster);
 			ApplyEffectToDungeonMonster(Monster);
 			
-			// 몬스터 충돌 사운드 재생
-			if (OwnerPlayer && SkillInfo && SkillInfo->MonsterCollisionSound)
+			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 			{
-				OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->MonsterCollisionSound);
+				AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 1); // 1 = Monster
 			}
 		}
 	}
@@ -119,10 +113,9 @@ void UGS_ChanUltimateSkill::HandleUltimateCollision(AActor* HitActor, UPrimitive
 	{
 		bInStructureCrash = true;
 		
-		// 벽 충돌 사운드 재생
-		if (OwnerPlayer && SkillInfo && SkillInfo->WallCollisionSound)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->WallCollisionSound);
+			AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 0); // 0 = Wall
 		}
 		
 		// 대시 종료

@@ -25,6 +25,13 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UTexture2D* SkillImage;
 
+	UPROPERTY(EditDefaultsOnly)
+	int8 AllowSkillsMask;
+
+	UPROPERTY(EditDefaultsOnly)
+	FControlValue AllowControlValue;
+	
+
 	// VFX 관련 속성들 (데이터 테이블에서 설정됨)
 	UPROPERTY(BlueprintReadOnly, Category = "VFX")
 	TObjectPtr<UNiagaraSystem> SkillCastVFX;

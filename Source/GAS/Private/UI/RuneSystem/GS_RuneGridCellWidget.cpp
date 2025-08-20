@@ -91,6 +91,11 @@ void UGS_RuneGridCellWidget::SetPreviewVisualState(EGridCellVisualState NewState
 			PreviewImage->SetVisibility(ESlateVisibility::Visible);
 			PreviewImage->SetColorAndOpacity(FLinearColor(0.f, 1.f, 0.f, 0.2f));
 			break;
+		case EGridCellVisualState::ReplaceExisting:
+			CellBG->SetVisibility(ESlateVisibility::Hidden);
+			PreviewImage->SetVisibility(ESlateVisibility::Visible);
+			PreviewImage->SetColorAndOpacity(FLinearColor(1.f, 0.65f, 0.f, 0.2f)); // 주황색
+			break;
 		case EGridCellVisualState::Invalid:
 			CellBG->SetVisibility(ESlateVisibility::Hidden);
 			PreviewImage->SetVisibility(ESlateVisibility::Visible);

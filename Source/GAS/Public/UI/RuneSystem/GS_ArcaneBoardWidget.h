@@ -15,6 +15,8 @@ class UGS_DragVisualWidget;
 class UGS_RuneTooltipWidget;
 class UGS_ArcaneBoardManager;
 class UGS_ArcaneBoardLPS;
+class UGS_CommonTwoBtnPopup;
+class UButton;
 
 /**
  * 아케인 보드 메인 위젯
@@ -106,10 +108,19 @@ public:
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 
-	class UButton* ApplyButton;
+	UButton* ApplyButton;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UButton* ResetButton;
+	UButton* ResetButton;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UButton* PresetButton1;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UButton* PresetButton2;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UButton* PresetButton3;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 
@@ -176,6 +187,28 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	USoundBase* RuneConnectionBonusSound;
 
+	// 프리셋 관련
+	UPROPERTY()
+	int32 PendingPresetIndex;
+
+	UFUNCTION()
+	void OnPresetButton1Clicked();
+
+	UFUNCTION()
+	void OnPresetButton2Clicked();
+
+	UFUNCTION()
+	void OnPresetButton3Clicked();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard|Preset")
+	void UpdatePresetButtonVisuals();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ArcaneBoard")
+	TSubclassOf<UGS_CommonTwoBtnPopup> PresetSaveConfirmPopupClass;
+
+	UPROPERTY()
+	UGS_CommonTwoBtnPopup* PresetSaveConfirmPopup;
+
 private:
 	void BindToLPS();
 	void UnbindFromLPS();
@@ -192,4 +225,14 @@ private:
 	void ShowTooltip(uint8 RuneID, const FVector2D& MousePos);
 	bool ShouldShowTooltip() const;
 	bool IsMouseOverTooltipWidget(const FVector2D& ScreenPos);
+
+	// 프리셋 관련
+	void ShowPresetSaveConfirmPopup(int32 TargetPresetIndex);
+	void SwitchToPreset(int32 PresetIndex);
+
+	UFUNCTION()
+	void OnPresetSaveYes();
+
+	UFUNCTION()
+	void OnPresetSaveNo();
 };

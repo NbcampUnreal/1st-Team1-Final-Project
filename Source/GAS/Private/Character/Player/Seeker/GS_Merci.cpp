@@ -2,6 +2,7 @@
 
 
 #include "Character/Player/Seeker/GS_Merci.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -109,15 +110,15 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		return;
 	}
 
-	// 피격 애니메이션 제한
-	Server_SetCanHitReact(false);
-
+	// DrawBow 가 Client 외에 Server 에서 호출될 일이 있나? Client 에서 해당 함수가 호출되었다면 이미 쥐에서 Return 으로 막히는 거 아닌가?
 	if (!GetDrawState())
 	{
 		if (WidgetCrosshair)
 		{
 			WidgetCrosshair->PlayAimAnim(true);
 		}
+
+		// 줌 시작
 		if(!GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
 		{
 			Client_StartZoom();
@@ -129,7 +130,10 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		UE_LOG(LogTemp, Warning, TEXT("GetDrawState=false pass: %s"), GetDrawState()?TEXT("true") : TEXT("false"));
 		UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage()"))
 		Multicast_PlayDrawMontage(DrawMontage);
-		SetDrawState(true); // 상태 전환
+
+		// 활 상태 업데이트
+		SetDrawState(true);
+		SetAimState(false);
 		Multicast_SetMustTurnInPlace(true);
 		
 		// 활 당기는 사운드 재생 (멀티캐스트로 변경)
@@ -140,6 +144,7 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		UE_LOG(LogTemp, Warning, TEXT("bIsDrawState true"));
 	}
 
+	// 걷기 상태 설정
 	SetSeekerGait(EGait::Walk);
 }
 
@@ -156,36 +161,34 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		WidgetCrosshair->PlayAimAnim(false);
 	}
 
+	// 줌 중지
 	if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
 	{
 		Client_StopZoom();
 	}
-
-	SetAimState(false);
-	SetDrawState(false);
+	
+	// 몽타주 정지
 	Multicast_StopDrawMontage();
 	
-	if (bIsFullyDrawn)
+	// 조준 완료 시(활을 끝까지 당겼을 때)
+	if (GetAimState())
 	{
 		// 활 놓는 사운드 재생 (멀티캐스트로 변경)
 		Multicast_PlayBowReleaseSound();
 
+		// 화살 발사
 		Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
-
 		bIsFullyDrawn = false;  // 상태 초기화
 
-		// 화살 발사 사운드는 Server_FireArrow에서 실제 발사할 때만 재생
-
+		GetSkillComp()->ResetAllowedSkillsMask(); // SJE
 	}
-	//Client_SetWidgetVisibility(false);
 
+	// 달리기 상태 설정
 	SetSeekerGait(EGait::Run);
-	
-	// 피격 애니메이션 제한 해제
-	if(!this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
-	{
-		Server_SetCanHitReact(true); // 서버에 전달
-	}
+
+	// 활 상태 업데이트
+	SetAimState(false);
+	SetDrawState(false);
 }
 
 void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)
@@ -428,9 +431,6 @@ void AGS_Merci::SetAutoAimTarget(AActor* Target)
 		{
 			AutoAimTarget = Target;
 			OnRep_AutoAimTarget(); // 즉시 로컬 처리
-
-			/*UE_LOG(LogTemp, Warning, TEXT("Aiming Target: %s !!!!!!!!!!!!!!!!!!!!!!!!!"), *Target->GetName());
-			Client_DrawDebugSphere(Target->GetActorLocation(), 100.0f, FColor::Red, 0.2f);*/
 		}
 	}
 }
@@ -460,7 +460,6 @@ void AGS_Merci::Multicast_DrawDebugLine_Implementation(FVector Start, FVector En
 void AGS_Merci::OnDrawMontageEnded()
 {
 	bIsFullyDrawn = true;  // 활 완전히 당김 상태 설정
-	//Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
 
 	// 서버로 전달
 	if (HasAuthority() == false)
@@ -560,6 +559,35 @@ void AGS_Merci::LeftClickRelease_Implementation()
 	IGS_AttackInterface::LeftClickRelease_Implementation();
 }
 
+float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	// 활을 들고 있는 경우
+	if (GetDrawState() || GetAimState())
+	{
+		// 활 쏘기 애니메이션 재생 정지
+		if (UAnimInstance* AnimInst = GetMesh()->GetAnimInstance())
+		{
+			AnimInst->StopAllMontages(0.2f);
+		}
+
+		// 활 쏘기 줌 아웃 (궁극기 상태가 아닐 때만)
+		if (!this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
+		{
+			Client_StopZoom();
+		}
+
+		// 활 쏘기 조준 상태 해제
+		SetDrawState(false);
+		SetAimState(false);
+
+		// 달리기 상태 설정
+		SetSeekerGait(EGait::Run);
+	}
+
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	return ActualDamage;
+}
+
 int32 AGS_Merci::GetMaxAxeArrows()
 {
 	return MaxAxeArrows;
@@ -597,7 +625,10 @@ void AGS_Merci::OnRep_CurrentArrowType()
 	// 화살 타입 변경 사운드 재생
 	if (ArrowTypeChangeSound && IsLocallyControlled())
 	{
-		UAkGameplayStatics::PostEvent(ArrowTypeChangeSound, this, 0, FOnAkPostEventCallback());
+		if (CharacterAudioComponent)
+		{
+			CharacterAudioComponent->PlaySound(ArrowTypeChangeSound, true);
+		}
 	}
 }
 
@@ -714,63 +745,41 @@ void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRot
 
 void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 {
-	if (ArrowShotSound)
+	if (CharacterAudioComponent)
 	{
-		UAkGameplayStatics::PostEvent(ArrowShotSound, this, 0, FOnAkPostEventCallback());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayArrowShotSound_Implementation: ArrowShotSound is null"));
+		CharacterAudioComponent->PlaySound(ArrowShotSound);
 	}
 }
 
 void AGS_Merci::Multicast_PlayArrowEmptySound_Implementation()
 {
-	// 로컬 플레이어에게만 사운드 재생 (화살 부족은 개인적인 피드백)
-	if (ArrowEmptySound && IsLocallyControlled())
+	if (CharacterAudioComponent)
 	{
-		UAkGameplayStatics::PostEvent(ArrowEmptySound, this, 0, FOnAkPostEventCallback());
+		CharacterAudioComponent->PlaySound(ArrowEmptySound, true); // 로컬 플레이어에게만 재생
 	}
 }
 
 void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
 {
-	// 타격 피드백 사운드는 화살을 쏜 플레이어에게만 재생
-	if (HitFeedbackSound && IsLocallyControlled())
+	if (CharacterAudioComponent)
 	{
-		UAkGameplayStatics::PostEvent(HitFeedbackSound, this, 0, FOnAkPostEventCallback());
-	}
-	else if (!HitFeedbackSound)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Client_PlayHitFeedbackSound_Implementation: HitFeedbackSound is null"));
+		CharacterAudioComponent->PlaySound(HitFeedbackSound, true); // 로컬 플레이어에게만 재생
 	}
 }
 
 void AGS_Merci::Multicast_PlayBowPullSound_Implementation()
 {
-	// 데디케이티드 서버에서는 사운드 재생하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	if (CharacterAudioComponent)
 	{
-		return;
-	}
-
-	if (BowPullSound)
-	{
-		UAkGameplayStatics::PostEvent(BowPullSound, this, 0, FOnAkPostEventCallback());
+		CharacterAudioComponent->PlaySound(BowPullSound);
 	}
 }
 
 void AGS_Merci::Multicast_PlayBowReleaseSound_Implementation()
 {
-	// 데디케이티드 서버에서는 사운드 재생하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	if (CharacterAudioComponent)
 	{
-		return;
-	}
-
-	if (BowReleaseSound)
-	{
-		UAkGameplayStatics::PostEvent(BowReleaseSound, this, 0, FOnAkPostEventCallback());
+		CharacterAudioComponent->PlaySound(BowReleaseSound);
 	}
 }
 

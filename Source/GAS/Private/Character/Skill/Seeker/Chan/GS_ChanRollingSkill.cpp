@@ -2,8 +2,12 @@
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanRollingSkill.h"
+
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/GS_TpsController.h"
+#include "Sound/GS_CharacterAudioComponent.h"
+#include "Components/CapsuleComponent.h"
 
 UGS_ChanRollingSkill::UGS_ChanRollingSkill()
 {
@@ -15,37 +19,37 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	Super::ActiveSkill();
 	StartCoolDown();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{		
-		// 구르기 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
+	{
+		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			// 구르기 시작 사운드 재생 // 구르기 사운드를 Server 에서 처리하는게 맞은가..? // SJE
+			const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+			if (SkillInfo && SkillInfo->SkillStartSound)
+			{
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			}
+		}
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+		OwnerPlayer->CanChangeSeekerGait = false;
+		
+		const FName RollDirection = CalRollDirection();
+		if (RollDirection == FName("00"))
+		{
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
+		}
+		else
+		{
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
 		}
 
-			OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-			OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
-			OwnerPlayer->SetSkillInputControl(false, false, false);
-			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->CanChangeSeekerGait = false;
-			FName RollDirection = CalRollDirection();
-			if (RollDirection == FName("00"))
-			{
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
-			}
-			else
-			{
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
-			}
-
+		OwnerPlayer->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	}
 }
 
 void UGS_ChanRollingSkill::OnSkillCanceledByDebuff()
 {
 	Super::OnSkillCanceledByDebuff();
-
-	
 }
 
 void UGS_ChanRollingSkill::OnSkillAnimationEnd()
@@ -55,23 +59,25 @@ void UGS_ChanRollingSkill::OnSkillAnimationEnd()
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->SetSkillInputControl(true, true, true);
-		OwnerPlayer->SetMoveControlValue(true, true);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 		OwnerPlayer->CanChangeSeekerGait = true;
 
 		SetIsActive(false);
+
+		OwnerPlayer->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	}
 }
 
 void UGS_ChanRollingSkill::InterruptSkill()
 {
 	Super::InterruptSkill();
-	AGS_Chan* AresCharacter = Cast<AGS_Chan>(OwnerCharacter);
-	if (AresCharacter->GetSkillComp())
+	if (AGS_Chan* AresCharacter = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		AresCharacter->Multicast_SetIsFullBodySlot(false);
-		AresCharacter->SetMoveControlValue(true, true);
-		SetIsActive(false);
+		if (AresCharacter->GetSkillComp())
+		{
+			AresCharacter->Multicast_SetIsFullBodySlot(false);
+			AresCharacter->SetMoveControlValue(true, true);
+			SetIsActive(false);
+		}
 	}
 }

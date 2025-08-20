@@ -2,10 +2,13 @@
 #include "Character/Player/GS_Player.h"
 #include "Character/Skill/GS_SkillBase.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Character/Skill/Seeker/GS_HealSkill.h"
 #include "Components/Image.h"
 #include "Components/PanelWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 
 UGS_SkillWidget::UGS_SkillWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -32,6 +35,42 @@ void UGS_SkillWidget::Initialize(UGS_SkillBase* Skill)
 		OnSkillCoolTimeChanged(SkillSlot, 0.f);
 		CurrentCoolTimeText->SetVisibility(ESlateVisibility::Hidden);
 		SkillImage->SetBrushFromTexture(Skill->GetSkillImage());
+
+		if (SkillSlot == ESkillSlot::Ready)
+		{
+			HealCountText->SetVisibility(ESlateVisibility::Visible);
+			CoolTimeBar->SetVisibility(ESlateVisibility::Hidden);
+			
+			// 힐 스킬의 초기 횟수 표시
+			if (UGS_HealSkill* HealSkill = Cast<UGS_HealSkill>(Skill))
+			{
+				int32 CurrentCount = HealSkill->GetCurrentHealCount();
+				int32 MaxCount = HealSkill->GetMaxHealCount();
+				HealCountText->SetText(FText::FromString(FString::Printf(TEXT("%d"), CurrentCount)));
+			}
+		}
+		else
+		{
+			HealCountText->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void UGS_SkillWidget::OnSkillActivated(ESkillSlot InSkillSlot)
+{
+	if (InSkillSlot == SkillSlot)
+	{
+		PlayHeartbeatAnimation();
+		PlayGlowEffect();
+		
+		if (IsUltimateSkillSlot())
+		{
+			PlayUltimateSkillActivationSound();
+		}
+		else
+		{
+			PlaySkillActivationSound();
+		}
 	}
 }
 
@@ -57,5 +96,74 @@ void UGS_SkillWidget::OnSkillCoolTimeChanged(ESkillSlot InSkillSlot, float InCur
 		CoolTimeBar->SetVisibility(ESlateVisibility::Visible);
 		CurrentCoolTimeText->SetText(FText::FromString(FString::Printf(TEXT("%d"),FMath::RoundToInt(InCurrentCoolTime))));
 		CoolTimeBar->SetPercent(InCurrentCoolTime/CoolTime);
+	}
+}
+
+void UGS_SkillWidget::OnHealCountChanged(ESkillSlot InSkillSlot, int32 CurrentCount, int32 MaxCount)
+{
+	if (SkillSlot != InSkillSlot) return;
+
+	HealCountText->SetText(FText::FromString(FString::Printf(TEXT("%d"), CurrentCount)));
+
+	if (CurrentCount <= 0)
+	{
+		PlayCooldownBlockedAnimation();
+		PlayRedFlashEffect();
+		PlaySkillCooldownSound();
+	}
+}
+
+void UGS_SkillWidget::PlaySkillActivationSound()
+{
+	if (bEnableAudio && SkillActivationSound)
+	{
+		UGameplayStatics::PlaySound2D(this, SkillActivationSound, AudioVolume);
+	}
+}
+
+void UGS_SkillWidget::OnSkillCooldownBlocked(ESkillSlot InSkillSlot)
+{
+	if (InSkillSlot == SkillSlot)
+	{
+		PlayCooldownBlockedAnimation();
+		PlayRedFlashEffect();
+		
+		if (IsUltimateSkillSlot())
+		{
+			PlayUltimateSkillCooldownSound();
+		}
+		else
+		{
+			PlaySkillCooldownSound();
+		}
+	}
+}
+
+void UGS_SkillWidget::PlaySkillCooldownSound()
+{
+	if (bEnableAudio && SkillCooldownSound)
+	{
+		UGameplayStatics::PlaySound2D(this, SkillCooldownSound, AudioVolume);
+	}
+}
+
+bool UGS_SkillWidget::IsUltimateSkillSlot() const
+{
+	return SkillSlot == ESkillSlot::Ultimate;
+}
+
+void UGS_SkillWidget::PlayUltimateSkillActivationSound()
+{
+	if (bEnableAudio && UltimateSkillActivationSound)
+	{
+		UGameplayStatics::PlaySound2D(this, UltimateSkillActivationSound, AudioVolume);
+	}
+}
+
+void UGS_SkillWidget::PlayUltimateSkillCooldownSound()
+{
+	if (bEnableAudio && UltimateSkillCooldownSound)
+	{
+		UGameplayStatics::PlaySound2D(this, UltimateSkillCooldownSound, AudioVolume);
 	}
 }

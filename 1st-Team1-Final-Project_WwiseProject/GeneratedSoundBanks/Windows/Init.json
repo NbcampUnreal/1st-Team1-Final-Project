@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{9EB7A761-36A0-76FF-D5ED-9E37424D289F}",
+    "Hash": "{C8BD6451-5F50-EE80-4D7B-37D6A71B5A43}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -100,6 +100,12 @@
       "Name": "MapBGMVolume",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\MapBGMVolume",
       "GUID": "{2F3E4FB8-0714-4169-BAB2-33AE6207B7C7}"
+     },
+     {
+      "Id": "3868840468",
+      "Name": "RTS_Base_20m",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\RTS_Base_20m",
+      "GUID": "{0D40C47D-E51C-450D-8A24-0C6878B9E10F}"
      }
     ],
     "StateGroups": [
@@ -248,6 +254,6 @@
     ]
    }
   ],
-  "FileHash": "{B83A468E-E6EF-55A9-11E3-221A1EE834E0}"
+  "FileHash": "{05637F53-6579-156A-1D27-FCFE34C3C8BF}"
  }
 }

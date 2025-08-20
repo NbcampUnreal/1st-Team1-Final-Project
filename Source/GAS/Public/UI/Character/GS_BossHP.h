@@ -12,6 +12,7 @@ class AGS_Guardian;
 class AGS_Character;
 class AGS_Player;
 class UGS_DrakharFeverGauge;
+class UGS_WidgetShakeHelper;
 
 UCLASS()
 class GAS_API UGS_BossHP : public UUserWidget
@@ -81,4 +82,11 @@ private:
 	
 	// Guardian 초기화 재시도 타이머
 	FTimerHandle GuardianInitRetryTimer;
+
+	// 피해 감지용 변수
+	float LastHPPercent = 1.0f; // 이전 HP 비율 (피해량 계산용)
+
+	// 흔들림 헬퍼 (UObject 기반)
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	TObjectPtr<UGS_WidgetShakeHelper> ShakeHelper;
 };
