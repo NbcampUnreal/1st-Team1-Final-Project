@@ -10,6 +10,7 @@
 
 class AGS_Monster;
 class AGS_Seeker;
+class AGS_RTSController;
 
 /**
  * 몬스터의 거리별 사운드를 관리하는 컴포넌트
@@ -42,6 +43,19 @@ struct FMonsterAudioConfig
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound Events")
     UAkAudioEvent* DeathSound;
 
+    // RTS 모드 전용 사운드 이벤트 (2D 사운드)
+    // UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound Events|RTS", meta = (DisplayName = "RTS Idle Sound"))
+    // UAkAudioEvent* RTS_IdleSound;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound Events|RTS", meta = (DisplayName = "RTS Combat Sound"))
+    UAkAudioEvent* RTS_CombatSound;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound Events|RTS", meta = (DisplayName = "RTS Hurt Sound"))
+    UAkAudioEvent* RTS_HurtSound;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound Events|RTS", meta = (DisplayName = "RTS Death Sound"))
+    UAkAudioEvent* RTS_DeathSound;
+
     // 게임 로직용 거리 설정 (Wwise Attenuation과 별개)
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Logic", meta = (ClampMin = "0.0"))
     float AlertDistance = 800.0f; // 이 거리 안에 시커가 있으면 Combat 상태
@@ -55,7 +69,20 @@ struct FMonsterAudioConfig
         CombatSound = nullptr;
         HurtSound = nullptr;
         DeathSound = nullptr;
+        // RTS_IdleSound = nullptr;
+        RTS_CombatSound = nullptr;
+        RTS_HurtSound = nullptr;
+        RTS_DeathSound = nullptr;
     }
+};
+
+UENUM(BlueprintType)
+enum class ERTSCommandSoundType : uint8
+{
+    Selection       UMETA(DisplayName = "유닛 선택"),
+    Move            UMETA(DisplayName = "이동 명령"),
+    Attack          UMETA(DisplayName = "공격 명령"),
+    Death           UMETA(DisplayName = "유닛 죽음")
 };
 
 UCLASS(ClassGroup=(Audio), meta=(BlueprintSpawnableComponent))
@@ -69,6 +96,7 @@ public:
     // RTPC 이름 상수
     static const FName DistanceToPlayerRTPCName;
     static const FName MonsterVariantRTPCName;
+    static const FName AttenuationModeRTPCName;
 
 protected:
     virtual void BeginPlay() override;
@@ -96,21 +124,21 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio|Swing")
     UAkAudioEvent* SwingSound = nullptr;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio|Swing", meta = (DisplayName = "RTS Swing Sound"))
+    UAkAudioEvent* RTS_SwingSound = nullptr;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio|Swing", meta=(ClampMin="0.0"))
     float SwingResetTime = 0.2f;
 
-    // RTS 사운드
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS")
+    // RTS 커맨드 사운드 (UI 피드백용)
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS Commands")
     UAkAudioEvent* SelectionClickSound = nullptr;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS Commands")
     UAkAudioEvent* RTSMoveCommandSound = nullptr;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS Commands")
     UAkAudioEvent* RTSAttackCommandSound = nullptr;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS")
-    UAkAudioEvent* RTSUnitDeathSound = nullptr;
 
     /** 몬스터 상태 변경 시 호출 */
     UFUNCTION(BlueprintCallable, Category = "Monster Audio")
@@ -138,16 +166,7 @@ public:
 
     // RTS 커맨드 사운드
     UFUNCTION(BlueprintCallable, Category = "Monster Audio|RTS")
-    void PlaySelectionClickSound();
-
-    UFUNCTION(BlueprintCallable, Category = "Monster Audio|RTS")
-    void PlayRTSMoveCommandSound();
-
-    UFUNCTION(BlueprintCallable, Category = "Monster Audio|RTS")
-    void PlayRTSAttackCommandSound();
-
-    UFUNCTION(BlueprintCallable, Category = "Monster Audio|RTS")
-    void PlayRTSUnitDeathSound();
+    void PlayRTSCommandSound(ERTSCommandSoundType CommandType);
 
     // Replication 설정
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -174,6 +193,12 @@ private:
     
     /** 가장 가까운 시커 찾기 */
     AGS_Seeker* FindNearestSeeker() const;
+
+    /** 리스너 위치 가져오기 (RTS/TPS) */
+    bool GetListenerLocation(FVector& OutLocation) const;
+
+    /** 현재 RTS 모드인지 확인 */
+    bool IsRTSMode() const;
 
     /** 시커와의 거리 계산 */
     float CalculateDistanceToNearestSeeker() const;

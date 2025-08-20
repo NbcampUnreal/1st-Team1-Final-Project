@@ -48,6 +48,11 @@ AGS_RTSController::AGS_RTSController()
 	ScrollRightCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_R"));
 }
 
+AActor* AGS_RTSController::GetViewTarget() const
+{
+	return Super::GetViewTarget();
+}
+
 void AGS_RTSController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -167,10 +172,6 @@ void AGS_RTSController::CameraMoveEnd()
 void AGS_RTSController::OnCommandMove(const FInputActionValue& Value)
 {
 	MoveSelectedUnits();
-		if (CommandButtonSound)
-	{
-		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
-	}
 }
 
 void AGS_RTSController::MoveSelectedUnits()
@@ -183,10 +184,6 @@ void AGS_RTSController::MoveSelectedUnits()
 void AGS_RTSController::OnCommandAttack(const FInputActionValue& Value)
 {
 	AttackSelectedUnits();
-	if (CommandButtonSound)
-	{
-		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
-	}
 }
 
 void AGS_RTSController::AttackSelectedUnits()
@@ -199,10 +196,6 @@ void AGS_RTSController::AttackSelectedUnits()
 void AGS_RTSController::OnCommandStop(const FInputActionValue& Value)
 {
 	StopSelectedUnits();
-	if (CommandButtonSound)
-	{
-		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
-	}
 }
 
 void AGS_RTSController::StopSelectedUnits()
@@ -218,10 +211,6 @@ void AGS_RTSController::StopSelectedUnits()
 void AGS_RTSController::OnCommandHold(const FInputActionValue& Value)
 {
 	HoldSelectedUnits();
-	if (CommandButtonSound)
-	{
-		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
-	}
 }
 
 void AGS_RTSController::HoldSelectedUnits()
@@ -237,10 +226,6 @@ void AGS_RTSController::HoldSelectedUnits()
 void AGS_RTSController::OnCommandSkill(const FInputActionValue& Value)
 {
 	SkillSelectedUnits();
-	if (CommandButtonSound)
-	{
-		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
-	}
 }
 
 void AGS_RTSController::SkillSelectedUnits()
@@ -373,10 +358,6 @@ void AGS_RTSController::OnEscapeButtonClicked()
 {
 	if (CurrentCommand != ERTSCommand::None)
 	{
-		if (CommandCancelSound)
-		{
-			UAkGameplayStatics::PostEvent(CommandCancelSound, this, 0, FOnAkPostEventCallback());
-		}
 		CurrentCommand = ERTSCommand::None;
 		OnRTSCommandChanged.Broadcast(CurrentCommand);
 	}
@@ -889,7 +870,7 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
                 {
                     if (Unit->MonsterAudioComponent)
                     {
-                        Unit->MonsterAudioComponent->PlayRTSMoveCommandSound();
+                        Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Move);
                     }
                 }
 			}
@@ -918,7 +899,7 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
                 {
                     if (Unit->MonsterAudioComponent)
                     {
-                        Unit->MonsterAudioComponent->PlayRTSAttackCommandSound();
+                        Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Attack);
                     }
                 }
 			}
@@ -948,7 +929,7 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
                 {
                     if (Unit->MonsterAudioComponent)
                     {
-                        Unit->MonsterAudioComponent->PlayRTSAttackCommandSound();
+                        Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Attack);
                     }
                 }
 			}
@@ -973,12 +954,12 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::None));
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, false);
 
-                // 첫 번째 유닛만 정지 소리 재생
+                // 첫 번째 유닛만 정지 소리 재생 (Move 사운드 재활용)
                 if (i == 0)
                 {
                     if (Unit->MonsterAudioComponent)
                     {
-                        Unit->MonsterAudioComponent->PlayRTSMoveCommandSound();
+                        Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Move);
                     }
                 }
 			}
@@ -1001,12 +982,12 @@ void AGS_RTSController::Server_RTSHold_Implementation(const TArray<AGS_Monster*>
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Hold));
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, false);
 
-                // 첫 번째 유닛만 정지 소리 재생
+                // 첫 번째 유닛만 정지 소리 재생 (Move 사운드 재활용)
                 if (i == 0)
                 {
                     if (Unit->MonsterAudioComponent)
                     {
-                        Unit->MonsterAudioComponent->PlayRTSMoveCommandSound();
+                        Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Move);
                     }
                 }
 			}
@@ -1028,10 +1009,10 @@ void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Skill));
 
-				// 첫 번째 유닛만 스킬 소리 재생
+				// 첫 번째 유닛만 스킬 소리 재생 (Move 사운드 재활용)
                 if (i == 0 && Unit->MonsterAudioComponent)
                 {
-                    Unit->MonsterAudioComponent->PlayRTSMoveCommandSound();
+                    Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Move);
                 }
 			}
 		}
@@ -1087,7 +1068,7 @@ void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)
     {
         if (Monster->MonsterAudioComponent)
         {
-            Monster->MonsterAudioComponent->PlayRTSUnitDeathSound();
+            Monster->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Death);
         }
     }
     RemoveUnitFromSelection(Monster);

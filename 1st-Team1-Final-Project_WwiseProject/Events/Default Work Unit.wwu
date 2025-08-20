@@ -128,6 +128,17 @@
 										</Action>
 									</ChildrenList>
 								</Event>
+								<Event Name="EV_Mon_SmallClaw_Attack_Swing_RTS" ID="{52FE19F3-A728-44D4-B961-62931E03513E}">
+									<ChildrenList>
+										<Action Name="" ID="{FF0C7160-DC31-4A70-8138-6F67709C6880}" ShortID="39547027">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_Mon_SmallClaw_Attack_Swing_RTS" ID="{983951CA-4558-4969-A47A-8DB5B52B3DA0}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
 						</Folder>
 						<Folder Name="IronFang" ID="{CA20C564-C0A1-4C48-8D92-D78430AC931D}" ShortID="744766679">
@@ -377,6 +388,153 @@
 											<ReferenceList>
 												<Reference Name="Target">
 													<ObjectRef Name="SFX_Mon_NeedleFang_RTS_Death" ID="{1EDD119F-8586-4C52-AA59-DD5CEB83D1D7}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Mon_NeedleFang_Shot_RTS" ID="{F6DD5329-CC95-453B-A696-2FCE2ED2A9B8}">
+									<ChildrenList>
+										<Action Name="" ID="{AC4E8E15-D0AA-4605-884E-47AF5A96FAE5}" ShortID="944696002">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_NeedleFang_Shot_RTS" ID="{27357D4A-49E8-4EB9-AB55-538D9B48870D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Mon_NeedleFang_RTS_Attack_Swing" ID="{94203898-87DC-40A3-A25A-4899ED27C5E9}">
+									<ChildrenList>
+										<Action Name="" ID="{7C5770AC-DFFB-45C8-9225-20A2F2DD2F85}" ShortID="659188229">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_Mon_NeedleFang_Attack_Swing_RTS" ID="{EB18E151-033D-40A6-9AB6-DA7B4BF6685F}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+							</ChildrenList>
+						</Folder>
+						<Event Name="EV_AttackSwingSound_RTS" ID="{F1A00B00-0267-4C92-9B88-3C06D6765898}">
+							<ChildrenList>
+								<Action Name="" ID="{86718CB1-08A8-4EC7-9CCC-F2C20CF4EEF4}" ShortID="310534848">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_AttackSwingSound_RTS" ID="{29F52B23-AFEB-4BC7-AFC8-BA269A78CA52}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_MeleeAttack_RTS" ID="{4F1663D5-6BFF-4898-B54C-9E58EA29967C}">
+							<ChildrenList>
+								<Action Name="" ID="{3FA5CF07-2997-4404-856A-939892045F8D}" ShortID="651924657">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_MeleeHit_RTS" ID="{7870EEF6-D2C8-42C4-B006-244B463F35F6}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_MeleeAttack_Sword_RTS" ID="{6D494C81-1D1F-44C2-B295-125B55A1A565}">
+							<ChildrenList>
+								<Action Name="" ID="{2345C2EA-D9FE-4993-9725-2D6242E0A75D}" ShortID="568858769">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="SFX_MeleeHit_Sword_RTS" ID="{7151371B-06C6-41CB-B421-0CFFF6523E4E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Folder Name="RTS_UISound" ID="{EFF542EC-35E3-40F6-8600-C55C04300918}" ShortID="263167326">
+							<ChildrenList>
+								<Event Name="EV_UI_Mon_ShadowFang" ID="{C1167BDD-D31B-471D-BCBE-F6C4EE8E8309}">
+									<ChildrenList>
+										<Action Name="" ID="{6345D4B2-FC21-423D-B350-784526701415}" ShortID="823325589">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_UI_Mon_ShadowFang" ID="{64E4E812-121F-4A46-92EE-602259D29361}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_UI_Mon_ShadowFang_Attack" ID="{BC1F0ACF-8BBE-48AB-9D16-6F6030777A27}">
+									<ChildrenList>
+										<Action Name="" ID="{6B69A2A3-1C0E-4969-A566-6F222D672E62}" ShortID="946301986">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_UI_Mon_ShadowFang_Attack" ID="{D4A54142-E16E-44D8-BA77-44993FCA9F25}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_UI_Mon_SmallClaw" ID="{82CEBE2B-BC4B-495E-B655-31BC4F1B1ED1}">
+									<ChildrenList>
+										<Action Name="" ID="{4131F454-1C09-4180-844F-571DCF63BE69}" ShortID="732420371">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_UI_Mon_SmallClaw" ID="{8332ADEF-A70F-4D38-A4F3-A563ABF50F49}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_UI_Mon_SmallClaw_Attack" ID="{6D0034B9-30C3-4782-85D0-A5A3BD72EA3B}">
+									<ChildrenList>
+										<Action Name="" ID="{F76707D5-40F5-4F1E-AC13-2C89AAD82995}" ShortID="130384539">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_UI_Mon_SmallClaw_Attack" ID="{A22C7C63-FC04-4608-85C1-9048BFCF395E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_UI_Mon_IronFang" ID="{AB0A7ABE-8A84-4275-86C6-9F0D6055EC06}">
+									<ChildrenList>
+										<Action Name="" ID="{B3BF0687-9E63-4A97-8F65-C9904F7E47FF}" ShortID="215978591">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_UI_Mon_IronFang" ID="{40F5A0E1-0516-40CD-B6C5-F8829143ACF9}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_UI_Mon_IronFang_Attack" ID="{05C664A9-8858-4308-9826-1B444CCD290E}">
+									<ChildrenList>
+										<Action Name="" ID="{EF8B0518-BE05-46A2-96E2-06C77DC1B8CD}" ShortID="527929126">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_UI_Mon_IronFang_Attack" ID="{0B17E119-68A1-450D-8C12-97D8822F292D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_UI_Mon_NeedleFang" ID="{6A4A78D2-D983-41B4-998D-7B946B1C1C1A}">
+									<ChildrenList>
+										<Action Name="" ID="{E0A486A8-17ED-43EF-8A62-F3E7D547E728}" ShortID="658478059">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_UI_Mon_NeedleFang" ID="{3E8B28CE-4DDA-4D3B-AE13-01607EC48928}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_UI_Mon_NeedleFang_Attack" ID="{F3ED247D-FE65-4739-AD7B-6928FA94A5EE}">
+									<ChildrenList>
+										<Action Name="" ID="{C178CDDF-DA73-4EB5-BE62-0CE819940AE3}" ShortID="578539891">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_UI_Mon_NeedleFang_Attack" ID="{F9CCD54F-44EE-4263-A9AF-A87A38137387}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>

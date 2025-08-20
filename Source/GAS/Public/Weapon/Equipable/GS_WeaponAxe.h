@@ -86,6 +86,12 @@ protected:
 	virtual void PlayHitSound(EAxeHitTargetType TargetType, const FHitResult& SweepResult);
 	virtual void PlayHitVFX(EAxeHitTargetType TargetType, const FHitResult& SweepResult);
 
+	// RTS 모드 지원을 위한 리스너 위치 가져오기
+	bool GetListenerLocation(FVector& OutLocation) const;
+	
+	// RTS 모드 감지
+	bool IsRTSMode() const;
+
 	// 멀티캐스트 함수들
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayHitSound(EAxeHitTargetType TargetType, const FHitResult& SweepResult);
