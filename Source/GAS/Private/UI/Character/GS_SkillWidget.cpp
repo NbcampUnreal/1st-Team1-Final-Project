@@ -38,15 +38,19 @@ void UGS_SkillWidget::Initialize(UGS_SkillBase* Skill)
 
 		if (SkillSlot == ESkillSlot::Ready)
 		{
-			HealCountText->SetVisibility(ESlateVisibility::Visible);
 			CoolTimeBar->SetVisibility(ESlateVisibility::Hidden);
 			
-			// 힐 스킬의 초기 횟수 표시
+			// 힐 스킬일 때만 카운트 텍스트 표시
 			if (UGS_HealSkill* HealSkill = Cast<UGS_HealSkill>(Skill))
 			{
+				HealCountText->SetVisibility(ESlateVisibility::Visible);
 				int32 CurrentCount = HealSkill->GetCurrentHealCount();
 				int32 MaxCount = HealSkill->GetMaxHealCount();
 				HealCountText->SetText(FText::FromString(FString::Printf(TEXT("%d"), CurrentCount)));
+			}
+			else
+			{
+				HealCountText->SetVisibility(ESlateVisibility::Hidden);
 			}
 		}
 		else
