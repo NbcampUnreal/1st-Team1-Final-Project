@@ -23,7 +23,6 @@ AGS_InGameGM::AGS_InGameGM()
 	GameStateClass = AGS_InGameGS::StaticClass();
     PlayerStateClass = AGS_PlayerState::StaticClass();
     bUseSeamlessTravel = true;
-    RTSCamera = nullptr;
 }
 
 TSubclassOf<APlayerController> AGS_InGameGM::GetPlayerControllerClassToSpawnForSeamlessTravel(APlayerController* PreviousPC)
@@ -145,9 +144,19 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
         }
     }
 
-    if (RTSCamera != nullptr)
+    // 가디언 벽 숨김 처리
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
     {
-        RTSCamera->HideWallAndCeiling();
+        APlayerController* PC = It->Get();
+        AGS_PlayerState* PS = PC ? PC->GetPlayerState<AGS_PlayerState>() : nullptr;
+        if (PS && PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+        {
+            if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(PC))
+            {
+                RTSController->Client_HideDungeonElements();
+                break;
+            }
+        }
     }
     
     // 내비메시 재빌드 요청
