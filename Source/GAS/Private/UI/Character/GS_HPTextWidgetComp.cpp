@@ -1,5 +1,4 @@
 #include "UI/Character/GS_HPTextWidgetComp.h"
-
 #include "UI/Character/GS_HPText.h"
 
 void UGS_HPTextWidgetComp::InitWidget()
@@ -17,6 +16,10 @@ void UGS_HPTextWidgetComp::InitWidget()
 			if (IsValid(HPText))
 			{
 				HPText->SetOwningActor(GetOwner());
+				if (HPText->GetOwningActor()->ActorHasTag(("Monster")))
+				{
+					HPText->SetHPBarColor(false);
+				}
 				//return;
 			}
 		}

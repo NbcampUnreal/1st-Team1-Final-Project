@@ -33,3 +33,23 @@ void UGS_HPText::OnCurrentHPChanged(UGS_StatComp* InStatComp)
 	CurrentHPText->SetText(FText::FromString(FString::Printf(TEXT("%d"),FMath::RoundToInt(InStatComp->GetCurrentHealth()))));
 	HPBar->SetPercent(InStatComp->GetCurrentHealth()/InStatComp->GetMaxHealth());
 }
+
+void UGS_HPText::SetHPBarColor(bool bIsEnemy)
+{
+	if (!IsValid(HPBar))
+	{
+		return;
+	}
+	
+	FProgressBarStyle CurrentStyle = HPBar->GetWidgetStyle();
+	if (bIsEnemy)
+	{
+		CurrentStyle.FillImage.SetResourceObject(RedHPBarTexture);
+	}
+	else
+	{
+		CurrentStyle.FillImage.SetResourceObject(GreenHPBarTexture);
+	}
+	
+	HPBar->SetWidgetStyle(CurrentStyle);
+}
