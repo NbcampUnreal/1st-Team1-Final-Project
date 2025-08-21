@@ -7,6 +7,7 @@
 #include "Props/Trap/GS_TrapManager.h"
 #include "GS_InGameGM.generated.h"
 
+class AGS_RTSCamera;
 class AGS_PlayerState;
 struct FDESaveData;
 class AGS_Monster;
@@ -52,6 +53,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "HUD Classes")
 	TSubclassOf<AHUD> RTSHUDClass;
 
+	UPROPERTY(VisibleAnywhere, Category = "ObjectPtr")
+	TObjectPtr<AGS_RTSCamera> RTSCamera;
+	
 	void HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, bool bIsAlive);
 
 	void CheckAllPlayersDead();
@@ -62,6 +66,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void EndGame(EGameResult Result);
+
+	UFUNCTION()
+	void SetRTSCamera(AGS_RTSCamera* In_RTSCamera) { RTSCamera = In_RTSCamera; };
 
 private:
 	void SetGameResultOnAllPlayers(EGameResult Result);
