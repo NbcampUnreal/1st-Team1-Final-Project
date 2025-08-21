@@ -14,7 +14,7 @@ enum class ETrapPlacement : uint8
 };
 
 
-//함정 효과 분류(우선 각각의 효과 체크 하는 것만)
+//함정 효과 분류
 USTRUCT(BlueprintType)
 struct FTrapEffect
 {
@@ -38,19 +38,6 @@ struct FTrapEffect
     //Lava
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool bLava = false;
-
-
-
-    ////dot damage
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    //bool bDoT = false;
-
-    //UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="bDoT"))
-    //int32 DamageCount = 3;
-
-    //UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(EditCondition="bDoT"))
-    //float DamageInterval = 1.0f;
-
 };
 
 USTRUCT(BlueprintType)

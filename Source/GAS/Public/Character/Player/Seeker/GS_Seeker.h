@@ -16,6 +16,7 @@ class UGS_StatComp;
 class AGS_PlayerState;
 class UGS_DebuffVFXComponent;
 class AGS_Monster;
+class UGS_CharacterAudioComponent;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -39,6 +40,15 @@ struct FSeekerState
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSeekerHover, bool, bIsHover);
 
+// 충돌 사운드 타입 열거형
+UENUM(BlueprintType)
+enum class ECollisionSoundType : uint8
+{
+	Wall,
+	Monster, 
+	Guardian
+};
+
 UCLASS()
 class GAS_API AGS_Seeker : public AGS_Player
 {
@@ -46,9 +56,7 @@ class GAS_API AGS_Seeker : public AGS_Player
 
 public:
 	AGS_Seeker();
-
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Death
@@ -88,6 +96,9 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetMontageSlot(ESeekerMontageSlot InputMontageSlot);
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetMustTurnInPlace(bool MustTurn);
@@ -111,8 +122,8 @@ public:
 	UFUNCTION()
 	void ComboInputClose();
 
-	UFUNCTION()
-	virtual void OnComboAttack();
+	UFUNCTION(Server, Reliable)
+	virtual void Server_OnComboAttack();
 
 	// Control
 	UFUNCTION()
@@ -123,12 +134,12 @@ public:
 	// Replication Set
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	// Notify
-	void CallDeactiveSkill(ESkillSlot Slot);
-
-	// 스킬 사운드 재생 (모든 시커 캐릭터에서 사용)
+	// === Audio Functions ===
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlaySkillSound(class UAkAudioEvent* SoundToPlay);
+	void Multicast_PlaySound(class UAkAudioEvent* SoundToPlay);
+	
+	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
+	class UAkComponent* GetOrCreateAkComponent();
 
 	// ===============
 	// 공격 사운드 리셋 관련
@@ -189,6 +200,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
 	UGS_DebuffVFXComponent* DebuffVFXComponent;
 
+	// =======================
+	// 캐릭터 오디오 컴포넌트
+	// =======================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UGS_CharacterAudioComponent* CharacterAudioComponent;
+
 	// ================
 	// 함정 VFX 컴포넌트
 	// ================
@@ -234,9 +251,7 @@ protected:
 	void InitializeCameraManager();
 	void UpdatePostProcessEffect(float EffectStrength);
 
-	// 사운드 관련 헬퍼 함수
-	class UAkComponent* GetOrCreateAkComponent();
-
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
 

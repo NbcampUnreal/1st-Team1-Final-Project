@@ -25,6 +25,13 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	UTexture2D* SkillImage;
 
+	UPROPERTY(EditDefaultsOnly)
+	int8 AllowSkillsMask;
+
+	UPROPERTY(EditDefaultsOnly)
+	FControlValue AllowControlValue;
+	
+
 	// VFX 관련 속성들 (데이터 테이블에서 설정됨)
 	UPROPERTY(BlueprintReadOnly, Category = "VFX")
 	TObjectPtr<UNiagaraSystem> SkillCastVFX;
@@ -73,13 +80,16 @@ public:
 	void PlayEndVFX(FVector Location, FRotator Rotation);
 
 	// 스킬 작동
-	virtual void ActiveSkill(); // 서버 권한에서만 호출
-	virtual void DeactiveSkill();
+	virtual void ActiveSkill(); // 스킬 시작(서버 권한에서만 호출)
+	virtual void OnSkillCanceledByDebuff(); // 스킬 중도 종료(Mute 디버프)
+	virtual void OnSkillAnimationEnd(); // 애니메이션 종료 시 호출
 	virtual void ExecuteSkillEffect();
-	virtual void OnSkillCommand();
-	virtual bool CanActive() const;
-	virtual bool IsActive() const;
-	virtual void InterruptSkill();
+	virtual void DeactiveSkill(); // 스킬 종료
+	virtual void OnSkillCommand(); // 보조 스킬 발동
+	virtual bool CanActive() const; // 사용 가능한지 반환
+	virtual bool GetIsActive() const; // 사용중인지 반환
+	virtual void InterruptSkill(); // 다른 스킬 사용으로 인한 스킬 중단
+	virtual void SetIsActive(bool bInIsActive);
 
 	// 쿨타임 
 	void SetCoolingDown(bool bInCoolingDown) { bIsCoolingDown = bInCoolingDown; }

@@ -14,6 +14,9 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Engine/World.h"
 #include "Character/F_GS_DamageEvent.h"
+#include "AI/RTS/GS_RTSController.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AGS_WeaponAxe::AGS_WeaponAxe()
@@ -162,12 +165,36 @@ void AGS_WeaponAxe::PlayHitSound(EAxeHitTargetType TargetType, const FHitResult&
 
 	if (SoundEventToPlay && GetWorld())
 	{
-		UAkGameplayStatics::PostEventAtLocation(
-			SoundEventToPlay,
-			SweepResult.ImpactPoint,
-			FRotator::ZeroRotator,
-			GetWorld()
-		);
+		FVector ListenerLocation;
+		if (GetListenerLocation(ListenerLocation))
+		{
+			// RTS 모드와 TPS 모드에 따른 거리 체크
+			const bool bRTS = IsRTSMode();
+			const float MaxDistance = bRTS ? 8000.0f : 2000.0f; // RTS: 80m, TPS: 20m
+
+			const float DistanceToListener = FVector::Dist(SweepResult.ImpactPoint, ListenerLocation);
+
+			
+			if (DistanceToListener <= MaxDistance)
+			{
+				UAkGameplayStatics::PostEventAtLocation(
+					SoundEventToPlay,
+					SweepResult.ImpactPoint,
+					FRotator::ZeroRotator,
+					GetWorld()
+				);
+			}
+		}
+		else
+		{
+			// Fallback: 리스너 위치를 찾지 못할 경우 거리 체크 없이 재생
+			UAkGameplayStatics::PostEventAtLocation(
+				SoundEventToPlay,
+				SweepResult.ImpactPoint,
+				FRotator::ZeroRotator,
+				GetWorld()
+			);
+		}
 	}
 }
 
@@ -278,5 +305,36 @@ void AGS_WeaponAxe::BeginPlay()
 void AGS_WeaponAxe::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+bool AGS_WeaponAxe::GetListenerLocation(FVector& OutLocation) const
+{
+	APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!LocalPC)
+	{
+		return false;
+	}
+
+	if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(LocalPC))
+	{
+		if (RTSController->GetViewTarget())
+		{
+			OutLocation = RTSController->GetViewTarget()->GetActorLocation();
+			return true;
+		}
+	}
+	else if (LocalPC->GetPawn())
+	{
+		OutLocation = LocalPC->GetPawn()->GetActorLocation();
+		return true;
+	}
+
+	return false;
+}
+
+bool AGS_WeaponAxe::IsRTSMode() const
+{
+	APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	return LocalPC && Cast<AGS_RTSController>(LocalPC) != nullptr;
 }
 

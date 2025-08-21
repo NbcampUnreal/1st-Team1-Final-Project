@@ -2,10 +2,12 @@
 
 
 #include "Character/Skill/Seeker/Ares/GS_AresUltimateSkill.h"
+
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_StatRow.h"
-#include "Character/Player/GS_Player.h"
-#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Sound/GS_CharacterAudioComponent.h"
+ #include "Character/Player/Seeker/GS_Ares.h"
 
 UGS_AresUltimateSkill::UGS_AresUltimateSkill()
 {
@@ -15,26 +17,30 @@ UGS_AresUltimateSkill::UGS_AresUltimateSkill()
 
 void UGS_AresUltimateSkill::ActiveSkill()
 {
-	if (!CanActive()) return;
 	Super::ActiveSkill();
-	UE_LOG(LogTemp, Warning, TEXT("Ares Ultimate Skill Active"));
 
-	// 스킬 시작 사운드 재생
+	// 쿨타임 측정 시작
+	StartCoolDown();
+	
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
+	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		if (SkillInfo && SkillInfo->SkillStartSound)
+		// 스킬 시작 사운드 재생 (데이터 테이블 기반)
+		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			
+			// 궁극기 가동 사운드 재생 (루프)
+			AudioComp->PlaySkillLoopSoundFromDataTable(CurrentSkillType);
 		}
 
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		// 입력 제한 설정
+		//OwnerPlayer->Multicast_SetIsFullBodySlot(true);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
-		OwnerPlayer->SetSkillInputControl(false, false, false, false);
+		//OwnerPlayer->SetSkillInputControl(false, false, false, false);
 		OwnerPlayer->SetMoveControlValue(false, false);
 	}
-	
-	bIsBerserker = true;
 	
 	// =======================
 	// VFX 재생 - 컴포넌트 RPC 사용
@@ -49,46 +55,31 @@ void UGS_AresUltimateSkill::ActiveSkill()
 		OwningComp->Multicast_PlayCastVFX(CurrentSkillType, SkillLocation, SkillRotation);
 	}
 
-	// 만약 일정 시간 후 효과 해제를 원하면, 타이머로 DeactiveSkill 호출
-	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UltimateSkillTimerHandle, this, &UGS_AresUltimateSkill::DeactiveSkillEffect, 10.f, false);
-	ExecuteSkillEffect();
+	// DeactiveSkill 호출을 위한 타이머 설정
+	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UltimateSkillTimerHandle, this, &UGS_AresUltimateSkill::DeactiveSkill, 10.f, false);
 
+	// 광전사화
+	BecomeBerserker();
 }
 
-void UGS_AresUltimateSkill::DeactiveSkill()
+void UGS_AresUltimateSkill::OnSkillCanceledByDebuff()
 {
+}
+
+void UGS_AresUltimateSkill::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
+
 	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
 	{
-		OwnerPlayer->Multicast_SetIsFullBodySlot(false);
-		OwnerPlayer->SetSkillInputControl(true, true, true);
+		//OwnerPlayer->Multicast_SetIsFullBodySlot(false);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+		//OwnerPlayer->SetSkillInputControl(true, true, true);
 		OwnerPlayer->SetMoveControlValue(true, true);
 	}
 }
 
-void UGS_AresUltimateSkill::DeactiveSkillEffect()
-{
-	bIsBerserker = false;
-
-	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
-	{
-		StatComp->SetInvincible(false);
-		StatComp->ResetStat(BuffAmount);
-	}
-
-	
-
-	// 쿨타임 복원
-	if (UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp())
-	{
-		if (UGS_SkillBase* MovingSkill = SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving))
-		{
-			SkillComp->ResetCooldownModifier(ESkillSlot::Moving);
-		}
-		OriginalMovingSkillCooltime = -1.f; // 초기화
-	}
-}
-
-void UGS_AresUltimateSkill::ExecuteSkillEffect()
+void UGS_AresUltimateSkill::BecomeBerserker()
 {
 	if (!OwnerCharacter)
 	{
@@ -122,7 +113,34 @@ void UGS_AresUltimateSkill::ExecuteSkillEffect()
 	}
 }
 
-bool UGS_AresUltimateSkill::IsActive() const
+void UGS_AresUltimateSkill::DeactiveSkill()
 {
-	return bIsBerserker;
+	// 궁극기 종료 사운드 재생
+	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType); // 루프 사운드 중지
+	}
+
+	// 스탯 복원
+	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
+	{
+		StatComp->SetInvincible(false);
+		StatComp->ResetStat(BuffAmount);
+	}
+
+	// 쿨타임 복원
+	if (UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp())
+	{
+		/*if (UGS_SkillBase* MovingSkill = SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving))
+		{
+			SkillComp->ResetCooldownModifier(ESkillSlot::Moving);
+		}*/
+		SkillComp->ResetCooldownModifier(ESkillSlot::Moving);
+		OriginalMovingSkillCooltime = -1.f; // 초기화
+	}
+	
+	Super::DeactiveSkill();
 }
+
+

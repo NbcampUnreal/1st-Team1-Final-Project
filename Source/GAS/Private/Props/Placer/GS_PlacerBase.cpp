@@ -7,6 +7,7 @@
 #include "DungeonEditor/Component/PlaceInfoComponent.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
 #include "Props/GS_RoomBase.h"
+#include "UI/DungeonEditor/GS_NectarWidget.h"
 #include "RuneSystem/GS_EnumUtils.h"
 
 
@@ -139,8 +140,13 @@ void AGS_PlacerBase::BuildObject()
 	bUpdatePlaceIndicators = true;
 
 	DrawPlacementIndicators();
-	if (bCanBuild)
+	UGS_NectarComp* NectarComp = BuildManagerRef->FindComponentByClass<UGS_NectarComp>();
+
+	if (bCanBuild && NectarComp->CanSpendResource(ObjectData.ConstructionCost))
 	{
+		//Nectar 차감
+		NectarComp->SpendResource(ObjectData.ConstructionCost);
+
 		// 성공 사운드 재생
 		if (PlaceSuccessSound)
 		{
@@ -156,7 +162,9 @@ void AGS_PlacerBase::BuildObject()
 		//FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
 		FRotator SpawnRotator = GetActorRotation();
 		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator);
-		
+
+
+
 		NewActor->SetActorRotation(NewActor->GetActorRotation() + FRotator(0.0f, RotateYaw, 0.0f));
 		SpawnOffset = SpawnOffset.GetRotated(RotateYaw);
 		SpawnLocation = NewActor->GetActorLocation();
@@ -201,7 +209,7 @@ void AGS_PlacerBase::BuildObject()
 		// Cell Info를 Component에 전달 및 저장
 		if (UPlaceInfoComponent* PlaceInfoCompo = NewActor->GetComponentByClass<UPlaceInfoComponent>())
 		{
-			PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapType, IntPointArray);
+			PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapType, IntPointArray, ObjectData.ConstructionCost);
 		}
 
 		// 먼지 이펙트 생성 DustEffectTemplate
@@ -277,6 +285,7 @@ UStaticMeshComponent* AGS_PlacerBase::CreateIndicatorMesh()
 	{
 		// 월드에 등록
 		NewStaticMeshCompo->RegisterComponent();
+		NewStaticMeshCompo->ComponentTags.Add(FName("PlacementIndicator"));
 		
 		PlaceIndicators.Add(NewStaticMeshCompo);
 		if (PlaneMesh)
@@ -344,6 +353,48 @@ void AGS_PlacerBase::DrawPlacementIndicators()
 				{
 					PlaceIndicators[i]->SetMaterial(0, PlaceRejectedMaterial);
 					bCanBuild = false;
+				}
+				// if (!BuildManagerRef->CheckOccupancyData(IntPointArray[i], TargetType))
+				// {
+				// 	bCanBuild = false;
+				// 	break;
+				// }
+			}
+
+			TArray<UMeshComponent*> AllMeshComponents;
+			GetComponents<UMeshComponent>(AllMeshComponents);
+			
+			for (UMeshComponent* MeshComponent : AllMeshComponents)
+			{
+				if (MeshComponent)
+				{
+					if (MeshComponent->ComponentHasTag(FName("PlacementIndicator")))
+					{
+						if (bCanBuild)
+						{
+							MeshComponent->SetMaterial(0, PlaceAcceptedMaterial);
+						}
+						else
+						{
+							MeshComponent->SetMaterial(0, PlaceRejectedMaterial);
+						}
+						
+						continue; 
+					}
+					
+					int32 NumMaterials = MeshComponent->GetNumMaterials();
+
+					for (int32 i = 0; i < NumMaterials; ++i)
+					{					
+						if (bCanBuild)
+						{
+							MeshComponent->SetMaterial(i, BuildAcceptedMaterial);
+						}
+						else
+						{
+							MeshComponent->SetMaterial(i, BuildRejectedMaterial);
+						}
+					}
 				}
 			}
 		}

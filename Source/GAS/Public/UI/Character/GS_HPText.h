@@ -26,6 +26,8 @@ public:
 
 	UFUNCTION()
 	void OnCurrentHPChanged(UGS_StatComp* InStatComp);
+	
+	void SetHPBarColor(bool bIsEnemy);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
@@ -36,4 +38,10 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<AActor>OwningActor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* GreenHPBarTexture;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* RedHPBarTexture;
 };

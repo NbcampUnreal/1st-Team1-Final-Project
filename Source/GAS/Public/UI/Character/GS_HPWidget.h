@@ -11,6 +11,7 @@ class AGS_Character;
 class UProgressBar;
 class UImage;
 class USlider;
+class UGS_WidgetShakeHelper;
 
 UCLASS()
 class GAS_API UGS_HPWidget : public UUserWidget
@@ -21,6 +22,7 @@ public:
 	UGS_HPWidget(const FObjectInitializer& ObjectInitializer);
 
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	
 	void InitializeHPWidget(UGS_StatComp* InStatComp);
 	
@@ -41,7 +43,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<USlider> HPSlider;
 
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<AGS_Character> OwningCharacter;
 
@@ -55,7 +56,11 @@ protected:
 	FTimerHandle DelayBeforInterpTimerHandle;
 	FTimerHandle InterpTimerHandle;
 
+	// 흔들림 헬퍼 (UObject 기반)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_WidgetShakeHelper> ShakeHelper;
 
+private:
 	void UpdateDelayedHP();
 	void UpdateMainHP();
 	void StartDelayBarInterp();

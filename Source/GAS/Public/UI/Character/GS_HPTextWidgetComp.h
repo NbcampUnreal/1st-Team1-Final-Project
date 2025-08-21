@@ -11,4 +11,5 @@ class GAS_API UGS_HPTextWidgetComp : public UWidgetComponent
 
 public:
 	virtual void InitWidget() override;
+
 };

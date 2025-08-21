@@ -21,6 +21,9 @@ AGS_PlayerState::AGS_PlayerState()
 	, BoundStatComp(nullptr)
 {
     bReplicates = true;
+
+    //AetherComp 연결
+    AetherComp = CreateDefaultSubobject<UGS_AetherComp>(TEXT("Aether"));
 }
 
 void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -45,6 +48,9 @@ void AGS_PlayerState::BeginPlay()
     {
         FetchMySteamAvatar();
     }
+    //에테르 값 초기화
+    AetherComp->InitializeMaxAmount(250.f);
+
 }
 
 void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
@@ -344,4 +350,9 @@ void AGS_PlayerState::SetPlayerRole(EPlayerRole NewRole)
 {
 // ... existing code ...
 
+}
+
+UGS_AetherComp* AGS_PlayerState::GetAetherComp() const
+{
+    return AetherComp;
 }

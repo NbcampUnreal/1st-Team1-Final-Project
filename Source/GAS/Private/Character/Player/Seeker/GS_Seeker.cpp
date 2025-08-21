@@ -31,6 +31,7 @@
 #include "AkComponent.h"
 #include "AkAudioDevice.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -53,6 +54,11 @@ AGS_Seeker::AGS_Seeker()
 	// 디버프 VFX 컴포넌트 생성
 	// =======================
 	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
+
+	// =======================
+	// 캐릭터 오디오 컴포넌트 생성
+	// =======================
+	CharacterAudioComponent = CreateDefaultSubobject<UGS_CharacterAudioComponent>("CharacterAudioComponent");
 
 	// Fire Effect 생성 및 설정
 	FeetLavaVFX_L = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_L"));
@@ -181,7 +187,9 @@ void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AGS_Seeker::SetAimState(bool IsAim)
 {
-	SeekerState.IsAim = IsAim;
+	FSeekerState NewState = SeekerState;
+	NewState.IsAim = IsAim;
+	SeekerState = NewState;
 }
 
 bool AGS_Seeker::GetAimState()
@@ -191,7 +199,9 @@ bool AGS_Seeker::GetAimState()
 
 void AGS_Seeker::SetDrawState(bool IsDraw)
 {
-	SeekerState.IsDraw = IsDraw;
+	FSeekerState NewState = SeekerState;
+	NewState.IsDraw = IsDraw;
+	SeekerState = NewState;
 }
 
 bool AGS_Seeker::GetDrawState()
@@ -310,20 +320,29 @@ void AGS_Seeker::ComboInputClose()
 	}
 }
 
-void AGS_Seeker::OnComboAttack()
-{	
-	if (CanAcceptComboInput)
+void AGS_Seeker::Server_OnComboAttack_Implementation()
+{
+	if (!CanAcceptComboInput) // Handler 에서도 검사하고 있었는데 서버에서도 검사한다. 이중검사가 필요한가?
 	{
-		if (CurrentComboIndex == 0)
-		{
-			GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
-			ServerAttackMontage(); // 이게 두번 호출되는거 같은데...
-		}
-		else
-		{
-			Server_SetNextComboFlag(true);
-			Server_SetComboInputFlag(false);
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, CanAcceptComboInput == false"));
+		return;
+	}
+
+	if (!GetSkillComp()->IsSkillAllowed(ESkillSlot::Combo))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, IsSkillAllowed == false"));
+		return;
+	}
+		
+	if (CurrentComboIndex == 0)
+	{
+		GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
+		ServerAttackMontage();
+	}
+	else
+	{
+		Server_SetNextComboFlag(true);
+		Server_SetComboInputFlag(false); // server 함수의 호출을 막기 위해서 합친 함수를 만들어야 하나?
 	}
 }
 
@@ -331,6 +350,7 @@ void AGS_Seeker::SetMoveControlValue(bool bMoveForward, bool bMoveRight)
 {
 	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("SetMoveControlValue"));
 		TPSController->SetMoveControlValue(bMoveRight, bMoveForward);
 	}
 }
@@ -353,6 +373,7 @@ void AGS_Seeker::UpdatePostProcessEffect(float EffectStrength)
 
 void AGS_Seeker::ServerAttackMontage_Implementation()
 {
+	Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 	MulticastPlayComboSection();
 }
 
@@ -364,9 +385,6 @@ void AGS_Seeker::MulticastPlayComboSection_Implementation()
 	{
 		if (HasAuthority())
 		{
-			Multicast_SetIsFullBodySlot(true);
-			Multicast_SetIsUpperBodySlot(false); // Montage_Play 의 slot 에 직접적 영향. Replicated 대신 Multicast 사용.
-			SetMoveControlValue(false, false);
 			CurrentComboIndex++;
 			CanAcceptComboInput = false;
 			bNextCombo = false;
@@ -464,12 +482,6 @@ void AGS_Seeker::UpdateLowHealthEffect()
 	}
 }
 
-
-void AGS_Seeker::CallDeactiveSkill(ESkillSlot Slot)
-{
-	GetSkillComp()->TryDeactiveSkill(Slot);
-}
-
 void AGS_Seeker::OnRep_SeekerGait()
 {
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
@@ -478,6 +490,14 @@ void AGS_Seeker::OnRep_SeekerGait()
 		{
 			InputObj->Gait = SeekerGait;
 		}
+	}
+}
+
+void AGS_Seeker::Multicast_SetMontageSlot_Implementation(ESeekerMontageSlot InputMontageSlot)
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->SetCurMontageSlot(InputMontageSlot);
 	}
 }
 
@@ -528,11 +548,11 @@ void AGS_Seeker::OnRep_CurrentEffectStrength()
 	UpdatePostProcessEffect(CurrentEffectStrength);
 }
 
-// =================
-// 전투 음악 관리 함수
-// =================
+// ============================
+// 상태 전환에 따른 음악 함수 관련
+// ============================
 
-// 새로운 몬스터 감지 시스템 (시커가 몬스터를 감지)
+// 몬스터 감지 시스템 (시커가 몬스터를 감지)
 void AGS_Seeker::OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor->IsA(AGS_Monster::StaticClass()))
@@ -720,7 +740,6 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 
 void AGS_Seeker::Server_RestKey_Implementation()
 {
-	// SJE
 	SetSkillInputControl(true, true, true, true);
 	SetAimState(false);
 	SetDrawState(false);
@@ -731,7 +750,7 @@ void AGS_Seeker::Server_RestKey_Implementation()
 	SetMoveControlValue(true, true);
 }
 
-void AGS_Seeker::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
+void AGS_Seeker::Multicast_PlaySound_Implementation(UAkAudioEvent* SoundToPlay)
 {
 	// 데디케이티드 서버에서는 사운드 재생하지 않음
 	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
@@ -741,26 +760,25 @@ void AGS_Seeker::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToP
 
 	if (!SoundToPlay)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::Multicast_PlaySkillSound - SoundEvent is null"));
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::Multicast_PlaySound - SoundEvent is null"));
 		return;
 	}
 
 	if (!FAkAudioDevice::Get())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::Multicast_PlaySkillSound - Wwise AudioDevice is not initialized"));
+		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::Multicast_PlaySound - Wwise AudioDevice is not initialized"));
 		return;
 	}
 
-	// AkComponent가 없거나 유효하지 않으면 새로 생성
 	UAkComponent* AkComp = GetOrCreateAkComponent();
-	if (AkComp)
+	if (!AkComp)
 	{
-		AkComp->PostAkEvent(SoundToPlay);
+		UE_LOG(LogTemp, Error, TEXT("AGS_Seeker::Multicast_PlaySound - Failed to get or create AkComponent"));
+		return;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("AGS_Seeker::Multicast_PlaySkillSound - Failed to get or create AkComponent"));
-	}
+
+	// 실제 사운드 재생
+	AkComp->PostAkEvent(SoundToPlay);
 }
 
 UAkComponent* AGS_Seeker::GetOrCreateAkComponent()

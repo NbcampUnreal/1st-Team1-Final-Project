@@ -37,9 +37,8 @@ public:
 	TSubclassOf<AGS_EarthquakeEffect> GC_EarthquakeEffect;
 	
 	//[combo attack variables]
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, ReplicatedUsing=OnRep_CanCombo)
+	UPROPERTY(Replicated)
 	bool bCanCombo;
-	bool bClientCanCombo;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool IsAttacking;
 	
@@ -84,9 +83,6 @@ public:
 	
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastRPCComboAttack();
-	
-	UFUNCTION()
-	void OnRep_CanCombo();
 
 	void ComboLastAttack();
 	
@@ -124,11 +120,12 @@ public:
 	//[Fly Skill]
 	UFUNCTION(Server, Reliable)
 	void ServerRPCStartCtrl();
-
-	void StopCtrl() override;
-	
 	UFUNCTION(Server, Reliable)
 	void ServerRPCStopCtrl();
+
+	void StartCtrl() override;
+	void StopCtrl() override;
+	
 	
 	//[Fever Mode]
 	FORCEINLINE float GetCurrentFeverGauge() const { return CurrentFeverGauge; }

@@ -25,6 +25,7 @@
 						<Value Platform="Mac">GeneratedSoundBanks\Mac\</Value>
 					</ValueList>
 				</Property>
+				<Property Name="LicenseKey" Type="string" Value="PHByb2plY3QgaWQ9IjIwNTk3IiBtYXNrPSJWUE1VNjkzNSIgZW5jPSIwIj48bGljZW5zZSBpZD0iMSIgbmFtZT0iV3dpc2UiIHR5cGU9IjEiIHBsYXRmb3Jtcz0iMTAiIGV4cGlyZXM9IjIwMjYtMDctMzEiICAvPjxsaWNlbnNlIGlkPSIyMSIgbmFtZT0iTWFpbnRlbmFuY2UiIHR5cGU9IjEiIHBsYXRmb3Jtcz0iMTAiIGV4cGlyZXM9IjIwMjYtMDctMzEiICAvPjxsaWNlbnNlIGlkPSI3MCIgbmFtZT0iSW5kaWUgTGljZW5zZSIgdHlwZT0iMSIgcGxhdGZvcm1zPSIxMCIgZXhwaXJlcz0iMjAyNi0wNy0zMSIgIC8+PC9wcm9qZWN0Pg==|ci6/fj0tuRfmRZ3z133RPNFzD/vodhOMCYOZNykqIkZoRwLbMUaovQ3nz9JzdYVbMjoUGirA5s8juTsKnK0/5CR9P9NdUsMn2mtwmFEsYzpgbsOF4HL4/ffHiHEY5KxA6LLX0XCTWatiQW7TC1y6IN/7EUNdUyeorX1bOTVF0wP+D7SGyVPX9dTuQarFPikhYoQhO4dvBZnaTHfi8BVG9Q68A8Yf5kqNL+E159noL3LBVqWeVBg0LYPEuiV8jzw8P87TodEHvHArMFHSPLGIzknBAySzLTpNNaiiC2dZ8+TuLUONHQuowo5PKESLXUbGbPKOxiQ2fE9tE/ZwFf31qA=="/>
 				<Property Name="SoundBankHeaderFilePath" Type="string" Value="GeneratedSoundBanks\"/>
 				<Property Name="SoundBankPaths" Type="string">
 					<ValueList>

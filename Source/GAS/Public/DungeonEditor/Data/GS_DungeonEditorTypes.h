@@ -101,7 +101,8 @@ struct FDESaveData
 	EObjectType ObjectType;
 	UPROPERTY()
 	ETrapPlacement TrapPlacement;
-
+	UPROPERTY()
+	float ConstructionCost;
 	FDESaveData() {}
 };
 
@@ -115,6 +116,6 @@ FORCEINLINE FArchive& operator<<(FArchive& Ar, FDESaveData& Data)
 	Ar << Data.CellCoord;
 	Ar << Data.ObjectType;
 	Ar << Data.TrapPlacement;
-
+	Ar << Data.ConstructionCost;
 	return Ar;
 }

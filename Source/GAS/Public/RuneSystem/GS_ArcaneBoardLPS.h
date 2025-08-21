@@ -11,6 +11,7 @@
 
 class UGS_ArcaneBoardManager;
 class UGS_ArcaneBoardWidget;
+class UGS_ArcaneBoardSaveGame;
 
 /**
  * 룬 시스템을 관리하는 로컬 플레이어 서브 시스템
@@ -48,16 +49,33 @@ public:
     void OnBoardStatsChanged(const FArcaneBoardStats& NewStats);
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void SaveBoardConfig();
+    void SaveBoardConfig(int32 PresetIndex = -1);
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-    void LoadBoardConfig();
+    void LoadBoardConfig(int32 PresetIndex = -1);
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    bool IsPresetEmpty(int32 PresetIndex) const;
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    int32 GetCurrentPresetIndex() const;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     bool HasUnsavedChanges() const;
 
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     UGS_ArcaneBoardManager* GetOrCreateBoardManager();
+
+    // 룬 인벤 관련
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    TArray<uint8> GetOwnedRunes() const;
+
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void AddRuneToInventory(uint8 RuneID);
+
+    // 테스트용
+    UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+    void InitializeDefaultRunes();
 
     // 위젯 등록/해제 함수 추가
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -72,4 +90,20 @@ public:
 private:
     UPROPERTY()
     TWeakObjectPtr<UGS_ArcaneBoardWidget> CurrentUIWidget;
+
+    UPROPERTY()
+    TSet<uint8> OwnedRuneIDs;
+
+    void EnsureRuneInvenInit();
+    TArray<FPlacedRuneInfo> LoadPresetData(ECharacterClass CharClass, int32 PresetIndex);
+    void ApplyPresetToBoard(ECharacterClass CharClass, const TArray<FPlacedRuneInfo>& PresetData);
+
+    int32 GetLastUsedPresetIndex();
+
+    UPROPERTY()
+    int32 CurrentPresetIndex;
+
+    UGS_ArcaneBoardSaveGame* GetOrCreateSaveGame();
+    const TArray<FPlacedRuneInfo>* GetPresetArray(const FArcaneBoardPresets& Presets, int32 PresetIndex) const;
+    TArray<FPlacedRuneInfo>* GetPresetArray(FArcaneBoardPresets& Presets, int32 PresetIndex);
 };

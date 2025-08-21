@@ -34,11 +34,11 @@ void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& In
 
 	if (!bCtrlHeld)
 	{
-		MerciCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+		MerciCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
 	}
 	else
 	{
-		MerciCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+		MerciCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	}
 }
 
@@ -67,7 +67,7 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+		OwnerCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
 	}
 }
 
@@ -90,7 +90,7 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 	
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{
-		MerciCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+		MerciCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Aiming);
 	}
 	else
 	{
@@ -123,7 +123,7 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Moving);
+		OwnerCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Moving);
 	}
 }
 
@@ -146,7 +146,7 @@ void UGS_MerciSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& I
 	
 	if (MerciCharacter)
 	{
-		MerciCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Rolling);
+		MerciCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Rolling);
 	}
 }
 

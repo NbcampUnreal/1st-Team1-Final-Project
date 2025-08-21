@@ -9,6 +9,9 @@
 #include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_StatComp::UGS_StatComp()
 {
@@ -162,13 +165,19 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 		}
 	}
 	//damaged
-	else
-	{
-		//[TODO] play take damage montage
-		if (!TakeDamageMontages.IsEmpty())
-		{
-			MulticastRPCPlayTakeDamageMontage();
-		}
+    else
+    {
+        // 피격 사운드는 항상 재생
+        MulticastRPCPlayTakeDamageMontage();
+
+        // 몬스터인 경우 Hurt 사운드 즉시 재생(서버 권한에서만 멀티캐스트 트리거)
+        if (AGS_Monster* DamagedMonster = Cast<AGS_Monster>(GetOwner()))
+        {
+            if (IsValid(DamagedMonster) && IsValid(DamagedMonster->MonsterAudioComponent))
+            {
+                DamagedMonster->MonsterAudioComponent->PlayHurtSound();
+            }
+        }
 
 		//dead
 		if (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER)
@@ -220,35 +229,41 @@ void UGS_StatComp::SetAttackSpeed(float InAttackSpeed)
 void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 {
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-
-	// 죽은 상태가 아닐 때만 히트 사운드 재생
-	if (HitSoundEvent && CanPlayHitSound() && CurrentHealth > KINDA_SMALL_NUMBER)
+	
+	// 시커 캐릭터: CharacterAudioComponent에서 피격 사운드 처리
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
-		UAkGameplayStatics::PostEvent(HitSoundEvent, OwnerCharacter, 0, FOnAkPostEventCallback());
-		LastHitSoundTime = GetWorld()->GetTimeSeconds();
+		if (OwnerSeeker->CharacterAudioComponent)
+		{
+			OwnerSeeker->CharacterAudioComponent->PlayHitSound();
+		}
 	}
 	
-	int32 idx = FMath::RandRange(0, TakeDamageMontages.Num() - 1);
-	UAnimMontage* AnimMontage = TakeDamageMontages[idx];
-
-	if (IsValid(OwnerCharacter))
+	// 피격 애니메이션 재생 (몬스터만)
+	if (TakeDamageMontages.Num() > 0)
 	{
-		if (AGS_Monster* Monster = Cast<AGS_Monster>(OwnerCharacter))
+		int32 idx = FMath::RandRange(0, TakeDamageMontages.Num() - 1);
+		UAnimMontage* AnimMontage = TakeDamageMontages[idx];
+
+		if (IsValid(OwnerCharacter))
 		{
-			Monster->PlayAnimMontage(AnimMontage);
-
-			if (Monster->HasAuthority())
+			if (AGS_Monster* Monster = Cast<AGS_Monster>(OwnerCharacter))
 			{
-				//stop character during damage animation
-				CharacterWalkSpeed = Monster->GetCharacterMovement()->MaxWalkSpeed;
-				Monster->GetCharacterMovement()->MaxWalkSpeed = 0.f;
-			}
+				Monster->PlayAnimMontage(AnimMontage);
 
-			if (UAnimInstance* AnimInstance = Monster->GetMesh()->GetAnimInstance())
-			{
-				FOnMontageBlendingOutStarted BlendOut;
-				BlendOut.BindUObject(this, &UGS_StatComp::OnDamageMontageEnded);
-				AnimInstance->Montage_SetBlendingOutDelegate(BlendOut, AnimMontage);
+				if (Monster->HasAuthority())
+				{
+					//stop character during damage animation
+					CharacterWalkSpeed = Monster->GetCharacterMovement()->MaxWalkSpeed;
+					Monster->GetCharacterMovement()->MaxWalkSpeed = 0.f;
+				}
+
+				if (UAnimInstance* AnimInstance = Monster->GetMesh()->GetAnimInstance())
+				{
+					FOnMontageBlendingOutStarted BlendOut;
+					BlendOut.BindUObject(this, &UGS_StatComp::OnDamageMontageEnded);
+					AnimInstance->Montage_SetBlendingOutDelegate(BlendOut, AnimMontage);
+				}
 			}
 		}
 	}
@@ -290,17 +305,6 @@ void UGS_StatComp::ServerRPCHeal_Implementation(float InHealAmount)
 
     float NewHealth = FMath::Min(CurrentHealth + InHealAmount, MaxHealth);
     SetCurrentHealth(NewHealth, true);
-}
-
-bool UGS_StatComp::CanPlayHitSound() const
-{
-	if (!GetWorld())
-	{
-		return false;
-	}
-	
-	float CurrentTime = GetWorld()->GetTimeSeconds();
-	return (CurrentTime - LastHitSoundTime) >= HitSoundCooldownTime;
 }
 
 ECharacterClass UGS_StatComp::MapCharacterTypeToCharacterClass(ECharacterType CharacterType)
