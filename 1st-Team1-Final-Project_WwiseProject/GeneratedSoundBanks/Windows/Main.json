@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{289E5FE3-CA5C-C515-4F93-2D05F7D76850}",
+    "Hash": "{CC28BF92-1554-89AD-CE29-AEA93B087655}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -238,6 +238,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
       "CachePath": "86/{86BCC787-7896-A5DC-34C9-11CB3C5F7B34}.wem"
+     },
+     {
+      "Id": "111629751",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_StoneTrap1.wav",
+      "CachePath": "FF/{FF536A7B-7D00-D293-EDDE-0AA029F33223}.wem"
      },
      {
       "Id": "112081368",
@@ -576,6 +584,14 @@
       "CachePath": "8A/{8A474FBA-B766-7FB7-7D59-ED8CF723C908}.wem"
      },
      {
+      "Id": "265430466",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "GlassBreakWine_SFXB.2343.wav",
+      "CachePath": "FA/{FA377A72-D92C-960A-4DA4-191DB4E074D4}.wem"
+     },
+     {
       "Id": "269881452",
       "Language": "SFX",
       "Streaming": "false",
@@ -790,6 +806,14 @@
       "Location": "Memory",
       "ShortName": "Footstep_Grass (3).wav",
       "CachePath": "00/{00230D6F-B6B2-51BA-E447-CEE35C030F2D}.wem"
+     },
+     {
+      "Id": "381244851",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "GlassBreakWine_SFXB.2343.wav",
+      "CachePath": "7D/{7DE99BD9-AF3E-1BDF-B37F-4C9A4042C5B8}.wem"
      },
      {
       "Id": "384034531",
@@ -1088,6 +1112,14 @@
       "CachePath": "34/{34EFDC65-55C7-0461-652E-81A9A70E369C}.wem"
      },
      {
+      "Id": "520933609",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
+      "CachePath": "E2/{E2718A2A-6910-61CA-311B-2A6F261F67F8}.wem"
+     },
+     {
       "Id": "523547018",
       "Language": "SFX",
       "Streaming": "false",
@@ -1184,6 +1216,14 @@
       "CachePath": "4E/{4E4E3F56-EC3D-8523-005F-76A0F1318B72}.wem"
      },
      {
+      "Id": "572286695",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "GlassBreakWine_SFXB.2343.wav",
+      "CachePath": "B4/{B4B8AF4B-602E-DE94-EC24-E88A42ABED5B}.wem"
+     },
+     {
       "Id": "572957501",
       "Language": "SFX",
       "Streaming": "false",
@@ -1264,12 +1304,28 @@
       "CachePath": "60/{609E8860-35DF-020B-4A9C-6857350771B1}.wem"
      },
      {
+      "Id": "589741947",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_EMDP1_fx_foley_loop_earthquake_stone_rumbling_debris_01.wav",
+      "CachePath": "9F/{9F8EB4A9-55F2-7EEF-1ADD-C9E0C260ADB9}.wem"
+     },
+     {
       "Id": "595941273",
       "Language": "SFX",
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "MA_POR_FX_Texture_One_Shot_Agitate.wav",
       "CachePath": "D9/{D916BA6B-7DBC-2E15-BC16-8012A9D27838}.wem"
+     },
+     {
+      "Id": "602204976",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_StoneTrap_Hit.wav",
+      "CachePath": "D7/{D7B0DCFB-15DD-9365-2977-071AC58BB715}.wem"
      },
      {
       "Id": "606572947",
@@ -1472,6 +1528,14 @@
       "CachePath": "C2/{C2372EDC-5E11-DC0C-8B2E-3CEF9D3640D9}.wem"
      },
      {
+      "Id": "709751505",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_MG3_fx_foley_smash_rocks_pickaxe_02a.wav",
+      "CachePath": "02/{028DDEBD-C775-A3DF-6336-5621A17AAE36}.wem"
+     },
+     {
       "Id": "710539305",
       "Language": "SFX",
       "Streaming": "false",
@@ -1656,6 +1720,14 @@
       "CachePath": "BD/{BD3AE8AA-6BA5-8124-4732-95AD7BCF0892}.wem"
      },
      {
+      "Id": "811340583",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "GlassBreakWine_SFXB.2343.wav",
+      "CachePath": "73/{736825A3-09E2-796D-E1C9-BC7BB2FC84C4}.wem"
+     },
+     {
       "Id": "812504196",
       "Language": "SFX",
       "Streaming": "false",
@@ -1760,6 +1832,14 @@
       "CachePath": "01/{01640E22-782B-18A8-6A77-92C92C41C694}.wem"
      },
      {
+      "Id": "865033342",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_StoneTrap1.wav",
+      "CachePath": "35/{3582557B-19F8-0513-8DA5-18A99F5FEB52}.wem"
+     },
+     {
       "Id": "866318197",
       "Language": "SFX",
       "Streaming": "false",
@@ -1774,6 +1854,14 @@
       "Location": "Memory",
       "ShortName": "ESM_FG2_FX_combat_one_shot_cinematic_weapons_melee_axe_hits_04.wav",
       "CachePath": "C1/{C146135E-E7F9-DF8B-D034-7EF65E7E8CD4}.wem"
+     },
+     {
+      "Id": "870347167",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_EMDP1_fx_foley_loop_earthquake_stone_rumbling_debris_01.wav",
+      "CachePath": "84/{84BC54CE-91A4-7D21-608D-C5B41BC28BF1}.wem"
      },
      {
       "Id": "872852181",
@@ -1982,6 +2070,14 @@
       "Location": "Memory",
       "ShortName": "FootstepsConcrete.wav",
       "CachePath": "CA/{CAAFAB44-DA9A-54E9-E276-6B019EE9A9E3}.wem"
+     },
+     {
+      "Id": "980125505",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_1_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact.wav",
+      "CachePath": "A2/{A284C5E0-875B-79EB-4006-5F5BADC19786}.wem"
      },
      {
       "Id": "992284103",
@@ -5760,6 +5856,27 @@
       ]
      },
      {
+      "Id": "1954750879",
+      "Name": "Props_CrystalCeilTrap_Warn",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalCeilTrap_Warn",
+      "GUID": "{B04602E2-FB96-44B6-8F1F-73807B6D663A}",
+      "MaxAttenuation": "960.00006",
+      "DurationType": "OneShot",
+      "DurationMin": "1.8649746",
+      "DurationMax": "1.9196225",
+      "MediaRefs": [
+       {
+        "Id": "589741947"
+       },
+       {
+        "Id": "933149701"
+       },
+       {
+        "Id": "980125505"
+       }
+      ]
+     },
+     {
       "Id": "2640261390",
       "Name": "Props_CrystalSpike_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalSpike_Hit",
@@ -5781,6 +5898,27 @@
       ]
      },
      {
+      "Id": "3756775051",
+      "Name": "Props_CrystalSpike_Warn",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalSpike_Warn",
+      "GUID": "{DD18B330-B074-4D2A-98BB-5D65C009673B}",
+      "MaxAttenuation": "960.00006",
+      "DurationType": "OneShot",
+      "DurationMin": "0.62017554",
+      "DurationMax": "0.67630625",
+      "MediaRefs": [
+       {
+        "Id": "265430466"
+       },
+       {
+        "Id": "552526360"
+       },
+       {
+        "Id": "709751505"
+       }
+      ]
+     },
+     {
       "Id": "446941167",
       "Name": "Props_CrystalWallTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap",
@@ -5798,6 +5936,72 @@
        },
        {
         "Id": "810310470"
+       }
+      ]
+     },
+     {
+      "Id": "1663686961",
+      "Name": "Props_CrystalWallTrap_End",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap_End",
+      "GUID": "{89711335-193C-46E0-A2F3-AF1AC6E56925}",
+      "MaxAttenuation": "660",
+      "DurationType": "OneShot",
+      "DurationMin": "1.2887006",
+      "DurationMax": "1.3653308",
+      "MediaRefs": [
+       {
+        "Id": "381244851"
+       },
+       {
+        "Id": "865033342"
+       }
+      ]
+     },
+     {
+      "Id": "1078191565",
+      "Name": "Props_CrystalWallTrap_Hit",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap_Hit",
+      "GUID": "{B21DE69E-40F0-4E26-A3A1-FD3ACBE3F2B1}",
+      "MaxAttenuation": "800",
+      "DurationType": "OneShot",
+      "DurationMin": "1.8",
+      "DurationMax": "1.9070336",
+      "MediaRefs": [
+       {
+        "Id": "107540085"
+       },
+       {
+        "Id": "313983704"
+       },
+       {
+        "Id": "602204976"
+       },
+       {
+        "Id": "811340583"
+       }
+      ]
+     },
+     {
+      "Id": "870469010",
+      "Name": "Props_CrystalWallTrap_Warn",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_CrystalWallTrap_Warn",
+      "GUID": "{33AD43EF-BF24-497E-9E82-E5002392E978}",
+      "MaxAttenuation": "720",
+      "DurationType": "OneShot",
+      "DurationMin": "1.0204769",
+      "DurationMax": "1.0837611",
+      "MediaRefs": [
+       {
+        "Id": "111629751"
+       },
+       {
+        "Id": "520933609"
+       },
+       {
+        "Id": "572286695"
+       },
+       {
+        "Id": "870347167"
        }
       ]
      },
@@ -6548,6 +6752,6 @@
     ]
    }
   ],
-  "FileHash": "{42F1CE98-E779-20CE-4242-2F8B99A85BB0}"
+  "FileHash": "{DED6D3B0-38B4-6D47-5551-7132FA1D75DC}"
  }
 }

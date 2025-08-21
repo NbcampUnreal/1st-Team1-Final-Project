@@ -42,6 +42,7 @@
 						<ObjectRef Name="SFX_GrenadeTick" ID="{032BB249-4018-4415-AE23-D5223963CE2B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="UI_ButtonSFX_Disable" ID="{39B3734C-350B-4435-8668-E75DB82F1D5B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_IronFang_Idle" ID="{D36C465E-BF45-44B6-950D-FF21056CE83A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Props_CrystalCeilTrap_Warn" ID="{B04602E2-FB96-44B6-8F1F-73807B6D663A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_MeleeAttack_Sword_RTS" ID="{6D494C81-1D1F-44C2-B295-125B55A1A565}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw_Attack_Swing_RTS" ID="{52FE19F3-A728-44D4-B961-62931E03513E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_Mon_SmallClaw_RTS" ID="{9F91CF19-E3D0-44E4-AB7B-AA5DE1A9EA71}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
@@ -63,6 +64,7 @@
 						<ObjectRef Name="EV_Drakhar_Flying_Play" ID="{C62A4302-E43E-469D-9D88-EE6CC3EFC83E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_GrenadeFuse" ID="{F132EACB-2D2B-46AD-A69A-7A9E5F8BA8C2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_DraconicFuryProjectile_Impact" ID="{6CC63D62-1048-46DC-B03B-560D5B86DEF7}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Props_CrystalWallTrap_End" ID="{89711335-193C-46E0-A2F3-AF1AC6E56925}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_CrystalWallTrap" ID="{9C89005A-CF4E-46F0-9A26-2606EC93E64B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Axe_Hit" ID="{E6A16F60-3008-4709-B717-1D97F028AB1C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_UI_Mon_ShadowFang" ID="{C1167BDD-D31B-471D-BCBE-F6C4EE8E8309}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -91,6 +93,7 @@
 						<ObjectRef Name="EV_AresUltimateEnd" ID="{7F3B4958-9FDC-491C-956A-B4F02A7846AB}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_UI_Mon_SmallClaw" ID="{82CEBE2B-BC4B-495E-B655-31BC4F1B1ED1}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Ares_Hit" ID="{87F36914-441D-497C-A206-E42B977BF28F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Props_CrystalWallTrap_Warn" ID="{33AD43EF-BF24-497E-9E82-E5002392E978}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Chan_Attack" ID="{241C638E-B089-4989-827A-E6D31828D946}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_NeedleFang_Shot_By" ID="{D8116CA9-51E2-49B6-A563-0721E17ECC81}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw_Hurt" ID="{15D157B1-0553-49DF-81AD-D0D205606DA6}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -126,6 +129,7 @@
 						<ObjectRef Name="Voice_Ares_Sick" ID="{D7B07F59-9755-4CF3-86F4-D2EF768F8E2F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Ares_Attack_02" ID="{1E0C93ED-3671-4D14-AA2C-4874F9BA328B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Merci_ArrowZero" ID="{1A835349-0C17-4D22-AF35-BAFC0385C29C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Props_CrystalSpike_Warn" ID="{DD18B330-B074-4D2A-98BB-5D65C009673B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Merci_Die" ID="{169823F8-E7B9-4D5E-AE2E-003C93280F66}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_NeedleFang_Death" ID="{DFF756ED-92D9-4D60-845E-A4A73A393363}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_NeedleFang_Hurt" ID="{E593CAE0-ED33-4D92-AC10-AECCA9C0D50D}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -137,6 +141,7 @@
 						<ObjectRef Name="Props_StoneTrap_Hit" ID="{624349E1-2251-4E0E-8E91-39536798294E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_CombatPlay" ID="{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_WingRush" ID="{148D1E7F-E352-4E1C-A1EB-4F703B63F0EE}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Props_CrystalWallTrap_Hit" ID="{B21DE69E-40F0-4E26-A3A1-FD3ACBE3F2B1}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_DraconicFuryProjectile_Hit" ID="{3F91B356-9681-4E2A-8026-856DB43E3FF9}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_ShadowFang_Hurt" ID="{867842C7-5E23-4E64-97E2-5E7B42894DDD}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_MineExplode" ID="{59F8482E-4399-4E6E-B401-0432CFED7550}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
