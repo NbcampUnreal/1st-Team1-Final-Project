@@ -354,11 +354,6 @@ void AGS_PlacerBase::DrawPlacementIndicators()
 					PlaceIndicators[i]->SetMaterial(0, PlaceRejectedMaterial);
 					bCanBuild = false;
 				}
-				// if (!BuildManagerRef->CheckOccupancyData(IntPointArray[i], TargetType))
-				// {
-				// 	bCanBuild = false;
-				// 	break;
-				// }
 			}
 
 			TArray<UMeshComponent*> AllMeshComponents;

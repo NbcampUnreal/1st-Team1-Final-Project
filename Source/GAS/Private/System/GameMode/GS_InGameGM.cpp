@@ -8,6 +8,7 @@
 #include "GameFramework/Pawn.h"
 #include "EngineUtils.h"
 #include "NavigationSystem.h"
+#include "AI/RTS/GS_RTSCamera.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/GS_TpsController.h"
 #include "GameFramework/PlayerStart.h"
@@ -22,6 +23,7 @@ AGS_InGameGM::AGS_InGameGM()
 	GameStateClass = AGS_InGameGS::StaticClass();
     PlayerStateClass = AGS_PlayerState::StaticClass();
     bUseSeamlessTravel = true;
+    RTSCamera = nullptr;
 }
 
 TSubclassOf<APlayerController> AGS_InGameGM::GetPlayerControllerClassToSpawnForSeamlessTravel(APlayerController* PreviousPC)
@@ -143,6 +145,11 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
         }
     }
 
+    if (RTSCamera != nullptr)
+    {
+        RTSCamera->HideWallAndCeiling();
+    }
+    
     // 내비메시 재빌드 요청
     UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
     if (IsValid(NavSystem))

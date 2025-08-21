@@ -2,6 +2,7 @@
 
 
 #include "AI/RTS/GS_RTSCamera.h"
+#include "System/GameMode/GS_InGameGM.h"
 
 // Sets default values
 AGS_RTSCamera::AGS_RTSCamera()
@@ -15,7 +16,17 @@ AGS_RTSCamera::AGS_RTSCamera()
 void AGS_RTSCamera::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (UWorld* GameWorld = GetWorld())
+	{
+		if (AGameModeBase* GameModeInstance = GameWorld->GetAuthGameMode())
+		{
+			if (AGS_InGameGM* InGameGM = Cast<AGS_InGameGM>(GameModeInstance))
+			{
+				InGameGM->SetRTSCamera(this);
+			}
+		}
+	}
 }
 
 // Called every frame
