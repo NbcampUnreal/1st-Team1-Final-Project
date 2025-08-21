@@ -446,6 +446,14 @@ void AGS_RTSController::InitCameraActor()
 	}
 }
 
+void AGS_RTSController::Client_HideDungeonElements_Implementation()
+{
+	if (CameraActor)
+	{
+		CameraActor->HideWallAndCeiling();
+	}
+}
+
 void AGS_RTSController::SetRTSCursor(const FName& CursorPath)
 {
 	if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
