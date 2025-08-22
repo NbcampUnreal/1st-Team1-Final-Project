@@ -1103,12 +1103,12 @@
 												</Action>
 											</ChildrenList>
 										</Event>
-										<Event Name="EV_Bow_Pull" ID="{70E298F1-D671-45D2-BDB8-C18312B3AFC5}">
+										<Event Name="EV_Bow_Draw" ID="{70E298F1-D671-45D2-BDB8-C18312B3AFC5}">
 											<ChildrenList>
 												<Action Name="" ID="{10A53F8C-96E8-4EA7-A856-D07AA5FC80CD}" ShortID="510559510">
 													<ReferenceList>
 														<Reference Name="Target">
-															<ObjectRef Name="SFX_BowPull" ID="{11BA4BA9-843B-43A6-A8FA-5596EE0D6A1D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+															<ObjectRef Name="SFX_Bow_Draw" ID="{11BA4BA9-843B-43A6-A8FA-5596EE0D6A1D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 														</Reference>
 													</ReferenceList>
 												</Action>

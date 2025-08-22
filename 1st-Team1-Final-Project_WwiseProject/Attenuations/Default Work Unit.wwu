@@ -188,7 +188,7 @@
 				</Attenuation>
 				<Attenuation Name="RTS_Attenuation" ID="{BA588512-4963-42D7-AD9C-A02AD9F2F4F8}" ShortID="845504517">
 					<PropertyList>
-						<Property Name="RadiusMax" Type="Real64" Value="4000"/>
+						<Property Name="RadiusMax" Type="Real64" Value="5000"/>
 					</PropertyList>
 					<CurveUsageInfoList>
 						<VolumeDryUsage>
@@ -205,13 +205,13 @@
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>3522.75377</XPos>
-											<YPos>-1.81475</YPos>
+											<XPos>4560.72698</XPos>
+											<YPos>-1.25206</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>4000</XPos>
+											<XPos>5000</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>
@@ -238,7 +238,7 @@
 											<Flags>5</Flags>
 										</Point>
 										<Point>
-											<XPos>4000</XPos>
+											<XPos>5000</XPos>
 											<YPos>100</YPos>
 											<Flags>37</Flags>
 										</Point>

@@ -22446,6 +22446,12 @@
 									</ReferenceList>
 									<ChildrenList>
 										<AudioFileSource Name="BowSnap_BW_54387" ID="{3724B2CC-BC91-49EB-B127-D632E9FAE6EB}">
+											<PropertyList>
+												<Property Name="FadeInDuration" Type="Real64" Value="0.0153373757969902"/>
+												<Property Name="FadeOutDuration" Type="Real64" Value="0.211285386781476"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0149081365799341"/>
+											</PropertyList>
 											<Language>SFX</Language>
 											<AudioFile>BowSnap_BW.54387.wav</AudioFile>
 											<MediaIDList>
@@ -22457,7 +22463,7 @@
 										<ActiveSource Name="BowSnap_BW_54387" ID="{3724B2CC-BC91-49EB-B127-D632E9FAE6EB}" Platform="Linked"/>
 									</ActiveSourceList>
 								</Sound>
-								<RandomSequenceContainer Name="SFX_BowPull" ID="{11BA4BA9-843B-43A6-A8FA-5596EE0D6A1D}" ShortID="267195149">
+								<RandomSequenceContainer Name="SFX_Bow_Draw" ID="{11BA4BA9-843B-43A6-A8FA-5596EE0D6A1D}" ShortID="267195149">
 									<PropertyList>
 										<Property Name="3DSpatialization" Type="int16" Value="2"/>
 										<Property Name="AttenuationDistanceScaling" Type="Real32" Value="0.9"/>
@@ -22667,6 +22673,7 @@
 								<RandomSequenceContainer Name="Voice_Merci_Hit" ID="{3F4C103D-A1CF-4B0D-BE2B-37458590A7B5}" ShortID="256550765">
 									<PropertyList>
 										<Property Name="3DSpatialization" Type="int16" Value="1"/>
+										<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.1"/>
 										<Property Name="GlobalOrPerObject" Type="int16" Value="0"/>
 										<Property Name="Lowpass" Type="int16">
 											<ValueList>
@@ -22707,7 +22714,7 @@
 									</PropertyList>
 									<ReferenceList>
 										<Reference Name="Attenuation">
-											<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+											<ObjectRef Name="RTS_Attenuation" ID="{BA588512-4963-42D7-AD9C-A02AD9F2F4F8}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
 										</Reference>
 										<Reference Name="Conversion">
 											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
@@ -23189,6 +23196,7 @@
 								<Sound Name="Voice_MerciDie" ID="{9B0DBA9E-7F7F-4974-91FE-1DF25CE1859E}" ShortID="854020006">
 									<PropertyList>
 										<Property Name="3DSpatialization" Type="int16" Value="2"/>
+										<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.1"/>
 										<Property Name="Highpass" Type="int16">
 											<ValueList>
 												<Value>5</Value>
@@ -23219,7 +23227,7 @@
 									</PropertyList>
 									<ReferenceList>
 										<Reference Name="Attenuation">
-											<ObjectRef Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
+											<ObjectRef Name="RTS_Attenuation" ID="{BA588512-4963-42D7-AD9C-A02AD9F2F4F8}" WorkUnitID="{884F5FC8-7442-4A32-8FB6-CA9454D5D66C}"/>
 										</Reference>
 										<Reference Name="Conversion">
 											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{9BBAD039-2C0A-43FC-8801-0916388F0152}"/>
