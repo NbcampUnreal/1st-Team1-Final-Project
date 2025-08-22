@@ -143,21 +143,6 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
             }
         }
     }
-
-    // 가디언 벽 숨김 처리
-    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-    {
-        APlayerController* PC = It->Get();
-        AGS_PlayerState* PS = PC ? PC->GetPlayerState<AGS_PlayerState>() : nullptr;
-        if (PS && PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
-        {
-            if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(PC))
-            {
-                RTSController->Client_HideDungeonElements();
-                break;
-            }
-        }
-    }
     
     // 내비메시 재빌드 요청
     UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
@@ -223,6 +208,24 @@ void AGS_InGameGM::OnNavMeshBuildComplete()
             }
         }
     }
+
+    // 가디언 벽 숨김 처리
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        AGS_PlayerState* PS = PC ? PC->GetPlayerState<AGS_PlayerState>() : nullptr;
+        if (PS && PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] 찾은 가디언 플레이어: %s"), *PC->GetName());
+            if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(PC))
+            {
+                UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] RTS컨트롤러 캐스팅 성공, RPC 호출..."));
+                RTSController->Client_HideDungeonElements();
+                break;
+            }
+        }
+    }
+    
     FTimerHandle DelayedRestartPlayerHandle;
     GetWorld()->GetTimerManager().SetTimer(DelayedRestartPlayerHandle, this, &AGS_InGameGM::DelayedRestartPlayer, 2.f, false);
 }
