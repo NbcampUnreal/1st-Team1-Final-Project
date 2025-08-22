@@ -8253,7 +8253,8 @@
 					<ChildrenList>
 						<SwitchContainer Name="RTS_Sound" ID="{374F33B7-CC1F-425C-9FE7-5D4D526F2165}" ShortID="683822960">
 							<PropertyList>
-								<Property Name="3DSpatialization" Type="int16" Value="2"/>
+								<Property Name="3DSpatialization" Type="int16" Value="1"/>
+								<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.1"/>
 								<Property Name="Lowpass" Type="int16">
 									<ValueList>
 										<Value>5</Value>
