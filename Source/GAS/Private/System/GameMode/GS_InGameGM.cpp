@@ -16,6 +16,7 @@
 #include "UI/Character/GS_HPBoardWidget.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
+#include "Props/GS_RoomBase.h"
 
 AGS_InGameGM::AGS_InGameGM()
 {
@@ -121,6 +122,8 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
         DelayedRestartPlayer();//이거 나중에 반드시 빼야함
         return;
     }
+
+    int RoomCount = 0;
     // 받아온 데이터를 기반으로 "몬스터"를 제외한 액터 스폰
     UWorld* World = GetWorld();
     if (IsValid(World))
@@ -139,9 +142,23 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
                     {
                         SpawnedDungeonActors.Add(NewActor);
                     }
+
+                    // 만약 이번에 스폰한 액터가 방 모듈이면 방 개수 증가.
+                    if (Cast<AGS_RoomBase>(ActorClassToSpawn))
+                    {
+                        RoomCount++;
+                    }
                 }
             }
         }
+    }
+
+    AGS_InGameGS* InGameGS = GetGameState<AGS_InGameGS>();
+    if (InGameGS)
+    {
+        // 실제로 생성된 방의 개수를 GameState에 기록하고,
+        // 모든 클라이언트에게 '검증 시작' 신호를 보냅니다.
+        InGameGS->SetDungeonData(RoomCount);
     }
     
     // 내비메시 재빌드 요청
@@ -210,21 +227,21 @@ void AGS_InGameGM::OnNavMeshBuildComplete()
     }
 
     // 가디언 벽 숨김 처리
-    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-    {
-        APlayerController* PC = It->Get();
-        AGS_PlayerState* PS = PC ? PC->GetPlayerState<AGS_PlayerState>() : nullptr;
-        if (PS && PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] 찾은 가디언 플레이어: %s"), *PC->GetName());
-            if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(PC))
-            {
-                UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] RTS컨트롤러 캐스팅 성공, RPC 호출..."));
-                RTSController->Client_HideDungeonElements();
-                break;
-            }
-        }
-    }
+    // for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    // {
+    //     APlayerController* PC = It->Get();
+    //     AGS_PlayerState* PS = PC ? PC->GetPlayerState<AGS_PlayerState>() : nullptr;
+    //     if (PS && PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+    //     {
+    //         UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] 찾은 가디언 플레이어: %s"), *PC->GetName());
+    //         if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(PC))
+    //         {
+    //             UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] RTS컨트롤러 캐스팅 성공, RPC 호출..."));
+    //             RTSController->Client_HideDungeonElements();
+    //             break;
+    //         }
+    //     }
+    // }
     
     FTimerHandle DelayedRestartPlayerHandle;
     GetWorld()->GetTimerManager().SetTimer(DelayedRestartPlayerHandle, this, &AGS_InGameGM::DelayedRestartPlayer, 2.f, false);

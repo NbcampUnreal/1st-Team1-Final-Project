@@ -446,7 +446,7 @@ void AGS_RTSController::InitCameraActor()
 	}
 }
 
-void AGS_RTSController::Client_HideDungeonElements_Implementation()
+void AGS_RTSController::HideDungeonElements()
 {
 	UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그]===== CLIENT RPC RECEIVED on %s! ====="), *GetName());
 	if (CameraActor)

@@ -196,8 +196,11 @@ public:
 	// Client
 	UFUNCTION(Client, Reliable)
 	void Client_StartGame();
-	UFUNCTION(Client, Reliable)
-	void Client_HideDungeonElements();
+	// UFUNCTION(Client, Reliable)
+	// void Client_HideDungeonElements();
+
+	UFUNCTION()
+	void HideDungeonElements();
 	
 	// UI 버튼 클릭 함수
 	UFUNCTION(BlueprintCallable, Category="RTS")
