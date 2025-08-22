@@ -74,6 +74,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnAttackHit(int32 ComboIndex);
 
+	// Damage handling with audio feedback
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

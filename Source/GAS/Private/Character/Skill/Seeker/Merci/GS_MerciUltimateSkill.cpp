@@ -29,10 +29,7 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 		if (AGS_Merci* OwnerPlayer = Cast<AGS_Merci>(OwnerCharacter))
 		{
 			// 스킬 시작 사운드 재생
-			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-			}
+			PlaySkillStartSound();
 
 			OwnerPlayer->SetAutoAimTarget(nullptr);
 		}

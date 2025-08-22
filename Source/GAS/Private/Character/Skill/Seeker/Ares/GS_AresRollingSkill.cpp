@@ -28,10 +28,7 @@ void UGS_AresRollingSkill::ActiveSkill()
 		if (OwnerPlayer->HasAuthority())
 		{
 			// 스킬 시작 사운드 재생
-			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-			}
+			PlaySkillStartSound();
 
 			//OwnerPlayer->Multicast_SetIsFullBodySlot(true);
 			//OwnerPlayer->Multicast_SetIsUpperBodySlot(false);

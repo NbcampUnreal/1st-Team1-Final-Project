@@ -472,32 +472,8 @@ void UGS_CharacterAudioComponent::ResetAttackSoundSequence()
 
 void UGS_CharacterAudioComponent::PlayHitSound()
 {
-	// 데디케이티드 서버에서는 사운드 재생하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
-	{
-		return;
-	}
-
-	// 쿨다운 체크 (인스턴스 변수 사용)
-	float CurrentTime = GetWorld()->GetTimeSeconds();
-	if (CurrentTime - LastHitSoundTime < HitSoundCooldownTime)
-	{
-		return;
-	}
-	LastHitSoundTime = CurrentTime;
-
-	if (!HitSoundEvent)
-	{
-		return;
-	}
-
-	// 죽은 상태가 아닐 때만 히트 사운드 재생
-	if (AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner()))
-	{
-		if (OwnerCharacter->GetStatComp() && OwnerCharacter->GetStatComp()->GetCurrentHealth() > KINDA_SMALL_NUMBER)
-		{
-			PlaySound(HitSoundEvent);
-		}
-	}
+	// PlayHitSound는 더 이상 사용되지 않음 - SeekerAudioComponent의 PlayHurtSound로 대체됨
+	// 하위 클래스에서 오버라이드하여 적절한 사운드 재생 시스템 사용
+	UE_LOG(LogTemp, Warning, TEXT("CharacterAudioComponent::PlayHitSound is deprecated. Use SeekerAudioComponent::PlayHurtSound instead."));
 }
 

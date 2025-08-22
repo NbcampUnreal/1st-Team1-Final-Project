@@ -53,11 +53,8 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, 800.0f);
 		}
 			
-		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-		}
+		// 스킬 시작 사운드 재생
+		PlaySkillStartSound();
 
 		// 방어력 강화
 		StrengthenDefense();

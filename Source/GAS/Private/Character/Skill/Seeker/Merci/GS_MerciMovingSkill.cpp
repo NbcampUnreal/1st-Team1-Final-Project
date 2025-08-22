@@ -18,10 +18,8 @@ void UGS_MerciMovingSkill::ActiveSkill()
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (MerciCharacter)
 	{
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-		}
+		// 스킬 시작 사운드 재생
+		PlaySkillStartSound();
 		
 		MerciCharacter->SetDrawState(false);
 

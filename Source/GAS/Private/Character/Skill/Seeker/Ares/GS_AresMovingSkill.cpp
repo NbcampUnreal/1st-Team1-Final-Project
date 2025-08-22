@@ -12,6 +12,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/Player/Seeker/GS_Ares.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/GS_TpsController.h"
 #include "Sound/GS_CharacterAudioComponent.h"
 
@@ -72,13 +74,15 @@ void UGS_AresMovingSkill::OnSkillCommand()
 	Super::OnSkillCommand();
 
 	// 차징 루프 사운드 정지 및 돌진 사운드 재생
-	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	// 차징 사운드 정지 및 돌진 사운드 재생
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
-		// 차징 사운드 정지
-		AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
-		// 돌진 사운드 재생
-		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
+		}
 	}
+	PlaySkillStartSound();
 
 	// 차징 종료
 	OwnerCharacter->GetWorld()->GetTimerManager().ClearTimer(ChargingTimerHandle);
@@ -244,10 +248,7 @@ void UGS_AresMovingSkill::DeactiveSkill()
 	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 
 	// 스킬 종료 사운드 재생
-	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-	{
-		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
-	}
+	PlaySkillEndSound();
 
 	Super::DeactiveSkill();
 }

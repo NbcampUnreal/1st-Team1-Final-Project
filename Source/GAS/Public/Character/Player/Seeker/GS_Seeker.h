@@ -16,7 +16,7 @@ class UGS_StatComp;
 class AGS_PlayerState;
 class UGS_DebuffVFXComponent;
 class AGS_Monster;
-class UGS_CharacterAudioComponent;
+class UGS_SeekerAudioComponent;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -138,9 +138,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySound(class UAkAudioEvent* SoundToPlay);
 	
-	UFUNCTION(BlueprintCallable, Category = "Sound|Character")
-	class UAkComponent* GetOrCreateAkComponent();
-
 	// ===============
 	// 공격 사운드 리셋 관련
 	// ===============
@@ -201,10 +198,10 @@ public:
 	UGS_DebuffVFXComponent* DebuffVFXComponent;
 
 	// =======================
-	// 캐릭터 오디오 컴포넌트
+	// 시커 오디오 컴포넌트 (RTS/TPS 지원)
 	// =======================
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
-	UGS_CharacterAudioComponent* CharacterAudioComponent;
+	UGS_SeekerAudioComponent* SeekerAudioComponent;
 
 	// ================
 	// 함정 VFX 컴포넌트
@@ -300,7 +297,7 @@ protected:
 	virtual void OnHoverEnd() override;
 	virtual FLinearColor GetCurrentDecalColor() override;
 	virtual bool ShowDecal() override;
-
+	
 private:
 	UPROPERTY(VisibleAnywhere, Category="State", Replicated)
 	FSeekerState SeekerState;

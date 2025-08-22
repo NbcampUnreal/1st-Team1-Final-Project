@@ -11,7 +11,7 @@ class UAkComponent;
 class UGS_StatComp;
 class AGS_Character;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, DeprecatedNode, DeprecationMessage="Use GS_SeekerAudioComponent instead") )
 class GAS_API UGS_CharacterAudioComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -94,12 +94,12 @@ public:
 	void PlayHitSound();
 
 public:
-	// 피격 사운드 이벤트
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound|Hit")
+	// 피격 사운드 이벤트 (Deprecated - SeekerAudioComponent 사용 권장)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Deprecated", meta = (DeprecatedProperty, DeprecationMessage = "Use SeekerAudioComponent::PlayHurtSound instead"))
 	UAkAudioEvent* HitSoundEvent;
 	
-	// 히트 사운드 쿨다운 시간
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Hit", meta = (ClampMin = "0.0", ClampMax = "5.0"))
+	// 히트 사운드 쿨다운 시간 (Deprecated)
+	UPROPERTY(EditDefaultsOnly, Category = "Deprecated", meta = (DeprecatedProperty, DeprecationMessage = "Use SeekerAudioComponent state-based system", ClampMin = "0.0", ClampMax = "5.0"))
 	float HitSoundCooldownTime = 1.75f;
 
 private:
@@ -110,7 +110,7 @@ private:
 	UPROPERTY()
 	UAkAudioEvent* CurrentStopEvent;
 
-	// 마지막 히트 사운드 재생 시간 (인스턴스별)
+	// 마지막 히트 사운드 재생 시간 (Deprecated)
 	float LastHitSoundTime = 0.0f;
 
 protected:

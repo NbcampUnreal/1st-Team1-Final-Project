@@ -11,7 +11,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UGS_StatComp::UGS_StatComp()
 {
@@ -229,15 +229,6 @@ void UGS_StatComp::SetAttackSpeed(float InAttackSpeed)
 void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 {
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-	
-	// 시커 캐릭터: CharacterAudioComponent에서 피격 사운드 처리
-	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
-	{
-		if (OwnerSeeker->CharacterAudioComponent)
-		{
-			OwnerSeeker->CharacterAudioComponent->PlayHitSound();
-		}
-	}
 	
 	// 피격 애니메이션 재생 (몬스터만)
 	if (TakeDamageMontages.Num() > 0)

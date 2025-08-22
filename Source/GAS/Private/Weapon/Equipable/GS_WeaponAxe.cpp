@@ -170,7 +170,7 @@ void AGS_WeaponAxe::PlayHitSound(EAxeHitTargetType TargetType, const FHitResult&
 		{
 			// RTS 모드와 TPS 모드에 따른 거리 체크
 			const bool bRTS = IsRTSMode();
-			const float MaxDistance = bRTS ? 8000.0f : 2000.0f; // RTS: 80m, TPS: 20m
+			const float MaxDistance = bRTS ? 10000.0f : 2000.0f; // RTS: 100m, TPS: 20m
 
 			const float DistanceToListener = FVector::Dist(SweepResult.ImpactPoint, ListenerLocation);
 

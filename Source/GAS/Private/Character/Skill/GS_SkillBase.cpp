@@ -5,6 +5,8 @@
 #include "NiagaraComponent.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UTexture2D* UGS_SkillBase::GetSkillImage()
 {
@@ -250,5 +252,53 @@ const FSkillInfo* UGS_SkillBase::GetCurrentSkillInfo() const
 		return &SkillSet->RollingSkill;
 	default:
 		return nullptr;
+	}
+}
+
+void UGS_SkillBase::PlaySkillStartSound() const
+{
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	// 시커인 경우 SeekerAudioComponent 사용
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
+	}
+	// 다른 캐릭터인 경우 CharacterAudioComponent 사용
+	else if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No audio component found for character: %s"), *OwnerCharacter->GetName());
+	}
+}
+
+void UGS_SkillBase::PlaySkillEndSound() const
+{
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	// 시커인 경우 SeekerAudioComponent 사용
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
+	}
+	// 다른 캐릭터인 경우 CharacterAudioComponent 사용
+	else if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	{
+		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
 	}
 }

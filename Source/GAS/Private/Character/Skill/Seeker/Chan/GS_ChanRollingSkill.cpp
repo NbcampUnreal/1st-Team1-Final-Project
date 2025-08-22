@@ -21,15 +21,8 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-		{
-			// 구르기 시작 사운드 재생 // 구르기 사운드를 Server 에서 처리하는게 맞은가..? // SJE
-			const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-			if (SkillInfo && SkillInfo->SkillStartSound)
-			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-			}
-		}
+		// 구르기 시작 사운드 재생
+		PlaySkillStartSound();
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 		OwnerPlayer->CanChangeSeekerGait = false;
 		

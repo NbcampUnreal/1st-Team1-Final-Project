@@ -36,10 +36,7 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		// 궁극기 사운드 재생
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-		}
+		PlaySkillStartSound();
 		
 		// 입력 제한 설정
 		//OwnerPlayer->SetSkillInputControl(false, false, false);

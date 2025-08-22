@@ -2,8 +2,9 @@
 
 
 #include "Character/Player/Seeker/GS_Ares.h"
-#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
+#include "Character/Component/GS_StatComp.h"
 
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/GS_TpsController.h"
@@ -59,25 +60,25 @@ void AGS_Ares::MulticastPlayComboSection()
 {	
 	Super::MulticastPlayComboSection();
 
-	// 오디오 컴포넌트를 통해 콤보 공격 사운드 재생
-	if (CharacterAudioComponent)
+	// SeekerAudioComponent를 통해 콤보 공격 사운드 재생
+	if (SeekerAudioComponent)
 	{
 		// 새로운 콤보별 사운드 시스템 사용 (추가 사운드 포함)
 		if (ComboSwingSounds.Num() > 0 || ComboVoiceSounds.Num() > 0 || ComboExtraSounds.Num() > 0)
 		{
-			CharacterAudioComponent->PlayComboAttackSoundByIndexWithExtra(CurrentComboIndex, ComboSwingSounds, ComboVoiceSounds, ComboExtraSounds, SwordSwingStopEvent, AttackSoundResetTime);
+			SeekerAudioComponent->PlayComboAttackSoundByIndexWithExtra(CurrentComboIndex, ComboSwingSounds, ComboVoiceSounds, ComboExtraSounds, SwordSwingStopEvent, AttackSoundResetTime);
 		}
 		// 레거시 시스템으로 폴백 (기존 설정이 있는 경우)
 		else if (SwordSwingSound || AttackVoiceSound)
 		{
-			CharacterAudioComponent->PlayComboAttackSound(SwordSwingSound, AttackVoiceSound, SwordSwingStopEvent, AttackSoundResetTime);
+			SeekerAudioComponent->PlayComboAttackSound(SwordSwingSound, AttackVoiceSound, SwordSwingStopEvent, AttackSoundResetTime);
 		}
 	}
 }
 
 void AGS_Ares::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
 {
-	if (!CharacterAudioComponent)
+	if (!SeekerAudioComponent)
 	{
 		return;
 	}
@@ -86,12 +87,29 @@ void AGS_Ares::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
 	int32 ArrayIndex = ComboIndex - 1; // 1-based에서 0-based로 변환
 	if (ComboExtraSounds.IsValidIndex(ArrayIndex) && ComboExtraSounds[ArrayIndex])
 	{
-		CharacterAudioComponent->PlayFinalAttackSound(ComboExtraSounds[ArrayIndex]);
+		SeekerAudioComponent->PlayFinalAttackSound(ComboExtraSounds[ArrayIndex]);
 	}
 	// 레거시 시스템으로 폴백 (4번째 공격에 대해서만)
 	else if (ComboIndex == 4 && FinalAttackExtraSound)
 	{
-		CharacterAudioComponent->PlayFinalAttackSound(FinalAttackExtraSound);
+		SeekerAudioComponent->PlayFinalAttackSound(FinalAttackExtraSound);
 	}
+}
+
+float AGS_Ares::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	// Call parent implementation
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	// Play hurt sound if we actually took damage and are still alive
+	if (ActualDamage > 0.0f && GetStatComp() && GetStatComp()->GetCurrentHealth() > 0.0f)
+	{
+		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
+		{
+			SeekerAudio->PlayHurtSound();
+		}
+	}
+
+	return ActualDamage;
 }
 

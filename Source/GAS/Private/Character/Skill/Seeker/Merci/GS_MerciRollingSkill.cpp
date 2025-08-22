@@ -21,10 +21,7 @@ void UGS_MerciRollingSkill::ActiveSkill()
 		if (MerciCharacter->HasAuthority())
 		{
 			// 스킬 시작 사운드 재생
-			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-			}
+			PlaySkillStartSound();
 
 			MerciCharacter->SetDrawState(false);
 			MerciCharacter->SetAimState(false);

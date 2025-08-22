@@ -18,10 +18,7 @@ void UGS_MerciAimingSkill::ActiveSkill()
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
 		// 스킬 시작 사운드 재생
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-		}
+		PlaySkillStartSound();
 
 		MerciCharacter->SetDrawState(false);
 

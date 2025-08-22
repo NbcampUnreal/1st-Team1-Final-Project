@@ -81,6 +81,9 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
+	// Damage handling with audio feedback
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	// Knockback Collision (KCY)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UltimateSkill")
 	UCapsuleComponent* UltimateCollision;
