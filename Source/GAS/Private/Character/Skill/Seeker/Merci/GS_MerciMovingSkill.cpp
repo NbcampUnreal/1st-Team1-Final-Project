@@ -2,7 +2,6 @@
 
 
 #include "Character/Skill/Seeker/Merci/GS_MerciMovingSkill.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/Player/Seeker/GS_Merci.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
 

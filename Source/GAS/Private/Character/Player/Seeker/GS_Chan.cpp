@@ -87,10 +87,12 @@ void AGS_Chan::MulticastPlayComboSection()
 {
 	Super::MulticastPlayComboSection();
 
-	// 오디오 컴포넌트를 통해 콤보 공격 사운드 재생
+	// 오디오 컴포넌트를 통해 찬 전용 콤보 공격 사운드 재생
 	if (SeekerAudioComponent)
 	{
-		SeekerAudioComponent->PlayComboAttackSound(AxeSwingSound, AttackVoiceSound, AxeSwingStopEvent, 1.0f);
+		// 현재 콤보 인덱스를 가져와서 적절한 사운드 재생
+		// TODO: 현재 콤보 인덱스를 추적하는 로직 필요
+		SeekerAudioComponent->PlayChanComboAttackSound(0); // 기본값 0, 실제로는 현재 콤보 인덱스 사용
 	}
 }
 
@@ -99,7 +101,7 @@ void AGS_Chan::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
 	// 4번째 공격일 때 특별한 사운드 재생
 	if (ComboIndex == 4 && SeekerAudioComponent)
 	{
-		SeekerAudioComponent->PlayFinalAttackSound(FinalAttackExtraSound);
+		SeekerAudioComponent->PlayChanFinalAttackSound();
 	}
 }
 

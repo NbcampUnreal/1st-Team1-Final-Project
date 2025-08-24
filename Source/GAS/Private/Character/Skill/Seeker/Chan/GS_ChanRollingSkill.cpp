@@ -6,7 +6,6 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/GS_TpsController.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 #include "Components/CapsuleComponent.h"
 
 UGS_ChanRollingSkill::UGS_ChanRollingSkill()
@@ -20,7 +19,7 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	StartCoolDown();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
+		// 스킬 시작 사운드 재생
 		// 구르기 시작 사운드 재생
 		PlaySkillStartSound();
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);

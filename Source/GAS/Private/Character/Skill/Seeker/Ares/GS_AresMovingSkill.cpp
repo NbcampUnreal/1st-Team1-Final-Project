@@ -15,7 +15,6 @@
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/GS_TpsController.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 
 
 UGS_AresMovingSkill::UGS_AresMovingSkill()
@@ -32,11 +31,7 @@ void UGS_AresMovingSkill::ActiveSkill()
 		// 스킬 애니메이션 재생
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 
-		// 차징 루프 사운드 재생 (준비 동작)
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-		{
-			AudioComp->PlaySkillLoopSoundFromDataTable(CurrentSkillType);
-		}
+		// 차징 루프 사운드는 SeekerAudioComponent를 통해 처리됨
 
 		OwnerPlayer->SetMoveControlValue(false, false);
 	}
@@ -123,11 +118,7 @@ void UGS_AresMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 	// 데미지
 	UGameplayStatics::ApplyDamage(Target, 50.0f, OwnerCharacter->GetController(), OwnerCharacter, nullptr);
 	
-	// 몬스터 충돌 사운드 재생
-	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-	{
-		AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 1); // 1: Monster
-	}
+	// 몬스터 충돌 사운드는 SeekerAudioComponent를 통해 처리됨
 }
 
 void UGS_AresMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
@@ -135,11 +126,7 @@ void UGS_AresMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 	// 데미지
 	UGameplayStatics::ApplyDamage(Target, 50.0f, OwnerCharacter->GetController(), OwnerCharacter, nullptr);
 	
-	// 가디언 충돌 사운드 재생
-	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-	{
-		AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 2); // 2: Guardian
-	}
+	// 가디언 충돌 사운드는 SeekerAudioComponent를 통해 처리됨
 }
 
 void UGS_AresMovingSkill::UpdateCharging()

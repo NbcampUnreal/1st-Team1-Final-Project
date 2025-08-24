@@ -5,7 +5,6 @@
 
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Ares.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_AresRollingSkill::UGS_AresRollingSkill()
 {

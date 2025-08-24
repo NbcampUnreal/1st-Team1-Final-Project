@@ -11,6 +11,7 @@
 #include "GS_AudioComponentBase.generated.h"
 
 class AGS_RTSController;
+class AGS_RTSCamera;
 
 /**
  * RTS 커맨드 사운드 타입 (공통 enum)
@@ -39,6 +40,7 @@ public:
 	// RTPC 이름 상수
 	static const FName DistanceToPlayerRTPCName;
 	static const FName AttenuationModeRTPCName;
+	static const FName OcclusionDisableRTPCName;
 
 protected:
 	virtual void BeginPlay() override;
@@ -56,12 +58,12 @@ public:
 	static constexpr float RTPCDistanceThreshold = 50.0f;    // RTPC 업데이트를 위한 최소 거리 차이
 	
 	// 모드별 거리 설정 상수
-	static constexpr float RTSMaxDistance = 15000.0f;        // RTS 모드 최대 거리 (150m) - 더 넓게 설정
+	static constexpr float RTSMaxDistance = 20000.0f;        // RTS 모드 최대 거리 (200m)
 	static constexpr float TPSMaxDistance = 2000.0f;         // TPS 모드 최대 거리 (20m)
 	
 	// Distance Scaling 설정 상수
-	static constexpr float RTSDistanceScaling = 1.0f;        // RTS 모드 (800% = 150m) - 더 강하게 설정
-	static constexpr float TPSDistanceScaling = 0.0f;        // TPS 모드 (100% = 20m)
+	static constexpr float RTSDistanceScaling = 1.0f;        // RTS 모드 (100% = 200m)
+	static constexpr float TPSDistanceScaling = 1.0f;        // TPS 모드 (100% = 20m)
 	
 	// 기타 상수들
 	static constexpr float LocalSoundCooldownMultiplier = 0.9f; // 로컬 사운드 쿨다운 배율
@@ -98,6 +100,26 @@ protected:
 	UPROPERTY(Transient) 
 	float LastRTPCUpdateTime = DefaultInitTime;
 	
+	// ===================
+	// 카메라 위치 캐싱
+	// ===================
+	
+	/** 캐싱된 카메라 위치 */
+	UPROPERTY(Transient)
+	mutable FVector CachedCameraLocation = FVector::ZeroVector;
+	
+	/** 마지막 카메라 위치 업데이트 시간 */
+	UPROPERTY(Transient)
+	mutable float LastCameraLocationUpdateTime = DefaultInitTime;
+	
+	/** 카메라 위치 업데이트 주기 (초) */
+	UPROPERTY(Transient)
+	mutable float CameraLocationUpdateInterval = 0.1f;
+	
+	/** 캐싱된 RTS 카메라 액터 */
+	UPROPERTY(Transient)
+	mutable TWeakObjectPtr<AGS_RTSCamera> CachedRTSCamera;
+	
 	FTimerHandle DistanceCheckTimerHandle;
 
 public:
@@ -123,6 +145,62 @@ public:
 	
 	/** RPC 호출 빈도 체크 */
 	bool CanSendRPC() const;
+	
+	/** RTS 카메라의 실제 보이는 영역 계산 */
+	UFUNCTION(BlueprintPure, Category = "Audio")
+	FBox2D GetRTSCameraViewBounds() const;
+	
+	/** 실제 카메라 위치 가져오기 (캐싱 포함) */
+	UFUNCTION(BlueprintPure, Category = "Audio")
+	bool GetActualCameraLocation(FVector& OutLocation) const;
+	
+	/** 소스가 뷰 프러스텀 내에 있는지 확인 */
+	UFUNCTION(BlueprintPure, Category = "Audio")
+	bool IsInViewFrustum(const FVector& SourceLocation) const;
+	
+	/** RTS 오디오 가시성 체크 */
+	bool CheckRTSAudioVisibility(AGS_RTSController* RTSController, const FVector& SourceLocation) const;
+	
+	/** 화면 월드 경계 계산 */
+	FBox2D CalculateScreenWorldBounds(AGS_RTSController* RTSController) const;
+	
+	/** 화면 경계까지의 거리 계산 */
+	float CalculateDistanceToScreenBounds(const FVector2D& Point, const FBox2D& Bounds) const;
+	
+	/** 통로 범위 내에 있는지 확인 */
+	bool IsInCorridorRange(const FVector& CameraLocation, const FVector& SourceLocation) const;
+	
+	// ===================
+	// 스프링암 각도 보정 함수들
+	// ===================
+	
+	/** Pitch 각도에 따른 보정 계수 계산 */
+	float CalculatePitchCorrectionFactor(float PitchAngle) const;
+	
+	/** Yaw 각도에 따른 보정 계수 계산 */
+	float CalculateYawCorrectionFactor(float YawAngle) const;
+	
+	/** 스프링암 각도에 따른 위치 보정 적용 */
+	FVector2D ApplySpringArmCorrection(
+		const FVector2D& OriginalPos, 
+		float PitchAngle, 
+		float YawAngle, 
+		float ArmLength,
+		float PitchCorrectionFactor,
+		float YawCorrectionFactor) const;
+	
+	/** 스프링암 각도에 따른 최종 경계 상자 보정 */
+	FBox2D ApplyFinalSpringArmCorrection(
+		const FBox2D& OriginalBounds, 
+		float PitchAngle, 
+		float YawAngle, 
+		float ArmLength) const;
+	
+	/** 줌 레벨에 따른 동적 보정 계수 계산 */
+	float CalculateZoomCorrectionFactor(float ArmLength) const;
+
+	/** FOV 기반 Pitch 각도 보정 계수 계산 */
+	float CalculateFOVPitchCorrection(float PitchAngle, float CameraHeight) const;
 
 protected:
 	// ===================

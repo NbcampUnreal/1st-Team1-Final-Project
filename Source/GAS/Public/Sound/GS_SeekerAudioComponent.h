@@ -5,6 +5,7 @@
 #include "Character/Skill/ESkill.h"
 #include "Engine/TimerHandle.h"
 #include "Net/UnrealNetwork.h"
+#include "Character/GS_Character.h"
 #include "GS_SeekerAudioComponent.generated.h"
 
 class AGS_Seeker;
@@ -79,6 +80,27 @@ protected:
 
 public:
     // ===================
+    // 캐릭터 타입 설정
+    // ===================
+    // 캐릭터 타입 (GS_Character의 ECharacterType과 연동)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Character Type", meta = (DisplayName = "Character Type"))
+    ECharacterType CharacterType;
+
+    // 캐릭터 타입 getter
+    UFUNCTION(BlueprintPure, Category = "Seeker Audio|Character Type")
+    ECharacterType GetCharacterType() const { return CharacterType; }
+
+    // 캐릭터 타입별 체크 함수들
+    UFUNCTION(BlueprintPure, Category = "Seeker Audio|Character Type")
+    bool IsChan() const { return CharacterType == ECharacterType::Chan; }
+    
+    UFUNCTION(BlueprintPure, Category = "Seeker Audio|Character Type")
+    bool IsAres() const { return CharacterType == ECharacterType::Ares; }
+    
+    UFUNCTION(BlueprintPure, Category = "Seeker Audio|Character Type")
+    bool IsMerci() const { return CharacterType == ECharacterType::Merci; }
+
+    // ===================
     // 사운드 설정 (에디터에서 설정)
     // ===================
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Core Settings", meta = (DisplayName = "Audio Configuration"))
@@ -86,53 +108,90 @@ public:
 
     // 사운드 재생 간격 (초)
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio", meta = (ClampMin = "1.0", ClampMax = "30.0"))
-    float CombatSoundInterval = 5.0f;
+    float CombatSoundInterval = 1.0f;
 
     // ===================
-    // 조준 관련 사운드 (에디터에서 설정)
+    // 메르시 전용 사운드 (Merci Only - ECharacterType::Merci = 2)
     // ===================
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Aiming Events", meta = (DisplayName = "Bow Draw Sound (TPS)"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Merci Only", meta = (DisplayName = "🏹 Bow Draw Sound", EditCondition = "CharacterType == ECharacterType::Merci", EditConditionHides))
     UAkAudioEvent* BowDrawSound = nullptr;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Aiming Events", meta = (DisplayName = "Bow Release Sound (TPS)"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Merci Only", meta = (DisplayName = "🏹 RTS Bow Draw Sound", EditCondition = "CharacterType == ECharacterType::Merci", EditConditionHides))
+    UAkAudioEvent* RTSBowDrawSound = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Merci Only", meta = (DisplayName = "🏹 Bow Release Sound", EditCondition = "CharacterType == ECharacterType::Merci", EditConditionHides))
     UAkAudioEvent* BowReleaseSound = nullptr;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Aiming Events", meta = (DisplayName = "RTS Bow Draw Sound"))
-    UAkAudioEvent* RTS_BowDrawSound = nullptr;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Merci Only", meta = (DisplayName = "🏹 RTS Bow Release Sound", EditCondition = "CharacterType == ECharacterType::Merci", EditConditionHides))
+    UAkAudioEvent* RTSBowReleaseSound = nullptr;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Aiming Events", meta = (DisplayName = "RTS Bow Release Sound"))
-    UAkAudioEvent* RTS_BowReleaseSound = nullptr;
-
-    // ===================
-    // 화살 관련 사운드 (에디터에서 설정)
-    // ===================
-    
-    // 화살 발사 사운드
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Arrow Events", meta = (DisplayName = "Arrow Shot Sound (TPS)"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Merci Only", meta = (DisplayName = "🏹 Arrow Shot Sound (TPS)", EditCondition = "CharacterType == ECharacterType::Merci", EditConditionHides))
     UAkAudioEvent* ArrowShotSound = nullptr;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Arrow Events", meta = (DisplayName = "RTS Arrow Shot Sound"))
-    UAkAudioEvent* RTS_ArrowShotSound = nullptr;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Merci Only", meta = (DisplayName = "🏹 Arrow Shot Sound (RTS)", EditCondition = "CharacterType == ECharacterType::Merci", EditConditionHides))
+    UAkAudioEvent* RTSArrowShotSound = nullptr;
 
-    // 화살 타입 변경 사운드
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Arrow Events", meta = (DisplayName = "Arrow Type Change Sound"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Merci Only", meta = (DisplayName = "🏹 Arrow Type Change Sound", EditCondition = "CharacterType == ECharacterType::Merci", EditConditionHides))
     UAkAudioEvent* ArrowTypeChangeSound = nullptr;
 
-    // 화살 부족 사운드
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Arrow Events", meta = (DisplayName = "Arrow Empty Sound"))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Merci Only", meta = (DisplayName = "🏹 Arrow Empty Sound", EditCondition = "CharacterType == ECharacterType::Merci", EditConditionHides))
     UAkAudioEvent* ArrowEmptySound = nullptr;
 
-    // 타격 피드백 사운드
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Feedback Events", meta = (DisplayName = "Hit Feedback Sound"))
-    UAkAudioEvent* HitFeedbackSound_Archery = nullptr;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Merci Only", meta = (DisplayName = "🏹 Hit Feedback Sound", EditCondition = "CharacterType == ECharacterType::Merci", EditConditionHides))
+    UAkAudioEvent* HitFeedbackSound = nullptr;
 
     // ===================
-    // 스킬 관련 사운드 (기존 CharacterAudioComponent 기능 통합)
+    // 스킬 관련 사운드
     // ===================
     
-    // 기본 스킬 이벤트 (에디터에서 설정)
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Skill Events", meta = (DisplayName = "Default Skill Event"))
-    UAkAudioEvent* SkillEvent;
+    // 기본 스킬 이벤트
+    // UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Skill Events", meta = (DisplayName = "Default Skill Event"))
+    UAkAudioEvent* SkillEvent = nullptr;
+
+    // ===================
+    // 찬 전용 사운드 (Chan Only - ECharacterType::Chan = 1) 
+    // ===================
+    
+    // 방패 슬램 사운드
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Chan Only", meta = (DisplayName = "🛡️ Shield Slam Start Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
+    UAkAudioEvent* ShieldSlamStartSound = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Chan Only", meta = (DisplayName = "🛡️ Shield Slam Impact Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
+    UAkAudioEvent* ShieldSlamImpactSound = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Chan Only", meta = (DisplayName = "🛡️ RTS Shield Slam Start Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
+    UAkAudioEvent* RTSShieldSlamStartSound = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Chan Only", meta = (DisplayName = "🛡️ RTS Shield Slam Impact Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
+    UAkAudioEvent* RTSShieldSlamImpactSound = nullptr;
+
+    // 찬 콤보 공격 사운드
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Chan Only", meta = (DisplayName = "🪓 Axe Swing Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
+    UAkAudioEvent* ChanAxeSwingSound = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Chan Only", meta = (DisplayName = "🪓 Axe Swing Stop Event", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
+    UAkAudioEvent* ChanAxeSwingStopEvent = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Chan Only", meta = (DisplayName = "🪓 Final Attack Extra Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
+    UAkAudioEvent* ChanFinalAttackExtraSound = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Chan Only", meta = (DisplayName = "🗣️ Attack Voice Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
+    UAkAudioEvent* ChanAttackVoiceSound = nullptr;
+
+    // ===================
+    // 아레스 전용 사운드 (Ares Only - ECharacterType::Ares = 0)
+    // ===================
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Ares Only", meta = (DisplayName = "⚔️ Sword Swing Stop Event", EditCondition = "CharacterType == ECharacterType::Ares", EditConditionHides))
+    UAkAudioEvent* AresSwordSwingStopEvent = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Ares Only", meta = (DisplayName = "⚔️ Combo Swing Sounds Array", EditCondition = "CharacterType == ECharacterType::Ares", EditConditionHides))
+    TArray<UAkAudioEvent*> AresComboSwingSounds;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Ares Only", meta = (DisplayName = "🗣️ Combo Voice Sounds Array", EditCondition = "CharacterType == ECharacterType::Ares", EditConditionHides))
+    TArray<UAkAudioEvent*> AresComboVoiceSounds;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Ares Only", meta = (DisplayName = "✨ Combo Extra Sounds Array", EditCondition = "CharacterType == ECharacterType::Ares", EditConditionHides))
+    TArray<UAkAudioEvent*> AresComboExtraSounds;
 
 public:
     // ===================
@@ -159,40 +218,39 @@ public:
     UFUNCTION(BlueprintPure, Category = "Seeker Audio")
     ESeekerAudioState GetCurrentAudioState() const { return CurrentAudioState; }
 
+    /** 원거리 캐릭터인지 확인 */
+    UFUNCTION(BlueprintPure, Category = "Seeker Audio")
+    bool IsRangedCharacter() const { return CharacterType == ECharacterType::Merci; }
+
     // ===================
-    // 조준 관련 함수
+    // 원거리 캐릭터 전용 함수 (메르시 전용)
     // ===================
     
-    /** 활 당기기 사운드 재생 */
-    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Aiming")
+    /** 활 당기기 사운드 재생 (원거리 캐릭터 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Ranged Only (Merci)")
     void PlayBowDrawSound();
 
-    /** 활 발사 사운드 재생 */
-    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Aiming")
+    /** 활 발사 사운드 재생 (원거리 캐릭터 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Ranged Only (Merci)")
     void PlayBowReleaseSound();
 
-    // ===================
-    // 화살 관련 함수
-    // ===================
-    
-    /** 화살 발사 사운드 재생 */
-    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Arrow")
+    /** 화살 발사 사운드 재생 (원거리 캐릭터 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Ranged Only (Merci)")
     void PlayArrowShotSound();
 
-    /** 화살 타입 변경 사운드 재생 */
-    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Arrow")
+    /** 화살 타입 변경 사운드 재생 (원거리 캐릭터 전용) */
     void PlayArrowTypeChangeSound();
 
-    /** 화살 부족 사운드 재생 */
-    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Arrow")
+    /** 화살 부족 사운드 재생 (메르시 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Merci Only", meta = (CallInEditor = "true"))
     void PlayArrowEmptySound();
 
-    /** 타격 피드백 사운드 재생 */
-    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Feedback")
+    /** 타격 피드백 사운드 재생 (메르시 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Merci Only", meta = (CallInEditor = "true"))
     void PlayHitFeedbackSound();
 
     // ===================
-    // 스킬 관련 함수 (기존 CharacterAudioComponent에서 이전)
+    // 스킬 관련 함수
     // ===================
     
     UFUNCTION(BlueprintCallable, Category = "Sound|Skill")
@@ -200,6 +258,38 @@ public:
     
     UFUNCTION(BlueprintCallable, Category = "Sound|Skill")
     void StopSkill();
+
+    // ===================
+    // 찬 전용 함수 (Chan Only Functions)
+    // ===================
+    
+    /** 방패 슬램 시작 사운드 (찬 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Chan Only", meta = (CallInEditor = "true"))
+    void PlayShieldSlamStartSound();
+
+    /** 방패 슬램 충돌 사운드 (찬 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Chan Only", meta = (CallInEditor = "true"))
+    void PlayShieldSlamImpactSound();
+
+    /** 콤보 공격 사운드 (찬 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Chan Only", meta = (CallInEditor = "true"))
+    void PlayChanComboAttackSound(int32 ComboIndex);
+
+    /** 최종 공격 사운드 (찬 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Chan Only", meta = (CallInEditor = "true"))
+    void PlayChanFinalAttackSound();
+
+    // ===================
+    // 아레스 전용 함수 (Ares Only Functions)
+    // ===================
+    
+    /** 콤보 공격 사운드 (아레스 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Ares Only", meta = (CallInEditor = "true"))
+    void PlayAresComboAttackSound(int32 ComboIndex);
+
+    /** 콤보 공격 사운드 (추가 사운드 포함, 아레스 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Ares Only", meta = (CallInEditor = "true"))
+    void PlayAresComboAttackSoundWithExtra(int32 ComboIndex);
     
     // AkComponent 헬퍼 함수
     UFUNCTION(BlueprintCallable, Category = "Sound|Character")
@@ -267,8 +357,13 @@ protected:
     virtual float GetMaxAudioDistance() const override;
 
 private:
+    // Owner 참조 (하위 호환성)
     UPROPERTY()
     TObjectPtr<AGS_Seeker> OwnerSeeker;
+
+    // Owner 참조 (GS_Character 기반)
+    UPROPERTY()
+    TObjectPtr<AGS_Character> OwnerCharacter;
 
     UPROPERTY(ReplicatedUsing = OnRep_CurrentAudioState)
     ESeekerAudioState CurrentAudioState;
@@ -277,8 +372,10 @@ private:
     ESeekerAudioState PreviousAudioState;
 
     FTimerHandle IdleSoundTimer;
-    FTimerHandle CombatSoundTimer;
-    
+    // 타이머 핸들
+    UPROPERTY()
+    FTimerHandle CombatSoundTimerHandle;
+
     // 마지막 사운드 재생 시간
     float LastSoundPlayTime;
     
@@ -301,6 +398,7 @@ private:
     UPROPERTY()
     UAkAudioEvent* CurrentStopEvent;
 
+    UPROPERTY()
     FTimerHandle AttackSoundResetTimerHandle;
 
     /** 자동 사운드 재생 (타이머 콜백) */
@@ -311,6 +409,9 @@ private:
     void StartSoundTimer();
     void StopSoundTimer();
     void UpdateSoundTimer();
+    
+    /** 캐릭터 타입별 설정 검증 */
+    void ValidateCharacterTypeSetup();
 
     /** Wwise 이벤트 실제 재생 (Wwise가 거리 감쇠 자동 처리) */
     UAkAudioEvent* GetSoundEvent(ESeekerAudioState SoundType) const;
@@ -335,6 +436,13 @@ private:
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_PlayDeathSound();
+
+    // 방패 슬램 사운드 멀티캐스트 RPC
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_PlayShieldSlamStartSound();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_PlayShieldSlamImpactSound();
 
     // 화살 사운드 멀티캐스트 RPC
     UFUNCTION(NetMulticast, Reliable)

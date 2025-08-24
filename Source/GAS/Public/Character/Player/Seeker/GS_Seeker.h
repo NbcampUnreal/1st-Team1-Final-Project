@@ -323,4 +323,27 @@ private:
 public:
 	UFUNCTION(Server, Reliable)
 	void Server_RestKey();
+
+	// State
+	UPROPERTY(Replicated)
+	bool bIsAiming = false;
+
+	// ===============
+	// 시커 타입 체크 함수들 (GS_Character의 ECharacterType 사용)
+	// ===============
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsChan() const { return GetCharacterType() == ECharacterType::Chan; }
+	
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsAres() const { return GetCharacterType() == ECharacterType::Ares; }
+	
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsMerci() const { return GetCharacterType() == ECharacterType::Merci; }
+
+	// 근접/원거리 체크 (하위 호환성)
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsMeleeSeeker() const { return IsChan() || IsAres(); }
+	
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsRangedSeeker() const { return IsMerci(); }
 };

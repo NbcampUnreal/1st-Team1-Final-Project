@@ -4,7 +4,6 @@
 #include "Character/Skill/Seeker/Merci/GS_MerciAimingSkill.h"
 #include "Character/Player/Seeker/GS_Merci.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_MerciAimingSkill::UGS_MerciAimingSkill()
 {

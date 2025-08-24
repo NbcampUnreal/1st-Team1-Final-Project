@@ -5,7 +5,6 @@
 #include "NiagaraComponent.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 #include "Sound/GS_SeekerAudioComponent.h"
 
 UTexture2D* UGS_SkillBase::GetSkillImage()
@@ -270,14 +269,9 @@ void UGS_SkillBase::PlaySkillStartSound() const
 			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
 	}
-	// 다른 캐릭터인 경우 CharacterAudioComponent 사용
-	else if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-	{
-		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No audio component found for character: %s"), *OwnerCharacter->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("No SeekerAudioComponent found for character: %s"), *OwnerCharacter->GetName());
 	}
 }
 
@@ -296,9 +290,5 @@ void UGS_SkillBase::PlaySkillEndSound() const
 			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
 		}
 	}
-	// 다른 캐릭터인 경우 CharacterAudioComponent 사용
-	else if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
-	{
-		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
-	}
+	// 다른 캐릭터 타입은 각자의 오디오 컴포넌트 사용
 }

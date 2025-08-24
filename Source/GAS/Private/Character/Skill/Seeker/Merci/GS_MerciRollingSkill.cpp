@@ -3,7 +3,6 @@
 
 #include "Character/Skill/Seeker/Merci/GS_MerciRollingSkill.h"
 #include "Character/Player/Seeker/GS_Merci.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_MerciRollingSkill::UGS_MerciRollingSkill()
 {

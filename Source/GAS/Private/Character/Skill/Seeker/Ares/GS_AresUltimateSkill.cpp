@@ -6,7 +6,6 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_StatRow.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 #include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Character/Player/Seeker/GS_Seeker.h"

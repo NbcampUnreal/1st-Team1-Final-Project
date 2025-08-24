@@ -7,7 +7,6 @@
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Kismet/GameplayStatics.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 
 UGS_MerciUltimateSkill::UGS_MerciUltimateSkill()
 {

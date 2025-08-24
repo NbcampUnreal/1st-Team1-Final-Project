@@ -9,7 +9,6 @@ class AGS_Character;
 class UAkAudioEvent;
 class UGS_StatComp;
 class AGS_Seeker;
-class UGS_CharacterAudioComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentHPChangedDelegate, UGS_StatComp*);
 

@@ -148,9 +148,23 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
     const float MaxDistance = GetMaxDistanceForMode(bRTS);
     
     float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
-    if (DistanceToListener > MaxDistance)
+    
+    // RTS 모드에서는 화면 시야각 기반 체크, TPS 모드에서는 거리 기반 체크
+    if (bRTS)
     {
-        return;
+        // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
+        if (!IsInViewFrustum(OwnerMonster->GetActorLocation()))
+        {
+            return;
+        }
+    }
+    else
+    {
+        // TPS 모드: 기존 거리 기반 체크
+        if (DistanceToListener > MaxDistance)
+        {
+            return;
+        }
     }
     
     UAkAudioEvent* SoundEvent = GetSoundEvent(SoundTypeToTrigger);
@@ -314,9 +328,23 @@ void UGS_MonsterAudioComponent::Multicast_PlaySwingSound_Implementation()
     const float MaxDistance = GetMaxDistanceForMode(bRTS);
     
     const float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
-    if (DistanceToListener > MaxDistance)
+    
+    // RTS 모드에서는 화면 시야각 기반 체크, TPS 모드에서는 거리 기반 체크
+    if (bRTS)
     {
-        return;
+        // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
+        if (!IsInViewFrustum(OwnerMonster->GetActorLocation()))
+        {
+            return;
+        }
+    }
+    else
+    {
+        // TPS 모드: 기존 거리 기반 체크
+        if (DistanceToListener > MaxDistance)
+        {
+            return;
+        }
     }
 
     const float CurrentTime = GetWorld()->GetTimeSeconds();

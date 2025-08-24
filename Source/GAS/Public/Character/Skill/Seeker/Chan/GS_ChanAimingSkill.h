@@ -6,6 +6,9 @@
 #include "Character/Skill/Seeker/GS_SeekerSkillBase.h"
 #include "GS_ChanAimingSkill.generated.h"
 
+// Forward declarations
+class UGS_SeekerAudioComponent;
+
 /**
  *
  */
