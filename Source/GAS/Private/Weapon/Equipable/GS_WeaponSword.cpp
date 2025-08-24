@@ -16,7 +16,7 @@
 #include "Character/F_GS_DamageEvent.h"
 #include "AI/RTS/GS_RTSController.h"
 #include "Kismet/GameplayStatics.h"
-
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
 
 AGS_WeaponSword::AGS_WeaponSword()
 {
@@ -95,6 +95,19 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	
 	AGS_Character* Damaged = Cast<AGS_Character>(OtherActor);
 	AGS_Character* Attacker = OwnerChar;
+
+	//에테르 추출기
+	if (!Damaged && Attacker)
+	{
+		if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(OtherActor))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[AGS_WeaponSword]OnHit is called"));
+			float Damage = Attacker->GetStatComp()->GetAttackPower();
+			FGS_DamageEvent DamageEvent;
+			AetherExtractor->TakeDamageBySeeker(Damage, OwnerChar);
+			HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
 
 	if (!Damaged || !Attacker || !Damaged->IsEnemy(Attacker))
 	{
