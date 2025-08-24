@@ -27140,11 +27140,6 @@
 														<Value>5</Value>
 													</ValueList>
 												</Property>
-												<Property Name="InitialDelay" Type="Real64">
-													<ValueList>
-														<Value>0.3</Value>
-													</ValueList>
-												</Property>
 												<Property Name="Lowpass" Type="int16">
 													<ValueList>
 														<Value>5</Value>
@@ -27742,7 +27737,7 @@
 																</Property>
 																<Property Name="InitialDelay" Type="Real64">
 																	<ValueList>
-																		<Value>0.5</Value>
+																		<Value>0.3</Value>
 																	</ValueList>
 																</Property>
 																<Property Name="Lowpass" Type="int16">
@@ -27938,11 +27933,6 @@
 												<Property Name="Highpass" Type="int16">
 													<ValueList>
 														<Value>5</Value>
-													</ValueList>
-												</Property>
-												<Property Name="InitialDelay" Type="Real64">
-													<ValueList>
-														<Value>0.3</Value>
 													</ValueList>
 												</Property>
 												<Property Name="Lowpass" Type="int16">
@@ -28394,7 +28384,7 @@
 																</Property>
 																<Property Name="InitialDelay" Type="Real64">
 																	<ValueList>
-																		<Value>0.5</Value>
+																		<Value>0.3</Value>
 																	</ValueList>
 																</Property>
 																<Property Name="Lowpass" Type="int16">
