@@ -7,6 +7,7 @@ Event	ID	Name			Wwise Object Path	Notes
 	197987059	Voice_Chan_Attack			\Default Work Unit\Player\Seeker\Chan\Voice_Chan_Attack	
 	254810222	Props_Spike			\Default Work Unit\Props\Props_Spike	
 	283403029	EV_AresUltimateLoop			\Default Work Unit\Player\Seeker\Ares\EV_AresUltimateLoop	
+	293231240	EV_AttackSwingSound			\Default Work Unit\EV_AttackSwingSound	
 	326001922	Voice_Ares_Sick			\Default Work Unit\Player\Seeker\Ares\Voice_Ares_Sick	
 	357367056	SFX_ChanHitWall			\Default Work Unit\Player\Seeker\Chan\SFX_ChanHitWall	
 	374018819	Props_Portal_Trigger			\Default Work Unit\Props\Props_Portal_Trigger	

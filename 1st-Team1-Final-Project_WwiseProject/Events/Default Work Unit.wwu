@@ -1723,6 +1723,17 @@
 						</Event>
 					</ChildrenList>
 				</Folder>
+				<Event Name="EV_AttackSwingSound" ID="{97596B2C-ABE8-48F4-9B0E-808FB5CC13E3}">
+					<ChildrenList>
+						<Action Name="" ID="{071D5569-5C95-4A30-8826-D4558F054E6A}" ShortID="334226775">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_AttackSwingSound" ID="{38F6F7AF-274A-43AB-9171-C04D736CB2AD}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>
