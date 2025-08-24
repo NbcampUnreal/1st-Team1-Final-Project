@@ -22,15 +22,14 @@ AGS_AetherExtractor::AGS_AetherExtractor()
 void AGS_AetherExtractor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	StatComp->InitStat(FName("AetherExtractor"));
+
+
 	if (!HasAuthority())
 	{
 		return;
 	}
 	
-
-	StatComp->InitStat(FName("AetherExtractor"));
-
 	FTimerHandle DelayHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		DelayHandle,
@@ -168,17 +167,11 @@ void AGS_AetherExtractor::SetHPTextWidget(UGS_HPText* InHPTextWidget)
 	UGS_HPText* HPTextWidget = Cast<UGS_HPText>(InHPTextWidget);
 	if (IsValid(HPTextWidget))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[AetherExtractor] StatComp: %s, Current=%.1f, Max=%.1f"),
+			*GetNameSafe(StatComp),
+			StatComp ? StatComp->GetCurrentHealth() : -1.f,
+			StatComp ? StatComp->GetMaxHealth() : -1.f);
 		HPTextWidget->InitializeHPTextWidget(GetStatComp());
 		StatComp->OnCurrentHPChanged.AddUObject(HPTextWidget, &UGS_HPText::OnCurrentHPChanged);
 	}
 }
-
-//void AGS_AetherExtractor::SetHPBarWidget(UGS_HPWidget* InHPBarWidget)
-//{
-//	UGS_HPWidget* HPBarWidget = Cast<UGS_HPWidget>(InHPBarWidget);
-//	if (IsValid(HPBarWidget))
-//	{
-//		HPBarWidget->InitializeHPWidget(GetStatComp());
-//		StatComp->OnCurrentHPChanged.AddUObject(HPBarWidget, &UGS_HPWidget::OnCurrentHPBarChanged);
-//	}
-//}

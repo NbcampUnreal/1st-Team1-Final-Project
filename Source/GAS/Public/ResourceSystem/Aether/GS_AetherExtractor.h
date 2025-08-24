@@ -35,10 +35,13 @@ protected:
 	UGS_AetherComp* CachedAetherComp = nullptr;
 
 public:
-	UGS_StatComp* StatComp;
-	USceneComponent* RootSceneComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_StatComp> StatComp;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
-	UGS_HPTextWidgetComp* HPTextWidgetComp;
+	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
+
+	USceneComponent* RootSceneComp;
 
 	UFUNCTION()
 	void ExtractAether();
@@ -49,7 +52,6 @@ public:
 
 	//HPwidget
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
-	//void SetHPBarWidget(UGS_HPWidget* InHPBarWidget);
 
 	//getter
 	FORCEINLINE UGS_StatComp* GetStatComp() const { return StatComp; }
