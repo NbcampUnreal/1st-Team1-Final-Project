@@ -35,7 +35,7 @@ void AGS_SeekerMerciArrowNormal::ProcessDamageLogic(ETargetType TargetType, cons
 	}
 
 	// 데미지를 적용할 타겟인지 확인
-	if (TargetType != ETargetType::Guardian && TargetType != ETargetType::DungeonMonster)
+	if (TargetType != ETargetType::Guardian && TargetType != ETargetType::DungeonMonster && TargetType != ETargetType::AetherExtractor)
 	{
 		return; // 가디언과 던전몬스터가 아니면 데미지 처리 안함
 	}
@@ -82,15 +82,23 @@ void AGS_SeekerMerciArrowNormal::ProcessDamageLogic(ETargetType TargetType, cons
 	// 데미지 적용
 	if (DamageToApply > 0.f)
 	{
-		UGameplayStatics::ApplyPointDamage(
-			HitActor,
-			DamageToApply,
-			GetActorForwardVector(),
-			SweepResult,
-			GetInstigatorController(),
-			this,
-			DamageTypeClass
-		);
+		// 데미지 대상이 AetherExtractor일 경우
+		if (TargetType == ETargetType::AetherExtractor)
+		{
+			// 여기에 데미지 로직 추가!!!!!!!!!!!!!!!!!!!!!!!!!!
+		}
+		else // Monster나 Guardian일 경우
+		{
+			UGameplayStatics::ApplyPointDamage(
+				HitActor,
+				DamageToApply,
+				GetActorForwardVector(),
+				SweepResult,
+				GetInstigatorController(),
+				this,
+				DamageTypeClass
+			);
+		}
 
 		// 데미지 적용 후 대상 기록 (중복 방지)
 		DamagedActors.Add(HitActor);
