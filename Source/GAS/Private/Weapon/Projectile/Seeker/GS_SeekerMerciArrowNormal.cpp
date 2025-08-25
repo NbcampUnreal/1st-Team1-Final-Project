@@ -92,7 +92,6 @@ void AGS_SeekerMerciArrowNormal::ProcessDamageLogic(ETargetType TargetType, cons
 			AetherExtractor->TakeDamageBySeeker(Damage, OwnerCharacter);
 
 		}
-		// 여기에 데미지 로직 추가!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
 
 	else if (DamageToApply > 0.f)
