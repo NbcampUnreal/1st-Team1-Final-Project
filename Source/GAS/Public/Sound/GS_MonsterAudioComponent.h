@@ -79,12 +79,10 @@ class GAS_API UGS_MonsterAudioComponent : public UGS_AudioComponentBase
 public:
     UGS_MonsterAudioComponent();
 
-    // 몬스터 전용 RTPC 이름 상수
-    static const FName MonsterVariantRTPCName;
-
 protected:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+    virtual void InitializeAudioRTPCs() override;
 
 public:
     // ==========
@@ -100,11 +98,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio", meta = (ClampMin = "1.0", ClampMax = "30.0"))
     float CombatSoundInterval = 4.0f;
 
-    // 몬스터 종류별 고유 사운드 인덱스
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio")
-    int32 MonsterSoundVariant = 0;
-
-    // 스윙 사운드 (에디터에서 설정)
+    // 스윙 사운드
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio|Swing Events", meta = (DisplayName = "Swing Sound (TPS)"))
     UAkAudioEvent* SwingSound = nullptr;
 
@@ -114,7 +108,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Monster Audio|Swing", meta=(ClampMin="0.0"))
     float SwingResetTime = 0.2f;
 
-    // RTS 커맨드 사운드 (에디터에서 설정)
+    // RTS 커맨드 사운드
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Monster Audio|RTS Command Events", meta = (DisplayName = "Selection Click Sound"))
     UAkAudioEvent* SelectionClickSound = nullptr;
 
@@ -173,9 +167,6 @@ private:
     FTimerHandle IdleSoundTimer;
     FTimerHandle CombatSoundTimer;
     
-    // 마지막 사운드 재생 시간
-    float LastSoundPlayTime;
-    
     /** 가장 가까운 시커 찾기 */
     AGS_Seeker* FindNearestSeeker() const;
 
@@ -193,9 +184,6 @@ private:
 
     /** Wwise 이벤트 실제 재생 (Wwise가 거리 감쇠 자동 처리) */
     UAkAudioEvent* GetSoundEvent(EMonsterAudioState SoundType) const;
-
-    /** 디버그 정보 표시 */
-    void DrawDebugInfo() const;
 
     UFUNCTION()
     void OnRep_CurrentAudioState();

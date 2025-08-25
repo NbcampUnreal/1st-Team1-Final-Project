@@ -27,7 +27,10 @@ void UGS_AresUltimateSkill::ActiveSkill()
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
 		// 스킬 시작 사운드 재생
-		PlaySkillStartSound();
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
 		
 		// 궁극기 루프 사운드 재생 (SeekerAudioComponent만 지원)
 		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
@@ -119,15 +122,13 @@ void UGS_AresUltimateSkill::BecomeBerserker()
 
 void UGS_AresUltimateSkill::DeactiveSkill()
 {
-	// 궁극기 종료 사운드 재생
-	PlaySkillEndSound();
-	
-	// 궁극기 루프 사운드 중지 (SeekerAudioComponent만 지원)
+	// 궁극기 루프 사운드 정지
 	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
 		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
 		{
 			AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
 		}
 	}
 

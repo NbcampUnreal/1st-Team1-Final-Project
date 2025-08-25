@@ -13,6 +13,7 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_StatRow.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UGS_ChanMovingSkill::UGS_ChanMovingSkill()
 {
@@ -53,7 +54,13 @@ void UGS_ChanMovingSkill::ActiveSkill()
 		}
 			
 		// 스킬 시작 사운드 재생
-		PlaySkillStartSound();
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+		{
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			}
+		}
 
 		// 방어력 강화
 		StrengthenDefense();
@@ -128,6 +135,15 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 {
 	// 방어력 증가 디버프 해제
 	DeactiveDEFBuff();
+
+	// SeekerAudioComponent를 통한 스킬 종료 사운드
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
+	}
 
 	// 스킬 상태 업데이트
 	Super::DeactiveSkill();

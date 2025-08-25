@@ -8,10 +8,6 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EngineUtils.h"
 
-// RTPC 이름을 상수로 정의
-const FName UGS_AudioComponentBase::DistanceToPlayerRTPCName = TEXT("Distance_to_Player");
-const FName UGS_AudioComponentBase::AttenuationModeRTPCName = TEXT("Attenuation_Mode");
-const FName UGS_AudioComponentBase::OcclusionDisableRTPCName = TEXT("Occlusion_Disable");
 
 UGS_AudioComponentBase::UGS_AudioComponentBase()
 {
@@ -36,15 +32,8 @@ void UGS_AudioComponentBase::BeginPlay()
 {
     Super::BeginPlay();
     
-    // 초기 Distance Scaling 및 오클루전 설정 (TPS 모드 기본값)
-    if (FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get())
-    {
-        const float InitialScalingValue = TPSDistanceScaling;
-        AkAudioDevice->SetRTPCValue(*AttenuationModeRTPCName.ToString(), InitialScalingValue, 0, GetOwner());
-        
-        // TPS 모드 기본값이므로 오클루전 활성화 (0.0f)
-        AkAudioDevice->SetRTPCValue(*OcclusionDisableRTPCName.ToString(), 0.0f, 0, GetOwner());
-    }
+    // 모든 오디오 RTPC 초기화 (통일된 시스템 사용)
+    InitializeAudioRTPCs();
     
     // 거리 체크 타이머 시작 - 성능 최적화된 주기
     if (GetWorld())
@@ -80,7 +69,7 @@ bool UGS_AudioComponentBase::IsRTSMode() const
         return false;
     }
     
-    bool bIsRTS = Cast<AGS_RTSController>(LocalPC) != nullptr;    
+    bool bIsRTS = Cast<AGS_RTSController>(LocalPC) != nullptr;
     return bIsRTS;
 }
 
@@ -172,6 +161,12 @@ bool UGS_AudioComponentBase::IsInViewFrustum(const FVector& SourceLocation) cons
 
 bool UGS_AudioComponentBase::CheckRTSAudioVisibility(AGS_RTSController* RTSController, const FVector& SourceLocation) const
 {
+    // TPS 모드에서는 프러스텀 계산 스킵 (성능 최적화)
+    if (!IsRTSMode())
+    {
+        return true;
+    }
+    
     // 입력 유효성 검사
     if (!RTSController || !IsValid(RTSController))
     {
@@ -200,8 +195,49 @@ bool UGS_AudioComponentBase::CheckRTSAudioVisibility(AGS_RTSController* RTSContr
         return true; // 유효하지 않은 위치인 경우 소리 재생 허용
     }
     
-    // 2. 화면 영역 계산
-    FBox2D ScreenBounds = CalculateScreenWorldBounds(RTSController);
+    // 2. RTS 카메라의 실제 뷰포트 경계 계산 (캐싱 활용)
+    FBox2D ScreenBounds(ForceInit);
+    
+    // 캐싱된 RTS 카메라 사용 (성능 최적화)
+    AGS_RTSCamera* RTSCameraActor = CachedRTSCamera.Get();
+    
+    if (!RTSCameraActor || !IsValid(RTSCameraActor))
+    {
+        // 캐시가 유효하지 않으면 새로 찾기
+        for (TActorIterator<AGS_RTSCamera> ActorIterator(GetWorld()); ActorIterator; ++ActorIterator)
+        {
+            AGS_RTSCamera* FoundCamera = *ActorIterator;
+            if (FoundCamera && IsValid(FoundCamera))
+            {
+                RTSCameraActor = FoundCamera;
+                CachedRTSCamera = FoundCamera; // 캐시 업데이트
+                break;
+            }
+        }
+    }
+    
+    if (RTSCameraActor)
+    {
+        // RTS 카메라의 컴포넌트들이 유효한지 확인
+        UCameraComponent* CameraComp = RTSCameraActor->GetCameraComponent();
+        USpringArmComponent* SpringArmComp = RTSCameraActor->GetSpringArmComponent();
+        
+        if (CameraComp && SpringArmComp)
+        {
+            // 간단한 RTS 카메라 뷰포트 계산 사용
+            ScreenBounds = RTSCameraActor->GetSimpleViewBounds();
+        }
+        else
+        {
+            // 컴포넌트가 없으면 폴백: 기존 방식 사용
+            ScreenBounds = CalculateScreenWorldBounds(RTSController);
+        }
+    }
+    else
+    {
+        // 폴백: 기존 방식 사용
+        ScreenBounds = CalculateScreenWorldBounds(RTSController);
+    }
     
     // 화면 영역 유효성 검사
     if (ScreenBounds.GetExtent().IsZero())
@@ -209,8 +245,7 @@ bool UGS_AudioComponentBase::CheckRTSAudioVisibility(AGS_RTSController* RTSContr
         return true; // 유효하지 않은 화면 영역인 경우 소리 재생 허용
     }
     
-    // 3. 십자 형태 맵을 위한 특별 처리
-    // 소스가 화면 안에 있는지 체크
+    // 3. RTS 카메라의 뷰포트 내 위치 확인
     FVector2D SourcePos2D(SourceLocation.X, SourceLocation.Y);
     bool bInScreen = ScreenBounds.IsInside(SourcePos2D);
     
@@ -220,7 +255,7 @@ bool UGS_AudioComponentBase::CheckRTSAudioVisibility(AGS_RTSController* RTSContr
     }
     
     // 4. 화면 밖이지만 가까운 경우 체크
-    // 십자 형태의 통로를 고려한 거리 계산
+    // RTS 카메라의 정확한 거리 계산 사용
     float DistanceToScreen = CalculateDistanceToScreenBounds(SourcePos2D, ScreenBounds);
     
     // 거리 유효성 검사
@@ -229,24 +264,20 @@ bool UGS_AudioComponentBase::CheckRTSAudioVisibility(AGS_RTSController* RTSContr
         return true; // 유효하지 않은 거리인 경우 소리 재생 허용
     }
     
-    // 5. 거리 기반 임계값 (스타크래프트 스타일)
-    const float AudioExtendDistance = 800.0f; // 화면 밖 8m까지 들림
-    
-    // 6. 통로/복도 감지 (십자 형태 맵 특별 처리)
+    // 5. 통로/복도 감지 (십자 형태 맵 특별 처리)
     bool bInCorridor = IsInCorridorRange(CameraLocation, SourceLocation);
     
     if (bInCorridor)
     {
         // 복도/통로에 있는 경우 더 멀리까지 들림
-        const float CorridorAudioDistance = 1500.0f; // 15m
         return DistanceToScreen <= CorridorAudioDistance;
     }
     
-    // 7. 일반적인 경우
+    // 6. 일반적인 경우
     return DistanceToScreen <= AudioExtendDistance;
 }
 
-// 추가 헬퍼 함수: RTS 카메라의 실제 보이는 영역 계산
+// RTS 카메라의 실제 보이는 영역 계산
 FBox2D UGS_AudioComponentBase::GetRTSCameraViewBounds() const
 {
     FBox2D ViewBounds(ForceInit);
@@ -314,7 +345,7 @@ bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
         return true;
     }
     
-    // Get local player controller (캐싱하지 않음 - 자주 바뀔 수 있음)
+    // Get local player controller
     APlayerController* LocalPC = nullptr;
     UWorld* World = GetWorld();
     
@@ -367,44 +398,23 @@ bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
         {
             FVector NewCameraLocation = FVector::ZeroVector;
             
-            // RTS 카메라에서 실제 카메라 컴포넌트 찾기
-            UCameraComponent* CameraComp = RTSCameraActor->FindComponentByClass<UCameraComponent>();
+            UCameraComponent* CameraComp = RTSCameraActor->GetCameraComponent();
+            USpringArmComponent* SpringArmComp = RTSCameraActor->GetSpringArmComponent();
+            
             if (CameraComp)
             {
+                // 카메라 컴포넌트의 실제 위치 사용
                 NewCameraLocation = CameraComp->GetComponentLocation();
+            }
+            else if (SpringArmComp)
+            {
+                // SpringArm을 통한 카메라 위치 계산
+                NewCameraLocation = SpringArmComp->GetComponentLocation() + SpringArmComp->GetForwardVector() * SpringArmComp->TargetArmLength;
             }
             else
             {
-                // SpringArm을 통한 카메라 위치 계산
-                USpringArmComponent* SpringArmComp = RTSCameraActor->FindComponentByClass<USpringArmComponent>();
-                if (SpringArmComp)
-                {
-                    // SpringArm의 자식 카메라 찾기
-                    TArray<USceneComponent*> Children;
-                    SpringArmComp->GetChildrenComponents(true, Children);
-                    
-                    bool bFoundChildCamera = false;
-                    for (USceneComponent* Child : Children)
-                    {
-                        if (UCameraComponent* ChildCamera = Cast<UCameraComponent>(Child))
-                        {
-                            NewCameraLocation = ChildCamera->GetComponentLocation();
-                            bFoundChildCamera = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!bFoundChildCamera)
-                    {
-                        // SpringArm 끝점으로 카메라 위치 계산
-                        NewCameraLocation = SpringArmComp->GetComponentLocation() + SpringArmComp->GetForwardVector() * SpringArmComp->TargetArmLength;
-                    }
-                }
-                else
-                {
-                    // 최후에는 RTS 카메라 액터의 위치
-                    NewCameraLocation = RTSCameraActor->GetActorLocation();
-                }
+                // 최후에는 RTS 카메라 액터의 위치
+                NewCameraLocation = RTSCameraActor->GetActorLocation();
             }
             
             if (!NewCameraLocation.IsZero())
@@ -425,7 +435,6 @@ bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
             
             if (!CameraManagerLocation.IsZero())
             {
-                // 캐시 업데이트
                 CachedCameraLocation = CameraManagerLocation;
                 LastCameraLocationUpdateTime = CurrentTime;
                 
@@ -471,21 +480,29 @@ void UGS_AudioComponentBase::CleanupFinishedSounds()
 {
     if (!FAkAudioDevice::Get()) return;
     
-    // 완료된 사운드 ID들을 제거
-    for (int32 i = ActivePlayingIDs.Num() - 1; i >= 0; --i)
-    {
-        // Wwise에서 사운드가 여전히 재생 중인지 확인하는 로직을 추가할 수 있음
-        // 현재는 잘못된 ID들만 제거
-        if (ActivePlayingIDs[i] == AK_INVALID_PLAYING_ID)
-        {
-            ActivePlayingIDs.RemoveAt(i);
-        }
-    }
+    // 잘못된 ID들 제거
+    ActivePlayingIDs.RemoveAll([](AkPlayingID ID) {
+        return ID == AK_INVALID_PLAYING_ID;
+    });
     
-    // 배열 크기가 너무 커지지 않도록 제한
+    // 배열 크기 제한 - 가장 오래된 항목부터 제거
     if (ActivePlayingIDs.Num() > MaxActivePlayingIDs)
     {
-        ActivePlayingIDs.RemoveAt(0, ActivePlayingIDs.Num() - MaxActivePlayingIDs);
+        int32 ItemsToRemove = ActivePlayingIDs.Num() - MaxActivePlayingIDs;
+        
+        for (int32 i = 0; i < ItemsToRemove; ++i)
+        {
+            AkPlayingID OldID = ActivePlayingIDs[0];
+            ActivePlayingIDs.RemoveAt(0);
+            
+            if (CurrentPlayingID == OldID)
+            {
+                CurrentPlayingID = ActivePlayingIDs.Num() > 0 ? ActivePlayingIDs.Last() : AK_INVALID_PLAYING_ID;
+            }
+            
+            // 하위 클래스 정리 처리
+            OnSpecificSoundFinished(OldID);
+        }
     }
 }
 
@@ -513,9 +530,21 @@ void UGS_AudioComponentBase::RegisterPlayingID(AkPlayingID NewPlayingID)
         ActivePlayingIDs.Add(NewPlayingID);
         CurrentPlayingID = NewPlayingID;
         
-        // 주기적으로 완료된 사운드 정리
+        // 주기적 정리
         CleanupFinishedSounds();
     }
+}
+
+AkPlayingID UGS_AudioComponentBase::PostEventWithCallback(UAkAudioEvent* AkEvent, AActor* Actor)
+{
+    if (!AkEvent || !Actor) return AK_INVALID_PLAYING_ID;
+    
+    AkPlayingID PlayingID = UAkGameplayStatics::PostEvent(AkEvent, Actor, 0, FOnAkPostEventCallback());
+    
+    // ID 등록
+    RegisterPlayingID(PlayingID);
+    
+    return PlayingID;
 }
 
 void UGS_AudioComponentBase::UpdateDistanceRTPC()
@@ -535,12 +564,13 @@ void UGS_AudioComponentBase::UpdateDistanceRTPC()
             // RTPC 업데이트 최적화 - 거리 차이가 임계값 이상이거나 일정 시간 경과 시만 업데이트
             if (ShouldUpdateRTPC(DistanceToListener, CurrentTime))
             {
-                if (FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get())
-                {
-                    AkAudioDevice->SetRTPCValue(*DistanceToPlayerRTPCName.ToString(), DistanceToListener, 0, GetOwner());
-                    LastDistanceRTPCValue = DistanceToListener;
-                    LastRTPCUpdateTime = CurrentTime;
-                }
+                // 거리를 0-1 범위로 정규화하여 통일된 RTPC 시스템 사용
+                const float MaxDistance = GetMaxAudioDistance();
+                const float NormalizedDistance = MaxDistance > 0.0f ? FMath::Clamp(DistanceToListener / MaxDistance, 0.0f, 1.0f) : 0.0f;
+                
+                SetUnifiedRTPCValue(DistanceToPlayerRTPC, NormalizedDistance);
+                LastDistanceRTPCValue = DistanceToListener;
+                LastRTPCUpdateTime = CurrentTime;
             }
         }
         
@@ -575,25 +605,25 @@ bool UGS_AudioComponentBase::ShouldUpdateRTPC(float NewDistance, float CurrentTi
 
 void UGS_AudioComponentBase::SetDistanceScaling(bool bIsRTS)
 {
-    if (FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get())
-    {
-        const float ScalingValue = GetDistanceScalingForMode(bIsRTS);
-        AkAudioDevice->SetRTPCValue(*AttenuationModeRTPCName.ToString(), ScalingValue, 0, GetOwner());
-        
-        // RTS 모드에서는 오클루전/오브스트럭션 비활성화
-        const float OcclusionValue = bIsRTS ? 1.0f : 0.0f; // 1.0f = 비활성화, 0.0f = 활성화
-        AkAudioDevice->SetRTPCValue(*OcclusionDisableRTPCName.ToString(), OcclusionValue, 0, GetOwner());
-    }
-    else
-    {
-        // CRITICAL: Wwise AudioDevice가 없는 경우 경고
-        UE_LOG(LogTemp, Error, TEXT("[CRITICAL] FAkAudioDevice::Get() returned NULL - Wwise audio system failure!"));
-        UE_LOG(LogTemp, Error, TEXT("[CRITICAL] This may be caused by WAAPI connection failure or Wwise initialization problems"));
-    }
+    // 통일된 RTPC 시스템 사용
+    const float ScalingValue = GetDistanceScalingForMode(bIsRTS);
+    SetUnifiedRTPCValue(AttenuationModeRTPC, ScalingValue / 100.0f); // 0-100 → 0-1 정규화
+    
+    // RTS 모드에서는 오클루전/오브스트럭션 비활성화
+    const float OcclusionValue = bIsRTS ? 1.0f : 0.0f; // 1.0f = 비활성화, 0.0f = 활성화
+    SetUnifiedRTPCValue(OcclusionDisableRTPC, OcclusionValue); // 이미 0-1 범위
 }
 
 FBox2D UGS_AudioComponentBase::CalculateScreenWorldBounds(AGS_RTSController* RTSController) const
 {
+    // 단순화된 계산 방식 우선 시도
+    FBox2D SimplifiedBounds = CalculateSimplifiedScreenBounds(RTSController);
+    if (!SimplifiedBounds.GetExtent().IsZero())
+    {
+        return SimplifiedBounds;
+    }
+    
+    // 폴백: 기존 복잡한 방식
     FBox2D Bounds(ForceInit);
     
     if (!RTSController->PlayerCameraManager)
@@ -603,7 +633,7 @@ FBox2D UGS_AudioComponentBase::CalculateScreenWorldBounds(AGS_RTSController* RTS
     }
     
     // 1. 카메라 정보 가져오기 (FOV, 스프링암 각도 등)
-    float CameraFOV = 90.0f; // 기본값
+    float CameraFOV = DefaultFOV; // 기본값
     float SpringArmPitch = 0.0f;
     float SpringArmYaw = 0.0f;
     float SpringArmLength = 2000.0f;
@@ -661,13 +691,13 @@ FBox2D UGS_AudioComponentBase::CalculateScreenWorldBounds(AGS_RTSController* RTS
             FVector2D(CameraLocation.X + HalfHorizontalSize, CameraLocation.Y + HalfVerticalSize)
         );
         
-        UE_LOG(LogTemp, Verbose, TEXT("[Audio] FOV Calculation - Height: %.1f, H: %.1f, V: %.1f"), 
-               CameraHeight, HalfHorizontalSize, HalfVerticalSize);
-        
-        // 스프링암 각도 보정 적용
+        //  Pitch 각도 보정
         if (FMath::Abs(SpringArmPitch) > 5.0f) // 카메라가 기울어져 있으면 보정
         {
-            float PitchMultiplier = CalculateFOVPitchCorrection(SpringArmPitch, CameraHeight);
+            // 선형 보정: -90도에서 1.3배, 0도에서 1.0배
+            float PitchRad = FMath::DegreesToRadians(FMath::Abs(SpringArmPitch));
+            float PitchMultiplier = FMath::Lerp(1.0f, 1.3f, PitchRad / (PI * 0.5f));
+            
             HalfVerticalSize *= PitchMultiplier;
             HalfHorizontalSize *= PitchMultiplier;
             
@@ -682,10 +712,23 @@ FBox2D UGS_AudioComponentBase::CalculateScreenWorldBounds(AGS_RTSController* RTS
         return Bounds; // FOV 기반 정확한 계산 결과 반환
     }
     
-    // FOV 기반 계산이 실패한 경우 기존 방식 사용
-    // 4. 스프링암 각도에 따른 보정 계수 계산 (기존 방식 폴백)
-    float PitchCorrectionFactor = CalculatePitchCorrectionFactor(SpringArmPitch);
-    float YawCorrectionFactor = CalculateYawCorrectionFactor(SpringArmYaw);
+    // 4. 스프링암 각도 보정 계산
+    float PitchCorrectionFactor = 1.0f;
+    float YawCorrectionFactor = 1.0f;
+    
+    // Pitch 보정
+    if (FMath::Abs(SpringArmPitch) > 5.0f)
+    {
+        float PitchRad = FMath::DegreesToRadians(FMath::Abs(SpringArmPitch));
+        PitchCorrectionFactor = FMath::Lerp(1.0f, 0.85f, PitchRad / (PI * 0.5f));
+    }
+    
+    // Yaw 보정
+    if (FMath::Abs(SpringArmYaw) > 45.0f)
+    {
+        float YawRad = FMath::DegreesToRadians(FMath::Abs(SpringArmYaw));
+        YawCorrectionFactor = FMath::Lerp(1.0f, 0.9f, YawRad / PI);
+    }
     
     // 5. 화면 가장자리 샘플링 (성능과 정확도 균형) - 폴백 방식
     const int32 SampleCount = 8; // 각 변마다 8개 포인트 (성능 최적화)
@@ -731,26 +774,28 @@ FBox2D UGS_AudioComponentBase::CalculateScreenWorldBounds(AGS_RTSController* RTS
                 float T = -WorldPos.Z / WorldDir.Z;
                 FVector GroundPos = WorldPos + WorldDir * T;
                 
-                // 스프링암 각도에 따른 보정 적용
-                FVector2D CorrectedPos = ApplySpringArmCorrection(
-                    FVector2D(GroundPos.X, GroundPos.Y), 
-                    SpringArmPitch, 
-                    SpringArmYaw, 
-                    SpringArmLength,
-                    PitchCorrectionFactor,
-                    YawCorrectionFactor
-                );
+                // 단순한 스프링암 보정 적용
+                FVector2D OriginalPos(GroundPos.X, GroundPos.Y);
+                float TotalCorrectionFactor = PitchCorrectionFactor * YawCorrectionFactor;
+                FVector2D CorrectedPos = OriginalPos * TotalCorrectionFactor;
                 
                 Bounds += CorrectedPos;
             }
         }
     }
     
-    // 6. 스프링암 각도에 따른 추가 보정
-    Bounds = ApplyFinalSpringArmCorrection(Bounds, SpringArmPitch, SpringArmYaw, SpringArmLength);
+    // 6. 최종 경계 보정
+    FVector2D Center = Bounds.GetCenter();
+    FVector2D CurrentExtent = Bounds.GetExtent();
+    
+    float FinalMultiplier = FMath::Clamp(PitchCorrectionFactor * YawCorrectionFactor, 0.7f, 1.5f);
+    FVector2D NewExtent = CurrentExtent * FinalMultiplier;
+    
+    Bounds = FBox2D(Center - NewExtent, Center + NewExtent);
     
     return Bounds;
 }
+
 
 float UGS_AudioComponentBase::CalculateDistanceToScreenBounds(const FVector2D& Point, const FBox2D& Bounds) const
 {
@@ -769,197 +814,121 @@ float UGS_AudioComponentBase::CalculateDistanceToScreenBounds(const FVector2D& P
 
 bool UGS_AudioComponentBase::IsInCorridorRange(const FVector& CameraLocation, const FVector& SourceLocation) const
 {
-    // 십자 형태 맵의 통로 감지
-    // 카메라와 소스가 직선 통로로 연결되어 있는지 체크
-    
+    // 십자 형태 맵의 통로 감지 (카메라와 소스가 직선 통로로 연결되어 있는지 체크)
     FVector2D CameraPos2D(CameraLocation.X, CameraLocation.Y);
     FVector2D SourcePos2D(SourceLocation.X, SourceLocation.Y);
     
     // X축 또는 Y축 정렬 체크 (통로는 보통 직선)
-    // 더 관대한 임계값으로 설정하여 자연스러운 오디오 경험 제공
-    const float AlignmentThreshold = 600.0f; // 6m 오차 허용 (기존 3m에서 증가)
-    
-    bool bXAligned = FMath::Abs(CameraPos2D.X - SourcePos2D.X) < AlignmentThreshold;
-    bool bYAligned = FMath::Abs(CameraPos2D.Y - SourcePos2D.Y) < AlignmentThreshold;
+    bool bXAligned = FMath::Abs(CameraPos2D.X - SourcePos2D.X) < CorridorAlignmentThreshold;
+    bool bYAligned = FMath::Abs(CameraPos2D.Y - SourcePos2D.Y) < CorridorAlignmentThreshold;
     
     // 십자 형태에서는 X 또는 Y 중 하나가 정렬되어 있으면 통로
     return bXAligned || bYAligned;
 }
 
 
+// ======================
+// 화면 경계 계산 함수 구현
+// ======================
 
-// ===================
-// 스프링암 각도 보정 함수들
-// ===================
-
-float UGS_AudioComponentBase::CalculatePitchCorrectionFactor(float PitchAngle) const
+FBox2D UGS_AudioComponentBase::CalculateSimplifiedScreenBounds(AGS_RTSController* RTSController) const
 {
-    // Pitch 각도는 -90도(수직 아래)에서 0도(수평)까지
-    // 과도한 보정을 방지하고 안정적인 범위로 제한
+    if (!RTSController || !RTSController->PlayerCameraManager)
+    {
+        return FBox2D(ForceInit);
+    }
     
-    // 각도를 라디안으로 변환
-    float PitchRad = FMath::DegreesToRadians(PitchAngle);
+    FVector CameraLocation;
+    if (!GetActualCameraLocation(CameraLocation))
+    {
+        return FBox2D(ForceInit);
+    }
     
-    // 코사인 값을 사용하여 보정 계수 계산 (안정적인 범위로 제한)
-    // -90도일 때: cos(-90°) = 0, 보정 계수 = 0.7 (화면 영역 30% 축소)
-    // -60도일 때: cos(-60°) = 0.5, 보정 계수 = 0.85
-    // -50도일 때: cos(-50°) = 0.64, 보정 계수 = 0.93
-    // 0도일 때: cos(0°) = 1, 보정 계수 = 1.0 (보정 없음)
+    // 카메라 설정 가져오기
+    float CameraFOV = RTSController->PlayerCameraManager->GetFOVAngle();
+    float CameraHeight = FMath::Abs(CameraLocation.Z);
     
-    float CosValue = FMath::Abs(FMath::Cos(PitchRad));
-    float CorrectionFactor = FMath::Lerp(0.7f, 1.0f, CosValue); // 안정적인 범위로 제한
-    
-    return CorrectionFactor;
+    // 기본 화면 영역 계산
+    return CalculateBasicViewBounds(CameraLocation, CameraFOV, CameraHeight);
 }
 
-float UGS_AudioComponentBase::CalculateFOVPitchCorrection(float PitchAngle, float CameraHeight) const
+FBox2D UGS_AudioComponentBase::CalculateBasicViewBounds(const FVector& CameraLocation, float FOV, float CameraHeight, float AspectRatio) const
 {
-    // FOV 기반 Pitch 보정 - Perspective 투영에서 카메라가 기울어졌을 때의 정확한 보정
-    // PitchAngle: 음수 = 아래로 기울임, 양수 = 위로 기울임
+    // FOV를 라디안으로 변환
+    const float FOVRadians = FMath::DegreesToRadians(FOV);
     
-    float PitchRad = FMath::DegreesToRadians(PitchAngle);
+    // 기본 투영 계산
+    const float HalfVerticalSize = CameraHeight * FMath::Tan(FOVRadians * 0.5f);
+    const float HalfHorizontalSize = HalfVerticalSize * AspectRatio;
     
-    // 카메라가 아래로 기울어져 있으면 보이는 영역이 더 넓어짐 (원근 효과)
-    // 카메라가 위로 기울어져 있으면 보이는 영역이 좁아짐
+    // 경계 상자 생성 (여유 공간 추가)
+    const FVector2D HalfExtent(HalfHorizontalSize * ViewBoundsMargin, HalfVerticalSize * ViewBoundsMargin);
+    const FVector2D Center(CameraLocation.X, CameraLocation.Y);
     
-    if (PitchAngle < -10.0f) // 아래로 많이 기울어진 경우 (-10도 이하)
+    return FBox2D(Center - HalfExtent, Center + HalfExtent);
+}
+
+// 통일된 RTPC 시스템 구현
+void UGS_AudioComponentBase::SetUnifiedRTPCValue(UAkRtpc* RTPC, float NormalizedValue, float InterpolationTime)
+{
+    if (!RTPC)
     {
-        // 원근 효과로 인해 더 넓은 영역이 보임
-        float PitchFactor = FMath::Abs(PitchAngle) / 90.0f; // 0.0 ~ 1.0
-        return FMath::Lerp(1.0f, 2.5f, PitchFactor); // 최대 2.5배까지 확장
+        // 한 번만 경고하고 스킵 (스팸 방지)
+        static TSet<FString> WarnedActors;
+        FString ActorName = GetOwner() ? GetOwner()->GetName() : TEXT("Unknown");
+        
+        if (!WarnedActors.Contains(ActorName))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("[AudioBase] RTPC not assigned in %s - check Blueprint configuration"), *ActorName);
+            WarnedActors.Add(ActorName);
+        }
+        return;
     }
-    else if (PitchAngle > 10.0f) // 위로 많이 기울어진 경우 (10도 이상)
+
+    FAkAudioDevice* AkDevice = FAkAudioDevice::Get();
+    if (!AkDevice)
     {
-        // 하늘을 보게 되어 지면 영역이 줄어듦
-        float PitchFactor = PitchAngle / 90.0f; // 0.0 ~ 1.0
-        return FMath::Lerp(1.0f, 0.5f, PitchFactor); // 최대 50%까지 축소
+        UE_LOG(LogTemp, Error, TEXT("[AudioBase] SetUnifiedRTPCValue: Wwise AudioDevice not found"));
+        return;
+    }
+
+    // 0-1 정규화된 값을 0-100 Wwise 값으로 변환
+    const float WwiseValue = NormalizedValue * 100.0f;
+    const int32 InterpolationTimeMs = FMath::RoundToInt(InterpolationTime * 1000.0f);
+
+    AKRESULT Result = AkDevice->SetRTPCValue(RTPC, WwiseValue, InterpolationTimeMs, GetOwner());
+    
+    if (Result != AK_Success)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[AudioBase] SetUnifiedRTPCValue failed for RTPC: %s, Value: %.2f"), 
+               RTPC ? *RTPC->GetName() : TEXT("Unknown"), WwiseValue);
+    }
+}
+
+void UGS_AudioComponentBase::InitializeAudioRTPCs()
+{
+    if (!GetOwner())
+    {
+        return;
+    }
+
+    // Distance Scaling 초기값 설정 (TPS 모드 기본: 1.0f = 100%)
+    if (AttenuationModeRTPC)
+    {
+        SetUnifiedRTPCValue(AttenuationModeRTPC, TPSDistanceScaling);
     }
     else
     {
-        // -10도 ~ 10도 범위에서는 선형 보정
-        float LinearFactor = FMath::Abs(PitchAngle) / 10.0f;
-        if (PitchAngle < 0) // 아래로 기울어짐
-        {
-            return FMath::Lerp(1.0f, 1.3f, LinearFactor);
-        }
-        else // 위로 기울어짐
-        {
-            return FMath::Lerp(1.0f, 0.8f, LinearFactor);
-        }
+        UE_LOG(LogTemp, Warning, TEXT("[AudioBase] AttenuationModeRTPC not assigned in %s - audio distance scaling disabled"), *GetOwner()->GetName());
     }
-}
 
-float UGS_AudioComponentBase::CalculateYawCorrectionFactor(float YawAngle) const
-{
-    // Yaw 각도는 회전 방향에 따라 화면 영역이 달라짐
-    // 일반적으로 Yaw는 큰 영향을 주지 않지만, 극단적인 각도에서는 보정 필요
-    
-    // 각도를 -180~180 범위로 정규화
-    YawAngle = FMath::Fmod(YawAngle + 180.0f, 360.0f) - 180.0f;
-    
-    // Yaw 각도가 극단적일 때만 보정 (예: 90도, -90도)
-    float AbsYaw = FMath::Abs(YawAngle);
-    if (AbsYaw > 45.0f)
+    // Occlusion 초기값 설정 (TPS 모드는 활성화: 0.0f = 0%)
+    if (OcclusionDisableRTPC)
     {
-        // 극단적인 Yaw 각도에서는 화면 영역이 약간 축소됨
-        float YawRad = FMath::DegreesToRadians(AbsYaw);
-        float SinValue = FMath::Sin(YawRad);
-        return FMath::Lerp(1.0f, 0.8f, SinValue);
-    }
-    
-    return 1.0f; // 기본값
-}
-
-FVector2D UGS_AudioComponentBase::ApplySpringArmCorrection(
-    const FVector2D& OriginalPos, 
-    float PitchAngle, 
-    float YawAngle, 
-    float ArmLength,
-    float PitchCorrectionFactor,
-    float YawCorrectionFactor) const
-{
-    // 1. Pitch 각도에 따른 거리 보정
-    // Pitch가 낮을수록(수평에 가까울수록) 화면 영역이 넓어짐
-    float PitchDistanceMultiplier = PitchCorrectionFactor;
-    
-    // 2. Yaw 각도에 따른 방향 보정
-    // Yaw가 극단적일 때 화면 영역이 약간 축소됨
-    float YawDistanceMultiplier = YawCorrectionFactor;
-    
-    // 3. 스프링암 길이에 따른 보정
-    // 스프링암이 길수록 화면 영역이 넓어짐
-    // 줌인할 때도 적절한 보정을 위해 동적 보정 시스템 적용
-    float LengthMultiplier = CalculateZoomCorrectionFactor(ArmLength);
-    
-    // 4. 최종 보정 계수 계산
-    float TotalCorrectionFactor = PitchDistanceMultiplier * YawDistanceMultiplier * LengthMultiplier;
-    
-    // 5. 위치 보정 적용
-    FVector2D CorrectedPos = OriginalPos * TotalCorrectionFactor;
-    
-    return CorrectedPos;
-}
-
-FBox2D UGS_AudioComponentBase::ApplyFinalSpringArmCorrection(
-    const FBox2D& OriginalBounds, 
-    float PitchAngle, 
-    float YawAngle, 
-    float ArmLength) const
-{
-    FBox2D CorrectedBounds = OriginalBounds;
-    
-    // 1. Pitch 각도에 따른 최종 보정 (안정적인 범위로 제한)
-    float PitchRad = FMath::DegreesToRadians(PitchAngle);
-    float PitchMultiplier = FMath::Lerp(1.2f, 0.9f, FMath::Abs(FMath::Cos(PitchRad))); // 기존 1.5f~0.8f에서 1.2f~0.9f로 제한
-    
-    // 2. 스프링암 길이에 따른 최종 보정
-    float LengthMultiplier = CalculateZoomCorrectionFactor(ArmLength);
-    
-    // 3. 최종 보정 계수 (과도한 보정 방지)
-    float FinalMultiplier = FMath::Clamp(PitchMultiplier * LengthMultiplier, 0.7f, 1.8f);
-    
-    // 4. 경계 상자 확장/축소
-    FVector2D Center = CorrectedBounds.GetCenter();
-    FVector2D Extent = CorrectedBounds.GetExtent() * FinalMultiplier;
-    
-    CorrectedBounds = FBox2D(Center - Extent, Center + Extent);
-    
-    return CorrectedBounds;
-}
-
-float UGS_AudioComponentBase::CalculateZoomCorrectionFactor(float ArmLength) const
-{
-    // 줌 레벨에 따른 동적 보정 계수 계산
-    // 줌인할 때와 줌아웃할 때를 구분하여 적절한 보정 적용
-    
-    // 1. 기본 줌 레벨 (2000 = 100%)
-    const float BaseZoomLevel = 2000.0f;
-    const float ZoomRatio = ArmLength / BaseZoomLevel;
-    
-    // 2. 줌 레벨별 보정 계수
-    float CorrectionFactor = 1.0f;
-    
-    if (ZoomRatio < 0.5f)
-    {
-        // 줌인 (50% 이하): 화면 영역이 좁아지므로 보정 필요
-        // 0.5배 줌일 때 0.85배 보정, 0.1배 줌일 때 0.95배 보정
-        float ZoomInFactor = FMath::Lerp(0.95f, 0.85f, (0.5f - ZoomRatio) / 0.4f);
-        CorrectionFactor = ZoomInFactor;
-    }
-    else if (ZoomRatio > 1.5f)
-    {
-        // 줌아웃 (150% 이상): 화면 영역이 넓어지므로 보정 필요
-        // 1.5배 줌일 때 1.15배 보정, 3.0배 줌일 때 1.5배 보정
-        float ZoomOutFactor = FMath::Lerp(1.15f, 1.5f, (ZoomRatio - 1.5f) / 1.5f);
-        CorrectionFactor = ZoomOutFactor;
+        SetUnifiedRTPCValue(OcclusionDisableRTPC, 0.0f);
     }
     else
     {
-        // 중간 줌 레벨 (50% ~ 150%): 자연스러운 보정
-        // 1.0배 줌일 때 1.0배 보정, 1.5배 줌일 때 1.15배 보정
-        float MidZoomFactor = FMath::Lerp(1.0f, 1.15f, (ZoomRatio - 0.5f) / 1.0f);
-        CorrectionFactor = MidZoomFactor;
+        UE_LOG(LogTemp, Warning, TEXT("[AudioBase] OcclusionDisableRTPC not assigned in %s - audio occlusion disabled"), *GetOwner()->GetName());
     }
-    
-    return CorrectionFactor;
 }

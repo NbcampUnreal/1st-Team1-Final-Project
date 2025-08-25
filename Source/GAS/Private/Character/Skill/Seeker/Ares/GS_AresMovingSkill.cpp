@@ -31,6 +31,15 @@ void UGS_AresMovingSkill::ActiveSkill()
 		// 스킬 애니메이션 재생
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 
+		// SeekerAudioComponent를 통한 스킬 시작 사운드
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+		{
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			}
+		}
+
 		// 차징 루프 사운드는 SeekerAudioComponent를 통해 처리됨
 
 		OwnerPlayer->SetMoveControlValue(false, false);
@@ -68,16 +77,18 @@ void UGS_AresMovingSkill::OnSkillCommand()
 
 	Super::OnSkillCommand();
 
-	// 차징 루프 사운드 정지 및 돌진 사운드 재생
-	// 차징 사운드 정지 및 돌진 사운드 재생
+	// SeekerAudioComponent를 통한 사운드 처리
 	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
 		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
 		{
+			// 차징 루프 사운드 정지
 			AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
+			
+			// 돌진 시작 사운드 재생
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
 	}
-	PlaySkillStartSound();
 
 	// 차징 종료
 	OwnerCharacter->GetWorld()->GetTimerManager().ClearTimer(ChargingTimerHandle);
@@ -234,8 +245,14 @@ void UGS_AresMovingSkill::DeactiveSkill()
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 
-	// 스킬 종료 사운드 재생
-	PlaySkillEndSound();
+	// SeekerAudioComponent를 통한 스킬 종료 사운드
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
+	}
 
 	Super::DeactiveSkill();
 }

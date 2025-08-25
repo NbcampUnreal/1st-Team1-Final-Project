@@ -37,10 +37,15 @@ class GAS_API UGS_AudioComponentBase : public UActorComponent
 public:
 	UGS_AudioComponentBase();
 
-	// RTPC 이름 상수
-	static const FName DistanceToPlayerRTPCName;
-	static const FName AttenuationModeRTPCName;
-	static const FName OcclusionDisableRTPCName;
+	// RTPC 포인터 (UAkRtpc* 기반 통일)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio|RTPC")
+	UAkRtpc* DistanceToPlayerRTPC = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio|RTPC")  
+	UAkRtpc* AttenuationModeRTPC = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio|RTPC")
+	UAkRtpc* OcclusionDisableRTPC = nullptr;
 
 protected:
 	virtual void BeginPlay() override;
@@ -57,18 +62,27 @@ public:
 	static constexpr float MinRTPCUpdateInterval = 0.2f;     // RTPC 업데이트 최소 간격
 	static constexpr float RTPCDistanceThreshold = 50.0f;    // RTPC 업데이트를 위한 최소 거리 차이
 	
+	
 	// 모드별 거리 설정 상수
 	static constexpr float RTSMaxDistance = 20000.0f;        // RTS 모드 최대 거리 (200m)
 	static constexpr float TPSMaxDistance = 2000.0f;         // TPS 모드 최대 거리 (20m)
 	
-	// Distance Scaling 설정 상수
-	static constexpr float RTSDistanceScaling = 1.0f;        // RTS 모드 (100% = 200m)
+	// Distance Scaling 설정 상수 (개선된 RTS/TPS 구분)
+	static constexpr float RTSDistanceScaling = 2.0f;        // RTS 모드 (200% = 400m)
 	static constexpr float TPSDistanceScaling = 1.0f;        // TPS 모드 (100% = 20m)
 	
 	// 기타 상수들
 	static constexpr float LocalSoundCooldownMultiplier = 0.9f; // 로컬 사운드 쿨다운 배율
 	static constexpr int32 MaxActivePlayingIDs = 10;           // 최대 활성 사운드 ID 개수
 	static constexpr float DefaultInitTime = -1000.0f;         // 초기 시간 값
+	
+	// 화면 경계 계산 상수들
+	static constexpr float DefaultFOV = 90.0f;                 // 기본 FOV 값
+	static constexpr float DefaultAspectRatio = 16.0f / 9.0f;  // 기본 화면 비율
+	static constexpr float ViewBoundsMargin = 1.1f;            // 화면 경계 여유 공간 (110%)
+	static constexpr float CorridorAlignmentThreshold = 600.0f; // 통로 감지 임계값 (6m)
+	static constexpr float AudioExtendDistance = 1200.0f;      // 화면 밖 오디오 확장 거리 (12m)
+	static constexpr float CorridorAudioDistance = 2000.0f;    // 통로 내 오디오 거리 (20m)
 
 protected:
 	// ===================
@@ -161,7 +175,7 @@ public:
 	/** RTS 오디오 가시성 체크 */
 	bool CheckRTSAudioVisibility(AGS_RTSController* RTSController, const FVector& SourceLocation) const;
 	
-	/** 화면 월드 경계 계산 */
+	/** 화면 월드 경계 계산 (RTS 모드 전용) */
 	FBox2D CalculateScreenWorldBounds(AGS_RTSController* RTSController) const;
 	
 	/** 화면 경계까지의 거리 계산 */
@@ -171,41 +185,19 @@ public:
 	bool IsInCorridorRange(const FVector& CameraLocation, const FVector& SourceLocation) const;
 	
 	// ===================
-	// 스프링암 각도 보정 함수들
+	// 화면 경계 계산 함수들
 	// ===================
 	
-	/** Pitch 각도에 따른 보정 계수 계산 */
-	float CalculatePitchCorrectionFactor(float PitchAngle) const;
+	/** FOV 기반 화면 경계 계산 */
+	FBox2D CalculateSimplifiedScreenBounds(AGS_RTSController* RTSController) const;
 	
-	/** Yaw 각도에 따른 보정 계수 계산 */
-	float CalculateYawCorrectionFactor(float YawAngle) const;
-	
-	/** 스프링암 각도에 따른 위치 보정 적용 */
-	FVector2D ApplySpringArmCorrection(
-		const FVector2D& OriginalPos, 
-		float PitchAngle, 
-		float YawAngle, 
-		float ArmLength,
-		float PitchCorrectionFactor,
-		float YawCorrectionFactor) const;
-	
-	/** 스프링암 각도에 따른 최종 경계 상자 보정 */
-	FBox2D ApplyFinalSpringArmCorrection(
-		const FBox2D& OriginalBounds, 
-		float PitchAngle, 
-		float YawAngle, 
-		float ArmLength) const;
-	
-	/** 줌 레벨에 따른 동적 보정 계수 계산 */
-	float CalculateZoomCorrectionFactor(float ArmLength) const;
-
-	/** FOV 기반 Pitch 각도 보정 계수 계산 */
-	float CalculateFOVPitchCorrection(float PitchAngle, float CameraHeight) const;
+	/** 카메라 설정을 기반으로 한 기본 화면 영역 계산 */
+	FBox2D CalculateBasicViewBounds(const FVector& CameraLocation, float FOV, float CameraHeight, float AspectRatio = 16.0f/9.0f) const;
 
 protected:
-	// ===================
+	// ===============
 	// 메모리 관리 헬퍼
-	// ===================
+	// ===============
 	
 	/** 활성 사운드 정리 */
 	void CleanupFinishedSounds();
@@ -213,12 +205,15 @@ protected:
 	/** 모든 활성 사운드 중지 */
 	void StopAllActiveSounds();
 	
-	/** 새 사운드 ID 등록 */
+	/** 새 사운드 ID 등록 (개선된 정리 시스템 포함) */
 	void RegisterPlayingID(AkPlayingID NewPlayingID);
+	
+	/** EndOfEvent 콜백과 함께 사운드 재생 */
+	AkPlayingID PostEventWithCallback(UAkAudioEvent* AkEvent, AActor* Actor);
 
-	// ===================
+	// =================
 	// 거리 및 RTPC 관리
-	// ===================
+	// =================
 	
 	/** 거리 및 상태 체크 (타이머 콜백) */
 	virtual void UpdateDistanceRTPC();
@@ -226,8 +221,14 @@ protected:
 	/** RTPC 업데이트가 필요한지 확인 */
 	bool ShouldUpdateRTPC(float NewDistance, float CurrentTime) const;
 	
-	/** Distance Scaling 설정 */
+	/** 통일된 RTPC 값 설정 (0-1 → 0-100 자동 변환) */
+	void SetUnifiedRTPCValue(UAkRtpc* RTPC, float NormalizedValue, float InterpolationTime = 0.0f);
+	
+	/** Distance Scaling 설정 (통일된 방식) */
 	void SetDistanceScaling(bool bIsRTS);
+	
+	/** 모든 오디오 RTPC 초기화 */
+	virtual void InitializeAudioRTPCs();
 
 	// ===================
 	// 가상 함수 (하위 클래스에서 구현)
@@ -238,6 +239,9 @@ protected:
 	
 	/** 최대 오디오 거리 반환 (하위 클래스에서 구현) */
 	virtual float GetMaxAudioDistance() const { return TPSMaxDistance; }
+	
+	/** 특정 사운드 완료 시 추가 정리 작업 (하위 클래스에서 구현) */
+	virtual void OnSpecificSoundFinished(AkPlayingID FinishedID) {}
 
 public:
 	// Replication 설정

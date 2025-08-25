@@ -43,8 +43,10 @@ void UGS_ChanAimingSkill::ActiveSkill()
 		OwnerPlayer->CanChangeSeekerGait = false;
 
 		// 스킬 시작 사운드 재생
-		// 스킬 시작 사운드 재생
-		PlaySkillStartSound();
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
 
 		// =======================
 		// VFX 재생 - 컴포넌트 RPC 사용

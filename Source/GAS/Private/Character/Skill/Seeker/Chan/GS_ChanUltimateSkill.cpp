@@ -36,7 +36,10 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		// 궁극기 사운드 재생
-		PlaySkillStartSound();
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
 		
 		// 입력 제한 설정
 		//OwnerPlayer->SetSkillInputControl(false, false, false);
@@ -202,6 +205,15 @@ void UGS_ChanUltimateSkill::DeactiveSkill()
 
 	// 충돌 이력 초기화
 	HitActors.Empty();
+
+	// SeekerAudioComponent를 통한 스킬 종료 사운드
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
+	}
 
 	Super::DeactiveSkill();
 }

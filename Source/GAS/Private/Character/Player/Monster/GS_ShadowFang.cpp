@@ -16,8 +16,6 @@ void AGS_ShadowFang::BeginPlay()
 	// ShadowFang 전용 몬스터 오디오 설정 (컴포넌트 사용)
 	if (MonsterAudioComponent)
 	{
-		MonsterAudioComponent->MonsterSoundVariant = 3; // ShadowFang = 3
-
 		// 큰 몬스터 특성: 더 먼 거리에서 경계, 긴 최대 거리
 		MonsterAudioComponent->AudioConfig.AlertDistance = 1000.0f;
 		MonsterAudioComponent->AudioConfig.MaxAudioDistance = 4000.0f;

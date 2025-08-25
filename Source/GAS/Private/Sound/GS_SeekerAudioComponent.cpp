@@ -1,7 +1,6 @@
 #include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Engine/World.h"
-// #include "Engine/OverlapResult.h"
 #include "TimerManager.h"
 #include "CollisionQueryParams.h"
 #include "CollisionShape.h"
@@ -18,7 +17,6 @@
 #include "Character/GS_Character.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Component/GS_StatComp.h"
-// #include "AkInclude.h"
 
 
 UGS_SeekerAudioComponent::UGS_SeekerAudioComponent()
@@ -29,10 +27,8 @@ UGS_SeekerAudioComponent::UGS_SeekerAudioComponent()
     PreviousAudioState = ESeekerAudioState::Idle;
     
     AudioConfig.MaxAudioDistance = 2000.0f;
-    CombatSoundInterval = 5.0f;
     
-    SkillEventID = 0;
-    LastHitSoundTime = 0.0f;
+    SkillEventID = AK_INVALID_PLAYING_ID;
 }
 
 void UGS_SeekerAudioComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -79,25 +75,11 @@ void UGS_SeekerAudioComponent::BeginPlay()
 				TypeName = TEXT("Unknown");
 				break;
 		}
-		
-		UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Auto-detected character type: %s for %s"), *TypeName, *GetOwner()->GetName());
-		
-		// Owner가 GS_Seeker인지도 확인 (하위 호환성)
+	    
+		// Owner가 GS_Seeker인지도 확인
 		OwnerSeeker = Cast<AGS_Seeker>(GetOwner());
-		
-		// 타입별 유효성 검증
-		ValidateCharacterTypeSetup();
 	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("[SeekerAudio] Failed to cast Owner to GS_Character: %s"), GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
-	}
-	
-	// 타이머 초기화
-	if (GetWorld())
-	{
-		GetWorld()->GetTimerManager().SetTimer(CombatSoundTimerHandle, this, &UGS_SeekerAudioComponent::PlayCombatSound, CombatSoundInterval, true);
-	}
+    
 }
 
 void UGS_SeekerAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -107,6 +89,18 @@ void UGS_SeekerAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     StopAllActiveSounds();
     
     Super::EndPlay(EndPlayReason);
+}
+
+void UGS_SeekerAudioComponent::OnSpecificSoundFinished(AkPlayingID FinishedID)
+{
+    // 스킬 이벤트가 완료된 경우 SkillEventID 초기화
+    if (SkillEventID == FinishedID)
+    {
+        SkillEventID = AK_INVALID_PLAYING_ID;
+    }
+    
+    // 부모 클래스 처리
+    Super::OnSpecificSoundFinished(FinishedID);
 }
 
 float UGS_SeekerAudioComponent::GetMaxAudioDistance() const
@@ -138,12 +132,8 @@ void UGS_SeekerAudioComponent::PlaySound(ESeekerAudioState SoundType, bool bForc
 
     if (!bForcePlay)
     {
-        float Interval;
-        if (SoundType == ESeekerAudioState::Combat) Interval = CombatSoundInterval;
-        else Interval = 1.0f;
-
         float CurrentTime = GetWorld()->GetTimeSeconds();
-        if ((CurrentTime - ServerLastBroadcastTime.FindOrAdd(SoundType, 0.0f)) < Interval)
+        if ((CurrentTime - ServerLastBroadcastTime.FindOrAdd(SoundType, 0.0f)) < 1.0f)
         {
             return;
         }
@@ -156,6 +146,9 @@ void UGS_SeekerAudioComponent::PlaySound(ESeekerAudioState SoundType, bool bForc
 
 void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudioState SoundTypeToTrigger, bool bIsImmediate)
 {
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+    
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -202,13 +195,8 @@ void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudi
 
     if (!bIsImmediate)
     {
-        float Interval;
-        // Idle과 Aiming은 시커에서 사용하지 않음
-        if (SoundTypeToTrigger == ESeekerAudioState::Combat) Interval = CombatSoundInterval;
-        else Interval = 1.0f;
-
         float CurrentTime = GetWorld()->GetTimeSeconds();
-        if ((CurrentTime - LocalLastSoundPlayTimes.FindOrAdd(SoundTypeToTrigger, 0.0f)) < (Interval * LocalSoundCooldownMultiplier)) 
+        if ((CurrentTime - LocalLastSoundPlayTimes.FindOrAdd(SoundTypeToTrigger, 0.0f)) < (1.0f * LocalSoundCooldownMultiplier)) 
         {
             return; 
         }
@@ -247,14 +235,11 @@ void UGS_SeekerAudioComponent::PlayBowDrawSound()
     // 메르시만 활 사운드 재생 가능
     if (CharacterType != ECharacterType::Merci)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] PlayBowDrawSound called on non-Merci character (%s). This function is Merci-only."), 
-               OwnerCharacter ? *OwnerCharacter->GetName() : TEXT("Unknown"));
         return;
     }
     
     if (!OwnerSeeker || !OwnerSeeker->IsMerci())
     {
-        UE_LOG(LogTemp, Error, TEXT("[SeekerAudio] CharacterType mismatch! Type=%d but OwnerSeeker is not Merci"), (int32)CharacterType);
         return;
     }
 
@@ -273,6 +258,9 @@ void UGS_SeekerAudioComponent::PlayBowDrawSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayBowDrawSound_Implementation()
 {
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+    
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -308,7 +296,7 @@ void UGS_SeekerAudioComponent::Multicast_PlayBowDrawSound_Implementation()
         }
     }
 
-    UAkAudioEvent* SoundToPlay = bRTS ? RTSBowDrawSound : BowDrawSound;
+    UAkAudioEvent* SoundToPlay = bRTS ? RTSMerciBowDrawSound : BowDrawSound;
     if (SoundToPlay)
     {
         // RTS 모드에 따른 Distance Scaling 설정
@@ -327,14 +315,11 @@ void UGS_SeekerAudioComponent::PlayBowReleaseSound()
     // 메르시만 활 사운드 재생 가능
     if (CharacterType != ECharacterType::Merci)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] PlayBowReleaseSound called on non-Merci character (%s). This function is Merci-only."), 
-               OwnerCharacter ? *OwnerCharacter->GetName() : TEXT("Unknown"));
         return;
     }
     
     if (!OwnerSeeker || !OwnerSeeker->IsMerci())
     {
-        UE_LOG(LogTemp, Error, TEXT("[SeekerAudio] CharacterType mismatch! Type=%d but OwnerSeeker is not Merci"), (int32)CharacterType);
         return;
     }
 
@@ -353,6 +338,9 @@ void UGS_SeekerAudioComponent::PlayBowReleaseSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayBowReleaseSound_Implementation()
 {
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+        
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -388,7 +376,7 @@ void UGS_SeekerAudioComponent::Multicast_PlayBowReleaseSound_Implementation()
         }
     }
 
-    UAkAudioEvent* SoundToPlay = bRTS ? RTSBowReleaseSound : BowReleaseSound;
+    UAkAudioEvent* SoundToPlay = bRTS ? RTSMerciBowReleaseSound : BowReleaseSound;
     if (SoundToPlay)
     {
         // RTS 모드에 따른 Distance Scaling 설정
@@ -399,8 +387,6 @@ void UGS_SeekerAudioComponent::Multicast_PlayBowReleaseSound_Implementation()
     }
 }
 
-// RTS 커맨드 사운드는 시커에서 사용하지 않음 (플레이어 직접 조종)
-
 void UGS_SeekerAudioComponent::StartSoundTimer()
 {
     if (!GetOwner() || !GetOwner()->HasAuthority() || !GetWorld())
@@ -408,7 +394,6 @@ void UGS_SeekerAudioComponent::StartSoundTimer()
 
     StopSoundTimer();
     
-    float Interval;
     FTimerDelegate TimerDelegate;
 
     switch (CurrentAudioState)
@@ -417,9 +402,6 @@ void UGS_SeekerAudioComponent::StartSoundTimer()
             break;
             
         case ESeekerAudioState::Combat:
-            Interval = CombatSoundInterval; 
-            TimerDelegate.BindUObject(this, &UGS_SeekerAudioComponent::PlayCombatSound);
-            GetWorld()->GetTimerManager().SetTimer(CombatSoundTimerHandle, TimerDelegate, Interval, true);
             break;
             
         case ESeekerAudioState::Aiming:
@@ -435,8 +417,6 @@ void UGS_SeekerAudioComponent::StopSoundTimer()
     if (!GetWorld()) return;
 
     FTimerManager& TimerManager = GetWorld()->GetTimerManager();
-    if (IdleSoundTimer.IsValid())
-        TimerManager.ClearTimer(IdleSoundTimer);
     if (CombatSoundTimerHandle.IsValid())
     {
         TimerManager.ClearTimer(CombatSoundTimerHandle);
@@ -457,11 +437,7 @@ UAkAudioEvent* UGS_SeekerAudioComponent::GetSoundEvent(ESeekerAudioState SoundTy
         case ESeekerAudioState::Idle:    
             return nullptr;
         case ESeekerAudioState::Combat:  
-            if (bRTS)
-            {
-                return AudioConfig.RTS_CombatSound ? AudioConfig.RTS_CombatSound : AudioConfig.CombatSound;
-            }
-            return AudioConfig.CombatSound;
+            return nullptr;
         case ESeekerAudioState::Aiming:  
             return nullptr;
         case ESeekerAudioState::Hurt:    
@@ -517,22 +493,6 @@ void UGS_SeekerAudioComponent::CheckForStateChanges()
     
 }
 
-void UGS_SeekerAudioComponent::PlayIdleSound()
-{
-    if (GetOwner() && GetOwner()->HasAuthority())
-    {
-        PlaySound(ESeekerAudioState::Idle, false);
-    }
-}
-
-void UGS_SeekerAudioComponent::PlayCombatSound()
-{
-    if (GetOwner() && GetOwner()->HasAuthority())
-    {
-        PlaySound(ESeekerAudioState::Combat, false);
-    }
-}
-
 // =============================================
 // 스킬 관련 기능들
 // =============================================
@@ -547,13 +507,21 @@ void UGS_SeekerAudioComponent::PlaySkill()
         DummyCallback, // No callback
         false // bStopWhenAttachedToDestroyed
     );
+    
+    // 스킬 이벤트도 ActivePlayingIDs에서 관리 (선택적 정지를 위해)
+    RegisterPlayingID(SkillEventID);
 }
 
 void UGS_SeekerAudioComponent::StopSkill()
 {
-    if (GetOwner())
+    // 선택적 정지: 스킬 사운드만 정지
+    if (SkillEventID != AK_INVALID_PLAYING_ID)
     {
-        UAkGameplayStatics::StopActor(GetOwner());
+        if (FAkAudioDevice* AkDevice = FAkAudioDevice::Get())
+        {
+            AkDevice->StopPlayingID(SkillEventID);
+        }
+        SkillEventID = AK_INVALID_PLAYING_ID;
     }
 }
 
@@ -853,12 +821,6 @@ void UGS_SeekerAudioComponent::PlayGenericSound(UAkAudioEvent* SoundToPlay, bool
     }
 }
 
-void UGS_SeekerAudioComponent::PlayHitSound()
-{
-    // PlayHitSound는 PlayHurtSound로 대체됨 - RTS/TPS 모드 지원을 위해
-    PlayHurtSound();
-}
-
 void UGS_SeekerAudioComponent::ResetAttackSoundSequence()
 {
     if (CurrentStopEvent)
@@ -895,14 +857,11 @@ void UGS_SeekerAudioComponent::PlayShieldSlamStartSound()
     // 찬만 방패 슬램 사운드 재생 가능
     if (CharacterType != ECharacterType::Chan)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] PlayShieldSlamStartSound called on non-Chan character (%s). This function is Chan-only."), 
-               OwnerCharacter ? *OwnerCharacter->GetName() : TEXT("Unknown"));
         return;
     }
     
     if (!OwnerSeeker || !OwnerSeeker->IsChan())
     {
-        UE_LOG(LogTemp, Error, TEXT("[SeekerAudio] CharacterType mismatch! Type=%d but OwnerSeeker is not Chan"), (int32)CharacterType);
         return;
     }
 
@@ -947,38 +906,27 @@ void UGS_SeekerAudioComponent::PlayShieldSlamImpactSound()
 void UGS_SeekerAudioComponent::PlayChanComboAttackSound(int32 ComboIndex)
 {
     // 찬만 찬 콤보 공격 사운드 재생 가능
+    if (CharacterType != ECharacterType::Chan)
+    {
+        return;
+    }
+    
     if (!OwnerSeeker || !OwnerSeeker->IsChan())
     {
         return;
     }
 
-    if (!OwnerSeeker || !GetWorld())
+    if (!GetOwner() || !GetOwner()->HasAuthority())
     {
         return;
     }
 
-    // 찬 전용 콤보 공격 사운드 재생
-    if (ChanAxeSwingSound)
-    {
-        AkPlayingID SwingPlayingID = UAkGameplayStatics::PostEvent(ChanAxeSwingSound, OwnerSeeker, 0, FOnAkPostEventCallback());
-        RegisterPlayingID(SwingPlayingID);
-    }
+    // RPC 호출 빈도 체크
+    if (!CanSendRPC())
+        return;
 
-    if (ChanAttackVoiceSound)
-    {
-        AkPlayingID VoicePlayingID = UAkGameplayStatics::PostEvent(ChanAttackVoiceSound, OwnerSeeker, 0, FOnAkPostEventCallback());
-        RegisterPlayingID(VoicePlayingID);
-    }
-
-    // 콤보 정지 사운드 설정
-    if (ChanAxeSwingStopEvent)
-    {
-        CurrentStopEvent = ChanAxeSwingStopEvent;
-        if (GetWorld())
-        {
-            GetWorld()->GetTimerManager().SetTimer(AttackSoundResetTimerHandle, this, &UGS_SeekerAudioComponent::ResetAttackSoundSequence, 1.0f, false);
-        }
-    }
+    LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    Multicast_PlayChanComboAttackSound(ComboIndex);
 }
 
 void UGS_SeekerAudioComponent::PlayChanFinalAttackSound()
@@ -1008,25 +956,102 @@ void UGS_SeekerAudioComponent::PlayAresComboAttackSound(int32 ComboIndex)
     // 아레스만 아레스 콤보 공격 사운드 재생 가능
     if (CharacterType != ECharacterType::Ares)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] PlayAresComboAttackSound called on non-Ares character (%s). This function is Ares-only."), 
-               OwnerCharacter ? *OwnerCharacter->GetName() : TEXT("Unknown"));
         return;
     }
     
     if (!OwnerSeeker || !OwnerSeeker->IsAres())
     {
-        UE_LOG(LogTemp, Error, TEXT("[SeekerAudio] CharacterType mismatch! Type=%d but OwnerSeeker is not Ares"), (int32)CharacterType);
         return;
     }
 
+    if (!GetOwner() || !GetOwner()->HasAuthority())
+    {
+        return;
+    }
+
+    // RPC 호출 빈도 체크
+    if (!CanSendRPC())
+        return;
+
+    LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    Multicast_PlayAresComboAttackSound(ComboIndex);
+}
+
+void UGS_SeekerAudioComponent::PlayAresComboAttackSoundWithExtra(int32 ComboIndex)
+{
+    // 기본 콤보 공격 사운드 재생
+    PlayAresComboAttackSound(ComboIndex);
+
+    // 추가 사운드 재생
+    if (!GetOwner() || !GetOwner()->HasAuthority())
+    {
+        return;
+    }
+
+    // RPC 호출 빈도 체크
+    if (!CanSendRPC())
+        return;
+
+    LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    Multicast_PlayAresComboAttackSoundWithExtra(ComboIndex);
+}
+
+// ===================
+// TPS 콤보 사운드 멀티캐스트 RPC 구현
+// ===================
+
+void UGS_SeekerAudioComponent::Multicast_PlayChanComboAttackSound_Implementation(int32 ComboIndex)
+{
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+    
     if (!OwnerSeeker || !GetWorld())
     {
         return;
     }
 
-    // 아레스 전용 콤보 공격 사운드 재생
-    int32 ArrayIndex = ComboIndex - 1; // 1-based에서 0-based로 변환
+    // 찬 전용 TPS 콤보 공격 사운드 재생
+    if (ChanAxeSwingSound)
+    {
+        AkPlayingID SwingPlayingID = UAkGameplayStatics::PostEvent(ChanAxeSwingSound, OwnerSeeker, 0, FOnAkPostEventCallback());
+        RegisterPlayingID(SwingPlayingID);
+    }
+
+    if (ChanAttackVoiceSound)
+    {
+        AkPlayingID VoicePlayingID = UAkGameplayStatics::PostEvent(ChanAttackVoiceSound, OwnerSeeker, 0, FOnAkPostEventCallback());
+        RegisterPlayingID(VoicePlayingID);
+    }
+
+    // 콤보 정지 사운드 설정
+    if (ChanAxeSwingStopEvent)
+    {
+        CurrentStopEvent = ChanAxeSwingStopEvent;
+        if (GetWorld())
+        {
+            GetWorld()->GetTimerManager().SetTimer(AttackSoundResetTimerHandle, this, &UGS_SeekerAudioComponent::ResetAttackSoundSequence, 1.0f, false);
+        }
+    }
+}
+
+void UGS_SeekerAudioComponent::Multicast_PlayAresComboAttackSound_Implementation(int32 ComboIndex)
+{
+    // 공통 체크 로직 사용 (콤보 사운드는 거리 체크 없이 재생)
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
     
+    if (!OwnerSeeker || !GetWorld())
+    {
+        return;
+    }
+
+    // 콤보 인덱스 검증 및 변환
+    int32 ArrayIndex = ValidateAndConvertComboIndex(ComboIndex, AresComboSwingSounds.Num());
+    if (ArrayIndex == INDEX_NONE)
+    {
+        return;
+    }
+    
+    // 아레스 전용 TPS 콤보 공격 사운드 재생
     if (AresComboSwingSounds.IsValidIndex(ArrayIndex) && AresComboSwingSounds[ArrayIndex])
     {
         AkPlayingID SwingPlayingID = UAkGameplayStatics::PostEvent(AresComboSwingSounds[ArrayIndex], OwnerSeeker, 0, FOnAkPostEventCallback());
@@ -1045,15 +1070,21 @@ void UGS_SeekerAudioComponent::PlayAresComboAttackSound(int32 ComboIndex)
         CurrentStopEvent = AresSwordSwingStopEvent;
         if (GetWorld())
         {
-            GetWorld()->GetTimerManager().SetTimer(AttackSoundResetTimerHandle, this, &UGS_SeekerAudioComponent::ResetAttackSoundSequence, 1.0f, false);
+            static constexpr float ComboResetDelay = 1.0f; // 하드코딩 제거
+            GetWorld()->GetTimerManager().SetTimer(AttackSoundResetTimerHandle, this, &UGS_SeekerAudioComponent::ResetAttackSoundSequence, ComboResetDelay, false);
         }
     }
 }
 
-void UGS_SeekerAudioComponent::PlayAresComboAttackSoundWithExtra(int32 ComboIndex)
+void UGS_SeekerAudioComponent::Multicast_PlayAresComboAttackSoundWithExtra_Implementation(int32 ComboIndex)
 {
-    // 기본 콤보 공격 사운드 재생
-    PlayAresComboAttackSound(ComboIndex);
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+    
+    if (!OwnerSeeker || !GetWorld())
+    {
+        return;
+    }
 
     // 추가 사운드 재생
     int32 ArrayIndex = ComboIndex - 1; // 1-based에서 0-based로 변환
@@ -1109,46 +1140,18 @@ void UGS_SeekerAudioComponent::PlayHitFeedbackSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayArrowShotSound_Implementation()
 {
-    if (!OwnerSeeker || !GetWorld())
+    // 공통 체크 로직 사용
+    if (!ShouldPlaySoundAtLocation(OwnerSeeker->GetActorLocation()))
     {
         return;
     }
 
-    FVector ListenerLocation;
-    if (!GetListenerLocation(ListenerLocation))
-    {
-        return;
-    }
-
-    // RTS 모드와 TPS 모드에 따른 거리 체크
-    const bool bRTS = IsRTSMode();
-    const float MaxDistance = GetMaxDistanceForMode(bRTS);
-    
-    const float DistanceToListener = FVector::Dist(OwnerSeeker->GetActorLocation(), ListenerLocation);
-    
-    // RTS 모드에서는 화면 시야각 기반 체크, TPS 모드에서는 거리 기반 체크
-    if (bRTS)
-    {
-        // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
-        if (!IsInViewFrustum(OwnerSeeker->GetActorLocation()))
-        {
-            return;
-        }
-    }
-    else
-    {
-        // TPS 모드: 기존 거리 기반 체크
-        if (DistanceToListener > MaxDistance)
-        {
-            return;
-        }
-    }
-
-    UAkAudioEvent* SoundToPlay = bRTS ? RTSArrowShotSound : ArrowShotSound;
+    // 모드별 사운드 이벤트 선택
+    UAkAudioEvent* SoundToPlay = SelectSoundEventByMode(ArrowShotSound, RTSMerciArrowShotSound);
     if (SoundToPlay)
     {
         // RTS 모드에 따른 Distance Scaling 설정
-        SetDistanceScaling(bRTS);
+        SetDistanceScaling(IsRTSMode());
         
         AkPlayingID ArrowShotPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
         RegisterPlayingID(ArrowShotPlayingID);
@@ -1195,6 +1198,9 @@ void UGS_SeekerAudioComponent::Multicast_PlayHitFeedbackSound_Implementation()
 
 void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamStartSound_Implementation()
 {
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+    
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -1243,6 +1249,9 @@ void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamStartSound_Implementation
 
 void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamImpactSound_Implementation()
 {
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+    
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -1291,6 +1300,9 @@ void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamImpactSound_Implementatio
 
 void UGS_SeekerAudioComponent::Multicast_PlayHurtSound_Implementation()
 {
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+    
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -1329,25 +1341,30 @@ void UGS_SeekerAudioComponent::Multicast_PlayHurtSound_Implementation()
         // RTS 모드에 따른 Distance Scaling 설정
         SetDistanceScaling(bRTS);
         
-        // RTPC 값 설정 및 Wwise 연결 상태 체크
-        if (FAkAudioDevice* AkDevice = FAkAudioDevice::Get())
+        // 거리 기반 RTPC 설정
+        const float RTPCMaxDistance = GetMaxAudioDistance();
+        // RTS 모드에서는 더 넓은 거리 범위 사용
+        const float EffectiveMaxDistance = bRTS ? FMath::Max(RTPCMaxDistance, 10000.0f) : RTPCMaxDistance;
+        // 거리가 멀수록 볼륨이 작아지도록 역수 관계 적용
+        const float DistanceRatio = FMath::Clamp(DistanceToListener / EffectiveMaxDistance, 0.0f, 1.0f);
+        const float NormalizedDistance = 1.0f - DistanceRatio; // 거리가 멀수록 0에 가까워짐
+        SetUnifiedRTPCValue(DistanceToPlayerRTPC, NormalizedDistance);
+        
+        // 사운드 재생
+        AkPlayingID HurtPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
+        
+        if (HurtPlayingID != AK_INVALID_PLAYING_ID)
         {
-            AkDevice->SetRTPCValue(*DistanceToPlayerRTPCName.ToString(), DistanceToListener, 0, OwnerSeeker);
-            AkDevice->SetRTPCValue(*AttenuationModeRTPCName.ToString(), GetDistanceScalingForMode(bRTS), 0, OwnerSeeker);
-            
-            // 사운드 재생
-            AkPlayingID HurtPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
-            
-            if (HurtPlayingID != AK_INVALID_PLAYING_ID)
-            {
-                RegisterPlayingID(HurtPlayingID);
-            }
+            RegisterPlayingID(HurtPlayingID);
         }
     }
 }
 
 void UGS_SeekerAudioComponent::Multicast_PlayDeathSound_Implementation()
 {
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+    
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -1386,12 +1403,10 @@ void UGS_SeekerAudioComponent::Multicast_PlayDeathSound_Implementation()
         // RTS 모드에 따른 Distance Scaling 설정
         SetDistanceScaling(bRTS);
         
-        // RTPC 값 설정
-        if (FAkAudioDevice* AkDevice = FAkAudioDevice::Get())
-        {
-            AkDevice->SetRTPCValue(*DistanceToPlayerRTPCName.ToString(), DistanceToListener, 0, OwnerSeeker);
-            AkDevice->SetRTPCValue(*AttenuationModeRTPCName.ToString(), GetDistanceScalingForMode(bRTS), 0, OwnerSeeker);
-        }
+        // 거리 기반 RTPC 설정 (통일된 시스템 사용)
+        const float RTPCMaxDistance = GetMaxAudioDistance();
+        const float NormalizedDistance = RTPCMaxDistance > 0.0f ? FMath::Clamp(DistanceToListener / RTPCMaxDistance, 0.0f, 1.0f) : 0.0f;
+        SetUnifiedRTPCValue(DistanceToPlayerRTPC, NormalizedDistance);
         
         // 사운드 재생
         AkPlayingID DeathPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
@@ -1399,73 +1414,415 @@ void UGS_SeekerAudioComponent::Multicast_PlayDeathSound_Implementation()
     }
 }
 
-void UGS_SeekerAudioComponent::ValidateCharacterTypeSetup()
+// ===================
+// RTS 사운드 재생 함수들 구현
+// ===================
+
+void UGS_SeekerAudioComponent::PlayRTSAresSwordSwingSound(int32 ComboIndex)
 {
-    if (!OwnerCharacter)
+    if (!OwnerSeeker || !OwnerSeeker->IsAres())
+    {
+        return;
+    }
+
+    // RTS 모드에서만 재생
+    if (!IsRTSMode())
+    {
+        return;
+    }
+
+    // 거리 및 시야각 체크
+    FVector ListenerLocation;
+    if (!GetListenerLocation(ListenerLocation))
+    {
+        return;
+    }
+
+    if (!IsInViewFrustum(OwnerSeeker->GetActorLocation()))
+    {
+        return;
+    }
+
+    // 배열 인덱스 체크 (0-based)
+    int32 ArrayIndex = ComboIndex - 1; // 1-based에서 0-based로 변환
+    if (!RTSAresSwordSwingSounds.IsValidIndex(ArrayIndex) || !RTSAresSwordSwingSounds[ArrayIndex])
+    {
+        return;
+    }
+
+    // RTS 모드에 따른 Distance Scaling 설정
+    SetDistanceScaling(true);
+    
+    AkPlayingID RTSSwordPlayingID = UAkGameplayStatics::PostEvent(RTSAresSwordSwingSounds[ArrayIndex], OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(RTSSwordPlayingID);
+}
+
+void UGS_SeekerAudioComponent::PlayRTSAresComboVoiceSound(int32 ComboIndex)
+{
+    if (!OwnerSeeker || !OwnerSeeker->IsAres())
+    {
+        return;
+    }
+
+    // RTS 모드에서만 재생
+    if (!IsRTSMode())
+    {
+        return;
+    }
+
+    // 거리 및 시야각 체크
+    FVector ListenerLocation;
+    if (!GetListenerLocation(ListenerLocation))
+    {
+        return;
+    }
+
+    if (!IsInViewFrustum(OwnerSeeker->GetActorLocation()))
+    {
+        return;
+    }
+
+    // 배열 인덱스 체크 (0-based)
+    int32 ArrayIndex = ComboIndex - 1; // 1-based에서 0-based로 변환
+    if (!RTSAresComboVoiceSounds.IsValidIndex(ArrayIndex) || !RTSAresComboVoiceSounds[ArrayIndex])
+    {
+        return;
+    }
+
+    // RTS 모드에 따른 Distance Scaling 설정
+    SetDistanceScaling(true);
+    
+    AkPlayingID RTSVoicePlayingID = UAkGameplayStatics::PostEvent(RTSAresComboVoiceSounds[ArrayIndex], OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(RTSVoicePlayingID);
+}
+
+void UGS_SeekerAudioComponent::PlayRTSAresComboExtraSound(int32 ComboIndex)
+{
+    if (!OwnerSeeker || !OwnerSeeker->IsAres())
+    {
+        return;
+    }
+
+    // RTS 모드에서만 재생
+    if (!IsRTSMode())
+    {
+        return;
+    }
+
+    // 거리 및 시야각 체크
+    FVector ListenerLocation;
+    if (!GetListenerLocation(ListenerLocation))
+    {
+        return;
+    }
+
+    if (!IsInViewFrustum(OwnerSeeker->GetActorLocation()))
+    {
+        return;
+    }
+
+    // 배열 인덱스 체크 (0-based)
+    int32 ArrayIndex = ComboIndex - 1; // 1-based에서 0-based로 변환
+    if (!RTSAresComboExtraSounds.IsValidIndex(ArrayIndex) || !RTSAresComboExtraSounds[ArrayIndex])
+    {
+        return;
+    }
+
+    // RTS 모드에 따른 Distance Scaling 설정
+    SetDistanceScaling(true);
+    
+    AkPlayingID RTSExtraPlayingID = UAkGameplayStatics::PostEvent(RTSAresComboExtraSounds[ArrayIndex], OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(RTSExtraPlayingID);
+}
+
+// ===================
+// RTS 콤보 사운드 통합 함수들 구현
+// ===================
+
+
+
+void UGS_SeekerAudioComponent::PlayRTSAresComboAttackSound(int32 ComboIndex)
+{
+    // 아레스만 아레스 RTS 콤보 공격 사운드 재생 가능
+    if (CharacterType != ECharacterType::Ares)
     {
         return;
     }
     
-    // 캐릭터 타입별 사운드 에셋 검증
-    switch(CharacterType)
+    if (!OwnerSeeker || !OwnerSeeker->IsAres())
     {
-        case ECharacterType::Merci:
-        {
-            // 메르시 전용 사운드 검증
-            int32 MissingCount = 0;
-            if (!BowDrawSound) { UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Missing BowDrawSound for Merci")); MissingCount++; }
-            if (!ArrowShotSound) { UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Missing ArrowShotSound for Merci")); MissingCount++; }
-            if (!HitFeedbackSound) { UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Missing HitFeedbackSound for Merci")); MissingCount++; }
-            
-            if (MissingCount > 0)
-            {
-                UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] %d Merci-specific sounds are missing. Please assign them in the editor."), MissingCount);
-            }
-            else
-            {
-                UE_LOG(LogTemp, Log, TEXT("[SeekerAudio] All essential Merci sounds are configured"));
-            }
-            break;
-        }
-        
-        case ECharacterType::Chan:
-        {
-            // 찬 전용 사운드 검증
-            int32 MissingCount = 0;
-            if (!ShieldSlamStartSound) { UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Missing ShieldSlamStartSound for Chan")); MissingCount++; }
-            if (!ChanAxeSwingSound) { UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Missing ChanAxeSwingSound for Chan")); MissingCount++; }
-            
-            if (MissingCount > 0)
-            {
-                UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] %d Chan-specific sounds are missing. Please assign them in the editor."), MissingCount);
-            }
-            else
-            {
-                UE_LOG(LogTemp, Log, TEXT("[SeekerAudio] All essential Chan sounds are configured"));
-            }
-            break;
-        }
-        
-        case ECharacterType::Ares:
-        {
-            // 아레스 전용 사운드 검증
-            int32 MissingCount = 0;
-            if (AresComboSwingSounds.Num() == 0) { UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Missing AresComboSwingSounds array for Ares")); MissingCount++; }
-            if (AresComboVoiceSounds.Num() == 0) { UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Missing AresComboVoiceSounds array for Ares")); MissingCount++; }
-            
-            if (MissingCount > 0)
-            {
-                UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] %d Ares-specific sounds are missing. Please assign them in the editor."), MissingCount);
-            }
-            else
-            {
-                UE_LOG(LogTemp, Log, TEXT("[SeekerAudio] All essential Ares sounds are configured"));
-            }
-            break;
-        }
-        
-        default:
-            UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Unknown character type detected: %d"), (int32)CharacterType);
-            break;
+        return;
     }
+
+    // RTS 모드에서만 재생
+    if (!IsRTSMode())
+    {
+        return;
+    }
+
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+    
+    if (!OwnerSeeker || !GetWorld())
+    {
+        return;
+    }
+
+    // 아레스 전용 RTS 콤보 공격 사운드 재생
+    int32 ArrayIndex = ComboIndex - 1; // 1-based에서 0-based로 변환
+    
+    if (RTSAresSwordSwingSounds.IsValidIndex(ArrayIndex) && RTSAresSwordSwingSounds[ArrayIndex])
+    {
+        AkPlayingID SwingPlayingID = UAkGameplayStatics::PostEvent(RTSAresSwordSwingSounds[ArrayIndex], OwnerSeeker, 0, FOnAkPostEventCallback());
+        RegisterPlayingID(SwingPlayingID);
+    }
+
+    if (RTSAresComboVoiceSounds.IsValidIndex(ArrayIndex) && RTSAresComboVoiceSounds[ArrayIndex])
+    {
+        AkPlayingID VoicePlayingID = UAkGameplayStatics::PostEvent(RTSAresComboVoiceSounds[ArrayIndex], OwnerSeeker, 0, FOnAkPostEventCallback());
+        RegisterPlayingID(VoicePlayingID);
+    }
+}
+
+void UGS_SeekerAudioComponent::PlayRTSAresComboAttackSoundWithExtra(int32 ComboIndex)
+{
+    // 기본 RTS 콤보 공격 사운드 재생
+    PlayRTSAresComboAttackSound(ComboIndex);
+
+    // 추가 사운드 재생
+    int32 ArrayIndex = ComboIndex - 1; // 1-based에서 0-based로 변환
+    if (RTSAresComboExtraSounds.IsValidIndex(ArrayIndex) && RTSAresComboExtraSounds[ArrayIndex])
+    {
+        AkPlayingID ExtraPlayingID = UAkGameplayStatics::PostEvent(RTSAresComboExtraSounds[ArrayIndex], OwnerSeeker, 0, FOnAkPostEventCallback());
+        RegisterPlayingID(ExtraPlayingID);
+    }
+}
+
+// ===================
+// 찬 전용 RTS 공격 사운드 함수 구현
+// ===================
+
+void UGS_SeekerAudioComponent::PlayRTSChanAttackSound()
+{
+    if (!OwnerSeeker || !OwnerSeeker->IsChan() || !RTSChanAxeSwingSound)
+    {
+        return;
+    }
+
+    // RTS 모드에서만 재생
+    if (!IsRTSMode())
+    {
+        return;
+    }
+
+    // 거리 및 시야각 체크
+    FVector ListenerLocation;
+    if (!GetListenerLocation(ListenerLocation))
+    {
+        return;
+    }
+
+    if (!IsInViewFrustum(OwnerSeeker->GetActorLocation()))
+    {
+        return;
+    }
+
+    // RTS 모드에 따른 Distance Scaling 설정
+    SetDistanceScaling(true);
+    
+    // 도끼 휘두르기 사운드 재생
+    AkPlayingID AxePlayingID = UAkGameplayStatics::PostEvent(RTSChanAxeSwingSound, OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(AxePlayingID);
+
+    // 공격 음성 사운드 재생
+    if (RTSChanAttackVoiceSound)
+    {
+        AkPlayingID VoicePlayingID = UAkGameplayStatics::PostEvent(RTSChanAttackVoiceSound, OwnerSeeker, 0, FOnAkPostEventCallback());
+        RegisterPlayingID(VoicePlayingID);
+    }
+}
+
+void UGS_SeekerAudioComponent::PlayRTSChanShieldSlamSound()
+{
+    if (!OwnerSeeker || !OwnerSeeker->IsChan())
+    {
+        return;
+    }
+
+    // RTS 모드에서만 재생
+    if (!IsRTSMode())
+    {
+        return;
+    }
+
+    // 거리 및 시야각 체크
+    FVector ListenerLocation;
+    if (!GetListenerLocation(ListenerLocation))
+    {
+        return;
+    }
+
+    if (!IsInViewFrustum(OwnerSeeker->GetActorLocation()))
+    {
+        return;
+    }
+
+    // RTS 모드에 따른 Distance Scaling 설정
+    SetDistanceScaling(true);
+    
+    // 방패 슬램 시작 사운드 재생
+    if (RTSShieldSlamStartSound)
+    {
+        AkPlayingID StartPlayingID = UAkGameplayStatics::PostEvent(RTSShieldSlamStartSound, OwnerSeeker, 0, FOnAkPostEventCallback());
+        RegisterPlayingID(StartPlayingID);
+    }
+
+    // 방패 슬램 충돌 사운드 재생
+    if (RTSShieldSlamImpactSound)
+    {
+        AkPlayingID ImpactPlayingID = UAkGameplayStatics::PostEvent(RTSShieldSlamImpactSound, OwnerSeeker, 0, FOnAkPostEventCallback());
+        RegisterPlayingID(ImpactPlayingID);
+    }
+}
+
+void UGS_SeekerAudioComponent::PlayRTSMerciBowDrawSound()
+{
+    if (!OwnerSeeker || !OwnerSeeker->IsMerci() || !RTSMerciBowDrawSound)
+    {
+        return;
+    }
+
+    // RTS 모드에서만 재생
+    if (!IsRTSMode())
+    {
+        return;
+    }
+
+    // 거리 및 시야각 체크
+    FVector ListenerLocation;
+    if (!GetListenerLocation(ListenerLocation))
+    {
+        return;
+    }
+
+    if (!IsInViewFrustum(OwnerSeeker->GetActorLocation()))
+    {
+        return;
+    }
+
+    // RTS 모드에 따른 Distance Scaling 설정
+    SetDistanceScaling(true);
+    
+    AkPlayingID RTSBowPlayingID = UAkGameplayStatics::PostEvent(RTSMerciBowDrawSound, OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(RTSBowPlayingID);
+}
+
+void UGS_SeekerAudioComponent::PlayRTSMerciArrowShotSound()
+{
+    if (!OwnerSeeker || !OwnerSeeker->IsMerci() || !RTSMerciArrowShotSound)
+    {
+        return;
+    }
+
+    // RTS 모드에서만 재생
+    if (!IsRTSMode())
+    {
+        return;
+    }
+
+    // 거리 및 시야각 체크
+    FVector ListenerLocation;
+    if (!GetListenerLocation(ListenerLocation))
+    {
+        return;
+    }
+
+    if (!IsInViewFrustum(OwnerSeeker->GetActorLocation()))
+    {
+        return;
+    }
+
+    // RTS 모드에 따른 Distance Scaling 설정
+    SetDistanceScaling(true);
+    
+    AkPlayingID RTSArrowPlayingID = UAkGameplayStatics::PostEvent(RTSMerciArrowShotSound, OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(RTSArrowPlayingID);
+}
+
+// ===================
+// 공통 헬퍼 함수들 구현
+// ===================
+
+bool UGS_SeekerAudioComponent::ShouldPlaySoundAtLocation(const FVector& SourceLocation, bool bSkipViewFrustumCheck) const
+{
+    // 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+    {
+        return false;
+    }
+    
+    if (!OwnerSeeker || !GetWorld())
+    {
+        return false;
+    }
+
+    FVector ListenerLocation;
+    if (!GetListenerLocation(ListenerLocation))
+    {
+        return false;
+    }
+
+    // RTS 모드와 TPS 모드에 따른 거리 체크
+    const bool bRTS = IsRTSMode();
+    const float MaxDistance = GetMaxDistanceForMode(bRTS);
+    
+    const float DistanceToListener = FVector::Dist(SourceLocation, ListenerLocation);
+    
+    // 모드별 체크 로직
+    if (bRTS)
+    {
+        // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
+        if (!bSkipViewFrustumCheck && !IsInViewFrustum(SourceLocation))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        // TPS 모드: 기존 거리 기반 체크
+        if (DistanceToListener > MaxDistance)
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+int32 UGS_SeekerAudioComponent::ValidateAndConvertComboIndex(int32 ComboIndex, int32 ArraySize) const
+{
+    // 1-based에서 0-based로 변환
+    int32 ArrayIndex = ComboIndex - ComboIndexOffset;
+    
+    // 유효성 검사
+    if (ArrayIndex < 0 || ArrayIndex >= ArraySize)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Invalid combo index: %d (Array size: %d)"), ComboIndex, ArraySize);
+        return INDEX_NONE;
+    }
+    
+    return ArrayIndex;
+}
+
+UAkAudioEvent* UGS_SeekerAudioComponent::SelectSoundEventByMode(UAkAudioEvent* TPSSound, UAkAudioEvent* RTSSound, bool bUseRTSMode) const
+{
+    const bool bRTS = bUseRTSMode || IsRTSMode();
+    
+    if (bRTS)
+    {
+        // RTS 사운드가 있으면 사용, 없으면 TPS 사운드로 폴백
+        return RTSSound ? RTSSound : TPSSound;
+    }
+    
+    return TPSSound;
 }

@@ -3,6 +3,7 @@
 
 #include "Character/Skill/Seeker/Merci/GS_MerciRollingSkill.h"
 #include "Character/Player/Seeker/GS_Merci.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UGS_MerciRollingSkill::UGS_MerciRollingSkill()
 {
@@ -20,7 +21,10 @@ void UGS_MerciRollingSkill::ActiveSkill()
 		if (MerciCharacter->HasAuthority())
 		{
 			// 스킬 시작 사운드 재생
-			PlaySkillStartSound();
+			if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
+			{
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			}
 
 			MerciCharacter->SetDrawState(false);
 			MerciCharacter->SetAimState(false);
@@ -54,6 +58,12 @@ void UGS_MerciRollingSkill::OnSkillAnimationEnd()
 			MerciCharacter->SetSkillInputControl(true, true, true);
 			MerciCharacter->SetMoveControlValue(true, true);
 			MerciCharacter->CanChangeSeekerGait = true;
+
+			// SeekerAudioComponent를 통한 스킬 종료 사운드
+			if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
+			{
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+			}
 
 			SetIsActive(false);
 		}
