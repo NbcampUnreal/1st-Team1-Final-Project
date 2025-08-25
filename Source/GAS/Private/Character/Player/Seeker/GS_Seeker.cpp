@@ -31,7 +31,7 @@
 #include "AkComponent.h"
 #include "AkAudioDevice.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
-#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -56,9 +56,9 @@ AGS_Seeker::AGS_Seeker()
 	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
 
 	// =======================
-	// 캐릭터 오디오 컴포넌트 생성
+	// 시커 오디오 컴포넌트 생성 (RTS/TPS 지원)
 	// =======================
-	CharacterAudioComponent = CreateDefaultSubobject<UGS_CharacterAudioComponent>("CharacterAudioComponent");
+	SeekerAudioComponent = CreateDefaultSubobject<UGS_SeekerAudioComponent>("SeekerAudioComponent");
 
 	// Fire Effect 생성 및 설정
 	FeetLavaVFX_L = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_L"));
@@ -189,6 +189,20 @@ void AGS_Seeker::SetAimState(bool IsAim)
 {
 	FSeekerState NewState = SeekerState;
 	NewState.IsAim = IsAim;
+	
+	// 시커 오디오 컴포넌트에 조준 상태 변경 알림
+	if (SeekerAudioComponent)
+	{
+		if (IsAim)
+		{
+			SeekerAudioComponent->SetSeekerAudioState(ESeekerAudioState::Aiming);
+		}
+		else if (SeekerAudioComponent->GetCurrentAudioState() == ESeekerAudioState::Aiming)
+		{
+			// 조준을 해제했을 때 다른 상태로 전환
+			SeekerAudioComponent->SetSeekerAudioState(ESeekerAudioState::Idle);
+		}
+	}
 	SeekerState = NewState;
 }
 
@@ -703,22 +717,22 @@ void AGS_Seeker::UpdateCombatMusicState()
 
 void AGS_Seeker::OnDeath()
 {
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::OnDeath() called for %s"), *GetName());
+	// 시커 죽음 사운드 재생
+	if (SeekerAudioComponent)
+	{
+		SeekerAudioComponent->PlayDeathSound();
+	}
+	
 	Super::OnDeath();
 	
-	// 확실하게 BGM 끄기 (백업용)
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::OnDeath() - Stopping combat music"));
 	ClientRPCStopCombatMusic();
 	NearbyMonsters.Empty();
 }
 
 void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() called for %s"), *GetName());
-	
 	if (!IsLocallyControlled()) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Not locally controlled"));
 		return;
 	}
 
@@ -726,13 +740,11 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 	AGS_PlayerState* MyPlayerState = GetPlayerState<AGS_PlayerState>();
 	if (ChangedPlayerState != MyPlayerState) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Not my PlayerState"));
 		return;
 	}
 
 	if (!bIsNowAlive) // 자신이 죽었을 때
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Player died, stopping combat music"));
 		ClientRPCStopCombatMusic();
 		NearbyMonsters.Empty();
 	}
@@ -759,48 +771,28 @@ void AGS_Seeker::Multicast_PlaySound_Implementation(UAkAudioEvent* SoundToPlay)
 
 	if (!SoundToPlay)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::Multicast_PlaySound - SoundEvent is null"));
 		return;
 	}
 
 	if (!FAkAudioDevice::Get())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::Multicast_PlaySound - Wwise AudioDevice is not initialized"));
 		return;
 	}
 
-	UAkComponent* AkComp = GetOrCreateAkComponent();
-	if (!AkComp)
+	UAkComponent* AkComp = nullptr;
+	if (SeekerAudioComponent)
 	{
-		UE_LOG(LogTemp, Error, TEXT("AGS_Seeker::Multicast_PlaySound - Failed to get or create AkComponent"));
+		AkComp = SeekerAudioComponent->GetOrCreateAkComponent();
+	}
+	
+	if (!AkComp)
+	{			
 		return;
 	}
 
 	// 실제 사운드 재생
 	AkComp->PostAkEvent(SoundToPlay);
 }
-
-UAkComponent* AGS_Seeker::GetOrCreateAkComponent()
-{
-	UAkComponent* AkComp = FindComponentByClass<UAkComponent>();
-	if (!AkComp)
-	{
-		// AkComponent가 없으면 새로 생성
-		AkComp = NewObject<UAkComponent>(this, TEXT("RuntimeAkAudioComponent"));
-		if (AkComp)
-		{
-			AkComp->SetupAttachment(GetRootComponent());
-			AkComp->RegisterComponent();
-			UE_LOG(LogTemp, Log, TEXT("AGS_Seeker::GetOrCreateAkComponent - Created new AkComponent"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("AGS_Seeker::GetOrCreateAkComponent - Failed to create AkComponent"));
-		}
-	}
-	return AkComp;
-}
-
 
 void AGS_Seeker::OnHoverBegin()
 {

@@ -17,7 +17,6 @@ class UGS_HPText;
 class UGS_HPWidget;
 class AGS_Weapon;
 class UDecalComponent;
-class UAkAudioEvent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeath);
 
@@ -65,9 +64,8 @@ public:
 	UPROPERTY(EditAnywhere, Category="Team")
 	FGenericTeamId TeamId;
 
-	// 죽음 사운드
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
-	UAkAudioEvent* DeathSoundEvent;
+	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
+	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
 
 	//variable
 	float MaxSpeed;

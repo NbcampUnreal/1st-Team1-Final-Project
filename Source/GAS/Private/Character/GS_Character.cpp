@@ -216,11 +216,8 @@ void AGS_Character::OnDeath()
 
 	OnDeathDelegate.Broadcast();
 
-	// 죽음 사운드 재생
-	if (DeathSoundEvent)
-	{
-		UAkGameplayStatics::PostEvent(DeathSoundEvent, this, 0, FOnAkPostEventCallback());
-	}
+	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
+	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
 
 	DestroyAllWeapons();
 	MulticastRPCCharacterDeath();

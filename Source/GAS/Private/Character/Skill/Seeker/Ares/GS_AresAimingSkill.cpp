@@ -7,7 +7,7 @@
 #include "Weapon/Projectile/Seeker/GS_SwordAuraProjectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/GS_TpsController.h"
-#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UGS_AresAimingSkill::UGS_AresAimingSkill()
 {
@@ -24,7 +24,7 @@ void UGS_AresAimingSkill::ActiveSkill()
 	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
 		// 스킬 시작 사운드 재생
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
 		{
 			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
@@ -62,6 +62,15 @@ void UGS_AresAimingSkill::DeactiveSkill()
 	/*AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
 	// 입력 제한 설정
 	AresCharacter->SetLookControlValue(true, true);*/
+
+	// SeekerAudioComponent를 통한 스킬 종료 사운드
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
+	}
 
 	Super::DeactiveSkill();
 }

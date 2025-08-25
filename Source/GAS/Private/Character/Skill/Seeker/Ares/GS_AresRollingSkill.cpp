@@ -5,7 +5,7 @@
 
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Ares.h"
-#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UGS_AresRollingSkill::UGS_AresRollingSkill()
 {
@@ -23,7 +23,7 @@ void UGS_AresRollingSkill::ActiveSkill()
 		if (OwnerPlayer->HasAuthority())
 		{
 			// 스킬 시작 사운드 재생
-			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
 			{
 				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 			}
@@ -58,6 +58,12 @@ void UGS_AresRollingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->CanChangeSeekerGait = true;
+
+		// SeekerAudioComponent를 통한 스킬 종료 사운드
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
 
 		SetIsActive(false);
 	}

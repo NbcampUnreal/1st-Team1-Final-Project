@@ -6,8 +6,9 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_StatRow.h"
-#include "Sound/GS_CharacterAudioComponent.h"
- #include "Character/Player/Seeker/GS_Ares.h"
+#include "Sound/GS_SeekerAudioComponent.h"
+#include "Character/Player/Seeker/GS_Ares.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 
 UGS_AresUltimateSkill::UGS_AresUltimateSkill()
 {
@@ -25,13 +26,19 @@ void UGS_AresUltimateSkill::ActiveSkill()
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		// 스킬 시작 사운드 재생 (데이터 테이블 기반)
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		// 스킬 시작 사운드 재생
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
 		{
 			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-			
-			// 궁극기 가동 사운드 재생 (루프)
-			AudioComp->PlaySkillLoopSoundFromDataTable(CurrentSkillType);
+		}
+		
+		// 궁극기 루프 사운드 재생 (SeekerAudioComponent만 지원)
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+		{
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->PlaySkillLoopSoundFromDataTable(CurrentSkillType);
+			}
 		}
 
 		// 입력 제한 설정
@@ -113,11 +120,14 @@ void UGS_AresUltimateSkill::BecomeBerserker()
 
 void UGS_AresUltimateSkill::DeactiveSkill()
 {
-	// 궁극기 종료 사운드 재생
-	if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+	// 궁극기 루프 사운드 정지
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
-		AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
-		AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType); // 루프 사운드 중지
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
 	}
 
 	// 스탯 복원

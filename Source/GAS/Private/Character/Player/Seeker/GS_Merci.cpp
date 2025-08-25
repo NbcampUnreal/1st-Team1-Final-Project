@@ -2,7 +2,8 @@
 
 
 #include "Character/Player/Seeker/GS_Merci.h"
-#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
+#include "Character/Component/GS_StatComp.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -136,8 +137,6 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 
 	if (!GetDrawState())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GetDrawState=false pass: %s"), GetDrawState()?TEXT("true") : TEXT("false"));
-		UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage()"))
 		Multicast_PlayDrawMontage(DrawMontage);
 
 		// 활 상태 업데이트
@@ -145,12 +144,11 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		SetAimState(false);
 		Multicast_SetMustTurnInPlace(true);
 		
-		// 활 당기는 사운드 재생 (멀티캐스트로 변경)
-		Multicast_PlayBowPullSound();
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("bIsDrawState true"));
+		// 활 당기는 사운드 재생 (SeekerAudioComponent에서 처리)
+		if (SeekerAudioComponent)
+		{
+			SeekerAudioComponent->PlayBowDrawSound();
+		}
 	}
 
 	// 걷기 상태 설정
@@ -185,8 +183,11 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	// 조준 완료 시(활을 끝까지 당겼을 때)
 	if (GetAimState())
 	{
-		// 활 놓는 사운드 재생 (멀티캐스트로 변경)
-		Multicast_PlayBowReleaseSound();
+		// 활 놓는 사운드 재생 (SeekerAudioComponent에서 처리)
+		if (SeekerAudioComponent)
+		{
+			SeekerAudioComponent->PlayBowReleaseSound();
+		}
 
 		// 화살 발사
 		Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
@@ -258,10 +259,6 @@ void AGS_Merci::Multicast_StopDrawMontage_Implementation()
 
 void AGS_Merci::Multicast_PlayDrawMontage_Implementation(UAnimMontage* Montage)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage called on %s"), *GetName());
-	UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage called on %s, Montage: %s"),
-		*GetName(),
-		*GetNameSafe(Montage));
 	PlayDrawMontage(Montage);
 }
 
@@ -275,13 +272,11 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	// 현재 화살 수량 체크
 	if (CurrentArrowType == EArrowType::Axe && CurrentAxeArrows <= 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Axe Empty"));
 		Multicast_PlayArrowEmptySound(); // 빈 화살 사운드 재생
 		return;
 	}
 	if (CurrentArrowType == EArrowType::Child && CurrentChildArrows <= 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Child Empty"));
 		Multicast_PlayArrowEmptySound(); // 빈 화살 사운드 재생
 		return;
 	}
@@ -292,12 +287,10 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		if (CurrentArrowType == EArrowType::Axe)
 		{
 			--CurrentAxeArrows;
-			UE_LOG(LogTemp, Log, TEXT("Axe Shot: %d"), CurrentAxeArrows);
 		}
 		else if (CurrentArrowType == EArrowType::Child)
 		{
 			--CurrentChildArrows;
-			UE_LOG(LogTemp, Log, TEXT("Child Shot: %d"), CurrentChildArrows);
 		}
 	}
 
@@ -436,6 +429,12 @@ void AGS_Merci::Server_ChangeArrowType_Implementation(int32 Direction)
 
 	CurrentArrowType = static_cast<EArrowType>(CurrentIndex);
 
+	// 화살 타입 변경 사운드 재생
+	if (SeekerAudioComponent)
+	{
+		SeekerAudioComponent->PlayArrowTypeChangeSound();
+	}
+
 	UE_LOG(LogTemp, Log, TEXT("Arrow Changed to: %d"), CurrentIndex);
 }
 
@@ -497,7 +496,6 @@ void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
 
 	if (WidgetCrosshair)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("WidgetVisibility"));
 		WidgetCrosshair->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	}
 }
@@ -605,6 +603,26 @@ float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	}
 
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	// 데미지를 받은 후 적절한 사운드 재생
+	if (SeekerAudioComponent && ActualDamage > 0.0f)
+	{
+		// 죽었는지 확인 (체력이 0 이하인지)
+		float CurrentHealth = GetStatComp() ? GetStatComp()->GetCurrentHealth() : -1.0f;
+		
+		if (GetStatComp() && GetStatComp()->GetCurrentHealth() <= 0.0f)
+		{
+			// Death Sound는 OnDeath()에서 재생되므로 여기서는 재생하지 않음
+			UE_LOG(LogTemp, Warning, TEXT("AGS_Merci::TakeDamage - Character died, Death sound will be played in OnDeath()"));
+		}
+		else
+		{
+			// 살아있으면 Hurt Sound 재생
+			UE_LOG(LogTemp, Warning, TEXT("AGS_Merci::TakeDamage - Character hurt, calling PlayHurtSound()"));
+			SeekerAudioComponent->PlayHurtSound();
+		}
+	}
+	
 	return ActualDamage;
 }
 
@@ -643,12 +661,9 @@ void AGS_Merci::OnRep_CurrentArrowType()
 	}
 
 	// 화살 타입 변경 사운드 재생
-	if (ArrowTypeChangeSound && IsLocallyControlled())
+	if (IsLocallyControlled() && SeekerAudioComponent)
 	{
-		if (CharacterAudioComponent)
-		{
-			CharacterAudioComponent->PlaySound(ArrowTypeChangeSound, true);
-		}
+		SeekerAudioComponent->PlayArrowTypeChangeSound();
 	}
 }
 
@@ -694,7 +709,6 @@ void AGS_Merci::RegenAxeArrow()
 	if (CurrentAxeArrows < MaxAxeArrows)
 	{
 		++CurrentAxeArrows;
-		UE_LOG(LogTemp, Log, TEXT("Axe regen: %d"), CurrentAxeArrows);
 	}
 }
 
@@ -708,7 +722,6 @@ void AGS_Merci::RegenChildArrow()
 	if (CurrentChildArrows < MaxChildArrows)
 	{
 		++CurrentChildArrows;
-		UE_LOG(LogTemp, Log, TEXT("Child regen: %d"), CurrentChildArrows);
 	}
 }
 
@@ -765,41 +778,24 @@ void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRot
 
 void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 {
-	if (CharacterAudioComponent)
+	if (SeekerAudioComponent)
 	{
-		CharacterAudioComponent->PlaySound(ArrowShotSound);
+		SeekerAudioComponent->PlayArrowShotSound();
 	}
 }
 
 void AGS_Merci::Multicast_PlayArrowEmptySound_Implementation()
 {
-	if (CharacterAudioComponent)
+	if (SeekerAudioComponent)
 	{
-		CharacterAudioComponent->PlaySound(ArrowEmptySound, true); // 로컬 플레이어에게만 재생
+		SeekerAudioComponent->PlayArrowEmptySound();
 	}
 }
 
 void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
 {
-	if (CharacterAudioComponent)
+	if (SeekerAudioComponent)
 	{
-		CharacterAudioComponent->PlaySound(HitFeedbackSound, true); // 로컬 플레이어에게만 재생
+		SeekerAudioComponent->PlayHitFeedbackSound();
 	}
 }
-
-void AGS_Merci::Multicast_PlayBowPullSound_Implementation()
-{
-	if (CharacterAudioComponent)
-	{
-		CharacterAudioComponent->PlaySound(BowPullSound);
-	}
-}
-
-void AGS_Merci::Multicast_PlayBowReleaseSound_Implementation()
-{
-	if (CharacterAudioComponent)
-	{
-		CharacterAudioComponent->PlaySound(BowReleaseSound);
-	}
-}
-

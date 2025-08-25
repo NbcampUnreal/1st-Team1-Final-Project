@@ -4,7 +4,7 @@
 #include "Character/Skill/Seeker/Merci/GS_MerciAimingSkill.h"
 #include "Character/Player/Seeker/GS_Merci.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
-#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UGS_MerciAimingSkill::UGS_MerciAimingSkill()
 {
@@ -18,7 +18,7 @@ void UGS_MerciAimingSkill::ActiveSkill()
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
 		// 스킬 시작 사운드 재생
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
 		{
 			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
@@ -68,5 +68,14 @@ void UGS_MerciAimingSkill::InterruptSkill()
 
 void UGS_MerciAimingSkill::DeactiveSkill()
 {
+	// SeekerAudioComponent를 통한 스킬 종료 사운드
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
+	}
+
 	Super::DeactiveSkill();
 }

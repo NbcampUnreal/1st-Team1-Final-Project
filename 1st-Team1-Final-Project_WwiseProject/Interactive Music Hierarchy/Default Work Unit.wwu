@@ -43,7 +43,7 @@
 								</Property>
 								<Property Name="MakeUpGain" Type="Real64">
 									<ValueList>
-										<Value>-3</Value>
+										<Value>-5</Value>
 									</ValueList>
 								</Property>
 								<Property Name="Volume" Type="Real64">
@@ -139,17 +139,17 @@
 								<Property Name="EndPosition" Type="Real64" Value="101078.9569161"/>
 								<Property Name="Highpass" Type="int16">
 									<ValueList>
-										<Value>5</Value>
+										<Value>6</Value>
 									</ValueList>
 								</Property>
 								<Property Name="Lowpass" Type="int16">
 									<ValueList>
-										<Value>5</Value>
+										<Value>6</Value>
 									</ValueList>
 								</Property>
 								<Property Name="MakeUpGain" Type="Real64">
 									<ValueList>
-										<Value>-1</Value>
+										<Value>-2</Value>
 									</ValueList>
 								</Property>
 								<Property Name="OverrideEffect" Type="bool" Value="True"/>

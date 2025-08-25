@@ -2,12 +2,11 @@
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanRollingSkill.h"
-
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/GS_TpsController.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UGS_ChanRollingSkill::UGS_ChanRollingSkill()
 {
@@ -20,15 +19,10 @@ void UGS_ChanRollingSkill::ActiveSkill()
 	StartCoolDown();
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		// 스킬 시작 사운드 재생
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
 		{
-			// 구르기 시작 사운드 재생 // 구르기 사운드를 Server 에서 처리하는게 맞은가..? // SJE
-			const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-			if (SkillInfo && SkillInfo->SkillStartSound)
-			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-			}
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 		OwnerPlayer->CanChangeSeekerGait = false;
@@ -61,6 +55,12 @@ void UGS_ChanRollingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 		OwnerPlayer->CanChangeSeekerGait = true;
+
+		// SeekerAudioComponent를 통한 스킬 종료 사운드
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
 
 		SetIsActive(false);
 

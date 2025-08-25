@@ -2,7 +2,6 @@
 
 
 #include "Character/Skill/Seeker/Chan/GS_ChanAimingSkill.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
@@ -14,6 +13,8 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/GS_Player.h"
 #include "AkAudioEvent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
+
 
 UGS_ChanAimingSkill::UGS_ChanAimingSkill()
 {
@@ -42,7 +43,7 @@ void UGS_ChanAimingSkill::ActiveSkill()
 		OwnerPlayer->CanChangeSeekerGait = false;
 
 		// 스킬 시작 사운드 재생
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
 		{
 			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
@@ -137,10 +138,10 @@ void UGS_ChanAimingSkill::OnSkillCommand()
 		const FVector JumpVelocity = Forward * 600.0f + FVector(0.f, 0.f, 420.0f);
 		OwnerPlayer->LaunchCharacter(JumpVelocity, true, true);
 
-		// 방패 슬램 사운드 재생
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		// 방패 슬램 시작 사운드 재생
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->FindComponentByClass<UGS_SeekerAudioComponent>())
 		{
-			AudioComp->PlaySkillCollisionSoundFromDataTable(CurrentSkillType, 0); // 0 = Wall
+			AudioComp->PlayShieldSlamStartSound();
 		}
 
 		// =======================
@@ -203,6 +204,12 @@ void UGS_ChanAimingSkill::OnShieldSlam()
 	// 스킬 범위 표시(테스트)
 	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 	OwnerPlayer->Multicast_DrawSkillRange(SkillLocation, Radius, FColor::Red, 1.0f);
+
+	// 방패 슬램 충돌 사운드 재생
+	if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->FindComponentByClass<UGS_SeekerAudioComponent>())
+	{
+		AudioComp->PlayShieldSlamImpactSound();
+	}
 
 	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(HitResults, SkillLocation, SkillLocation, FQuat::Identity, ECC_Pawn, Shape, Params))
 	{

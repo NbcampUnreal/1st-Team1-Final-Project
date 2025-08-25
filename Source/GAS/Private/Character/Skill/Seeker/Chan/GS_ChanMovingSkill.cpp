@@ -3,7 +3,6 @@
 
 #include "Character/Skill/Seeker/Chan/GS_ChanMovingSkill.h"
 #include "Character/Player/Seeker/GS_Chan.h"
-#include "Sound/GS_CharacterAudioComponent.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
@@ -14,6 +13,7 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Component/GS_StatRow.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UGS_ChanMovingSkill::UGS_ChanMovingSkill()
 {
@@ -53,10 +53,13 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, 800.0f);
 		}
 			
-		// 스킬 시작 사운드 재생 - CharacterAudioComponent 사용
-		if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+		// 스킬 시작 사운드 재생
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			}
 		}
 
 		// 방어력 강화
@@ -132,6 +135,15 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 {
 	// 방어력 증가 디버프 해제
 	DeactiveDEFBuff();
+
+	// SeekerAudioComponent를 통한 스킬 종료 사운드
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
+	}
 
 	// 스킬 상태 업데이트
 	Super::DeactiveSkill();

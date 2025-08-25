@@ -2,8 +2,9 @@
 
 
 #include "Character/Player/Seeker/GS_Ares.h"
-#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
+#include "Character/Component/GS_StatComp.h"
 
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/GS_TpsController.h"
@@ -18,10 +19,7 @@ AGS_Ares::AGS_Ares()
 	CharacterType = ECharacterType::Ares;
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_AresSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 
-	// 콤보별 사운드 배열 기본 크기 설정 (4개 콤보)
-	ComboSwingSounds.SetNum(4);
-	ComboVoiceSounds.SetNum(4);
-	ComboExtraSounds.SetNum(4);
+	// 사운드 배열들은 GS_SeekerAudioComponent에서 관리됨
 }
 
 // Called when the game starts or when spawned
@@ -59,39 +57,40 @@ void AGS_Ares::MulticastPlayComboSection()
 {	
 	Super::MulticastPlayComboSection();
 
-	// 오디오 컴포넌트를 통해 콤보 공격 사운드 재생
-	if (CharacterAudioComponent)
+	// SeekerAudioComponent를 통해 아레스 전용 콤보 공격 사운드 재생
+	if (SeekerAudioComponent)
 	{
-		// 새로운 콤보별 사운드 시스템 사용 (추가 사운드 포함)
-		if (ComboSwingSounds.Num() > 0 || ComboVoiceSounds.Num() > 0 || ComboExtraSounds.Num() > 0)
-		{
-			CharacterAudioComponent->PlayComboAttackSoundByIndexWithExtra(CurrentComboIndex, ComboSwingSounds, ComboVoiceSounds, ComboExtraSounds, SwordSwingStopEvent, AttackSoundResetTime);
-		}
-		// 레거시 시스템으로 폴백 (기존 설정이 있는 경우)
-		else if (SwordSwingSound || AttackVoiceSound)
-		{
-			CharacterAudioComponent->PlayComboAttackSound(SwordSwingSound, AttackVoiceSound, SwordSwingStopEvent, AttackSoundResetTime);
-		}
+		// GS_SeekerAudioComponent의 AresComboXXX 프로퍼티들을 사용하여 사운드 재생
+		SeekerAudioComponent->PlayAresComboAttackSoundWithExtra(CurrentComboIndex);
 	}
 }
 
 void AGS_Ares::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
 {
-	if (!CharacterAudioComponent)
+	if (!SeekerAudioComponent)
 	{
 		return;
 	}
 
-	// 새로운 콤보별 추가 사운드 시스템 사용
-	int32 ArrayIndex = ComboIndex - 1; // 1-based에서 0-based로 변환
-	if (ComboExtraSounds.IsValidIndex(ArrayIndex) && ComboExtraSounds[ArrayIndex])
+	// GS_SeekerAudioComponent의 PlayAresComboAttackSoundWithExtra 함수에서 
+	// 추가 사운드가 자동으로 재생되므로 별도 처리 불필요
+	// 필요시 여기서 추가 로직 구현 가능
+}
+
+float AGS_Ares::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	// Call parent implementation
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	// Play hurt sound if we actually took damage and are still alive
+	if (ActualDamage > 0.0f && GetStatComp() && GetStatComp()->GetCurrentHealth() > 0.0f)
 	{
-		CharacterAudioComponent->PlayFinalAttackSound(ComboExtraSounds[ArrayIndex]);
+		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
+		{
+			SeekerAudio->PlayHurtSound();
+		}
 	}
-	// 레거시 시스템으로 폴백 (4번째 공격에 대해서만)
-	else if (ComboIndex == 4 && FinalAttackExtraSound)
-	{
-		CharacterAudioComponent->PlayFinalAttackSound(FinalAttackExtraSound);
-	}
+
+	return ActualDamage;
 }
 

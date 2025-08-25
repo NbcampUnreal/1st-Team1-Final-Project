@@ -35,31 +35,12 @@ public:
 	virtual void MulticastPlayComboSection() override;
 
 	// ===============
-	// 전용 공격 사운드 (레거시)
+	// 사운드 시스템 (GS_SeekerAudioComponent로 통합됨)
 	// ===============
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Legacy")
-	UAkAudioEvent* SwordSwingSound;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Legacy")
-	UAkAudioEvent* SwordSwingStopEvent;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Legacy")
-	UAkAudioEvent* FinalAttackExtraSound;  // 4번째 공격 추가 사운드
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Voice|Legacy")
-	UAkAudioEvent* AttackVoiceSound;
-
-	// ===============
-	// 콤보별 공격 사운드 (개선된 시스템)
-	// ===============
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Combo", meta = (ToolTip = "각 콤보별 검 휘두르기 사운드 (Attack1, Attack2, Attack3, Attack4)"))
-	TArray<UAkAudioEvent*> ComboSwingSounds;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Combo", meta = (ToolTip = "각 콤보별 공격 보이스 사운드 (Attack1, Attack2, Attack3, Attack4)"))
-	TArray<UAkAudioEvent*> ComboVoiceSounds;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack|Combo", meta = (ToolTip = "각 콤보별 추가 특별 사운드 (선택사항)"))
-	TArray<UAkAudioEvent*> ComboExtraSounds;
+	// 모든 사운드는 GS_SeekerAudioComponent에서 처리됨
+	// - 콤보 공격 사운드: PlayAresComboAttackSound() 함수 사용
+	// - 콤보 공격 사운드 (추가 사운드 포함): PlayAresComboAttackSoundWithExtra() 함수 사용
+	// - 사운드 배열들은 GS_SeekerAudioComponent의 AresComboXXX 프로퍼티들에서 설정
 
 	UPROPERTY(EditDefaultsOnly, Category = "VFX|Attack")
 	class UNiagaraSystem* FinalAttackHitVFX; // 4번째 공격 추가 VFX
@@ -73,6 +54,9 @@ public:
 	// ===============
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnAttackHit(int32 ComboIndex);
+
+	// Damage handling with audio feedback
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 	// Called when the game starts or when spawned

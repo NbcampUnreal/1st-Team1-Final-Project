@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{C8BD6451-5F50-EE80-4D7B-37D6A71B5A43}",
+    "Hash": "{8CB8C727-F903-6338-8448-0E919580256A}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -94,6 +94,18 @@
       "Name": "LowHPSound",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
       "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
+     },
+     {
+      "Id": "1111830101",
+      "Name": "Distance_Volume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\Distance_Volume",
+      "GUID": "{CE0DA21D-B039-4D70-A62B-0321CD32566D}"
+     },
+     {
+      "Id": "3474855001",
+      "Name": "Occlusion_Disable",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\Occlusion_Disable",
+      "GUID": "{E652B0AB-C01E-4AD5-BCCF-46F25A638601}"
      },
      {
       "Id": "3561306875",
@@ -254,6 +266,6 @@
     ]
    }
   ],
-  "FileHash": "{05637F53-6579-156A-1D27-FCFE34C3C8BF}"
+  "FileHash": "{5E7B5506-485E-7ED7-0DF1-F1410E66BCD9}"
  }
 }

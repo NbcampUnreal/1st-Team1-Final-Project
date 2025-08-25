@@ -106,4 +106,8 @@ protected:
 	
 	// 데이터 테이블에서 현재 스킬 정보 가져오기
 	const FSkillInfo* GetCurrentSkillInfo() const;
+
+	// 스킬 오디오 재생 헬퍼 함수들
+	void PlaySkillStartSound() const;
+	void PlaySkillEndSound() const;
 };

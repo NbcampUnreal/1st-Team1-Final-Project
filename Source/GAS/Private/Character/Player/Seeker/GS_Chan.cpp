@@ -3,7 +3,8 @@
 
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Component/Seeker/GS_ChanSkillInputHandlerComp.h"
-#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
+#include "Character/Component/GS_StatComp.h"
 #include "Weapon/Equipable/GS_WeaponAxe.h"
 #include "Weapon/Equipable/GS_WeaponShield.h"
 #include "Net/UnrealNetwork.h"
@@ -86,19 +87,21 @@ void AGS_Chan::MulticastPlayComboSection()
 {
 	Super::MulticastPlayComboSection();
 
-	// 오디오 컴포넌트를 통해 콤보 공격 사운드 재생
-	if (CharacterAudioComponent)
+	// 오디오 컴포넌트를 통해 찬 전용 콤보 공격 사운드 재생
+	if (SeekerAudioComponent)
 	{
-		CharacterAudioComponent->PlayComboAttackSound(AxeSwingSound, AttackVoiceSound, AxeSwingStopEvent, 1.0f);
+		// 현재 콤보 인덱스를 가져와서 적절한 사운드 재생
+		// TODO: 현재 콤보 인덱스를 추적하는 로직 필요
+		SeekerAudioComponent->PlayChanComboAttackSound(0); // 기본값 0, 실제로는 현재 콤보 인덱스 사용
 	}
 }
 
 void AGS_Chan::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
 {
 	// 4번째 공격일 때 특별한 사운드 재생
-	if (ComboIndex == 4 && CharacterAudioComponent)
+	if (ComboIndex == 4 && SeekerAudioComponent)
 	{
-		CharacterAudioComponent->PlayFinalAttackSound(FinalAttackExtraSound);
+		SeekerAudioComponent->PlayChanFinalAttackSound();
 	}
 }
 
@@ -157,4 +160,22 @@ void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float
 		false,
 		InLifetime
 	);*/
+}
+
+float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	// Call parent implementation
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	// Play hurt sound if we actually took damage and are still alive
+	if (ActualDamage > 0.0f && GetStatComp() && GetStatComp()->GetCurrentHealth() > 0.0f)
+	{
+		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
+		{
+			SeekerAudio->PlayHurtSound();
+		}
+
+	}
+
+	return ActualDamage;
 }

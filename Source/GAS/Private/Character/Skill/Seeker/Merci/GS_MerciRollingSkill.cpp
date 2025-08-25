@@ -5,7 +5,7 @@
 
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Merci.h"
-#include "Sound/GS_CharacterAudioComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 #include "Components/CapsuleComponent.h"
 
 UGS_MerciRollingSkill::UGS_MerciRollingSkill()
@@ -22,7 +22,7 @@ void UGS_MerciRollingSkill::ActiveSkill()
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
 			// 스킬 시작 사운드 재생
-			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
+			if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
 			{
 				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 			}
@@ -57,6 +57,12 @@ void UGS_MerciRollingSkill::OnSkillAnimationEnd()
 			MerciCharacter->Multicast_StopSkillMontage(SkillAnimMontages[0]);
 			MerciCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 			MerciCharacter->CanChangeSeekerGait = true;
+
+			// SeekerAudioComponent를 통한 스킬 종료 사운드
+			if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
+			{
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+			}
 
 			SetIsActive(false);
 

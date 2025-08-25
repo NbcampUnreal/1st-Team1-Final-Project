@@ -37,40 +37,41 @@ public:
 	void OffJumpAttackSkill();
 	void ToIdle();
 
+	// ===============
+	// 찬 전용 공격 시스템
+	// ===============
+	
+	// 찬 전용 공격 VFX
+	UPROPERTY(EditDefaultsOnly, Category = "Chan|VFX|Attack", meta = (DisplayName = "4번째 공격 타격 VFX"))
+	class UNiagaraSystem* FinalAttackHitVFX;
+
+	// ===============
+	// 찬 전용 스킬 시스템
+	// ===============
+	
+	// 찬 전용 방패 슬램 스킬 범위 표시
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DrawSkillRange(FVector InLocation, float InRadius, FColor InColor, float InLifetime);
 
-	// ===============
-	// 전용 공격 사운드
-	// ===============
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
-	UAkAudioEvent* AxeSwingSound;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
-	UAkAudioEvent* AxeSwingStopEvent;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Attack")
-	UAkAudioEvent* FinalAttackExtraSound;  // 4번째 공격 추가 사운드
-
-	UPROPERTY(EditDefaultsOnly, Category = "VFX|Attack")
-	class UNiagaraSystem* FinalAttackHitVFX; // 4번째 공격 추가 VFX
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Voice")
-	UAkAudioEvent* AttackVoiceSound;
-
-	// ===============
-	// 스킬 사운드
-	// ===============
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Skill")
-	UAkAudioEvent* AimingSkillSlamSound;
-
-	// ===============
-	// 타격 처리 관련
-	// ===============
+	// 찬 전용 콤보 공격 타격 처리
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnAttackHit(int32 ComboIndex);
 
-	// [Widget]
+	// 찬 전용 궁극기 충돌 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Chan|UltimateSkill", meta = (DisplayName = "궁극기 충돌 컴포넌트"))
+	UCapsuleComponent* UltimateCollision;
+
+	// 찬 전용 궁극기 오버랩 처리 Knockback Collision (KCY)
+	UFUNCTION()
+	void OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
+
+	// ===============
+	// 찬 전용 UI 시스템
+	// ===============
+	
+	// 찬 전용 방패 들기 스킬 UI 위젯
 	void SetChanAimingSkillBarWidget(UGS_ChanAimingSkillBar* Widget) { ChanAimingSkillBarWidget = Widget; }
 
 	UFUNCTION(Client, Reliable)
@@ -81,14 +82,9 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
-	// Knockback Collision (KCY)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UltimateSkill")
-	UCapsuleComponent* UltimateCollision;
+	// Damage handling with audio feedback
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	UFUNCTION()
-	void OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-		bool bFromSweep, const FHitResult& SweepResult);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
