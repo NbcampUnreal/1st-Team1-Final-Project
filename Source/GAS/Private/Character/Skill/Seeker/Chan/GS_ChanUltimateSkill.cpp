@@ -231,8 +231,7 @@ void UGS_ChanUltimateSkill::StartCharge()
 	if (OwnerPlayer)
 	{
 		// 애니메이션 설정
-		OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-		OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 
 		// 스킬 애니메이션 재생
 		if (SkillAnimMontages[0])

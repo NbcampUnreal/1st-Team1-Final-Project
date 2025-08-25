@@ -75,7 +75,7 @@ void UGS_ChanRollingSkill::InterruptSkill()
 	{
 		if (AresCharacter->GetSkillComp())
 		{
-			AresCharacter->Multicast_SetIsFullBodySlot(false);
+			AresCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 			AresCharacter->SetMoveControlValue(true, true);
 			SetIsActive(false);
 		}

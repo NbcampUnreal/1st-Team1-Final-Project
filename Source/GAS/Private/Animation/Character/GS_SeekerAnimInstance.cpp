@@ -209,16 +209,19 @@ void UGS_SeekerAnimInstance::SetCurMontageSlot(ESeekerMontageSlot InputMontageSl
 	CurMontageSlot = BitFlag;
 }
 
-bool UGS_SeekerAnimInstance::IsMonstageSlotActive(ESeekerMontageSlot InputMontageSlot)
+bool UGS_SeekerAnimInstance::IsMontageSlotActive(ESeekerMontageSlot InputMontageSlot)
 {
 	uint8 BitFlag = 0;
 	BitFlag |= (1 << static_cast<int32>(InputMontageSlot));
 	return CurMontageSlot & BitFlag;
 }
 
+
 void UGS_SeekerAnimInstance::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UGS_SeekerAnimInstance, IsPlayingUpperBodyMontage);
-	DOREPLIFETIME(UGS_SeekerAnimInstance, IsPlayingFullBodyMontage);
+	DOREPLIFETIME(UGS_SeekerAnimInstance, CurMontageSlot);
+	/*DOREPLIFETIME(UGS_SeekerAnimInstance, IsPlayingUpperBodyMontage);
+	DOREPLIFETIME(UGS_SeekerAnimInstance, IsPlayingFullBodyMontage);*/
 }
+

@@ -509,7 +509,7 @@ void AGS_Seeker::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 	}
 }
 
-void AGS_Seeker::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
+/*void AGS_Seeker::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
 {
 	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
 	{
@@ -520,9 +520,9 @@ void AGS_Seeker::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
 	{
 		AnimInstance->IsPlayingFullBodyMontage = bFullBodySlot;
 	}
-}
+}*/
 
-void AGS_Seeker::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
+/*void AGS_Seeker::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
 {
 	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
 	{
@@ -533,7 +533,7 @@ void AGS_Seeker::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot
 	{
 		AnimInstance->IsPlayingUpperBodyMontage = bUpperBodySlot;
 	}
-}
+}*/
 
 void AGS_Seeker::OnRep_IsLowHealthEffectActive()
 {
@@ -740,14 +740,13 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 
 void AGS_Seeker::Server_RestKey_Implementation()
 {
-	SetSkillInputControl(true, true, true, true);
 	SetAimState(false);
 	SetDrawState(false);
 	CanAcceptComboInput = true;
 	CanChangeSeekerGait = true;
-	Multicast_SetIsFullBodySlot(true);
-	Multicast_SetIsUpperBodySlot(false);
+	Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 	SetMoveControlValue(true, true);
+	SetLookControlValue(true, true);
 }
 
 void AGS_Seeker::Multicast_PlaySound_Implementation(UAkAudioEvent* SoundToPlay)

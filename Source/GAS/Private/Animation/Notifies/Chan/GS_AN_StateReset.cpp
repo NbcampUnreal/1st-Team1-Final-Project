@@ -23,6 +23,8 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 			Character->SetMoveControlValue(true, true);
 			Character->SetLookControlValue(true, true);
 
+			Character->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+
 			Character->GetSkillComp()->ResetAllowedSkillsMask();
 			
 			Character->SetAimState(false);

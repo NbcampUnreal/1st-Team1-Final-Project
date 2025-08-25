@@ -36,11 +36,11 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	
 	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
 	
-	if (!(Ares->GetSkillInputControl().CanInputLC))
+	/*if (!(Ares->GetSkillInputControl().CanInputLC))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Left Click Lock"));
 		return;
-	}
+	}*/
 	
 	if (OwnerCharacter->IsDead())
 	{
@@ -86,7 +86,12 @@ void UGS_AresSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstanc
 		return;
 	}
 	
-	if (bWasCtrlHeldWhenLeftClicked && OwnerCharacter->GetSkillInputControl().CanInputCtrl)
+	/*if (bWasCtrlHeldWhenLeftClicked && OwnerCharacter->GetSkillInputControl().CanInputCtrl)
+	{
+		OwnerCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Moving);
+	}*/
+
+	if (bWasCtrlHeldWhenLeftClicked)
 	{
 		OwnerCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Moving);
 	}
@@ -95,11 +100,6 @@ void UGS_AresSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstanc
 void UGS_AresSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instance)
 {
 	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
-	if (!Ares->GetSkillInputControl().CanInputRoll)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Roll Lock"));
-		return;
-	}
 	
 	if (Ares->IsDead())
 	{
