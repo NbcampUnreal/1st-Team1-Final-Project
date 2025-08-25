@@ -11,6 +11,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
 #include "GameFramework/DamageType.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -80,25 +81,31 @@ void AGS_SeekerMerciArrowNormal::ProcessDamageLogic(ETargetType TargetType, cons
 	}
 
 	// 데미지 적용
-	if (DamageToApply > 0.f)
+	
+	// 데미지 대상이 AetherExtractor일 경우
+	if (TargetType == ETargetType::AetherExtractor)
 	{
-		// 데미지 대상이 AetherExtractor일 경우
-		if (TargetType == ETargetType::AetherExtractor)
+		if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(HitActor))
 		{
-			// 여기에 데미지 로직 추가!!!!!!!!!!!!!!!!!!!!!!!!!!
+			UE_LOG(LogTemp, Warning, TEXT("[AGS_MerciArrowNormal]OnHit is called"));
+			float Damage = OwnerCharacter->GetStatComp()->GetAttackPower();
+			AetherExtractor->TakeDamageBySeeker(Damage, OwnerCharacter);
+
 		}
-		else // Monster나 Guardian일 경우
-		{
-			UGameplayStatics::ApplyPointDamage(
-				HitActor,
-				DamageToApply,
-				GetActorForwardVector(),
-				SweepResult,
-				GetInstigatorController(),
-				this,
-				DamageTypeClass
-			);
-		}
+		// 여기에 데미지 로직 추가!!!!!!!!!!!!!!!!!!!!!!!!!!
+	}
+
+	else if (DamageToApply > 0.f)
+	{
+		UGameplayStatics::ApplyPointDamage(
+			HitActor,
+			DamageToApply,
+			GetActorForwardVector(),
+			SweepResult,
+			GetInstigatorController(),
+			this,
+			DamageTypeClass
+		);
 
 		// 데미지 적용 후 대상 기록 (중복 방지)
 		DamagedActors.Add(HitActor);
