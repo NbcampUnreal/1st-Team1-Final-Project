@@ -5,8 +5,52 @@
 			<ChildrenList>
 				<Attenuation Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" ShortID="683696575">
 					<PropertyList>
-						<Property Name="RadiusMax" Type="Real64" Value="900"/>
+						<Property Name="ConeUse" Type="bool">
+							<ValueList>
+								<Value>True</Value>
+							</ValueList>
+						</Property>
+						<Property Name="RadiusMax" Type="Real64" Value="1000"/>
 					</PropertyList>
+					<ObjectLists>
+						<ObjectList Name="RTPC">
+							<Reference>
+								<Local>
+									<RTPC Name="" ID="{77173B94-0E3A-43E1-B47E-858B195DB6D5}" ShortID="1050942234">
+										<PropertyList>
+											<Property Name="PropertyName" Type="string" Value="ConeAttenuation"/>
+										</PropertyList>
+										<ReferenceList>
+											<Reference Name="ControlInput">
+												<ObjectRef Name="Distance_Volume" ID="{CE0DA21D-B039-4D70-A62B-0321CD32566D}" WorkUnitID="{FDFB093B-59E2-4879-BF96-CF460645B40F}"/>
+											</Reference>
+											<Reference Name="Curve">
+												<Custom>
+													<Curve Name="" ID="{68A1ACF7-1899-4677-9724-00770755A208}">
+														<PropertyList>
+															<Property Name="Flags" Type="int32" Value="3"/>
+														</PropertyList>
+														<PointList>
+															<Point>
+																<XPos>0</XPos>
+																<YPos>-200</YPos>
+																<Flags>5</Flags>
+															</Point>
+															<Point>
+																<XPos>100</XPos>
+																<YPos>0</YPos>
+																<Flags>37</Flags>
+															</Point>
+														</PointList>
+													</Curve>
+												</Custom>
+											</Reference>
+										</ReferenceList>
+									</RTPC>
+								</Local>
+							</Reference>
+						</ObjectList>
+					</ObjectLists>
 					<CurveUsageInfoList>
 						<VolumeDryUsage>
 							<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
@@ -22,18 +66,18 @@
 											<SegmentShape>Exp3</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>625.833405</XPos>
-											<YPos>-0.51944</YPos>
+											<XPos>850.638477777778</XPos>
+											<YPos>-0.7115</YPos>
 											<Flags>0</Flags>
 										</Point>
 										<Point>
-											<XPos>722.1924</XPos>
-											<YPos>-1.21581</YPos>
+											<XPos>950.3103</XPos>
+											<YPos>-1.38585</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>900</XPos>
+											<XPos>1000</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>
@@ -188,8 +232,52 @@
 				</Attenuation>
 				<Attenuation Name="RTS_Attenuation" ID="{BA588512-4963-42D7-AD9C-A02AD9F2F4F8}" ShortID="845504517">
 					<PropertyList>
-						<Property Name="RadiusMax" Type="Real64" Value="2800"/>
+						<Property Name="ConeUse" Type="bool">
+							<ValueList>
+								<Value>True</Value>
+							</ValueList>
+						</Property>
+						<Property Name="RadiusMax" Type="Real64" Value="3000"/>
 					</PropertyList>
+					<ObjectLists>
+						<ObjectList Name="RTPC">
+							<Reference>
+								<Local>
+									<RTPC Name="" ID="{B07C5787-C497-49E5-AA34-48482B8F6863}" ShortID="610321727">
+										<PropertyList>
+											<Property Name="PropertyName" Type="string" Value="ConeAttenuation"/>
+										</PropertyList>
+										<ReferenceList>
+											<Reference Name="ControlInput">
+												<ObjectRef Name="Distance_Volume" ID="{CE0DA21D-B039-4D70-A62B-0321CD32566D}" WorkUnitID="{FDFB093B-59E2-4879-BF96-CF460645B40F}"/>
+											</Reference>
+											<Reference Name="Curve">
+												<Custom>
+													<Curve Name="" ID="{6C92C31F-4285-487B-A10F-4F16CD8B89BD}">
+														<PropertyList>
+															<Property Name="Flags" Type="int32" Value="3"/>
+														</PropertyList>
+														<PointList>
+															<Point>
+																<XPos>0</XPos>
+																<YPos>-200</YPos>
+																<Flags>5</Flags>
+															</Point>
+															<Point>
+																<XPos>100</XPos>
+																<YPos>0</YPos>
+																<Flags>37</Flags>
+															</Point>
+														</PointList>
+													</Curve>
+												</Custom>
+											</Reference>
+										</ReferenceList>
+									</RTPC>
+								</Local>
+							</Reference>
+						</ObjectList>
+					</ObjectLists>
 					<CurveUsageInfoList>
 						<VolumeDryUsage>
 							<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
@@ -205,13 +293,13 @@
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>2184.50563333333</XPos>
-											<YPos>-0.68833</YPos>
+											<XPos>2750.89295555556</XPos>
+											<YPos>-0.97471</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>2800</XPos>
+											<XPos>3000</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>
@@ -238,7 +326,7 @@
 											<Flags>5</Flags>
 										</Point>
 										<Point>
-											<XPos>2800</XPos>
+											<XPos>3000</XPos>
 											<YPos>100</YPos>
 											<Flags>37</Flags>
 										</Point>

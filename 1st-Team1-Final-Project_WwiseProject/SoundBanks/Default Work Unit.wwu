@@ -7,14 +7,18 @@
 					<ObjectInclusionList>
 						<ObjectRef Name="EV_Mon_SmallClaw_RTS_Attack" ID="{DF5C7E57-1AA2-4023-BDC8-20BE9E6BA92E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_ChanAggroSkill" ID="{28E1990D-73B5-403C-BA53-4DBAE2B3E962}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_ChanAimingSkill_Slam_RTS" ID="{B1609F67-7380-404F-A220-F2A20D55116E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresDashSkill_Hit" ID="{E12A0AAA-CF00-4078-82C1-13250F174C22}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw_RTS_Death" ID="{6C1FD15B-4E6D-4090-B077-F6E5FDD69397}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw_RTS" ID="{23941479-25EC-40A0-81FC-A265BBDEF2B9}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_NeedleFang_RTS_Attack_Swing" ID="{94203898-87DC-40A3-A25A-4899ED27C5E9}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresUltimateLoop" ID="{FE979811-406E-40BA-AEC5-17C733A46C5A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_AresDashSkill_Ready_RTS" ID="{A5098704-E60F-40BE-BD51-24B0EB52370D}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Ares_Attack_01_RTS" ID="{0F3CB135-2CA9-40D6-85BD-E727084B2A96}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresDashSkill" ID="{64BDB245-970D-40DB-B96E-C35613704729}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_IronFang_RTS_Deaeh" ID="{BF257B0D-2386-40DF-8A12-81D8DC4D42D3}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Chan_Attack_Stop" ID="{FB36B935-9B69-40E0-8061-EB8614F2CA6A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="SFX_ChanHitWall_RTS" ID="{9AF09F5D-1255-40EA-AB22-B8B1F443A50B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Chan_Move" ID="{FA35E9E7-77DD-410B-83DE-BD9F2372CDE5}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Ares_Attack_01" ID="{04416426-2600-4113-9DCF-1F7794024FF1}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_NeedleFang_Attack_Swing" ID="{10F45424-3303-4113-84EA-E04BC6E536AF}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -22,6 +26,8 @@
 						<ObjectRef Name="Voice_Merci_Ultimate" ID="{5CB23B2A-6717-4157-A1D5-3AE30E879A21}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Spike" ID="{87EFA3D2-5892-417F-A875-D06CCD556912}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_BearTrap" ID="{DCFFA37D-831E-4187-999F-FD2DB425816C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_AresUltimateEnd_RTS" ID="{0CC9AD6D-CC0D-4187-AA9F-C78BD4D610DE}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Chan_FinalAttack_RTS" ID="{B0C7B0AE-8D1A-4190-BDE6-DFFC7256DAE7}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_ShadowFang_RTS" ID="{FB6892C7-53B4-41AA-9001-6655B1697F98}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_UI_Mon_NeedleFang" ID="{6A4A78D2-D983-41B4-998D-7B946B1C1C1A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_IronFang_RTS" ID="{9F56E300-4B73-41DA-82E0-47C233DEC99F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -31,12 +37,17 @@
 						<ObjectRef Name="EV_NeedleFang_Shot" ID="{D5FB5933-2F9E-4265-BBF0-828FF4BF9D19}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_UI_Mon_IronFang" ID="{AB0A7ABE-8A84-4275-86C6-9F0D6055EC06}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Merci_FogArrow" ID="{9BD57FF9-A12E-42CC-B094-B13239741389}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_AresDashSkill_Hit_RTS" ID="{F2FE15FB-F0D3-4303-9E69-57DE5E51BFF5}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_UI_Mon_IronFang_Attack" ID="{05C664A9-8858-4308-9826-1B444CCD290E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Merci_Hit_RTS" ID="{2C9F47AB-5F15-432C-A354-4D6D8A7DEDB1}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Ares_Attack_Final" ID="{F9E4E007-BB21-433B-B984-9BD2A6D80544}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw_Attack_Swing" ID="{9773521B-3E47-434B-A618-825EECCA9E38}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="BossFootSteps" ID="{69071155-5833-435C-A2EE-C31CC2FCA94B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_ChanUltimateSkill" ID="{40E52A35-A7E0-4366-B089-96E381CC811A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Saw_Hit" ID="{DFBB5823-D275-437F-99C5-623B934A4616}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_AresUltimateLoop_RTS" ID="{2C72BD5C-0887-438E-8BDF-BB214F5245AB}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Ares_Attack_04_RTS" ID="{585AB6AC-FB2E-4392-9C00-9A6C1C813FC8}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Ares_Hit_RTS" ID="{BF2BF6EF-E790-4393-BDDC-F7785800CE5F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_NeedleFang_Idle" ID="{0AAE6D9B-5BD0-43A1-8116-58B74D0EFF9E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Merci_Hit" ID="{5098E2B9-90BA-4412-987D-8FC0FAE125C3}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_GrenadeTick" ID="{032BB249-4018-4415-AE23-D5223963CE2B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
@@ -54,12 +65,16 @@
 						<ObjectRef Name="EV_ChanAimingSkill_Start" ID="{7C3AC2CE-3A77-4585-B3B8-C6EC25FF562B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_ShadowFang_Attack" ID="{6CACEDAF-1AE0-45AA-A59A-4E2EBD2F58A2}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_ChanAimingSkill_Slam" ID="{B5B5055B-9F50-45BF-8C07-B1DA58911028}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_ChanUltimateSkill_RTS" ID="{AD8C1856-C16F-45C1-989D-CDF5EB043762}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Ares_Attack_Final_RTS" ID="{4DD1D11D-7CB7-45CB-8D24-3F3A269B4055}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Bow_Draw" ID="{70E298F1-D671-45D2-BDB8-C18312B3AFC5}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_NeedleFang_Attack" ID="{3EFB6D5A-17E3-45E1-A754-47ED8C814230}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_NeedleFang_RTS" ID="{71EE4A1B-8D1C-4604-9422-C84015FB45B6}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Ares_FinalAttack" ID="{7D641009-3933-460E-B5D0-EE0F5B7D0CEA}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Chan_Die_RTS" ID="{B54A72D4-43C8-4625-B4E0-590261DAE2CE}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Merci_ArrowChange" ID="{E705CDED-3EB0-4631-B23E-66B019AFD271}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_MeleeAttack" ID="{711FAB82-E203-463E-846A-2577FBDF70FA}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Ares_Attack_RTS" ID="{49963E3C-FD02-4656-BB12-227B6339CD7F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Ares_Attack_04" ID="{CBCB0FEC-1611-466C-B646-871135F8D9DD}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_Flying_Play" ID="{C62A4302-E43E-469D-9D88-EE6CC3EFC83E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_GrenadeFuse" ID="{F132EACB-2D2B-46AD-A69A-7A9E5F8BA8C2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
@@ -89,6 +104,7 @@
 						<ObjectRef Name="EV_Chan_FinalAttack" ID="{FE229EF2-B036-48BD-BFB8-FD28A465AC48}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_ArrowImpact_Stone" ID="{5B4DA841-68C7-48EF-90AB-20E344778912}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AttackSwingSound" ID="{97596B2C-ABE8-48F4-9B0E-808FB5CC13E3}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Ares_Attack_Stop_RTS" ID="{CF02F759-7A1D-48F8-8276-C34813218E70}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Fire_Burn" ID="{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresUltimateEnd" ID="{7F3B4958-9FDC-491C-956A-B4F02A7846AB}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -100,13 +116,20 @@
 						<ObjectRef Name="EV_Mon_SmallClaw_Hurt" ID="{15D157B1-0553-49DF-81AD-D0D205606DA6}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw_Idle" ID="{CBF98796-A6A2-4A10-8163-018B83F0EB4C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Bow_Realse" ID="{77A06439-AF10-4A18-AA52-5B5A3A9E5468}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Merci_Die_RTS" ID="{5A88AC2D-A8BD-4A1D-9CCA-048A34E554D6}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Chan_Hit" ID="{0473682A-3932-4A2B-B275-C5D3FFFCEDCC}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Merci_Sick" ID="{7573A416-C37E-4A3F-8DDC-F3B908D97302}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_Flying_Stop" ID="{526C5CE2-A699-4A40-B2A1-F663563E7805}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Axe" ID="{597B061A-CE0A-4A56-8154-41280E86C596}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_AresUltimateStart_RTS" ID="{B487BE12-4971-4A69-9428-4597AE9BA7DC}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Ares_Die_RTS" ID="{3B104F7B-0B10-4ABE-BA0C-8A1ACAA83E6A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Chan_Attack_RTS" ID="{330A4E75-D8EC-4AC2-9DBD-DEB488ADE9C6}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_ShadowFang_RTS_Attack" ID="{8DE63A1C-56E7-4AE3-94DF-B4A5DEEE9DF4}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw_Attack" ID="{AE9C194D-5E96-4AEF-9752-5E1B836D4377}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_ArrowImpact_Body" ID="{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Bow_Realse_RTS" ID="{0440754D-2AB9-4B04-BF6B-A8740C810F18}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Chan_Attack_Stop_RTS" ID="{4FE1CBFB-E83A-4B30-8667-0FABAB0ED04E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Ares_Attack_03_RTS" ID="{0597AD71-80A1-4B49-829C-9F096FE6DDF0}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresDashSkill_Ready" ID="{7C331407-0104-4B4D-8344-CCAC7CD0DA05}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_IronFang_RTS_Attack" ID="{29499E58-ED05-4B4E-8BF4-0C16C5D663EC}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Ares_Die" ID="{F0FCA463-FA24-4B51-9AD4-B1F6F233E9FA}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -121,16 +144,23 @@
 						<ObjectRef Name="EV_Mon_IronFang_Hurt" ID="{F8949CCF-265D-4C1C-B33D-07313F2D4B89}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="UI_ButtonSFX_Select" ID="{440A0D46-796D-4C69-9C71-5EEB6C876D51}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_Portal" ID="{5A8B2DE9-4541-4C6A-83D3-08FE49DC1DC2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Chan_Attack_RTS" ID="{6C21320A-C9C2-4C73-BDAB-2F9BCA08C72E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_ChanAggroSkill_RTS" ID="{2BA088F9-56CF-4C7F-9802-B828301B5694}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AttackSwingSound_RTS" ID="{F1A00B00-0267-4C92-9B88-3C06D6765898}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_AresSlashSkill_RTS" ID="{0CBAA4D3-99C4-4CA1-BB98-6E16FC1A1056}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_DraconicFury" ID="{329C4613-CE8B-4CB3-9316-AD3F12A67659}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_ShadowFang_Idle" ID="{8EC51832-E441-4CC3-94F7-33551F4C039E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw_Death" ID="{F30A66B7-4A42-4CDB-AE3A-054594053AE9}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Arrow_Shot_RTS" ID="{6D51478D-34CA-4CE3-B0AF-CB5CABB826D3}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_StoneDooor_Open" ID="{A5598EC5-E8E1-4CE5-83AF-3F8909B45F09}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Chan_Attack" ID="{EBADCE3E-03AD-4CE6-8FD3-AA2B341B5AF0}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Ares_Sick" ID="{D7B07F59-9755-4CF3-86F4-D2EF768F8E2F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Ares_Attack_02" ID="{1E0C93ED-3671-4D14-AA2C-4874F9BA328B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Merci_ArrowZero" ID="{1A835349-0C17-4D22-AF35-BAFC0385C29C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Ares_FinalAttack_RTS" ID="{0DAE8DEF-FD08-4D24-8282-B7614F79841E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_ChanAimingSkill_Start_RTS" ID="{4936CE04-4A4E-4D27-AC37-959A419E7475}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_CrystalSpike_Warn" ID="{DD18B330-B074-4D2A-98BB-5D65C009673B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Chan_Hit_RTS" ID="{D392185D-4090-4D40-B217-BDB6E3FCAF6E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Merci_Die" ID="{169823F8-E7B9-4D5E-AE2E-003C93280F66}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_NeedleFang_Death" ID="{DFF756ED-92D9-4D60-845E-A4A73A393363}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_NeedleFang_Hurt" ID="{E593CAE0-ED33-4D92-AC10-AECCA9C0D50D}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -148,13 +178,18 @@
 						<ObjectRef Name="Props_MineExplode" ID="{59F8482E-4399-4E6E-B401-0432CFED7550}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Chan_Die" ID="{B5D9F3B7-56D1-4E7E-B266-A42C91017124}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_Arrow_By" ID="{3AF9A3F0-DE14-4EB3-AA03-2EBCC8FB07A2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_AresUltimateLoop_Stop_RTS" ID="{A2E5CB98-DAFE-4ECB-8DED-4BE838AD5C76}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_ChanHitWall" ID="{8151B500-BECD-4ED7-B5E7-B09771D5C0BC}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_MapBGM_Play" ID="{97CFC085-71D5-4ED9-898C-E53752C8E96F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="UI_ButtonSFX_Able" ID="{4B543912-C03A-4EEC-96E4-B06A2F9B579A}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_NeedleFang_RTS_Death" ID="{16CE49D6-33D6-4F11-8566-9462D0E9494C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_FlameTrap" ID="{E933E0D7-C994-4F16-A665-499CBF190223}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_AresDashSkill_RTS" ID="{ABEDFDD4-4132-4F26-B8AC-52B51C52CE49}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Merci_Ultimate_RTS" ID="{1C49C85C-2F73-4F57-B2FA-3E5EE2135A39}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Ares_Attack" ID="{DF6D56DF-DFD1-4F71-9A94-5517556CF4F3}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_ArrowHit_UI" ID="{19A9D1EE-8500-4FAB-BEB7-CB13F9A27600}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Ares_Attack_02_RTS" ID="{F5773B96-4138-4FEB-9116-B96446A09D9D}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Bow_Draw_RTS" ID="{3792FCE5-5E10-4FEF-BD6A-11C7D9F98CE0}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 					</ObjectInclusionList>
 					<ObjectExclusionList/>
 					<GameSyncExclusionList/>
