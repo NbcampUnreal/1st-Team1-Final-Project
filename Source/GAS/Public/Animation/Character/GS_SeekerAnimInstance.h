@@ -69,14 +69,14 @@ public:
 	void SetCurMontageSlot(ESeekerMontageSlot InputMontageSlot);
 
 	// Slot Change Control Value
-	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
+	/*UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingUpperBodyMontage = false;
 
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	bool IsPlayingFullBodyMontage = false;
 
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
-	bool IsPlayingLeftArmMontage = false;
+	bool IsPlayingLeftArmMontage = false;*/
 
 	UPROPERTY(Replicated, BlueprintReadWrite, Category = "Montage", meta = (BlueprintThreadSafe))
 	uint8 CurMontageSlot = 0;
@@ -109,5 +109,5 @@ protected:
 	float PreviousDesiredController;
 
 	UFUNCTION(BlueprintPure, Category = "Montage")
-	bool IsMonstageSlotActive(ESeekerMontageSlot InputMontageSlot);
+	bool IsMontageSlotActive(ESeekerMontageSlot InputMontageSlot);
 };

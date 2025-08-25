@@ -2,8 +2,11 @@
 
 
 #include "Character/Skill/Seeker/Merci/GS_MerciRollingSkill.h"
+
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Merci.h"
 #include "Sound/GS_CharacterAudioComponent.h"
+#include "Components/CapsuleComponent.h"
 
 UGS_MerciRollingSkill::UGS_MerciRollingSkill()
 {
@@ -18,8 +21,6 @@ void UGS_MerciRollingSkill::ActiveSkill()
 
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
-		if (MerciCharacter->HasAuthority())
-		{
 			// 스킬 시작 사운드 재생
 			if (UGS_CharacterAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_CharacterAudioComponent>())
 			{
@@ -28,9 +29,7 @@ void UGS_MerciRollingSkill::ActiveSkill()
 
 			MerciCharacter->SetDrawState(false);
 			MerciCharacter->SetAimState(false);
-			MerciCharacter->Multicast_SetIsFullBodySlot(true);
-			MerciCharacter->SetSkillInputControl(false, false, false);
-			MerciCharacter->SetMoveControlValue(false, false);
+			MerciCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 			MerciCharacter->CanChangeSeekerGait = false;
 
 			FName RollDirection = CalRollDirection();
@@ -42,7 +41,8 @@ void UGS_MerciRollingSkill::ActiveSkill()
 			{
 				MerciCharacter->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
 			}
-		}
+
+			MerciCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	}
 }
 
@@ -54,12 +54,13 @@ void UGS_MerciRollingSkill::OnSkillAnimationEnd()
 	{
 		if (MerciCharacter->HasAuthority())
 		{
-			MerciCharacter->Multicast_SetIsFullBodySlot(false);
-			MerciCharacter->SetSkillInputControl(true, true, true);
-			MerciCharacter->SetMoveControlValue(true, true);
+			MerciCharacter->Multicast_StopSkillMontage(SkillAnimMontages[0]);
+			MerciCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 			MerciCharacter->CanChangeSeekerGait = true;
 
 			SetIsActive(false);
+
+			MerciCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 		}
 	}
 }
@@ -70,7 +71,7 @@ void UGS_MerciRollingSkill::InterruptSkill()
 	AGS_Merci* AresCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (AresCharacter->GetSkillComp())
 	{
-		AresCharacter->Multicast_SetIsFullBodySlot(false);
+		AresCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 		AresCharacter->SetMoveControlValue(true, true);
 		SetIsActive(false);
 	}

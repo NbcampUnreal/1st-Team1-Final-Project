@@ -110,6 +110,15 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		return;
 	}
 
+	
+	// 가장 먼저 활 시위를 당길 수 있는 상황인지를 판단
+	if (!GetSkillComp()->IsSkillAllowed(ESkillSlot::Combo))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, IsSkillAllowed == false"));
+		return;
+	}
+	
+
 	// DrawBow 가 Client 외에 Server 에서 호출될 일이 있나? Client 에서 해당 함수가 호출되었다면 이미 쥐에서 Return 으로 막히는 거 아닌가?
 	if (!GetDrawState())
 	{
@@ -155,12 +164,15 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		Server_ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 		return;
 	}
+	
 
-	if (WidgetCrosshair)
+	if (GetSkillComp()->IsSkillActive(ESkillSlot::Rolling))
 	{
-		WidgetCrosshair->PlayAimAnim(false);
+		UE_LOG(LogTemp, Warning, TEXT("Is Rolling not Release"));
+		return;
 	}
 
+	
 	// 줌 중지
 	if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
 	{
@@ -179,16 +191,21 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		// 화살 발사
 		Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 		bIsFullyDrawn = false;  // 상태 초기화
-
-		GetSkillComp()->ResetAllowedSkillsMask(); // SJE
 	}
 
+	GetSkillComp()->ResetAllowedSkillsMask(); // SJE
+	
 	// 달리기 상태 설정
 	SetSeekerGait(EGait::Run);
 
 	// 활 상태 업데이트
 	SetAimState(false);
 	SetDrawState(false);
+
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->PlayAimAnim(false);
+	}
 }
 
 void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)
@@ -579,6 +596,9 @@ float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 		// 활 쏘기 조준 상태 해제
 		SetDrawState(false);
 		SetAimState(false);
+
+		// 키 제한
+		GetSkillComp()->SetCurAllowedSkillsMask(0);
 
 		// 달리기 상태 설정
 		SetSeekerGait(EGait::Run);

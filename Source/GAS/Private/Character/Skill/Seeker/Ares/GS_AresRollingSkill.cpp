@@ -19,12 +19,7 @@ void UGS_AresRollingSkill::ActiveSkill()
 	StartCoolDown();
 
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
-	{
-		/*if (!OwnerPlayer->GetSkillInputControl().CanInputRoll)
-		{
-			return;
-		}*/
-		
+	{		
 		if (OwnerPlayer->HasAuthority())
 		{
 			// 스킬 시작 사운드 재생
@@ -32,11 +27,8 @@ void UGS_AresRollingSkill::ActiveSkill()
 			{
 				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 			}
-
-			//OwnerPlayer->Multicast_SetIsFullBodySlot(true);
-			//OwnerPlayer->Multicast_SetIsUpperBodySlot(false);
+			
 			OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
-			//OwnerPlayer->SetSkillInputControl(false, false, false, false);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->CanChangeSeekerGait = false;
 			FName RollDirection = CalRollDirection();
@@ -64,7 +56,6 @@ void UGS_AresRollingSkill::OnSkillAnimationEnd()
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
-		//OwnerPlayer->SetSkillInputControl(true, true, true);
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->CanChangeSeekerGait = true;
 
@@ -78,9 +69,7 @@ void UGS_AresRollingSkill::InterruptSkill()
 	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
 	if (AresCharacter->GetSkillComp())
 	{
-		AresCharacter->Multicast_SetIsFullBodySlot(false);
-		AresCharacter->SetSkillInputControl(true, true, true);
-		AresCharacter->SetMoveControlValue(true, true);
+		AresCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 		AresCharacter->CanChangeSeekerGait = true;
 		SetIsActive(false);
 	}

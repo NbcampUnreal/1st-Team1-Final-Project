@@ -104,18 +104,21 @@ void AGS_Chan::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
 
 void AGS_Chan::OnJumpAttackSkill()
 {
-	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	/*if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->IsPlayingFullBodyMontage = true;
-	}
+	}*/
+	Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 }
 
 void AGS_Chan::OffJumpAttackSkill()
 {
-	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	/*if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
 		AnimInstance->IsPlayingFullBodyMontage = false;
-	}
+		
+	}*/
+	Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 	StopAnimMontage();
 }
 

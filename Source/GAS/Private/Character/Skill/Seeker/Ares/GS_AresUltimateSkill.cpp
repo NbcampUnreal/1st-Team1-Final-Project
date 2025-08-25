@@ -72,9 +72,7 @@ void UGS_AresUltimateSkill::OnSkillAnimationEnd()
 
 	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Seeker>(OwnerCharacter))
 	{
-		//OwnerPlayer->Multicast_SetIsFullBodySlot(false);
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
-		//OwnerPlayer->SetSkillInputControl(true, true, true);
 		OwnerPlayer->SetMoveControlValue(true, true);
 	}
 }
