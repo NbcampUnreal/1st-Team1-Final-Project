@@ -9,6 +9,7 @@
 #include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Sound/GS_CharacterAudioComponent.h"
@@ -79,11 +80,16 @@ void UGS_StatComp::InitStat(FName RowName)
 		AttackSpeed = FoundRow->ATS;
 
 		CurrentHealth = MaxHealth;
+		//UE_LOG(LogTemp, Warning, TEXT("StatComp InitStat 성공: RowName=%s, HP=%.1f, ATK=%.1f, DEF=%.1f, AGL=%.1f, ATS=%.1f"),
+		//	*RowName.ToString(), MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
 	}
 
 	//set move speed
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-	OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed *= Agility;
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed *= Agility;
+	}
 }
 
 void UGS_StatComp::ChangeStat(const FGS_StatRow& InChangeStat)
@@ -184,12 +190,18 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("death"));
 			CurrentHealth = 0.f;
-	
+
 			AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
 			if (IsValid(OwnerCharacter))
 			{
 				OwnerCharacter->OnDeath();
 			}
+			else if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(GetOwner()))
+			{
+				AetherExtractor->DestroyAetherExtractor();
+			}
+
+
 		}
 		else if (CurrentHealth <= KINDA_SMALL_NUMBER)
 		{

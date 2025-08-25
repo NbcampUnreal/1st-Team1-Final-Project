@@ -4,13 +4,32 @@
 AGS_AetherExtractor::AGS_AetherExtractor()
 {
 	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
 
+	RootSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComp"));
+	RootComponent = RootSceneComp;
+
+	HPTextWidgetComp = CreateDefaultSubobject<UGS_HPTextWidgetComp>("HPTextWidgetComp");
+	HPTextWidgetComp->SetupAttachment(RootComponent);
+	HPTextWidgetComp->SetWidgetSpace(EWidgetSpace::World);
+	HPTextWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HPTextWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	HPTextWidgetComp->SetVisibility(true);
+
+	StatComp = CreateDefaultSubobject<UGS_StatComp>(TEXT("StatComp"));
 }
 
 void AGS_AetherExtractor::BeginPlay()
 {
 	Super::BeginPlay();
+	StatComp->InitStat(FName("AetherExtractor"));
 
+
+	if (!HasAuthority())
+	{
+		return;
+	}
+	
 	FTimerHandle DelayHandle;
 	GetWorld()->GetTimerManager().SetTimer(
 		DelayHandle,
@@ -106,5 +125,53 @@ void AGS_AetherExtractor::ExtractAether()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AetherComp in PlayerState is lost"));
+	}
+}
+
+
+//공격 받았을 때 데미지 처리
+void AGS_AetherExtractor::TakeDamageBySeeker(float DamageAmount, AActor* DamageCauser)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[AetherExtractor]TakeDamageBySeeker is called"));
+	if (!StatComp || DamageAmount <= 0.0f)
+	{
+		return;
+	}
+	//float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	float CurrentHealth = StatComp->GetCurrentHealth();
+	float NewHealth = CurrentHealth - DamageAmount;
+
+	StatComp->SetCurrentHealth(NewHealth, false);
+	////만약 갱신한 값이 0 이하라면(0이라면) 파괴
+	//if (NewHealth <= KINDA_SMALL_NUMBER)
+	//{
+	//	//위젯 삭제 코드 추가 필요
+	//	//if (ExtractorWidget && ExtractorWidget->IsInViewport())
+	//	/*{
+	//		ExtractorWidget->RemoveFromParent();
+	//	}*/
+	//	Destroy();
+
+	//}
+}
+
+void AGS_AetherExtractor::DestroyAetherExtractor()
+{
+	//위젯 파괴 추가하기
+	Destroy();
+}
+
+void AGS_AetherExtractor::SetHPTextWidget(UGS_HPText* InHPTextWidget)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[AetherExtractor]SetHPTextWidget is called"));
+	UGS_HPText* HPTextWidget = Cast<UGS_HPText>(InHPTextWidget);
+	if (IsValid(HPTextWidget))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[AetherExtractor] StatComp: %s, Current=%.1f, Max=%.1f"),
+			*GetNameSafe(StatComp),
+			StatComp ? StatComp->GetCurrentHealth() : -1.f,
+			StatComp ? StatComp->GetMaxHealth() : -1.f);
+		HPTextWidget->InitializeHPTextWidget(GetStatComp());
+		StatComp->OnCurrentHPChanged.AddUObject(HPTextWidget, &UGS_HPText::OnCurrentHPChanged);
 	}
 }

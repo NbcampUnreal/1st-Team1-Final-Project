@@ -2,6 +2,7 @@
 
 #include "Character/Component/GS_StatComp.h"
 #include "Character/GS_Character.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
 #include "Components/ProgressBar.h"
 
 #include "Components/TextBlock.h"
@@ -20,6 +21,10 @@ void UGS_HPText::NativeConstruct()
 	{
 		OwningCharacter->SetHPTextWidget(this);
 	}
+	else if (AGS_AetherExtractor* OwningExtractor = Cast<AGS_AetherExtractor>(OwningActor))
+	{
+		OwningExtractor->SetHPTextWidget(this);
+	}
 }
 
 void UGS_HPText::InitializeHPTextWidget(UGS_StatComp* InStatComp)
@@ -31,6 +36,7 @@ void UGS_HPText::OnCurrentHPChanged(UGS_StatComp* InStatComp)
 {
 	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("HP")), true, true, FLinearColor::Green, 5.f);
 	CurrentHPText->SetText(FText::FromString(FString::Printf(TEXT("%d"),FMath::RoundToInt(InStatComp->GetCurrentHealth()))));
+	UE_LOG(LogTemp, Warning, TEXT("[GS_HPText]OnCurrentHP Changed to : %f"), InStatComp->GetCurrentHealth());
 	HPBar->SetPercent(InStatComp->GetCurrentHealth()/InStatComp->GetMaxHealth());
 }
 

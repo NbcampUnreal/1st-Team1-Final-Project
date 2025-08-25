@@ -14,6 +14,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Engine/World.h"
 #include "Character/F_GS_DamageEvent.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
 #include "AI/RTS/GS_RTSController.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
@@ -76,6 +77,19 @@ void AGS_WeaponAxe::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 	
 	AGS_Character* Damaged = Cast<AGS_Character>(OtherActor);
 	AGS_Character* Attacker = OwnerChar;
+
+	//에테르 추출기
+	if (!Damaged && Attacker)
+	{
+		if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(OtherActor))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[AGS_WeaponAxe]OnHit is called"));
+			float Damage = Attacker->GetStatComp()->GetAttackPower();
+			FGS_DamageEvent DamageEvent;
+			AetherExtractor->TakeDamageBySeeker(Damage, OwnerChar);
+			HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
 
 	if (!Damaged || !Attacker || !Damaged->IsEnemy(Attacker))
 	{
