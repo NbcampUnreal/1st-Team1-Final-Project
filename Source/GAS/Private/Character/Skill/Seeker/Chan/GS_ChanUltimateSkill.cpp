@@ -146,7 +146,7 @@ void UGS_ChanUltimateSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 	}
 
 	// 현재 프레임의 실시간 방향 계산
-	FVector CurrentForward = OwnerPlayer->GetActorForwardVector().GetSafeNormal(); // 실시간
+	FVector CurrentForward = OwnerPlayer->GetActorForwardVector().GetSafeNormal();
 	FVector PlayerToMonster = Target->GetActorLocation() - OwnerPlayer->GetActorLocation();
 	FVector RightVector = FVector::CrossProduct(CurrentForward, FVector::UpVector).GetSafeNormal();
 
@@ -274,18 +274,18 @@ void UGS_ChanUltimateSkill::EndCharge()
 	{
 		if (OwnerPlayer && SkillAnimMontages[2])
 		{
-			// 애니메이션 재생
+			// 애니메이션 재생만 (방패 공격 콜리전 비활성화)
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[2]);
 		}
 	}
-	else // 구조물이 아닌 곳에 부딪혔을 때
-	{
-		if (OwnerPlayer && SkillAnimMontages[1])
+			else // 구조물이 아닌 곳에 부딪혔을 때
 		{
-			// 애니메이션 재생
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+			if (OwnerPlayer && SkillAnimMontages[1])
+			{
+				// 애니메이션 재생 (방패 공격은 애님님노티파이로 처리)
+				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
+			}
 		}
-	}
 
 	DeactiveSkill();
 }

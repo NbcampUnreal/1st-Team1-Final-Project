@@ -83,7 +83,6 @@ void AGS_WeaponAxe::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 	{
 		if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("[AGS_WeaponAxe]OnHit is called"));
 			float Damage = Attacker->GetStatComp()->GetAttackPower();
 			FGS_DamageEvent DamageEvent;
 			AetherExtractor->TakeDamageBySeeker(Damage, OwnerChar);
@@ -288,23 +287,35 @@ void AGS_WeaponAxe::EnableHit()
 	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
 	HitActors.Empty();
+	
+	// 안전장치: 3초 후에 자동으로 비활성화
+	GetWorldTimerManager().ClearTimer(SafetyTimerHandle);
+	GetWorldTimerManager().SetTimer(SafetyTimerHandle, this, &AGS_WeaponAxe::DisableHit, 3.0f, false);
 }
 
 void AGS_WeaponAxe::DisableHit()
 {
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	// 타이머 정리
+	GetWorldTimerManager().ClearTimer(SafetyTimerHandle);
 }
 
 void AGS_WeaponAxe::ServerDisableHit_Implementation()
 {
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	// 타이머 정리
+	GetWorldTimerManager().ClearTimer(SafetyTimerHandle);
 }
 
 void AGS_WeaponAxe::ServerEnableHit_Implementation()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
+	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);	
 	HitActors.Empty();
+	
+	GetWorldTimerManager().ClearTimer(SafetyTimerHandle);
+	GetWorldTimerManager().SetTimer(SafetyTimerHandle, this, &AGS_WeaponAxe::DisableHit, 3.0f, false);
 }
 
 // Called when the game starts or when spawned
@@ -313,6 +324,7 @@ void AGS_WeaponAxe::BeginPlay()
 	Super::BeginPlay();
 
 	OwnerChar = Cast<AGS_Character>(GetOwner());
+	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called every frame

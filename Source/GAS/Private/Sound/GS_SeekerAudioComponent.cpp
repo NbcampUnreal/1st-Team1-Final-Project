@@ -947,6 +947,36 @@ void UGS_SeekerAudioComponent::PlayChanFinalAttackSound()
     RegisterPlayingID(FinalPlayingID);
 }
 
+void UGS_SeekerAudioComponent::PlayDefenseSound()
+{
+    // 찬만 방어 사운드 재생 가능
+    if (!OwnerSeeker || !OwnerSeeker->IsChan())
+    {
+        return;
+    }
+
+    // TPS 모드와 RTS 모드에 따른 방어 사운드 선택
+    UAkAudioEvent* DefenseSoundToPlay = nullptr;
+    
+    if (IsRTSMode())
+    {
+        // RTS 모드일 때 RTS 방어 사운드 사용
+        DefenseSoundToPlay = RTSChanDefenseSound;
+    }
+    else
+    {
+        // TPS 모드일 때 일반 방어 사운드 사용
+        DefenseSoundToPlay = ChanDefenseSound;
+    }
+
+    if (DefenseSoundToPlay)
+    {
+        // 방어 사운드 재생
+        AkPlayingID DefensePlayingID = UAkGameplayStatics::PostEvent(DefenseSoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
+        RegisterPlayingID(DefensePlayingID);
+    }
+}
+
 // ===================
 // 아레스 전용 콤보 공격 사운드 함수 구현
 // ===================

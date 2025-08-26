@@ -19,6 +19,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
+#include "Engine/DamageEvents.h"
 
 
 // Sets default values
@@ -87,12 +88,42 @@ void AGS_Chan::MulticastPlayComboSection()
 {
 	Super::MulticastPlayComboSection();
 
+	// 3번째 공격(Attack3)에서만 방패 콜리전 활성화
+	if (HasAuthority() && CurrentComboIndex == 3)
+	{
+		// 방패 찾기 및 활성화
+		bool bShieldFound = false;
+		for (int32 i = 0; i < 5; ++i)
+		{
+			if (AGS_WeaponShield* Shield = Cast<AGS_WeaponShield>(GetWeaponByIndex(i)))
+			{
+				Shield->ServerEnableHit();
+				bShieldFound = true;
+				
+				// 0.8초 후 비활성화 (방패 공격 지속 시간을 좀 더 길게)
+				GetWorldTimerManager().ClearTimer(ShieldDisableTimer);
+				GetWorldTimerManager().SetTimer(ShieldDisableTimer, [Shield]()
+				{
+					if (Shield && IsValid(Shield))
+					{
+						Shield->ServerDisableHit();
+					}
+				}, 0.8f, false);
+				break;
+			}
+		}
+		
+		if (!bShieldFound)
+		{
+			UE_LOG(LogTemp, Error, TEXT("[Chan] Shield not found in any weapon slot!"));
+		}
+	}
+
 	// 오디오 컴포넌트를 통해 찬 전용 콤보 공격 사운드 재생
 	if (SeekerAudioComponent)
 	{
 		// 현재 콤보 인덱스를 가져와서 적절한 사운드 재생
-		// TODO: 현재 콤보 인덱스를 추적하는 로직 필요
-		SeekerAudioComponent->PlayChanComboAttackSound(0); // 기본값 0, 실제로는 현재 콤보 인덱스 사용
+		SeekerAudioComponent->PlayChanComboAttackSound(CurrentComboIndex);
 	}
 }
 
@@ -164,8 +195,28 @@ void AGS_Chan::Multicast_DrawSkillRange_Implementation(FVector InLocation, float
 
 float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	// Call parent implementation
-	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	float ActualDamage = DamageAmount;
+	
+	// 방어 상태일 때는 데미지를 아예 받지 않음 (피격 애니메이션 방지)
+	if (bIsDefending)
+	{
+		// 방어 효과음 재생
+		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
+		{
+			SeekerAudio->PlayDefenseSound();
+		}
+		
+		// 방어 VFX 재생 (나중에 구현)
+		// PlayDefenseVFX();
+		
+		// 방어 성공 시 데미지 0으로 설정하여 피격 애니메이션 방지
+		ActualDamage = 0.0f;
+	}
+	else
+	{
+		// 방어 상태가 아닐 때만 부모 클래스의 TakeDamage 호출
+		ActualDamage = Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
+	}
 
 	// Play hurt sound if we actually took damage and are still alive
 	if (ActualDamage > 0.0f && GetStatComp() && GetStatComp()->GetCurrentHealth() > 0.0f)
@@ -174,8 +225,108 @@ float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 		{
 			SeekerAudio->PlayHurtSound();
 		}
-
 	}
 
 	return ActualDamage;
+}
+
+void AGS_Chan::SetDefending(bool bDefending)
+{
+	if (HasAuthority())
+	{
+		bIsDefending = bDefending;
+		
+		// 방패의 방어용 콜리전 제어
+		for (int32 i = 0; i < 5; ++i)
+		{
+			if (AGS_WeaponShield* Shield = Cast<AGS_WeaponShield>(GetWeaponByIndex(i)))
+			{
+				if (bDefending)
+				{
+					// 방어 시작 - 방어용 콜리전 활성화
+					Shield->ServerEnableDefenseHit();
+				}
+				else
+				{
+					// 방어 해제 - 방어용 콜리전 비활성화
+					Shield->ServerDisableDefenseHit();
+				}
+				break;
+			}
+		}
+		
+		// 방어 상태에 따른 애니메이션 변경 (나중에 구현)
+		if (bDefending)
+		{
+			// 방어 애니메이션 재생
+			// Multicast_PlayDefenseAnimation();
+		}
+		else
+		{
+			// 기본 애니메이션으로 복귀
+			// Multicast_StopDefenseAnimation();
+		}
+	}
+}
+
+void AGS_Chan::OnRep_IsDefending()
+{
+	// 방어 상태 변경 시 UI 업데이트 등 (나중에 구현)
+	if (bIsDefending)
+	{
+		// 방어 UI 표시
+		// ShowDefenseUI(true);
+	}
+	else
+	{
+		// 방어 UI 숨기기
+		// ShowDefenseUI(false);
+	}
+}
+
+bool AGS_Chan::IsHitInShieldDefenseArea(const FVector& HitLocation) const
+{
+	// 방패를 찾아서 방어 영역 확인
+	for (int32 i = 0; i < 5; ++i)
+	{
+		if (AGS_WeaponShield* Shield = Cast<AGS_WeaponShield>(GetWeaponByIndex(i)))
+		{
+			if (Shield && Shield->DefenseHitBox)
+			{
+				// 방패의 월드 위치와 방어용 콜리전 크기 가져오기
+				FVector ShieldLocation = Shield->GetActorLocation();
+				FVector ShieldForward = Shield->GetActorForwardVector();
+				
+				// 방패 방어 영역 계산 (방패 앞쪽 반구형 영역)
+				const float DefenseRadius = 200.0f; // 방패 방어 반경
+				const float DefenseAngle = 120.0f;  // 방패 방어 각도 (도)
+				
+				// 타격 지점과 방패 사이의 거리 계산
+				FVector ToHit = HitLocation - ShieldLocation;
+				float Distance = ToHit.Size();
+				
+				// 거리가 방어 반경을 벗어나면 방어 불가
+				if (Distance > DefenseRadius)
+				{
+					return false;
+				}
+				
+				// 타격 지점이 방패 앞쪽에 있는지 확인 (각도 체크)
+				ToHit.Normalize();
+				float DotProduct = FVector::DotProduct(ShieldForward, ToHit);
+				float AngleInRadians = FMath::Acos(DotProduct);
+				float AngleInDegrees = FMath::RadiansToDegrees(AngleInRadians);
+				
+				// 방어 각도 내에 있으면 방어 가능
+				if (AngleInDegrees <= DefenseAngle * 0.5f)
+				{
+					return true;
+				}
+			}
+			break;
+		}
+	}
+	
+	// 방패를 찾지 못했거나 방어 영역 밖이면 방어 불가
+	return false;
 }
