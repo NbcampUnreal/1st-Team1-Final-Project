@@ -12,6 +12,7 @@ enum class ESkillSlot : uint8
 	Ultimate,
 	Rolling,
 	Combo,
+	HealPotion,
 	End
 };
 

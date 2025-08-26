@@ -148,6 +148,9 @@ struct GAS_API FGS_SkillSet : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FSkillInfo ComboSkill;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FSkillInfo HealPotionSkill;
+
 	FGS_SkillSet()
 	{
 	}

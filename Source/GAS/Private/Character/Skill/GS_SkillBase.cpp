@@ -249,6 +249,8 @@ const FSkillInfo* UGS_SkillBase::GetCurrentSkillInfo() const
 		return &SkillSet->UltimateSkill;
 	case ESkillSlot::Rolling:
 		return &SkillSet->RollingSkill;
+	case ESkillSlot::HealPotion:
+		return &SkillSet->HealPotionSkill;
 	default:
 		return nullptr;
 	}

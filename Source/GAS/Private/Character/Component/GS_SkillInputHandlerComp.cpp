@@ -188,13 +188,13 @@ void UGS_SkillInputHandlerComp::OnHealSkill(const FInputActionInstance& Instance
     if (!SkillComp) return;
 
     // Ready 슬롯(힐 스킬)의 스킬 객체 가져옴
-    UGS_HealSkill* HealSkill = Cast<UGS_HealSkill>(SkillComp->GetSkillFromSkillMap(ESkillSlot::Ready));
+    UGS_HealSkill* HealSkill = Cast<UGS_HealSkill>(SkillComp->GetSkillFromSkillMap(ESkillSlot::HealPotion));
     if (!HealSkill) return;
 
     // 클라이언트에서 먼저 스킬 사용 가능 여부 검사
     if (HealSkill->CanActivateHealSkill())
     {
-        SkillComp->Server_TryActivateSkill(ESkillSlot::Ready);
+        SkillComp->Server_TryActivateSkill(ESkillSlot::HealPotion);
     }
     else
     {
