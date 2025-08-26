@@ -8,6 +8,7 @@
 
 // Forward declarations
 class UGS_SeekerAudioComponent;
+class AGS_Chan;
 
 /**
  * 

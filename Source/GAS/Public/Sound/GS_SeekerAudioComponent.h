@@ -122,6 +122,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|TPS Sounds|Chan", meta = (DisplayName = "🗣️ Attack Voice Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
     UAkAudioEvent* ChanAttackVoiceSound = nullptr;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|TPS Sounds|Chan", meta = (DisplayName = "🛡️ Defense Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
+    UAkAudioEvent* ChanDefenseSound = nullptr;
+
     // 아레스 전용 TPS 사운드
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|TPS Sounds|Ares", meta = (DisplayName = "⚔️ Sword Swing Stop Event", EditCondition = "CharacterType == ECharacterType::Ares", EditConditionHides))
     UAkAudioEvent* AresSwordSwingStopEvent = nullptr;
@@ -170,6 +173,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|RTS Sounds|Chan", meta = (DisplayName = "🗣️ RTS Attack Voice Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
     UAkAudioEvent* RTSChanAttackVoiceSound = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|RTS Sounds|Chan", meta = (DisplayName = "🛡️ RTS Defense Sound", EditCondition = "CharacterType == ECharacterType::Chan", EditConditionHides))
+    UAkAudioEvent* RTSChanDefenseSound = nullptr;
 
     // 아레스 전용 RTS 사운드
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|RTS Sounds|Ares", meta = (DisplayName = "⚔️ RTS Sword Swing Sounds Array", EditCondition = "CharacterType == ECharacterType::Ares", EditConditionHides))
@@ -284,6 +290,10 @@ public:
     /** 최종 공격 사운드 (찬 전용) */
     UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Chan Only", meta = (CallInEditor = "true"))
     void PlayChanFinalAttackSound();
+
+    /** 방어 사운드 (찬 전용) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Chan Only", meta = (CallInEditor = "true"))
+    void PlayDefenseSound();
 
     // ===================
     // 아레스 전용 함수 (Ares Only Functions)

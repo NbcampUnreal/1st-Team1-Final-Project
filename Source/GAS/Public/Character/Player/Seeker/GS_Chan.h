@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GS_Seeker.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include "Iris/ReplicationSystem/ReplicationSystemTypes.h"
 #include "GS_Chan.generated.h"
 
@@ -61,6 +61,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Chan|UltimateSkill", meta = (DisplayName = "궁극기 충돌 컴포넌트"))
 	UCapsuleComponent* UltimateCollision;
 
+	// 방패 비활성화 타이머
+	FTimerHandle ShieldDisableTimer;
+
 	// 찬 전용 궁극기 오버랩 처리 Knockback Collision (KCY)
 	UFUNCTION()
 	void OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -85,11 +88,28 @@ public:
 	// Damage handling with audio feedback
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	// 방어 상태 관련
+	UPROPERTY(ReplicatedUsing = OnRep_IsDefending, BlueprintReadOnly, Category = "Chan|Defense")
+	bool bIsDefending;
+
+	// 방어력 증가량 (0.0f = 100% 데미지, 0.7f = 30% 데미지)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Defense")
+	float DefenseDamageReduction = 0.7f;
+
+	// 방어 상태 변경 함수
+	UFUNCTION(BlueprintCallable, Category = "Chan|Defense")
+	void SetDefending(bool bDefending);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	
+	// 방어 상태 변경 시 호출되는 함수
+	UFUNCTION()
+	void OnRep_IsDefending();
+
+	// 타격 지점이 방패 방어 영역 내에 있는지 확인하는 함수
+	bool IsHitInShieldDefenseArea(const FVector& HitLocation) const;
 
 private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;

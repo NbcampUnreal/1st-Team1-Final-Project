@@ -62,12 +62,21 @@ void UGS_ChanAimingSkill::ActiveSkill()
 
 		// 방패 들기
 		StartHoldUp();
+
+		// 방어 상태 활성화
+		OwnerPlayer->SetDefending(true);
 	}
 }
 
 void UGS_ChanAimingSkill::OnSkillCanceledByDebuff()
 {
 	Super::OnSkillCanceledByDebuff();
+
+	// 방어 상태 비활성화
+	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
+	{
+		OwnerPlayer->SetDefending(false);
+	}
 }
 
 void UGS_ChanAimingSkill::OnSkillAnimationEnd()
@@ -87,7 +96,7 @@ void UGS_ChanAimingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->SetLookControlValue(true, true);
 
-		SetIsActive(false); // 이걸 할 필요가 있나?
+		// SetIsActive(false); // 방어 상태를 유지하기 위해 제거
 
 		// =======================
 		// 스킬 종료 VFX 재생
@@ -181,6 +190,9 @@ void UGS_ChanAimingSkill::InterruptSkill()
 	OwnerPlayer->SetLookControlValue(true, true);
 	SetIsActive(false);
 
+	// 방어 상태 비활성화 (스킬이 중단될 때)
+	OwnerPlayer->SetDefending(false);
+
 	CurrentStamina = 0;
 	ShowProgressBar(false);
 	OwnerPlayer->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
@@ -261,6 +273,9 @@ void UGS_ChanAimingSkill::OnShieldSlam()
 	// Set HitReact
 	OwnerPlayer->SetCanHitReact(true);
 
+	// 방어 상태 해제 (방패 슬램 실행 시)
+	OwnerPlayer->SetDefending(false);
+
 	// 스킬 종료
 	DeactiveSkill();
 }
@@ -282,6 +297,12 @@ void UGS_ChanAimingSkill::TickDrainStamina()
 		if (OwnerPlayer)
 		{
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("LoopEnd"));
+		}
+
+		// 방어 상태 해제 (스테미나 소진 시)
+		if (OwnerPlayer)
+		{
+			OwnerPlayer->SetDefending(false);
 		}
 
 		// 스킬 종료
@@ -340,6 +361,12 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 	// UI 숨기기
 	ShowProgressBar(false);
 	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+
+	// 방어 상태 비활성화 (스킬 완전 종료 시)
+	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
+	{
+		OwnerPlayer->SetDefending(false);
+	}
 
 	// 스킬 상태 업데이트
 	Super::DeactiveSkill();
