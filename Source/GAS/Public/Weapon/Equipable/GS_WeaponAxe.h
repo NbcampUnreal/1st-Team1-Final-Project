@@ -74,6 +74,9 @@ public:
 	UPROPERTY()
 	TSet<AActor*> HitActors;
 
+	// 안전장치용 타이머
+	FTimerHandle SafetyTimerHandle;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
