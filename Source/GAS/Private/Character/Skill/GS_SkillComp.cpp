@@ -156,6 +156,7 @@ void UGS_SkillComp::InitSkills()
 		SetSkill(ESkillSlot::Ultimate, SkillSet->UltimateSkill);
 		SetSkill(ESkillSlot::Rolling, SkillSet->RollingSkill);
 		SetSkill(ESkillSlot::Combo, SkillSet->ComboSkill);
+		SetSkill(ESkillSlot::HealPotion, SkillSet->HealPotionSkill);
 	}
 }
 
