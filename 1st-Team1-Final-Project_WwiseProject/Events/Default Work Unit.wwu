@@ -1126,8 +1126,30 @@
 														</Action>
 													</ChildrenList>
 												</Event>
+												<Event Name="EV_Chan_Guard_RTS" ID="{670746C3-3B7C-4832-B587-FE4D66CDCE6B}">
+													<ChildrenList>
+														<Action Name="" ID="{839552D5-7961-486C-8FFB-F6957FEF9051}" ShortID="487989935">
+															<ReferenceList>
+																<Reference Name="Target">
+																	<ObjectRef Name="SFX_Shield_Guard_RTS" ID="{14121E85-A00A-4E6C-B8AD-18C87EFDC2A7}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+																</Reference>
+															</ReferenceList>
+														</Action>
+													</ChildrenList>
+												</Event>
 											</ChildrenList>
 										</Folder>
+										<Event Name="EV_Chan_Guard" ID="{0CFFA605-301A-4C5F-87EF-01D76D6FF3E8}">
+											<ChildrenList>
+												<Action Name="" ID="{B9FC795C-30A8-411E-845F-E8B4A0510010}" ShortID="175947166">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Shield_Guard" ID="{C2EF8F7B-EE72-4D37-AAF3-64AC5E133614}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
 									</ChildrenList>
 								</Folder>
 								<Folder Name="Merci" ID="{B1592F05-6F45-48E2-9C57-F34C2178CBE0}" ShortID="365961453">
@@ -2135,6 +2157,17 @@
 							<ReferenceList>
 								<Reference Name="Target">
 									<ObjectRef Name="SFX_AttackSwingSound" ID="{38F6F7AF-274A-43AB-9171-C04D736CB2AD}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="EV_MeleeAttack_Shield" ID="{CA274296-6F15-4B60-88E7-FEAA253294EE}">
+					<ChildrenList>
+						<Action Name="" ID="{E804BA1F-E90C-4C0A-B470-4B59F9168123}" ShortID="55584841">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="SFX_MeleeHit_Shield" ID="{00AB26FC-EF14-49A1-8A8C-DCD96A8A642C}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 								</Reference>
 							</ReferenceList>
 						</Action>
