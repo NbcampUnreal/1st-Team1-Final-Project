@@ -36,7 +36,7 @@ void UGS_SkillWidget::Initialize(UGS_SkillBase* Skill)
 		CurrentCoolTimeText->SetVisibility(ESlateVisibility::Hidden);
 		SkillImage->SetBrushFromTexture(Skill->GetSkillImage());
 
-		if (SkillSlot == ESkillSlot::Ready)
+		if (SkillSlot == ESkillSlot::HealPotion)
 		{
 			CoolTimeBar->SetVisibility(ESlateVisibility::Hidden);
 			
