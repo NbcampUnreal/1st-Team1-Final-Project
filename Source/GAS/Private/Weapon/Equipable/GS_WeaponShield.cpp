@@ -80,8 +80,28 @@ void AGS_WeaponShield::BeginPlay()
 	Super::BeginPlay();
 	OwnerChar = Cast<AGS_Character>(GetOwner());
 	
-	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (AttackHitBox)
+	{
+		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	if (DefenseHitBox)
+	{
+		DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AGS_WeaponShield::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// 레벨 전환 시 타이머 정리
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SafetyTimerHandle);
+	}
+	
+	// 히트 액터 목록 정리
+	AttackHitActors.Empty();
+	
+	Super::EndPlay(EndPlayReason);
 }
 
 // Called every frame
@@ -333,7 +353,11 @@ void AGS_WeaponShield::Multicast_PlaySpecialHitVFX_Implementation(UNiagaraSystem
 
 void AGS_WeaponShield::EnableAttackHit()
 {
-	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	if (AttackHitBox && IsValid(AttackHitBox))
+	{
+		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	
 	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
 	AttackHitActors.Empty();
 	
@@ -343,9 +367,13 @@ void AGS_WeaponShield::EnableAttackHit()
 
 void AGS_WeaponShield::DisableAttackHit()
 {
-	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (AttackHitBox && IsValid(AttackHitBox))
+	{
+		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 	
-	if (DefenseHitBox->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
+	if (DefenseHitBox && IsValid(DefenseHitBox) && 
+		DefenseHitBox->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
 	{
 		SetActorTickEnabled(false);
 	}
@@ -353,9 +381,19 @@ void AGS_WeaponShield::DisableAttackHit()
 
 void AGS_WeaponShield::ServerDisableAttackHit_Implementation()
 {
-	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValid(this) || !GetWorld())
+	{
+		return;
+	}
 	
-	if (DefenseHitBox->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
+	if (AttackHitBox && IsValid(AttackHitBox))
+	{
+		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	
+	if (DefenseHitBox && IsValid(DefenseHitBox) && 
+		DefenseHitBox->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
 	{
 		SetActorTickEnabled(false);
 	}
@@ -363,7 +401,17 @@ void AGS_WeaponShield::ServerDisableAttackHit_Implementation()
 
 void AGS_WeaponShield::ServerEnableAttackHit_Implementation()
 {
-	AttackHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValid(this) || !GetWorld())
+	{
+		return;
+	}
+	
+	if (AttackHitBox && IsValid(AttackHitBox))
+	{
+		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	
 	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
 	AttackHitActors.Empty();
 	
@@ -371,8 +419,11 @@ void AGS_WeaponShield::ServerEnableAttackHit_Implementation()
 	SetActorTickEnabled(true);
 		
 	// 안전장치: 3초 후에 자동으로 비활성화 (AnimNotify가 실행되지 않을 경우 대비)
-	GetWorldTimerManager().ClearTimer(SafetyTimerHandle);
-	GetWorldTimerManager().SetTimer(SafetyTimerHandle, this, &AGS_WeaponShield::DisableAttackHit, 3.0f, false);
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SafetyTimerHandle);
+		World->GetTimerManager().SetTimer(SafetyTimerHandle, this, &AGS_WeaponShield::DisableAttackHit, 3.0f, false);
+	}
 }
 
 void AGS_WeaponShield::ServerEnableHit_Implementation()
@@ -451,43 +502,64 @@ void AGS_WeaponShield::OnDefenseHit(UPrimitiveComponent* OverlappedComponent, AA
 		// 일시적으로 공격 콜리전 비활성화
 		OtherComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
-		// 0.1초 후 콜리전 재활성화
-		FTimerHandle ReEnableCollisionHandle;
-		GetWorld()->GetTimerManager().SetTimer(ReEnableCollisionHandle, [OtherComp]()
+		// 0.1초 후 콜리전 재활성화 (null 참조 방지)
+		if (UWorld* World = GetWorld())
 		{
-			if (OtherComp && IsValid(OtherComp))
+			FTimerHandle ReEnableCollisionHandle;
+			World->GetTimerManager().SetTimer(ReEnableCollisionHandle, [OtherComp]()
 			{
-				OtherComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-			}
-		}, 0.1f, false);
+				if (OtherComp && IsValid(OtherComp))
+				{
+					OtherComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+				}
+			}, 0.1f, false);
+		}
 	}
 }
 
 void AGS_WeaponShield::EnableDefenseHit()
 {
-	DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	if (DefenseHitBox && IsValid(DefenseHitBox))
+	{
+		DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
 	SetActorTickEnabled(true);
 }
 
 void AGS_WeaponShield::DisableDefenseHit()
 {
-	DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (DefenseHitBox && IsValid(DefenseHitBox))
+	{
+		DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 	
 	// 콜리전 비활성화 시 Tick 비활성화 (공격 콜리전도 체크)
-	if (AttackHitBox->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
+	if (AttackHitBox && IsValid(AttackHitBox) && 
+		AttackHitBox->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
 	{
 		SetActorTickEnabled(false);
 	}
-	
 }
 
 void AGS_WeaponShield::ServerEnableDefenseHit_Implementation()
 {
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValid(this) || !GetWorld())
+	{
+		return;
+	}
+	
 	EnableDefenseHit();
 }
 
 void AGS_WeaponShield::ServerDisableDefenseHit_Implementation()
 {
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValid(this) || !GetWorld())
+	{
+		return;
+	}
+	
 	DisableDefenseHit();
 }
 
