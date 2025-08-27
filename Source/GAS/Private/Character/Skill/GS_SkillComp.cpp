@@ -119,6 +119,8 @@ bool UGS_SkillComp::IsSkillAllowed(ESkillSlot CompareSkillType)
 {
 	uint8 BitFlag = 0;
 	BitFlag |= (1 << static_cast<int32>(CompareSkillType));
+	UE_LOG(LogTemp, Warning, TEXT("UGS_SkillComp::IsSkillAllowed BitFlag :%d"), BitFlag);
+	UE_LOG(LogTemp, Warning, TEXT("UGS_SkillComp::IsSkillAllowed CurAllowedSkillsMask :%d"), CurAllowedSkillsMask);
 	return CurAllowedSkillsMask & BitFlag;
 }
 

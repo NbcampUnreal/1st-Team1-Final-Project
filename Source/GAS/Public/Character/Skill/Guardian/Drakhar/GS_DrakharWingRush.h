@@ -13,4 +13,5 @@ public:
 
 	virtual void ActiveSkill() override;
 	virtual void ExecuteSkillEffect() override;
+	virtual void OnSkillAnimationEnd() override;
 };

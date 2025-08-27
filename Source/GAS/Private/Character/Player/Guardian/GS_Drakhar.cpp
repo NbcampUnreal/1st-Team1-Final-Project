@@ -481,6 +481,8 @@ void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
 	
 	MoveSpeed = NormalMoveSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+
+	GetSkillComp()->ResetAllowedSkillsMask();
 }
 
 void AGS_Drakhar::StartCtrl()

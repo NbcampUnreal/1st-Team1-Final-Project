@@ -53,6 +53,7 @@ void UGS_DrakharFly::ExecuteSkillEffect()
 {
 	if (bIsFlying)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("drakhar Fly Skill Execute Effect"));
 		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
 	}
 	else

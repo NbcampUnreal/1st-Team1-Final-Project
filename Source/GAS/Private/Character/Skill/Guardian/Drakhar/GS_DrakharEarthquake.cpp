@@ -12,6 +12,8 @@ void UGS_DrakharEarthquake::ActiveSkill()
 {
 	Super::ActiveSkill();
 
+	UE_LOG(LogTemp, Warning, TEXT("Active Drakhar Aiming Skill")); // SJE
+
 	//cool time check
 	if (!CanActive())
 	{
@@ -44,4 +46,10 @@ void UGS_DrakharEarthquake::ExecuteSkillEffect()
 		//play montage, except server
 		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
 	}
+}
+
+void UGS_DrakharEarthquake::OnSkillAnimationEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Drakhar OnSkill Animation"));
+	Super::OnSkillAnimationEnd();
 }

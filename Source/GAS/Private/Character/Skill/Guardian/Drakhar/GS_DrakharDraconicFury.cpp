@@ -11,12 +11,15 @@ UGS_DrakharDraconicFury::UGS_DrakharDraconicFury()
 
 void UGS_DrakharDraconicFury::ActiveSkill()
 {
+	UE_LOG(LogTemp, Warning, TEXT("UGS_DrakharDraconicFury::ActiveSkill")); // SJE
+	
 	Super::ActiveSkill();
 	
 	if (!CanActive())
 	{
 		return;
 	}
+	
 	ExecuteSkillEffect();
 }
 
@@ -27,6 +30,7 @@ void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 		return;
 	}
 
+	
 	//server logic
 	AGS_Guardian* Guardian = Cast<AGS_Guardian>(OwnerCharacter);
 	if (Guardian)
@@ -42,4 +46,9 @@ void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
 	}
 	
+}
+
+void UGS_DrakharDraconicFury::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 }
