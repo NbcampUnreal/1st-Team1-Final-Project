@@ -156,6 +156,7 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
     AGS_InGameGS* InGameGS = GetGameState<AGS_InGameGS>();
     if (InGameGS)
     {
+        UE_LOG(LogTemp, Warning, TEXT("[방 숨김] GS 찾음, 방 개수 전달 %d"), RoomCount);
         // 실제로 생성된 방의 개수를 GameState에 기록하고,
         // 모든 클라이언트에게 '검증 시작' 신호를 보냅니다.
         InGameGS->SetDungeonData(RoomCount);
