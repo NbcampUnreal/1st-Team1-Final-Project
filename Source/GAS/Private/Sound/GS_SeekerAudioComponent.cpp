@@ -58,24 +58,6 @@ void UGS_SeekerAudioComponent::BeginPlay()
 		ECharacterType DetectedType = OwnerCharacter->GetCharacterType();
 		CharacterType = DetectedType;
 		
-		// 타입별 로그 출력 (디버깅용)
-		FString TypeName;
-		switch(DetectedType)
-		{
-			case ECharacterType::Ares:
-				TypeName = TEXT("Ares (Melee - Sword)");
-				break;
-			case ECharacterType::Chan:
-				TypeName = TEXT("Chan (Melee - Axe/Shield)");
-				break;
-			case ECharacterType::Merci:
-				TypeName = TEXT("Merci (Ranged - Bow)");
-				break;
-			default:
-				TypeName = TEXT("Unknown");
-				break;
-		}
-	    
 		// Owner가 GS_Seeker인지도 확인
 		OwnerSeeker = Cast<AGS_Seeker>(GetOwner());
 	}
@@ -304,9 +286,6 @@ void UGS_SeekerAudioComponent::Multicast_PlayBowDrawSound_Implementation()
         
         AkPlayingID BowPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
         RegisterPlayingID(BowPlayingID);
-    }
-    else
-    {
     }
 }
 
@@ -1837,7 +1816,6 @@ int32 UGS_SeekerAudioComponent::ValidateAndConvertComboIndex(int32 ComboIndex, i
     // 유효성 검사
     if (ArrayIndex < 0 || ArrayIndex >= ArraySize)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[SeekerAudio] Invalid combo index: %d (Array size: %d)"), ComboIndex, ArraySize);
         return INDEX_NONE;
     }
     

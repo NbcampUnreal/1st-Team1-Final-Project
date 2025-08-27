@@ -877,18 +877,13 @@ void UGS_AudioComponentBase::SetUnifiedRTPCValue(UAkRtpc* RTPC, float Normalized
         static TSet<FString> WarnedActors;
         FString ActorName = GetOwner() ? GetOwner()->GetName() : TEXT("Unknown");
         
-        if (!WarnedActors.Contains(ActorName))
-        {
-            UE_LOG(LogTemp, Warning, TEXT("[AudioBase] RTPC not assigned in %s - check Blueprint configuration"), *ActorName);
-            WarnedActors.Add(ActorName);
-        }
+        WarnedActors.Add(ActorName);
         return;
     }
 
     FAkAudioDevice* AkDevice = FAkAudioDevice::Get();
     if (!AkDevice)
     {
-        UE_LOG(LogTemp, Error, TEXT("[AudioBase] SetUnifiedRTPCValue: Wwise AudioDevice not found"));
         return;
     }
 
@@ -898,11 +893,6 @@ void UGS_AudioComponentBase::SetUnifiedRTPCValue(UAkRtpc* RTPC, float Normalized
 
     AKRESULT Result = AkDevice->SetRTPCValue(RTPC, WwiseValue, InterpolationTimeMs, GetOwner());
     
-    if (Result != AK_Success)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("[AudioBase] SetUnifiedRTPCValue failed for RTPC: %s, Value: %.2f"), 
-               RTPC ? *RTPC->GetName() : TEXT("Unknown"), WwiseValue);
-    }
 }
 
 void UGS_AudioComponentBase::InitializeAudioRTPCs()
@@ -917,18 +907,10 @@ void UGS_AudioComponentBase::InitializeAudioRTPCs()
     {
         SetUnifiedRTPCValue(AttenuationModeRTPC, TPSDistanceScaling);
     }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("[AudioBase] AttenuationModeRTPC not assigned in %s - audio distance scaling disabled"), *GetOwner()->GetName());
-    }
 
     // Occlusion 초기값 설정 (TPS 모드는 활성화: 0.0f = 0%)
     if (OcclusionDisableRTPC)
     {
         SetUnifiedRTPCValue(OcclusionDisableRTPC, 0.0f);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("[AudioBase] OcclusionDisableRTPC not assigned in %s - audio occlusion disabled"), *GetOwner()->GetName());
     }
 }
