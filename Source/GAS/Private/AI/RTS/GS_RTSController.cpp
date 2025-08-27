@@ -446,11 +446,17 @@ void AGS_RTSController::InitCameraActor()
 	}
 }
 
-void AGS_RTSController::Client_HideDungeonElements_Implementation()
+void AGS_RTSController::HideDungeonElements()
 {
+	UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그]===== CLIENT RPC RECEIVED on %s! ====="), *GetName());
 	if (CameraActor)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] RTSCamera is valid. Hiding walls."));
 		CameraActor->HideWallAndCeiling();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] 으악! 실패!! 카메라 액터가 없음."));
 	}
 }
 
