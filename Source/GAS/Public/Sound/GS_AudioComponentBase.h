@@ -162,8 +162,8 @@ public:
 	bool CanSendRPC() const;
 	
 	/** RTS 카메라의 실제 보이는 영역 계산 */
-	UFUNCTION(BlueprintPure, Category = "Audio")
-	FBox2D GetRTSCameraViewBounds() const;
+	// UFUNCTION(BlueprintPure, Category = "Audio")
+	// FBox2D GetRTSCameraViewBounds() const;
 	
 	/** 실제 카메라 위치 가져오기 (캐싱 포함) */
 	UFUNCTION(BlueprintPure, Category = "Audio")

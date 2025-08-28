@@ -434,6 +434,29 @@ bool UGS_AudioComponentBase::CanSendRPC() const
     return (CurrentTime - LastMulticastTime) >= MinRPCInterval;
 }
 
+// FBox2D UGS_AudioComponentBase::GetRTSCameraViewBounds() const
+// {
+//     if (!GetWorld())
+//     {
+//         return FBox2D(ForceInit);
+//     }
+//     
+//     APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+//     if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(LocalPC))
+//     {
+//         return CalculateScreenWorldBounds(RTSController);
+//     }
+//     
+//     // 기본값 반환 (TPS 모드이거나 컨트롤러가 없는 경우)
+//     FVector CameraLocation;
+//     if (GetActualCameraLocation(CameraLocation))
+//     {
+//         return CalculateBasicViewBounds(CameraLocation, DefaultFOV, FMath::Abs(CameraLocation.Z));
+//     }
+//     
+//     return FBox2D(FVector2D(-2000, -2000), FVector2D(2000, 2000));
+// }
+
 void UGS_AudioComponentBase::CleanupFinishedSounds()
 {
     if (!FAkAudioDevice::Get()) return;
