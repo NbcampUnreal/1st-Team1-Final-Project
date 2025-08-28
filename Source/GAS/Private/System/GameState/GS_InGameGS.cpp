@@ -2,6 +2,7 @@
 
 #include "EngineUtils.h"
 #include "AI/RTS/GS_RTSController.h"
+#include "DungeonEditor/Component/PlaceInfoComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "System/GameMode/GS_InGameGM.h"
 #include "Kismet/GameplayStatics.h"
@@ -129,11 +130,22 @@ void AGS_InGameGS::OnRep_DungeonDataReplicated()
 
 void AGS_InGameGS::Client_VerifyRoomSpawning()
 {
-	// 현재 내(클라이언트) 월드에 스폰된 Room 액터의 수를 셉니다.
+	// 현재 내(클라이언트) 월드에 스폰된 Room과 Door/Wall 액터의 수를 셉니다.
 	int32 CurrentLocalRoomCount = 0;
-	for (TActorIterator<AGS_RoomBase> It(GetWorld()); It; ++It)
+	for (TActorIterator<AActor> It(GetWorld()); It; ++It)
 	{
-		CurrentLocalRoomCount++;
+		AActor* CurrentActor = *It;
+		if (!CurrentActor) continue;
+
+		// 액터가 UPlaceableInfoComponent를 가지고 있는지 확인합니다.
+		if (UPlaceInfoComponent* InfoComponent = CurrentActor->FindComponentByClass<UPlaceInfoComponent>())
+		{
+			EObjectType ObjectType = InfoComponent->GetObjectType();
+			if (ObjectType == EObjectType::Room || ObjectType == EObjectType::DoorAndWall)
+			{
+				CurrentLocalRoomCount++;
+			}
+		}
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("[로딩] CLIENT: 방 개수 %d / %d."), CurrentLocalRoomCount, TotalRoomCount);
