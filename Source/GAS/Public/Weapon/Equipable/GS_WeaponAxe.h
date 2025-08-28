@@ -68,15 +68,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
 	UNiagaraSystem* HitStructureVFX;
 
-	UPROPERTY()
-	class AGS_Character* OwnerChar;
-
-	UPROPERTY()
-	TSet<AActor*> HitActors;
-
-	// 안전장치용 타이머
-	FTimerHandle SafetyTimerHandle;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -94,6 +85,9 @@ protected:
 	
 	// RTS 모드 감지
 	bool IsRTSMode() const;
+
+	// 특화 헬퍼 함수 (타이머 관련)
+	void ClearSafetyTimer();
 
 	// 멀티캐스트 함수들
 	UFUNCTION(NetMulticast, Reliable)

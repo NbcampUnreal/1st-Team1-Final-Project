@@ -105,15 +105,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
 	UNiagaraSystem* HitStructureVFX;
 
-	UPROPERTY()
-	class AGS_Character* OwnerChar;
-
 	// 공격용 히트 액터 목록 (중복 히트 방지)
 	UPROPERTY()
 	TSet<AActor*> AttackHitActors;
-
-	// 안전장치용 타이머
-	FTimerHandle SafetyTimerHandle;
 
 	// 방어용 콜리전
 	UPROPERTY(VisibleAnywhere, Category = "Defense")
@@ -141,6 +135,9 @@ protected:
 	
 	// RTS 모드 감지
 	bool IsRTSMode() const;
+
+	// 자식 클래스 특화 헬퍼 함수
+	void DisableAllCollisions();
 
 	// 멀티캐스트 함수들
 	UFUNCTION(NetMulticast, Reliable)

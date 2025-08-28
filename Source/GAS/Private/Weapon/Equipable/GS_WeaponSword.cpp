@@ -27,9 +27,6 @@ AGS_WeaponSword::AGS_WeaponSword()
 	HitBox->SetupAttachment(Mesh);
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HitBox->OnComponentBeginOverlap.AddDynamic(this, &AGS_WeaponSword::OnHit);
-
-	OwnerChar = nullptr;
-	bReplicates = true;
 }
 
 
@@ -44,7 +41,7 @@ void AGS_WeaponSword::EnableHit()
 {
 	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
-	HitActors.Empty();
+	ClearHitActors();
 }
 
 void AGS_WeaponSword::DisableHit()
@@ -54,13 +51,25 @@ void AGS_WeaponSword::DisableHit()
 
 void AGS_WeaponSword::ServerEnableHit_Implementation()
 {
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
 	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
-	HitActors.Empty();
+	ClearHitActors();
 }
 
 void AGS_WeaponSword::ServerDisableHit_Implementation()
 {
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
 	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
@@ -72,8 +81,20 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 		return;
 	}
 
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
 	// 중복 히트 방지
 	if (!OtherActor || OtherActor == this || HitActors.Contains(OtherActor))
+	{
+		return;
+	}
+
+	// OwnerChar 유효성 확인 (레벨 전환 시 null일 수 있음)
+	if (!IsOwnerCharValid())
 	{
 		return;
 	}
@@ -84,12 +105,7 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	ESwordHitTargetType TargetType = DetermineTargetType(OtherActor);
 
 	// HitResult 생성 (Overlap에서는 정확한 히트 포인트가 없을 수 있음)
-	FHitResult CorrectHitResult = SweepResult;
-	if (!bFromSweep)
-	{
-		// 히트 포인트 계산
-		CorrectHitResult = CalculateMoreAccurateHitPoint(OtherActor);
-	}
+	FHitResult CorrectHitResult = CreateCorrectHitResult(SweepResult, bFromSweep);
 
 	Multicast_PlayHitSound(TargetType, CorrectHitResult);
 	
@@ -281,6 +297,12 @@ bool AGS_WeaponSword::Multicast_PlayHitSound_Validate(ESwordHitTargetType Target
 
 void AGS_WeaponSword::Multicast_PlayHitSound_Implementation(ESwordHitTargetType TargetType, const FHitResult& SweepResult)
 {
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
 	PlayHitSound(TargetType, SweepResult);
 }
 
@@ -291,11 +313,23 @@ bool AGS_WeaponSword::Multicast_PlayHitVFX_Validate(ESwordHitTargetType TargetTy
 
 void AGS_WeaponSword::Multicast_PlayHitVFX_Implementation(ESwordHitTargetType TargetType, const FHitResult& SweepResult)
 {
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
 	PlayHitVFX(TargetType, SweepResult);
 }
 
 void AGS_WeaponSword::Multicast_PlaySpecialHitVFX_Implementation(UNiagaraSystem* VFXToPlay, const FHitResult& HitResult)
 {
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
 	if (VFXToPlay && GetWorld())
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
@@ -308,6 +342,69 @@ void AGS_WeaponSword::Multicast_PlaySpecialHitVFX_Implementation(UNiagaraSystem*
 			true
 		);
 	}
+}
+
+// 히트 포인트 계산 구현
+FHitResult AGS_WeaponSword::CalculateMoreAccurateHitPoint(AActor* OtherActor) const
+{
+	FHitResult ResultHit;
+
+	if (!OtherActor || !HitBox || !GetWorld())
+	{
+		// 기본값으로 무기 위치 사용
+		ResultHit.ImpactPoint = GetActorLocation();
+		ResultHit.Location = GetActorLocation();
+		ResultHit.ImpactNormal = FVector::UpVector;
+		ResultHit.Normal = FVector::UpVector;
+		return ResultHit;
+	}
+
+	// HitBox의 월드 위치와 타겟의 위치 계산
+	FVector HitBoxLocation = HitBox->GetComponentLocation();
+	FVector TargetLocation = OtherActor->GetActorLocation();
+
+	// HitBox에서 타겟으로의 방향 벡터
+	FVector TraceDirection = (TargetLocation - HitBoxLocation).GetSafeNormal();
+
+	// Line Trace 거리 (HitBox 크기의 2배 정도)
+	float TraceDistance = FVector::Dist(HitBoxLocation, TargetLocation) + 100.0f;
+
+	// Line Trace 시작점과 끝점
+	FVector TraceStart = HitBoxLocation;
+	FVector TraceEnd = HitBoxLocation + (TraceDirection * TraceDistance);
+
+	// Line Trace 파라미터 설정
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this); // 무기 자체는 무시
+	QueryParams.AddIgnoredActor(GetOwner()); // 무기 소유자도 무시
+	QueryParams.bTraceComplex = false;
+
+	// Line Trace 실행
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		ResultHit,
+		TraceStart,
+		TraceEnd,
+		ECC_Pawn, // Pawn 채널로 트레이스
+		QueryParams
+	);
+
+	if (bHit && ResultHit.GetActor() == OtherActor)
+	{
+		// 트레이스가 성공하고 올바른 타겟을 맞췄다면 해당 결과 사용
+	}
+	else
+	{
+		// 트레이스가 실패했다면 두 객체 간의 중점 계산
+		FVector MidPoint = (HitBoxLocation + TargetLocation) * 0.5f;
+		FVector ToTarget = (TargetLocation - HitBoxLocation).GetSafeNormal();
+
+		ResultHit.ImpactPoint = MidPoint;
+		ResultHit.Location = MidPoint;
+		ResultHit.ImpactNormal = -ToTarget; // 타겟을 향하는 반대 방향
+		ResultHit.Normal = -ToTarget;
+	}
+
+	return ResultHit;
 }
 
 bool AGS_WeaponSword::GetListenerLocation(FVector& OutLocation) const
@@ -341,64 +438,15 @@ bool AGS_WeaponSword::IsRTSMode() const
 	return LocalPC && Cast<AGS_RTSController>(LocalPC) != nullptr;
 }
 
-FHitResult AGS_WeaponSword::CalculateMoreAccurateHitPoint(AActor* OtherActor) const
+// 특화 헬퍼 함수 구현
+FHitResult AGS_WeaponSword::CreateCorrectHitResult(const FHitResult& OriginalResult, bool bFromSweep) const
 {
-	FHitResult ResultHit;
-	
-	if (!OtherActor || !HitBox || !GetWorld())
+	if (!bFromSweep && IsOwnerCharValid() && OriginalResult.GetActor())
 	{
-		// 기본값으로 무기 위치 사용
-		ResultHit.ImpactPoint = GetActorLocation();
-		ResultHit.Location = GetActorLocation();
-		ResultHit.ImpactNormal = FVector::UpVector;
-		ResultHit.Normal = FVector::UpVector;
-		return ResultHit;
+		// Sword의 경우 더 정확한 히트 포인트 계산을 위해 기존 함수 활용
+		return CalculateMoreAccurateHitPoint(OriginalResult.GetActor());
 	}
 
-	// HitBox의 월드 위치와 타겟의 위치 계산
-	FVector HitBoxLocation = HitBox->GetComponentLocation();
-	FVector TargetLocation = OtherActor->GetActorLocation();
-	
-	// HitBox에서 타겟으로의 방향 벡터
-	FVector TraceDirection = (TargetLocation - HitBoxLocation).GetSafeNormal();
-	
-	// Line Trace 거리 (HitBox 크기의 2배 정도)
-	float TraceDistance = FVector::Dist(HitBoxLocation, TargetLocation) + 100.0f;
-	
-	// Line Trace 시작점과 끝점
-	FVector TraceStart = HitBoxLocation;
-	FVector TraceEnd = HitBoxLocation + (TraceDirection * TraceDistance);
-	
-	// Line Trace 파라미터 설정
-	FCollisionQueryParams QueryParams;
-	QueryParams.AddIgnoredActor(this); // 무기 자체는 무시
-	QueryParams.AddIgnoredActor(GetOwner()); // 무기 소유자도 무시
-	QueryParams.bTraceComplex = false;
-	
-	// Line Trace 실행
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
-		ResultHit,
-		TraceStart,
-		TraceEnd,
-		ECC_Pawn, // Pawn 채널로 트레이스
-		QueryParams
-	);
-	
-	if (bHit && ResultHit.GetActor() == OtherActor)
-	{
-		// 트레이스가 성공하고 올바른 타겟을 맞췄다면 해당 결과 사용
-	}
-	else
-	{
-		// 트레이스가 실패했다면 두 객체 간의 중점 계산
-		FVector MidPoint = (HitBoxLocation + TargetLocation) * 0.5f;
-		FVector ToTarget = (TargetLocation - HitBoxLocation).GetSafeNormal();
-		
-		ResultHit.ImpactPoint = MidPoint;
-		ResultHit.Location = MidPoint;
-		ResultHit.ImpactNormal = -ToTarget; // 타겟을 향하는 반대 방향
-		ResultHit.Normal = -ToTarget;
-	}
-	
-	return ResultHit;
+	// 부모 클래스의 기본 구현 사용
+	return Super::CreateCorrectHitResult(OriginalResult, bFromSweep);
 }

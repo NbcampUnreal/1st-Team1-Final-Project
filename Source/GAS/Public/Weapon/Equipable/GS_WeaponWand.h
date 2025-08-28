@@ -26,6 +26,4 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY()
-	class AGS_Character* OwnerChar;
 };

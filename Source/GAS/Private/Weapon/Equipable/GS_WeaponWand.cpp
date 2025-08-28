@@ -8,14 +8,9 @@ AGS_WeaponWand::AGS_WeaponWand()
 {
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>("Mesh");
 	RootComponent = Mesh;
-	
-	OwnerChar = nullptr;
-	bReplicates = true;
 }
 
 void AGS_WeaponWand::BeginPlay()
 {
 	Super::BeginPlay();
-
-	OwnerChar = Cast<AGS_Character>(GetOwner());
 }
