@@ -504,30 +504,6 @@ void UGS_SeekerAudioComponent::StopSkill()
     }
 }
 
-UAkComponent* UGS_SeekerAudioComponent::GetOrCreateAkComponent()
-{
-    if (CachedAkComponent && IsValid(CachedAkComponent))
-    {
-        return CachedAkComponent;
-    }
-
-    AActor* Owner = GetOwner();
-    if (!Owner)
-    {
-        return nullptr;
-    }
-
-    CachedAkComponent = Owner->FindComponentByClass<UAkComponent>();
-    if (!CachedAkComponent)
-    {
-        CachedAkComponent = NewObject<UAkComponent>(Owner);
-        CachedAkComponent->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-        CachedAkComponent->RegisterComponent();
-    }
-
-    return CachedAkComponent;
-}
-
 void UGS_SeekerAudioComponent::PlaySoundAtLocation(UAkAudioEvent* SoundEvent, const FVector& Location)
 {
     // 데디케이티드 서버에서는 사운드 재생하지 않음

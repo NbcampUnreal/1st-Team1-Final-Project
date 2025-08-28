@@ -7,7 +7,6 @@
 #include "TimerManager.h"
 #include "CollisionQueryParams.h"
 #include "CollisionShape.h"
-#include "AkComponent.h"
 #include "AkGameplayStatics.h"
 #include "AkAudioDevice.h"
 #include "AkAudioEvent.h"

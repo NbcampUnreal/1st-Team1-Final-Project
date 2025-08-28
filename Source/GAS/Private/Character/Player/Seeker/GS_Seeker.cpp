@@ -779,10 +779,16 @@ void AGS_Seeker::Multicast_PlaySound_Implementation(UAkAudioEvent* SoundToPlay)
 		return;
 	}
 
-	UAkComponent* AkComp = nullptr;
-	if (SeekerAudioComponent)
+	UAkComponent* AkComp = FindComponentByClass<UAkComponent>();
+	if (!AkComp)
 	{
-		AkComp = SeekerAudioComponent->GetOrCreateAkComponent();
+		// AkComponent가 없으면 새로 생성
+		AkComp = NewObject<UAkComponent>(this);
+		if (AkComp && GetRootComponent())
+		{
+			AkComp->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+			AkComp->RegisterComponent();
+		}
 	}
 	
 	if (!AkComp)
