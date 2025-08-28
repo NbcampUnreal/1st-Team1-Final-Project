@@ -12,6 +12,7 @@
 
 class AGS_RTSController;
 class AGS_RTSCamera;
+class AGS_RoomBase;
 
 /**
  * RTS 커맨드 사운드 타입 (공통 enum)
@@ -172,8 +173,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Audio")
 	bool IsInViewFrustum(const FVector& SourceLocation) const;
 	
-	/** RTS 오디오 가시성 체크 */
-	bool CheckRTSAudioVisibility(AGS_RTSController* RTSController, const FVector& SourceLocation) const;
+	/** 화면 투영 기반 소스 가시성 체크 */
+	bool IsSourceVisibleOnScreen(AGS_RTSController* RTSController, const FVector& SourceLocation) const;
 	
 	/** 화면 월드 경계 계산 (RTS 모드 전용) */
 	FBox2D CalculateScreenWorldBounds(AGS_RTSController* RTSController) const;
@@ -193,6 +194,15 @@ public:
 	
 	/** 카메라 설정을 기반으로 한 기본 화면 영역 계산 */
 	FBox2D CalculateBasicViewBounds(const FVector& CameraLocation, float FOV, float CameraHeight, float AspectRatio = 16.0f/9.0f) const;
+
+	/** 두 위치가 같은 방에 있는지 확인 */
+	bool IsInSameRoom(const FVector& ListenerPos, const FVector& SourcePos) const;
+
+	/** 두 방이 연결되어 있는지 확인 */
+	bool AreRoomsConnected(AGS_RoomBase* Room1, AGS_RoomBase* Room2) const;
+
+	/** 카메라 각도를 고려한 실제 화면 경계 계산 */
+	FBox2D CalculateAngledCameraViewBounds(const FVector& CameraLocation, float Pitch) const;
 
 protected:
 	// ===============
