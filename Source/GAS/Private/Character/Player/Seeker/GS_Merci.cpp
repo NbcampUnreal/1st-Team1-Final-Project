@@ -301,7 +301,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 
 	// 2. 카메라에서 정면으로 Ray를 쏨
 	FVector TraceStart = ViewLoc;
-	FVector TraceEnd = TraceStart + ViewRot.Vector() * 2000.0f;
+	FVector TraceEnd = TraceStart + ViewRot.Vector() * 8000.0f;
 	//Multicast_DrawDebugLine(TraceStart, TraceEnd, FColor::Green);
 	
 	// 3. Ray가 무언가에 부딪히면 그 위치를 목표로 설정, 아니면 끝 지점 사용
