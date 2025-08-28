@@ -101,19 +101,28 @@ void AGS_InGameGS::OnRep_DungeonDataReplicated()
 		if (AGS_RTSController* MyController = Cast<AGS_RTSController>(GetGameInstance()->GetFirstLocalPlayerController()))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("[방 숨김] 컨트롤러가 RTS인 애들만 진행"));
-			if (AGS_PlayerState* PS = MyController->GetPlayerState<AGS_PlayerState>())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("[로딩] PlayerState 찾음"));
-				if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("[로딩] 서버 던전 방 생성 준비 완료, 클라 검증 중.."));
-					Client_VerifyRoomSpawning();
-				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("[로딩] 플레이어 룰이 가디언이 아님. 방 숨김 처리 취소"));
-				}
-			}
+			// if (AGS_PlayerState* PS = MyController->GetPlayerState<AGS_PlayerState>())
+			// {
+			// 	UE_LOG(LogTemp, Warning, TEXT("[로딩] PlayerState 찾음"));
+			// 	if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+			// 	{
+			// 		UE_LOG(LogTemp, Warning, TEXT("[로딩] 서버 던전 방 생성 준비 완료, 클라 검증 중.."));
+			// 		Client_VerifyRoomSpawning();
+			// 	}
+			// 	else
+			// 	{
+			// 		UE_LOG(LogTemp, Warning, TEXT("[로딩] 플레이어 룰이 가디언이 아님. 방 숨김 처리 취소"));
+			// 	}
+			// }
+
+			// 임시 코드 나중에 RTSController쪽 초기화 부분 수정한 다음 다시 플레이어 룰 검사하는 방향으로 변경해야 함.
+			UE_LOG(LogTemp, Warning, TEXT("[로딩] 서버 던전 방 생성 준비 완료, 클라 검증 중.."));
+			Client_VerifyRoomSpawning();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[로딩] 플레이어 룰이 가디언이 아님. 방 숨김 처리 취소"));
+
 		}
 	}
 }
