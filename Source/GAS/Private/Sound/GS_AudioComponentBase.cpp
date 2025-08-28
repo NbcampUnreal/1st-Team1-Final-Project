@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "EngineUtils.h"
+#include "Props/GS_RoomBase.h"
 
 
 UGS_AudioComponentBase::UGS_AudioComponentBase()
@@ -32,7 +33,7 @@ void UGS_AudioComponentBase::BeginPlay()
 {
     Super::BeginPlay();
     
-    // 모든 오디오 RTPC 초기화 (통일된 시스템 사용)
+    // 모든 오디오 RTPC 초기화
     InitializeAudioRTPCs();
     
     // 거리 체크 타이머 시작 - 성능 최적화된 주기
@@ -152,180 +153,138 @@ bool UGS_AudioComponentBase::IsInViewFrustum(const FVector& SourceLocation) cons
     // RTS 모드 체크
     if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(LocalPC))
     {
-        return CheckRTSAudioVisibility(RTSController, SourceLocation);
+        // 새로운 화면 투영 기반 체크 사용
+        return IsSourceVisibleOnScreen(RTSController, SourceLocation);
     }
     
     // TPS 모드는 항상 true
     return true;
 }
 
-bool UGS_AudioComponentBase::CheckRTSAudioVisibility(AGS_RTSController* RTSController, const FVector& SourceLocation) const
+
+bool UGS_AudioComponentBase::IsSourceVisibleOnScreen(AGS_RTSController* RTSController, const FVector& SourceLocation) const
 {
-    // TPS 모드에서는 프러스텀 계산 스킵 (성능 최적화)
-    if (!IsRTSMode())
-    {
-        return true;
-    }
-    
-    // 입력 유효성 검사
-    if (!RTSController || !IsValid(RTSController))
+    if (!RTSController)
     {
         return true;
     }
     
     // 1. 카메라 정보 가져오기
     FVector CameraLocation;
-    if (!GetActualCameraLocation(CameraLocation))
+    FRotator CameraRotation;
+    if (!GetActualCameraLocation(CameraLocation)) return true;
+    
+    // RTSCamera에서 실제 회전값 가져오기
+    if (AGS_RTSCamera* RTSCamera = CachedRTSCamera.Get())
     {
-        if (AActor* ViewTarget = RTSController->GetViewTarget())
+        if (USpringArmComponent* SpringArm = RTSCamera->GetSpringArmComponent())
         {
-            CameraLocation = ViewTarget->GetActorLocation();
+            CameraRotation = SpringArm->GetComponentRotation();
         }
-        else
+        else if (UCameraComponent* CameraComp = RTSCamera->GetCameraComponent())
         {
-            // 카메라 위치를 가져올 수 없는 경우 안전한 폴백
-            // RTS 모드에서는 기본적으로 소리 재생 허용 (플레이어 경험 보장)
-            return true;
+            CameraRotation = CameraComp->GetComponentRotation();
+        }
+    }
+    else
+    {
+        if (RTSController->PlayerCameraManager)
+        {
+            CameraRotation = RTSController->PlayerCameraManager->GetCameraRotation();
         }
     }
     
-    // 카메라 위치 유효성 검사
-    if (CameraLocation.IsZero())
+    // 2. 카메라 각도를 고려한 시야각 및 거리 체크
+    FVector CameraToSource = SourceLocation - CameraLocation;
+    float Distance = CameraToSource.Size();
+    
+    // 지면 기준 카메라 forward 벡터 계산 (pitch 영향 제거)
+    FVector CameraForward = CameraRotation.Vector();
+    FVector GroundForward = FVector(CameraForward.X, CameraForward.Y, 0.0f).GetSafeNormal();
+    
+    // 시야각 체크 - 지면 투영된 벡터로 계산
+    CameraToSource.Normalize();
+    FVector GroundCameraToSource = FVector(CameraToSource.X, CameraToSource.Y, 0.0f).GetSafeNormal();
+    float DotProduct = FVector::DotProduct(GroundForward, GroundCameraToSource);
+    
+    // Pitch 각도에 따른 시야각 조정 (-60도가 -90도보다 더 넓은 시야각)
+    float AdjustedFOV = 90.0f; // 기본 FOV
+    float CameraPitch = FMath::Abs(CameraRotation.Pitch);
+    if (CameraPitch > 45.0f)
     {
-        return true; // 유효하지 않은 위치인 경우 소리 재생 허용
+        // -60도(60도)가 -90도(90도)보다 더 넓은 시야각을 가지도록 수정
+        float PitchFactor = (90.0f - CameraPitch) / 45.0f; // 90도에서 0, 45도에서 1
+        AdjustedFOV = FMath::Lerp(120.0f, 140.0f, FMath::Clamp(PitchFactor, 0.0f, 1.0f));
     }
     
-    // 2. RTS 카메라의 실제 뷰포트 경계 계산 (캐싱 활용)
-    FBox2D ScreenBounds(ForceInit);
+    float FOVCos = FMath::Cos(FMath::DegreesToRadians(AdjustedFOV * 0.5f));
     
-    // 캐싱된 RTS 카메라 사용 (성능 최적화)
-    AGS_RTSCamera* RTSCameraActor = CachedRTSCamera.Get();
-    
-    if (!RTSCameraActor || !IsValid(RTSCameraActor))
+    // 3. 수학적 시야각 체크
+    bool bPassedMathCheck = (DotProduct >= FOVCos);
+    if (!bPassedMathCheck)
     {
-        // 캐시가 유효하지 않으면 새로 찾기
-        for (TActorIterator<AGS_RTSCamera> ActorIterator(GetWorld()); ActorIterator; ++ActorIterator)
+        // 시야각 밖 - 각도별 최적화된 거리 임계값 적용
+        float CloseDistance = 1500.0f; // 기본값
+        
+        if (CameraPitch >= 85.0f) // -90도 근처
         {
-            AGS_RTSCamera* FoundCamera = *ActorIterator;
-            if (FoundCamera && IsValid(FoundCamera))
+            CloseDistance = 2000.0f;
+        }
+        else if (CameraPitch >= 55.0f && CameraPitch < 85.0f) // -60도 범위
+        {
+            CloseDistance = 2500.0f; // -60도는 가장 관대하게
+        }
+        else if (CameraPitch > 45.0f) // -45도 ~ -55도
+        {
+            CloseDistance = 2200.0f;
+        }
+        
+        if (Distance > CloseDistance)
+        {
+            // 시야각 밖이고 멀리 있으면 화면 투영으로 재검증
+            FVector2D ScreenPosition;
+            bool bIsOnScreen = RTSController->ProjectWorldLocationToScreen(SourceLocation, ScreenPosition, false);
+            
+            if (!bIsOnScreen) return false; // 화면에도 없으면 차단
+            
+            // 화면 경계 확인
+            FVector2D ViewportSize;
+            if (GEngine && GEngine->GameViewport)
             {
-                RTSCameraActor = FoundCamera;
-                CachedRTSCamera = FoundCamera; // 캐시 업데이트
-                break;
+                GEngine->GameViewport->GetViewportSize(ViewportSize);
+                
+                // -60도에서 더 관대한 화면 경계 적용
+                float MarginMultiplier = (CameraPitch >= 55.0f && CameraPitch < 85.0f) ? 0.2f : 0.1f;
+                float MarginX = ViewportSize.X * MarginMultiplier;
+                float MarginY = ViewportSize.Y * MarginMultiplier;
+                
+                bool bInScreenBounds = (ScreenPosition.X >= -MarginX && 
+                                      ScreenPosition.X <= ViewportSize.X + MarginX &&
+                                      ScreenPosition.Y >= -MarginY && 
+                                      ScreenPosition.Y <= ViewportSize.Y + MarginY);
+                
+                if (!bInScreenBounds) return false; // 화면 경계 밖이면 차단
             }
         }
     }
     
-    if (RTSCameraActor)
+    // 4. 거리 기반 예외 처리
+    if (Distance <= 800.0f) // 8미터 이내는 항상 들림
     {
-        // RTS 카메라의 컴포넌트들이 유효한지 확인
-        UCameraComponent* CameraComp = RTSCameraActor->GetCameraComponent();
-        USpringArmComponent* SpringArmComp = RTSCameraActor->GetSpringArmComponent();
-        
-        if (CameraComp && SpringArmComp)
+        return true;
+    }
+    
+    // 5. 방 모듈 체크
+    if (IsInSameRoom(CameraLocation, SourceLocation))
+    {
+        if (Distance <= 1200.0f) // 같은 방이면 12미터까지 들림
         {
-            // 간단한 RTS 카메라 뷰포트 계산 사용
-            ScreenBounds = RTSCameraActor->GetSimpleViewBounds();
-        }
-        else
-        {
-            // 컴포넌트가 없으면 폴백: 기존 방식 사용
-            ScreenBounds = CalculateScreenWorldBounds(RTSController);
-        }
-    }
-    else
-    {
-        // 폴백: 기존 방식 사용
-        ScreenBounds = CalculateScreenWorldBounds(RTSController);
-    }
-    
-    // 화면 영역 유효성 검사
-    if (ScreenBounds.GetExtent().IsZero())
-    {
-        return true; // 유효하지 않은 화면 영역인 경우 소리 재생 허용
-    }
-    
-    // 3. RTS 카메라의 뷰포트 내 위치 확인
-    FVector2D SourcePos2D(SourceLocation.X, SourceLocation.Y);
-    bool bInScreen = ScreenBounds.IsInside(SourcePos2D);
-    
-    if (bInScreen)
-    {
-        return true; // 화면 안에 있으면 무조건 재생
-    }
-    
-    // 4. 화면 밖이지만 가까운 경우 체크
-    // RTS 카메라의 정확한 거리 계산 사용
-    float DistanceToScreen = CalculateDistanceToScreenBounds(SourcePos2D, ScreenBounds);
-    
-    // 거리 유효성 검사
-    if (DistanceToScreen < 0.0f || FMath::IsNaN(DistanceToScreen))
-    {
-        return true; // 유효하지 않은 거리인 경우 소리 재생 허용
-    }
-    
-    // 5. 통로/복도 감지 (십자 형태 맵 특별 처리)
-    bool bInCorridor = IsInCorridorRange(CameraLocation, SourceLocation);
-    
-    if (bInCorridor)
-    {
-        // 복도/통로에 있는 경우 더 멀리까지 들림
-        return DistanceToScreen <= CorridorAudioDistance;
-    }
-    
-    // 6. 일반적인 경우
-    return DistanceToScreen <= AudioExtendDistance;
-}
-
-// RTS 카메라의 실제 보이는 영역 계산
-FBox2D UGS_AudioComponentBase::GetRTSCameraViewBounds() const
-{
-    FBox2D ViewBounds(ForceInit);
-    
-    APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-    if (!LocalPC || !LocalPC->PlayerCameraManager)
-    {
-        return ViewBounds;
-    }
-    
-    // 화면의 네 모서리를 월드 좌표로 변환
-    FVector2D ViewportSize;
-    if (GEngine && GEngine->GameViewport)
-    {
-        GEngine->GameViewport->GetViewportSize(ViewportSize);
-    }
-    else
-    {
-        ViewportSize = FVector2D(1920, 1080); // 기본값
-    }
-    
-    // 화면 모서리 좌표
-    TArray<FVector2D> ScreenCorners = {
-        FVector2D(0, 0),                                    // 좌상단
-        FVector2D(ViewportSize.X, 0),                       // 우상단
-        FVector2D(0, ViewportSize.Y),                       // 좌하단
-        FVector2D(ViewportSize.X, ViewportSize.Y)           // 우하단
-    };
-    
-    // 각 모서리를 월드 좌표로 변환
-    for (const FVector2D& ScreenPos : ScreenCorners)
-    {
-        FVector WorldPos, WorldDir;
-        if (LocalPC->DeprojectScreenPositionToWorld(ScreenPos.X, ScreenPos.Y, WorldPos, WorldDir))
-        {
-            // 지면과의 교점 계산 (Z = 0 평면)
-            float T = -WorldPos.Z / WorldDir.Z;
-            FVector GroundPos = WorldPos + WorldDir * T;
-            
-            ViewBounds += FVector2D(GroundPos.X, GroundPos.Y);
+            return true;
         }
     }
     
-    // 여유 공간 추가 (화면 크기의 50%)
-    FVector2D Center = ViewBounds.GetCenter();
-    FVector2D Extent = ViewBounds.GetExtent() * 1.5f; // 150% 크기
-    
-    return FBox2D(Center - Extent, Center + Extent);
+    // 6. 최종 통과
+    return true;
 }
 
 bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
@@ -337,7 +296,6 @@ bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
     
     const float CurrentTime = GetWorld()->GetTimeSeconds();
     
-    // 캐싱된 카메라 위치가 유효하고 업데이트 주기 내라면 캐시 사용
     if (!CachedCameraLocation.IsZero() && 
         (CurrentTime - LastCameraLocationUpdateTime) < CameraLocationUpdateInterval)
     {
@@ -372,7 +330,7 @@ bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
     // RTS Controller 처리
     if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(LocalPC))
     {
-        // 1-1: 캐싱된 RTSCamera 사용 (성능 최적화)
+        // 1-1: 캐싱된 RTSCamera 사용
         AGS_RTSCamera* RTSCameraActor = nullptr;
         
         if (CachedRTSCamera.IsValid())
@@ -396,7 +354,7 @@ bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
         
         if (RTSCameraActor)
         {
-            FVector NewCameraLocation = FVector::ZeroVector;
+            FVector NewCameraLocation;
             
             UCameraComponent* CameraComp = RTSCameraActor->GetCameraComponent();
             USpringArmComponent* SpringArmComp = RTSCameraActor->GetSpringArmComponent();
@@ -413,7 +371,7 @@ bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
             }
             else
             {
-                // 최후에는 RTS 카메라 액터의 위치
+                // RTS 카메라 액터의 위치
                 NewCameraLocation = RTSCameraActor->GetActorLocation();
             }
             
@@ -428,7 +386,7 @@ bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
             }
         }
         
-        // 1-2: PlayerCameraManager 백업 (캐싱 없음 - 불안정함)
+        // 1-2: PlayerCameraManager 백업
         if (RTSController->PlayerCameraManager)
         {
             FVector CameraManagerLocation = RTSController->PlayerCameraManager->GetCameraLocation();
@@ -632,11 +590,12 @@ FBox2D UGS_AudioComponentBase::CalculateScreenWorldBounds(AGS_RTSController* RTS
         return FBox2D(FVector2D(-2000, -2000), FVector2D(2000, 2000));
     }
     
-    // 1. 카메라 정보 가져오기 (FOV, 스프링암 각도 등)
+    // 1. 카메라 정보 가져오기 (FOV, 스프링암 각도 및 길이 등)
     float CameraFOV = DefaultFOV; // 기본값
     float SpringArmPitch = 0.0f;
     float SpringArmYaw = 0.0f;
-    float SpringArmLength = 2000.0f;
+    float SpringArmLength = 2000.0f; // 기본값
+    float CameraHeight = 0.0f;
     
     // FOV 가져오기
     if (RTSController->PlayerCameraManager)
@@ -660,6 +619,18 @@ FBox2D UGS_AudioComponentBase::CalculateScreenWorldBounds(AGS_RTSController* RTS
         }
     }
     
+    // 카메라 높이 계산 (SpringArm 길이와 각도를 고려)
+    FVector CameraLocation;
+    if (GetActualCameraLocation(CameraLocation))
+    {
+        CameraHeight = FMath::Abs(CameraLocation.Z);
+    }
+    else
+    {
+        // SpringArm 정보로 카메라 높이 추정
+        CameraHeight = SpringArmLength * FMath::Sin(FMath::DegreesToRadians(FMath::Abs(SpringArmPitch)));
+    }
+    
     // 2. 뷰포트 크기
     FVector2D ViewportSize;
     if (GEngine && GEngine->GameViewport)
@@ -671,45 +642,65 @@ FBox2D UGS_AudioComponentBase::CalculateScreenWorldBounds(AGS_RTSController* RTS
         ViewportSize = FVector2D(1920, 1080);
     }
     
-    // 3. FOV 기반 계산 (Perspective 투영 고려)
+    // 3. SpringArm 정보를 활용한 정확한 FOV 계산
     float FOVRadians = FMath::DegreesToRadians(CameraFOV);
     float AspectRatio = ViewportSize.X / ViewportSize.Y;
     
-    // FOV와 카메라 높이를 이용한 이론적 화면 영역 계산
-    FVector CameraLocation;
-    if (GetActualCameraLocation(CameraLocation))
+    if (CameraHeight > 0.0f)
     {
-        float CameraHeight = FMath::Abs(CameraLocation.Z);
-        
-        // Perspective 투영에서 지면에 투영되는 영역 계산
         float HalfVerticalSize = CameraHeight * FMath::Tan(FOVRadians * 0.5f);
         float HalfHorizontalSize = HalfVerticalSize * AspectRatio;
         
-        // FOV 기반 이론적 경계 (스프링암 각도 무시)
-        FBox2D TheoreticalBounds(
-            FVector2D(CameraLocation.X - HalfHorizontalSize, CameraLocation.Y - HalfVerticalSize),
-            FVector2D(CameraLocation.X + HalfHorizontalSize, CameraLocation.Y + HalfVerticalSize)
-        );
-        
-        //  Pitch 각도 보정
-        if (FMath::Abs(SpringArmPitch) > 5.0f) // 카메라가 기울어져 있으면 보정
+        // SpringArm Pitch 각도 보정 (더 정확한 계산)
+        if (FMath::Abs(SpringArmPitch) > 5.0f)
         {
-            // 선형 보정: -90도에서 1.3배, 0도에서 1.0배
             float PitchRad = FMath::DegreesToRadians(FMath::Abs(SpringArmPitch));
-            float PitchMultiplier = FMath::Lerp(1.0f, 1.3f, PitchRad / (PI * 0.5f));
             
-            HalfVerticalSize *= PitchMultiplier;
-            HalfHorizontalSize *= PitchMultiplier;
+            // 실제 지면 투영 거리 계산
+            float HorizontalDistance = SpringArmLength * FMath::Cos(PitchRad);
+            float VerticalOffset = HorizontalDistance * FMath::Tan(FOVRadians * 0.5f);
             
-            TheoreticalBounds = FBox2D(
-                FVector2D(CameraLocation.X - HalfHorizontalSize, CameraLocation.Y - HalfVerticalSize),
-                FVector2D(CameraLocation.X + HalfHorizontalSize, CameraLocation.Y + HalfVerticalSize)
-            );
+            // 각도가 클수록 앞쪽으로 더 많이 보임
+            float ForwardBias = FMath::Lerp(1.0f, 1.8f, PitchRad / (PI * 0.5f));
+            float BackwardBias = FMath::Lerp(1.0f, 0.6f, PitchRad / (PI * 0.5f));
+            
+            HalfVerticalSize = VerticalOffset;
+            HalfHorizontalSize = HalfVerticalSize * AspectRatio;
+            
+            // 카메라 위치 기준으로 비대칭 경계 계산
+            FVector CameraPos;
+            if (GetActualCameraLocation(CameraPos))
+            {
+                FVector ForwardDir = FVector(1, 0, 0).RotateAngleAxis(SpringArmYaw, FVector::UpVector);
+                FVector2D Center2D(CameraPos.X, CameraPos.Y);
+                FVector2D ForwardOffset2D(ForwardDir.X, ForwardDir.Y);
+                
+                // 앞쪽과 뒤쪽을 다르게 적용
+                FVector2D ForwardExtent = ForwardOffset2D * (HalfVerticalSize * ForwardBias);
+                FVector2D BackwardExtent = ForwardOffset2D * (HalfVerticalSize * BackwardBias);
+                FVector2D SideExtent = FVector2D(-ForwardDir.Y, ForwardDir.X) * HalfHorizontalSize;
+                
+                Bounds = FBox2D(ForceInit);
+                Bounds += Center2D + ForwardExtent + SideExtent;
+                Bounds += Center2D + ForwardExtent - SideExtent;
+                Bounds += Center2D - BackwardExtent + SideExtent;
+                Bounds += Center2D - BackwardExtent - SideExtent;
+                
+                return Bounds;
+            }
         }
         
-        Bounds = TheoreticalBounds;
-        
-        return Bounds; // FOV 기반 정확한 계산 결과 반환
+        // 기본 대칭 계산
+        FVector CameraPos;
+        if (GetActualCameraLocation(CameraPos))
+        {
+            FBox2D TheoreticalBounds(
+                FVector2D(CameraPos.X - HalfHorizontalSize, CameraPos.Y - HalfVerticalSize),
+                FVector2D(CameraPos.X + HalfHorizontalSize, CameraPos.Y + HalfVerticalSize)
+            );
+            
+            return TheoreticalBounds;
+        }
     }
     
     // 4. 스프링암 각도 보정 계산
@@ -891,7 +882,7 @@ void UGS_AudioComponentBase::SetUnifiedRTPCValue(UAkRtpc* RTPC, float Normalized
     const float WwiseValue = NormalizedValue * 100.0f;
     const int32 InterpolationTimeMs = FMath::RoundToInt(InterpolationTime * 1000.0f);
 
-    AKRESULT Result = AkDevice->SetRTPCValue(RTPC, WwiseValue, InterpolationTimeMs, GetOwner());
+    AkDevice->SetRTPCValue(RTPC, WwiseValue, InterpolationTimeMs, GetOwner());
     
 }
 
@@ -913,4 +904,60 @@ void UGS_AudioComponentBase::InitializeAudioRTPCs()
     {
         SetUnifiedRTPCValue(OcclusionDisableRTPC, 0.0f);
     }
+}
+
+// 새로운 헬퍼 함수 추가
+bool UGS_AudioComponentBase::IsInSameRoom(const FVector& ListenerPos, const FVector& SourcePos) const
+{
+    // 방 모듈 찾기
+    TArray<AActor*> OverlappingRooms;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGS_RoomBase::StaticClass(), OverlappingRooms);
+    
+    AGS_RoomBase* ListenerRoom = nullptr;
+    AGS_RoomBase* SourceRoom = nullptr;
+    
+    for (AActor* RoomActor : OverlappingRooms)
+    {
+        if (AGS_RoomBase* Room = Cast<AGS_RoomBase>(RoomActor))
+        {
+            FBox RoomBounds = Room->GetComponentsBoundingBox();
+            
+            if (RoomBounds.IsInside(ListenerPos))
+                ListenerRoom = Room;
+            
+            if (RoomBounds.IsInside(SourcePos))
+                SourceRoom = Room;
+        }
+    }
+    
+    // 같은 방이거나 연결된 방인지 체크
+    return ListenerRoom == SourceRoom || AreRoomsConnected(ListenerRoom, SourceRoom);
+}
+
+bool UGS_AudioComponentBase::AreRoomsConnected(AGS_RoomBase* Room1, AGS_RoomBase* Room2) const
+{
+    if (!Room1 || !Room2) return false;
+    
+    // 인접한 방인지 체크 (거리 기반)
+    FVector Room1Center = Room1->GetActorLocation();
+    FVector Room2Center = Room2->GetActorLocation();
+    
+    float RoomDistance = FVector::Dist(Room1Center, Room2Center);
+    return RoomDistance < 2000.0f; // 방 크기에 따라 조절
+}
+
+FBox2D UGS_AudioComponentBase::CalculateAngledCameraViewBounds(const FVector& CameraLocation, float Pitch) const
+{
+    // -60도 카메라의 실제 투영 영역 계산
+    const float PitchRad = FMath::DegreesToRadians(FMath::Abs(Pitch));
+    const float ViewDistance = 3000.0f; // 시야 거리
+    
+    // 카메라가 보는 지면 영역 계산
+    float ForwardOffset = ViewDistance * FMath::Cos(PitchRad);
+    
+    // 실제 보이는 영역 (타원형에 가까움)
+    FVector2D Center(CameraLocation.X + ForwardOffset * 0.3f, CameraLocation.Y);
+    FVector2D Extents(ViewDistance * 0.8f, ViewDistance * 0.6f);
+    
+    return FBox2D(Center - Extents, Center + Extents);
 }

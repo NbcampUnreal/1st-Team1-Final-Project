@@ -136,7 +136,7 @@ protected:
 	// RTS 모드 감지
 	bool IsRTSMode() const;
 
-	// 자식 클래스 특화 헬퍼 함수
+	// 특화 헬퍼 함수
 	void DisableAllCollisions();
 
 	// 멀티캐스트 함수들

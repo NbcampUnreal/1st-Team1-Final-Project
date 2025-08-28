@@ -653,4 +653,3 @@ void AGS_WeaponShield::DisableAllCollisions()
 		DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
-
