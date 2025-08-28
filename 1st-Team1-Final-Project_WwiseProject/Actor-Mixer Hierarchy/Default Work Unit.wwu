@@ -48762,6 +48762,18 @@
 								<Value>5</Value>
 							</ValueList>
 						</Property>
+						<Property Name="MakeUpGain" Type="Real64">
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{EFA48AA2-863F-451C-BCF6-AD780506A426}">
+										<PropertyList>
+											<Property Name="Enabled" Type="bool" Value="True"/>
+											<Property Name="Min" Type="Real64" Value="-1"/>
+										</PropertyList>
+									</Modifier>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
 					</PropertyList>
 					<ReferenceList>
 						<Reference Name="Attenuation">
@@ -48859,7 +48871,7 @@
 								</Property>
 								<Property Name="Lowpass" Type="int16">
 									<ValueList>
-										<Value>10</Value>
+										<Value>15</Value>
 									</ValueList>
 								</Property>
 								<Property Name="MakeUpGain" Type="Real64">
@@ -48892,7 +48904,7 @@
 								</Property>
 								<Property Name="Volume" Type="Real64">
 									<ValueList>
-										<Value>-5</Value>
+										<Value>-6</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
@@ -48900,7 +48912,7 @@
 												<PropertyList>
 													<Property Name="Enabled" Type="bool" Value="True"/>
 													<Property Name="Max" Type="Real64" Value="1"/>
-													<Property Name="Min" Type="Real64" Value="-1"/>
+													<Property Name="Min" Type="Real64" Value="-2"/>
 												</PropertyList>
 											</Modifier>
 										</ModifierInfo>
@@ -48918,8 +48930,8 @@
 							<ChildrenList>
 								<AudioFileSource Name="FNF_ME_sfx_combat_axe_impact_metal_heavy" ID="{14423DBF-70F2-44D9-945C-F8072E3963AF}">
 									<PropertyList>
-										<Property Name="FadeInDuration" Type="Real64" Value="0.0269681476514574"/>
-										<Property Name="FadeOutDuration" Type="Real64" Value="0.781730195945335"/>
+										<Property Name="FadeInDuration" Type="Real64" Value="0.0558061631290491"/>
+										<Property Name="FadeOutDuration" Type="Real64" Value="0.815374547335859"/>
 										<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
 										<Property Name="TrimBegin" Type="Real64" Value="0.0370812030207539"/>
 										<Property Name="TrimEnd" Type="Real64" Value="1.39923140109071"/>

@@ -10,7 +10,7 @@
 								<Value>True</Value>
 							</ValueList>
 						</Property>
-						<Property Name="RadiusMax" Type="Real64" Value="1200"/>
+						<Property Name="RadiusMax" Type="Real64" Value="1100"/>
 					</PropertyList>
 					<ObjectLists>
 						<ObjectList Name="RTPC">
@@ -66,18 +66,18 @@
 											<SegmentShape>Exp3</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>1020.76617333333</XPos>
-											<YPos>-0.7115</YPos>
+											<XPos>879.42326</XPos>
+											<YPos>-0.57141</YPos>
 											<Flags>0</Flags>
 										</Point>
 										<Point>
-											<XPos>1140.37236</XPos>
-											<YPos>-1.38585</YPos>
+											<XPos>989.06226</XPos>
+											<YPos>-1.15986</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>1200</XPos>
+											<XPos>1100</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>
@@ -237,7 +237,7 @@
 								<Value>True</Value>
 							</ValueList>
 						</Property>
-						<Property Name="RadiusMax" Type="Real64" Value="3200"/>
+						<Property Name="RadiusMax" Type="Real64" Value="3000"/>
 					</PropertyList>
 					<ObjectLists>
 						<ObjectList Name="RTPC">
@@ -293,13 +293,13 @@
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>2934.28581925926</XPos>
-											<YPos>-0.97471</YPos>
+											<XPos>2318.33481</XPos>
+											<YPos>-0.75904</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>3200</XPos>
+											<XPos>3000</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>
@@ -326,7 +326,7 @@
 											<Flags>5</Flags>
 										</Point>
 										<Point>
-											<XPos>3200</XPos>
+											<XPos>3000</XPos>
 											<YPos>100</YPos>
 											<Flags>37</Flags>
 										</Point>
