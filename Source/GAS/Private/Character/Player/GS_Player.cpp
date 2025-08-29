@@ -36,13 +36,13 @@ AGS_Player::AGS_Player()
 	PostProcessComponent->bUnbound = true; // 시야 안 전체에만 적용할 경우 false
 	PostProcessComponent->BlendWeight = 0.f; // 기본은 비활성화
 
-	////steam name widget
-	//SteamNameWidgetComp = CreateDefaultSubobject<UGS_SteamNameWidgetComp>(TEXT("SteamWidgetComp"));
-	//SteamNameWidgetComp->SetupAttachment(RootComponent);
-	//SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
-	////SteamNameWidgetComp->GetBodyInstance()->TermBody();
-	//SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//SteamNameWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+	//steam name widget
+	SteamNameWidgetComp = CreateDefaultSubobject<UGS_SteamNameWidgetComp>(TEXT("SteamWidgetComp"));
+	SteamNameWidgetComp->SetupAttachment(RootComponent);
+	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
+	SteamNameWidgetComp->GetBodyInstance()->TermBody();
+	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SteamNameWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BlurMat(TEXT("/Game/VFX/MI_AbscureDebuff"));
 	if (BlurMat.Succeeded())
@@ -107,11 +107,11 @@ void AGS_Player::Tick(float DeltaSeconds)
 		ObscureTimeline.TickTimeline(DeltaSeconds);
 	}
 
-	////steam widget rotate
-	//if (IsValid(SteamNameWidgetComp) && !HasAuthority())
-	//{
-	//	UpdateSteamNameWidgetRotation();
-	//}
+	//steam widget rotate
+	if (IsValid(SteamNameWidgetComp) && !HasAuthority())
+	{
+		UpdateSteamNameWidgetRotation();
+	}
 }
 
 void AGS_Player::PossessedBy(AController* NewController)
@@ -439,20 +439,20 @@ void AGS_Player::PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPos
 
 void AGS_Player::UpdateSteamNameWidgetRotation()
 {
-	//if (!IsValid(SteamNameWidgetComp))
-	//{
-	//	return;
-	//}
- //   
-	//if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
-	//{
-	//	FVector CameraForward = CameraManager->GetCameraRotation().Vector();
-	//	FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
-	//	FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
-	//	FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
- //       
-	//	SteamNameWidgetComp->SetWorldRotation(WidgetRotation);
-	//}
+	if (!IsValid(SteamNameWidgetComp))
+	{
+		return;
+	}
+    
+	if (APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0))
+	{
+		FVector CameraForward = CameraManager->GetCameraRotation().Vector();
+		FVector CameraRight = FVector::CrossProduct(CameraForward, FVector::UpVector).GetSafeNormal();
+		FVector CameraUp = FVector::CrossProduct(CameraRight, CameraForward).GetSafeNormal();
+		FRotator WidgetRotation = UKismetMathLibrary::MakeRotFromXZ(-CameraForward, CameraUp);
+        
+		SteamNameWidgetComp->SetWorldRotation(WidgetRotation);
+	}
 }
 
 /*

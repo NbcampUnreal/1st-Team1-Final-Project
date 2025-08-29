@@ -510,6 +510,7 @@ void AGS_Drakhar::StopCtrl()
 		
 		TargetSpringArmLength = 500.f;
 		bIsFlying = true;
+		bCanCombo = true;
 	}
 }
 
