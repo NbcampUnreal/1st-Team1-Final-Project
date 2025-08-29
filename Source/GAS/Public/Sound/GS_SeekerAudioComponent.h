@@ -307,10 +307,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Ares Only", meta = (CallInEditor = "true"))
     void PlayAresComboAttackSoundWithExtra(int32 ComboIndex);
     
-    // AkComponent 헬퍼 함수
-    UFUNCTION(BlueprintCallable, Category = "Sound|Character")
-    class UAkComponent* GetOrCreateAkComponent();
-
     // 위치 기반 사운드 재생
     UFUNCTION(BlueprintCallable, Category = "Sound|Character")
     void PlaySoundAtLocation(UAkAudioEvent* SoundEvent, const FVector& Location);
@@ -531,9 +527,6 @@ private:
     // DT_SkillSet에서 스킬 정보 조회
     const struct FSkillInfo* GetSkillInfoFromDataTable(ESkillSlot SkillSlot) const;
 
-    UPROPERTY()
-    class UAkComponent* CachedAkComponent;
-    
     // ===================
     // 상수 정의
     // ===================

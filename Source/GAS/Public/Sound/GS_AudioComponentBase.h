@@ -13,6 +13,7 @@
 class AGS_RTSController;
 class AGS_RTSCamera;
 class AGS_RoomBase;
+class UAkComponent;
 
 /**
  * RTS 커맨드 사운드 타입 (공통 enum)
@@ -63,7 +64,6 @@ public:
 	static constexpr float MinRTPCUpdateInterval = 0.2f;     // RTPC 업데이트 최소 간격
 	static constexpr float RTPCDistanceThreshold = 50.0f;    // RTPC 업데이트를 위한 최소 거리 차이
 	
-	
 	// 모드별 거리 설정 상수
 	static constexpr float RTSMaxDistance = 20000.0f;        // RTS 모드 최대 거리 (200m)
 	static constexpr float TPSMaxDistance = 2000.0f;         // TPS 모드 최대 거리 (20m)
@@ -77,19 +77,11 @@ public:
 	static constexpr int32 MaxActivePlayingIDs = 10;           // 최대 활성 사운드 ID 개수
 	static constexpr float DefaultInitTime = -1000.0f;         // 초기 시간 값
 	
-	// 화면 경계 계산 상수들
-	static constexpr float DefaultFOV = 90.0f;                 // 기본 FOV 값
-	static constexpr float DefaultAspectRatio = 16.0f / 9.0f;  // 기본 화면 비율
-	static constexpr float ViewBoundsMargin = 1.1f;            // 화면 경계 여유 공간 (110%)
-	static constexpr float CorridorAlignmentThreshold = 600.0f; // 통로 감지 임계값 (6m)
-	static constexpr float AudioExtendDistance = 1200.0f;      // 화면 밖 오디오 확장 거리 (12m)
-	static constexpr float CorridorAudioDistance = 2000.0f;    // 통로 내 오디오 거리 (20m)
-
 protected:
 	// ===================
 	// 메모리 관리
 	// ===================
-	
+
 	// 현재 재생 중인 사운드 ID들을 추적
 	TArray<AkPlayingID> ActivePlayingIDs;
 	
@@ -114,6 +106,12 @@ protected:
 	
 	UPROPERTY(Transient) 
 	float LastRTPCUpdateTime = DefaultInitTime;
+	
+	/** 현재 RTS 모드인지 여부를 캐싱하여 중복 호출 방지 */
+	bool bIsRTSModeCached;
+
+	/** 오디오 컴포넌트 초기화 여부 플래그 */
+	bool bIsAudioComponentInitialized;
 	
 	// ===================
 	// 카메라 위치 캐싱
@@ -161,10 +159,6 @@ public:
 	/** RPC 호출 빈도 체크 */
 	bool CanSendRPC() const;
 	
-	/** RTS 카메라의 실제 보이는 영역 계산 */
-	// UFUNCTION(BlueprintPure, Category = "Audio")
-	// FBox2D GetRTSCameraViewBounds() const;
-	
 	/** 실제 카메라 위치 가져오기 (캐싱 포함) */
 	UFUNCTION(BlueprintPure, Category = "Audio")
 	bool GetActualCameraLocation(FVector& OutLocation) const;
@@ -176,35 +170,17 @@ public:
 	/** 화면 투영 기반 소스 가시성 체크 */
 	bool IsSourceVisibleOnScreen(AGS_RTSController* RTSController, const FVector& SourceLocation) const;
 	
-	/** 화면 월드 경계 계산 (RTS 모드 전용) */
-	FBox2D CalculateScreenWorldBounds(AGS_RTSController* RTSController) const;
-	
-	/** 화면 경계까지의 거리 계산 */
-	float CalculateDistanceToScreenBounds(const FVector2D& Point, const FBox2D& Bounds) const;
-	
-	/** 통로 범위 내에 있는지 확인 */
-	bool IsInCorridorRange(const FVector& CameraLocation, const FVector& SourceLocation) const;
-	
-	// ===================
-	// 화면 경계 계산 함수들
-	// ===================
-	
-	/** FOV 기반 화면 경계 계산 */
-	FBox2D CalculateSimplifiedScreenBounds(AGS_RTSController* RTSController) const;
-	
-	/** 카메라 설정을 기반으로 한 기본 화면 영역 계산 */
-	FBox2D CalculateBasicViewBounds(const FVector& CameraLocation, float FOV, float CameraHeight, float AspectRatio = 16.0f/9.0f) const;
-
 	/** 두 위치가 같은 방에 있는지 확인 */
 	bool IsInSameRoom(const FVector& ListenerPos, const FVector& SourcePos) const;
 
 	/** 두 방이 연결되어 있는지 확인 */
 	bool AreRoomsConnected(AGS_RoomBase* Room1, AGS_RoomBase* Room2) const;
 
-	/** 카메라 각도를 고려한 실제 화면 경계 계산 */
-	FBox2D CalculateAngledCameraViewBounds(const FVector& CameraLocation, float Pitch) const;
 
 protected:
+	/** 특정 위치에 있는 Room을 찾는 함수 */
+	AGS_RoomBase* FindRoomAtLocation(const FVector& Location) const;
+
 	// ===============
 	// 메모리 관리 헬퍼
 	// ===============
@@ -244,16 +220,23 @@ protected:
 	// 가상 함수 (하위 클래스에서 구현)
 	// ===================
 	
-	/** 거리 기반 상태 변경 체크 (하위 클래스에서 구현) */
+	/** 거리 기반 상태 변경 체크 */
 	virtual void CheckForStateChanges() {}
 	
-	/** 최대 오디오 거리 반환 (하위 클래스에서 구현) */
+	/** 최대 오디오 거리 반환 */
 	virtual float GetMaxAudioDistance() const { return TPSMaxDistance; }
 	
-	/** 특정 사운드 완료 시 추가 정리 작업 (하위 클래스에서 구현) */
+	/** 특정 사운드 완료 시 추가 정리 작업 */
 	virtual void OnSpecificSoundFinished(AkPlayingID FinishedID) {}
 
-public:
+	/** Owner Actor의 AkComponent를 찾거나 생성하는 함수 */
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	UAkComponent* GetOrCreateAkComponent();
+
 	// Replication 설정
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+protected:
+	UPROPERTY()
+	TObjectPtr<UAkComponent> CachedAkComponent; // Wwise Component Cache
 };
