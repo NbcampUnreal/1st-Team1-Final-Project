@@ -361,6 +361,9 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	//skill state reset
 	GuardianDoSkillState = EGuardianDoSkill::None;
+
+	// Skill Input Reset
+	GetSkillComp()->ResetAllowedSkillsMask(); // SJE
 	
 	if (DamagedCharactersFromDash.IsEmpty())
 	{

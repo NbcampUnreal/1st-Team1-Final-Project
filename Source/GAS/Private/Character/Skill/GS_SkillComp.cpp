@@ -164,6 +164,7 @@ void UGS_SkillComp::InitSkills()
 
 void UGS_SkillComp::ResetAllowedSkillsMask()
 {
+	UE_LOG(LogTemp, Warning, TEXT("ResetAllowedSkillsMask"));
 	CurAllowedSkillsMask = DefaultAllowedSkillsMask;
 }
 
@@ -239,7 +240,6 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 	
 	SkillMap.Add(Slot, Skill);
 }
-
 
 void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
 {

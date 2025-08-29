@@ -30,7 +30,6 @@ void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 		return;
 	}
 
-	
 	//server logic
 	AGS_Guardian* Guardian = Cast<AGS_Guardian>(OwnerCharacter);
 	if (Guardian)
@@ -42,10 +41,9 @@ void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 
 	if (OwnerCharacter)
 	{
-		//play montage, except server
+		// play montage, except server
 		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
 	}
-	
 }
 
 void UGS_DrakharDraconicFury::OnSkillAnimationEnd()
