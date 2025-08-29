@@ -8,7 +8,6 @@
 #include "GS_WeaponEquipable.generated.h"
 
 class AGS_Seeker;
-class UGS_WeaponVFXComponent;
 
 UCLASS()
 class GAS_API AGS_WeaponEquipable : public AGS_Weapon
@@ -24,7 +23,7 @@ protected:
 	bool IsValidForLevelTransition() const;
 	bool IsOwnerCharValid() const;
 	void ClearHitActors();
-	void ClearSafetyTimer();
+	virtual void ClearSafetyTimer();
 	virtual FHitResult CreateCorrectHitResult(const FHitResult& OriginalResult, bool bFromSweep) const;
 
 protected:

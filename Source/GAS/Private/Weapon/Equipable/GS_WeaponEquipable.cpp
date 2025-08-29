@@ -2,6 +2,7 @@
 
 
 #include "Weapon/Equipable/GS_WeaponEquipable.h"
+#include "Weapon/Component/GS_WeaponVFXComponent.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Player/Seeker/GS_Ares.h"
@@ -34,7 +35,7 @@ bool AGS_WeaponEquipable::IsValidForLevelTransition() const
 
 bool AGS_WeaponEquipable::IsOwnerCharValid() const
 {
-	return OwnerChar != nullptr;
+	return OwnerChar != nullptr && IsValid(OwnerChar) && !OwnerChar->IsActorBeingDestroyed();
 }
 
 void AGS_WeaponEquipable::ClearHitActors()
@@ -44,10 +45,18 @@ void AGS_WeaponEquipable::ClearHitActors()
 
 void AGS_WeaponEquipable::ClearSafetyTimer()
 {
-	if (UWorld* World = GetWorld())
+	// 안전한 타이머 정리 - 레벨 전환 시에도 안전하게 처리
+	if (UWorld* World = GetWorld(); World && IsValid(World) && !World->bIsTearingDown)
 	{
-		World->GetTimerManager().ClearTimer(SafetyTimerHandle);
+		FTimerManager& TimerManager = World->GetTimerManager();
+		if (&TimerManager && SafetyTimerHandle.IsValid())
+		{
+			TimerManager.ClearTimer(SafetyTimerHandle);
+		}
 	}
+	
+	// 타이머 핸들 무효화
+	SafetyTimerHandle.Invalidate();
 }
 
 FHitResult AGS_WeaponEquipable::CreateCorrectHitResult(const FHitResult& OriginalResult, bool bFromSweep) const
