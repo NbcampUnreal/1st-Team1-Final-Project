@@ -59,10 +59,6 @@ void UGS_HPWidget::InitializeHPWidget(UGS_StatComp* InStatComp)
 	{
 		HPDelayBarWidget->SetPercent(CurrentHPPercent);
 	}
-	if (HPSlider)
-	{
-		HPSlider->SetValue(CurrentHPPercent);
-	}
 	OnCurrentHPBarChanged(InStatComp);
 }
 
@@ -90,11 +86,8 @@ void UGS_HPWidget::OnCurrentHPBarChanged(UGS_StatComp* InStatComp)
 		CurrentHPPercent = TargetHPPercent; 
 		if (HPBarWidget)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("HPBarWidget SetPercent: %.4f"), TargetHPPercent);
 			HPBarWidget->SetPercent(TargetHPPercent); 
-		}
-		if (HPSlider)
-		{
-			HPSlider->SetValue(TargetHPPercent); 
 		}
 		
 		// 흔들림 헬퍼를 사용한 피해 효과 시작 (안전성 체크 포함)
@@ -112,10 +105,6 @@ void UGS_HPWidget::OnCurrentHPBarChanged(UGS_StatComp* InStatComp)
 		{
 			HPDelayBarWidget->SetPercent(DelayedHPPercent);
 		}
-		if (HPSlider)
-		{
-			HPSlider->SetValue(DelayedHPPercent);
-		}
 		CurrentHPPercent = HPBarWidget ? HPBarWidget->GetPercent() : TargetHPPercent;
 	}
 	
@@ -132,9 +121,9 @@ void UGS_HPWidget::StartDelayBarInterp()
 	if (DelayedHPPercent > TargetHPPercent)
 	{
 		//데미지
-		const float Duration = 0.05f;
+		const float Duration = 0.03f;
 		float Delta = FMath::Abs(DelayedHPPercent - TargetHPPercent);
-		InterpSpeed = FMath::Max(Delta / Duration, 0.01f);
+		InterpSpeed = FMath::Max(Delta / Duration, 0.5f);
 		GetWorld()->GetTimerManager().SetTimer(InterpTimerHandle, this, &UGS_HPWidget::UpdateDelayedHP, 0.01f, true);
 	}
 	else
