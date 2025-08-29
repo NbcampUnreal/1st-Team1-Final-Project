@@ -578,7 +578,6 @@ void UGS_AudioComponentBase::SetUnifiedRTPCValue(UAkRtpc* RTPC, float Normalized
     FAkAudioDevice* AkDevice = FAkAudioDevice::Get();
     if (!AkDevice)
     {
-        UE_LOG(LogTemp, Error, TEXT("[AudioBase] SetUnifiedRTPCValue: Wwise AudioDevice not found"));
         return;
     }
 
