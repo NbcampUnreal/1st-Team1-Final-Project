@@ -144,9 +144,11 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
                     }
 
                     // 만약 이번에 스폰한 액터가 방 모듈이면 방 개수 증가.
-                    if (Cast<AGS_RoomBase>(ActorClassToSpawn))
+                    if (ObjectData.ObjectType == EObjectType::Room
+                        || ObjectData.ObjectType == EObjectType::DoorAndWall)
                     {
                         RoomCount++;
+                        UE_LOG(LogTemp, Warning, TEXT("[방 숨김] 방 생성 완료 현재 방 개수 : %d"), RoomCount);
                     }
                 }
             }

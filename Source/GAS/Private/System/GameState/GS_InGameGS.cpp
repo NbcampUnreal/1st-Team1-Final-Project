@@ -2,6 +2,7 @@
 
 #include "EngineUtils.h"
 #include "AI/RTS/GS_RTSController.h"
+#include "DungeonEditor/Component/PlaceInfoComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "System/GameMode/GS_InGameGM.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,6 +25,7 @@ void AGS_InGameGS::SetDungeonData(int32 InTotalRoomCount)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[방 숨김] 서버에서만 호출 bool값 변경 완료"));
 		TotalRoomCount = InTotalRoomCount;
+		UE_LOG(LogTemp, Warning, TEXT("[방 숨김] TotalRoomCount = %d, InTotalRoomCount = %d"), TotalRoomCount, InTotalRoomCount);
 
 		// 이 변수를 true로 설정하면, 잠시 후 모든 클라이언트에서 OnRep_DungeonDataReplicated가 호출됩니다.
 		bDungeonDataReady = true;
@@ -95,28 +97,55 @@ void AGS_InGameGS::OnRep_DungeonDataReplicated()
 	// bDungeonDataReady가 true라는 신호를 받으면 검증을 시작합니다.
 	if (bDungeonDataReady)
 	{
-	UE_LOG(LogTemp, Warning, TEXT("[방 숨김] 클라이언트에서 방 숨김 진행"));
+		UE_LOG(LogTemp, Warning, TEXT("[방 숨김] 클라이언트에서 방 숨김 진행"));
 		// Guardian 역할을 가진 플레이어의 클라이언트에서만 벽 숨김 처리를 위한 검증을 시작합니다.
 		if (AGS_RTSController* MyController = Cast<AGS_RTSController>(GetGameInstance()->GetFirstLocalPlayerController()))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("[방 숨김] 컨트롤러가 RTS인 애들만 진행"));
-			AGS_PlayerState* PS = MyController->GetPlayerState<AGS_PlayerState>();
-			if (PS && PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("[로딩] 서버 던전 방 생성 준비 완료, 클라 검증 중.."));
-				Client_VerifyRoomSpawning();
-			}
+			// if (AGS_PlayerState* PS = MyController->GetPlayerState<AGS_PlayerState>())
+			// {
+			// 	UE_LOG(LogTemp, Warning, TEXT("[로딩] PlayerState 찾음"));
+			// 	if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+			// 	{
+			// 		UE_LOG(LogTemp, Warning, TEXT("[로딩] 서버 던전 방 생성 준비 완료, 클라 검증 중.."));
+			// 		Client_VerifyRoomSpawning();
+			// 	}
+			// 	else
+			// 	{
+			// 		UE_LOG(LogTemp, Warning, TEXT("[로딩] 플레이어 룰이 가디언이 아님. 방 숨김 처리 취소"));
+			// 	}
+			// }
+
+			// 임시 코드 나중에 RTSController쪽 초기화 부분 수정한 다음 다시 플레이어 룰 검사하는 방향으로 변경해야 함.
+			UE_LOG(LogTemp, Warning, TEXT("[로딩] 서버 던전 방 생성 준비 완료, 클라 검증 중.."));
+			Client_VerifyRoomSpawning();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[로딩] 플레이어 룰이 가디언이 아님. 방 숨김 처리 취소"));
+
 		}
 	}
 }
 
 void AGS_InGameGS::Client_VerifyRoomSpawning()
 {
-	// 현재 내(클라이언트) 월드에 스폰된 Room 액터의 수를 셉니다.
+	// 현재 내(클라이언트) 월드에 스폰된 Room과 Door/Wall 액터의 수를 셉니다.
 	int32 CurrentLocalRoomCount = 0;
-	for (TActorIterator<AGS_RoomBase> It(GetWorld()); It; ++It)
+	for (TActorIterator<AActor> It(GetWorld()); It; ++It)
 	{
-		CurrentLocalRoomCount++;
+		AActor* CurrentActor = *It;
+		if (!CurrentActor) continue;
+
+		// 액터가 UPlaceableInfoComponent를 가지고 있는지 확인합니다.
+		if (UPlaceInfoComponent* InfoComponent = CurrentActor->FindComponentByClass<UPlaceInfoComponent>())
+		{
+			EObjectType ObjectType = InfoComponent->GetObjectType();
+			if (ObjectType == EObjectType::Room || ObjectType == EObjectType::DoorAndWall)
+			{
+				CurrentLocalRoomCount++;
+			}
+		}
 	}
 
 	UE_LOG(LogTemp, Log, TEXT("[로딩] CLIENT: 방 개수 %d / %d."), CurrentLocalRoomCount, TotalRoomCount);
