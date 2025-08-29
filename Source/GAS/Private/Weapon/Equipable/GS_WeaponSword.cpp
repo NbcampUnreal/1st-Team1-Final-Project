@@ -39,14 +39,35 @@ void AGS_WeaponSword::BeginPlay()
 
 void AGS_WeaponSword::EnableHit()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	
 	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
 	ClearHitActors();
 }
 
 void AGS_WeaponSword::DisableHit()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 비활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AGS_WeaponSword::ServerEnableHit_Implementation()
@@ -57,7 +78,18 @@ void AGS_WeaponSword::ServerEnableHit_Implementation()
 		return;
 	}
 
-	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	
 	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
 	ClearHitActors();
 }
@@ -70,7 +102,17 @@ void AGS_WeaponSword::ServerDisableHit_Implementation()
 		return;
 	}
 
-	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 비활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -137,7 +179,10 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	// 1. 기본 VFX는 항상 재생
 	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 
-	// 2. '아레스'의 특수 공격일 경우 추가 효과(사운드, VFX) 재생
+	// 2. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
+	TriggerHitAuraOnHit(Damaged);
+
+	// 3. '아레스'의 특수 공격일 경우 추가 효과(사운드, VFX) 재생
 	if (AGS_Ares* Ares = Cast<AGS_Ares>(Attacker))
 	{
 		if (Ares->CurrentComboIndex == 4)

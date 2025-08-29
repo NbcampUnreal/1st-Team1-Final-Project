@@ -184,7 +184,10 @@ void AGS_WeaponShield::OnAttackHit(UPrimitiveComponent* OverlappedComponent, AAc
 	// 1. 기본 VFX는 항상 재생
 	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 
-	// 2. '찬'의 3번째 공격일 경우 추가 효과(사운드, VFX) 재생
+	// 2. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
+	TriggerHitAuraOnHit(Damaged);
+
+	// 3. '찬'의 3번째 공격일 경우 추가 효과(사운드, VFX) 재생
 	if (AGS_Chan* Chan = Cast<AGS_Chan>(Attacker))
 	{
 		if (Chan->CurrentComboIndex == 3)
@@ -378,7 +381,14 @@ void AGS_WeaponShield::Multicast_PlaySpecialHitVFX_Implementation(UNiagaraSystem
 
 void AGS_WeaponShield::EnableAttackHit()
 {
-	if (AttackHitBox && IsValid(AttackHitBox))
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// AttackHitBox 안전하게 활성화
+	if (AttackHitBox && IsValid(AttackHitBox) && !AttackHitBox->IsBeingDestroyed())
 	{
 		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
@@ -392,13 +402,30 @@ void AGS_WeaponShield::EnableAttackHit()
 
 void AGS_WeaponShield::DisableAttackHit()
 {
-	if (AttackHitBox && IsValid(AttackHitBox))
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// AttackHitBox 안전하게 비활성화
+	if (AttackHitBox && IsValid(AttackHitBox) && !AttackHitBox->IsBeingDestroyed())
 	{
 		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	
-	if (DefenseHitBox && IsValid(DefenseHitBox) && 
-		DefenseHitBox->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
+	// DefenseHitBox 상태를 안전하게 확인하여 Tick 상태 결정
+	bool bShouldDisableTick = true;
+	if (DefenseHitBox && IsValid(DefenseHitBox) && !DefenseHitBox->IsBeingDestroyed())
+	{
+		if (DefenseHitBox->GetCollisionEnabled() != ECollisionEnabled::NoCollision)
+		{
+			bShouldDisableTick = false;
+		}
+	}
+
+	// 모든 콜리전이 비활성화된 경우에만 Tick 비활성화
+	if (bShouldDisableTick)
 	{
 		SetActorTickEnabled(false);
 	}
@@ -411,14 +438,31 @@ void AGS_WeaponShield::ServerDisableAttackHit_Implementation()
 	{
 		return;
 	}
+
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
 	
-	if (AttackHitBox && IsValid(AttackHitBox))
+	// AttackHitBox 안전하게 비활성화
+	if (AttackHitBox && IsValid(AttackHitBox) && !AttackHitBox->IsBeingDestroyed())
 	{
 		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	
-	if (DefenseHitBox && IsValid(DefenseHitBox) && 
-		DefenseHitBox->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
+	// DefenseHitBox 상태를 안전하게 확인하여 Tick 상태 결정
+	bool bShouldDisableTick = true;
+	if (DefenseHitBox && IsValid(DefenseHitBox) && !DefenseHitBox->IsBeingDestroyed())
+	{
+		if (DefenseHitBox->GetCollisionEnabled() != ECollisionEnabled::NoCollision)
+		{
+			bShouldDisableTick = false;
+		}
+	}
+
+	// 모든 콜리전이 비활성화된 경우에만 Tick 비활성화
+	if (bShouldDisableTick)
 	{
 		SetActorTickEnabled(false);
 	}
@@ -431,8 +475,15 @@ void AGS_WeaponShield::ServerEnableAttackHit_Implementation()
 	{
 		return;
 	}
+
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
 	
-	if (AttackHitBox && IsValid(AttackHitBox))
+	// AttackHitBox 안전하게 활성화
+	if (AttackHitBox && IsValid(AttackHitBox) && !AttackHitBox->IsBeingDestroyed())
 	{
 		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
@@ -447,9 +498,14 @@ void AGS_WeaponShield::ServerEnableAttackHit_Implementation()
 	ClearSafetyTimer();
 
 	// 레벨 전환 중이 아닌 경우에만 타이머 설정
-	if (UWorld* World = GetWorld(); World && !World->bIsTearingDown)
+	if (UWorld* World = GetWorld(); World && !World->bIsTearingDown && IsValid(World))
 	{
-		World->GetTimerManager().SetTimer(SafetyTimerHandle, this, &AGS_WeaponShield::DisableAttackHit, 3.0f, false);
+		// 추가로 타이머 매니저의 유효성도 확인
+		FTimerManager& TimerManager = World->GetTimerManager();
+		if (&TimerManager)
+		{
+			TimerManager.SetTimer(SafetyTimerHandle, this, &AGS_WeaponShield::DisableAttackHit, 3.0f, false);
+		}
 	}
 }
 
@@ -472,7 +528,36 @@ void AGS_WeaponShield::ServerDisableHit_Implementation()
 		return;
 	}
 
-	ServerDisableAttackHit();
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
+
+	// 컴포넌트별 개별 유효성 검사와 함께 비활성화
+	if (AttackHitBox && IsValid(AttackHitBox) && !AttackHitBox->IsBeingDestroyed())
+	{
+		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	// DefenseHitBox도 동시에 체크하여 Tick 상태 결정
+	bool bShouldDisableTick = true;
+	if (DefenseHitBox && IsValid(DefenseHitBox) && !DefenseHitBox->IsBeingDestroyed())
+	{
+		if (DefenseHitBox->GetCollisionEnabled() != ECollisionEnabled::NoCollision)
+		{
+			bShouldDisableTick = false;
+		}
+	}
+
+	// 모든 콜리전이 비활성화된 경우에만 Tick 비활성화
+	if (bShouldDisableTick)
+	{
+		SetActorTickEnabled(false);
+	}
+
+	// 안전장치 타이머 정리
+	ClearSafetyTimer();
 }
 
 void AGS_WeaponShield::OnDefenseHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
@@ -563,7 +648,14 @@ void AGS_WeaponShield::OnDefenseHit(UPrimitiveComponent* OverlappedComponent, AA
 
 void AGS_WeaponShield::EnableDefenseHit()
 {
-	if (DefenseHitBox && IsValid(DefenseHitBox))
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// DefenseHitBox 안전하게 활성화
+	if (DefenseHitBox && IsValid(DefenseHitBox) && !DefenseHitBox->IsBeingDestroyed())
 	{
 		DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
@@ -572,14 +664,30 @@ void AGS_WeaponShield::EnableDefenseHit()
 
 void AGS_WeaponShield::DisableDefenseHit()
 {
-	if (DefenseHitBox && IsValid(DefenseHitBox))
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// DefenseHitBox 안전하게 비활성화
+	if (DefenseHitBox && IsValid(DefenseHitBox) && !DefenseHitBox->IsBeingDestroyed())
 	{
 		DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	
-	// 콜리전 비활성화 시 Tick 비활성화 (공격 콜리전도 체크)
-	if (AttackHitBox && IsValid(AttackHitBox) && 
-		AttackHitBox->GetCollisionEnabled() == ECollisionEnabled::NoCollision)
+	// AttackHitBox 상태를 안전하게 확인하여 Tick 상태 결정
+	bool bShouldDisableTick = true;
+	if (AttackHitBox && IsValid(AttackHitBox) && !AttackHitBox->IsBeingDestroyed())
+	{
+		if (AttackHitBox->GetCollisionEnabled() != ECollisionEnabled::NoCollision)
+		{
+			bShouldDisableTick = false;
+		}
+	}
+
+	// 모든 콜리전이 비활성화된 경우에만 Tick 비활성화
+	if (bShouldDisableTick)
 	{
 		SetActorTickEnabled(false);
 	}
@@ -593,6 +701,12 @@ void AGS_WeaponShield::ServerEnableDefenseHit_Implementation()
 		return;
 	}
 
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
+
 	EnableDefenseHit();
 }
 
@@ -600,6 +714,12 @@ void AGS_WeaponShield::ServerDisableDefenseHit_Implementation()
 {
 	// 레벨 전환 시 null 참조 방지
 	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
 	{
 		return;
 	}
@@ -644,11 +764,20 @@ bool AGS_WeaponShield::IsRTSMode() const
 
 void AGS_WeaponShield::DisableAllCollisions()
 {
-	if (AttackHitBox && IsValid(AttackHitBox))
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// AttackHitBox 안전하게 비활성화
+	if (AttackHitBox && IsValid(AttackHitBox) && !AttackHitBox->IsBeingDestroyed())
 	{
 		AttackHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
-	if (DefenseHitBox && IsValid(DefenseHitBox))
+	
+	// DefenseHitBox 안전하게 비활성화
+	if (DefenseHitBox && IsValid(DefenseHitBox) && !DefenseHitBox->IsBeingDestroyed())
 	{
 		DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}

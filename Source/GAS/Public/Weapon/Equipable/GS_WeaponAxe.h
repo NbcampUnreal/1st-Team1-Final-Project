@@ -87,7 +87,7 @@ protected:
 	bool IsRTSMode() const;
 
 	// 특화 헬퍼 함수 (타이머 관련)
-	void ClearSafetyTimer();
+	virtual void ClearSafetyTimer() override;
 
 	// 멀티캐스트 함수들
 	UFUNCTION(NetMulticast, Reliable)

@@ -104,7 +104,10 @@ void AGS_WeaponAxe::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 	// 1. 기본 VFX는 항상 재생
 	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 
-	// 2. '찬'의 4번째 공격일 경우 추가 효과(사운드, VFX) 재생
+	// 2. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
+	TriggerHitAuraOnHit(Damaged);
+
+	// 3. '찬'의 4번째 공격일 경우 추가 효과(사운드, VFX) 재생
 	if (AGS_Chan* Chan = Cast<AGS_Chan>(Attacker))
 	{
 		if (Chan->CurrentComboIndex == 4)
@@ -304,21 +307,49 @@ void AGS_WeaponAxe::Multicast_PlaySpecialHitVFX_Implementation(UNiagaraSystem* V
 
 void AGS_WeaponAxe::EnableHit()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	
 	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
 	ClearHitActors();
 
 	// 안전장치: 3초 후에 자동으로 비활성화
 	ClearSafetyTimer();
-	if (UWorld* World = GetWorld(); World && !World->bIsTearingDown)
+	
+	// 레벨 전환 중이 아닌 경우에만 타이머 설정
+	if (UWorld* World = GetWorld(); World && !World->bIsTearingDown && IsValid(World))
 	{
-		World->GetTimerManager().SetTimer(SafetyTimerHandle, this, &AGS_WeaponAxe::DisableHit, 3.0f, false);
+		// 추가로 타이머 매니저의 유효성도 확인
+		FTimerManager& TimerManager = World->GetTimerManager();
+		if (&TimerManager)
+		{
+			TimerManager.SetTimer(SafetyTimerHandle, this, &AGS_WeaponAxe::DisableHit, 3.0f, false);
+		}
 	}
 }
 
 void AGS_WeaponAxe::DisableHit()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 비활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 
 	// 타이머 정리
 	ClearSafetyTimer();
@@ -332,7 +363,17 @@ void AGS_WeaponAxe::ServerDisableHit_Implementation()
 		return;
 	}
 
-	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 비활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 
 	// 타이머 정리
 	ClearSafetyTimer();
@@ -346,13 +387,31 @@ void AGS_WeaponAxe::ServerEnableHit_Implementation()
 		return;
 	}
 
-	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	
 	ClearHitActors();
 
 	ClearSafetyTimer();
-	if (UWorld* World = GetWorld(); World && !World->bIsTearingDown)
+	
+	// 레벨 전환 중이 아닌 경우에만 타이머 설정
+	if (UWorld* World = GetWorld(); World && !World->bIsTearingDown && IsValid(World))
 	{
-		World->GetTimerManager().SetTimer(SafetyTimerHandle, this, &AGS_WeaponAxe::DisableHit, 3.0f, false);
+		// 추가로 타이머 매니저의 유효성도 확인
+		FTimerManager& TimerManager = World->GetTimerManager();
+		if (&TimerManager)
+		{
+			TimerManager.SetTimer(SafetyTimerHandle, this, &AGS_WeaponAxe::DisableHit, 3.0f, false);
+		}
 	}
 }
 
@@ -404,12 +463,10 @@ bool AGS_WeaponAxe::IsRTSMode() const
 	return LocalPC && Cast<AGS_RTSController>(LocalPC) != nullptr;
 }
 
-// 특화 헬퍼 함수 구현 (타이머 관련)
+// 특화 헬퍼 함수 구현 (타이머 관련) - 부모 클래스 버전 사용
 void AGS_WeaponAxe::ClearSafetyTimer()
 {
-	if (UWorld* World = GetWorld())
-	{
-		World->GetTimerManager().ClearTimer(SafetyTimerHandle);
-	}
+	// 부모 클래스의 개선된 타이머 정리 함수 사용
+	Super::ClearSafetyTimer();
 }
 
