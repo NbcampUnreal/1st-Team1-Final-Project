@@ -11,12 +11,15 @@ UGS_DrakharDraconicFury::UGS_DrakharDraconicFury()
 
 void UGS_DrakharDraconicFury::ActiveSkill()
 {
+	UE_LOG(LogTemp, Warning, TEXT("UGS_DrakharDraconicFury::ActiveSkill")); // SJE
+	
 	Super::ActiveSkill();
 	
 	if (!CanActive())
 	{
 		return;
 	}
+	
 	ExecuteSkillEffect();
 }
 
@@ -38,8 +41,12 @@ void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 
 	if (OwnerCharacter)
 	{
-		//play montage, except server
+		// play montage, except server
 		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
 	}
-	
+}
+
+void UGS_DrakharDraconicFury::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 }

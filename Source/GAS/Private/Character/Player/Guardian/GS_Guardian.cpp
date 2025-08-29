@@ -221,6 +221,11 @@ void AGS_Guardian::ShowTargetUI(bool bIsActive)
 	}
 }
 
+float AGS_Guardian::GetFlySpeed()
+{
+	return SpeedUpMoveSpeed;
+}
+
 void AGS_Guardian::MulticastRPCApplyHitStop_Implementation(AGS_Character* InDamagedCharacter)
 {
 	if (HasAuthority())

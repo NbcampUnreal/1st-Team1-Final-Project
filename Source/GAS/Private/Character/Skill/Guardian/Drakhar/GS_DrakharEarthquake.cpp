@@ -1,6 +1,8 @@
 #include "Character/Skill/Guardian/Drakhar/GS_DrakharEarthquake.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 UGS_DrakharEarthquake::UGS_DrakharEarthquake()
@@ -11,6 +13,8 @@ UGS_DrakharEarthquake::UGS_DrakharEarthquake()
 void UGS_DrakharEarthquake::ActiveSkill()
 {
 	Super::ActiveSkill();
+
+	UE_LOG(LogTemp, Warning, TEXT("Active Drakhar Aiming Skill")); // SJE
 
 	//cool time check
 	if (!CanActive())
@@ -44,4 +48,9 @@ void UGS_DrakharEarthquake::ExecuteSkillEffect()
 		//play montage, except server
 		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
 	}
+}
+
+void UGS_DrakharEarthquake::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 }

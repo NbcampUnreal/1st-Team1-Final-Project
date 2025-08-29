@@ -48,3 +48,8 @@ void UGS_DrakharWingRush::ExecuteSkillEffect()
 	
 }
 
+void UGS_DrakharWingRush::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
+}
+

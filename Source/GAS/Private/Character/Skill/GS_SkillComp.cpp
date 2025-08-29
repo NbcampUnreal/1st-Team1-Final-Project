@@ -119,6 +119,8 @@ bool UGS_SkillComp::IsSkillAllowed(ESkillSlot CompareSkillType)
 {
 	uint8 BitFlag = 0;
 	BitFlag |= (1 << static_cast<int32>(CompareSkillType));
+	UE_LOG(LogTemp, Warning, TEXT("UGS_SkillComp::IsSkillAllowed BitFlag :%d"), BitFlag);
+	UE_LOG(LogTemp, Warning, TEXT("UGS_SkillComp::IsSkillAllowed CurAllowedSkillsMask :%d"), CurAllowedSkillsMask);
 	return CurAllowedSkillsMask & BitFlag;
 }
 
@@ -162,6 +164,7 @@ void UGS_SkillComp::InitSkills()
 
 void UGS_SkillComp::ResetAllowedSkillsMask()
 {
+	UE_LOG(LogTemp, Warning, TEXT("ResetAllowedSkillsMask"));
 	CurAllowedSkillsMask = DefaultAllowedSkillsMask;
 }
 
@@ -237,7 +240,6 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 	
 	SkillMap.Add(Slot, Skill);
 }
-
 
 void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
 {

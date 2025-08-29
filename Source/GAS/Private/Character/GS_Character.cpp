@@ -316,18 +316,21 @@ void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 
 void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)
 {
-	if (!HasAuthority())
+	UE_LOG(LogTemp, Warning, TEXT("MulticastRPCPlaySkillMontage")); // SJE
+	/*if (!HasAuthority())
 	{
 		PlayAnimMontage(SkillMontage);
-	}
+	}*/ // SJE
+	PlayAnimMontage(SkillMontage);
 }
 
 void AGS_Character::MulicastRPCStopCurrentSkillMontage_Implementation(UAnimMontage* CurrentSkillMontage)
 {
-	if (!HasAuthority())
+	/*if (!HasAuthority())
 	{
 		StopAnimMontage(CurrentSkillMontage);
-	}
+	}*/ // SJE
+	StopAnimMontage(CurrentSkillMontage);
 }
 
 void AGS_Character::Multicast_PlayImpactVFX_Implementation(UNiagaraSystem* VFXAsset, FVector Scale)

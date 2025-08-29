@@ -101,6 +101,8 @@ public:
 	void ShowTargetUI(bool bIsActive);
 
 	FORCEINLINE UGS_CameraShakeComponent* GetCameraShakeComponent() const { return CameraShakeComponent; }
+
+	float GetFlySpeed();
 	
 protected:
 	float NormalMoveSpeed;
