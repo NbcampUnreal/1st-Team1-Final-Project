@@ -45,10 +45,10 @@ private:
 	void OnShieldSlam();
 
 	// 스테미나 관리
-	float MaxStamina = 20.0f;
+	float MaxStamina = 100.0f;
 	float CurrentStamina;
-	float StaminaDrainRate = 1.0f; // 초당 소비량
-	float SlamStaminaCost = 20.0f;
+	float StaminaDrainRate = 0.1f; // 초당 소비량
+	float SlamStaminaCost = 100.0f;
 	FTimerHandle StaminaDrainHandle;
 
 	// UI
