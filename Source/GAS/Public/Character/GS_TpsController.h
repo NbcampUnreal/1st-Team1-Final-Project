@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/GS_BasePlayerController.h"
 #include "Character/GS_Character.h"
 #include "UI/Character/GS_CrossHairImage.h"
 #include "Character/Skill/ESkill.h"
@@ -44,7 +44,7 @@ public:
 };*/
 
 UCLASS()
-class GAS_API AGS_TpsController : public APlayerController
+class GAS_API AGS_TpsController : public AGS_BasePlayerController
 {
 	GENERATED_BODY()
 

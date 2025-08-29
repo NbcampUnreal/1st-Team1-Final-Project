@@ -24,7 +24,7 @@ void UGS_OptionMenuUI::OnCloseButtonClicked()
 	{
 		MainMenuUI->OptionMenuAddressClear();
 	}
-	RemoveFromParent();
+	this->RemoveFromParent();
 	// ConditionalBeginDestroy();
 }
 

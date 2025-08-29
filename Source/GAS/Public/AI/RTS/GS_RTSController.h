@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/GS_BasePlayerController.h"
 #include "RTSCommand.h"
 #include "AkGameplayStatics.h"
 #include "GS_RTSController.generated.h"
@@ -31,7 +31,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRTSCommandChanged, ERTSCommand, N
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedUnitsSkillChanged, bool, bAnyUnitHasSkill);
 
 UCLASS()
-class GAS_API AGS_RTSController : public APlayerController
+class GAS_API AGS_RTSController : public AGS_BasePlayerController
 {
 	GENERATED_BODY()
 
