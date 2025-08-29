@@ -137,7 +137,10 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	// 1. 기본 VFX는 항상 재생
 	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 
-	// 2. '아레스'의 특수 공격일 경우 추가 효과(사운드, VFX) 재생
+	// 2. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
+	TriggerHitAuraOnHit(Damaged);
+
+	// 3. '아레스'의 특수 공격일 경우 추가 효과(사운드, VFX) 재생
 	if (AGS_Ares* Ares = Cast<AGS_Ares>(Attacker))
 	{
 		if (Ares->CurrentComboIndex == 4)

@@ -184,7 +184,10 @@ void AGS_WeaponShield::OnAttackHit(UPrimitiveComponent* OverlappedComponent, AAc
 	// 1. 기본 VFX는 항상 재생
 	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 
-	// 2. '찬'의 3번째 공격일 경우 추가 효과(사운드, VFX) 재생
+	// 2. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
+	TriggerHitAuraOnHit(Damaged);
+
+	// 3. '찬'의 3번째 공격일 경우 추가 효과(사운드, VFX) 재생
 	if (AGS_Chan* Chan = Cast<AGS_Chan>(Attacker))
 	{
 		if (Chan->CurrentComboIndex == 3)

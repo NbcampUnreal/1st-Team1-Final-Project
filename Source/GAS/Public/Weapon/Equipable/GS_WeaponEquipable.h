@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Weapon/GS_Weapon.h"
+#include "Weapon/Component/GS_WeaponVFXComponent.h"
 #include "GS_WeaponEquipable.generated.h"
 
 class AGS_Seeker;
+class UGS_WeaponVFXComponent;
 
 UCLASS()
 class GAS_API AGS_WeaponEquipable : public AGS_Weapon
@@ -34,4 +36,20 @@ protected:
 	TSet<AActor*> HitActors;
 
 	FTimerHandle SafetyTimerHandle;
+
+	// 무기 VFX 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UGS_WeaponVFXComponent* WeaponVFXComponent;
+
+public:
+	// 무기 VFX 관련 함수들
+	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
+	void TriggerHitAuraOnHit(class AGS_Character* HitTarget);
+
+	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
+	ESeekerAuraType GetSeekerAuraType(class AGS_Character* SeekerChar) const;
+
+protected:
+	// 아우라 트리거 조건 확인
+	virtual bool ShouldTriggerAuraOnHit(class AGS_Character* HitTarget) const;
 };
