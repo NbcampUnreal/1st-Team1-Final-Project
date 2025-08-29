@@ -39,7 +39,7 @@ AGS_Player::AGS_Player()
 	//steam name widget
 	SteamNameWidgetComp = CreateDefaultSubobject<UGS_SteamNameWidgetComp>(TEXT("SteamWidgetComp"));
 	SteamNameWidgetComp->SetupAttachment(RootComponent);
-	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
+	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
 	SteamNameWidgetComp->GetBodyInstance()->TermBody();
 	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SteamNameWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
