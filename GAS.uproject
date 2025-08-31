@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.4",
+	"EngineAssociation": "{62EDE94E-48AB-CD34-9750-E79065AC7BCB}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -52,6 +52,10 @@
 		},
 		{
 			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
+			"Name": "GameLiftPlugin",
 			"Enabled": true
 		}
 	]
