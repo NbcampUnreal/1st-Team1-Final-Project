@@ -320,7 +320,7 @@ void UGS_ChanAimingSkill::StartHoldUp()
 	UpdateProgressBar(CurrentStamina);
 
 	// 스테미나 감소 타이머
-	OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 1.0f, true);
+	OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 0.1f, true);
 }
 
 void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
