@@ -10,6 +10,7 @@ class GAS_API UGS_HPTextWidgetComp : public UWidgetComponent
 	GENERATED_BODY()
 
 public:
-	virtual void InitWidget() override;
-
+	// virtual void InitWidget() override;
+	virtual void BeginPlay() override;
+	
 };
