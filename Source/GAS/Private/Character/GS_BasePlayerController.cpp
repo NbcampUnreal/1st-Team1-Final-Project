@@ -7,6 +7,8 @@
 
 void AGS_BasePlayerController::BeginPlay()
 {
+	Super::BeginPlay();
+	
 	MenuAction = nullptr;
 }
 

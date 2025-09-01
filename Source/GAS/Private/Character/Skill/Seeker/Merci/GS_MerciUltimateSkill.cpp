@@ -12,6 +12,7 @@
 UGS_MerciUltimateSkill::UGS_MerciUltimateSkill()
 {
 	CurrentSkillType = ESkillSlot::Ultimate;
+	AllowSkillsMask = -9;
 }
 
 void UGS_MerciUltimateSkill::ActiveSkill()

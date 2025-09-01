@@ -24,6 +24,10 @@ void UGS_ANS_DrakharDash::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequ
 		if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner))
 		{
 			//attack and moving
+			if (Drakhar->HasAuthority())
+			{
+				return;
+			}
 			Drakhar->ServerRPCDoDash(FrameDeltaTime);
 		}
 	}
@@ -37,6 +41,10 @@ void UGS_ANS_DrakharDash::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeque
 	{
 		if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner))
 		{
+			if (Drakhar->HasAuthority())
+			{
+				return;
+			}
 			//damage
 			Drakhar->ServerRPCEndDash();
 			//Drakhar->ClientGuardianDoSkillState = EGuardianDoSkill::None;
