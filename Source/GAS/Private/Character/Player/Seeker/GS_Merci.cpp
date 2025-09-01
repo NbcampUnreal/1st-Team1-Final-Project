@@ -253,6 +253,7 @@ void AGS_Merci::Multicast_StopDrawMontage_Implementation()
 {
 	if (Mesh && Mesh->GetAnimInstance())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Multicast_StopDrawMontage"));
 		Mesh->GetAnimInstance()->Montage_Stop(0.2f); // BlendOut 0.2초
 	}
 }
@@ -478,7 +479,7 @@ void AGS_Merci::OnDrawMontageEnded()
 	bIsFullyDrawn = true;  // 활 완전히 당김 상태 설정
 
 	// 서버로 전달
-	if (HasAuthority() == false)
+	if (!HasAuthority())
 	{
 		Server_NotifyDrawMontageEnded();
 	}
