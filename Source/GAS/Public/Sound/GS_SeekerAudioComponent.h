@@ -330,6 +330,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Sound|EventDriven")
     void RequestSkillAudio(ESkillSlot SkillSlot, int32 AudioEventType, FVector Location = FVector::ZeroVector);
 
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_RequestSkillAudio(ESkillSlot SkillSlot, int32 AudioEventType, FVector Location = FVector::ZeroVector);
+
     // 스킬셋 데이터 기반 사운드 재생 헬퍼 함수
     UFUNCTION(BlueprintCallable, Category = "Sound|Character")
     void PlaySkillSoundFromSkillInfo(bool bIsSkillStart, UAkAudioEvent* SkillStartSound, UAkAudioEvent* SkillEndSound);

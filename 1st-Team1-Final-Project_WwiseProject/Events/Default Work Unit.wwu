@@ -1344,6 +1344,17 @@
 														</Action>
 													</ChildrenList>
 												</Event>
+												<Event Name="Voice_Merci_Jump_RTS" ID="{DF082920-6A95-47CD-A724-9F2AC9FF152F}">
+													<ChildrenList>
+														<Action Name="" ID="{57B06CBD-DAB8-4D76-A671-F210BA56CEF1}" ShortID="334719878">
+															<ReferenceList>
+																<Reference Name="Target">
+																	<ObjectRef Name="Voice_MerciJump_RTS" ID="{75AB825F-3E09-4D3F-BF64-06AA3CEF2D67}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+																</Reference>
+															</ReferenceList>
+														</Action>
+													</ChildrenList>
+												</Event>
 											</ChildrenList>
 										</Folder>
 									</ChildrenList>
