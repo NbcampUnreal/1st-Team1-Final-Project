@@ -94,10 +94,14 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 	{
 		return;
 	}
+
+	//UE_LOG(LogTemp, Warning, TEXT("bWasCtrlHeldWhenLeftClicked %d" ,bWasCtrlHeldWhenLeftClicked));
+	
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{
 		if (MerciCharacter->NormalArrowClass)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Is MormalArrowClass"));
 			MerciCharacter->ReleaseArrow(MerciCharacter->NormalArrowClass);
 		}
 	}
