@@ -30,3 +30,6 @@ Saved/
 # Claude
 .claude/
 *.md
+
+
+Plugins/GameLiftPlugin/
