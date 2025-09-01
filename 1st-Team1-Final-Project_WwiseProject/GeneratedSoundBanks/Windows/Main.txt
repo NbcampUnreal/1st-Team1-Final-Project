@@ -159,6 +159,7 @@ Event	ID	Name			Wwise Object Path	Notes
 	3602244534	Voice_Ares_Die_RTS			\Default Work Unit\Player\Seeker\Ares\RTS\Voice_Ares_Die_RTS	
 	3655041021	EV_UI_Mon_NeedleFang_Attack			\Default Work Unit\Monster\RTS_UISound\EV_UI_Mon_NeedleFang_Attack	
 	3690243300	EV_Mon_ShadowFang_RTS			\Default Work Unit\Monster\ShadowFang\EV_Mon_ShadowFang_RTS	
+	3719835003	Voice_Merci_Jump_RTS			\Default Work Unit\Player\Seeker\Merci\RTS\Voice_Merci_Jump_RTS	
 	3725158777	EV_ChanUltimateSkill_RTS			\Default Work Unit\Player\Seeker\Chan\RTS\EV_ChanUltimateSkill_RTS	
 	3746434199	EV_ChanAimingSkill_Slam			\Default Work Unit\Player\Seeker\Chan\EV_ChanAimingSkill_Slam	
 	3756775051	Props_CrystalSpike_Warn			\Default Work Unit\Props\Props_CrystalSpike_Warn	
@@ -394,7 +395,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	363053273	SFX_NeedleFangShot_By_01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B4\{B47B7F61-27A5-548B-E2FB-73203E6BE75E}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Projectile\SFX_NeedleFangShot_By\SFX_NeedleFangShot_By_01		211132
 	369007659	Props_TorchFlicker	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E9\{E93E11AF-4684-5D00-A49D-01E8163638B9}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TorchFlicker		15893968
 	369405294	AttackVoice1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\22\{229A5453-4A62-EF27-EAA1-F84C2AEC156F}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\Voice_ChanAttack_RTS\AttackVoice1		45068
-	372981139	Merci_Jump1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F7\{F7117DF6-ED74-986B-09C2-FBB104D7A9E6}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Merci\Voice_MerciJump\Merci_Jump1		28760
+	372981139	Merci_Jump1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F7\{F7117DF6-ED74-986B-09C2-FBB104D7A9E6}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\Voice_MerciJump_RTS\Merci_Jump1		28760
 	373316616	SFX_Arrow_Shot_RTS	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\74\{74880479-9A9D-3F13-1BC5-D4E2BF33BD9B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\SFX_Arrow_Shot_RTS		285096
 	377837800	Footstep_Grass (3)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\00\{00230D6F-B6B2-51BA-E447-CEE35C030F2D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Grass\Footstep_Grass (3)		58648
 	381244851	GlassBreakWine_SFXB_2343	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\6C\{6C9A4829-A5B2-9265-E99D-D425B7CA2251}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\SFX_CrystalTrap_End\GlassBreakWine_SFXB_2343		152000
@@ -484,7 +485,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	665252404	EarthquakeTremorRocks	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\32\{32796D3A-8F1C-5320-5441-768D926FD74B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Guardian\EV_DrakharEarthquake\EarthquakeTremorRocks		499520
 	674316476	Beast_Attack_Dry	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BB\{BB69DEC3-7850-9D9E-61A8-2C1A411383AC}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_UI_Sound\SFX_UI_Mon_IronFang\Beast_Attack_Dry		80768
 	678238931	Props_CampFire	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CC\{CC1ACFFD-2993-61AD-7C6F-05F047CC3034}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_CampFire		1628452
-	680560106	Combat_axe_impact	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CD\{CD92B475-E32A-1094-A26B-1E61E49A55BB}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_MeleeHit_Shield\Combat_axe_impact		240376
+	680560106	Combat_axe_impact	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CB\{CB6C1D75-6E64-631B-1F48-87212F548CD9}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_MeleeHit_Shield\Combat_axe_impact		240376
 	684819280	Combat_axe_impact_01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\1B\{1B80E696-4AD3-E30F-1CE4-0BC1737BEA4C}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\SFX_Shield_Guard_RTS\Combat_axe_impact_01		370960
 	689500474	SFX_ArrowImpact_Body	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\2F\{2F48D1A4-DA9C-10C9-EC73-0E5AA1A41B36}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Merci\EV_ArrowHit_UI\SFX_ArrowImpact_Body		61392
 	690637492	Stone_gravel	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\87\{8764FE14-89A4-96B2-CD1B-0B94ACBFB665}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Chan\EV_ChanAimingSkill_Slam\Slam1\CrashSound\Stone_gravel		289088

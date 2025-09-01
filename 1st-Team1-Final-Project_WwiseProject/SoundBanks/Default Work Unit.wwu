@@ -92,6 +92,7 @@
 						<ObjectRef Name="EV_Mon_ShadowFang_RTS_Death" ID="{60797ECA-AE5F-47A8-B660-9743A16F43C3}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Ares_Attack_03" ID="{E8AD266E-E28A-47B1-A47E-BC51CAD1987C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_DraconicFuryProjectile" ID="{387683CC-2A65-47BA-9BD8-6BBE6541B8F1}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="Voice_Merci_Jump_RTS" ID="{DF082920-6A95-47CD-A724-9F2AC9FF152F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_BearTrap_Out" ID="{A8F68B4C-166B-47F0-82AB-7DA87701254B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Saw" ID="{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Chan_Guard_RTS" ID="{670746C3-3B7C-4832-B587-FE4D66CDCE6B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
