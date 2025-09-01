@@ -95,7 +95,7 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 		return;
 	}
 
-	//UE_LOG(LogTemp, Warning, TEXT("bWasCtrlHeldWhenLeftClicked %d" ,bWasCtrlHeldWhenLeftClicked));
+	UE_LOG(LogTemp, Warning, TEXT("LeftRelease"));
 	
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{

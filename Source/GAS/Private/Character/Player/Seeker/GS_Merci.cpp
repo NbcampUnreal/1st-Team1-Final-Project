@@ -163,13 +163,11 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		return;
 	}
 	
-
 	if (GetSkillComp()->IsSkillActive(ESkillSlot::Rolling))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Is Rolling not Release"));
 		return;
 	}
-
 	
 	// 줌 중지
 	if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
@@ -477,16 +475,19 @@ void AGS_Merci::Multicast_DrawDebugLine_Implementation(FVector Start, FVector En
 void AGS_Merci::OnDrawMontageEnded()
 {
 	bIsFullyDrawn = true;  // 활 완전히 당김 상태 설정
-
-	// 서버로 전달
+	SetAimState(true);
+	SetDrawState(false);
+	UE_LOG(LogTemp, Warning, TEXT("OnDrawMontageEnded in server"));
+	/*// 서버로 전달
 	if (!HasAuthority())
 	{
 		Server_NotifyDrawMontageEnded();
-	}
+	}*/
 }
 
 void AGS_Merci::Server_NotifyDrawMontageEnded_Implementation()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Server_NotifyDrawMontageEnded"));
 	SetAimState(true);
 	SetDrawState(false);
 }
