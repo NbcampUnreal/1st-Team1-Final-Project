@@ -108,7 +108,7 @@ public:
 	float CurrentStamina = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
-	float StaminaDrainRate = 1.f;
+	float StaminaDrainRate = 0.1f;
 
 	float GetCurrentStamina() const { return CurrentStamina; }
 	void ResetCurrentStamina();
@@ -131,4 +131,7 @@ private:
 
 	// 스테미나 관리
 	FTimerHandle StaminaDrainHandle;
+
+	// 체력 관리
+	float MaxHealth;
 };

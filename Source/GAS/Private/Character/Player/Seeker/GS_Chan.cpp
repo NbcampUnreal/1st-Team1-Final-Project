@@ -75,6 +75,7 @@ void AGS_Chan::BeginPlay()
 	UltimateCollision->OnComponentBeginOverlap.AddDynamic(this, &AGS_Chan::OnUltimateOverlap);
 
 	CurrentStamina = MaxStamina;
+	MaxHealth = GetStatComp()->GetMaxHealth();
 }
 
 void AGS_Chan::OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -231,10 +232,19 @@ float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 		
 		// 방어 성공 시 데미지 0으로 설정하여 피격 애니메이션 방지
 		ActualDamage = 0.0f;
+
+		// 스테미나 감소
+		if (MaxHealth > 0.f)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Stamina Damage In"));
+			float StaminaDamage = DamageAmount * (MaxStamina / MaxHealth);
+			SetCurrentStamina(CurrentStamina - StaminaDamage);
+		}
 	}
 	else
 	{
 		// 방어 상태가 아닐 때만 부모 클래스의 TakeDamage 호출
+		//UE_LOG(LogTemp, Warning, TEXT("Normal Damage In"));
 		ActualDamage = Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
 	}
 
