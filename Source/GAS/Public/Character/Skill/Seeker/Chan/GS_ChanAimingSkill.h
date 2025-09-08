@@ -28,7 +28,6 @@ public:
 
 	// 스테미나 관리
 	void TickDrainStamina();
-	float GetCurrentStamina();
 
 protected:
 	// 스탠스 관리
@@ -45,15 +44,7 @@ private:
 	void OnShieldSlam();
 
 	// 스테미나 관리
-	float MaxStamina = 100.0f;
-	float CurrentStamina;
-	float StaminaDrainRate = 0.1f; // 초당 소비량
-	float SlamStaminaCost = 100.0f;
 	FTimerHandle StaminaDrainHandle;
-
-	// UI
-	void UpdateProgressBar(float InStamina);
-	void ShowProgressBar(bool bShow);
 
 	FTimerHandle KnockbackHandle;
 

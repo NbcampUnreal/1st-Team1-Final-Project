@@ -45,6 +45,25 @@ void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
+void AGS_Chan::ResetCurrentStamina()
+{
+	CurrentStamina = MaxStamina;
+}
+
+void AGS_Chan::SetCurrentStamina(float NewValue)
+{
+	CurrentStamina = FMath::Clamp(NewValue, 0.f, MaxStamina);
+
+	// UI 반영
+	Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
+
+	// 스테미나가 다 떨어지면 스킬
+	if (CurrentStamina <= 0.f && SkillComp)
+	{
+		SkillComp->Server_TryDeactiveSkill(ESkillSlot::Aiming);
+	}
+}
+
 // Called when the game starts or when spawned
 void AGS_Chan::BeginPlay()
 {
@@ -55,6 +74,7 @@ void AGS_Chan::BeginPlay()
 
 	UltimateCollision->OnComponentBeginOverlap.AddDynamic(this, &AGS_Chan::OnUltimateOverlap);
 
+	CurrentStamina = MaxStamina;
 }
 
 void AGS_Chan::OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

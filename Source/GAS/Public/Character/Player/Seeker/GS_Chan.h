@@ -100,6 +100,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Chan|Defense")
 	void SetDefending(bool bDefending);
 
+	// 스테미나 관리
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
+	float MaxStamina = 100.f;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Chan|Stamina")
+	float CurrentStamina = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
+	float StaminaDrainRate = 1.f;
+
+	float GetCurrentStamina() const { return CurrentStamina; }
+	void ResetCurrentStamina();
+	void SetCurrentStamina(float NewValue);
+	bool HasEnoughStamina(float Cost) const { return CurrentStamina >= Cost; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -113,4 +128,7 @@ protected:
 
 private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;
+
+	// 스테미나 관리
+	FTimerHandle StaminaDrainHandle;
 };

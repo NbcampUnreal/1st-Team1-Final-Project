@@ -193,8 +193,8 @@ void UGS_ChanAimingSkill::InterruptSkill()
 	// 방어 상태 비활성화 (스킬이 중단될 때)
 	OwnerPlayer->SetDefending(false);
 
-	CurrentStamina = 0;
-	ShowProgressBar(false);
+	OwnerPlayer->SetCurrentStamina(0.f);
+	OwnerPlayer->Client_ChanAimingSkillBar(false);
 	OwnerPlayer->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
 }
 
@@ -282,18 +282,16 @@ void UGS_ChanAimingSkill::OnShieldSlam()
 
 void UGS_ChanAimingSkill::TickDrainStamina()
 {
-	CurrentStamina -= StaminaDrainRate;
+	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 
-	// UI 업데이트
-	UpdateProgressBar(CurrentStamina);
+	if(OwnerPlayer)
+	{
+		OwnerPlayer->SetCurrentStamina(OwnerPlayer->GetCurrentStamina() - OwnerPlayer->StaminaDrainRate);
+	}
 
-	// UE_LOG(LogTemp, Warning, TEXT("Stamina : %f"), CurrentStamina); 신중은
-	
-	// 스테미나가 0이 되었을 때
-	if (CurrentStamina <= 0.f)
+	if (OwnerPlayer->GetCurrentStamina() <= 0.f)
 	{
 		// 기본 포즈로 애니메이션 재생
-		AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
 		if (OwnerPlayer)
 		{
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("LoopEnd"));
@@ -312,15 +310,19 @@ void UGS_ChanAimingSkill::TickDrainStamina()
 
 void UGS_ChanAimingSkill::StartHoldUp()
 {
-	// 스테미나 초기화
-	CurrentStamina = MaxStamina;
+	if (AGS_Chan* OwnerChan = Cast<AGS_Chan>(OwnerCharacter))
+	{
+		// 스테미나 초기화
+		OwnerChan->ResetCurrentStamina();
 
-	// UI 표시
-	ShowProgressBar(true);
-	UpdateProgressBar(CurrentStamina);
+		// UI 표시
+		OwnerChan->Client_ChanAimingSkillBar(true);
 
-	// 스테미나 감소 타이머
-	OwnerCharacter->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 0.1f, true);
+		// 스테미나 감소 타이머
+		TWeakObjectPtr<AGS_Chan> WeakOwner = OwnerChan;
+
+		OwnerChan->GetWorldTimerManager().SetTimer(StaminaDrainHandle, this, &UGS_ChanAimingSkill::TickDrainStamina, 0.1f, true);
+	}
 }
 
 void UGS_ChanAimingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
@@ -358,34 +360,18 @@ void UGS_ChanAimingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 
 void UGS_ChanAimingSkill::DeactiveSkill()
 {
-	// UI 숨기기
-	ShowProgressBar(false);
-	OwnerCharacter->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
-
-	// 방어 상태 비활성화 (스킬 완전 종료 시)
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
+		// UI 숨기기
+		OwnerPlayer->Client_ChanAimingSkillBar(false);
+
+		// 타이머 초기화
+		OwnerPlayer->GetWorldTimerManager().ClearTimer(StaminaDrainHandle);
+
+		// 방어 상태 비활성화 (스킬 완전 종료 시)
 		OwnerPlayer->SetDefending(false);
 	}
 
 	// 스킬 상태 업데이트
 	Super::DeactiveSkill();
-}
-
-void UGS_ChanAimingSkill::UpdateProgressBar(float InStamina)
-{
-	AGS_Chan* OwnerChan = Cast<AGS_Chan>(OwnerCharacter);
-	OwnerChan->Client_UpdateChanAimingSkillBar(InStamina / MaxStamina);
-}
-
-void UGS_ChanAimingSkill::ShowProgressBar(bool bShow)
-{
-	AGS_Chan* OwnerChan = Cast<AGS_Chan>(OwnerCharacter);
-	OwnerChan->Client_ChanAimingSkillBar(bShow);
-}
-
-
-float UGS_ChanAimingSkill::GetCurrentStamina()
-{
-	return CurrentStamina;
 }
