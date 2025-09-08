@@ -43,7 +43,7 @@ void AGS_NeedleFang::Server_SpawnProjectile_Implementation()
 		FVector DirectionToTarget = (TargetActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 		
 		float DotProduct = FVector::DotProduct(MonsterForwardVector, DirectionToTarget);
-		const float HalfAngleRadians = FMath::DegreesToRadians(20.0f); 
+		const float HalfAngleRadians = FMath::DegreesToRadians(5.0f); 
 		const float CosineThreshold = FMath::Cos(HalfAngleRadians);
 		if (DotProduct >= CosineThreshold)
 		{
