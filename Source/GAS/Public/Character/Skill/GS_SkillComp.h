@@ -75,6 +75,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_TryDeactiveSkill(ESkillSlot Slot);
+
+	UFUNCTION(Server, Reliable)
+	void Server_TrySkillCanceledByDebuff(ESkillSlot Slot);
 	
 	UFUNCTION(Server, Reliable)
 	void Server_TrySkillCommand(ESkillSlot Slot);
@@ -95,7 +98,7 @@ public:
 	void TrySkillAnimationEnd(ESkillSlot Slot);
 	
 	void SetSkill(ESkillSlot Slot, const FSkillInfo& Info);
-	
+
 	UFUNCTION(BlueprintCallable)
 	void SetCanUseSkill(bool InCanUseSkill);
 

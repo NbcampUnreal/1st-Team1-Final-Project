@@ -312,6 +312,14 @@ void UGS_SkillComp::Client_BroadcastSkillCooldownBlocked_Implementation(ESkillSl
 }
 
 void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
+{
+	if (SkillMap.Contains(Slot))
+	{
+		SkillMap[Slot]->DeactiveSkill();
+	}
+}
+
+void UGS_SkillComp::Server_TrySkillCanceledByDebuff_Implementation(ESkillSlot Slot)
 {	
 	if (SkillMap.Contains(Slot))
 	{
