@@ -218,7 +218,7 @@ float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 {
 	float ActualDamage = DamageAmount;
 	
-	// 방어 상태일 때는 데미지를 아예 받지 않음 (피격 애니메이션 방지)
+	// 방어 상태일 때는 스테미나 감소 (피격 애니메이션 방지)
 	if (bIsDefending)
 	{
 		// 방어 효과음 재생
