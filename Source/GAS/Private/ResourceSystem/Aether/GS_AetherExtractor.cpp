@@ -1,5 +1,5 @@
 #include "ResourceSystem/Aether/GS_AetherExtractor.h"
-
+#include "AI/RTS/GS_RTSController.h"
 
 AGS_AetherExtractor::AGS_AetherExtractor()
 {
@@ -30,81 +30,68 @@ void AGS_AetherExtractor::BeginPlay()
 		return;
 	}
 	
-	FTimerHandle DelayHandle;
-	GetWorld()->GetTimerManager().SetTimer(
-		DelayHandle,
-		this,
-		&ThisClass::InitializeAetherComp,
-		1.5f,  // 딜레이 후 초기화 시도
-		false
-	);
+	UE_LOG(LogTemp, Warning, TEXT("[AetherExtractor::BeginPlay] NumControllers=%d"),
+		GetWorld()->GetNumPlayerControllers());
 
 
-	//CachedAetherComp = FindGuardianAetherComp();
-
-	//GetWorld()->GetTimerManager().SetTimer(
-	//	AetherExtractTimerHandle,
-	//	this,
-	//	&ThisClass::ExtractAether,
-	//	ExtractionInterval,
-	//	true
-	//);
-
-}
-
-UGS_AetherComp* AGS_AetherExtractor::FindGuardianAetherComp()
-{
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
-		APlayerController* PC = It->Get();
-		if (!PC)
+		AGS_RTSController* RTSController = Cast<AGS_RTSController>(It->Get());
+		if (!RTSController)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlayerController is null"));
 			continue;
 		}
 
-		AGS_PlayerState* PS = Cast<AGS_PlayerState>(PC->PlayerState);
-		/*if (PS && PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+		//찾은 경우
+		if (IsValid(RTSController->AetherComp))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AetherComp found"));
-			return PS->GetAetherComp();
-		}*/
-
-		if (!PS)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("PlayerState is not GS_PlayerState"));
-			continue;
+			CachedAetherComp = RTSController->AetherComp;
+			UE_LOG(LogTemp, Warning, TEXT("  -> RTSController %s, AetherComp=%s"),
+				*GetNameSafe(RTSController),
+				*GetNameSafe(RTSController->AetherComp));
+			InitializeAetherComp();
+			break;
 		}
-
-		UE_LOG(LogTemp, Warning, TEXT("Current PlayerRole: %s"),
-			PS ? *UEnum::GetValueAsString(PS->CurrentPlayerRole) : TEXT("No GS_PlayerState"));
-
-
-		if (PS->CurrentPlayerRole != EPlayerRole::PR_Guardian)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("PlayerRole is not Guardian"));
-			continue;
-		}
-
-		if (!PS->GetAetherComp())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("AetherComp is null on Guardian PlayerState"));
-			continue;
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT("AetherComp found successfully!"));
-		return PS->GetAetherComp();
 	}
-	UE_LOG(LogTemp, Warning, TEXT("AetherComp not found"));
-	return nullptr;
 }
+
+
+
+void AGS_AetherExtractor::RegisterRTSController(AGS_RTSController* InController)
+{
+	if (!InController)
+	{
+		return;
+	}
+	if (IsValid(InController->GetAetherComp()))
+	{
+		UE_LOG(LogTemp, Error, TEXT("[RegisterRTSController]RTS Controller found!"));
+		CachedAetherComp = InController->GetAetherComp();
+		InitializeAetherComp();
+	}
+	else
+	{
+		InController->OnAetherCompReady.AddDynamic(this, &ThisClass::HandleAetherCompReady);
+	}
+
+}
+
+void AGS_AetherExtractor::HandleAetherCompReady(UGS_AetherComp* AetherComp)
+{
+	UE_LOG(LogTemp, Error, TEXT("[HandleAetherCompReady] AetherComp broadcasted and found"));
+	CachedAetherComp = AetherComp;
+	InitializeAetherComp();
+}
+
 
 
 void AGS_AetherExtractor::InitializeAetherComp()
 {
-
-	CachedAetherComp = FindGuardianAetherComp();
-
+	if (!HasAuthority())
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Error, TEXT("[InitializeAetherComp] Timer Start!"));
 	GetWorld()->GetTimerManager().SetTimer(
 		AetherExtractTimerHandle,
 		this,
@@ -118,13 +105,18 @@ void AGS_AetherExtractor::InitializeAetherComp()
 
 void AGS_AetherExtractor::ExtractAether()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+	UE_LOG(LogTemp, Error, TEXT("[ExtractAether] AetherExtractor Extracting..."));
 	if (IsValid(CachedAetherComp))
 	{
 		CachedAetherComp->AddResource(ExtractionAmount);
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AetherComp in PlayerState is lost"));
+		UE_LOG(LogTemp, Warning, TEXT("AetherComp in RTSController is lost"));
 	}
 }
 
@@ -173,5 +165,29 @@ void AGS_AetherExtractor::SetHPTextWidget(UGS_HPText* InHPTextWidget)
 			StatComp ? StatComp->GetMaxHealth() : -1.f);
 		HPTextWidget->InitializeHPTextWidget(GetStatComp());
 		StatComp->OnCurrentHPChanged.AddUObject(HPTextWidget, &UGS_HPText::OnCurrentHPChanged);
+	}
+}
+
+
+
+void AGS_AetherExtractor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	if (!GetWorld())
+	{
+		return;
+	}
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
+	{
+		if (APlayerController* PC = It->Get())
+		{
+			if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(PC))
+			{
+				if (IsValid(RTSController))
+				{
+					RTSController->OnAetherCompReady.RemoveDynamic(this, &ThisClass::HandleAetherCompReady);
+				}
+			}
+		}
 	}
 }

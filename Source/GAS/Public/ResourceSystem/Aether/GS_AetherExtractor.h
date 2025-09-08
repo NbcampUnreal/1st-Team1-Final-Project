@@ -23,18 +23,18 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
-	FTimerHandle AetherExtractTimerHandle;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+public:
+    FTimerHandle AetherExtractTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aether")
 	float ExtractionInterval = 10.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aether")
 	float ExtractionAmount = 5.f;
-	
-	UPROPERTY()
-	UGS_AetherComp* CachedAetherComp = nullptr;
 
-public:
+	UPROPERTY()
+	TObjectPtr<UGS_AetherComp> CachedAetherComp;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_StatComp> StatComp;
 	
@@ -44,9 +44,17 @@ public:
 	USceneComponent* RootSceneComp;
 
 	UFUNCTION()
+	void RegisterRTSController(AGS_RTSController* InController);
+
+	UFUNCTION()
+	void HandleAetherCompReady(UGS_AetherComp* AetherComp);
+
+	UFUNCTION()
 	void ExtractAether();
+
+	UFUNCTION()
 	void InitializeAetherComp();
-	UGS_AetherComp* FindGuardianAetherComp();
+	//UGS_AetherComp* FindGuardianAetherComp();
 	void TakeDamageBySeeker(float DamageAmount, AActor* DamageCauser);
 	void DestroyAetherExtractor();
 

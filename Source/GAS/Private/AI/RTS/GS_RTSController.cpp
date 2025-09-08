@@ -18,7 +18,9 @@
 #include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "Sound/GS_AudioManager.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
 #include "System/GameMode/GS_InGameGM.h"
+
 
 
 AGS_RTSController::AGS_RTSController()
@@ -46,6 +48,9 @@ AGS_RTSController::AGS_RTSController()
 	ScrollDownCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_D"));
 	ScrollLeftCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_L"));
 	ScrollRightCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_R"));
+
+	//[Aether] AetherComp 연결
+	AetherComp = CreateDefaultSubobject<UGS_AetherComp>(TEXT("AetherComp"));
 }
 
 AActor* AGS_RTSController::GetViewTarget() const
@@ -93,6 +98,22 @@ void AGS_RTSController::BeginPlay()
 	}
 	
 	Server_NotifyPlayerIsReady();
+
+	//[Aether] 준비 완료 시 broadcast
+	if (IsValid(AetherComp))
+	{
+		//AetherComp->InitializeMaxAmount(250.f);
+		OnAetherCompReady.Broadcast(AetherComp);
+	}
+	for (TActorIterator<AGS_AetherExtractor> It(GetWorld()); It; ++It)
+	{
+		It->RegisterRTSController(this);
+
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[RTSController::BeginPlay] Authority=%d, AetherComp=%s"),
+		HasAuthority(),
+		*GetNameSafe(AetherComp));
 }
 
 void AGS_RTSController::SetupInputComponent()
@@ -1086,4 +1107,10 @@ void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)
         }
     }
     RemoveUnitFromSelection(Monster);
+}
+
+//[Aether] 에테르 반환
+UGS_AetherComp* AGS_RTSController::GetAetherComp() const
+{
+	return AetherComp;
 }
