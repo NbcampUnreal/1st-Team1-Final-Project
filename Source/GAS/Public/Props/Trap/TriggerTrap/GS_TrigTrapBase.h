@@ -51,9 +51,15 @@ protected:
 	void Server_DelayTrapEffect(AActor* TargetActor);
 	void Server_DelayTrapEffect_Implementation(AActor* TargetActor);
 
-	UFUNCTION(BlueprintNativeEvent, Category="Trap")
-	void PlayTrapAlertSound(AActor* TargetActor);
-	void PlayTrapAlertSound_Implementation(AActor* TargetActor);
+	UFUNCTION(BlueprintCallable, Category="Trap|Sound")
+	void CallTrapAlertSound(AActor* TargetActor);
+
+	UFUNCTION(BlueprintImplementableEvent, Category="Trap|Sound")
+	void OnTrapAlertSoundPlayed(AActor* TargetActor);
+
+	/** 서버에서 멀티캐스트로 경고 사운드 재생 */
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayTrapAlertSound(AActor* TargetActor);
 
 
 	// - 함정 동작 적용

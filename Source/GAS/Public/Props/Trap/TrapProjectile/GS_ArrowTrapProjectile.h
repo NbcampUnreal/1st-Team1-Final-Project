@@ -40,14 +40,32 @@ public:
 
 	FTimerHandle LifeSpanHandle;
 
+	// Arrow By Sound 관련 변수들
+	bool bArrowBySoundPlayed; // Arrow By 사운드가 이미 재생되었는지 체크
 
+	// Arrow By 콜리전 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision")
+	USphereComponent* ArrowByCollisionComp;
 
-	// Audio Events - Wwise
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
-	UAkAudioEvent* ImpactSoundEvent;
+	// Audio Events - TPS Mode
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|TPS")
+	UAkAudioEvent* ImpactSoundEvent_TPS;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
-	UAkAudioEvent* PlayerHitSoundEvent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|TPS")
+	UAkAudioEvent* PlayerHitSoundEvent_TPS;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|TPS")
+	UAkAudioEvent* ArrowBySoundEvent_TPS;
+
+	// Audio Events - RTS Mode
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|RTS")
+	UAkAudioEvent* ImpactSoundEvent_RTS;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|RTS")
+	UAkAudioEvent* PlayerHitSoundEvent_RTS;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|RTS")
+	UAkAudioEvent* ArrowBySoundEvent_RTS;
 
 	// VFX Systems
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
@@ -93,6 +111,29 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Sound")
 	void PlayHitSound(EArrowHitType HitType, const FVector& Location);
+
+	/** 현재 RTS 모드인지 확인 */
+	UFUNCTION(BlueprintPure, Category = "Sound")
+	bool IsRTSMode() const;
+
+	/** 모드에 맞는 사운드 이벤트 선택 */
+	UFUNCTION(BlueprintPure, Category = "Sound")
+	UAkAudioEvent* SelectSoundEventByMode(UAkAudioEvent* TPSSound, UAkAudioEvent* RTSSound) const;
+
+	/** Arrow By 사운드 재생 */
+	UFUNCTION(BlueprintCallable, Category = "Sound")
+	void PlayArrowBySound();
+
+	/** Arrow By 콜리전 오버랩 이벤트 */
+	UFUNCTION()
+	void OnArrowByCollisionBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+		const FHitResult& SweepResult);
+
+	/** Arrow By 콜리전 엔드 오버랩 이벤트 */
+	UFUNCTION()
+	void OnArrowByCollisionEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "VFX")
 	void PlayHitVFX(EArrowHitType HitType, const FVector& ImpactPoint, const FVector& ImpactNormal);
