@@ -15,6 +15,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_SteamNameWidgetComp.h"
+#include "AkAudioDevice.h"
 
 AGS_Player::AGS_Player()
 {
@@ -62,12 +63,28 @@ AGS_Player::AGS_Player()
 	AkComponent = CreateDefaultSubobject<UAkComponent>(TEXT("AkComponent"));
 	AkComponent->SetupAttachment(GetRootComponent());
 
+	// 머리 위치 오디오 리스너 컴포넌트 생성
+	HeadAudioListenerComponent = CreateDefaultSubobject<UAkComponent>(TEXT("HeadAudioListenerComponent"));
+	// 스켈레탈 메시가 아직 설정되지 않았으므로 RootComponent에 임시로 attach
+	HeadAudioListenerComponent->SetupAttachment(GetRootComponent());
+
+	// 기본 후보 세팅 (프로젝트 표준 본/소켓명 우선순위)
+	HeadListenerCandidates = {
+		TEXT("head"),
+		TEXT("Head"),
+		TEXT("neck_01"),
+		TEXT("spine_03")
+	};
+
 	bIsObscuring = false;
 }
 
 void AGS_Player::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 오디오 디바이스 캐싱
+	CachedAudioDevice = FAkAudioDevice::Get();
 	if (ObscureCurve)
 	{
 		FOnTimelineFloat TimelineCallback;
@@ -84,11 +101,12 @@ void AGS_Player::BeginPlay()
 	BlurMID = UMaterialInstanceDynamic::Create(PostProcessMat, this);
 	PostProcessComponent->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, BlurMID));
 
-	// 로컬 플레이어만 오디오 리스너 설정
+	// 머리 위치에 오디오 리스너 설정 (모든 클라이언트에서)
+	SetupHeadAudioListener();
+	
+	// 로컬 플레이어만 추가 오디오 설정
 	if (IsLocalPlayer())
 	{
-		SetupLocalAudioListener();
-		
 		// 자체 AkComponent의 Occlusion도 비활성화
 		if (AkComponent)
 		{
@@ -187,13 +205,25 @@ void AGS_Player::BeginDestroy()
 		AkComponent->Stop();
 	}
 
-	// 4. 타임라인 정리
+	// 4. HeadAudioListenerComponent 정리
+	if (IsValid(HeadAudioListenerComponent) && !HeadAudioListenerComponent->IsBeingDestroyed())
+	{
+		// 기본 리스너에서 제거
+		FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+		if (AudioDevice && HeadAudioListenerComponent->IsDefaultListener)
+		{
+			AudioDevice->RemoveDefaultListener(HeadAudioListenerComponent);
+		}
+		HeadAudioListenerComponent->Stop();
+	}
+
+	// 5. 타임라인 정리
 	if (ObscureTimeline.IsPlaying())
 	{
 		ObscureTimeline.Stop();
 	}
 
-	// 5. 다이나믹 머티리얼 참조 해제
+	// 6. 다이나믹 머티리얼 참조 해제
 	BlurMID = nullptr;
 
 	UE_LOG(LogTemp, Warning, TEXT("AGS_Player::BeginDestroy() completed for %s"), *GetName());
@@ -380,6 +410,78 @@ void AGS_Player::SetupLocalAudioListener()
 				UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Camera audio listener occlusion DISABLED for local player."));
 			}
 		}
+	}
+}
+
+void AGS_Player::SetupHeadAudioListener()
+{
+	if (!HeadAudioListenerComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGS_Player::SetupHeadAudioListener: HeadAudioListenerComponent is null!"));
+		return;
+	}
+
+	// 스켈레탈 메시에서 머리 본이나 head 소켓을 찾아 리스너를 부착
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	if (MeshComp)
+	{
+		bool bAttached = false;
+		for (const FName& Candidate : HeadListenerCandidates)
+		{
+			if (MeshComp->DoesSocketExist(Candidate))
+			{
+				HeadAudioListenerComponent->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale, Candidate);
+				// UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Head audio listener attached to socket '%s'."), *Candidate.ToString());
+				bAttached = true;
+				break;
+			}
+			if (MeshComp->GetBoneIndex(Candidate) != INDEX_NONE)
+			{
+				HeadAudioListenerComponent->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale, Candidate);
+				// UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Head audio listener attached to bone '%s'."), *Candidate.ToString());
+				bAttached = true;
+				break;
+			}
+		}
+
+		if (!bAttached)
+		{
+			HeadAudioListenerComponent->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale);
+			HeadAudioListenerComponent->SetRelativeLocation(FVector(0.0f, 0.0f, HeadListenerZOffset));
+			// UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Head audio listener attached to mesh root with offset Z=%.1f."), HeadListenerZOffset);
+		}
+
+		// 로컬 플레이어만 기본 리스너로 설정
+		if (IsLocalPlayer())
+		{
+			if (CachedAudioDevice)
+			{
+				// 기존 카메라 리스너 제거
+				APlayerController* PC = Cast<APlayerController>(GetController());
+				if (PC && PC->PlayerCameraManager)
+				{
+					TArray<UAkComponent*> CameraAkComponents;
+					PC->PlayerCameraManager->GetComponents<UAkComponent>(CameraAkComponents);
+					for (UAkComponent* Component : CameraAkComponents)
+					{
+						if (Component && Component->IsDefaultListener)
+						{
+							CachedAudioDevice->RemoveDefaultListener(Component);
+							// UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Removed camera audio listener."));
+						}
+					}
+				}
+
+				// 새로운 머리 위치 리스너를 기본 리스너로 설정
+				CachedAudioDevice->AddDefaultListener(HeadAudioListenerComponent);
+				HeadAudioListenerComponent->OcclusionRefreshInterval = 0.0f; // Occlusion 비활성화
+				// UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Head audio listener set as default listener for local player."));
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AGS_Player::SetupHeadAudioListener: Skeletal mesh component is null!"));
 	}
 }
 
