@@ -14,7 +14,7 @@ void AGS_NonTrigTrapBase::BeginPlay()
 	// 논트리거 함정용 콜리전 활성화
 	if (ActivateSphereComp)
 	{
-		ActivateSphereComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_NonTrigTrapBase::OnActivSCompBeginOverlap);
+		//ActivateSphereComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_NonTrigTrapBase::OnActivSCompBeginOverlap);
 		ActivateSphereComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
 
