@@ -3,9 +3,9 @@
 #include "UI/Character/GS_SteamNameWidget.h"
 
 
-void UGS_SteamNameWidgetComp::InitWidget()
+void UGS_SteamNameWidgetComp::BeginPlay()
 {
-	Super::InitWidget();
+	Super::BeginPlay();
 
 	if (GetWidget())
 	{
