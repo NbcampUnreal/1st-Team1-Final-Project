@@ -12,6 +12,8 @@
 #include "GameFramework/GameStateBase.h"
 #include "System/PlayerController/GS_MainMenuPC.h"
 
+DEFINE_LOG_CATEGORY(GameServerLog);
+
 UGS_GameInstance::UGS_GameInstance()
     : DefaultLobbyMapName(TEXT("/Game/Maps/CustomLobbyLevel"))
     , MainMenuMapPath(TEXT("/Game/Maps/MainLevel"))
@@ -99,7 +101,14 @@ void UGS_GameInstance::Init()
     if (IsDedicatedServerInstance())
     {
         UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Init() - This is a Dedicated Server Instance. Attempting to host a session."));
+
+#if WITH_GAMELIFT
+        // GameLift 빌드인 경우: GameLift SDK를 초기화하고 GameLift의 지시를 기다린다.
+        InitGameLift();
+#else
+        // 일반 데디 서버 빌드인 경우: 직접 스팀 세션을 호스팅한다.
         GSHostSession(DefaultMaxLobbyPlayers, NAME_GameSession, DefaultLobbyMapName, DefaultLobbyGameModePath);
+#endif
     }
     else
     {
@@ -333,10 +342,10 @@ void UGS_GameInstance::GSHostSession(int32 MaxPlayers, FName SessionCustomName, 
     HostSessionSettings = MakeShareable(new FOnlineSessionSettings());
     HostSessionSettings->NumPublicConnections = 1; //이거 나중에 1로 바꾸기
     HostSessionSettings->NumPrivateConnections = 0;//MaxPlayers - HostSessionSettings->NumPublicConnections;
-    HostSessionSettings->bShouldAdvertise = true;
+    HostSessionSettings->bShouldAdvertise = false;
     HostSessionSettings->bIsLANMatch = false;
-    HostSessionSettings->bUsesPresence = false; // 스팀데디에서 이거 반드시 꺼야됨
-    HostSessionSettings->bUseLobbiesIfAvailable = false;  //bUsesPresence 값이랑 동일해야함
+    HostSessionSettings->bUsesPresence = true; // 스팀데디에서 이거 반드시 꺼야됨
+    HostSessionSettings->bUseLobbiesIfAvailable = true;  //bUsesPresence 값이랑 동일해야함
     HostSessionSettings->bAllowJoinViaPresence = true;
     HostSessionSettings->bAllowJoinInProgress = true;
     HostSessionSettings->bAllowInvites = true;
@@ -740,4 +749,179 @@ void UGS_GameInstance::LoadSettings()
             MouseSensitivity = LoadGameInstance->MouseSensitivity;
         }
     }
+}
+
+void UGS_GameInstance::InitGameLift()
+{
+#if WITH_GAMELIFT
+	UE_LOG(GameServerLog, Log, TEXT("Calling InitGameLift..."));
+
+	// Getting the module first.
+	FGameLiftServerSDKModule* GameLiftSdkModule = &FModuleManager::LoadModuleChecked<FGameLiftServerSDKModule>(FName("GameLiftServerSDK"));
+
+	//Define the server parameters for a GameLift Anywhere fleet. These are not needed for a GameLift managed EC2 fleet.
+	FServerParameters ServerParametersForAnywhere;
+    
+    // If GameLift Anywhere is enabled, parse command line arguments and pass them in the ServerParameters object.
+    SetServerParameters(ServerParametersForAnywhere);
+
+    
+    //InitSDK will establish a local connection with GameLift's agent to enable further communication.
+    //Use InintSDK(ServerParametersForAnywhere) for a GameLift Anywhere fleet.
+    //Use InitSDK() for a GameLift managed EC2 fleet.
+    GameLiftSdkModule->InitSDK(ServerParametersForAnywhere);
+
+
+    
+    ProcessParameters = MakeShared<FProcessParameters>();
+    
+    //When a game session is created, Amazon GameLift Servers sends an activation request to the game server and passes along the game session object containing game properties and other settings.
+    //Here is where a game server should take action based on the game session object.
+    //Once the game server is ready to receive incoming player connections, it should invoke GameLiftServerAPI.ActivateGameSession()
+    ProcessParameters->OnStartGameSession.BindLambda([=, this](Aws::GameLift::Server::Model::GameSession InGameSession)
+            {
+                FString GameSessionId = FString(InGameSession.GetGameSessionId());
+                UE_LOG(GameServerLog, Log, TEXT("GameSession Initializing: %s"), *GameSessionId);
+                
+                // 1. GameLift에 세션이 활성화되었음을 먼저 알림
+                GameLiftSdkModule->ActivateGameSession();
+
+                // 2. 이제 이 정보를 바탕으로 OSS(스팀)에 세션을 등록하여 소셜 기능 활성화
+                // 주의: 이 세션은 일반 서버 목록에 노출(Advertise)되지 않도록 설정하는 것이 일반적이다.
+                // GameLift가 매치메이킹을 담당하므로, 스팀 서버 브라우저를 통한 접속은 막고
+                // 친구 초대나 현재 플레이 중인 게임 참가 기능만 허용하기 위함이다.
+                UE_LOG(LogTemp, Log, TEXT("Registering session with OnlineSubsystem (Steam) for social features."));
+        
+                // GSHostSession 함수 내부의 FOnlineSessionSettings에서
+                // bShouldAdvertise = false; // 서버 목록에 노출 안 함
+                // bAllowJoinViaPresence = true; // 친구 목록의 '게임 참가' 허용
+                // 와 같이 설정하면 좋다.
+                GSHostSession(DefaultMaxLobbyPlayers, NAME_GameSession, DefaultLobbyMapName, DefaultLobbyGameModePath);
+            });
+
+
+    
+    //OnProcessTerminate callback. Amazon GameLift Servers will invoke this callback before shutting down an instance hosting this game server.
+    //It gives this game server a chance to save its state, communicate with services, etc., before being shut down.
+    //In this case, we simply tell Amazon GameLift Servers we are indeed going to shutdown.
+    ProcessParameters->OnTerminate.BindLambda([=]()
+        {
+            UE_LOG(GameServerLog, Log, TEXT("Game Server Process is terminating"));
+            GameLiftSdkModule->ProcessEnding();
+        });
+
+
+    
+    //This is the HealthCheck callback.
+    //Amazon GameLift Servers will invoke this callback every 60 seconds or so.
+    //Here, a game server might want to check the health of dependencies and such.
+    //Simply return true if healthy, false otherwise.
+    //The game server has 60 seconds to respond with its health status. Amazon GameLift Servers will default to 'false' if the game server doesn't respond in time.
+    //In this case, we're always healthy!
+    ProcessParameters->OnHealthCheck.BindLambda([]()
+        {
+            UE_LOG(GameServerLog, Log, TEXT("Performing Health Check"));
+            return true;
+        });
+
+
+    
+    //GameServer.exe -port=7777 LOG=server.mylog
+    ProcessParameters->port = FURL::UrlConfig.DefaultPort;
+    TArray<FString> CommandLineTokens;
+    TArray<FString> CommandLineSwitches;
+
+    FCommandLine::Parse(FCommandLine::Get(), CommandLineTokens, CommandLineSwitches);
+
+    for (const FString SwitchStr : CommandLineSwitches)
+    {
+        FString Key;
+        FString Value;
+
+        if (SwitchStr.Split("=", &Key, &Value))
+        {
+            if (Key.Equals(TEXT("port"), ESearchCase::IgnoreCase))
+            {
+                ProcessParameters->port = FCString::Atoi(*Value);
+            }
+        }
+    }
+
+    //Here, the game server tells Amazon GameLift Servers where to find game session log files.
+    //At the end of a game session, Amazon GameLift Servers uploads everything in the specified 
+    //location and stores it in the cloud for access later.
+    TArray<FString> Logfiles;
+    Logfiles.Add(TEXT("1st-Team1-Final-Project/Saved/Logs/server.log"));
+    ProcessParameters->logParameters = Logfiles;
+
+    //The game server calls ProcessReady() to tell Amazon GameLift Servers it's ready to host game sessions.
+    UE_LOG(GameServerLog, Log, TEXT("Calling Process Ready..."));
+    
+    FGameLiftGenericOutcome ProcessReadyOutcome = GameLiftSdkModule->ProcessReady(*ProcessParameters);
+    if (ProcessReadyOutcome.IsSuccess())
+    {
+        UE_LOG(GameServerLog, SetColor, TEXT("%s"), COLOR_GREEN);
+        UE_LOG(GameServerLog, Log, TEXT("Process Ready!"));
+        UE_LOG(GameServerLog, SetColor, TEXT("%s"), COLOR_NONE);
+    }
+    else
+    {
+        UE_LOG(GameServerLog, SetColor, TEXT("%s"), COLOR_RED);
+        UE_LOG(GameServerLog, Log, TEXT("ERROR: Process Ready Failed!"));
+        FGameLiftError ProcessReadyError = ProcessReadyOutcome.GetError();
+        UE_LOG(GameServerLog, Log, TEXT("ERROR: %s"), *ProcessReadyError.m_errorMessage);
+        UE_LOG(GameServerLog, SetColor, TEXT("%s"), COLOR_NONE);
+    }
+
+    UE_LOG(GameServerLog, Log, TEXT("InitGameLift completed!"));
+    
+#endif
+}
+
+void UGS_GameInstance::SetServerParameters(FServerParameters& OutServerParameters)
+{
+    FString glAnywhereWebSocketUrl = "";
+    if (FParse::Value(FCommandLine::Get(), TEXT("-websocketurl="), glAnywhereWebSocketUrl))
+    {
+        OutServerParameters.m_webSocketUrl = TCHAR_TO_UTF8(*glAnywhereWebSocketUrl);
+    }
+
+    FString glAnywhereFleetId = "";
+    if (FParse::Value(FCommandLine::Get(), TEXT("-fleetid="), glAnywhereFleetId))
+    {
+        OutServerParameters.m_fleetId = TCHAR_TO_UTF8(*glAnywhereFleetId);
+    }
+
+    FString glAnywhereHostId = "";
+    if (FParse::Value(FCommandLine::Get(), TEXT("-hostid="), glAnywhereHostId))
+    {
+        OutServerParameters.m_hostId = TCHAR_TO_UTF8(*glAnywhereHostId);
+    }
+
+    FString glAnywhereAuthToken = "";
+    if (FParse::Value(FCommandLine::Get(), TEXT("-authtoken="), glAnywhereAuthToken))
+    {
+        OutServerParameters.m_authToken = TCHAR_TO_UTF8(*glAnywhereAuthToken);
+    }
+
+    FString glAnywhereProcessId = "";
+    if (FParse::Value(FCommandLine::Get(), TEXT("-processid="), glAnywhereProcessId))
+    {
+        OutServerParameters.m_processId = TCHAR_TO_UTF8(*glAnywhereProcessId);
+    }
+    else
+    {
+        // If no ProcessId is passed as a command line argument, generate a randomized unique string.
+        FString TimeString = FString::FromInt(std::time(nullptr));
+        FString ProcessId = "ProcessId_" + TimeString;
+        OutServerParameters.m_processId = TCHAR_TO_UTF8(*ProcessId);
+    }
+
+    UE_LOG(GameServerLog, SetColor, TEXT("%s"), COLOR_YELLOW);
+    UE_LOG(GameServerLog, Log, TEXT(">>>> WebSocket URL: %s"), *OutServerParameters.m_webSocketUrl);
+    UE_LOG(GameServerLog, Log, TEXT(">>>> Fleet ID: %s"), *OutServerParameters.m_fleetId);
+    UE_LOG(GameServerLog, Log, TEXT(">>>> Host ID (Compute Name): %s"), *OutServerParameters.m_hostId);
+    UE_LOG(GameServerLog, Log, TEXT(">>>> Auth Token: %s"), *OutServerParameters.m_authToken);
+    UE_LOG(GameServerLog, Log, TEXT(">>>> Process ID: %s"), *OutServerParameters.m_processId);
+    UE_LOG(GameServerLog, SetColor, TEXT("%s"), COLOR_NONE);
 }

@@ -5,6 +5,7 @@
 #include "Engine/GameInstance.h"
 #include "Interfaces/OnlineSessionInterface.h"
 #include "OnlineSessionSettings.h"
+#include "GameLiftServerSDK.h"
 #include "Interfaces/OnlineFriendsInterface.h"
 #include "GS_GameInstance.generated.h"
 
@@ -15,6 +16,8 @@ class FUniqueNetId;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSteamFriendsListUpdated, const TArray<TSharedRef<FOnlineFriend>>& /* FriendsList */);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerCountChangedDelegate);
+
+DECLARE_LOG_CATEGORY_EXTERN(GameServerLog, Log, All);
 
 UCLASS()
 class GAS_API UGS_GameInstance : public UGameInstance
@@ -147,4 +150,12 @@ public:
 
      UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
      float MaxSensitivity;
+
+    //AWS GameLift
+private:
+    void InitGameLift();
+    void SetServerParameters(FServerParameters& OutServerParameters);
+
+    TSharedPtr<FProcessParameters> ProcessParameters;
+    
 };
