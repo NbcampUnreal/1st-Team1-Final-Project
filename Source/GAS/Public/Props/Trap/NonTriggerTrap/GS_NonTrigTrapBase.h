@@ -15,40 +15,33 @@ public:
 	AGS_NonTrigTrapBase();
 
 protected:
-	//virtual void BeginPlay() override;
+	virtual void BeginPlay() override;
+
+	/** 부모 클래스의 오버랩 콜리전 함수 오버라이드 */
+	virtual void OnActivSCompBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
 
 
-public:
-	/*UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Trap")
-	USphereComponent* ActivateSphereComp;
+// ===================
+// Non-Trigger Trap Specific Functions
+// ===================
 
-	FTimerHandle CheckOverlapTimerHandle;
+/** 논트리거 함정 전용 활성화 로직 */
+UFUNCTION(BlueprintCallable, Category = "Trap|NonTrigger")
+void ActivateNonTriggerTrap(AActor* TargetActor);
 
-	bool bIsActivated = false;
+/** 논트리거 함정 전용 비활성화 로직 */
+UFUNCTION(BlueprintCallable, Category = "Trap|NonTrigger")
+void DeactivateNonTriggerTrap();
 
-	UFUNCTION(Server, Reliable)
-	void Server_ActivateTrap(AActor* TargetActor);
-	void Server_ActivateTrap_Implementation(AActor* TargetActor);
+	// ===================
+	// Trap Motion Functions
+	// ===================
 
-	UFUNCTION(BlueprintNativeEvent)
-	void ActivateTrap(AActor* TargetActor);
-	void ActivateTrap_Implementation(AActor* TargetActor);
+	virtual bool CanStartMotion() const override;
 
-	UFUNCTION(BlueprintNativeEvent)
-	void DeActivateTrap();
-	void DeActivateTrap_Implementation();
-
-	UFUNCTION()
-	void OnActivSCompBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-									UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-									bool bFromSweep, const FHitResult& SweepResult);
-
-	void StartDeactivateTrapCheck();
-
-	void CheckOverlappingSeeker();*/
-
-	//TrapMotion
-	//virtual bool CanStartMotion() const override;
-	//virtual bool CanStopMotion() const override;
+	/** 논트리거 함정의 모션 정지 가능 여부 */
+	virtual bool CanStopMotion() const;
 
 };

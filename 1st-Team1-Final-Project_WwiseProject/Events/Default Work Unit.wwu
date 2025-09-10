@@ -14,28 +14,6 @@
 						</Action>
 					</ChildrenList>
 				</Event>
-				<Event Name="EV_Fire_Burn" ID="{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}">
-					<ChildrenList>
-						<Action Name="" ID="{D2FA98EC-5A68-4637-83C2-72D8C056E220}" ShortID="495966144">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="SFX_Fire_Burn" ID="{FEB4D4C7-8CE2-48DA-B308-EAA571DC9D18}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
-				<Event Name="EV_Fire_Extinguish" ID="{1261AE45-6B7B-489A-93E1-50AC8218A43C}">
-					<ChildrenList>
-						<Action Name="" ID="{CC333081-7CF9-4058-853F-98697CB21FD0}" ShortID="429770673">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="SFX_Fire_Extinguish" ID="{11A74A67-676A-442A-9E86-ED45D354EA37}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
 				<Folder Name="Monster" ID="{5CA52F78-D146-4FA5-B390-3B10914645C6}" ShortID="301194847">
 					<ChildrenList>
 						<Folder Name="SmallClaw" ID="{F5483532-88AC-40B4-B9B4-12A599A070B7}" ShortID="411578717">
@@ -546,306 +524,653 @@
 				</Folder>
 				<Folder Name="Props" ID="{0E04C431-8B91-44C6-B10A-6CC72F56E83F}" ShortID="225733664">
 					<ChildrenList>
-						<Event Name="Props_Axe" ID="{597B061A-CE0A-4A56-8154-41280E86C596}">
+						<Folder Name="Props_RTS" ID="{37AFBAAC-0C29-444B-8E8F-809EEED49886}" ShortID="149023618">
 							<ChildrenList>
-								<Action Name="" ID="{6E25780F-87DB-48A7-B190-994F28F075A5}" ShortID="786140471">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_AxeSwing" ID="{C1BDC775-E001-4714-AB7D-D2BAEED57903}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
+								<Event Name="Props_BearTrap_RTS" ID="{1C65F06B-702B-4629-A701-FF618D66EA3B}">
+									<ChildrenList>
+										<Action Name="" ID="{BCB8F1DD-7891-49E0-8948-1AD3F566FBD5}" ShortID="717900729">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_BearTrap_RTS" ID="{A5E12241-FD9A-488A-AD4E-F3FF6F4ECF62}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="Props_FloorCrystalSpike_Hit_RTS" ID="{E6498CA0-C3F7-467C-9409-2BDEA70741F5}">
+									<ChildrenList>
+										<Action Name="" ID="{ACD524EA-72ED-41F2-AA61-D5B08C121601}" ShortID="620458142">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_FloorCrystalSpikeTrap_RTS" ID="{98991E48-4B61-4947-9F92-81A359D5D30D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Folder Name="CrystalWall" ID="{6FEB7417-30FC-4866-9C59-A1F6447A6C35}" ShortID="592125646">
+									<ChildrenList>
+										<Event Name="Props_CrystalWallTrap_End_RTS" ID="{82C0E362-0251-4453-A8F1-C933F8B2442D}">
+											<ChildrenList>
+												<Action Name="" ID="{75EE0E77-819E-4A97-8885-0BD583A3E582}" ShortID="1016001423">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalTrap_End_RTS" ID="{B202E50D-CE99-45B9-8B9B-1DCB77A5541F}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalWallTrap_RTS" ID="{1462F21D-FA91-4E0A-A39F-7D1971122EFA}">
+											<ChildrenList>
+												<Action Name="" ID="{DCD14BEF-C080-43CB-8801-A6E6E3D88FA3}" ShortID="879198761">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalWallTrap_RTS" ID="{B1C29D2A-C9B5-4443-977E-FEC6673297D7}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalSpike_Hit_RTS" ID="{1B363824-F4F9-461B-992A-C8F06200B4AB}">
+											<ChildrenList>
+												<Action Name="" ID="{4B275146-4A7B-458C-A80B-1F3C8633766A}" ShortID="677030094">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalTrap_Hit_RTS" ID="{3305B11C-C912-4648-8764-2E71C0CFB432}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="CrystalSaw" ID="{82B42B37-F5F2-42A0-A32D-F9621205E944}" ShortID="277813185">
+									<ChildrenList>
+										<Event Name="Props_CrystalSaw_RTS" ID="{6761E834-442B-4846-AF95-720AC72C1DBD}">
+											<ChildrenList>
+												<Action Name="" ID="{DF868850-D8DC-4C97-8854-E81996BCB95D}" ShortID="90117131">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalSaw_RTS" ID="{5E2C4437-B54C-4973-9C58-1506812DDE86}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalSaw_Hit_RTS" ID="{DC4266BD-67B7-4E75-8D82-B1863DE791F9}">
+											<Comment>플레이어가 함정에 닿았을 때</Comment>
+											<ChildrenList>
+												<Action Name="" ID="{03591807-B8F9-4839-84F8-A31B7E6EBD8E}" ShortID="186776020">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalSaw_Hit_RTS" ID="{1C6620BE-DCE9-4EA6-8F25-F80AC9A2A27B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalSaw_Stop_RTS" ID="{755DB002-5CB1-40F2-BC13-74E46289ED7D}">
+											<ChildrenList>
+												<Action Name="" ID="{21703684-8C83-4505-BA38-57BCA39B6A5E}" ShortID="1064409654">
+													<PropertyList>
+														<Property Name="ActionType" Type="int16" Value="2"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalSaw_RTS" ID="{5E2C4437-B54C-4973-9C58-1506812DDE86}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="SwingBlade" ID="{BAB8E82B-195E-4632-9E57-DABF318AD02C}" ShortID="924619337">
+									<ChildrenList>
+										<Event Name="Props_SwingBlade_RTS" ID="{93F95ACD-9639-4C6F-B4D4-9FC5A11A6B77}">
+											<ChildrenList>
+												<Action Name="" ID="{BE1D3EF1-4C93-4AD2-97EE-1E4207E5BC61}" ShortID="731918480">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_SwingBlade_RTS" ID="{BBA48431-D7BA-49AA-BD37-D924440D8D58}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_SwingBlade_Hit_RTS" ID="{A4701B2E-9803-4024-A2D7-D27F67E3B93D}">
+											<ChildrenList>
+												<Action Name="" ID="{DC41CC49-CE73-4A18-B25E-3A9D2C0AC7B2}" ShortID="631440833">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_SwingBlade_Hit_RTS" ID="{B87923CA-6F5B-4488-95C6-2E3BEBFF41A3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_SwingBlade_Stop_RTS" ID="{854B3850-7329-4648-BF7B-5D9EE8281880}">
+											<ChildrenList>
+												<Action Name="" ID="{F460F889-0A49-4B57-ADEB-2A67E9B49706}" ShortID="11385261">
+													<PropertyList>
+														<Property Name="ActionType" Type="int16" Value="2"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_SwingBlade_RTS" ID="{BBA48431-D7BA-49AA-BD37-D924440D8D58}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="Mine" ID="{EA6319B2-7E61-42FC-AE1B-868F8ED79E34}" ShortID="431799249">
+									<ChildrenList>
+										<Event Name="Props_MineExplode_RTS" ID="{3B4EC7E8-6F73-4E80-9E21-A33F6C6CBA78}">
+											<ChildrenList>
+												<Action Name="" ID="{07334CA6-7152-4C82-AE1E-FA9C71B2B502}" ShortID="273087746">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Mine_Explosion_RTS" ID="{746B9FF6-5E6A-4084-97CF-4E383DD1B1E3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_MineFuse_RTS" ID="{9ED3419B-DF28-4C5B-861E-99CD1E9A6F71}">
+											<ChildrenList>
+												<Action Name="" ID="{403651A0-4C90-4E4A-9136-F86ED1BDE179}" ShortID="651159118">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Mine_Fuse_RTS" ID="{CA3BF339-276B-49FB-A5E0-3201FE170FD5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_MineTick_RTS" ID="{1264840D-B1FE-483A-8822-04B210E41BC1}">
+											<ChildrenList>
+												<Action Name="" ID="{BB6B1D69-7A4E-42DB-BE50-BC5FAC97DEE8}" ShortID="578692996">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Mine_Tick_RTS" ID="{BB577954-0C0E-4084-A787-C1DE678118E6}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="Lava" ID="{203CDD35-49AE-43F9-A9C4-5A746F54D43E}" ShortID="809465945">
+									<ChildrenList>
+										<Event Name="Props_Lava_RTS" ID="{6144C6B4-4A0D-46E5-AB26-EBD812E4DC21}">
+											<ChildrenList>
+												<Action Name="" ID="{F45201AB-0F6C-42E8-AAE9-1D34FFAB5174}" ShortID="559010319">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Lava_RTS" ID="{0CE74616-CCF2-4E77-A7FA-E50006FBA5C3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_Lava_Burn_RTS" ID="{4D65125F-1E3D-483B-A4A3-2B5BCA8C9212}">
+											<ChildrenList>
+												<Action Name="" ID="{75B48B7E-0673-48B8-B01C-D1D71492BEE0}" ShortID="812274831">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Lava_Burn_RTS" ID="{9C9FCEA7-A4C6-4BCD-9D87-BBD420D31E5B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_Lava_Stop_RTS" ID="{3A957645-65FA-4D7B-83D2-9FDE42DF9740}">
+											<ChildrenList>
+												<Action Name="" ID="{125FE87E-3640-4220-807C-FE9454A7BA34}" ShortID="191727523">
+													<PropertyList>
+														<Property Name="ActionType" Type="int16" Value="2"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Lava_RTS" ID="{0CE74616-CCF2-4E77-A7FA-E50006FBA5C3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Event Name="EV_Fire_Burn_RTS" ID="{0D19D74B-F16F-4A78-A9C6-45BDDB7047C7}">
+									<ChildrenList>
+										<Action Name="" ID="{E93CD95B-FF90-48FD-82DA-E4D263C1DAF6}" ShortID="466699359">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_Fire_Burn_RTS" ID="{AD22AD31-8A3A-40D8-8637-C52BFBDAEE5A}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Fire_Extinguish_RTS" ID="{31398026-F90C-4DEE-BD28-B1D52D9E0C65}">
+									<ChildrenList>
+										<Action Name="" ID="{69BBDFC8-BD96-42E2-A5F7-ECBE8A4A20AD}" ShortID="455526691">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_Fire_Extinguish_RTS" ID="{7C87F6F3-7E68-4120-898E-54B51B3CA705}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="Props_FlameTrap_RTS" ID="{E6BFC29F-EE85-478A-8B34-EA3EC1E3453D}">
+									<ChildrenList>
+										<Action Name="" ID="{745C970F-71EB-4692-93F6-411E3B3183B5}" ShortID="445139316">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_FlameShot_RTS" ID="{35A47DD6-54A4-4A91-8B6E-B5AE2A18DCEE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
-						</Event>
-						<Event Name="Props_Axe_Hit" ID="{E6A16F60-3008-4709-B717-1D97F028AB1C}">
+						</Folder>
+						<Folder Name="Props_TPS" ID="{83734475-9FAB-43AB-B635-06B7E4FBFDB8}" ShortID="796313646">
 							<ChildrenList>
-								<Action Name="" ID="{D3E40DAC-E979-4EF4-8D48-3F16EDC86F3E}" ShortID="745598978">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_Swing_Hit" ID="{199C4062-58AF-4B39-B5CE-2F7029BABD29}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
+								<Event Name="Props_FlameTrap" ID="{E933E0D7-C994-4F16-A665-499CBF190223}">
+									<ChildrenList>
+										<Action Name="" ID="{B5D756A3-0621-4A12-80F9-65FB1455EDDE}" ShortID="96018703">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_FlameShot" ID="{0312B3C9-A72E-4271-AB15-0AB269A5BD80}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}">
+									<Comment>횃불 소리</Comment>
+									<ChildrenList>
+										<Action Name="" ID="{49404C92-16D5-48EE-9F94-47B3C188EBA1}" ShortID="848011745">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="Props_TorchFlicker" ID="{32881CE0-989D-4C38-8D9A-12376643AE6D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="Props_CampFire" ID="{BCEA7046-966A-4D96-8341-33FB4002A3CD}">
+									<Comment>횃불 소리</Comment>
+									<ChildrenList>
+										<Action Name="" ID="{94488CC4-1B7A-485A-A7DB-A0EE6F354A7A}" ShortID="714936233">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="Props_CampFire" ID="{1B25F955-5553-4E88-9D95-D88E5145ABFE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Folder Name="BearTrap" ID="{EC6FD840-BE59-43AE-A6CE-E6A6749475C9}" ShortID="322001538">
+									<ChildrenList>
+										<Event Name="Props_BearTrap" ID="{DCFFA37D-831E-4187-999F-FD2DB425816C}">
+											<ChildrenList>
+												<Action Name="" ID="{2BAAB3FE-8DA0-4A9F-A1ED-37FA263C85D0}" ShortID="944004173">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_BearTrap" ID="{B3EA5DAE-A012-453C-BD81-FAF1F4CF82A5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_BearTrap_Out" ID="{A8F68B4C-166B-47F0-82AB-7DA87701254B}">
+											<ChildrenList>
+												<Action Name="" ID="{2A2C5DB5-E674-4B40-9F49-5CF18D261247}" ShortID="32656675">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_BearTrap_Out" ID="{B06F6092-F653-4DD6-A2F9-F7D1BDEDB916}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="CrystalSpike" ID="{5ACB6478-CBE4-459F-B968-872018CFFB93}" ShortID="123055199">
+									<ChildrenList>
+										<Event Name="Props_CrystalSpike_Hit" ID="{36F0066E-709B-487B-AB1C-AAC04B8F753C}">
+											<ChildrenList>
+												<Action Name="" ID="{59F7A33F-8634-4313-875F-EA9AE94ED1A1}" ShortID="310572861">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_FloorCrystalSpikeTrap" ID="{C3DFCFBC-AD76-47D7-8F26-4ED602CC8A43}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalSpike_Warn" ID="{DD18B330-B074-4D2A-98BB-5D65C009673B}">
+											<ChildrenList>
+												<Action Name="" ID="{E6C62417-2644-4E29-8195-2B6FB59355D9}" ShortID="812565130">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_FloorSpikeTrap_Warning" ID="{ADB4D0DF-B762-4889-B913-F72B23027F8E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="CrystalWall" ID="{303D63B1-AD3F-438C-B78B-5AEE8A9AD39B}" ShortID="720245324">
+									<ChildrenList>
+										<Event Name="Props_CrystalCeilTrap_Warn" ID="{B04602E2-FB96-44B6-8F1F-73807B6D663A}">
+											<ChildrenList>
+												<Action Name="" ID="{C19CA46E-1C0C-4CAF-A2CA-C07BD597B940}" ShortID="423628214">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CystalCeilTrap_Warning" ID="{8EA4FDBE-9BA7-4C7A-8B01-2772B0C60458}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalWallTrap" ID="{9C89005A-CF4E-46F0-9A26-2606EC93E64B}">
+											<ChildrenList>
+												<Action Name="" ID="{99C1554E-6C82-410F-8563-2BCF2A7714A2}" ShortID="302038271">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalWallTrap" ID="{718BD15B-1AFD-469E-94CE-28FFE8661F93}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalWallTrap_End" ID="{89711335-193C-46E0-A2F3-AF1AC6E56925}">
+											<ChildrenList>
+												<Action Name="" ID="{D4888671-7CD4-447B-86C1-7935C067E21A}" ShortID="816475567">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalTrap_End" ID="{10A0F971-F5D7-4E3A-A59D-D9E774EEF284}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalWallTrap_Hit" ID="{B21DE69E-40F0-4E26-A3A1-FD3ACBE3F2B1}">
+											<ChildrenList>
+												<Action Name="" ID="{DF3E5BE0-9604-464E-8B5B-2BC6D70E906C}" ShortID="1041416101">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalTrap_Hit" ID="{6786AD38-A246-4D4F-991C-6B947DAD639B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalWallTrap_Warn" ID="{33AD43EF-BF24-497E-9E82-E5002392E978}">
+											<ChildrenList>
+												<Action Name="" ID="{BC2CB4E6-65EB-4DB7-8DDB-ED2C2425FAE4}" ShortID="659606984">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalWallTrap_Warning" ID="{0DD6513C-71AE-4F24-B5C3-2C0619D14B44}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_StoneTrap_Hit" ID="{624349E1-2251-4E0E-8E91-39536798294E}">
+											<ChildrenList>
+												<Action Name="" ID="{DC419BB4-3FDC-483A-B993-EDCDFCF2EC08}" ShortID="49632125">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_SpikeTrap_Hit" ID="{9C483B99-6DBB-4BB3-98E8-CEAAB68C4397}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="Lava" ID="{865F989D-FE4E-438C-B1AA-90C68BFE5C02}" ShortID="1050979212">
+									<ChildrenList>
+										<Event Name="Props_Lava" ID="{6686274F-8432-44ED-A70C-2B145099B0E2}">
+											<ChildrenList>
+												<Action Name="" ID="{3FA96047-6D65-4E5B-9E5E-C1C90E4A3DEE}" ShortID="1068416541">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Lava" ID="{6EBCA42F-E97F-4637-82DB-0EB5CE3561B0}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_Lava_Burn" ID="{714D3788-7B53-452D-9C66-6FC35CD86958}">
+											<ChildrenList>
+												<Action Name="" ID="{449C1F91-6272-489E-AB05-785BEC9F273D}" ShortID="606897860">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Lava_Hit" ID="{0D32CFBB-A13E-4E8D-983B-9A609616FC9B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_Lava_Stop" ID="{F8F88827-F9C9-4601-BBCB-FFF194D1E872}">
+											<ChildrenList>
+												<Action Name="" ID="{89A1C8D1-D092-4CA7-9B6D-A9BB218AFDA0}" ShortID="965506287">
+													<PropertyList>
+														<Property Name="ActionType" Type="int16" Value="2"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Lava" ID="{6EBCA42F-E97F-4637-82DB-0EB5CE3561B0}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="Mine" ID="{57507F35-B37D-40B4-A750-6D6B90258AF7}" ShortID="505042378">
+									<ChildrenList>
+										<Event Name="Props_MineExplode" ID="{59F8482E-4399-4E6E-B401-0432CFED7550}">
+											<ChildrenList>
+												<Action Name="" ID="{5CB5FC2A-A611-4283-B91A-F41FB6BEE5CB}" ShortID="843699091">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Mine_Explosion" ID="{611E6FF4-0073-4C79-9A94-D76F510F0993}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_MineFuse" ID="{A35527D0-C2F4-47A0-BDE7-2C8FA15D748C}">
+											<ChildrenList>
+												<Action Name="" ID="{FC063C7F-121C-4A98-AD16-1683D829FE3F}" ShortID="241425375">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Mine_Fuse" ID="{F132EACB-2D2B-46AD-A69A-7A9E5F8BA8C2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_MineTick" ID="{74D1A5FF-BF72-4F0B-9EF1-9D75B1CBC0BA}">
+											<ChildrenList>
+												<Action Name="" ID="{8F0EF89B-4107-4A1B-9DF5-419226E5ABF3}" ShortID="719083748">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Mine_Tick" ID="{032BB249-4018-4415-AE23-D5223963CE2B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="Portal" ID="{637D4697-E98E-413C-B88C-59BEE793995E}" ShortID="89293091">
+									<ChildrenList>
+										<Event Name="Props_Portal" ID="{9141DA7A-2D2F-449C-88E2-C9754D09EDA8}">
+											<ChildrenList>
+												<Action Name="" ID="{487CC211-14A8-4ECF-BB98-B5806E9CFD08}" ShortID="821686714">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Portal" ID="{5A8B2DE9-4541-4C6A-83D3-08FE49DC1DC2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_Portal_Trigger" ID="{3DFD4CDA-F232-4F79-B00F-324E80CF48AF}">
+											<ChildrenList>
+												<Action Name="" ID="{9054C610-3408-46EF-91BE-F40F46AA5207}" ShortID="57729274">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_PortalTrigger" ID="{D6B65CF6-F612-4727-809B-A8822FBA29F3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="CrystalSaw" ID="{AD83C768-5B46-4724-95D7-4C66A5D7ACA1}" ShortID="483061696">
+									<ChildrenList>
+										<Event Name="Props_CrystalSaw" ID="{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}">
+											<ChildrenList>
+												<Action Name="" ID="{59A44036-0045-42D0-A5C6-016AD2610615}" ShortID="234166397">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalSaw" ID="{6F302D28-2733-4779-A4AA-A97068514725}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalSaw_Hit" ID="{DFBB5823-D275-437F-99C5-623B934A4616}">
+											<Comment>플레이어가 함정에 닿았을 때</Comment>
+											<ChildrenList>
+												<Action Name="" ID="{9A5EADA5-6F38-4DE9-B836-BF942CA83ADC}" ShortID="96101203">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalSaw_Hit" ID="{7E0EF1DB-5A85-4BD9-B830-47BB74676879}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalSaw_Stop" ID="{0B497819-5444-4391-8753-6AFFFFD59EEF}">
+											<ChildrenList>
+												<Action Name="" ID="{1F0AA84C-185C-4DFF-815F-6CE22E7DD620}" ShortID="1011925032">
+													<PropertyList>
+														<Property Name="ActionType" Type="int16" Value="2"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_CrystalSaw" ID="{6F302D28-2733-4779-A4AA-A97068514725}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="SwingBlade" ID="{DDF15871-49BA-4C0D-BEFD-1545C566DCAA}" ShortID="426873290">
+									<ChildrenList>
+										<Event Name="Props_SwingBlade" ID="{597B061A-CE0A-4A56-8154-41280E86C596}">
+											<ChildrenList>
+												<Action Name="" ID="{6E25780F-87DB-48A7-B190-994F28F075A5}" ShortID="786140471">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_SwingBlade" ID="{C1BDC775-E001-4714-AB7D-D2BAEED57903}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_SwingBlade_Hit" ID="{E6A16F60-3008-4709-B717-1D97F028AB1C}">
+											<ChildrenList>
+												<Action Name="" ID="{D3E40DAC-E979-4EF4-8D48-3F16EDC86F3E}" ShortID="745598978">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_Swing_Hit" ID="{199C4062-58AF-4B39-B5CE-2F7029BABD29}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_SwingBlade_Stop" ID="{B47D561B-5CC3-49ED-B6BF-29D5C4547AE8}">
+											<ChildrenList>
+												<Action Name="" ID="{9B59F3A1-F546-4C22-8E3C-365E1D6171F7}" ShortID="555895554">
+													<PropertyList>
+														<Property Name="ActionType" Type="int16" Value="2"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_SwingBlade" ID="{C1BDC775-E001-4714-AB7D-D2BAEED57903}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="StoneDoor" ID="{A1F5BCD1-8A34-4EBC-A59B-57E3CFDD3DEB}" ShortID="556730071">
+									<ChildrenList>
+										<Event Name="Props_StoneDooor_Close" ID="{CAF2368B-2B31-4894-B890-6034FC2E534C}">
+											<ChildrenList>
+												<Action Name="" ID="{392007A3-E193-491E-BC8D-EE9240E3B4C4}" ShortID="154069511">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_StoneDooor_Close" ID="{8A6F0607-E3A7-4FBA-8B04-460759311C6A}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_StoneDooor_Open" ID="{A5598EC5-E8E1-4CE5-83AF-3F8909B45F09}">
+											<ChildrenList>
+												<Action Name="" ID="{07349D8A-05E2-4DE9-A02C-D99AE02B6219}" ShortID="1071094070">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_StoneDooor_Open" ID="{B89E9F33-EC2D-4DA0-901F-5D23FABF0863}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Event Name="EV_Fire_Burn" ID="{3FB90D14-53F2-491A-8FFF-AF0821B59A6A}">
+									<ChildrenList>
+										<Action Name="" ID="{D2FA98EC-5A68-4637-83C2-72D8C056E220}" ShortID="495966144">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_Fire_Burn" ID="{FEB4D4C7-8CE2-48DA-B308-EAA571DC9D18}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Fire_Extinguish" ID="{1261AE45-6B7B-489A-93E1-50AC8218A43C}">
+									<ChildrenList>
+										<Action Name="" ID="{CC333081-7CF9-4058-853F-98697CB21FD0}" ShortID="429770673">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_Fire_Extinguish" ID="{11A74A67-676A-442A-9E86-ED45D354EA37}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
-						</Event>
-						<Event Name="Props_Lava" ID="{6686274F-8432-44ED-A70C-2B145099B0E2}">
-							<ChildrenList>
-								<Action Name="" ID="{3FA96047-6D65-4E5B-9E5E-C1C90E4A3DEE}" ShortID="1068416541">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_Lava" ID="{6EBCA42F-E97F-4637-82DB-0EB5CE3561B0}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_BearTrap_Out" ID="{A8F68B4C-166B-47F0-82AB-7DA87701254B}">
-							<ChildrenList>
-								<Action Name="" ID="{2A2C5DB5-E674-4B40-9F49-5CF18D261247}" ShortID="32656675">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_BearTrap_Out" ID="{B06F6092-F653-4DD6-A2F9-F7D1BDEDB916}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_Lava_Hit" ID="{714D3788-7B53-452D-9C66-6FC35CD86958}">
-							<ChildrenList>
-								<Action Name="" ID="{449C1F91-6272-489E-AB05-785BEC9F273D}" ShortID="606897860">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_Lava_Hit" ID="{0D32CFBB-A13E-4E8D-983B-9A609616FC9B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_BearTrap" ID="{DCFFA37D-831E-4187-999F-FD2DB425816C}">
-							<ChildrenList>
-								<Action Name="" ID="{2BAAB3FE-8DA0-4A9F-A1ED-37FA263C85D0}" ShortID="944004173">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_BearTrap" ID="{B3EA5DAE-A012-453C-BD81-FAF1F4CF82A5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_FlameTrap" ID="{E933E0D7-C994-4F16-A665-499CBF190223}">
-							<ChildrenList>
-								<Action Name="" ID="{B5D756A3-0621-4A12-80F9-65FB1455EDDE}" ShortID="96018703">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_FlameShot" ID="{0312B3C9-A72E-4271-AB15-0AB269A5BD80}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_Saw" ID="{B73BBD5B-05EC-4800-AF81-CE5C6B64DE6F}">
-							<ChildrenList>
-								<Action Name="" ID="{59A44036-0045-42D0-A5C6-016AD2610615}" ShortID="234166397">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_CrystalSaw" ID="{6F302D28-2733-4779-A4AA-A97068514725}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_Saw_Hit" ID="{DFBB5823-D275-437F-99C5-623B934A4616}">
-							<Comment>플레이어가 함정에 닿았을 때</Comment>
-							<ChildrenList>
-								<Action Name="" ID="{9A5EADA5-6F38-4DE9-B836-BF942CA83ADC}" ShortID="96101203">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_CrystalSaw_Hit" ID="{7E0EF1DB-5A85-4BD9-B830-47BB74676879}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_CrystalWallTrap" ID="{9C89005A-CF4E-46F0-9A26-2606EC93E64B}">
-							<ChildrenList>
-								<Action Name="" ID="{99C1554E-6C82-410F-8563-2BCF2A7714A2}" ShortID="302038271">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_CrystalWallTrap" ID="{718BD15B-1AFD-469E-94CE-28FFE8661F93}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_StoneTrap_Hit" ID="{624349E1-2251-4E0E-8E91-39536798294E}">
-							<ChildrenList>
-								<Action Name="" ID="{DC419BB4-3FDC-483A-B993-EDCDFCF2EC08}" ShortID="49632125">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_SpikeTrap_Hit" ID="{9C483B99-6DBB-4BB3-98E8-CEAAB68C4397}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_Spike" ID="{87EFA3D2-5892-417F-A875-D06CCD556912}">
-							<ChildrenList>
-								<Action Name="" ID="{3D1ADF06-DF28-42A6-A305-9D0749263153}" ShortID="258217654">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_CrystalSpikeTrap" ID="{C3DFCFBC-AD76-47D7-8F26-4ED602CC8A43}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_CrystalSpike_Hit" ID="{36F0066E-709B-487B-AB1C-AAC04B8F753C}">
-							<ChildrenList>
-								<Action Name="" ID="{59F7A33F-8634-4313-875F-EA9AE94ED1A1}" ShortID="310572861">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_CrystalSpikeTrap" ID="{C3DFCFBC-AD76-47D7-8F26-4ED602CC8A43}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_MineExplode" ID="{59F8482E-4399-4E6E-B401-0432CFED7550}">
-							<ChildrenList>
-								<Action Name="" ID="{5CB5FC2A-A611-4283-B91A-F41FB6BEE5CB}" ShortID="843699091">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_GrenadeExplosion" ID="{611E6FF4-0073-4C79-9A94-D76F510F0993}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_MineTick" ID="{74D1A5FF-BF72-4F0B-9EF1-9D75B1CBC0BA}">
-							<ChildrenList>
-								<Action Name="" ID="{8F0EF89B-4107-4A1B-9DF5-419226E5ABF3}" ShortID="719083748">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_GrenadeTick" ID="{032BB249-4018-4415-AE23-D5223963CE2B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_MineFuse" ID="{A35527D0-C2F4-47A0-BDE7-2C8FA15D748C}">
-							<ChildrenList>
-								<Action Name="" ID="{FC063C7F-121C-4A98-AD16-1683D829FE3F}" ShortID="241425375">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_GrenadeFuse" ID="{F132EACB-2D2B-46AD-A69A-7A9E5F8BA8C2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_Portal" ID="{9141DA7A-2D2F-449C-88E2-C9754D09EDA8}">
-							<ChildrenList>
-								<Action Name="" ID="{487CC211-14A8-4ECF-BB98-B5806E9CFD08}" ShortID="821686714">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_Portal" ID="{5A8B2DE9-4541-4C6A-83D3-08FE49DC1DC2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_Portal_Trigger" ID="{3DFD4CDA-F232-4F79-B00F-324E80CF48AF}">
-							<ChildrenList>
-								<Action Name="" ID="{9054C610-3408-46EF-91BE-F40F46AA5207}" ShortID="57729274">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_PortalTrigger" ID="{D6B65CF6-F612-4727-809B-A8822FBA29F3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_CrystalWallTrap_Hit" ID="{B21DE69E-40F0-4E26-A3A1-FD3ACBE3F2B1}">
-							<ChildrenList>
-								<Action Name="" ID="{DF3E5BE0-9604-464E-8B5B-2BC6D70E906C}" ShortID="1041416101">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_CrystalTrap_Hit" ID="{6786AD38-A246-4D4F-991C-6B947DAD639B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_StoneDooor_Open" ID="{A5598EC5-E8E1-4CE5-83AF-3F8909B45F09}">
-							<ChildrenList>
-								<Action Name="" ID="{07349D8A-05E2-4DE9-A02C-D99AE02B6219}" ShortID="1071094070">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_StoneDooor_Open" ID="{B89E9F33-EC2D-4DA0-901F-5D23FABF0863}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_StoneDooor_Close" ID="{CAF2368B-2B31-4894-B890-6034FC2E534C}">
-							<ChildrenList>
-								<Action Name="" ID="{392007A3-E193-491E-BC8D-EE9240E3B4C4}" ShortID="154069511">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_StoneDooor_Close" ID="{8A6F0607-E3A7-4FBA-8B04-460759311C6A}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_Torch" ID="{0FE8AE3D-0C62-4903-9226-37A060EB1543}">
-							<Comment>횃불 소리</Comment>
-							<ChildrenList>
-								<Action Name="" ID="{49404C92-16D5-48EE-9F94-47B3C188EBA1}" ShortID="848011745">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="Props_TorchFlicker" ID="{32881CE0-989D-4C38-8D9A-12376643AE6D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_CampFire" ID="{BCEA7046-966A-4D96-8341-33FB4002A3CD}">
-							<Comment>횃불 소리</Comment>
-							<ChildrenList>
-								<Action Name="" ID="{94488CC4-1B7A-485A-A7DB-A0EE6F354A7A}" ShortID="714936233">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="Props_CampFire" ID="{1B25F955-5553-4E88-9D95-D88E5145ABFE}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_CrystalSpike_Warn" ID="{DD18B330-B074-4D2A-98BB-5D65C009673B}">
-							<ChildrenList>
-								<Action Name="" ID="{E6C62417-2644-4E29-8195-2B6FB59355D9}" ShortID="812565130">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_FloorSpikeTrap_Warning" ID="{ADB4D0DF-B762-4889-B913-F72B23027F8E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_CrystalWallTrap_Warn" ID="{33AD43EF-BF24-497E-9E82-E5002392E978}">
-							<ChildrenList>
-								<Action Name="" ID="{BC2CB4E6-65EB-4DB7-8DDB-ED2C2425FAE4}" ShortID="659606984">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_CrystalWallTrap_Warning" ID="{0DD6513C-71AE-4F24-B5C3-2C0619D14B44}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_CrystalCeilTrap_Warn" ID="{B04602E2-FB96-44B6-8F1F-73807B6D663A}">
-							<ChildrenList>
-								<Action Name="" ID="{C19CA46E-1C0C-4CAF-A2CA-C07BD597B940}" ShortID="423628214">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_CystalCeilTrap_Warning" ID="{8EA4FDBE-9BA7-4C7A-8B01-2772B0C60458}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="Props_CrystalWallTrap_End" ID="{89711335-193C-46E0-A2F3-AF1AC6E56925}">
-							<ChildrenList>
-								<Action Name="" ID="{D4888671-7CD4-447B-86C1-7935C067E21A}" ShortID="816475567">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_CrystalTrap_End" ID="{10A0F971-F5D7-4E3A-A59D-D9E774EEF284}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
+						</Folder>
 					</ChildrenList>
 				</Folder>
 				<Folder Name="Player" ID="{5B530A9A-1B94-4771-9758-F7BC6453FCEA}" ShortID="925469267">

@@ -2,6 +2,9 @@
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include <Net/UnrealNetwork.h>
+#include "AkGameplayStatics.h"
+#include "Kismet/GameplayStatics.h"
+#include "AI/RTS/GS_RTSController.h"
 AGS_TrigTrapBase::AGS_TrigTrapBase()
 {
 	TriggerBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
@@ -29,31 +32,76 @@ void AGS_TrigTrapBase::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor != this && !bIsTriggered)
+	if (OtherActor && OtherActor != this)
 	{
 		AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
 		if (Seeker)
 		{
-			//함정 트리거 이후, 동작 전 경고 사운드 함수(BP에서 구현)
-			PlayTrapAlertSound(Seeker);
+		//함정 트리거 이후, 동작 전 경고 사운드 함수(BP에서 구현)
+		// 재발동 시에도 사운드가 들리도록 조건 밖에 호출
+		CallTrapAlertSound(Seeker);
 
-			if (!HasAuthority())
+			if (!bIsTriggered)
 			{
-				//클라이언트
-
-				Server_DelayTrapEffect(Seeker);
-			}
-			else
-			{
-				DelayTrapEffect(Seeker);
+				if (!HasAuthority())
+				{
+					//클라이언트
+					Server_DelayTrapEffect(Seeker);
+				}
+				else
+				{
+					DelayTrapEffect(Seeker);
+				}
 			}
 		}
-		
+
 	}
 }
 
-void AGS_TrigTrapBase::PlayTrapAlertSound_Implementation(AActor* TargetActor)
+void AGS_TrigTrapBase::CallTrapAlertSound(AActor* TargetActor)
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	UAkAudioEvent* SoundEvent = SelectSoundEventByMode(TrapData.AlertSound_TPS, TrapData.AlertSound_RTS);
+	if (SoundEvent)
+	{
+		Multicast_PlayTrapAlertSound(TargetActor);
+	}
+
+	// 블루프린트에서 추가 로직을 실행할 수 있도록 이벤트 호출
+	OnTrapAlertSoundPlayed(TargetActor);
+}
+
+void AGS_TrigTrapBase::Multicast_PlayTrapAlertSound_Implementation(AActor* TargetActor)
+{
+	// 데디케이티드 서버에서는 오디오 처리 불필요
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[TrigTrap] Dedicated Server - Audio skipped"));
+		return;
+	}
+
+	// 거리 기반 최적화 체크 (임시로 비활성화)
+	bool bShouldPlay = ShouldPlayTrapSoundAtLocation(GetActorLocation());
+	UE_LOG(LogTemp, Warning, TEXT("[TrigTrap] ShouldPlayTrapSoundAtLocation: %s"), bShouldPlay ? TEXT("TRUE") : TEXT("FALSE"));
+	
+	// 디버깅을 위해 임시로 거리 체크 무시
+	// if (!bShouldPlay)
+	// {
+	//     return;
+	// }
+
+	UAkAudioEvent* SoundEvent = SelectSoundEventByMode(TrapData.AlertSound_TPS, TrapData.AlertSound_RTS);
+	
+	if (SoundEvent)
+	{
+		// TrapAkComponent가 있으면 해당 컴포넌트를 사용, 없으면 Actor 자체 사용
+		AActor* AudioActor = TrapAkComponent ? TrapAkComponent->GetOwner() : this;
+		UAkGameplayStatics::PostEvent(SoundEvent, AudioActor, 0, FOnAkPostEventCallback());
+	}
 }
 
 void AGS_TrigTrapBase::Server_DelayTrapEffect_Implementation(AActor* TargetActor)

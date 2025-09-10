@@ -8,8 +8,11 @@
 #include "Character/Component/GS_DebuffComp.h"
 #include "Props/Trap/GS_TrapManager.h"
 #include "Components/SphereComponent.h"
+#include "Sound/GS_AudioComponentBase.h"
 #include "GS_TrapBase.generated.h"
 
+// Forward declarations
+class UAkAudioEvent;
 class UBoxComponent;
 UCLASS()
 class GAS_API AGS_TrapBase : public AActor
@@ -18,7 +21,6 @@ class GAS_API AGS_TrapBase : public AActor
 	
 public:	
 	AGS_TrapBase();
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Trap")
 	FName TrapID;
@@ -39,15 +41,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Trap")
 	USphereComponent* ActivateSphereComp;
 
-	
+	/** 함정 사운드용 AkComponent */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	class UAkComponent* TrapAkComponent;
 
 	//함정 데이터 테이블
 	UPROPERTY(EditDefaultsOnly, Category = "Trap")
 	UDataTable* TrapDataTable;
 
 	FTrapData TrapData;
-	
-
 	FTimerHandle CheckOverlapTimerHandle;
 
 	bool bIsActivated = false;
@@ -70,6 +72,50 @@ public:
 	void DeActivateTrap();
 	void DeActivateTrap_Implementation();
 
+	// ===================
+	// Audio Functions
+	// ===================
+
+	/** 현재 RTS 모드인지 확인 */
+	UFUNCTION(BlueprintPure, Category = "Trap|Audio")
+	bool IsRTSMode() const;
+
+	/** 모드에 맞는 사운드 이벤트 선택 */
+	UFUNCTION(BlueprintPure, Category = "Trap|Audio")
+	UAkAudioEvent* SelectSoundEventByMode(UAkAudioEvent* TPSSound, UAkAudioEvent* RTSSound) const;
+
+	/** 함정 사운드 재생 최적화를 위한 거리/시야 체크 */
+	UFUNCTION(BlueprintPure, Category = "Trap|Audio")
+	bool ShouldPlayTrapSoundAtLocation(const FVector& TrapLocation) const;
+
+	/** TrapAkComponent를 에디터에서 설정하는 헬퍼 함수 */
+	UFUNCTION(BlueprintCallable, Category = "Audio", CallInEditor)
+	void SetTrapAkComponent(class UAkComponent* NewAkComponent);
+
+
+
+	/** 활성화 사운드 재생 */
+	UFUNCTION(BlueprintCallable, Category = "Trap|Audio")
+	void PlayActivationSound();
+
+	/** 비활성화 사운드 재생 */
+	UFUNCTION(BlueprintCallable, Category = "Trap|Audio")
+	void PlayDeactivationSound();
+
+	/** 함정 히트 사운드 재생 */
+	UFUNCTION(BlueprintCallable, Category = "Trap|Audio")
+	void PlayHitSound();
+
+	/** 서버에서 멀티캐스트로 사운드 재생 */
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayActivationSound();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDeactivationSound();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayHitSound();
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_EnableOptimizedCollision();
 	void Multicast_EnableOptimizedCollision_Implementation();
@@ -77,28 +123,14 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DisableOptimizedCollision();
 	void Multicast_DisableOptimizedCollision_Implementation();
-
-
-
 	void StartDeactivateTrapCheck();
-
 	void CheckOverlappingSeeker();
-
-
-
-
-
-
-
-
 
 	//Damage Box에 오버랩 되었을 때
 	UFUNCTION()
 	virtual void OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult);
-
-
 
 	UFUNCTION(BlueprintNativeEvent)
 	void DamageBoxEffect(AActor* OtherActor);
@@ -121,10 +153,8 @@ public:
 	void CustomTrapEffect(AActor* TargetActor);
 	void CustomTrapEffect_Implementation(AActor* TargetActor);
 
-
 	UFUNCTION(BlueprintCallable, Category="Trap")
 	void PushCharacterInBox(UBoxComponent* CollisionBox, float PushPower = 600.0f);
-
 
 	//Damage 관련 함수
 	UFUNCTION(Server, Reliable)
@@ -146,22 +176,15 @@ public:
 	virtual bool CanStartMotion() const;
 	AGS_TrapManager* GetTrapManager() const;
 
-
 	void LoadTrapData();
-
 
 	bool IsBlockedInDirection(const FVector& Start, const FVector& Direction, float Distance, AGS_Character* CharacterToIgnore);
 
 	//void ClearDotTimerForActor(AActor* Actor);
-
-
-
-
 
 protected:
 	//TMap<AActor*, FTimerHandle> ActiveDoTTimers;
 
 	virtual void BeginPlay() override;
 	
-
 };
