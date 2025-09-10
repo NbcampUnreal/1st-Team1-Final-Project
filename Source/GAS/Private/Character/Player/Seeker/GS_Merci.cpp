@@ -123,10 +123,7 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 	// DrawBow 가 Client 외에 Server 에서 호출될 일이 있나? Client 에서 해당 함수가 호출되었다면 이미 쥐에서 Return 으로 막히는 거 아닌가?
 	if (!GetDrawState())
 	{
-		if (WidgetCrosshair)
-		{
-			WidgetCrosshair->PlayAimAnim(true);
-		}
+		Client_UpdateCrosshairAim(true);
 
 		// 줌 시작
 		if(!GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
@@ -162,6 +159,8 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		Server_ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 		return;
 	}
+
+	Client_UpdateCrosshairAim(false);
 	
 	if (GetSkillComp()->IsSkillActive(ESkillSlot::Rolling))
 	{
@@ -531,6 +530,14 @@ void AGS_Merci::SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget)
 		{
 			WidgetCrosshair->UpdateArrowCnt(EArrowType::Child, CurrentChildArrows);
 		}
+	}
+}
+
+void AGS_Merci::Client_UpdateCrosshairAim_Implementation(bool bAiming)
+{
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->PlayAimAnim(bAiming);
 	}
 }
 
