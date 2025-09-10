@@ -39,10 +39,9 @@ AGS_Player::AGS_Player()
 
 	//steam name widget
 	SteamNameWidgetComp = CreateDefaultSubobject<UGS_SteamNameWidgetComp>(TEXT("SteamWidgetComp"));
-	//SteamNameWidgetComp->SetupAttachment(GetMesh());
-	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::World);
-	//SteamNameWidgetComp->TimingPolicy =EWidgetTimingPolicy::GameTime; 
-	//SteamNameWidgetComp->GetBodyInstance()->TermBody();
+	SteamNameWidgetComp->SetupAttachment(RootComponent);
+	SteamNameWidgetComp->SetWidgetSpace(EWidgetSpace::Screen);
+	SteamNameWidgetComp->GetBodyInstance()->TermBody(); 
 	SteamNameWidgetComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SteamNameWidgetComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	
