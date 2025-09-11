@@ -44,9 +44,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayArrowShotSound();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayArrowEmptySound();
-
 	// getter
 	UFUNCTION(BlueprintCallable, Category = "Arrow")
 	int32 GetMaxAxeArrows();
@@ -124,6 +121,9 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_PlayHitFeedbackSound();
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlayArrowEmptySound();
 
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateTargetUI(AActor* NewTarget, AActor* OldTarget);

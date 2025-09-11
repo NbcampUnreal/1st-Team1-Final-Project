@@ -42,13 +42,14 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 {
 	if (!CanActive() || !GetIsActive())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Moving Can't Start Command"));
 		return;
 	}
 
 	// 활 놓기
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
-
+	
 	if (MerciCharacter->SmokeArrowClass)
 	{
 		MerciCharacter->ReleaseArrow(MerciCharacter->SmokeArrowClass);
