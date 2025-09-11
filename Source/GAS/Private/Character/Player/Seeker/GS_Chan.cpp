@@ -50,15 +50,22 @@ void AGS_Chan::ResetCurrentStamina()
 	CurrentStamina = MaxStamina;
 }
 
-void AGS_Chan::SetCurrentStamina(float NewValue)
+void AGS_Chan::SetCurrentStamina(float NewValue, bool SetbyDamage)
 {
 	CurrentStamina = FMath::Clamp(NewValue, 0.f, MaxStamina);
-
-	// UI 반영
 	Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
+	// UI 반영
+	/*if (SetbyDamage)
+	{
+		Client_UpdateChanAimingSkillBarDealy(CurrentStamina / MaxStamina);
+	}
+	else
+	{
+		Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
+	}*/
 
 	// 스테미나가 다 떨어지면 스킬
-	if (CurrentStamina <= 0.f && SkillComp)
+	if (CurrentStamina <= 0.f && SkillComp && CurrentStamina > 0.f) // 직전 값 기준 체크
 	{
 		SkillComp->Server_TryDeactiveSkill(ESkillSlot::Aiming);
 	}
@@ -193,6 +200,14 @@ void AGS_Chan::Client_UpdateChanAimingSkillBar_Implementation(float Stamina)
 	}
 }
 
+void AGS_Chan::Client_UpdateChanAimingSkillBarDealy_Implementation(float Stamina)
+{
+	if (ChanAimingSkillBarWidget)
+	{
+		ChanAimingSkillBarWidget->SetAimingProgressByDamage(Stamina);
+	}
+}
+
 void AGS_Chan::Client_ChanAimingSkillBar_Implementation(bool bShow)
 {
 	if (ChanAimingSkillBarWidget)
@@ -238,7 +253,7 @@ float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Stamina Damage In"));
 			float StaminaDamage = DamageAmount * (MaxStamina / MaxHealth);
-			SetCurrentStamina(CurrentStamina - StaminaDamage);
+			SetCurrentStamina(CurrentStamina - StaminaDamage, true);
 		}
 	}
 	else

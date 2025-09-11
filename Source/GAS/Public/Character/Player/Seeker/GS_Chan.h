@@ -81,6 +81,9 @@ public:
 	void Client_UpdateChanAimingSkillBar(float Stamina);
 
 	UFUNCTION(Client, Reliable)
+	void Client_UpdateChanAimingSkillBarDealy(float Stamina);
+
+	UFUNCTION(Client, Reliable)
 	void Client_ChanAimingSkillBar(bool bShow);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
@@ -112,7 +115,7 @@ public:
 
 	float GetCurrentStamina() const { return CurrentStamina; }
 	void ResetCurrentStamina();
-	void SetCurrentStamina(float NewValue);
+	void SetCurrentStamina(float NewValue, bool SetbyDamage = false);
 	bool HasEnoughStamina(float Cost) const { return CurrentStamina >= Cost; }
 
 protected:
