@@ -66,6 +66,17 @@ void AGS_TrapBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!TrapAkComponent)
+	{
+		TrapAkComponent = FindComponentByClass<UAkComponent>();
+	}
+	
+	if (TrapAkComponent)
+	{
+		// AkComponent의 틱 비활성화.사운드 재생은 PostEvent를 통해 멀티캐스트로 처리되므로 틱이 필요하지 않음.
+		TrapAkComponent->SetComponentTickEnabled(false);
+	}
+
 	TArray<UActorComponent*> Components;
 	GetComponents(UPrimitiveComponent::StaticClass(), Components);
 	for (UActorComponent* Comp : Components)
