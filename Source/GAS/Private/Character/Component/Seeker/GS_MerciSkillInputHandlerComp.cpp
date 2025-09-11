@@ -16,6 +16,11 @@ UGS_MerciSkillInputHandlerComp::UGS_MerciSkillInputHandlerComp()
 
 void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
+	if (bMouseLeftClicked)
+	{
+		return;
+	}
+	
 	Super::OnRightClick(Instance);
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
@@ -33,11 +38,19 @@ void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& In
 	{
 		MerciCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	}
+
+	bMouseRightClicked = true;
 }
 
 void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
+	if (bMouseRightClicked)
+	{
+		return;
+	}
+	
 	Super::OnLeftClick(Instance);
+	
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 
 	if (OwnerCharacter->IsDead())
@@ -56,10 +69,14 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 	{
 		OwnerCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
 	}
+
+	bMouseLeftClicked = true;
 }
 
 void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
 {
+	bMouseRightClicked = false;
+	
 	Super::OnRightClickRelease(Instance);
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
@@ -86,6 +103,8 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 
 void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
 {
+	bMouseLeftClicked = false;
+	
 	Super::OnLeftClickRelease(Instance);
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
@@ -99,9 +118,9 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 	
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{
-		if (MerciCharacter->NormalArrowClass)
+		if (MerciCharacter->NormalArrowClass) // 왜 NormalArrowClass 로 만 해놓은 것일까..?
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Is MormalArrowClass"));
+			UE_LOG(LogTemp, Warning, TEXT("Is NormalArrowClass"));
 			MerciCharacter->ReleaseArrow(MerciCharacter->NormalArrowClass);
 		}
 	}
