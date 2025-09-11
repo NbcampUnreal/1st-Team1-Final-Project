@@ -428,12 +428,6 @@ void AGS_Merci::Server_ChangeArrowType_Implementation(int32 Direction)
 
 	CurrentArrowType = static_cast<EArrowType>(CurrentIndex);
 
-	// 화살 타입 변경 사운드 재생
-	if (SeekerAudioComponent)
-	{
-		SeekerAudioComponent->PlayArrowTypeChangeSound();
-	}
-
 	UE_LOG(LogTemp, Log, TEXT("Arrow Changed to: %d"), CurrentIndex);
 }
 
