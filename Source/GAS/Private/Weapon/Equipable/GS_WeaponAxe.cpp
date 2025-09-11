@@ -463,10 +463,9 @@ bool AGS_WeaponAxe::IsRTSMode() const
 	return LocalPC && Cast<AGS_RTSController>(LocalPC) != nullptr;
 }
 
-// 특화 헬퍼 함수 구현 (타이머 관련) - 부모 클래스 버전 사용
+// 특화 헬퍼 함수 구현 (타이머 관련)
 void AGS_WeaponAxe::ClearSafetyTimer()
 {
-	// 부모 클래스의 개선된 타이머 정리 함수 사용
 	Super::ClearSafetyTimer();
 }
 

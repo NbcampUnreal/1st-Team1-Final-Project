@@ -502,15 +502,6 @@ private:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_PlayArrowShotSound();
 
-    UFUNCTION(NetMulticast, Reliable)
-    void Multicast_PlayArrowTypeChangeSound();
-
-    UFUNCTION(NetMulticast, Reliable)
-    void Multicast_PlayArrowEmptySound();
-
-    UFUNCTION(NetMulticast, Reliable)
-    void Multicast_PlayHitFeedbackSound();
-
     // ===================
     // 공통 헬퍼 함수들
     // ===================

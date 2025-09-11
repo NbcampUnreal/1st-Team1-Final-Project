@@ -1160,9 +1160,13 @@ void UGS_SeekerAudioComponent::PlayArrowTypeChangeSound()
         return;
     }
 
-    if (!CanSendRPC()) return;
-    
-    Multicast_PlayArrowTypeChangeSound();
+    if (!ArrowTypeChangeSound)
+    {
+        return;
+    }
+
+    AkPlayingID ChangePlayingID = UAkGameplayStatics::PostEvent(ArrowTypeChangeSound, OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(ChangePlayingID);
 }
 
 void UGS_SeekerAudioComponent::PlayArrowEmptySound()
@@ -1173,9 +1177,13 @@ void UGS_SeekerAudioComponent::PlayArrowEmptySound()
         return;
     }
 
-    if (!CanSendRPC()) return;
-    
-    Multicast_PlayArrowEmptySound();
+    if (!ArrowEmptySound)
+    {
+        return;
+    }
+
+    AkPlayingID EmptyPlayingID = UAkGameplayStatics::PostEvent(ArrowEmptySound, OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(EmptyPlayingID);
 }
 
 void UGS_SeekerAudioComponent::PlayHitFeedbackSound()
@@ -1186,9 +1194,13 @@ void UGS_SeekerAudioComponent::PlayHitFeedbackSound()
         return;
     }
 
-    if (!CanSendRPC()) return;
-    
-    Multicast_PlayHitFeedbackSound();
+    if (!HitFeedbackSound)
+    {
+        return;
+    }
+
+    AkPlayingID HitPlayingID = UAkGameplayStatics::PostEvent(HitFeedbackSound, OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(HitPlayingID);
 }
 
 // ===================
@@ -1213,40 +1225,6 @@ void UGS_SeekerAudioComponent::Multicast_PlayArrowShotSound_Implementation()
         AkPlayingID ArrowShotPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
         RegisterPlayingID(ArrowShotPlayingID);
     }
-}
-
-void UGS_SeekerAudioComponent::Multicast_PlayArrowTypeChangeSound_Implementation()
-{
-    if (!OwnerSeeker || !ArrowTypeChangeSound)
-    {
-        return;
-    }
-
-    AkPlayingID ChangePlayingID = UAkGameplayStatics::PostEvent(ArrowTypeChangeSound, OwnerSeeker, 0, FOnAkPostEventCallback());
-    RegisterPlayingID(ChangePlayingID);
-}
-
-void UGS_SeekerAudioComponent::Multicast_PlayArrowEmptySound_Implementation()
-{
-    if (!OwnerSeeker || !ArrowEmptySound)
-    {
-        return;
-    }
-
-    AkPlayingID EmptyPlayingID = UAkGameplayStatics::PostEvent(ArrowEmptySound, OwnerSeeker, 0, FOnAkPostEventCallback());
-    RegisterPlayingID(EmptyPlayingID);
-}
-
-void UGS_SeekerAudioComponent::Multicast_PlayHitFeedbackSound_Implementation()
-{
-    if (!OwnerSeeker || !HitFeedbackSound)
-    {
-        return;
-    }
-
-    // 히트 피드백 사운드는 UI 피드백이므로 거리 제한 없이 재생
-    AkPlayingID FeedbackPlayingID = UAkGameplayStatics::PostEvent(HitFeedbackSound, OwnerSeeker, 0, FOnAkPostEventCallback());
-    RegisterPlayingID(FeedbackPlayingID);
 }
 
 // ===================
