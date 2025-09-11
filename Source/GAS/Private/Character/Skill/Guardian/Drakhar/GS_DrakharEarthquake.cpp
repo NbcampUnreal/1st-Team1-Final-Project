@@ -14,8 +14,6 @@ void UGS_DrakharEarthquake::ActiveSkill()
 {
 	Super::ActiveSkill();
 
-	UE_LOG(LogTemp, Warning, TEXT("Active Drakhar Aiming Skill")); // SJE
-
 	//cool time check
 	if (!CanActive())
 	{

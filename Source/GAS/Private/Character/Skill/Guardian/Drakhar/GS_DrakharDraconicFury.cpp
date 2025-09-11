@@ -10,9 +10,7 @@ UGS_DrakharDraconicFury::UGS_DrakharDraconicFury()
 }
 
 void UGS_DrakharDraconicFury::ActiveSkill()
-{
-	UE_LOG(LogTemp, Warning, TEXT("UGS_DrakharDraconicFury::ActiveSkill")); // SJE
-	
+{	
 	Super::ActiveSkill();
 	
 	if (!CanActive())
