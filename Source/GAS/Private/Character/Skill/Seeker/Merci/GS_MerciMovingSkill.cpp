@@ -42,6 +42,7 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 {
 	if (!CanActive() || !GetIsActive())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Moving Can't Start Command"));
 		return;
 	}
 
@@ -49,6 +50,8 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
 
+	UE_LOG(LogTemp, Warning, TEXT("Hear!!")); // SJE
+	
 	if (MerciCharacter->SmokeArrowClass)
 	{
 		MerciCharacter->ReleaseArrow(MerciCharacter->SmokeArrowClass);
