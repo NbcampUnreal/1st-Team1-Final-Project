@@ -270,12 +270,12 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	// 현재 화살 수량 체크
 	if (CurrentArrowType == EArrowType::Axe && CurrentAxeArrows <= 0)
 	{
-		Multicast_PlayArrowEmptySound(); // 빈 화살 사운드 재생
+		Client_PlayArrowEmptySound();
 		return;
 	}
 	if (CurrentArrowType == EArrowType::Child && CurrentChildArrows <= 0)
 	{
-		Multicast_PlayArrowEmptySound(); // 빈 화살 사운드 재생
+		Client_PlayArrowEmptySound();
 		return;
 	}
 
@@ -787,18 +787,18 @@ void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 	}
 }
 
-void AGS_Merci::Multicast_PlayArrowEmptySound_Implementation()
-{
-	if (SeekerAudioComponent)
-	{
-		SeekerAudioComponent->PlayArrowEmptySound();
-	}
-}
-
 void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
 {
 	if (SeekerAudioComponent)
 	{
 		SeekerAudioComponent->PlayHitFeedbackSound();
+	}
+}
+
+void AGS_Merci::Client_PlayArrowEmptySound_Implementation()
+{
+	if (SeekerAudioComponent)
+	{
+		SeekerAudioComponent->PlayArrowEmptySound();
 	}
 }
