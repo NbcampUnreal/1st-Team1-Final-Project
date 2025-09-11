@@ -93,6 +93,11 @@ public:
 
 	void InitControllerPerWorld();
 
+	UFUNCTION(Client, Reliable)
+	void Client_PrepareForMatchStart();
+
+	void OnIntroFinished();
+
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyPlayerIsReady();
 
@@ -147,6 +152,7 @@ protected:
 	virtual void SetupInputComponent() override;
 	virtual void PostSeamlessTravel() override;
 	virtual void BeginPlayingState() override;
+	virtual void ReceivedPlayer() override;
 
 	//게임 인스턴스 참조
 	UPROPERTY(BlueprintReadOnly, Category = "Settings")
@@ -155,6 +161,13 @@ protected:
 	//메르시 크로스헤어 위젯
 	UPROPERTY(BlueprintReadOnly, Category = "UI")
 	UGS_CrossHairImage* CrosshairWidget;
+
+	//로딩 스크린
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> LoadingScreenWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> LoadingScreenWidgetInstance;
 
 	void SnapCameraToCharacterYaw();
 
