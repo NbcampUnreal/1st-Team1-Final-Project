@@ -2,15 +2,13 @@
 
 
 #include "Character/Player/Seeker/GS_Ares.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
+#include "Character/Component/GS_StatComp.h"
 
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/GS_TpsController.h"
 #include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
-#include "AkComponent.h"
-#include "AkAudioEvent.h"
-#include "AkGameplayStatics.h"
-#include "AkAudioDevice.h"
 
 
 // Sets default values
@@ -20,6 +18,8 @@ AGS_Ares::AGS_Ares()
 	PrimaryActorTick.bCanEverTick = true;
 	CharacterType = ECharacterType::Ares;
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_AresSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
+
+	// 사운드 배열들은 GS_SeekerAudioComponent에서 관리됨
 }
 
 // Called when the game starts or when spawned
@@ -29,9 +29,6 @@ void AGS_Ares::BeginPlay()
 
 	SetReplicateMovement(true);
 	GetMesh()->SetIsReplicated(true);
-	
-	// 사운드 시스템 초기화 - 모든 클라이언트에서 사운드 정리
-	Multicast_StopAttackSound();
 }
 
 // Called every frame
@@ -46,10 +43,10 @@ void AGS_Ares::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AGS_Ares::OnComboAttack()
+/*void AGS_Ares::OnComboAttack()
 {
 	Super::OnComboAttack();
-}
+}*/
 
 void AGS_Ares::ServerAttackMontage()
 {
@@ -58,65 +55,42 @@ void AGS_Ares::ServerAttackMontage()
 
 void AGS_Ares::MulticastPlayComboSection()
 {	
-	// 1. 기존 타이머가 있다면 클리어하고 즉시 Stop 이벤트 호출 (멀티캐스트)
-	GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
-	Multicast_StopAttackSound();
-	
-	// 2. 부모 클래스의 콤보 로직 실행 (CurrentComboIndex++ 포함)
 	Super::MulticastPlayComboSection();
-	
-	// 3. 새로운 공격 사운드 재생
-	if (SwordSwingSound)
-	{
-		Multicast_PlaySkillSound(SwordSwingSound);
-	}
-	
-	if (AttackVoiceSound)
-	{
-		Multicast_PlaySkillSound(AttackVoiceSound);
-	}
-	
-	// 4. 공격 후 일정 시간 뒤 사운드 시퀀스 리셋을 위한 타이머 설정
-	GetWorldTimerManager().SetTimer(
-		AttackSoundResetTimerHandle,
-		this,
-		&AGS_Ares::ResetAttackSoundSequence,
-		AttackSoundResetTime,  // 설정 가능한 시간 사용
-		false
-	);
-}
 
-void AGS_Ares::ResetAttackSoundSequence()
-{
-	// 멀티캐스트로 모든 클라이언트에서 Stop 이벤트 호출
-	Multicast_StopAttackSound();
+	// SeekerAudioComponent를 통해 아레스 전용 콤보 공격 사운드 재생
+	if (SeekerAudioComponent)
+	{
+		// GS_SeekerAudioComponent의 AresComboXXX 프로퍼티들을 사용하여 사운드 재생
+		SeekerAudioComponent->PlayAresComboAttackSoundWithExtra(CurrentComboIndex);
+	}
 }
 
 void AGS_Ares::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
 {
-	// 4번째 공격일 때 특별한 사운드 재생
-	if (ComboIndex == 4 && FinalAttackExtraSound)
-	{
-		Multicast_PlaySkillSound(FinalAttackExtraSound);
-	}
-}
-
-void AGS_Ares::Multicast_StopAttackSound_Implementation()
-{
-	// 데디케이티드 서버에서는 사운드 재생하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	if (!SeekerAudioComponent)
 	{
 		return;
 	}
 
-	// 사용자가 만든 Wwise Stop 이벤트 호출
-	if (SwordSwingStopEvent)
+	// GS_SeekerAudioComponent의 PlayAresComboAttackSoundWithExtra 함수에서 
+	// 추가 사운드가 자동으로 재생되므로 별도 처리 불필요
+	// 필요시 여기서 추가 로직 구현 가능
+}
+
+float AGS_Ares::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	// Call parent implementation
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	// Play hurt sound if we actually took damage and are still alive
+	if (ActualDamage > 0.0f && GetStatComp() && GetStatComp()->GetCurrentHealth() > 0.0f)
 	{
-		UAkComponent* AkComp = GetOrCreateAkComponent();
-		if (AkComp)
+		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
 		{
-			AkComp->PostAkEvent(SwordSwingStopEvent);
+			SeekerAudio->PlayHurtSound();
 		}
 	}
+
+	return ActualDamage;
 }
 

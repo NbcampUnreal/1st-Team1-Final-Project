@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/GS_BasePlayerController.h"
 #include "RTSCommand.h"
 #include "AkGameplayStatics.h"
 #include "GS_RTSController.generated.h"
@@ -31,7 +31,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRTSCommandChanged, ERTSCommand, N
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedUnitsSkillChanged, bool, bAnyUnitHasSkill);
 
 UCLASS()
-class GAS_API AGS_RTSController : public APlayerController
+class GAS_API AGS_RTSController : public AGS_BasePlayerController
 {
 	GENERATED_BODY()
 
@@ -90,13 +90,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Selection")
 	FOnSelectedUnitsSkillChanged OnSelectedUnitsSkillChanged;
 
-	// UI 반응 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandButtonSound; 
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandCancelSound;
-
+	virtual AActor* GetViewTarget() const override;
+	
 	// 현재 선택된 유닛들
 	UFUNCTION(BlueprintCallable)
 	const TArray<AGS_Monster*>& GetUnitSelection() const { return UnitSelection; }
@@ -201,6 +196,11 @@ public:
 	// Client
 	UFUNCTION(Client, Reliable)
 	void Client_StartGame();
+	// UFUNCTION(Client, Reliable)
+	// void Client_HideDungeonElements();
+
+	UFUNCTION()
+	void HideDungeonElements();
 	
 	// UI 버튼 클릭 함수
 	UFUNCTION(BlueprintCallable, Category="RTS")

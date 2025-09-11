@@ -18,4 +18,5 @@ protected:
 	virtual void OnRightClick(const struct FInputActionInstance& Instance) override;
 	virtual void OnLeftClick(const struct FInputActionInstance& Instance) override;
 	virtual void OnRoll(const struct FInputActionInstance& Instance) override;
+	virtual void OnKeyReset(const struct FInputActionInstance& Instance) override;
 };

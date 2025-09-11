@@ -95,7 +95,6 @@ void AGS_Character::BeginPlay()
 void AGS_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -105,7 +104,6 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
-	DOREPLIFETIME(AGS_Character, CanHitReact);
 }
 
 
@@ -165,9 +163,6 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	//when damage input start -> for drakhar 6/24
 	OnDamageStart();
 
-	// SJE
-	UE_LOG(LogTemp, Warning, TEXT("CanHitReact : %s"), CanHitReact ? TEXT("true") : TEXT("false"));
-
 	if (CanHitReact)
 	{
 		EHitReactType HitReactType = EHitReactType::DamageOnly;
@@ -196,17 +191,18 @@ void AGS_Character::OnDamageStart()
 	//
 }
 
-void AGS_Character::Multicast_SetCanHitReact_Implementation(bool CanReact)
+void AGS_Character::DisableHitReact(float CooldownTime)
 {
-	CanHitReact = CanReact;
-}
-
-void AGS_Character::AllowHitReact()
-{
+	SetCanHitReact(false);
 	GetWorld()->GetTimerManager().SetTimer(HitReactTimerHandle, [this]()
 	{
 		CanHitReact = true;
-	}, 3.0f, false);
+	}, CooldownTime, false);
+}
+
+void AGS_Character::DisableHitReact(bool bAllowHitReact)
+{
+	CanHitReact = bAllowHitReact;
 }
 
 void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -220,11 +216,8 @@ void AGS_Character::OnDeath()
 
 	OnDeathDelegate.Broadcast();
 
-	// 죽음 사운드 재생
-	if (DeathSoundEvent)
-	{
-		UAkGameplayStatics::PostEvent(DeathSoundEvent, this, 0, FOnAkPostEventCallback());
-	}
+	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
+	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
 
 	DestroyAllWeapons();
 	MulticastRPCCharacterDeath();
@@ -323,18 +316,21 @@ void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 
 void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)
 {
-	if (!HasAuthority())
+	UE_LOG(LogTemp, Warning, TEXT("MulticastRPCPlaySkillMontage")); // SJE
+	/*if (!HasAuthority())
 	{
 		PlayAnimMontage(SkillMontage);
-	}
+	}*/ // SJE
+	PlayAnimMontage(SkillMontage);
 }
 
 void AGS_Character::MulicastRPCStopCurrentSkillMontage_Implementation(UAnimMontage* CurrentSkillMontage)
 {
-	if (!HasAuthority())
+	/*if (!HasAuthority())
 	{
 		StopAnimMontage(CurrentSkillMontage);
-	}
+	}*/ // SJE
+	StopAnimMontage(CurrentSkillMontage);
 }
 
 void AGS_Character::Multicast_PlayImpactVFX_Implementation(UNiagaraSystem* VFXAsset, FVector Scale)
@@ -413,6 +409,11 @@ void AGS_Character::OnRep_CharacterSpeed()
 
 
 void AGS_Character::Server_SetCanHitReact_Implementation(bool bCanReact)
+{
+	CanHitReact = bCanReact;
+}
+
+void AGS_Character::SetCanHitReact(bool bCanReact)
 {
 	CanHitReact = bCanReact;
 }

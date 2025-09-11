@@ -15,6 +15,8 @@
 #include "Engine/World.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
+
 
 AGS_SeekerMerciArrow::AGS_SeekerMerciArrow()
 {
@@ -334,6 +336,10 @@ ETargetType AGS_SeekerMerciArrow::DetermineTargetType(AActor* OtherActor) const
 	else if (Cast<AGS_Guardian>(OtherActor))
 	{
 		return ETargetType::Guardian;
+	}
+	else if (Cast<AGS_AetherExtractor>(OtherActor))
+	{
+		return ETargetType::AetherExtractor;
 	}
 	else if (Cast<AGS_Seeker>(OtherActor))
 	{

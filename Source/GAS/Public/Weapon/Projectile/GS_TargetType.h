@@ -11,6 +11,7 @@ enum class ETargetType : uint8
 	Guardian		UMETA(DisplayName = "Guardian"),
 	DungeonMonster	UMETA(DisplayName = "DungeonMonster"),
 	Seeker			UMETA(DisplayName = "Seeker"),
+	AetherExtractor	UMETA(DisplayName = "AetherExtractor"),
 	Structure		UMETA(DisplayName = "Structure"),
 	Skill			UMETA(DisplayName = "Skill")
 }; 

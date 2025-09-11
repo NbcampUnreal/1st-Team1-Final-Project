@@ -15,8 +15,6 @@ void AGS_IronFang::BeginPlay()
 	// IronFang 전용 몬스터 오디오 설정 (컴포넌트 사용)
 	if (MonsterAudioComponent)
 	{
-		MonsterAudioComponent->MonsterSoundVariant = 2; // IronFang = 2
-
 		// 중간 몬스터 특성: 기본 거리 사용
 		MonsterAudioComponent->AudioConfig.AlertDistance = 800.0f;
 		MonsterAudioComponent->AudioConfig.MaxAudioDistance = 3000.0f;

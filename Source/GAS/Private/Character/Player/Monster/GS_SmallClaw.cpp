@@ -20,21 +20,9 @@ void AGS_SmallClaw::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (SmallClawClickSound)
-	{
-		ClickSoundEvent = SmallClawClickSound;
-	}
-
-	if (SmallClawMoveSound)
-	{
-		MoveSoundEvent = SmallClawMoveSound;
-	}
-
 	// SmallClaw 전용 몬스터 오디오 설정 (컴포넌트 사용)
 	if (MonsterAudioComponent)
 	{
-		MonsterAudioComponent->MonsterSoundVariant = 1; // SmallClaw = 1
-
 		// 작은 몬스터 특성: 가까운 거리에서 경계, 짧은 최대 거리
 		MonsterAudioComponent->AudioConfig.AlertDistance = 600.0f;
 		MonsterAudioComponent->AudioConfig.MaxAudioDistance = 2000.0f;

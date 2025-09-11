@@ -83,7 +83,6 @@ void AGS_Monster::BeginPlay()
 	if (AkComponent)
 	{
 		AkComponent->OcclusionRefreshInterval = 0.0f;
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Monster: AkComponent occlusion DISABLED."));
 	}
 }
 
@@ -179,6 +178,7 @@ void AGS_Monster::OnDeath()
 		false
 	);
 }
+ 
 
 void AGS_Monster::HandleDelayedDestroy()
 {
@@ -230,6 +230,12 @@ void AGS_Monster::Attack()
 {
 	if (HasAuthority())
 	{
+		// 공격 모션 시작 시 전투/스윙 사운드 트리거 (서버)
+		if (MonsterAudioComponent)
+		{
+			MonsterAudioComponent->PlaySound(EMonsterAudioState::Combat, /*bForcePlay=*/false);
+			MonsterAudioComponent->PlaySwingSound();
+		}
 		Multicast_PlayAttackMontage();
 	}
 }
@@ -245,11 +251,10 @@ void AGS_Monster::SetSelected(bool bSelected, bool bPlaySound)
 	bIsSelected = bSelected;
 	UpdateDecal();
 
-	// 선택되었고, 소리 재생이 허용된 경우에만 소리 재생
-	if (bSelected && bPlaySound && ClickSoundEvent)
-	{
-		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
-	}
+    if (bSelected && bPlaySound && MonsterAudioComponent)
+    {
+        MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Selection);
+    }
 }
 
 FLinearColor AGS_Monster::GetCurrentDecalColor()

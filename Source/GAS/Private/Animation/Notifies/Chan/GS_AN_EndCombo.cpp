@@ -14,10 +14,8 @@ void UGS_AN_EndCombo::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	{
 		if (Character->HasAuthority())
 		{
-			Character->Multicast_SetIsFullBodySlot(false);
-			Character->Multicast_SetIsUpperBodySlot(false);
-			Character->SetMoveControlValue(true, true);
-			Character->SetSkillInputControl(true, true, true);
+			Character->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+			Character->GetSkillComp()->ResetAllowedSkillsMask();
 			Character->CanChangeSeekerGait = true;
 			Character->CurrentComboIndex = 0;
 			Character->ComboInputOpen();

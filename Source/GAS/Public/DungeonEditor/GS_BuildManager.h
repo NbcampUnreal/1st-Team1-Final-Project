@@ -5,6 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "ResourceSystem/Nectar/GS_NectarComp.h"
 #include "GS_BuildManager.generated.h"
 
 struct FGS_PlaceableObjectsRow;
@@ -31,6 +32,10 @@ public:
 	TObjectPtr<UStaticMeshComponent> StaticMeshCompo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
 	TObjectPtr<UDecalComponent> DecalCompo;
+
+	//NectarComp 추가 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
+	TObjectPtr<UGS_NectarComp> NectarComp;
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DecalMaterialInstance;

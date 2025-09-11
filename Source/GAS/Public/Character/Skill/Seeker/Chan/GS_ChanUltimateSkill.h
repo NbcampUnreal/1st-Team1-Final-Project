@@ -6,6 +6,10 @@
 #include "Character/Skill/Seeker/GS_SeekerSkillBase.h"
 #include "GS_ChanUltimateSkill.generated.h"
 
+// Forward declarations
+class UGS_SeekerAudioComponent;
+class AGS_Chan;
+
 /**
  * 
  */
@@ -17,8 +21,8 @@ class GAS_API UGS_ChanUltimateSkill : public UGS_SeekerSkillBase
 public:
 	UGS_ChanUltimateSkill();
 	virtual void ActiveSkill() override;
-	virtual void ExecuteSkillEffect() override;
-	virtual void DeactiveSkill() override;
+	virtual void OnSkillCanceledByDebuff() override;
+	virtual void OnSkillAnimationEnd() override;
 	virtual void InterruptSkill() override;
 
 	void HandleUltimateCollision(AActor* HitActor, UPrimitiveComponent* HitComp);
@@ -50,8 +54,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill Settings", meta = (AllowPrivateAccess = "true"))
 	float Damage = 100.0f; // 스킬 데미지
 
+	virtual void DeactiveSkill() override;
+
 	// 돌진 상태 관리
-	bool bIsCharging = false;
 	FVector ChargeStartLocation;
 	FVector ChargeDirection;
 	FTimerHandle ChargeTimerHandle;

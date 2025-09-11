@@ -14,15 +14,16 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Engine/World.h"
 #include "Character/F_GS_DamageEvent.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
+#include "AI/RTS/GS_RTSController.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 AGS_WeaponAxe::AGS_WeaponAxe()
 {
-	bReplicates = true;
-	
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	OwnerChar = nullptr;
 
 	AxeMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("AxeMeshComponent"));
 	RootComponent = AxeMeshComponent;
@@ -48,8 +49,20 @@ void AGS_WeaponAxe::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 		return;
 	}
 
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
 	// 중복 히트 방지
 	if (!OtherActor || OtherActor == this || HitActors.Contains(OtherActor))
+	{
+		return;
+	}
+
+	// OwnerChar 유효성 확인 (레벨 전환 시 null일 수 있음)
+	if (!IsOwnerCharValid())
 	{
 		return;
 	}
@@ -60,19 +73,24 @@ void AGS_WeaponAxe::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 	EAxeHitTargetType TargetType = DetermineTargetType(OtherActor);
 
 	// HitResult 생성 (Overlap에서는 정확한 히트 포인트가 없을 수 있음)
-	FHitResult CorrectHitResult = SweepResult;
-	if (!bFromSweep)
-	{
-		CorrectHitResult.ImpactPoint = GetActorLocation();
-		CorrectHitResult.Location = GetActorLocation();
-		CorrectHitResult.ImpactNormal = FVector::UpVector;
-		CorrectHitResult.Normal = FVector::UpVector;
-	}
+	FHitResult CorrectHitResult = CreateCorrectHitResult(SweepResult, bFromSweep);
 
 	Multicast_PlayHitSound(TargetType, CorrectHitResult);
 	
 	AGS_Character* Damaged = Cast<AGS_Character>(OtherActor);
 	AGS_Character* Attacker = OwnerChar;
+
+	//에테르 추출기
+	if (!Damaged && Attacker)
+	{
+		if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(OtherActor))
+		{
+			float Damage = Attacker->GetStatComp()->GetAttackPower();
+			FGS_DamageEvent DamageEvent;
+			AetherExtractor->TakeDamageBySeeker(Damage, OwnerChar);
+			HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+	}
 
 	if (!Damaged || !Attacker || !Damaged->IsEnemy(Attacker))
 	{
@@ -86,7 +104,10 @@ void AGS_WeaponAxe::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Othe
 	// 1. 기본 VFX는 항상 재생
 	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 
-	// 2. '찬'의 4번째 공격일 경우 추가 효과(사운드, VFX) 재생
+	// 2. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
+	TriggerHitAuraOnHit(Damaged);
+
+	// 3. '찬'의 4번째 공격일 경우 추가 효과(사운드, VFX) 재생
 	if (AGS_Chan* Chan = Cast<AGS_Chan>(Attacker))
 	{
 		if (Chan->CurrentComboIndex == 4)
@@ -162,12 +183,36 @@ void AGS_WeaponAxe::PlayHitSound(EAxeHitTargetType TargetType, const FHitResult&
 
 	if (SoundEventToPlay && GetWorld())
 	{
-		UAkGameplayStatics::PostEventAtLocation(
-			SoundEventToPlay,
-			SweepResult.ImpactPoint,
-			FRotator::ZeroRotator,
-			GetWorld()
-		);
+		FVector ListenerLocation;
+		if (GetListenerLocation(ListenerLocation))
+		{
+			// RTS 모드와 TPS 모드에 따른 거리 체크
+			const bool bRTS = IsRTSMode();
+			const float MaxDistance = bRTS ? 10000.0f : 2000.0f; // RTS: 100m, TPS: 20m
+
+			const float DistanceToListener = FVector::Dist(SweepResult.ImpactPoint, ListenerLocation);
+
+			
+			if (DistanceToListener <= MaxDistance)
+			{
+				UAkGameplayStatics::PostEventAtLocation(
+					SoundEventToPlay,
+					SweepResult.ImpactPoint,
+					FRotator::ZeroRotator,
+					GetWorld()
+				);
+			}
+		}
+		else
+		{
+			// Fallback: 리스너 위치를 찾지 못할 경우 거리 체크 없이 재생
+			UAkGameplayStatics::PostEventAtLocation(
+				SoundEventToPlay,
+				SweepResult.ImpactPoint,
+				FRotator::ZeroRotator,
+				GetWorld()
+			);
+		}
 	}
 }
 
@@ -213,6 +258,12 @@ bool AGS_WeaponAxe::Multicast_PlayHitSound_Validate(EAxeHitTargetType TargetType
 
 void AGS_WeaponAxe::Multicast_PlayHitSound_Implementation(EAxeHitTargetType TargetType, const FHitResult& SweepResult)
 {
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
 	PlayHitSound(TargetType, SweepResult);
 }
 
@@ -223,11 +274,23 @@ bool AGS_WeaponAxe::Multicast_PlayHitVFX_Validate(EAxeHitTargetType TargetType, 
 
 void AGS_WeaponAxe::Multicast_PlayHitVFX_Implementation(EAxeHitTargetType TargetType, const FHitResult& SweepResult)
 {
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
 	PlayHitVFX(TargetType, SweepResult);
 }
 
 void AGS_WeaponAxe::Multicast_PlaySpecialHitVFX_Implementation(UNiagaraSystem* VFXToPlay, const FHitResult& HitResult)
 {
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
 	if (VFXToPlay && GetWorld())
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
@@ -244,26 +307,112 @@ void AGS_WeaponAxe::Multicast_PlaySpecialHitVFX_Implementation(UNiagaraSystem* V
 
 void AGS_WeaponAxe::EnableHit()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	
 	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
-	HitActors.Empty();
+	ClearHitActors();
+
+	// 안전장치: 3초 후에 자동으로 비활성화
+	ClearSafetyTimer();
+	
+	// 레벨 전환 중이 아닌 경우에만 타이머 설정
+	if (UWorld* World = GetWorld(); World && !World->bIsTearingDown && IsValid(World))
+	{
+		// 추가로 타이머 매니저의 유효성도 확인
+		FTimerManager& TimerManager = World->GetTimerManager();
+		if (&TimerManager)
+		{
+			TimerManager.SetTimer(SafetyTimerHandle, this, &AGS_WeaponAxe::DisableHit, 3.0f, false);
+		}
+	}
 }
 
 void AGS_WeaponAxe::DisableHit()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 레벨 전환 중인 경우 안전하게 종료
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 비활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	// 타이머 정리
+	ClearSafetyTimer();
 }
 
 void AGS_WeaponAxe::ServerDisableHit_Implementation()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 비활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	// 타이머 정리
+	ClearSafetyTimer();
 }
 
 void AGS_WeaponAxe::ServerEnableHit_Implementation()
 {
-	HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	// 히트 액터 목록 초기화 (새로운 공격 시작 시)
-	HitActors.Empty();
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	// 추가 안전성 검사: 액터와 컴포넌트 유효성 확인
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
+
+	// HitBox 안전하게 활성화
+	if (HitBox && IsValid(HitBox) && !HitBox->IsBeingDestroyed())
+	{
+		HitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	
+	ClearHitActors();
+
+	ClearSafetyTimer();
+	
+	// 레벨 전환 중이 아닌 경우에만 타이머 설정
+	if (UWorld* World = GetWorld(); World && !World->bIsTearingDown && IsValid(World))
+	{
+		// 추가로 타이머 매니저의 유효성도 확인
+		FTimerManager& TimerManager = World->GetTimerManager();
+		if (&TimerManager)
+		{
+			TimerManager.SetTimer(SafetyTimerHandle, this, &AGS_WeaponAxe::DisableHit, 3.0f, false);
+		}
+	}
 }
 
 // Called when the game starts or when spawned
@@ -271,12 +420,53 @@ void AGS_WeaponAxe::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// OwnerChar 설정
 	OwnerChar = Cast<AGS_Character>(GetOwner());
+
+	HitBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called every frame
 void AGS_WeaponAxe::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+bool AGS_WeaponAxe::GetListenerLocation(FVector& OutLocation) const
+{
+	APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!LocalPC)
+	{
+		return false;
+	}
+
+	if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(LocalPC))
+	{
+		if (RTSController->GetViewTarget())
+		{
+			OutLocation = RTSController->GetViewTarget()->GetActorLocation();
+			return true;
+		}
+	}
+	else if (LocalPC->GetPawn())
+	{
+		OutLocation = LocalPC->GetPawn()->GetActorLocation();
+		return true;
+	}
+
+	return false;
+}
+
+bool AGS_WeaponAxe::IsRTSMode() const
+{
+	APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	return LocalPC && Cast<AGS_RTSController>(LocalPC) != nullptr;
+}
+
+// 특화 헬퍼 함수 구현 (타이머 관련) - 부모 클래스 버전 사용
+void AGS_WeaponAxe::ClearSafetyTimer()
+{
+	// 부모 클래스의 개선된 타이머 정리 함수 사용
+	Super::ClearSafetyTimer();
 }
 

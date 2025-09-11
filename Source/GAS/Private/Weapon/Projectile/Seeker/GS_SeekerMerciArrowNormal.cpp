@@ -11,6 +11,7 @@
 #include "Character/Player/Guardian/GS_Guardian.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
 #include "GameFramework/DamageType.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -35,7 +36,7 @@ void AGS_SeekerMerciArrowNormal::ProcessDamageLogic(ETargetType TargetType, cons
 	}
 
 	// 데미지를 적용할 타겟인지 확인
-	if (TargetType != ETargetType::Guardian && TargetType != ETargetType::DungeonMonster)
+	if (TargetType != ETargetType::Guardian && TargetType != ETargetType::DungeonMonster && TargetType != ETargetType::AetherExtractor)
 	{
 		return; // 가디언과 던전몬스터가 아니면 데미지 처리 안함
 	}
@@ -80,7 +81,20 @@ void AGS_SeekerMerciArrowNormal::ProcessDamageLogic(ETargetType TargetType, cons
 	}
 
 	// 데미지 적용
-	if (DamageToApply > 0.f)
+	
+	// 데미지 대상이 AetherExtractor일 경우
+	if (TargetType == ETargetType::AetherExtractor)
+	{
+		if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(HitActor))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[AGS_MerciArrowNormal]OnHit is called"));
+			float Damage = OwnerCharacter->GetStatComp()->GetAttackPower();
+			AetherExtractor->TakeDamageBySeeker(Damage, OwnerCharacter);
+
+		}
+	}
+
+	else if (DamageToApply > 0.f)
 	{
 		UGameplayStatics::ApplyPointDamage(
 			HitActor,
@@ -135,13 +149,19 @@ bool AGS_SeekerMerciArrowNormal::HandleTargetTypeGeneric(ETargetType TargetType,
 		break;
 
 	case EArrowType::Child:
-		if (TargetType == ETargetType::Guardian)
+		if (HomingTarget && HomingTarget == SweepResult.GetActor())
+		{
+			// 유도화살 상태면서 지정한 타겟이 맞은 것이라면 삭제
+			// 타겟이 아니라면 아래로
+		}
+		else if (TargetType == ETargetType::Guardian)
 		{
 			// 가디언에게는 박힘
 		}
 		else if (TargetType == ETargetType::DungeonMonster)
 		{
 			// 던전 몬스터에게는 관통 - 아무것도 하지 않음 (박히지도 않고 파괴되지도 않음)
+			// 유도 화살 상태이면서 지정한 타겟이 아니라면 아무것도 하지 않음(통과)
 			return true; // 관통: 이동 계속
 		}
 		break;

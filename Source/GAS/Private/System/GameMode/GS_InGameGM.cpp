@@ -8,6 +8,7 @@
 #include "GameFramework/Pawn.h"
 #include "EngineUtils.h"
 #include "NavigationSystem.h"
+#include "AI/RTS/GS_RTSCamera.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/GS_TpsController.h"
 #include "GameFramework/PlayerStart.h"
@@ -15,6 +16,7 @@
 #include "UI/Character/GS_HPBoardWidget.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
+#include "Props/GS_RoomBase.h"
 
 AGS_InGameGM::AGS_InGameGM()
 {
@@ -120,6 +122,8 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
         DelayedRestartPlayer();//이거 나중에 반드시 빼야함
         return;
     }
+
+    int RoomCount = 0;
     // 받아온 데이터를 기반으로 "몬스터"를 제외한 액터 스폰
     UWorld* World = GetWorld();
     if (IsValid(World))
@@ -138,11 +142,28 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
                     {
                         SpawnedDungeonActors.Add(NewActor);
                     }
+
+                    // 만약 이번에 스폰한 액터가 방 모듈이면 방 개수 증가.
+                    if (ObjectData.ObjectType == EObjectType::Room
+                        || ObjectData.ObjectType == EObjectType::DoorAndWall)
+                    {
+                        RoomCount++;
+                        UE_LOG(LogTemp, Warning, TEXT("[방 숨김] 방 생성 완료 현재 방 개수 : %d"), RoomCount);
+                    }
                 }
             }
         }
     }
 
+    AGS_InGameGS* InGameGS = GetGameState<AGS_InGameGS>();
+    if (InGameGS)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[방 숨김] GS 찾음, 방 개수 전달 %d"), RoomCount);
+        // 실제로 생성된 방의 개수를 GameState에 기록하고,
+        // 모든 클라이언트에게 '검증 시작' 신호를 보냅니다.
+        InGameGS->SetDungeonData(RoomCount);
+    }
+    
     // 내비메시 재빌드 요청
     UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
     if (IsValid(NavSystem))
@@ -207,6 +228,24 @@ void AGS_InGameGM::OnNavMeshBuildComplete()
             }
         }
     }
+
+    // 가디언 벽 숨김 처리
+    // for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    // {
+    //     APlayerController* PC = It->Get();
+    //     AGS_PlayerState* PS = PC ? PC->GetPlayerState<AGS_PlayerState>() : nullptr;
+    //     if (PS && PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+    //     {
+    //         UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] 찾은 가디언 플레이어: %s"), *PC->GetName());
+    //         if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(PC))
+    //         {
+    //             UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] RTS컨트롤러 캐스팅 성공, RPC 호출..."));
+    //             RTSController->Client_HideDungeonElements();
+    //             break;
+    //         }
+    //     }
+    // }
+    
     FTimerHandle DelayedRestartPlayerHandle;
     GetWorld()->GetTimerManager().SetTimer(DelayedRestartPlayerHandle, this, &AGS_InGameGM::DelayedRestartPlayer, 2.f, false);
 }
@@ -221,19 +260,6 @@ void AGS_InGameGM::DelayedRestartPlayer()
             for (AController* PC : PendingPlayers)
             {
                 AActor* FoundStart = FindPlayerStart(PC);
-                if (FoundStart)
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("Found valid PlayerStart '%s' with for %s at location: %s"),
-                        *FoundStart->GetName(),
-                        *PC->PlayerState->GetPlayerName(),
-                        *FoundStart->GetActorLocation().ToString()
-                    );
-                }
-                else
-                {
-                    UE_LOG(LogTemp, Error, TEXT("FAILED to find any valid PlayerStart for %s. Player will spawn at origin."), *PC->PlayerState->GetPlayerName());
-                }
-
                 if (PC)
                 {
                     RestartPlayer(PC);

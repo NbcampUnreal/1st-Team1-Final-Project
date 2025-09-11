@@ -17,7 +17,6 @@ class UGS_HPText;
 class UGS_HPWidget;
 class AGS_Weapon;
 class UDecalComponent;
-class UAkAudioEvent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeath);
 
@@ -52,15 +51,12 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void OnDamageStart();
 	
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetCanHitReact(bool CanReact);
-	
-	UPROPERTY(Replicated)
+	// HitReact
 	bool CanHitReact = true;
-
 	FTimerHandle HitReactTimerHandle;
-
-	void AllowHitReact();
+	
+	void DisableHitReact(float CooldownTime);
+	void DisableHitReact(bool bAllowHitReact);
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -68,9 +64,8 @@ public:
 	UPROPERTY(EditAnywhere, Category="Team")
 	FGenericTeamId TeamId;
 
-	// 죽음 사운드
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
-	UAkAudioEvent* DeathSoundEvent;
+	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
+	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
 
 	//variable
 	float MaxSpeed;
@@ -138,9 +133,13 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCharacterDeath OnDeathDelegate;
-	
+
+	// HitReact
 	UFUNCTION(Server, Reliable)
 	void Server_SetCanHitReact(bool bCanReact);
+
+	UFUNCTION()
+	void SetCanHitReact(bool bCanReact);
 protected:
 	virtual void NotifyActorBeginCursorOver() override;
 	virtual void NotifyActorEndCursorOver() override;

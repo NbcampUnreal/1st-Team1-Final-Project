@@ -5,11 +5,12 @@
 #include "GS_SteamNameWidgetComp.generated.h"
 
 
-UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
+UCLASS()
 class GAS_API UGS_SteamNameWidgetComp : public UWidgetComponent
 {
 	GENERATED_BODY()
 
 public:
-	virtual void InitWidget() override;
+	virtual void BeginPlay()override;
+	//virtual void InitWidget() override;
 };

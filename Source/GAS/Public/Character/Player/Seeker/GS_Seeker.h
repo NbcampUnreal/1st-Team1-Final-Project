@@ -16,6 +16,7 @@ class UGS_StatComp;
 class AGS_PlayerState;
 class UGS_DebuffVFXComponent;
 class AGS_Monster;
+class UGS_SeekerAudioComponent;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -39,6 +40,15 @@ struct FSeekerState
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSeekerHover, bool, bIsHover);
 
+// 충돌 사운드 타입 열거형
+UENUM(BlueprintType)
+enum class ECollisionSoundType : uint8
+{
+	Wall,
+	Monster, 
+	Guardian
+};
+
 UCLASS()
 class GAS_API AGS_Seeker : public AGS_Player
 {
@@ -46,9 +56,7 @@ class GAS_API AGS_Seeker : public AGS_Player
 
 public:
 	AGS_Seeker();
-
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Death
@@ -83,11 +91,14 @@ public:
 	void OnRep_SeekerGait();
 
 	// AnimInstnace Slot State Value 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsUpperBodySlot(bool bUpperBodySlot);
+	/*UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsUpperBodySlot(bool bUpperBodySlot);*/
+
+	/*UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);*/
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);
+	void Multicast_SetMontageSlot(ESeekerMontageSlot InputMontageSlot);
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetMustTurnInPlace(bool MustTurn);
@@ -111,8 +122,8 @@ public:
 	UFUNCTION()
 	void ComboInputClose();
 
-	UFUNCTION()
-	virtual void OnComboAttack();
+	UFUNCTION(Server, Reliable)
+	virtual void Server_OnComboAttack();
 
 	// Control
 	UFUNCTION()
@@ -123,13 +134,10 @@ public:
 	// Replication Set
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	// Notify
-	void CallDeactiveSkill(ESkillSlot Slot);
-
-	// 스킬 사운드 재생 (모든 시커 캐릭터에서 사용)
+	// === Audio Functions ===
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlaySkillSound(class UAkAudioEvent* SoundToPlay);
-
+	void Multicast_PlaySound(class UAkAudioEvent* SoundToPlay);
+	
 	// ===============
 	// 공격 사운드 리셋 관련
 	// ===============
@@ -189,6 +197,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
 	UGS_DebuffVFXComponent* DebuffVFXComponent;
 
+	// =======================
+	// 시커 오디오 컴포넌트 (RTS/TPS 지원)
+	// =======================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UGS_SeekerAudioComponent* SeekerAudioComponent;
+
 	// ================
 	// 함정 VFX 컴포넌트
 	// ================
@@ -234,9 +248,7 @@ protected:
 	void InitializeCameraManager();
 	void UpdatePostProcessEffect(float EffectStrength);
 
-	// 사운드 관련 헬퍼 함수
-	class UAkComponent* GetOrCreateAkComponent();
-
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
 
@@ -285,7 +297,7 @@ protected:
 	virtual void OnHoverEnd() override;
 	virtual FLinearColor GetCurrentDecalColor() override;
 	virtual bool ShowDecal() override;
-
+	
 private:
 	UPROPERTY(VisibleAnywhere, Category="State", Replicated)
 	FSeekerState SeekerState;
@@ -307,5 +319,31 @@ private:
 
 	// 플레이어 상태 변경 처리
 	void HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive);
+
+public:
+	UFUNCTION(Server, Reliable)
+	void Server_RestKey();
+
+	// State
+	UPROPERTY(Replicated)
+	bool bIsAiming = false;
+
+	// ===============
+	// 시커 타입 체크 함수들 (GS_Character의 ECharacterType 사용)
+	// ===============
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsChan() const { return GetCharacterType() == ECharacterType::Chan; }
 	
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsAres() const { return GetCharacterType() == ECharacterType::Ares; }
+	
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsMerci() const { return GetCharacterType() == ECharacterType::Merci; }
+
+	// 근접/원거리 체크 (하위 호환성)
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsMeleeSeeker() const { return IsChan() || IsAres(); }
+	
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsRangedSeeker() const { return IsMerci(); }
 };

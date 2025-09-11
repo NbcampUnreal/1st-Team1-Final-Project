@@ -21,6 +21,9 @@ AGS_PlayerState::AGS_PlayerState()
 	, BoundStatComp(nullptr)
 {
     bReplicates = true;
+
+    //AetherComp 연결
+    AetherComp = CreateDefaultSubobject<UGS_AetherComp>(TEXT("Aether"));
 }
 
 void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -33,7 +36,7 @@ void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
     DOREPLIFETIME(AGS_PlayerState, bIsReady);
     DOREPLIFETIME(AGS_PlayerState, bIsAlive);
     DOREPLIFETIME(AGS_PlayerState, MySteamAvatar);
-    DOREPLIFETIME(AGS_PlayerState, ObjectData);
+    /*DOREPLIFETIME(AGS_PlayerState, ObjectData);*/
 }
 
 void AGS_PlayerState::BeginPlay()
@@ -45,6 +48,9 @@ void AGS_PlayerState::BeginPlay()
     {
         FetchMySteamAvatar();
     }
+    //에테르 값 초기화
+    AetherComp->InitializeMaxAmount(250.f);
+
 }
 
 void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
@@ -62,7 +68,10 @@ void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
         NewPS->MySteamAvatar = MySteamAvatar;
-        NewPS->ObjectData = ObjectData;
+        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        {
+            NewPS->ObjectData = ObjectData;
+        }
     }
 }
 
@@ -81,7 +90,10 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
         NewPS->MySteamAvatar = MySteamAvatar;
-        NewPS->ObjectData = ObjectData;
+        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        {
+            NewPS->ObjectData = ObjectData;
+        }
     }
 }
 
@@ -338,4 +350,9 @@ void AGS_PlayerState::SetPlayerRole(EPlayerRole NewRole)
 {
 // ... existing code ...
 
+}
+
+UGS_AetherComp* AGS_PlayerState::GetAetherComp() const
+{
+    return AetherComp;
 }

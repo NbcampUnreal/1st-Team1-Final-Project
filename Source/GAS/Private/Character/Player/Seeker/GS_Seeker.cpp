@@ -31,6 +31,7 @@
 #include "AkComponent.h"
 #include "AkAudioDevice.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -53,6 +54,11 @@ AGS_Seeker::AGS_Seeker()
 	// 디버프 VFX 컴포넌트 생성
 	// =======================
 	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
+
+	// =======================
+	// 시커 오디오 컴포넌트 생성 (RTS/TPS 지원)
+	// =======================
+	SeekerAudioComponent = CreateDefaultSubobject<UGS_SeekerAudioComponent>("SeekerAudioComponent");
 
 	// Fire Effect 생성 및 설정
 	FeetLavaVFX_L = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_L"));
@@ -181,7 +187,25 @@ void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AGS_Seeker::SetAimState(bool IsAim)
 {
+	/*FSeekerState NewState = SeekerState;
+	NewState.IsAim = IsAim;*/ // SJE
+
 	SeekerState.IsAim = IsAim;
+	
+	// 시커 오디오 컴포넌트에 조준 상태 변경 알림
+	if (SeekerAudioComponent)
+	{
+		if (IsAim)
+		{
+			SeekerAudioComponent->SetSeekerAudioState(ESeekerAudioState::Aiming);
+		}
+		else if (SeekerAudioComponent->GetCurrentAudioState() == ESeekerAudioState::Aiming)
+		{
+			// 조준을 해제했을 때 다른 상태로 전환
+			SeekerAudioComponent->SetSeekerAudioState(ESeekerAudioState::Idle);
+		}
+	}
+	/*SeekerState = NewState;*/
 }
 
 bool AGS_Seeker::GetAimState()
@@ -191,7 +215,9 @@ bool AGS_Seeker::GetAimState()
 
 void AGS_Seeker::SetDrawState(bool IsDraw)
 {
-	SeekerState.IsDraw = IsDraw;
+	FSeekerState NewState = SeekerState;
+	NewState.IsDraw = IsDraw;
+	SeekerState = NewState;
 }
 
 bool AGS_Seeker::GetDrawState()
@@ -310,20 +336,29 @@ void AGS_Seeker::ComboInputClose()
 	}
 }
 
-void AGS_Seeker::OnComboAttack()
-{	
-	if (CanAcceptComboInput)
+void AGS_Seeker::Server_OnComboAttack_Implementation()
+{
+	if (!CanAcceptComboInput) // Handler 에서도 검사하고 있었는데 서버에서도 검사한다. 이중검사가 필요한가?
 	{
-		if (CurrentComboIndex == 0)
-		{
-			GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
-			ServerAttackMontage(); // 이게 두번 호출되는거 같은데...
-		}
-		else
-		{
-			Server_SetNextComboFlag(true);
-			Server_SetComboInputFlag(false);
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, CanAcceptComboInput == false"));
+		return;
+	}
+
+	if (!GetSkillComp()->IsSkillAllowed(ESkillSlot::Combo))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, IsSkillAllowed == false"));
+		return;
+	}
+		
+	if (CurrentComboIndex == 0)
+	{
+		GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
+		ServerAttackMontage();
+	}
+	else
+	{
+		Server_SetNextComboFlag(true);
+		Server_SetComboInputFlag(false); // server 함수의 호출을 막기 위해서 합친 함수를 만들어야 하나?
 	}
 }
 
@@ -331,6 +366,7 @@ void AGS_Seeker::SetMoveControlValue(bool bMoveForward, bool bMoveRight)
 {
 	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("SetMoveControlValue"));
 		TPSController->SetMoveControlValue(bMoveRight, bMoveForward);
 	}
 }
@@ -353,6 +389,7 @@ void AGS_Seeker::UpdatePostProcessEffect(float EffectStrength)
 
 void AGS_Seeker::ServerAttackMontage_Implementation()
 {
+	Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 	MulticastPlayComboSection();
 }
 
@@ -364,9 +401,6 @@ void AGS_Seeker::MulticastPlayComboSection_Implementation()
 	{
 		if (HasAuthority())
 		{
-			Multicast_SetIsFullBodySlot(true);
-			Multicast_SetIsUpperBodySlot(false); // Montage_Play 의 slot 에 직접적 영향. Replicated 대신 Multicast 사용.
-			SetMoveControlValue(false, false);
 			CurrentComboIndex++;
 			CanAcceptComboInput = false;
 			bNextCombo = false;
@@ -464,12 +498,6 @@ void AGS_Seeker::UpdateLowHealthEffect()
 	}
 }
 
-
-void AGS_Seeker::CallDeactiveSkill(ESkillSlot Slot)
-{
-	GetSkillComp()->TryDeactiveSkill(Slot);
-}
-
 void AGS_Seeker::OnRep_SeekerGait()
 {
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
@@ -481,6 +509,14 @@ void AGS_Seeker::OnRep_SeekerGait()
 	}
 }
 
+void AGS_Seeker::Multicast_SetMontageSlot_Implementation(ESeekerMontageSlot InputMontageSlot)
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->SetCurMontageSlot(InputMontageSlot);
+	}
+}
+
 void AGS_Seeker::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 {
 	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
@@ -489,7 +525,7 @@ void AGS_Seeker::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 	}
 }
 
-void AGS_Seeker::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
+/*void AGS_Seeker::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
 {
 	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
 	{
@@ -500,9 +536,9 @@ void AGS_Seeker::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
 	{
 		AnimInstance->IsPlayingFullBodyMontage = bFullBodySlot;
 	}
-}
+}*/
 
-void AGS_Seeker::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
+/*void AGS_Seeker::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
 {
 	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
 	{
@@ -513,7 +549,7 @@ void AGS_Seeker::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot
 	{
 		AnimInstance->IsPlayingUpperBodyMontage = bUpperBodySlot;
 	}
-}
+}*/
 
 void AGS_Seeker::OnRep_IsLowHealthEffectActive()
 {
@@ -528,11 +564,11 @@ void AGS_Seeker::OnRep_CurrentEffectStrength()
 	UpdatePostProcessEffect(CurrentEffectStrength);
 }
 
-// =================
-// 전투 음악 관리 함수
-// =================
+// ============================
+// 상태 전환에 따른 음악 함수 관련
+// ============================
 
-// 새로운 몬스터 감지 시스템 (시커가 몬스터를 감지)
+// 몬스터 감지 시스템 (시커가 몬스터를 감지)
 void AGS_Seeker::OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor->IsA(AGS_Monster::StaticClass()))
@@ -683,22 +719,22 @@ void AGS_Seeker::UpdateCombatMusicState()
 
 void AGS_Seeker::OnDeath()
 {
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::OnDeath() called for %s"), *GetName());
+	// 시커 죽음 사운드 재생
+	if (SeekerAudioComponent)
+	{
+		SeekerAudioComponent->PlayDeathSound();
+	}
+	
 	Super::OnDeath();
 	
-	// 확실하게 BGM 끄기 (백업용)
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::OnDeath() - Stopping combat music"));
 	ClientRPCStopCombatMusic();
 	NearbyMonsters.Empty();
 }
 
 void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() called for %s"), *GetName());
-	
 	if (!IsLocallyControlled()) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Not locally controlled"));
 		return;
 	}
 
@@ -706,19 +742,28 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 	AGS_PlayerState* MyPlayerState = GetPlayerState<AGS_PlayerState>();
 	if (ChangedPlayerState != MyPlayerState) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Not my PlayerState"));
 		return;
 	}
 
 	if (!bIsNowAlive) // 자신이 죽었을 때
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Player died, stopping combat music"));
 		ClientRPCStopCombatMusic();
 		NearbyMonsters.Empty();
 	}
 }
 
-void AGS_Seeker::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToPlay)
+void AGS_Seeker::Server_RestKey_Implementation()
+{
+	SetAimState(false);
+	SetDrawState(false);
+	CanAcceptComboInput = true;
+	CanChangeSeekerGait = true;
+	Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+	SetMoveControlValue(true, true);
+	SetLookControlValue(true, true);
+}
+
+void AGS_Seeker::Multicast_PlaySound_Implementation(UAkAudioEvent* SoundToPlay)
 {
 	// 데디케이티드 서버에서는 사운드 재생하지 않음
 	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
@@ -728,49 +773,34 @@ void AGS_Seeker::Multicast_PlaySkillSound_Implementation(UAkAudioEvent* SoundToP
 
 	if (!SoundToPlay)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::Multicast_PlaySkillSound - SoundEvent is null"));
 		return;
 	}
 
 	if (!FAkAudioDevice::Get())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::Multicast_PlaySkillSound - Wwise AudioDevice is not initialized"));
 		return;
 	}
 
-	// AkComponent가 없거나 유효하지 않으면 새로 생성
-	UAkComponent* AkComp = GetOrCreateAkComponent();
-	if (AkComp)
-	{
-		AkComp->PostAkEvent(SoundToPlay);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("AGS_Seeker::Multicast_PlaySkillSound - Failed to get or create AkComponent"));
-	}
-}
-
-UAkComponent* AGS_Seeker::GetOrCreateAkComponent()
-{
 	UAkComponent* AkComp = FindComponentByClass<UAkComponent>();
 	if (!AkComp)
 	{
 		// AkComponent가 없으면 새로 생성
-		AkComp = NewObject<UAkComponent>(this, TEXT("RuntimeAkAudioComponent"));
-		if (AkComp)
+		AkComp = NewObject<UAkComponent>(this);
+		if (AkComp && GetRootComponent())
 		{
-			AkComp->SetupAttachment(GetRootComponent());
+			AkComp->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 			AkComp->RegisterComponent();
-			UE_LOG(LogTemp, Log, TEXT("AGS_Seeker::GetOrCreateAkComponent - Created new AkComponent"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("AGS_Seeker::GetOrCreateAkComponent - Failed to create AkComponent"));
 		}
 	}
-	return AkComp;
-}
+	
+	if (!AkComp)
+	{			
+		return;
+	}
 
+	// 실제 사운드 재생
+	AkComp->PostAkEvent(SoundToPlay);
+}
 
 void AGS_Seeker::OnHoverBegin()
 {

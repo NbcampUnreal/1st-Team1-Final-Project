@@ -10,6 +10,7 @@
 #include "UI/RuneSystem/GS_RuneInventoryWidget.h"
 #include "UI/RuneSystem/GS_StatPanelWidget.h"
 #include "UI/RuneSystem/GS_DragVisualWidget.h"
+#include "UI/Common/GS_CommonTwoBtnPopup.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "UI/RuneSystem/GS_RuneTooltipWidget.h"
 #include "Kismet/GameplayStatics.h"
@@ -59,6 +60,9 @@ UGS_ArcaneBoardWidget::UGS_ArcaneBoardWidget(const FObjectInitializer& ObjectIni
 	SelectionVisualWidget = nullptr;
 	RuneTooltipWidget = nullptr;
 	CurrTooltipRuneID = 0;
+
+	PendingPresetIndex = -1;
+	PresetSaveConfirmPopup = nullptr;
 }
 
 void UGS_ArcaneBoardWidget::NativeConstruct()
@@ -73,6 +77,21 @@ void UGS_ArcaneBoardWidget::NativeConstruct()
 	if (ResetButton)
 	{
 		ResetButton->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnResetButtonClicked);
+	}
+
+	if (PresetButton1)
+	{
+		PresetButton1->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnPresetButton1Clicked);
+	}
+
+	if (PresetButton2)
+	{
+		PresetButton2->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnPresetButton2Clicked);
+	}
+
+	if (PresetButton3)
+	{
+		PresetButton3->OnClicked.AddDynamic(this, &UGS_ArcaneBoardWidget::OnPresetButton3Clicked);
 	}
 
 	BindToLPS();
@@ -92,6 +111,12 @@ void UGS_ArcaneBoardWidget::NativeDestruct()
 	{
 		RuneTooltipWidget->RemoveFromParent();
 		RuneTooltipWidget = nullptr;
+	}
+
+	if (IsValid(PresetSaveConfirmPopup))
+	{
+		PresetSaveConfirmPopup->RemoveFromParent();
+		PresetSaveConfirmPopup = nullptr;
 	}
 
 	if (GetWorld())
@@ -210,6 +235,7 @@ void UGS_ArcaneBoardWidget::RefreshForCurrCharacter()
 		UpdateGridVisuals();
 		InitInventory();
 		InitStatPanel();
+		UpdatePresetButtonVisuals();
 	}
 }
 
@@ -276,25 +302,44 @@ void UGS_ArcaneBoardWidget::UpdateGridPreview(uint8 RuneID, const FIntPoint& Ref
 
 	ClearPreview();
 
-	TArray<FIntPoint> AffectedCells;
-	bool bCanPlace = BoardManager->PreviewRunePlacement(RuneID, ReferenceCellPos, AffectedCells);
-
-	for (const FIntPoint& CellPos : AffectedCells)
+	TArray<uint8> AffectedRuneIDs;
+	EPlacementResult PlacementResult = BoardManager->CheckRunePlacement(RuneID, ReferenceCellPos, AffectedRuneIDs);
+	
+	TArray<FIntPoint> RuneShape;
+	if (!BoardManager->GetRuneShape(RuneID, RuneShape))
 	{
+		return;
+	}
+
+	EGridCellVisualState PreviewState;
+	switch (PlacementResult)
+	{
+	case EPlacementResult::Valid:
+		PreviewState = EGridCellVisualState::Valid;
+		break;
+	case EPlacementResult::ReplaceExisting:
+		PreviewState = EGridCellVisualState::ReplaceExisting;
+		break;
+	case EPlacementResult::OutOfBounds:
+	default:
+		PreviewState = EGridCellVisualState::Invalid;
+		break;
+	}
+
+	for (const FIntPoint& Offset : RuneShape)
+	{
+		FIntPoint CellPos = ReferenceCellPos + Offset;
+
 		if (GridCells.Contains(CellPos))
 		{
 			UGS_RuneGridCellWidget* CellWidget = GridCells[CellPos];
-			if(CellWidget)
+			if (CellWidget)
 			{
-				EGridCellVisualState  PreviewState = bCanPlace ?
-					EGridCellVisualState::Valid : EGridCellVisualState::Invalid;
-
 				CellWidget->SetPreviewVisualState(PreviewState);
+				PreviewCells.Add(CellPos);
 			}
 		}
 	}
-
-	PreviewCells = AffectedCells;
 }
 
 void UGS_ArcaneBoardWidget::StartRuneSelection(uint8 RuneID)
@@ -371,59 +416,41 @@ void UGS_ArcaneBoardWidget::EndRuneSelection(bool bPlaceRune)
 			{
 				FIntPoint PlacementPos = TargetCell->GetCellPos();
 
-				if (BoardManager->CanPlaceRuneAt(SelectedRuneID, PlacementPos))
+				int32 PreviousConnectedRuneCnt = BoardManager->ConnectedRuneCnt;
+				TArray<uint8> RemovedRunes;
+
+				bool bPlaceSuccess = BoardManager->PlaceRune(SelectedRuneID, PlacementPos, RemovedRunes);
+
+				if (bPlaceSuccess)
 				{
-					// 연결 상태 미리 체크하여 보너스 사운드 여부 결정
-					int32 PreviousConnectedRuneCnt = BoardManager->ConnectedRuneCnt;
-
-					bool bPlaceSuccess = BoardManager->PlaceRune(SelectedRuneID, PlacementPos);
-
-					if (bPlaceSuccess)
+					if (RunePlaceSuccessSound)
 					{
-						// 룬 배치 성공 사운드
-						if (RunePlaceSuccessSound)
-						{
-							UGameplayStatics::PlaySound2D(this, RunePlaceSuccessSound);
-						}
+						UGameplayStatics::PlaySound2D(this, RunePlaceSuccessSound);
+					}
 
-						// 연결 보너스 체크 및 사운드 재생
-						if (BoardManager && BoardManager->ConnectedRuneCnt > PreviousConnectedRuneCnt)
+					// 연결 보너스 체크
+					if (BoardManager->ConnectedRuneCnt > PreviousConnectedRuneCnt)
+					{
+						if (RuneConnectionBonusSound)
 						{
-							if (RuneConnectionBonusSound)
+							if (GetWorld())
 							{
-								// 약간의 딜레이 후 연결 보너스 사운드 재생
-								if (GetWorld())
-								{
-									FTimerHandle ConnectionSoundTimer;
-									GetWorld()->GetTimerManager().SetTimer(ConnectionSoundTimer, [this]()
-										{
-											UGameplayStatics::PlaySound2D(this, RuneConnectionBonusSound);
-										}, 0.3f, false);
-								}
+								FTimerHandle ConnectionSoundTimer;
+								GetWorld()->GetTimerManager().SetTimer(ConnectionSoundTimer, [this]()
+									{
+										UGameplayStatics::PlaySound2D(this, RuneConnectionBonusSound);
+									}, 0.3f, false);
 							}
 						}
+					}
 
-						UpdateGridVisuals();
-						RuneInven->UpdatePlacedStateOfRune(SelectedRuneID, true);
-					}
-					else
+					for (uint8 RemovedRuneID : RemovedRunes)
 					{
-						// 룸 배치 실패 사운드
-						if (RunePlaceFailSound)
-						{
-							UGameplayStatics::PlaySound2D(this, RunePlaceFailSound);
-						}
-						UE_LOG(LogTemp, Warning, TEXT("룬 배치 실패: ID=%d"), SelectedRuneID);
+						RuneInven->UpdatePlacedStateOfRune(RemovedRuneID, false);
 					}
-				}
-				else
-				{
-					// 룬 배치 실패 사운드
-					if (RunePlaceFailSound)
-					{
-						UGameplayStatics::PlaySound2D(this, RunePlaceFailSound);
-					}
-					UE_LOG(LogTemp, Warning, TEXT("배치 위치를 찾을 수 없음: ID=%d"), SelectedRuneID);
+
+					UpdateGridVisuals();
+					RuneInven->UpdatePlacedStateOfRune(SelectedRuneID, true);
 				}
 			}
 			else
@@ -535,10 +562,7 @@ void UGS_ArcaneBoardWidget::OnApplyButtonClicked()
 {
 	if (UGS_ArcaneBoardLPS* LPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
 	{
-		if (HasUnsavedChanges())
-		{
-			LPS->ApplyBoardChanges();
-		}
+		LPS->ApplyBoardChanges();
 	}
 }
 
@@ -625,6 +649,73 @@ void UGS_ArcaneBoardWidget::CancelTooltipRequest()
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(TooltipDelayTimer);
+	}
+}
+
+void UGS_ArcaneBoardWidget::OnPresetButton1Clicked()
+{
+	if (HasUnsavedChanges())
+	{
+		ShowPresetSaveConfirmPopup(1);
+	}
+	else
+	{
+		SwitchToPreset(1);
+	}
+}
+
+void UGS_ArcaneBoardWidget::OnPresetButton2Clicked()
+{
+	if (HasUnsavedChanges())
+	{
+		ShowPresetSaveConfirmPopup(2);
+	}
+	else
+	{
+		SwitchToPreset(2);
+	}
+}
+
+void UGS_ArcaneBoardWidget::OnPresetButton3Clicked()
+{
+	if (HasUnsavedChanges())
+	{
+		ShowPresetSaveConfirmPopup(3);
+	}
+	else
+	{
+		SwitchToPreset(3);
+	}
+}
+
+void UGS_ArcaneBoardWidget::UpdatePresetButtonVisuals()
+{
+	if (!IsValid(ArcaneBoardLPS))
+	{
+		return;
+	}
+
+	int32 CurrentPresetIndex = ArcaneBoardLPS->GetCurrentPresetIndex();
+
+	if (IsValid(PresetButton1))
+	{
+		FLinearColor ButtonColor = (CurrentPresetIndex == 1) ?
+			FLinearColor::Green : FLinearColor::Gray;
+		PresetButton1->SetBackgroundColor(ButtonColor);
+	}
+
+	if (IsValid(PresetButton2))
+	{
+		FLinearColor ButtonColor = (CurrentPresetIndex == 2) ?
+			FLinearColor::Green : FLinearColor::Gray;
+		PresetButton2->SetBackgroundColor(ButtonColor);
+	}
+
+	if (IsValid(PresetButton3))
+	{
+		FLinearColor ButtonColor = (CurrentPresetIndex == 3) ?
+			FLinearColor::Green : FLinearColor::Gray;
+		PresetButton3->SetBackgroundColor(ButtonColor);
 	}
 }
 
@@ -750,6 +841,71 @@ bool UGS_ArcaneBoardWidget::IsMouseOverTooltipWidget(const FVector2D& ScreenPos)
 	}
 
 	return false;
+}
+
+void UGS_ArcaneBoardWidget::ShowPresetSaveConfirmPopup(int32 TargetPresetIndex)
+{
+	if (!IsValid(PresetSaveConfirmPopupClass))
+	{
+		return;
+	}
+
+	PendingPresetIndex = TargetPresetIndex;
+
+	if (IsValid(PresetSaveConfirmPopup))
+	{
+		PresetSaveConfirmPopup->RemoveFromParent();
+	}
+
+	PresetSaveConfirmPopup = CreateWidget<UGS_CommonTwoBtnPopup>(this, PresetSaveConfirmPopupClass);
+	if (PresetSaveConfirmPopup)
+	{
+		PresetSaveConfirmPopup->SetDescription(FText::FromString(TEXT("변경사항을\n저장하시겠습니까?")));
+		PresetSaveConfirmPopup->OnYesClicked.BindUObject(this, &UGS_ArcaneBoardWidget::OnPresetSaveYes);
+		PresetSaveConfirmPopup->OnNoClicked.BindUObject(this, &UGS_ArcaneBoardWidget::OnPresetSaveNo);
+
+		PresetSaveConfirmPopup->AddToViewport(10);
+	}
+}
+
+void UGS_ArcaneBoardWidget::SwitchToPreset(int32 PresetIndex)
+{
+	if (!IsValid(ArcaneBoardLPS))
+	{
+		return;
+	}
+	ArcaneBoardLPS->LoadBoardConfig(PresetIndex);
+	RefreshForCurrCharacter();
+	UpdatePresetButtonVisuals();
+}
+
+void UGS_ArcaneBoardWidget::OnPresetSaveYes()
+{
+	if (IsValid(ArcaneBoardLPS))
+	{
+		ArcaneBoardLPS->ApplyBoardChanges();
+	}
+
+	SwitchToPreset(PendingPresetIndex);
+
+	if (IsValid(PresetSaveConfirmPopup))
+	{
+		PresetSaveConfirmPopup->RemoveFromParent();
+		PresetSaveConfirmPopup = nullptr;
+	}
+	PendingPresetIndex = -1;
+}
+
+void UGS_ArcaneBoardWidget::OnPresetSaveNo()
+{
+	SwitchToPreset(PendingPresetIndex);
+
+	if (IsValid(PresetSaveConfirmPopup))
+	{
+		PresetSaveConfirmPopup->RemoveFromParent();
+		PresetSaveConfirmPopup = nullptr;
+	}
+	PendingPresetIndex = -1;
 }
 
 void UGS_ArcaneBoardWidget::UpdateGridVisuals()

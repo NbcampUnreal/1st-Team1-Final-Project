@@ -13,13 +13,9 @@ void UGS_AN_CheckStaminaEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 
 	if (AGS_Chan* Chan = Cast<AGS_Chan>(MeshComp->GetOwner()))
 	{
-		if (UGS_ChanAimingSkill* Skill = Cast<UGS_ChanAimingSkill>(Chan->GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::Aiming)))
+		if (Chan->GetCurrentStamina() <= 0)
 		{
-			
-			if (Skill->GetCurrentStamina() <= 0)
-			{
-				Chan->ToIdle();
-			}
+			Chan->ToIdle();
 		}
 	}
 	

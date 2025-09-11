@@ -18,15 +18,12 @@ public:
 	UGS_AresUltimateSkill();
 
 	virtual void ActiveSkill() override;
-	virtual void DeactiveSkill() override;
-
-	void DeactiveSkillEffect();
-	virtual void ExecuteSkillEffect() override;
-	virtual bool IsActive() const override;
+	virtual void OnSkillCanceledByDebuff() override;
+	virtual void OnSkillAnimationEnd() override;
 
 private:
-	//UPROPERTY(Replicated)
-	bool bIsBerserker;
+	virtual void DeactiveSkill() override;
+	void BecomeBerserker();
 
 	FTimerHandle UltimateSkillTimerHandle;
 	FGS_StatRow BuffAmount;

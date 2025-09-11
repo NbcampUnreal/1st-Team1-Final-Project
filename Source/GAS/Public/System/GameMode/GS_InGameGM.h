@@ -7,6 +7,7 @@
 #include "Props/Trap/GS_TrapManager.h"
 #include "GS_InGameGM.generated.h"
 
+class AGS_RTSCamera;
 class AGS_PlayerState;
 struct FDESaveData;
 class AGS_Monster;
@@ -51,7 +52,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "HUD Classes")
 	TSubclassOf<AHUD> RTSHUDClass;
-
+	
 	void HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, bool bIsAlive);
 
 	void CheckAllPlayersDead();

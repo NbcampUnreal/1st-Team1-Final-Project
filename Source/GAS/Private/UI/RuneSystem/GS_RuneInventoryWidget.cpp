@@ -5,6 +5,7 @@
 #include "UI/RuneSystem/GS_DraggableRuneWidget.h"
 #include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
 #include "RuneSystem/GS_ArcaneBoardManager.h"
+#include "RuneSystem/GS_ArcaneBoardLPS.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 
@@ -40,14 +41,22 @@ void UGS_RuneInventoryWidget::InitInven(UGS_ArcaneBoardManager* InBoardManager, 
 	}
 
 	RuneScrollBox->ClearChildren();
+	OwnsRuneList.Empty();
 
-	//테스트 용
-	for (uint8 RuneID=1; RuneID <=16; ++RuneID)
+	UGS_ArcaneBoardLPS* ArcaneBoardLPS = GetOwningLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>();
+	if (!IsValid(ArcaneBoardLPS))
+	{
+		return;
+	}
+
+	TArray<uint8> OwnedRunes = ArcaneBoardLPS->GetOwnedRunes();
+
+	for (uint8 RuneID : OwnedRunes)
 	{
 		FRuneTableRow RuneData;
 		if (BoardManager->GetRuneData(RuneID, RuneData))
 		{
-			if(RuneWidgetClass)
+			if (RuneWidgetClass)
 			{
 				UGS_DraggableRuneWidget* RuneWidget = CreateWidget<UGS_DraggableRuneWidget>(this, RuneWidgetClass);
 				if (RuneWidget)

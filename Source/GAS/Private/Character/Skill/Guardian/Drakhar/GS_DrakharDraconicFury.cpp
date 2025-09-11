@@ -11,10 +11,15 @@ UGS_DrakharDraconicFury::UGS_DrakharDraconicFury()
 
 void UGS_DrakharDraconicFury::ActiveSkill()
 {
+	UE_LOG(LogTemp, Warning, TEXT("UGS_DrakharDraconicFury::ActiveSkill")); // SJE
+	
+	Super::ActiveSkill();
+	
 	if (!CanActive())
 	{
 		return;
 	}
+	
 	ExecuteSkillEffect();
 }
 
@@ -26,17 +31,22 @@ void UGS_DrakharDraconicFury::ExecuteSkillEffect()
 	}
 
 	//server logic
+	AGS_Guardian* Guardian = Cast<AGS_Guardian>(OwnerCharacter);
+	if (Guardian)
+	{
+		Guardian->GuardianDoSkillState = EGuardianDoSkill::Ultimate;	
+	}
+	
 	StartCoolDown();
 
 	if (OwnerCharacter)
 	{
+		// play montage, except server
 		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
 	}
-	
-	AGS_Guardian* Guardian =Cast<AGS_Guardian>(OwnerCharacter);
-	if (Guardian)
-	{
-		Guardian->ClientGuardianDoSkillState = EGuardianDoSkill::Ultimate;
-		Guardian->GuardianDoSkillState = EGuardianDoSkill::Ultimate;	
-	}
+}
+
+void UGS_DrakharDraconicFury::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 }

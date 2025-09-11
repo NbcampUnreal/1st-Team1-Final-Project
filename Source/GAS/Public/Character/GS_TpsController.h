@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/GS_BasePlayerController.h"
 #include "Character/GS_Character.h"
 #include "UI/Character/GS_CrossHairImage.h"
+#include "Character/Skill/ESkill.h"
 #include "GS_TpsController.generated.h"
 
 class UGS_GameInstance;
@@ -13,7 +14,7 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
-USTRUCT(BlueprintType)
+/*USTRUCT(BlueprintType)
 struct FControlValue
 {
 	GENERATED_BODY()
@@ -40,10 +41,10 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool bCanMoveRight;
-};
+};*/
 
 UCLASS()
-class GAS_API AGS_TpsController : public APlayerController
+class GAS_API AGS_TpsController : public AGS_BasePlayerController
 {
 	GENERATED_BODY()
 

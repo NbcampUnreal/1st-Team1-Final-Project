@@ -35,6 +35,8 @@ public:
 	virtual void LeftClickPressed_Implementation() override;
 	virtual void LeftClickRelease_Implementation() override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	// 화살 발사 VFX
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayArrowShotVFX(FVector Location, FRotator Rotation, int32 NumArrows);
@@ -52,6 +54,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Arrow")
 	int32 GetMaxChildArrows();
 
+	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;
 
@@ -114,6 +117,9 @@ public:
 	void SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget);
 
 	UFUNCTION(Client, Reliable)
+	void Client_UpdateCrosshairAim(bool bAiming);
+
+	UFUNCTION(Client, Reliable)
 	void Client_ShowCrosshairHitFeedback();
 
 	UFUNCTION(Client, Reliable)
@@ -150,38 +156,7 @@ protected:
 	UFUNCTION()
 	void UpdateZoom(float Alpha);
 
-	// 활 관련 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
-	UAkAudioEvent* BowPullSound; // 활 당길 때(클릭)
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
-	UAkAudioEvent* BowReleaseSound; // 활 놓을 때(릴리즈)
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
-	UAkAudioEvent* ArrowShotSound; // 활 놓을 때(릴리즈)
-
-	// 화살 타입 변경 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Arrow")
-	UAkAudioEvent* ArrowTypeChangeSound; // 화살 타입 변경할 때
-
-	// 화살 부족 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Arrow")
-	UAkAudioEvent* ArrowEmptySound; // 화살이 없을 때
-
-	// 타격 피드백 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Feedback")
-	UAkAudioEvent* HitFeedbackSound; // 화살이 적을 맞췄을 때의 UI 피드백 사운드
-
-	// 멀티캐스트 사운드 함수들
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayBowPullSound();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayBowReleaseSound();
-
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
-
-	// [화살 관리]
 	
 private:
 	UGS_ArrowTypeWidget* ArrowTypeWidget;
@@ -204,8 +179,7 @@ private:
 	void Client_PlaySound(UAkComponent* SoundComp);
 
 	bool bIsFullyDrawn = false;
-
-
+	
 	// [화살 관리]
 	int32 MaxAxeArrows = 5;
 	int32 MaxChildArrows = 3;

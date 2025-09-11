@@ -55,21 +55,16 @@ void UGS_DrakharSFXComponent::PlayDraconicProjectileSound(const FVector& Locatio
 
 void UGS_DrakharSFXComponent::PlayAttackHitSound()
 {
-	UE_LOG(LogTemp, Warning, TEXT("UGS_DrakharSFXComponent::PlayAttackHitSound() called"));
-	
 	if (!OwnerDrakhar)
 	{
-		UE_LOG(LogTemp, Error, TEXT("PlayAttackHitSound: OwnerDrakhar is null"));
 		return;
 	}
 	
 	if (!OwnerDrakhar->AttackHitSoundEvent)
 	{
-		UE_LOG(LogTemp, Error, TEXT("PlayAttackHitSound: AttackHitSoundEvent is null - Check Blueprint settings"));
 		return;
 	}
 	
-	UE_LOG(LogTemp, Log, TEXT("PlayAttackHitSound: Playing AttackHitSoundEvent"));
 	PlaySoundEvent(OwnerDrakhar->AttackHitSoundEvent);
 }
 
@@ -98,13 +93,11 @@ void UGS_DrakharSFXComponent::PlaySoundEvent(UAkAudioEvent* SoundEvent, const FV
 
 	if (!SoundEvent)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UGS_DrakharSFXComponent::PlaySoundEvent - SoundEvent is null"));
 		return;
 	}
 
 	if (!FAkAudioDevice::Get())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UGS_DrakharSFXComponent::PlaySoundEvent - Wwise AudioDevice is not initialized"));
 		return;
 	}
 
