@@ -316,7 +316,6 @@ void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 
 void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)
 {
-	UE_LOG(LogTemp, Warning, TEXT("MulticastRPCPlaySkillMontage")); // SJE
 	/*if (!HasAuthority())
 	{
 		PlayAnimMontage(SkillMontage);

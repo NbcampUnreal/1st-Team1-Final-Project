@@ -16,7 +16,7 @@ UGS_MerciSkillInputHandlerComp::UGS_MerciSkillInputHandlerComp()
 
 void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
-	if (IsMouseClicked)
+	if (bMouseLeftClicked)
 	{
 		return;
 	}
@@ -39,12 +39,12 @@ void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& In
 		MerciCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	}
 
-	IsMouseClicked = true;
+	bMouseRightClicked = true;
 }
 
 void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
-	if (IsMouseClicked)
+	if (bMouseRightClicked)
 	{
 		return;
 	}
@@ -70,12 +70,12 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 		OwnerCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
 	}
 
-	IsMouseClicked = true;
+	bMouseLeftClicked = true;
 }
 
 void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
 {
-	IsMouseClicked = false;
+	bMouseRightClicked = false;
 	
 	Super::OnRightClickRelease(Instance);
 
@@ -98,13 +98,12 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OnRightClickRelease with bWasCtrlHeldWhenLeftClicked")); // SJE
 	}
 }
 
 void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
 {
-	IsMouseClicked = false;
+	bMouseLeftClicked = false;
 	
 	Super::OnLeftClickRelease(Instance);
 
@@ -127,7 +126,6 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstan
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Server_TrySkillCommand :: Moving")); // SJE
 		OwnerCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Moving);
 	}
 }

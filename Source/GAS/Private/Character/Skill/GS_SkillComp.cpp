@@ -321,10 +321,8 @@ void UGS_SkillComp::Server_TryDeactiveSkill_Implementation(ESkillSlot Slot)
 
 void UGS_SkillComp::Server_TrySkillCommand_Implementation(ESkillSlot Slot)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Server_TrySkillComnmand")); // SJE
 	if (SkillMap.Contains(Slot))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Server_TrySkillComnmand -> SkillMap.Contains(%s)"), *UEnum::GetValueAsString(Slot)); // SJE
 		if (UGS_SkillBase* Skill = SkillMap[Slot])
 		{
 			Skill->OnSkillCommand();

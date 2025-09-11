@@ -49,8 +49,6 @@ void UGS_MerciMovingSkill::OnSkillCommand()
 	// 활 놓기
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
-
-	UE_LOG(LogTemp, Warning, TEXT("Hear!!")); // SJE
 	
 	if (MerciCharacter->SmokeArrowClass)
 	{

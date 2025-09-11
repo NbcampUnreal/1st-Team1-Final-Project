@@ -29,7 +29,6 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
-	UE_LOG(LogTemp, Warning, TEXT("OnLeftClick")); // SJE
 	if (OwnerCharacter->IsDead())
 	{
 		return;
@@ -43,19 +42,16 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 		{
 			if (ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("OnLeftClick before Server_TrySkillCommand")); // SJE
 				ChanCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Aiming);
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT(" OnLeftClick before Server_OnComboAttack")); // SJE
 				ChanCharacter->Server_OnComboAttack();
 			}
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OnLeftClick bCtrlHeld")); // SJE
 		if (ChanCharacter)
 		{
 			ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
