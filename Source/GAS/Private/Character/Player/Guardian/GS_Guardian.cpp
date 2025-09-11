@@ -205,7 +205,7 @@ void AGS_Guardian::QuitGuardianSkill()
 		Drakhar->ServerRPCResetValue();
 	}
 	//fly end
-	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+	GetSkillComp()->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
 }
 
 void AGS_Guardian::FinishCtrlSkill()

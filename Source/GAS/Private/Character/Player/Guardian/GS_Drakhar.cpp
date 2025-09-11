@@ -506,7 +506,7 @@ void AGS_Drakhar::StopCtrl()
 	if (!HasAuthority())
 	{
 		ServerRPCStopCtrl();
-		GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+		GetSkillComp()->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
 		
 		TargetSpringArmLength = 500.f;
 		bIsFlying = true;
@@ -569,7 +569,7 @@ void AGS_Drakhar::EndDraconicFury()
 	UE_LOG(LogTemp, Warning, TEXT("Draconic Fury Skill End"));
 	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT] Draconic Fury Skill End")));
 	
-	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+	GetSkillComp()->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
 	GuardianState = EGuardianCtrlState::CtrlEnd;
 
 	MoveSpeed = NormalMoveSpeed;
