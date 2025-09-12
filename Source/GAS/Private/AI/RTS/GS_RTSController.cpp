@@ -155,11 +155,9 @@ void AGS_RTSController::Tick(float DeltaTime)
 	}
 }
 
-void AGS_RTSController::ReceivedPlayer()
+void AGS_RTSController::PostSeamlessTravel()
 {
-	Super::ReceivedPlayer();
-
-	UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@@ ReceivedPlayer() 호출 @@@@@@@@@@@@@@@@@"));
+	Super::PostSeamlessTravel();
 
 	if (IsLocalController())
 	{
@@ -176,7 +174,7 @@ void AGS_RTSController::ReceivedPlayer()
 			if (LoadingScreenWidgetInstance)
 			{
 				LoadingScreenWidgetInstance->AddToViewport(100);
-				UE_LOG(LogTemp, Warning, TEXT("로딩 스크린 성공적으로 생성"));
+				UE_LOG(LogTemp, Warning, TEXT("로딩 스크린 성공적으로 생성 (PostSeamlessTravel)"));
 			}
 		}
 		else
