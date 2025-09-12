@@ -364,7 +364,7 @@ void AGS_RTSController::Client_PrepareForMatchStart_Implementation()
 	// 로딩 스크린 제거되기 전에 먼저 수행되어야 할 것들 여기 넣기.
 	UE_LOG(LogTemp, Warning, TEXT("Client_PrepareForMatchStart_Implementation() 호출"));
 	FTimerHandle PTimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(PTimerHandle, this, &AGS_RTSController::OnIntroFinished, 3.0f, false);
+	GetWorld()->GetTimerManager().SetTimer(PTimerHandle, this, &AGS_RTSController::OnIntroFinished, 0.1f, false);
 }
 
 void AGS_RTSController::OnIntroFinished()
