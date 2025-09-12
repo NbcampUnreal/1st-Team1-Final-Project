@@ -222,7 +222,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void Tick(float DeltaTime) override;
-	virtual void ReceivedPlayer() override;
+	virtual void PostSeamlessTravel() override;
 
 private:
 	// 입력 상태
