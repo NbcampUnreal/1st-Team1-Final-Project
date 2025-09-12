@@ -3,8 +3,11 @@
 #include "CoreMinimal.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
 #include "GameFramework/Actor.h"
+#include "Sound/SoundBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "GS_PlacerBase.generated.h"
 
+class UNiagaraSystem;
 class AGS_BuildManager;
 
 UCLASS()
@@ -34,6 +37,18 @@ public:
 	TObjectPtr<UMaterialInterface> BuildAcceptedMaterial;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting|Material")
 	TObjectPtr<UMaterialInterface> BuildRejectedMaterial;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting|Sound")
+	TObjectPtr<USoundBase> PlaceSuccessSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting|Sound")
+	TObjectPtr<USoundBase> PlaceFailSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting|Sound")
+	TObjectPtr<USoundBase> PlaceDragSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting|Sound")
+	float DragSoundCooldown = 0.1f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Components")
+	TObjectPtr<UNiagaraSystem> DustEffectTemplate;
 	
 	// virtual void BuildObject() PURE_VIRTUAL(AGS_PlacerBase::BuildObject,);
 	void BuildObject();
@@ -68,9 +83,13 @@ private:
 
 	void CalCellsInRectArea(TArray<FIntPoint>& InIntPointArray);
 
-	EDEditorCellType GetTargetCellType();
+	// EDEditorCellType GetTargetCellType();
 	EDEditorCellType GetRoomCellInfo(int InIdx);
 
 	int RotateYaw;
 	bool bObjectSelected;
+	
+	// 드래그 사운드 관련
+	FIntPoint LastCellPosition;
+	float LastDragSoundTime;
 };

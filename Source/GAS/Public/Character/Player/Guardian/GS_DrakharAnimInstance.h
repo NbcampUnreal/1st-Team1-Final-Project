@@ -25,6 +25,10 @@ private:
 	UFUNCTION()
 	void AnimNotify_Reset();
 
+	//[last combo attack]
+	UFUNCTION()
+	void AnimNotify_ShootEnergy();
+
 	//[earthquake skill]
 	UFUNCTION()
 	void AnimNotify_EarthquakeCheck();
@@ -34,6 +38,9 @@ private:
 	void AnimNotify_DraconicFury();
 
 	//[skill check]
+	// UFUNCTION()
+	// void AnimNotify_CtrlSkillEnd();
+
 	UFUNCTION()
-	void AnimNotify_CtrlSkillEnd();
+	void AnimNotify_FinishCtrlSkill();
 };

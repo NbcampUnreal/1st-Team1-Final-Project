@@ -4,7 +4,7 @@
 AGS_Weapon::AGS_Weapon()
 {
 	// Set this actor to call Tick() every frame.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	
 	

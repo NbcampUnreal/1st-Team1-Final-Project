@@ -3,31 +3,22 @@
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
+#include "Character/E_Character.h"
+#include "Component/GS_HitReactComp.h"
 #include "GS_Character.generated.h"
 
 class UGS_StatComp;
 class UGS_SkillComp;
 class UGS_DebuffComp;
+class UGS_HitReactComp;
 class UGS_HPTextWidgetComp;
+class UGS_PlayerInfoWidget;
 class UGS_HPText;
 class UGS_HPWidget;
 class AGS_Weapon;
-class UAkAudioEvent;
+class UDecalComponent;
 
-UENUM(BlueprintType)
-enum class ECharacterType : uint8
-{
-	Ares,
-	Chan,
-	Merci,
-	Reina,
-	Drakhar,
-	SmallClaw,
-	NeedleFang,
-	IronFang,
-	ShadowFang,
-	StoneClaw
-};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeath);
 
 USTRUCT(BlueprintType)
 struct FWeaponSlot
@@ -56,8 +47,16 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
+	virtual void BeginDestroy() override;
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	virtual void OnDamageStart();
+	
+	// HitReact
+	bool CanHitReact = true;
+	FTimerHandle HitReactTimerHandle;
+	
+	void DisableHitReact(float CooldownTime);
+	void DisableHitReact(bool bAllowHitReact);
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -65,9 +64,8 @@ public:
 	UPROPERTY(EditAnywhere, Category="Team")
 	FGenericTeamId TeamId;
 
-	// 죽음 사운드
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
-	UAkAudioEvent* DeathSoundEvent;
+	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
+	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
 
 	//variable
 	float MaxSpeed;
@@ -80,7 +78,6 @@ public:
 	
 	//getter
 	FORCEINLINE UGS_StatComp* GetStatComp() const { return StatComp; }
-	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }
 	FORCEINLINE UGS_DebuffComp* GetDebuffComp() const { return DebuffComp; }
 	FORCEINLINE ECharacterType GetCharacterType() const { return CharacterType; }
 	
@@ -97,10 +94,13 @@ public:
 
 	UFUNCTION()
 	virtual void OnDeath();
+	UFUNCTION()
+	void DestroyAllWeapons();
 	
 	//HP widget
 	void SetHPTextWidget(UGS_HPText* InHPTextWidget);
 	void SetHPBarWidget(UGS_HPWidget* InHPBarWidget);
+	void SetPlayerInfoWidget(UGS_PlayerInfoWidget* InPlayerInfoWidget);
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	
 	UFUNCTION(BlueprintPure, Category = "Team")
@@ -113,35 +113,79 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulicastRPCStopCurrentSkillMontage(UAnimMontage* CurrentSkillMontage);
 
+	// Impact VFX 재생
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayImpactVFX(UNiagaraSystem* VFXAsset, FVector Scale);
+
 	UFUNCTION(BlueprintCallable)
 	AGS_Weapon* GetWeaponByIndex(int32 Index) const;
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetCharacterSpeed(float InRatio);
-	
-protected:
-	//component
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UGS_SkillComp> SkillComp;
 
+	UFUNCTION(BlueprintCallable)
+	virtual void SetCanUseSkill(bool bCanUse) {}
+	
+	UFUNCTION()
+	void SetCharacterSpeed(float InRatio);
+
+	bool IsDead() const;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnCharacterDeath OnDeathDelegate;
+
+	// HitReact
+	UFUNCTION(Server, Reliable)
+	void Server_SetCanHitReact(bool bCanReact);
+
+	UFUNCTION()
+	void SetCanHitReact(bool bCanReact);
+protected:
+	virtual void NotifyActorBeginCursorOver() override;
+	virtual void NotifyActorEndCursorOver() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
+	//component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_DebuffComp> DebuffComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_StatComp> StatComp;
-
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_HitReactComp> HitReactComp;
+	
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TArray<FWeaponSlot> WeaponSlots;
 
-private:
-	void SpawnAndAttachWeapons();
-	void DestroyAllWeapons();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="RTS")
+	TObjectPtr<UDecalComponent> SelectionDecal;
 
+	bool bIsHovered;
+	
+	virtual FLinearColor GetCurrentDecalColor();
+	virtual void UpdateDecal();
+	virtual bool ShowDecal();
+	void ShowDecalWithColor(const FLinearColor& Color);
+	virtual void OnHoverBegin();
+	virtual void OnHoverEnd();
+	
+private:
 	UPROPERTY(ReplicatedUsing = OnRep_CharacterSpeed)
 	float CharacterSpeed;
 	float DefaultCharacterSpeed;
+	
+	UPROPERTY(Replicated)
+	bool bIsDead;
 
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynamicDecalMaterial;
+	
 	UFUNCTION()
 	void OnRep_CharacterSpeed();
+
+	void SpawnAndAttachWeapons();
+	
+	void SetHovered(bool bHovered);
 };
 

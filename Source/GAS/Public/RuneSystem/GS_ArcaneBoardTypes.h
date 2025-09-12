@@ -23,11 +23,11 @@ enum class EGridCellState : uint8
 };
 
 UENUM(BlueprintType)
-enum class EPreviewState : uint8
+enum class EPlacementResult : uint8
 {
-	None		UMETA(DisplayName = "None"),
-	Valid		UMETA(DisplayName = "Valid"),
-	Invalid		UMETA(DisplayName = "Invalid")
+	Valid           UMETA(DisplayName = "Valid"),
+	ReplaceExisting UMETA(DisplayName = "ReplaceExisting"),
+	OutOfBounds     UMETA(DisplayName = "OutOfBounds")
 };
 
 USTRUCT(Atomic, BlueprintType)
@@ -51,6 +51,24 @@ struct FStatEffect
 	{
 		StatName = InStatName;
 		Value = InValue;
+	}
+};
+
+USTRUCT(Atomic, BlueprintType)
+struct FArcaneBoardStats
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite)
+	FGS_StatRow RuneStats;
+
+	UPROPERTY(BlueprintReadWrite)
+	FGS_StatRow BonusStats;
+
+	FArcaneBoardStats()
+	{
+		RuneStats = FGS_StatRow();
+		BonusStats = FGS_StatRow();
 	}
 };
 
@@ -93,37 +111,59 @@ struct FGridCellData
 	bool bIsSpecialCell;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsConnected;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 PlacedRuneID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* RuneTextureFrag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* ConnectedRuneTextureFrag;
 
 	FGridCellData()
 	{
 		Pos = { 0, 0 };
 		State = EGridCellState::Empty;
 		bIsSpecialCell = false;
+		bIsConnected = false;
 		PlacedRuneID = 0;
 		RuneTextureFrag = nullptr;
+		ConnectedRuneTextureFrag = nullptr;
 	}
 
-	FGridCellData(const FIntPoint& InPos, EGridCellState InState, bool InIsSpecialCell = false)
+	FGridCellData(const FIntPoint& InPos, EGridCellState InState, bool InIsSpecialCell = false, bool InIsConnected = false)
 	{
 		Pos = InPos;
 		State = InState;
 		bIsSpecialCell = InIsSpecialCell;
+		bIsConnected = InIsConnected;
 		PlacedRuneID = 0;
 		RuneTextureFrag = nullptr;
+		ConnectedRuneTextureFrag = nullptr;
 	}
 };
 
 USTRUCT(Atomic, BlueprintType)
-struct FRunePlacementData
+struct FArcaneBoardPresets
 {
 	GENERATED_BODY()
 
 	UPROPERTY()
-	TArray<FPlacedRuneInfo> PlacedRunes;
+	TArray<FPlacedRuneInfo> Preset1;
 
-	FRunePlacementData() {}
+	UPROPERTY()
+	TArray<FPlacedRuneInfo> Preset2;
+
+	UPROPERTY()
+	TArray<FPlacedRuneInfo> Preset3;
+
+	UPROPERTY()
+	int32 LastUsedPresetIndex;
+
+	FArcaneBoardPresets()
+	{
+		LastUsedPresetIndex = 1; // 기본값 설정
+	}
 };

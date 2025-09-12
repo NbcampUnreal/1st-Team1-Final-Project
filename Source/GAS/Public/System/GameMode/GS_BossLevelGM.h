@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
+#include "System/GS_BaseGM.h"
 #include "System/GS_PlayerRole.h"
 #include "Character/Player/GS_PawnMappingDataAsset.h"
 #include "GS_BossLevelGM.generated.h"
@@ -9,7 +9,7 @@
 class AGS_PlayerState;
 
 UCLASS()
-class GAS_API AGS_BossLevelGM : public AGameMode
+class GAS_API AGS_BossLevelGM : public AGS_BaseGM
 {
 	GENERATED_BODY()
 	
@@ -19,12 +19,11 @@ public:
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
 	virtual void StartPlay() override;
+	virtual void StartMatchWhenAllReady() override;
 	void BindToPlayerState(APlayerController* PlayerController);
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 	virtual void Logout(AController* Exiting) override;
-
-	void StartMatchCheck();
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	void OnTimerEnd();
 
 	void EndGame(EGameResult Result);
@@ -45,7 +44,4 @@ public:
 	UGS_PawnMappingDataAsset* PawnMappingDataAsset;
 	
 	FTimerHandle MatchStartTimerHandle;
-
-	bool bMatchHasStarted;
-	bool bGameEnded;
 };

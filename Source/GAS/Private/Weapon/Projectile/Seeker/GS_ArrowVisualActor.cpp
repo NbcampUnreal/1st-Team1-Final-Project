@@ -9,11 +9,15 @@ AGS_ArrowVisualActor::AGS_ArrowVisualActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
+
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	SetRootComponent(Root);
+
 	SetReplicateMovement(true);
 
 	ArrowMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ArrowMesh"));
 	ArrowMesh->SetIsReplicated(true);
-	SetRootComponent(ArrowMesh);
+	ArrowMesh->SetupAttachment(Root);
 
 	ArrowMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ArrowMesh->SetSimulatePhysics(false);
@@ -30,6 +34,15 @@ void AGS_ArrowVisualActor::SetArrowMesh(USkeletalMesh* Mesh)
 	{
 		ArrowMesh->SetSkeletalMesh(Mesh);
 		CurrentMesh = Mesh;
+	}
+}
+
+void AGS_ArrowVisualActor::SetAttachedTargetActor(AActor* Target)
+{
+	AttachedTargetActor = Target;
+	if (AttachedTargetActor)
+	{
+		AttachedTargetActor->OnDestroyed.AddDynamic(this, &AGS_ArrowVisualActor::OnAttachedTargetDestroyed);
 	}
 }
 

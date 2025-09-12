@@ -1,9 +1,7 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-
-#include "Animation/Notifies/GS_ANS_DrakharCombo.h"
+﻿#include "Animation/Notifies/GS_ANS_DrakharCombo.h"
 
 #include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 void UGS_ANS_DrakharCombo::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
                                        float TotalDuration, const FAnimNotifyEventReference& EventReference)

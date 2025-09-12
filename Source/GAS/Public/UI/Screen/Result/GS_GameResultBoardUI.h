@@ -10,6 +10,8 @@ class UTextBlock;
 class UImage;
 class UButton;
 class UCommonButtonBase;
+class AGS_PlayerState;
+class UGS_PawnMappingDataAsset;
 
 UCLASS()
 class GAS_API UGS_GameResultBoardUI : public UUserWidget
@@ -26,7 +28,7 @@ public:
 	UTextBlock* Text_PlayerID;
 
 	UPROPERTY(meta = (BindWidget))
-	UTextBlock* Text_Level;
+	UTextBlock* Text_Level; //?
 
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Text_Victory;
@@ -42,9 +44,15 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UCommonButtonBase* ArcaneBoardButton;
 
-
+	//생사 아이콘
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Result UI")
+	UTexture2D* DeadTexture;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Result UI")
+	UTexture2D* AliveTexture;
 
 	UFUNCTION()
 	void OnArcaneBoardButtonClicked();
 
+	UFUNCTION(BlueprintCallable, Category = "Game Result UI")
+	void SetupResultBoard(AGS_PlayerState* TargetPlayerState, UGS_PawnMappingDataAsset* PawnMappingDataAsset);
 };

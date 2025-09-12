@@ -30,7 +30,9 @@ public:
 
 	void CheckLavaLoop(AGS_Seeker* Seeker);
 
-	
+	void OnSeekerExitLava(AGS_Seeker* Seeker);
+
+	bool bStillInAnyLava = false;
 
 
 protected:

@@ -14,6 +14,7 @@ class FOnlineSessionSearchResult;
 class FUniqueNetId;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnSteamFriendsListUpdated, const TArray<TSharedRef<FOnlineFriend>>& /* FriendsList */);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerCountChangedDelegate);
 
 UCLASS()
 class GAS_API UGS_GameInstance : public UGameInstance
@@ -86,6 +87,10 @@ protected:
 public:
     FString GetAndClearPendingConnectString();
 
+    void LeaveCurrentSessionAndJoin(APlayerController* RequestingPlayer, const FOnlineSessionSearchResult& SearchResultToJoin);
+
+    bool bJoiningFromInvite = false;
+
 protected:
     FOnDestroySessionCompleteDelegate DestroySessionCompleteDelegateForInvite;
     FDelegateHandle DestroySessionCompleteDelegateForInviteHandle;
@@ -93,34 +98,53 @@ protected:
     TWeakObjectPtr<APlayerController> PlayerJoiningFromInvite;
     FOnlineSessionSearchResult InviteSessionToJoinAfterDestroy;
 
-    void LeaveCurrentSessionAndJoin(APlayerController* RequestingPlayer, const FOnlineSessionSearchResult& SearchResultToJoin);
     virtual void OnDestroySessionCompleteForInvite(FName SessionName, bool bWasSuccessful);
 
-//    //초대
-//public:
-//    UFUNCTION(BlueprintCallable, Category = "Network|Friends")
-//    void ReadSteamFriendsList(APlayerController* RequestingPlayer);
-//
-//    UFUNCTION(BlueprintCallable, Category = "Network|Friends")
-//    void SendSteamSessionInvite(APlayerController* RequestingPlayer, const FUniqueNetId& FriendToInviteId);
-//
-//protected:
-//    FOnSteamFriendsListUpdated OnSteamFriendsListUpdatedDelegate;
-//    IOnlineFriendsPtr FriendsInterface;
-//    TWeakObjectPtr<APlayerController> PlayerReadingFriendsList;
-//
-//    FOnReadFriendsListCompleteDelegate ReadFriendsCompleteDelegate;
-//    FDelegateHandle ReadFriendsCompleteDelegateHandle;
-//    virtual void OnReadFriendsListComplete(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
-//
     FOnSessionUserInviteAcceptedDelegate OnSessionUserInviteAcceptedDelegate;
     FDelegateHandle OnSessionUserInviteAcceptedDelegateHandle;
     virtual void OnSessionUserInviteAccepted_Impl(const bool bWasSuccessful, const int32 ControllerId, TSharedPtr<const FUniqueNetId> UserId, const FOnlineSessionSearchResult& InviteResult);
 
+    virtual void HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString);
 
+    FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegateForCleanup;
+    FDelegateHandle OnDestroySessionCompleteDelegateHandleForCleanup;
+    void OnDestroySessionCompleteForCleanup(FName SessionName, bool bWasSuccessful);
+
+    //세션 생명주기 관리
+public:
+    UPROPERTY(BlueprintAssignable, Category = "Session")
+    FOnPlayerCountChangedDelegate OnPlayerCountChanged;
+
+private:
+    UFUNCTION()
+    void HandlePlayerCountChanged();
 
     //타이머 넘기기
 public:
     UPROPERTY(BlueprintReadWrite, Category = "Timer")
     float RemainingTime;
+
+    //플레이어 옵션 세팅
+public:
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    float GetMouseSensitivity() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    void SetMouseSensitivity(float NewSensitivity);
+
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    void SaveSettings();
+
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    void LoadSettings();
+
+ private:
+     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+     float MouseSensitivity;
+
+     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+     float MinSensitivity;
+
+     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+     float MaxSensitivity;
 };

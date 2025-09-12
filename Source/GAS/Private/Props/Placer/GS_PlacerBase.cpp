@@ -1,9 +1,15 @@
 #include "Props/Placer/GS_PlacerBase.h"
 
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Character/Player/Monster/GS_IronFang.h"
 #include "DungeonEditor/GS_DEController.h"
+#include "DungeonEditor/Component/PlaceInfoComponent.h"
 #include "DungeonEditor/Data/GS_PlaceableObjectsRow.h"
+#include "Props/GS_RoomBase.h"
+#include "UI/DungeonEditor/GS_NectarWidget.h"
 #include "RuneSystem/GS_EnumUtils.h"
+
 
 AGS_PlacerBase::AGS_PlacerBase()
 {
@@ -53,6 +59,26 @@ AGS_PlacerBase::AGS_PlacerBase()
 	{
 		BuildRejectedMaterial = BuildRejectedMatFinder.Object;
 	}
+
+	// 사운드 로드
+	PlaceSuccessSound = nullptr;
+	PlaceFailSound = nullptr;
+	
+	// 드래그 사운드 로드
+	static ConstructorHelpers::FObjectFinder<USoundBase> DragSoundFinder(
+		TEXT("SoundWave'/Game/WwiseAudio/Audio/SFX_DE_GridSnap.SFX_DE_GridSnap'"));
+	if (DragSoundFinder.Succeeded())
+	{
+		PlaceDragSound = DragSoundFinder.Object;
+	}
+	else
+	{
+		PlaceDragSound = nullptr;
+	}
+
+	// 드래그 사운드 관련 초기화
+	LastCellPosition = FIntPoint(-1, -1);
+	LastDragSoundTime = 0.0f;
 
 	bUpdatePlaceIndicators = false;
 	Direction = EPlacerDirectionType::Forward;
@@ -114,8 +140,19 @@ void AGS_PlacerBase::BuildObject()
 	bUpdatePlaceIndicators = true;
 
 	DrawPlacementIndicators();
-	if (bCanBuild)
+	UGS_NectarComp* NectarComp = BuildManagerRef->FindComponentByClass<UGS_NectarComp>();
+
+	if (bCanBuild && NectarComp->CanSpendResource(ObjectData.ConstructionCost))
 	{
+		//Nectar 차감
+		NectarComp->SpendResource(ObjectData.ConstructionCost);
+
+		// 성공 사운드 재생
+		if (PlaceSuccessSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), PlaceSuccessSound);
+		}
+		
 		bUpdatePlaceIndicators = true;
 
 		FIntPoint CursorPoint = BuildManagerRef->GetCellUnderCursor();
@@ -125,6 +162,9 @@ void AGS_PlacerBase::BuildObject()
 		//FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
 		FRotator SpawnRotator = GetActorRotation();
 		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator);
+
+
+
 		NewActor->SetActorRotation(NewActor->GetActorRotation() + FRotator(0.0f, RotateYaw, 0.0f));
 		SpawnOffset = SpawnOffset.GetRotated(RotateYaw);
 		SpawnLocation = NewActor->GetActorLocation();
@@ -134,16 +174,77 @@ void AGS_PlacerBase::BuildObject()
 		TArray<FIntPoint> IntPointArray;
 		CalCellsInRectArea(IntPointArray);
 
-		EDEditorCellType TargetType = GetTargetCellType();
+		EDEditorCellType TargetType = BuildManagerRef->GetTargetCellType(ObjectData.ObjectType, ObjectData.TrapType);
 		bool IsRoom = false;
 		for (int i = 0; i < IntPointArray.Num(); i++)
 		{
 			if (ObjectData.ObjectType == EObjectType::Room)
 			{
+				if (AGS_RoomBase* RoomBase = Cast<AGS_RoomBase>(NewActor))
+				{
+					RoomBase->HideCeiling();
+					RoomBase->UseDepthStencil();
+				}
 				TargetType = GetRoomCellInfo(i);
 				IsRoom = true;
 			}
-			BuildManagerRef->SetOccupancyData(IntPointArray[i], TargetType, IsRoom);
+			else if (ObjectData.ObjectType == EObjectType::DoorAndWall)
+			{
+				if (ObjectData.DoorAndWallType == EDoorAndWallType::Wall)
+				{
+					TargetType = EDEditorCellType::VerticalPlaceable;
+					UActorComponent* ActorCompo = NewActor->FindComponentByTag(UStaticMeshComponent::StaticClass(),"Wall");
+					if (ActorCompo)
+					{
+						if (UStaticMeshComponent* WallStaticMesh = Cast<UStaticMeshComponent>(ActorCompo))
+						{
+							WallStaticMesh->SetRenderCustomDepth(true);
+						}
+					}
+				}
+			}
+			BuildManagerRef->SetOccupancyData(IntPointArray[i], TargetType, ObjectData.ObjectType, NewActor, IsRoom);
+		}
+
+		// Cell Info를 Component에 전달 및 저장
+		if (UPlaceInfoComponent* PlaceInfoCompo = NewActor->GetComponentByClass<UPlaceInfoComponent>())
+		{
+			PlaceInfoCompo->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapType, IntPointArray, ObjectData.ConstructionCost);
+		}
+
+		// 먼지 이펙트 생성 DustEffectTemplate
+		if (DustEffectTemplate)
+		{
+			FVector EffectSpawnLocation = NewActor->GetActorLocation();
+			const FRotator EffectSpawnRotation = NewActor->GetActorRotation();
+
+			// if (ObjectData.ObjectType == EObjectType::DoorAndWall)
+			EffectSpawnLocation.Z = 1100.0f;
+			
+			UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				DustEffectTemplate,
+				EffectSpawnLocation,
+				FRotator::ZeroRotator,
+				FVector(1.0f),
+				true,
+				true
+			);
+
+			if (SpawnedEffect)
+			{
+				float EffectScale = 0.25f * FMath::Max(ObjectData.ObjectSize.X , ObjectData.ObjectSize.Y);
+				SpawnedEffect->SetFloatParameter(FName("Scale_All"), EffectScale);
+				SpawnedEffect->SetRelativeRotation(EffectSpawnRotation);
+			}
+		}
+	}
+	else
+	{
+		// 실패 사운드 재생
+		if (PlaceFailSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), PlaceFailSound);
 		}
 	}
 }
@@ -184,6 +285,7 @@ UStaticMeshComponent* AGS_PlacerBase::CreateIndicatorMesh()
 	{
 		// 월드에 등록
 		NewStaticMeshCompo->RegisterComponent();
+		NewStaticMeshCompo->ComponentTags.Add(FName("PlacementIndicator"));
 		
 		PlaceIndicators.Add(NewStaticMeshCompo);
 		if (PlaneMesh)
@@ -207,34 +309,90 @@ void AGS_PlacerBase::DrawPlacementIndicators()
 {
 	if (BuildManagerRef)
 	{
+		// 현재 커서 위치 가져오기
+		FIntPoint CurrentCellPosition = BuildManagerRef->GetCellUnderCursor();
+		
 		// 커서 위치가 변경되었거나 Indicator를 업데이트 해주어야 할 때만 동작
-		 if (bUpdatePlaceIndicators
-		 	|| BuildManagerRef->IsCellUnderSursorChanged())
-		 {
-		 	bUpdatePlaceIndicators = false;
-		 	bCanBuild = true;
+		if (bUpdatePlaceIndicators || BuildManagerRef->IsCellUnderSursorChanged())
+		{
+			// 드래그 사운드 재생 (셀 위치가 변경되었고 쿨다운이 지났을 때)
+			if (LastCellPosition != CurrentCellPosition && LastCellPosition != FIntPoint(-1, -1))
+			{
+				float CurrentTime = GetWorld()->GetTimeSeconds();
+				if (CurrentTime - LastDragSoundTime >= DragSoundCooldown)
+				{
+					if (PlaceDragSound)
+					{
+						UGameplayStatics::PlaySound2D(GetWorld(), PlaceDragSound, 0.3f); // 볼륨 조금 낮게
+					}
+					LastDragSoundTime = CurrentTime;
+				}
+			}
+			
+			// 현재 위치를 이전 위치로 저장
+			LastCellPosition = CurrentCellPosition;
+			
+			bUpdatePlaceIndicators = false;
+			bCanBuild = true;
 
 			TArray<FIntPoint> IntPointArray;
-		 	CalCellsInRectArea(IntPointArray);
+			CalCellsInRectArea(IntPointArray);
 
-		 	EDEditorCellType TargetType = GetTargetCellType();
-		 	for (int i = 0; i < IntPointArray.Num(); i++)
-		 	{
-		 		FVector CellLocation = BuildManagerRef->GetCellLocation(IntPointArray[i]);
-		 		PlaceIndicators[i]->SetWorldLocation(CellLocation);
-		 		
-		 		if (!BuildManagerRef->CheckOccupancyData(IntPointArray[i], TargetType))
-		 			//&& FMath::Abs(CellLocation.Z - BaseBuildLevel) < MaxHeightDifferenceforConstruction))
-		 		{
-		 			PlaceIndicators[i]->SetMaterial(0, PlaceAcceptedMaterial);
-		 		}
-			    else
-			    {
-			    	PlaceIndicators[i]->SetMaterial(0, PlaceRejectedMaterial);
-			    	bCanBuild = false;
-			    }
-		 	}
-		 }
+			EDEditorCellType TargetType = BuildManagerRef->GetTargetCellType(ObjectData.ObjectType, ObjectData.TrapType);
+			for (int i = 0; i < IntPointArray.Num(); i++)
+			{
+				FVector CellLocation = BuildManagerRef->GetCellLocation(IntPointArray[i]);
+				PlaceIndicators[i]->SetWorldLocation(CellLocation);
+				
+				if (!BuildManagerRef->CheckOccupancyData(IntPointArray[i], TargetType))
+					//&& FMath::Abs(CellLocation.Z - BaseBuildLevel) < MaxHeightDifferenceforConstruction))
+				{
+					PlaceIndicators[i]->SetMaterial(0, PlaceAcceptedMaterial);
+				}
+				else
+				{
+					PlaceIndicators[i]->SetMaterial(0, PlaceRejectedMaterial);
+					bCanBuild = false;
+				}
+			}
+
+			TArray<UMeshComponent*> AllMeshComponents;
+			GetComponents<UMeshComponent>(AllMeshComponents);
+			
+			for (UMeshComponent* MeshComponent : AllMeshComponents)
+			{
+				if (MeshComponent)
+				{
+					if (MeshComponent->ComponentHasTag(FName("PlacementIndicator")))
+					{
+						if (bCanBuild)
+						{
+							MeshComponent->SetMaterial(0, PlaceAcceptedMaterial);
+						}
+						else
+						{
+							MeshComponent->SetMaterial(0, PlaceRejectedMaterial);
+						}
+						
+						continue; 
+					}
+					
+					int32 NumMaterials = MeshComponent->GetNumMaterials();
+
+					for (int32 i = 0; i < NumMaterials; ++i)
+					{					
+						if (bCanBuild)
+						{
+							MeshComponent->SetMaterial(i, BuildAcceptedMaterial);
+						}
+						else
+						{
+							MeshComponent->SetMaterial(i, BuildRejectedMaterial);
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -247,38 +405,38 @@ void AGS_PlacerBase::CalCellsInRectArea(TArray<FIntPoint>& InIntPointArray)
 	BuildManagerRef->GetCellsInRectArea(InIntPointArray, BuildManagerRef->GetCellUnderCursor(), ObjectSize, RotateYaw);
 }
 
-EDEditorCellType AGS_PlacerBase::GetTargetCellType()
-{
-	EObjectType ObjectType = ObjectData.ObjectType;
-	if (ObjectType == EObjectType::Room)
-	{
-		return EDEditorCellType::None;
-	}
-	else if (ObjectType == EObjectType::Monster)
-	{
-		return EDEditorCellType::FloorPlace;
-	}
-	else if (ObjectType == EObjectType::Trap)
-	{
-		ETrapPlacement TrapType = ObjectData.TrapType;
-		if (TrapType == ETrapPlacement::Floor)
-			return EDEditorCellType::FloorPlace;
-		else if (TrapType == ETrapPlacement::Ceiling)
-			return EDEditorCellType::CeilingPlace;
-		else if (TrapType == ETrapPlacement::Wall)
-			return EDEditorCellType::WallPlace;
-	}
-	else if (ObjectType == EObjectType::DoorAndWall)
-	{
-		// 나중에 벽과 문을 구분지어주어야 함.
-		return EDEditorCellType::Door;
-	}
-	else
-	{
-		return EDEditorCellType::None;
-	}
-	return EDEditorCellType::None;
-}
+// EDEditorCellType AGS_PlacerBase::GetTargetCellType()
+// {
+// 	EObjectType ObjectType = ObjectData.ObjectType;
+// 	if (ObjectType == EObjectType::Room)
+// 	{
+// 		return EDEditorCellType::None;
+// 	}
+// 	else if (ObjectType == EObjectType::Monster)
+// 	{
+// 		return EDEditorCellType::FloorPlace;
+// 	}
+// 	else if (ObjectType == EObjectType::Trap)
+// 	{
+// 		ETrapPlacement TrapType = ObjectData.TrapType;
+// 		if (TrapType == ETrapPlacement::Floor)
+// 			return EDEditorCellType::FloorPlace;
+// 		else if (TrapType == ETrapPlacement::Ceiling)
+// 			return EDEditorCellType::CeilingPlace;
+// 		else if (TrapType == ETrapPlacement::Wall)
+// 			return EDEditorCellType::WallPlace;
+// 	}
+// 	else if (ObjectType == EObjectType::DoorAndWall)
+// 	{
+// 		// 나중에 벽과 문을 구분지어주어야 함.
+// 		return EDEditorCellType::Door;
+// 	}
+// 	else
+// 	{
+// 		return EDEditorCellType::None;
+// 	}
+// 	return EDEditorCellType::None;
+// }
 
 EDEditorCellType AGS_PlacerBase::GetRoomCellInfo(int InIdx)
 {

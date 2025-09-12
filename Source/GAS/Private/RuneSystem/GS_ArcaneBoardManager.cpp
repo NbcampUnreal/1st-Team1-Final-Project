@@ -9,8 +9,8 @@ UGS_ArcaneBoardManager::UGS_ArcaneBoardManager()
 	//기본 초기화
 	CurrClass = ECharacterClass::Ares;
 	PlacedRunes.Empty();
-	AppliedStatEffects = FGS_StatRow();
-	CurrStatEffects = FGS_StatRow();
+	AppliedBoardStats = FArcaneBoardStats();
+	CurrBoardStats = FArcaneBoardStats();
 	CurrGridLayout = nullptr;
 
 	//데이터 테이블은 ArcaneBoardLPS에서 설정
@@ -74,15 +74,19 @@ bool UGS_ArcaneBoardManager::SetCurrClass(ECharacterClass NewClass)
 		}
 	}
 
+	bool bNeedGridReset = (CurrClass != NewClass);
+
 	CurrClass = NewClass;
 	CurrGridLayout = GridLayoutCache[NewClass];
 
-	InitGridState();
-
+	if (bNeedGridReset)
+	{
+		InitGridState();
+		CalculateStatEffects();
+		AppliedBoardStats = CurrBoardStats;
+	}
+	
 	bHasUnsavedChanges = false;
-
-	AppliedStatEffects = CalculateStatEffects();
-	CurrStatEffects = AppliedStatEffects;
 
 	return true;
 }
@@ -92,21 +96,83 @@ ECharacterClass UGS_ArcaneBoardManager::GetCurrClass()
 	return CurrClass;
 }
 
-bool UGS_ArcaneBoardManager::CanPlaceRuneAt(uint8 RuneID, const FIntPoint& Pos)
+EPlacementResult UGS_ArcaneBoardManager::CheckRunePlacement(uint8 RuneID, const FIntPoint& Pos, TArray<uint8>& OutAffectedRuneIDs)
 {
-	TArray<FIntPoint> AffectedCells;
-	return PreviewRunePlacement(RuneID, Pos, AffectedCells);
+	OutAffectedRuneIDs.Empty();
+
+	TArray<FIntPoint> RuneShape;
+	if (!GetRuneShape(RuneID, RuneShape))
+	{
+		return EPlacementResult::OutOfBounds;
+	}
+
+	bool bHasOverlapping = false;
+	bool bOutOfBounds = false;
+	TSet<uint8> OverlappingRuneIDSet;
+
+	for (const FIntPoint& Offset : RuneShape)
+	{
+		FIntPoint CellPos = Pos + Offset;
+
+		if (!CurrGridState.Contains(CellPos))
+		{
+			bOutOfBounds = true;
+			continue;
+		}
+
+		const FGridCellData& CellData = CurrGridState[CellPos];
+
+		if (CellData.State == EGridCellState::Occupied && CellData.PlacedRuneID > 0)
+		{
+			bHasOverlapping = true;
+			OverlappingRuneIDSet.Add(CellData.PlacedRuneID);
+		}
+	}
+
+	OutAffectedRuneIDs = OverlappingRuneIDSet.Array();
+
+	if (bOutOfBounds)
+	{
+		return EPlacementResult::OutOfBounds;
+	}
+	else if (bHasOverlapping)
+	{
+		return EPlacementResult::ReplaceExisting;
+	}
+	else
+	{
+		return EPlacementResult::Valid;
+	}
+	return EPlacementResult();
 }
 
-bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
+bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos, TArray<uint8>& OutRemovedRunes)
 {
-	TMap<FIntPoint, UTexture2D*> RuneShape;
-	if (!GetFragmentedRuneTexture(RuneID, RuneShape))
+	OutRemovedRunes.Empty();
+
+	TArray<uint8> AffectedRuneIDs;
+	EPlacementResult PlacementResult = CheckRunePlacement(RuneID, Pos, AffectedRuneIDs);
+
+	// 범위 밖
+	if (PlacementResult == EPlacementResult::OutOfBounds)
 	{
 		return false;
 	}
 
-	if (!CanPlaceRuneAt(RuneID, Pos))
+	// 겹치는 룬 제거
+	if (PlacementResult == EPlacementResult::ReplaceExisting)
+	{
+		for (uint8 OverlappingRuneID : AffectedRuneIDs)
+		{
+			if (RemoveRune(OverlappingRuneID))
+			{
+				OutRemovedRunes.Add(OverlappingRuneID);
+			}
+		}
+	}
+
+	TMap<FIntPoint, UTexture2D*> RuneShape;
+	if (!GetFragmentedRuneTexture(RuneID, RuneShape))
 	{
 		return false;
 	}
@@ -124,10 +190,10 @@ bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
 
 	bHasUnsavedChanges = true;
 
-	CurrStatEffects = CalculateStatEffects();
+	CalculateStatEffects();
 
 	//스탯창 UI 업데이트 이벤트 호출
-	OnStatsChanged.Broadcast(CurrStatEffects);
+	OnStatsChanged.Broadcast(CurrBoardStats);
 
 	return true;
 }
@@ -135,7 +201,7 @@ bool UGS_ArcaneBoardManager::PlaceRune(uint8 RuneID, const FIntPoint& Pos)
 bool UGS_ArcaneBoardManager::RemoveRune(uint8 RuneID)
 {
 	//배치된 룬 목록에서 해당 룬 찾기
-	uint8 RuneIndex = INDEX_NONE;
+	int8 RuneIndex = INDEX_NONE;
 	for (uint8 i = 0; i < PlacedRunes.Num(); ++i)
 	{
 		if (PlacedRunes[i].RuneID == RuneID)
@@ -157,58 +223,88 @@ bool UGS_ArcaneBoardManager::RemoveRune(uint8 RuneID)
 
 	bHasUnsavedChanges = true;
 
-	CurrStatEffects = CalculateStatEffects();
+	CalculateStatEffects();
 
 	//스탯창 UI 업데이트 이벤트 호출
-	OnStatsChanged.Broadcast(CurrStatEffects);
+	OnStatsChanged.Broadcast(CurrBoardStats);
 
 	return true;
 }
 
-FGS_StatRow UGS_ArcaneBoardManager::CalculateStatEffects()
+void UGS_ArcaneBoardManager::CalculateStatEffects()
 {
-	FGS_StatRow Result;
+	//특수 셀 연결 업데이트
+	UpdateConnections();
+
+	FGS_StatRow BaseResult, BonusResult;
+	float BonusValue = ConnectedRuneCnt;
 
 	for (const FPlacedRuneInfo& Rune : PlacedRunes)
 	{
 		FRuneTableRow RuneData;
 		if (GetRuneData(Rune.RuneID, RuneData))
 		{
+			bool bIsRuneConnected = IsRuneConnected(Rune.RuneID);
+
 			if (RuneData.StatEffect.StatName == FName("HP"))
 			{
-				Result.HP += RuneData.StatEffect.Value;
+				BaseResult.HP += RuneData.StatEffect.Value;
+
+				if (bIsRuneConnected && BonusResult.HP == 0)
+				{
+					BonusResult.HP = BonusValue;
+				}
 			}
 			else if (RuneData.StatEffect.StatName == FName("ATK"))
 			{
-				Result.ATK += RuneData.StatEffect.Value;
+				BaseResult.ATK += RuneData.StatEffect.Value;
+
+				if (bIsRuneConnected && BonusResult.ATK == 0)
+				{
+					BonusResult.ATK = BonusValue;
+				}
 			}
 			else if (RuneData.StatEffect.StatName == FName("DEF"))
 			{
-				Result.DEF += RuneData.StatEffect.Value;
+				BaseResult.DEF += RuneData.StatEffect.Value;
+				
+				if (bIsRuneConnected && BonusResult.DEF == 0)
+				{
+					BonusResult.DEF = BonusValue;
+				}
 			}
 			else if (RuneData.StatEffect.StatName == FName("AGL"))
 			{
-				Result.AGL += RuneData.StatEffect.Value;
+				BaseResult.AGL += RuneData.StatEffect.Value;
+
+				if (bIsRuneConnected && BonusResult.AGL == 0)
+				{
+					BonusResult.AGL = BonusValue;
+				}
 			}
 			else if (RuneData.StatEffect.StatName == FName("ATS"))
 			{
-				Result.ATS += RuneData.StatEffect.Value;
+				BaseResult.ATS += RuneData.StatEffect.Value;
+
+				if (bIsRuneConnected && BonusResult.ATS == 0)
+				{
+					BonusResult.ATS = BonusValue;
+				}
 			}
 		}
 	}
 
-	// 특수 셀 연결로직
-
-	return Result;
+	CurrBoardStats.RuneStats = BaseResult;
+	CurrBoardStats.BonusStats = BonusResult;
 }
 
 void UGS_ArcaneBoardManager::ApplyChanges()
 {
-	AppliedStatEffects = CurrStatEffects;
+	AppliedBoardStats = CurrBoardStats;
 
 	bHasUnsavedChanges = false;
 
-	OnStatsChanged.Broadcast(AppliedStatEffects);
+	OnStatsChanged.Broadcast(AppliedBoardStats);
 }
 
 void UGS_ArcaneBoardManager::ResetAllRune()
@@ -220,15 +316,16 @@ void UGS_ArcaneBoardManager::ResetAllRune()
 
 	PlacedRunes.Empty();
 	InitGridState();
-	CurrStatEffects = FGS_StatRow();
+	CurrBoardStats = FArcaneBoardStats();
 	bHasUnsavedChanges = true;
-	OnStatsChanged.Broadcast(CurrStatEffects);
+	OnStatsChanged.Broadcast(CurrBoardStats);
 }
 
 void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<FPlacedRuneInfo>& Runes)
 {
 	PlacedRunes.Empty();
 	InitGridState();
+	CurrBoardStats = FArcaneBoardStats();
 
 	for (const FPlacedRuneInfo& RuneInfo : Runes)
 	{
@@ -236,10 +333,10 @@ void UGS_ArcaneBoardManager::LoadSavedData(ECharacterClass Class, const TArray<F
 		ApplyRuneToGrid(RuneInfo.RuneID, RuneInfo.Pos, EGridCellState::Occupied, true);
 	}
 
-	AppliedStatEffects = CalculateStatEffects();
-	CurrStatEffects = AppliedStatEffects;
+	CalculateStatEffects();
+	AppliedBoardStats = CurrBoardStats;
 
-	OnStatsChanged.Broadcast(CurrStatEffects);
+	OnStatsChanged.Broadcast(CurrBoardStats);
 
 	bHasUnsavedChanges = false;
 }
@@ -283,12 +380,7 @@ bool UGS_ArcaneBoardManager::IsValidCell(const FIntPoint& Pos)
 		return false;
 	}
 
-	if (CurrGridState.Contains(Pos))
-	{
-		return CurrGridState[Pos].State == EGridCellState::Empty;
-	}
-
-	return false;
+	return CurrGridState.Contains(Pos);
 }
 
 void UGS_ArcaneBoardManager::InitDataCache()
@@ -332,45 +424,6 @@ void UGS_ArcaneBoardManager::InitDataCache()
 
 	//초기 클래스 설정
 	SetCurrClass(CurrClass);
-}
-
-bool UGS_ArcaneBoardManager::PreviewRunePlacement(uint8 RuneID, const FIntPoint& Pos, TArray<FIntPoint>& OutAffectedCells)
-{
-	OutAffectedCells.Empty();
-
-	TArray<FIntPoint> RuneShape;
-	if (!GetRuneShape(RuneID, RuneShape))
-	{
-		return false;
-	}
-
-	bool bCanPlace = true;
-	for (const FIntPoint& Offset : RuneShape)
-	{
-		FIntPoint CellPos(Pos.X + Offset.X, Pos.Y + Offset.Y);
-		OutAffectedCells.Add(CellPos);
-
-		if (!IsValidCell(CellPos))
-		{
-			bCanPlace = false;
-		}
-	}
-
-	return bCanPlace;
-}
-
-void UGS_ArcaneBoardManager::GetGridDimensions(int32& OutRows, int32& OutColumns)
-{
-	if (IsValid(CurrGridLayout))
-	{
-		OutRows = CurrGridLayout->GridSize.X;
-		OutColumns = CurrGridLayout->GridSize.Y;
-	}
-	else
-	{
-		OutRows = 0;
-		OutColumns = 0;
-	}
 }
 
 bool UGS_ArcaneBoardManager::GetCellData(const FIntPoint& Pos, FGridCellData& OutCellData)
@@ -419,9 +472,21 @@ bool UGS_ArcaneBoardManager::GetFragmentedRuneTexture(uint8 RuneID, TMap<FIntPoi
 	return false;
 }
 
+bool UGS_ArcaneBoardManager::GetConnectedFragmentedRuneTexture(uint8 RuneID, TMap<FIntPoint, UTexture2D*>& OutShape)
+{
+	FRuneTableRow RuneData;
+	if (GetRuneData(RuneID, RuneData))
+	{
+		OutShape = RuneData.ConnectedRuneShape;
+		return true;
+	}
+	return false;
+}
+
 void UGS_ArcaneBoardManager::InitGridState()
 {
 	CurrGridState.Empty();
+	PlacedRunes.Empty();
 
 	if (IsValid(CurrGridLayout))
 	{
@@ -437,6 +502,11 @@ void UGS_ArcaneBoardManager::InitGridState()
 				PlacedRunes.Add(FPlacedRuneInfo(Cell.PlacedRuneID, Cell.Pos));
 			}
 			CurrGridState.Add(Cell.Pos, NewCell);
+
+			if (Cell.bIsSpecialCell)
+			{
+				SpecialCellPos = Cell.Pos;
+			}
 		}
 	}
 }
@@ -444,7 +514,14 @@ void UGS_ArcaneBoardManager::InitGridState()
 void UGS_ArcaneBoardManager::ApplyRuneToGrid(uint8 RuneID, const FIntPoint& Position, EGridCellState NewState, bool bApplyTexture)
 {
 	TMap<FIntPoint, UTexture2D*> RuneShape;
+	TMap<FIntPoint, UTexture2D*> ConnectedRuneShape;
+
 	if (!GetFragmentedRuneTexture(RuneID, RuneShape))
+	{
+		return;
+	}
+
+	if (!GetConnectedFragmentedRuneTexture(RuneID, ConnectedRuneShape))
 	{
 		return;
 	}
@@ -453,52 +530,94 @@ void UGS_ArcaneBoardManager::ApplyRuneToGrid(uint8 RuneID, const FIntPoint& Posi
 	{
 		FIntPoint CellPos(Position.X + ShapePair.Key.X, Position.Y + ShapePair.Key.Y);
 
-		UTexture2D* TextureToApply = nullptr;
+		UTexture2D* NormalTexture = nullptr;
+		UTexture2D* ConnectedTexture = nullptr;
 		uint8 RuneIDToApply = 0;
 
 		if (NewState == EGridCellState::Occupied && bApplyTexture)
 		{
-			TextureToApply = ShapePair.Value;
+			NormalTexture = ShapePair.Value;
 			RuneIDToApply = RuneID;
+
+			// 연결 상태 텍스처도 설정
+			if (ConnectedRuneShape.Contains(ShapePair.Key))
+			{
+				ConnectedTexture = ConnectedRuneShape[ShapePair.Key];
+			}
 		}
 
-		UpdateCellState(CellPos, NewState, RuneIDToApply, TextureToApply);
+		UpdateCellState(CellPos, NewState, RuneIDToApply, NormalTexture, ConnectedTexture);
 	}
 }
 
-void UGS_ArcaneBoardManager::UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID, UTexture2D* RuneTextureFrag)
+void UGS_ArcaneBoardManager::UpdateCellState(const FIntPoint& Pos, EGridCellState NewState, uint8 RuneID, UTexture2D* RuneTextureFrag, UTexture2D* ConnectedRuneTextureFrag)
 {
 	if (CurrGridState.Contains(Pos))
 	{
 		CurrGridState[Pos].State = NewState;
 		CurrGridState[Pos].PlacedRuneID = RuneID;
 		CurrGridState[Pos].RuneTextureFrag = RuneTextureFrag;
+		CurrGridState[Pos].ConnectedRuneTextureFrag = ConnectedRuneTextureFrag;
 	}
 }
 
 void UGS_ArcaneBoardManager::UpdateConnections()
 {
+	for (auto& CellPair : CurrGridState)
+	{
+		CellPair.Value.bIsConnected = false;
+	}
+
+	TSet<FIntPoint> VisitedCells;
+	FindConnectedCells(SpecialCellPos, VisitedCells);
+
+	TSet<uint8> ConnectedRuneIDs;
+	for (const auto& CellPair : CurrGridState)
+	{
+		if (CellPair.Value.bIsConnected && CellPair.Value.PlacedRuneID > 0)
+		{
+			ConnectedRuneIDs.Add(CellPair.Value.PlacedRuneID);
+		}
+	}
+
+	ConnectedRuneCnt = ConnectedRuneIDs.Num();
 }
 
-void UGS_ArcaneBoardManager::FindConnectedRunes(const TArray<FPlacedRuneInfo>& StartNode, TArray<uint8>& CheckedIDs, TArray<uint8>& ResultIDs)
+void UGS_ArcaneBoardManager::FindConnectedCells(const FIntPoint CellPos, TSet<FIntPoint>& VisitedCell)
 {
+	if (VisitedCell.Contains(CellPos))
+	{
+		return;
+	}
+
+	FGridCellData CellData;
+	if (!GetCellData(CellPos, CellData) || CellData.State == EGridCellState::Empty)
+	{
+		return;
+	}
+
+	VisitedCell.Add(CellPos);
+	if (CurrGridState.Contains(CellPos))
+	{
+		CurrGridState[CellPos].bIsConnected = true;
+	}
+
+	TArray<FIntPoint> Directions = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
+	for (const FIntPoint& Dir : Directions)
+	{
+		FIntPoint NextPos = CellPos + Dir;
+		FindConnectedCells(NextPos, VisitedCell);
+	}
 }
 
-bool UGS_ArcaneBoardManager::IsRuneAdjacentToCell(const FPlacedRuneInfo& Rune, const FIntPoint& CellPos) const
+bool UGS_ArcaneBoardManager::IsRuneConnected(uint8 RuneID)
 {
-	return false;
-}
-
-bool UGS_ArcaneBoardManager::AreRunesAdjacent(const FPlacedRuneInfo& Rune1, const FPlacedRuneInfo& Rune2) const
-{
-	return false;
-}
-
-void UGS_ArcaneBoardManager::ApplySpecialCellBonus(TMap<FName, float>& StatEffects)
-{
-}
-
-bool UGS_ArcaneBoardManager::HasActualChanges() const
-{
+	for (const auto& CellPair : CurrGridState)
+	{
+		if (CellPair.Value.PlacedRuneID == RuneID && CellPair.Value.bIsConnected)
+		{
+			return true;
+		}
+	}
 	return false;
 }

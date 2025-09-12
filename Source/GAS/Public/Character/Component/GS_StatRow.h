@@ -25,4 +25,15 @@ struct GAS_API FGS_StatRow : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 
 	float ATS = 0.f;
+
+	FGS_StatRow operator+(const FGS_StatRow& Other) const
+	{
+		FGS_StatRow Result;
+		Result.HP = HP + Other.HP;
+		Result.ATK = ATK + Other.ATK;
+		Result.DEF = DEF + Other.DEF;
+		Result.AGL = AGL + Other.AGL;
+		Result.ATS = ATS + Other.ATS;
+		return Result;
+	}
 };

@@ -4,6 +4,13 @@
   "BasePlatform": "Mac",
   "PluginLibs": [
    {
+    "LibName": "Wwise Delay",
+    "LibId": "6946819",
+    "Type": "Effect",
+    "DLL": "AkDelay",
+    "StaticLib": "AkDelayFX"
+   },
+   {
     "LibName": "Wwise Compressor",
     "LibId": "7077891",
     "Type": "Effect",
@@ -49,6 +56,6 @@
     "Type": "AudioDevice"
    }
   ],
-  "FileHash": "{3C66A1FF-8BFD-6799-D7CC-FDA39BD007CE}"
+  "FileHash": "{6149C676-A388-6351-3FE4-92C63EB5738A}"
  }
 }

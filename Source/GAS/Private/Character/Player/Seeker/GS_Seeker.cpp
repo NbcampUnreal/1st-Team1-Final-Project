@@ -16,7 +16,6 @@
 #include "Sound/GS_AudioManager.h"
 #include "System/GS_PlayerState.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/ChildActorComponent.h"
 #include "GameFramework/Character.h"
 #include "Engine/PostProcessVolume.h"
@@ -24,11 +23,22 @@
 #include "Camera/PlayerCameraManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
+#include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Animation/Character/Seeker/GS_ChooserInputObj.h"
+#include "Character/GS_TpsController.h"
+#include "Character/Skill/GS_SkillComp.h"
+#include "AkAudioEvent.h"
+#include "AkComponent.h"
+#include "AkAudioDevice.h"
+#include "UI/Character/GS_HPTextWidgetComp.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	bReplicates = true;
 
 	GetMesh()->bEnableUpdateRateOptimizations = false;
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
@@ -39,6 +49,16 @@ AGS_Seeker::AGS_Seeker()
 	LowHealthPostProcessComp->SetupAttachment(CameraComp);
 	LowHealthPostProcessComp->bEnabled = false;
 	LowHealthPostProcessComp->Priority = 10;
+
+	// =======================
+	// 디버프 VFX 컴포넌트 생성
+	// =======================
+	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
+
+	// =======================
+	// 시커 오디오 컴포넌트 생성 (RTS/TPS 지원)
+	// =======================
+	SeekerAudioComponent = CreateDefaultSubobject<UGS_SeekerAudioComponent>("SeekerAudioComponent");
 
 	// Fire Effect 생성 및 설정
 	FeetLavaVFX_L = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_L"));
@@ -60,7 +80,7 @@ AGS_Seeker::AGS_Seeker()
 	// 전투 BGM 트리거 생성 (시커가 몬스터를 감지)
 	CombatTrigger = CreateDefaultSubobject<USphereComponent>(TEXT("CombatTrigger"));
 	CombatTrigger->SetupAttachment(RootComponent);
-	CombatTrigger->SetSphereRadius(1200.0f);
+	CombatTrigger->SetSphereRadius(800.0f);
 	CombatTrigger->SetCollisionProfileName(TEXT("SoundTrigger"));
 
 	//함정 - 화살발사기의 화살 채널 설정(Projectile)
@@ -70,38 +90,11 @@ AGS_Seeker::AGS_Seeker()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel4, ECR_Overlap);
 	GetMesh()->SetCollisionResponseToChannel(ECC_GameTraceChannel4, ECR_Ignore);
 
-
+	// State
+	SeekerGait = EGait::Run;
+	LastSeekerGait = SeekerGait;
+	CanChangeSeekerGait = true;
 }
-
-void AGS_Seeker::SetAimState(bool IsAim)
-{
-	SeekerState.IsAim = IsAim;
-}
-
-bool AGS_Seeker::GetAimState()
-{
-	return SeekerState.IsAim;
-}
-
-void AGS_Seeker::SetDrawState(bool IsDraw)
-{
-	SeekerState.IsDraw = IsDraw;
-}
-
-bool AGS_Seeker::GetDrawState()
-{
-	return SeekerState.IsDraw;
-}
-
-void AGS_Seeker::Multicast_SetNewPlayRate_Implementation(float PlayRate)
-{
-	NewPlayRate = PlayRate;
-}
-
-/*EGait AGS_Seeker::GetGait()
-{
-	return Gait;
-}*/
 
 void AGS_Seeker::BeginPlay()
 {
@@ -133,6 +126,162 @@ void AGS_Seeker::BeginPlay()
 	}
 }
 
+void AGS_Seeker::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	
+}
+
+// Called to bind functionality to input
+void AGS_Seeker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{	
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	if (SkillInputHandlerComponent)
+	{
+		SkillInputHandlerComponent->SetupEnhancedInput(PlayerInputComponent);
+	}
+}
+
+void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AGS_Seeker, bIsLowHealthEffectActive);
+	DOREPLIFETIME(AGS_Seeker, CurrentEffectStrength);
+	DOREPLIFETIME(AGS_Seeker, LastSeekerGait);
+	DOREPLIFETIME(AGS_Seeker, SeekerGait);
+	DOREPLIFETIME(AGS_Seeker, CanChangeSeekerGait);
+	DOREPLIFETIME(AGS_Seeker, CanAcceptComboInput);
+	DOREPLIFETIME(AGS_Seeker, CurrentComboIndex);
+	//DOREPLIFETIME(AGS_Seeker, bComboEnded);
+	DOREPLIFETIME(AGS_Seeker, SeekerState);
+}
+
+void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorldTimerManager().IsTimerActive(LowHealthEffectTimer))
+	{
+		GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);
+	}
+	
+	if (IsLocallyControlled() && LowHealthPostProcessComp)
+	{
+		LowHealthPostProcessComp->bEnabled = false;
+		LowHealthPostProcessComp->Settings.WeightedBlendables.Array.Empty();
+	}
+
+	// PlayerState 생존 상태 변경 델리게이트 해제
+	if (IsLocallyControlled())
+	{
+		AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
+		if (PS)
+		{
+			PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
+
+void AGS_Seeker::SetAimState(bool IsAim)
+{
+	/*FSeekerState NewState = SeekerState;
+	NewState.IsAim = IsAim;*/ // SJE
+
+	SeekerState.IsAim = IsAim;
+	
+	// 시커 오디오 컴포넌트에 조준 상태 변경 알림
+	if (SeekerAudioComponent)
+	{
+		if (IsAim)
+		{
+			SeekerAudioComponent->SetSeekerAudioState(ESeekerAudioState::Aiming);
+		}
+		else if (SeekerAudioComponent->GetCurrentAudioState() == ESeekerAudioState::Aiming)
+		{
+			// 조준을 해제했을 때 다른 상태로 전환
+			SeekerAudioComponent->SetSeekerAudioState(ESeekerAudioState::Idle);
+		}
+	}
+	/*SeekerState = NewState;*/
+}
+
+bool AGS_Seeker::GetAimState()
+{
+	return SeekerState.IsAim;
+}
+
+void AGS_Seeker::SetDrawState(bool IsDraw)
+{
+	FSeekerState NewState = SeekerState;
+	NewState.IsDraw = IsDraw;
+	SeekerState = NewState;
+}
+
+bool AGS_Seeker::GetDrawState()
+{
+	return SeekerState.IsDraw;
+}
+
+void AGS_Seeker::Server_SetSeekerGait_Implementation(EGait Gait)
+{
+	LastSeekerGait = SeekerGait;
+	SeekerGait = Gait;
+
+	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		SeekerAnim->ChooserInputObj->Gait = SeekerGait;
+	}
+	
+	switch (Gait)
+	{
+	case EGait::Walk :
+		SetCharacterSpeed(0.45f);	
+		break;
+	case EGait::Run :
+		SetCharacterSpeed(0.8f);
+		break;
+	case EGait::Sprint :
+		SetCharacterSpeed(1.0f);
+		break;
+	}
+}
+
+void AGS_Seeker::SetSeekerGait(EGait Gait)
+{
+	LastSeekerGait = SeekerGait;
+	SeekerGait = Gait;
+	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		SeekerAnim->ChooserInputObj->Gait = SeekerGait;
+	}
+	
+	switch (Gait)
+	{
+	case EGait::Walk :
+		SetCharacterSpeed(0.45f);	
+		break;
+	case EGait::Run :
+		SetCharacterSpeed(0.8f);
+		break;
+	case EGait::Sprint :
+		SetCharacterSpeed(1.0f);
+		break;
+	}
+}
+
+EGait AGS_Seeker::GetSeekerGait()
+{
+	return SeekerGait;
+}
+
+EGait AGS_Seeker::GetLastSeekerGait()
+{
+	return LastSeekerGait;
+}
+
 const FName AGS_Seeker::HPRatioParamName = TEXT("HPRatio");
 const FName AGS_Seeker::EffectIntensityParamName = TEXT("EffectIntensity");
 
@@ -159,11 +308,105 @@ void AGS_Seeker::InitializeCameraManager()
 	}
 }
 
+void AGS_Seeker::Server_SetNextComboFlag_Implementation(bool NextCombo)
+{
+	bNextCombo = NextCombo;
+}
+
+void AGS_Seeker::Server_SetComboInputFlag_Implementation(bool InputCombo)
+{
+	CanAcceptComboInput = InputCombo;
+}
+
+void AGS_Seeker::ComboInputOpen()
+{
+	CanAcceptComboInput = true;
+}
+
+void AGS_Seeker::ComboInputClose()
+{
+	if (HasAuthority())
+	{
+		CanAcceptComboInput = false;
+		if (bNextCombo)
+		{
+			ServerAttackMontage();
+			Server_SetNextComboFlag(false);
+		}
+	}
+}
+
+void AGS_Seeker::Server_OnComboAttack_Implementation()
+{
+	if (!CanAcceptComboInput) // Handler 에서도 검사하고 있었는데 서버에서도 검사한다. 이중검사가 필요한가?
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, CanAcceptComboInput == false"));
+		return;
+	}
+
+	if (!GetSkillComp()->IsSkillAllowed(ESkillSlot::Combo))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, IsSkillAllowed == false"));
+		return;
+	}
+		
+	if (CurrentComboIndex == 0)
+	{
+		GetWorldTimerManager().ClearTimer(AttackSoundResetTimerHandle);
+		ServerAttackMontage();
+	}
+	else
+	{
+		Server_SetNextComboFlag(true);
+		Server_SetComboInputFlag(false); // server 함수의 호출을 막기 위해서 합친 함수를 만들어야 하나?
+	}
+}
+
+void AGS_Seeker::SetMoveControlValue(bool bMoveForward, bool bMoveRight)
+{
+	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SetMoveControlValue"));
+		TPSController->SetMoveControlValue(bMoveRight, bMoveForward);
+	}
+}
+
+void AGS_Seeker::SetLookControlValue(bool bLookUp, bool bLookRight)
+{
+	if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(GetController()))
+	{
+		TPSController->SetLookControlValue(bLookRight, bLookUp);
+	}
+}
+
 void AGS_Seeker::UpdatePostProcessEffect(float EffectStrength)
 {
 	if (LowHealthDynamicMaterial)
 	{
 		LowHealthDynamicMaterial->SetScalarParameterValue(TEXT("HPRatio"), EffectStrength);
+	}
+}
+
+void AGS_Seeker::ServerAttackMontage_Implementation()
+{
+	Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+	MulticastPlayComboSection();
+}
+
+void AGS_Seeker::MulticastPlayComboSection_Implementation()
+{
+	FName SectionName = FName(*FString::Printf(TEXT("Attack%d"), CurrentComboIndex + 1));
+
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		if (HasAuthority())
+		{
+			CurrentComboIndex++;
+			CanAcceptComboInput = false;
+			bNextCombo = false;
+		}
+		AnimInstance->Montage_Play(ComboAnimMontage);
+		AnimInstance->Montage_JumpToSection(SectionName, ComboAnimMontage);
 	}
 }
 
@@ -188,6 +431,14 @@ void AGS_Seeker::HandleLowHealthEffect(UGS_StatComp* InStatComp)
 			CurrentEffectStrength = 0.0f;
 			bIsLowHealthEffectActive = true;
 			LowHealthPostProcessComp->bEnabled = true;
+			
+			GetWorldTimerManager().SetTimer(
+			   LowHealthEffectTimer,
+			   this,
+			   &AGS_Seeker::UpdateLowHealthEffect,
+			   0.1f,
+			   true
+			);
 		}
 		TargetEffectStrength = 1.0f - HealthRatio;
 	}
@@ -201,83 +452,104 @@ void AGS_Seeker::HandleLowHealthEffect(UGS_StatComp* InStatComp)
 			CurrentEffectStrength = 0.0f;
 			UpdatePostProcessEffect(0.0f);
 			LowHealthPostProcessComp->bEnabled = false;
+
+			GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);
 		}
 	}
 }
 
-void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void AGS_Seeker::UpdateLowHealthEffect()
 {
-	if (IsLocallyControlled() && LowHealthPostProcessComp)
+	if (!bIsLowHealthEffectActive || !LowHealthDynamicMaterial)
 	{
-		LowHealthPostProcessComp->bEnabled = false;
-		LowHealthPostProcessComp->Settings.WeightedBlendables.Array.Empty();
+		GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);
+		return;
 	}
 
-	// PlayerState 생존 상태 변경 델리게이트 해제
-	if (IsLocallyControlled())
+	if (UGS_StatComp* OwnerStatComp = FindComponentByClass<UGS_StatComp>())
 	{
-		AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
-		if (PS)
+		float HealthRatio = OwnerStatComp->GetCurrentHealth() / FMath::Max(1.0f, OwnerStatComp->GetMaxHealth());
+		HealthRatio = FMath::Clamp(HealthRatio, 0.0f, 1.0f);
+       
+		// 목표 효과 강도 계산
+		TargetEffectStrength = 1.0f - HealthRatio;
+
+		// 부드러운 보간
+		CurrentEffectStrength = FMath::FInterpTo(
+			CurrentEffectStrength,
+			TargetEffectStrength,
+			0.1f,
+			EffectInterpSpeed
+		);
+       
+		UpdatePostProcessEffect(CurrentEffectStrength);
+
+		// 효과가 충분히 작아지면 PostProcess 비활성화
+		if (!bIsLowHealthEffectActive && CurrentEffectStrength < KINDA_SMALL_NUMBER)
 		{
-			PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
+			LowHealthPostProcessComp->bEnabled = false;
+			UpdatePostProcessEffect(0.0f); // 혹시 모를 잔상 방지
+			GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);
 		}
 	}
-
-	Super::EndPlay(EndPlayReason);
+	else 
+	{
+		GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);
+	}
 }
 
-void AGS_Seeker::Tick(float DeltaTime)
+void AGS_Seeker::OnRep_SeekerGait()
 {
-	Super::Tick(DeltaTime);
-
-	if (bIsLowHealthEffectActive && LowHealthDynamicMaterial)
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
-		if (UGS_StatComp* OwnerStatComp = FindComponentByClass<UGS_StatComp>())
+		if (UGS_ChooserInputObj* InputObj = AnimInstance->ChooserInputObj)
 		{
-			float HealthRatio = OwnerStatComp->GetCurrentHealth() / FMath::Max(1.0f, OwnerStatComp->GetMaxHealth());
-			HealthRatio = FMath::Clamp(HealthRatio, 0.0f, 1.0f);
-			
-			// 목표 효과 강도 계산
-			TargetEffectStrength = 1.0f - HealthRatio;
-			
-			// 부드러운 보간
-			CurrentEffectStrength = FMath::FInterpTo(
-				CurrentEffectStrength,
-				TargetEffectStrength,
-				DeltaTime,
-				EffectInterpSpeed
-			);
-			
-			UpdatePostProcessEffect(CurrentEffectStrength);
-
-			// 효과가 충분히 작아지면 PostProcess 비활성화
-			if (!bIsLowHealthEffectActive && CurrentEffectStrength < KINDA_SMALL_NUMBER)
-			{
-				LowHealthPostProcessComp->bEnabled = false;
-				UpdatePostProcessEffect(0.0f); // 혹시 모를 잔상 방지
-			}
+			InputObj->Gait = SeekerGait;
 		}
 	}
 }
 
-// Called to bind functionality to input
-void AGS_Seeker::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{	
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	if (SkillInputHandlerComponent)
+void AGS_Seeker::Multicast_SetMontageSlot_Implementation(ESeekerMontageSlot InputMontageSlot)
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
 	{
-		SkillInputHandlerComponent->SetupEnhancedInput(PlayerInputComponent);
+		AnimInstance->SetCurMontageSlot(InputMontageSlot);
 	}
 }
 
-void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void AGS_Seeker::Multicast_SetMustTurnInPlace_Implementation(bool MustTurn)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
-	DOREPLIFETIME(AGS_Seeker, bIsLowHealthEffectActive);
-	DOREPLIFETIME(AGS_Seeker, CurrentEffectStrength);
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->SetMustTurnInPlace(MustTurn);
+	}
 }
+
+/*void AGS_Seeker::Multicast_SetIsFullBodySlot_Implementation(bool bFullBodySlot)
+{
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingFullBodyMontage = bFullBodySlot;
+	}
+}*/
+
+/*void AGS_Seeker::Multicast_SetIsUpperBodySlot_Implementation(bool bUpperBodySlot)
+{
+	if (!IsValid(this) || !GetWorld() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel())
+	{
+		return;
+	}
+
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		AnimInstance->IsPlayingUpperBodyMontage = bUpperBodySlot;
+	}
+}*/
 
 void AGS_Seeker::OnRep_IsLowHealthEffectActive()
 {
@@ -292,11 +564,11 @@ void AGS_Seeker::OnRep_CurrentEffectStrength()
 	UpdatePostProcessEffect(CurrentEffectStrength);
 }
 
-// =================
-// 전투 음악 관리 함수
-// =================
+// ============================
+// 상태 전환에 따른 음악 함수 관련
+// ============================
 
-// 새로운 몬스터 감지 시스템 (시커가 몬스터를 감지)
+// 몬스터 감지 시스템 (시커가 몬스터를 감지)
 void AGS_Seeker::OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor->IsA(AGS_Monster::StaticClass()))
@@ -304,6 +576,11 @@ void AGS_Seeker::OnCombatTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp
 		if (AGS_Monster* Monster = Cast<AGS_Monster>(OtherActor))
 		{
 			AddCombatMonster(Monster);
+			
+			if (UGS_HPTextWidgetComp* HPWidgetComp = Monster->FindComponentByClass<UGS_HPTextWidgetComp>())
+			{
+				HPWidgetComp->SetVisibility(true);
+			}
 		}
 	}
 }
@@ -315,6 +592,11 @@ void AGS_Seeker::OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedCompon
 		if (AGS_Monster* Monster = Cast<AGS_Monster>(OtherActor))
 		{
 			RemoveCombatMonster(Monster);
+
+			if (UGS_HPTextWidgetComp* HPWidgetComp = Monster->FindComponentByClass<UGS_HPTextWidgetComp>())
+			{
+				HPWidgetComp->SetVisibility(false);
+			}
 		}
 	}
 }
@@ -384,14 +666,14 @@ void AGS_Seeker::StartCombatMusic()
 void AGS_Seeker::ClientRPCStopCombatMusic_Implementation()
 {
 	// 죽었을 때는 IsLocallyControlled() 체크를 하지 않음
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() called for %s"), *GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() called for %s"), *GetName());
 
 	// AudioManager 가져오기
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() - Calling EndCombatSequence"));
+			//UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() - Calling EndCombatSequence"));
 			
 			// 현재 재생 중인 전투 BGM 이벤트 가져오기 (가장 마지막에 추가된 몬스터 기준 또는 다른 로직)
 			UAkAudioEvent* CombatStopEventToUse = nullptr;
@@ -437,22 +719,22 @@ void AGS_Seeker::UpdateCombatMusicState()
 
 void AGS_Seeker::OnDeath()
 {
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::OnDeath() called for %s"), *GetName());
+	// 시커 죽음 사운드 재생
+	if (SeekerAudioComponent)
+	{
+		SeekerAudioComponent->PlayDeathSound();
+	}
+	
 	Super::OnDeath();
 	
-	// 확실하게 BGM 끄기 (백업용)
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::OnDeath() - Stopping combat music"));
 	ClientRPCStopCombatMusic();
 	NearbyMonsters.Empty();
 }
 
 void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() called for %s"), *GetName());
-	
 	if (!IsLocallyControlled()) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Not locally controlled"));
 		return;
 	}
 
@@ -460,15 +742,86 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 	AGS_PlayerState* MyPlayerState = GetPlayerState<AGS_PlayerState>();
 	if (ChangedPlayerState != MyPlayerState) 
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Not my PlayerState"));
 		return;
 	}
 
 	if (!bIsNowAlive) // 자신이 죽었을 때
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::HandleAliveStatusChanged() - Player died, stopping combat music"));
 		ClientRPCStopCombatMusic();
 		NearbyMonsters.Empty();
 	}
 }
 
+void AGS_Seeker::Server_RestKey_Implementation()
+{
+	SetAimState(false);
+	SetDrawState(false);
+	CanAcceptComboInput = true;
+	CanChangeSeekerGait = true;
+	Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+	SetMoveControlValue(true, true);
+	SetLookControlValue(true, true);
+}
+
+void AGS_Seeker::Multicast_PlaySound_Implementation(UAkAudioEvent* SoundToPlay)
+{
+	// 데디케이티드 서버에서는 사운드 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	if (!SoundToPlay)
+	{
+		return;
+	}
+
+	if (!FAkAudioDevice::Get())
+	{
+		return;
+	}
+
+	UAkComponent* AkComp = FindComponentByClass<UAkComponent>();
+	if (!AkComp)
+	{
+		// AkComponent가 없으면 새로 생성
+		AkComp = NewObject<UAkComponent>(this);
+		if (AkComp && GetRootComponent())
+		{
+			AkComp->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+			AkComp->RegisterComponent();
+		}
+	}
+	
+	if (!AkComp)
+	{			
+		return;
+	}
+
+	// 실제 사운드 재생
+	AkComp->PostAkEvent(SoundToPlay);
+}
+
+void AGS_Seeker::OnHoverBegin()
+{
+	Super::OnHoverBegin();
+
+	OnSeekerHover.Broadcast(true);
+}
+
+void AGS_Seeker::OnHoverEnd()
+{
+	Super::OnHoverEnd();
+
+	OnSeekerHover.Broadcast(false);
+}
+
+FLinearColor AGS_Seeker::GetCurrentDecalColor()
+{
+	return FLinearColor::Red;
+}
+
+bool AGS_Seeker::ShowDecal()
+{
+	return true;
+}

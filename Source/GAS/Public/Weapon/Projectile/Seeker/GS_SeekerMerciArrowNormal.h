@@ -4,15 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
+#include "Weapon/Projectile/Seeker/GS_ArrowType.h"
 #include "GS_SeekerMerciArrowNormal.generated.h"
-
-UENUM(BlueprintType)
-enum class EArrowType : uint8
-{
-	Normal	UMETA(DisplayName="Normal"),
-	Axe		UMETA(DisplayName = "Axe"),
-	Child	UMETA(DisplayName = "Child")
-};
 
 UCLASS()
 class GAS_API AGS_SeekerMerciArrowNormal : public AGS_SeekerMerciArrow
@@ -29,15 +22,11 @@ public:
 	float BaseDamage = 10.0f;
 
 	void ChangeArrowType(EArrowType Type);
-	virtual void OnBeginOverlap(
-		UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-		bool bFromSweep, const FHitResult& SweepResult) override;
 
 protected:
 	virtual void BeginPlay() override;
-
+	virtual void ProcessDamageLogic(ETargetType TargetType, const FHitResult& SweepResult, AActor* HitActor) override;
+	virtual bool HandleTargetTypeGeneric(ETargetType TargetType, const FHitResult& SweepResult) override;
 private:
 	TSet<AActor*> DamagedActors;
-	
 };

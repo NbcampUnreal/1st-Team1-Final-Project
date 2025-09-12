@@ -4,13 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "AkAudioEvent.h"
-#include "Engine/World.h"
 #include "GS_CharacterAudioSystem.generated.h"
 
-/**
- * 캐릭터 오디오 시스템 - 캐릭터 고유 사운드 관리 (발소리, 공격음 등)
- */
+class UAkAudioEvent;
+
 UCLASS(BlueprintType)
 class GAS_API UGS_CharacterAudioSystem : public UObject
 {
@@ -29,5 +26,5 @@ public:
 protected:
 	// === 캐릭터 사운드 이벤트들 ===
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|Character")
-	class UAkAudioEvent* TestEvent;
+	UAkAudioEvent* TestEvent;
 };

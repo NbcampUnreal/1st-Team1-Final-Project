@@ -65,6 +65,7 @@ void UGS_StatDataWidget::SetRuneStatData(float InRuneValue, float InBonusValue)
 		UpdateUI();
 	}
 }
+
 void UGS_StatDataWidget::UpdateUI()
 {
 	if (IsValid(RuneValue))

@@ -2,6 +2,8 @@
 
 
 #include "Character/Player/Seeker/GS_Merci.h"
+#include "Sound/GS_SeekerAudioComponent.h"
+#include "Character/Component/GS_StatComp.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -17,7 +19,12 @@
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_ArrowTypeWidget.h"
+#include "UI/Character/GS_CrossHairImage.h"
 #include "AkGameplayStatics.h"
+#include "Character/GS_Character.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
+#include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Skill/GS_SkillComp.h"
 //#include "Weapon/Equipable/"
 
 // Sets default values
@@ -38,6 +45,63 @@ AGS_Merci::AGS_Merci()
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_MerciSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 }
 
+void AGS_Merci::Client_UpdateTargetUI_Implementation(AActor* NewTarget, AActor* OldTarget)
+{
+	// 이전 타겟 UI 숨기기
+	if (OldTarget)
+	{
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(OldTarget))
+		{
+			Monster->ShowTargetUI(false); // 일반 함수 호출
+		}
+		else if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(OldTarget))
+		{
+			Guardian->ShowTargetUI(false);
+		}
+	}
+
+	// 새 타겟 UI 표시
+	if (NewTarget)
+	{
+		if (AGS_Monster* Monster = Cast<AGS_Monster>(NewTarget))
+		{
+			Monster->ShowTargetUI(true);
+		}
+		else if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(NewTarget))
+		{
+			Guardian->ShowTargetUI(true);
+		}
+	}
+}
+
+// Called when the game starts or when spawned
+void AGS_Merci::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CurrentArrowType = EArrowType::Normal;
+
+	if (HasAuthority())
+	{
+		CurrentAxeArrows = MaxAxeArrows;
+		CurrentChildArrows = MaxChildArrows;
+
+		// 일정 주기로 화살 재충전 타이머 시작
+		GetWorld()->GetTimerManager().SetTimer(AxeArrowRegenTimer, this, &AGS_Merci::RegenAxeArrow, RegenInterval, true);
+		GetWorld()->GetTimerManager().SetTimer(ChildArrowRegenTimer, this, &AGS_Merci::RegenChildArrow, RegenInterval, true);
+	}
+
+	Mesh = this->GetMesh();
+	UE_LOG(LogTemp, Warning, TEXT("AnimInstance: %s"), *GetNameSafe(GetMesh()->GetAnimInstance()));
+	if (ZoomCurve)
+	{
+		FOnTimelineFloat TimelineCallback;
+		TimelineCallback.BindUFunction(this, FName("UpdateZoom"));
+
+		ZoomTimeline.AddInterpFloat(ZoomCurve, TimelineCallback);
+	}
+}
+
 void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 {
 	if (!HasAuthority())
@@ -47,52 +111,99 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		return;
 	}
 
+	
+	// 가장 먼저 활 시위를 당길 수 있는 상황인지를 판단
+	if (!GetSkillComp()->IsSkillAllowed(ESkillSlot::Combo))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, IsSkillAllowed == false"));
+		return;
+	}
+	
+
+	// DrawBow 가 Client 외에 Server 에서 호출될 일이 있나? Client 에서 해당 함수가 호출되었다면 이미 쥐에서 Return 으로 막히는 거 아닌가?
 	if (!GetDrawState())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GetDrawState=false pass: %s"), GetDrawState()?TEXT("true") : TEXT("false"));
-		Multicast_PlayDrawMontage(DrawMontage);
-		SetDrawState(true); // 상태 전환
-		
-		// 활 당기는 사운드 재생
-		PlaySound(BowPullSound);
-		
-		Client_StartZoom(); // 줌인
+		Client_UpdateCrosshairAim(true);
+
+		// 줌 시작
+		if(!GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
+		{
+			Client_StartZoom();
+		}
 	}
-	else
+
+	if (!GetDrawState())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("bIsDrawState true"));
+		Multicast_PlayDrawMontage(DrawMontage);
+
+		// 활 상태 업데이트
+		SetDrawState(true);
+		SetAimState(false);
+		Multicast_SetMustTurnInPlace(true);
+		
+		// 활 당기는 사운드 재생 (SeekerAudioComponent에서 처리)
+		if (SeekerAudioComponent)
+		{
+			SeekerAudioComponent->PlayBowDrawSound();
+		}
 	}
+
+	// 걷기 상태 설정
+	SetSeekerGait(EGait::Walk);
 }
 
 void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
 	if (!HasAuthority())
 	{
-		Server_ReleaseArrow(ArrowClass);
+		Server_ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 		return;
 	}
 
-	SetAimState(false);
-	SetDrawState(false);
+	Client_UpdateCrosshairAim(false);
+	
+	if (GetSkillComp()->IsSkillActive(ESkillSlot::Rolling))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Is Rolling not Release"));
+		return;
+	}
+	
+	// 줌 중지
+	if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
+	{
+		Client_StopZoom();
+	}
+	
+	// 몽타주 정지
 	Multicast_StopDrawMontage();
 	
-	if (bIsFullyDrawn)
+	// 조준 완료 시(활을 끝까지 당겼을 때)
+	if (GetAimState())
 	{
-		// 활 놓는 사운드 재생
-		PlaySound(BowReleaseSound);
+		// 활 놓는 사운드 재생 (SeekerAudioComponent에서 처리)
+		if (SeekerAudioComponent)
+		{
+			SeekerAudioComponent->PlayBowReleaseSound();
+		}
 
+		// 화살 발사
 		Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
-
 		bIsFullyDrawn = false;  // 상태 초기화
-
-		// 화살 발사 사운드 재생
-		//PlaySound(ArrowShotSound);  // 부모 클래스의 PlaySound 함수 사용
-		Multicast_PlayArrowShotSound();
-
 	}
 
-	Client_StopZoom();
-	Client_SetWidgetVisibility(false);
+	GetSkillComp()->ResetAllowedSkillsMask(); // SJE
+	
+	// 달리기 상태 설정
+	SetSeekerGait(EGait::Run);
+
+	// 활 상태 업데이트
+	SetAimState(false);
+	SetDrawState(false);
+
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->PlayAimAnim(false);
+	}
 }
 
 void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)
@@ -102,7 +213,7 @@ void AGS_Merci::Server_DrawBow_Implementation(UAnimMontage* DrawMontage)
 
 void AGS_Merci::Server_ReleaseArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
 {
-	ReleaseArrow(ArrowClass);
+	ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 }
 
 void AGS_Merci::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -112,6 +223,7 @@ void AGS_Merci::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 	DOREPLIFETIME(AGS_Merci, CurrentAxeArrows);
 	DOREPLIFETIME(AGS_Merci, CurrentChildArrows);
 	DOREPLIFETIME(AGS_Merci, CurrentArrowType);
+	DOREPLIFETIME(AGS_Merci, AutoAimTarget);
 }
 
 void AGS_Merci::PlayDrawMontage(UAnimMontage* DrawMontage)
@@ -138,16 +250,13 @@ void AGS_Merci::Multicast_StopDrawMontage_Implementation()
 {
 	if (Mesh && Mesh->GetAnimInstance())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Multicast_StopDrawMontage"));
 		Mesh->GetAnimInstance()->Montage_Stop(0.2f); // BlendOut 0.2초
 	}
 }
 
 void AGS_Merci::Multicast_PlayDrawMontage_Implementation(UAnimMontage* Montage)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage called on %s"), *GetName());
-	UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayDrawMontage called on %s, Montage: %s"),
-		*GetName(),
-		*GetNameSafe(Montage));
 	PlayDrawMontage(Montage);
 }
 
@@ -161,12 +270,12 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	// 현재 화살 수량 체크
 	if (CurrentArrowType == EArrowType::Axe && CurrentAxeArrows <= 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Axe Empty"));
+		Client_PlayArrowEmptySound();
 		return;
 	}
 	if (CurrentArrowType == EArrowType::Child && CurrentChildArrows <= 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Child Empty"));
+		Client_PlayArrowEmptySound();
 		return;
 	}
 
@@ -176,12 +285,10 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 		if (CurrentArrowType == EArrowType::Axe)
 		{
 			--CurrentAxeArrows;
-			UE_LOG(LogTemp, Log, TEXT("Axe Shot: %d"), CurrentAxeArrows);
 		}
 		else if (CurrentArrowType == EArrowType::Child)
 		{
 			--CurrentChildArrows;
-			UE_LOG(LogTemp, Log, TEXT("Child Shot: %d"), CurrentChildArrows);
 		}
 	}
 
@@ -192,7 +299,7 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 
 	// 2. 카메라에서 정면으로 Ray를 쏨
 	FVector TraceStart = ViewLoc;
-	FVector TraceEnd = TraceStart + ViewRot.Vector() * 2000.0f;
+	FVector TraceEnd = TraceStart + ViewRot.Vector() * 8000.0f;
 	//Multicast_DrawDebugLine(TraceStart, TraceEnd, FColor::Green);
 	
 	// 3. Ray가 무언가에 부딪히면 그 위치를 목표로 설정, 아니면 끝 지점 사용
@@ -205,7 +312,14 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params))
 	{
 		TargetLocation = Hit.ImpactPoint;
+
+		AActor* HitActor = Hit.GetActor();
+		UPrimitiveComponent* HitComponent = Hit.GetComponent();
+
+		UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), HitActor ? *HitActor->GetName() : TEXT("None"));
+		UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), HitComponent ? *HitComponent->GetName() : TEXT("None"));
 	}
+	
 
 	// 4. 무기의 소켓 위치에서 목표 위치로 향하는 방향 계산
 	FVector SpawnLocation = Weapon->GetSocketLocation("BowstringSocket");
@@ -222,12 +336,13 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 
 	
 	// 선형 보정 (예: 최대 2000 거리까지, 최대 20도 상승)
-	float MaxDistance = 5000.0f;
-	float MaxPitch = 40.0f;
-	// 제곱 보정 (거리가 멀수록 더 빠르게 증가)
-	float PitchAdjustment = FMath::Clamp(FMath::Square(Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
-	//float PitchAdjustment = FMath::Clamp((Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
-	BaseRotation.Pitch += PitchAdjustment;
+	//float MaxDistance = 5000.0f;
+	//float MaxPitch = 40.0f;
+	//// 제곱 보정 (거리가 멀수록 더 빠르게 증가)
+	//float PitchAdjustment = FMath::Clamp(FMath::Square(Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
+	////float PitchAdjustment = FMath::Clamp((Distance / MaxDistance) * MaxPitch, 0.0f, MaxPitch);
+	//BaseRotation.Pitch += PitchAdjustment;
+
 	// 5. 여러 발 발사 처리 (SpreadAngleDeg를 기준으로 좌우로 퍼지게 만듦)
 	int32 HalfCount = NumArrows / 2;
 	for (int32 i = 0; i < NumArrows; ++i)
@@ -272,10 +387,32 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 				NormalArrow->ChangeArrowType(CurrentArrowType);
 			}
 		}
+
+		// 8. 유도 화살
+		if (this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
+		{
+			if (AGS_SeekerMerciArrow* HomingArrow = Cast<AGS_SeekerMerciArrow>(SpawnedArrow))
+			{
+				if (AutoAimTarget)
+				{
+					HomingArrow->Multicast_InitHomingTarget(AutoAimTarget);
+				}
+			}
+		}
+		else
+		{
+			if (AGS_SeekerMerciArrow* HomingArrow = Cast<AGS_SeekerMerciArrow>(SpawnedArrow))
+			{
+				HomingArrow->Multicast_InitHomingTarget(nullptr);
+			}
+		}
 		//Multicast_DrawDebugLine(SpawnLocation, TargetLocation, FColor::Red);
 	}
-	// 8. 화살 발사 VFX 호출 (멀티캐스트로 모든 클라이언트에서 재생)
+	// 8. 화살 발사 VFX 및 사운드 호출 (멀티캐스트로 모든 클라이언트에서 재생)
 	Multicast_PlayArrowShotVFX(VFXLocation, VFXRotation, NumArrows);
+	
+	// 실제로 화살이 발사될 때만 사운드 재생
+	Multicast_PlayArrowShotSound();
 
 	
 }
@@ -293,44 +430,16 @@ void AGS_Merci::Server_ChangeArrowType_Implementation(int32 Direction)
 	UE_LOG(LogTemp, Log, TEXT("Arrow Changed to: %d"), CurrentIndex);
 }
 
-// Called when the game starts or when spawned
-void AGS_Merci::BeginPlay()
-{
-	Super::BeginPlay();
-
-	CurrentArrowType = EArrowType::Normal;
-
+void AGS_Merci::SetAutoAimTarget(AActor* Target)
+{ 
 	if (HasAuthority())
 	{
-		CurrentAxeArrows = MaxAxeArrows;
-		CurrentChildArrows = MaxChildArrows;
-
-		// 일정 주기로 화살 재충전 타이머 시작
-		GetWorld()->GetTimerManager().SetTimer(AxeArrowRegenTimer, this, &AGS_Merci::RegenAxeArrow, RegenInterval, true);
-		GetWorld()->GetTimerManager().SetTimer(ChildArrowRegenTimer, this, &AGS_Merci::RegenChildArrow, RegenInterval, true);
-	}
-
-	if (IsLocallyControlled()) // 꼭 필요!
-	{
-		if (WidgetCrosshairClass)
+		// 타겟 설정
+		if (Target)
 		{
-			WidgetCrosshair = CreateWidget<UUserWidget>(GetWorld(), WidgetCrosshairClass);
-			if (WidgetCrosshair)
-			{
-				WidgetCrosshair->AddToViewport();
-				WidgetCrosshair->SetVisibility(ESlateVisibility::Hidden);
-			}
+			AutoAimTarget = Target;
+			OnRep_AutoAimTarget(); // 즉시 로컬 처리
 		}
-	}
-
-	Mesh = this->GetMesh();
-	UE_LOG(LogTemp, Warning, TEXT("AnimInstance: %s"), *GetNameSafe(GetMesh()->GetAnimInstance()));
-	if (ZoomCurve)
-	{
-		FOnTimelineFloat TimelineCallback;
-		TimelineCallback.BindUFunction(this, FName("UpdateZoom"));
-
-		ZoomTimeline.AddInterpFloat(ZoomCurve, TimelineCallback);
 	}
 }
 
@@ -359,17 +468,19 @@ void AGS_Merci::Multicast_DrawDebugLine_Implementation(FVector Start, FVector En
 void AGS_Merci::OnDrawMontageEnded()
 {
 	bIsFullyDrawn = true;  // 활 완전히 당김 상태 설정
-	Client_SetWidgetVisibility(true); // 크로스 헤어 보이기
-
-	// 서버로 전달
-	if (HasAuthority() == false)
+	SetAimState(true);
+	SetDrawState(false);
+	UE_LOG(LogTemp, Warning, TEXT("OnDrawMontageEnded in server"));
+	/*// 서버로 전달
+	if (!HasAuthority())
 	{
 		Server_NotifyDrawMontageEnded();
-	}
+	}*/
 }
 
 void AGS_Merci::Server_NotifyDrawMontageEnded_Implementation()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Server_NotifyDrawMontageEnded"));
 	SetAimState(true);
 	SetDrawState(false);
 }
@@ -380,7 +491,6 @@ void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
 
 	if (WidgetCrosshair)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("WidgetVisibility"));
 		WidgetCrosshair->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	}
 }
@@ -393,6 +503,46 @@ void AGS_Merci::Client_StartZoom_Implementation()
 void AGS_Merci::Client_StopZoom_Implementation()
 {
 	ZoomTimeline.Reverse(); // 줌아웃
+}
+
+void AGS_Merci::SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget)
+{
+	WidgetCrosshair = InCrosshairWidget;
+
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->SetCrosshairVisibility(true);
+
+		WidgetCrosshair->InitArrowCounters();
+		WidgetCrosshair->UpdateArrowType(CurrentArrowType);
+
+		if (CurrentArrowType == EArrowType::Axe)
+		{
+			WidgetCrosshair->UpdateArrowCnt(EArrowType::Axe, CurrentAxeArrows);
+		}
+		else if (CurrentArrowType == EArrowType::Child)
+		{
+			WidgetCrosshair->UpdateArrowCnt(EArrowType::Child, CurrentChildArrows);
+		}
+	}
+}
+
+void AGS_Merci::Client_UpdateCrosshairAim_Implementation(bool bAiming)
+{
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->PlayAimAnim(bAiming);
+	}
+}
+
+void AGS_Merci::Client_ShowCrosshairHitFeedback_Implementation()
+{
+	if (!WidgetCrosshair)
+	{
+		return;
+	}
+
+	WidgetCrosshair->PlayHitFeedback();
 }
 
 void AGS_Merci::Client_PlaySound_Implementation(UAkComponent* SoundComp)
@@ -427,6 +577,68 @@ void AGS_Merci::LeftClickRelease_Implementation()
 	IGS_AttackInterface::LeftClickRelease_Implementation();
 }
 
+float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	// 활을 들고 있는 경우
+	if (GetDrawState() || GetAimState())
+	{
+		// 활 쏘기 애니메이션 재생 정지
+		if (UAnimInstance* AnimInst = GetMesh()->GetAnimInstance())
+		{
+			AnimInst->StopAllMontages(0.2f);
+		}
+
+		// 활 쏘기 줌 아웃 (궁극기 상태가 아닐 때만)
+		if (!this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
+		{
+			Client_StopZoom();
+		}
+
+		// 활 쏘기 조준 상태 해제
+		SetDrawState(false);
+		SetAimState(false);
+
+		// 키 제한
+		GetSkillComp()->SetCurAllowedSkillsMask(0);
+
+		// 달리기 상태 설정
+		SetSeekerGait(EGait::Run);
+	}
+
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	
+	// 데미지를 받은 후 적절한 사운드 재생
+	if (SeekerAudioComponent && ActualDamage > 0.0f)
+	{
+		// 죽었는지 확인 (체력이 0 이하인지)
+		float CurrentHealth = GetStatComp() ? GetStatComp()->GetCurrentHealth() : -1.0f;
+		
+		if (GetStatComp() && GetStatComp()->GetCurrentHealth() <= 0.0f)
+		{
+			// Death Sound는 OnDeath()에서 재생되므로 여기서는 재생하지 않음
+			UE_LOG(LogTemp, Warning, TEXT("AGS_Merci::TakeDamage - Character died, Death sound will be played in OnDeath()"));
+		}
+		else
+		{
+			// 살아있으면 Hurt Sound 재생
+			UE_LOG(LogTemp, Warning, TEXT("AGS_Merci::TakeDamage - Character hurt, calling PlayHurtSound()"));
+			SeekerAudioComponent->PlayHurtSound();
+		}
+	}
+	
+	return ActualDamage;
+}
+
+int32 AGS_Merci::GetMaxAxeArrows()
+{
+	return MaxAxeArrows;
+}
+
+int32 AGS_Merci::GetMaxChildArrows()
+{
+	return MaxChildArrows;
+}
+
 void AGS_Merci::OnRep_CurrentArrowType()
 {
 	if(ArrowTypeWidget)
@@ -445,6 +657,17 @@ void AGS_Merci::OnRep_CurrentArrowType()
 			ArrowTypeWidget->UpdateArrowCount(CurrentChildArrows);
 		}
 	}
+
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->UpdateArrowType(CurrentArrowType);
+	}
+
+	// 화살 타입 변경 사운드 재생
+	if (IsLocallyControlled() && SeekerAudioComponent)
+	{
+		SeekerAudioComponent->PlayArrowTypeChangeSound();
+	}
 }
 
 void AGS_Merci::OnRep_CurrentAxeArrows()
@@ -456,6 +679,11 @@ void AGS_Merci::OnRep_CurrentAxeArrows()
 			ArrowTypeWidget->UpdateArrowCount(CurrentAxeArrows);
 		}
 	}
+
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->UpdateArrowCnt(EArrowType::Axe, CurrentAxeArrows);
+	}
 }
 
 void AGS_Merci::OnRep_CurrentChildArrows()
@@ -466,6 +694,11 @@ void AGS_Merci::OnRep_CurrentChildArrows()
 		{
 			ArrowTypeWidget->UpdateArrowCount(CurrentChildArrows);
 		}
+	}
+
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->UpdateArrowCnt(EArrowType::Child, CurrentChildArrows);
 	}
 }
 
@@ -479,7 +712,6 @@ void AGS_Merci::RegenAxeArrow()
 	if (CurrentAxeArrows < MaxAxeArrows)
 	{
 		++CurrentAxeArrows;
-		UE_LOG(LogTemp, Log, TEXT("Axe regen: %d"), CurrentAxeArrows);
 	}
 }
 
@@ -493,8 +725,30 @@ void AGS_Merci::RegenChildArrow()
 	if (CurrentChildArrows < MaxChildArrows)
 	{
 		++CurrentChildArrows;
-		UE_LOG(LogTemp, Log, TEXT("Child regen: %d"), CurrentChildArrows);
 	}
+}
+
+void AGS_Merci::OnRep_AutoAimTarget()
+{
+	if (AutoAimTarget)
+	{
+		// 예: 조준 HUD 표시, 자동 공격 유도 등
+	}
+}
+
+void AGS_Merci::Client_DrawDebugSphere_Implementation(FVector Loc, float Radius, FColor Color, float Duration)
+{
+	DrawDebugSphere(
+		GetWorld(),
+		Loc,
+		Radius,              // 반지름
+		16,                 // 세그먼트
+		Color,        // 색상
+		false,              // 지속 여부
+		Duration,               // 지속 시간 (2초)
+		0,
+		2.0f                // 선 두께
+	);
 }
 
 void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRotator Rotation, int32 NumArrows)
@@ -527,13 +781,24 @@ void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRot
 
 void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 {
-	if (ArrowShotSound)
+	if (SeekerAudioComponent)
 	{
-		UAkGameplayStatics::PostEvent(ArrowShotSound, this, 0, FOnAkPostEventCallback());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Multicast_PlayArrowShotSound_Implementation: ArrowShotSound is null"));
+		SeekerAudioComponent->PlayArrowShotSound();
 	}
 }
 
+void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
+{
+	if (SeekerAudioComponent)
+	{
+		SeekerAudioComponent->PlayHitFeedbackSound();
+	}
+}
+
+void AGS_Merci::Client_PlayArrowEmptySound_Implementation()
+{
+	if (SeekerAudioComponent)
+	{
+		SeekerAudioComponent->PlayArrowEmptySound();
+	}
+}

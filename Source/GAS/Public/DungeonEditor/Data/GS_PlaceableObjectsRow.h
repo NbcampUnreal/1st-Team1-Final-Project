@@ -25,6 +25,8 @@ public:
 	ETrapPlacement TrapType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="MonsterType", EditCondition="ObjectType==EObjectType::Monster", EditConditionHides))
 	EMonsterType MonsterType = EMonsterType::None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="DoorAndWallType", EditCondition="ObjectType==EObjectType::DoorAndWall", EditConditionHides))
+	EDoorAndWallType DoorAndWallType = EDoorAndWallType::None;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FIntPoint ObjectSize = FIntPoint(1, 1);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(DisplayName="RoomCellInfo", EditCondition="ObjectType==EObjectType::Room", EditConditionHides))

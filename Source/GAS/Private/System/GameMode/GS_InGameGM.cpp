@@ -2,17 +2,21 @@
 #include "System/GameState/GS_InGameGS.h"
 #include "System/GS_GameInstance.h"
 #include "System/GS_PlayerState.h"
-#include "System/GS_GameInstance.h"
 #include "System/GS_PlayerRole.h"
 #include "AI/RTS/GS_RTSController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Pawn.h"
 #include "EngineUtils.h"
+#include "NavigationSystem.h"
+#include "AI/RTS/GS_RTSCamera.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/GS_TpsController.h"
 #include "GameFramework/PlayerStart.h"
 #include "GameFramework/HUD.h"
 #include "UI/Character/GS_HPBoardWidget.h"
+#include "Character/Player/Monster/GS_Monster.h"
+#include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
+#include "Props/GS_RoomBase.h"
 
 AGS_InGameGM::AGS_InGameGM()
 {
@@ -40,6 +44,8 @@ void AGS_InGameGM::HandleSeamlessTravelPlayer(AController*& C)
     {
         if (const auto* PS = PC->GetPlayerState<AGS_PlayerState>())
         {
+            FString RoleString = UEnum::GetValueAsString(PS->CurrentPlayerRole);
+            UE_LOG(LogTemp, Warning, TEXT("Player: %s, Role: %s"), *PS->GetPlayerName(), *RoleString);
             if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
             {
                 PC->ClientSetHUD(SeekerHUDClass);
@@ -96,80 +102,270 @@ UClass* AGS_InGameGM::GetDefaultPawnClassForController_Implementation(AControlle
     return ResolvedPawnClass;
 }
 
-AActor* AGS_InGameGM::ChoosePlayerStart_Implementation(AController* Player)
+void AGS_InGameGM::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) // 여기부터 호출 순서대로 나열했음
 {
-    FString PlayerStartTagToFind = TEXT("");
-
-    if (Player)
+    //Super 함수 호출 X
+    if (NewPlayer)
     {
-        AGS_PlayerState* PS = Player->GetPlayerState<AGS_PlayerState>();
-        if (PS)
-        {
-            if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
-            {
-                PlayerStartTagToFind = TEXT("SpawnPoint1");
-            }
-            else if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
-            {
-                PlayerStartTagToFind = TEXT("SpawnPoint1");
-                
-            }
-        }
+        PendingPlayers.Add(NewPlayer);
+        UE_LOG(LogTemp, Log, TEXT("Player %s added to pending list. Waiting for dungeon generation."), *NewPlayer->GetName());
     }
-
-    AActor* FoundPlayerStart = FindPlayerStart_Implementation(Player, PlayerStartTagToFind);
-
-    if (FoundPlayerStart)
-    {
-        return FoundPlayerStart;
-    }
-
-    //Super::ChoosePlayerStart_Implementation(Player) 호출과 유사한 효과를 내지만, 재귀 호출 위험을 줄임
-    if (!PlayerStartTagToFind.IsEmpty())
-    {
-        FoundPlayerStart = FindPlayerStart_Implementation(Player, TEXT(""));
-
-        if (FoundPlayerStart)
-        {
-            return FoundPlayerStart;
-        }
-    }
-    return nullptr;
 }
+
+void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
+{
+    UE_LOG(LogTemp, Warning, TEXT("SpawnDungeonFromArray called with %d objects."), SaveData.Num());
+    CachedSaveData = SaveData;
+    if (SaveData.IsEmpty())
+    {
+        UE_LOG(LogTemp, Error, TEXT("There is no SaveData. Can't Spawn Dungeon."));
+        DelayedRestartPlayer();//이거 나중에 반드시 빼야함
+        return;
+    }
+
+    int RoomCount = 0;
+    // 받아온 데이터를 기반으로 "몬스터"를 제외한 액터 스폰
+    UWorld* World = GetWorld();
+    if (IsValid(World))
+    {
+        for (const FDESaveData& ObjectData : SaveData)
+        {
+            if (TSubclassOf<AActor> ActorClassToSpawn = LoadClass<AActor>(nullptr, *ObjectData.SpawnActorClassPath))
+            {
+                if (!Cast<AGS_Monster>(ActorClassToSpawn))
+                {
+                    FActorSpawnParameters SpawnParams;
+                    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+                    AActor* NewActor = World->SpawnActor<AActor>(ActorClassToSpawn, ObjectData.SpawnTransform, SpawnParams);
+
+                    if (IsValid(NewActor))
+                    {
+                        SpawnedDungeonActors.Add(NewActor);
+                    }
+
+                    // 만약 이번에 스폰한 액터가 방 모듈이면 방 개수 증가.
+                    if (ObjectData.ObjectType == EObjectType::Room
+                        || ObjectData.ObjectType == EObjectType::DoorAndWall)
+                    {
+                        RoomCount++;
+                        UE_LOG(LogTemp, Warning, TEXT("[방 숨김] 방 생성 완료 현재 방 개수 : %d"), RoomCount);
+                    }
+                }
+            }
+        }
+    }
+
+    AGS_InGameGS* InGameGS = GetGameState<AGS_InGameGS>();
+    if (InGameGS)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[방 숨김] GS 찾음, 방 개수 전달 %d"), RoomCount);
+        // 실제로 생성된 방의 개수를 GameState에 기록하고,
+        // 모든 클라이언트에게 '검증 시작' 신호를 보냅니다.
+        InGameGS->SetDungeonData(RoomCount);
+    }
+    
+    // 내비메시 재빌드 요청
+    UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+    if (IsValid(NavSystem))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Requesting NavMesh rebuild..."));
+        // 모든 내비메시를 새로 빌드하도록 요청. 이 작업은 즉시 끝나지 않음
+        NavSystem->Build();
+
+        // 빌드가 완료되었는지 0.1초마다 확인하는 타이머 시작
+        GetWorld()->GetTimerManager().SetTimer(
+            NavMeshBuildTimerHandle,
+            this,
+            &AGS_InGameGM::CheckNavMeshBuildStatus,
+            0.1f,
+            true); // 반복 실행
+    }
+}
+
+void AGS_InGameGM::CheckNavMeshBuildStatus()
+{
+    UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+    // 내비메시 빌드가 진행 중이 아닌지(=완료되었는지) 확인
+    if (IsValid(NavSystem) && !NavSystem->IsNavigationBuildInProgress())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("NavMesh build is complete!"));
+        GetWorld()->GetTimerManager().ClearTimer(NavMeshBuildTimerHandle);
+        OnNavMeshBuildComplete();
+    }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("... Waiting for NavMesh build to finish ..."));
+    }
+}
+
+
+void AGS_InGameGM::OnNavMeshBuildComplete()
+{
+    if (CachedSaveData.IsEmpty())
+    {
+        UE_LOG(LogTemp, Error, TEXT("There is no CachedSaveData. Can't Spawn Monsters."));
+        return;
+    }
+
+    UWorld* World = GetWorld();
+    if (IsValid(World))
+    {
+        for (const FDESaveData& ObjectData : CachedSaveData)
+        {
+            if (TSubclassOf<AActor> ActorClassToSpawn = LoadClass<AActor>(nullptr, *ObjectData.SpawnActorClassPath))
+            {
+                if (Cast<AGS_Monster>(ActorClassToSpawn))
+                {
+                    FActorSpawnParameters SpawnParams;
+                    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+                    AActor* NewActor = World->SpawnActor<AActor>(ActorClassToSpawn, ObjectData.SpawnTransform, SpawnParams);
+
+                    if (IsValid(NewActor))
+                    {
+                        SpawnedDungeonActors.Add(NewActor);
+                    }
+                }
+            }
+        }
+    }
+
+    // 가디언 벽 숨김 처리
+    // for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    // {
+    //     APlayerController* PC = It->Get();
+    //     AGS_PlayerState* PS = PC ? PC->GetPlayerState<AGS_PlayerState>() : nullptr;
+    //     if (PS && PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+    //     {
+    //         UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] 찾은 가디언 플레이어: %s"), *PC->GetName());
+    //         if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(PC))
+    //         {
+    //             UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] RTS컨트롤러 캐스팅 성공, RPC 호출..."));
+    //             RTSController->Client_HideDungeonElements();
+    //             break;
+    //         }
+    //     }
+    // }
+    
+    FTimerHandle DelayedRestartPlayerHandle;
+    GetWorld()->GetTimerManager().SetTimer(DelayedRestartPlayerHandle, this, &AGS_InGameGM::DelayedRestartPlayer, 2.f, false);
+}
+
+void AGS_InGameGM::DelayedRestartPlayer()
+{
+    UE_LOG(LogTemp, Log, TEXT("DelayedRestartPlayer Executed!!! Dungeon generation complete. Restarting all players."));
+    if (GameState)
+    {
+        if (PendingPlayers.Num() > 0)
+        {
+            for (AController* PC : PendingPlayers)
+            {
+                AActor* FoundStart = FindPlayerStart(PC);
+                if (PC)
+                {
+                    RestartPlayer(PC);
+                }
+            }
+            PendingPlayers.Empty();
+        }
+    }
+}
+
+AActor* AGS_InGameGM::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
+{
+    UE_LOG(LogTemp, Warning, TEXT("Called FindPlayerStart_Implementation."));
+
+    for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
+    {
+        APlayerStart* PlayerStart = *It;
+        if (PlayerStart)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Found a valid PlayerStart '%s' at location %s via TActorIterator."), *PlayerStart->GetName(), *PlayerStart->GetActorLocation().ToString());
+            return PlayerStart;
+        }
+    }
+
+    UE_LOG(LogTemp, Error, TEXT("OVERRIDDEN FindPlayerStart FAILED to find any PlayerStart actors. Falling back to default behavior."));
+    return Super::FindPlayerStart_Implementation(Player, IncomingName);
+}
+
+ //AActor* AGS_InGameGM::ChoosePlayerStart_Implementation(AController* Player)
+ //{
+ //    FString PlayerStartTagToFind = TEXT("");
+
+ //    if (Player)
+ //    {
+ //        AGS_PlayerState* PS = Player->GetPlayerState<AGS_PlayerState>();
+ //        if (PS)
+ //        {
+ //            if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+ //            {
+ //                PlayerStartTagToFind = TEXT("SpawnPoint1");
+ //            }
+ //            else if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+ //            {
+ //                PlayerStartTagToFind = TEXT("SpawnPoint1");
+ //            }
+ //        }
+ //    }
+
+ //    AActor* FoundPlayerStart = FindPlayerStart_Implementation(Player, PlayerStartTagToFind);
+
+ //    if (!FoundPlayerStart && !PlayerStartTagToFind.IsEmpty())
+ //    {
+ //        UE_LOG(LogTemp, Warning, TEXT("Could not find a PlayerStart with tag '%s'. Searching for any available PlayerStart."), *PlayerStartTagToFind);
+ //        FoundPlayerStart = FindPlayerStart(Player, ""); // 태그 없이 다시 검색
+ //    }
+
+ //    if (FoundPlayerStart)
+ //    {
+ //        return FoundPlayerStart;
+ //    }
+ //    return nullptr;
+ //} // 여기까지 호출 순서대로 나열. 이후는 모름
 
 void AGS_InGameGM::StartPlay()
 {
     Super::StartPlay();
 
-    bMatchHasStarted = false;
-    bGameEnded = false;
-
-    /*FString BossLevelName = TEXT("BossLevel");
-    FString ResultLevelName = TEXT("ResultLevel");
-    UGameplayStatics::LoadStreamLevel(this, FName(*BossLevelName), false, false, FLatentActionInfo());
-    UGameplayStatics::LoadStreamLevel(this, FName(*ResultLevelName), false, false, FLatentActionInfo());*/
-
-    FTimerHandle TempHandle;
-    GetWorldTimerManager().SetTimer(TempHandle, [this]() {
-        if (GameState)
+    if (GameState)
+    {
+        for (APlayerState* PS : GameState->PlayerArray)
         {
-            for (APlayerState* PS : GameState->PlayerArray)
+            if (APlayerController* PC = PS->GetPlayerController())
             {
-                if (APlayerController* PC = PS->GetPlayerController())
-                {
-                    BindToPlayerState(PC);
-                }
-                else if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
-                {
-                    GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
-                    GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_InGameGM::HandlePlayerAliveStatusChanged);
-                    UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Bound to existing player (No PC) %s"), *GS_PS->GetPlayerName());
-                    HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
-                }
+                UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM::StartPlay - PlayerController: %s"), *PC->GetClass()->GetName())
+                BindToPlayerState(PC);
             }
-            GetWorldTimerManager().SetTimer(MatchStartTimerHandle, this, &AGS_InGameGM::StartMatchCheck, 2.0f, false);
+            else if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
+            {
+                GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_InGameGM::HandlePlayerAliveStatusChanged);
+                UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Bound to existing player (No PC) %s"), *GS_PS->GetPlayerName());
+                HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
+            }
+            AGS_PlayerState* GPS = Cast<AGS_PlayerState>(PS);
+            if (GPS && GPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Guardian Player '%s' found in StartPlay. Spawning dungeon..."), *GPS->GetPlayerName());
+                SpawnDungeonFromArray(GPS->ObjectData);
+            }
         }
-    }, 0.2f, false);
+    }
+}
+
+void AGS_InGameGM::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    if (GameState)
+    {
+        for (APlayerState* PS : GameState->PlayerArray)
+        {
+            if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
+            {
+                GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
+            }
+        }
+    }
+
+    Super::EndPlay(EndPlayReason);
 }
 
 void AGS_InGameGM::Logout(AController* Exiting)
@@ -193,39 +389,14 @@ void AGS_InGameGM::BindToPlayerState(APlayerController* PlayerController)
 {
     if (PlayerController)
     {
-        // [TODO] 플레이어 widget 업데이트
-        AGS_TpsController* TpsPC = Cast<AGS_TpsController>(PlayerController);
-        if (IsValid(TpsPC))
-        {
-            UUserWidget* Widget = TpsPC->GetPlayerWidget();
-            if (Widget)
-            {
-                UGS_HPBoardWidget* HPBoardWidget = Cast<UGS_HPBoardWidget>(Widget->GetWidgetFromName(TEXT("WBP_HPBoard")));
-                UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid widget"));
-                if (IsValid(HPBoardWidget))
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@ valid HPBoard Widget"));
-                    HPBoardWidget->InitBoardWidget();
-                }
-            }
-        }
-        
         AGS_PlayerState* GS_PS = PlayerController->GetPlayerState<AGS_PlayerState>();
         if (GS_PS)
         {
-            GS_PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
             GS_PS->OnPlayerAliveStatusChangedDelegate.AddUObject(this, &AGS_InGameGM::HandlePlayerAliveStatusChanged);
             UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Bound to player %s"), *GS_PS->GetPlayerName());
             HandlePlayerAliveStatusChanged(GS_PS, GS_PS->bIsAlive);
         }
     }
-}
-
-void AGS_InGameGM::StartMatchCheck()
-{
-    UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: Match checks started. bMatchHasStarted = true"));
-    bMatchHasStarted = true;
-    CheckAllPlayersDead(); //이거 지워도 상관 없음
 }
 
 void AGS_InGameGM::OnTimerEnd()
@@ -236,11 +407,31 @@ void AGS_InGameGM::OnTimerEnd()
 
 void AGS_InGameGM::EndGame(EGameResult Result)
 {
-    if (bGameEnded)
+    // 명시적으로 bIsAlive를 다시 한번 확실하게 동기화
+    if (GameState)
     {
-        return;
+        for (APlayerState* PS : GameState->PlayerArray)
+        {
+            if (AGS_PlayerState* GS_PS = Cast<AGS_PlayerState>(PS))
+            {
+                if (GS_PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+                {
+                    GS_PS->SetIsAlive(true);
+                    UE_LOG(LogTemp, Warning, TEXT("EndGame: Guardian (%s) bIsAlive state forced to TRUE before travel."), *GS_PS->GetPlayerName());
+                }
+                else if (GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+                {
+                    if (AGS_Character* SeekerPawn = Cast<AGS_Character>(GS_PS->GetPawn()))
+                    {
+                        if (UGS_StatComp* StatComp = SeekerPawn->GetStatComp())
+                        {
+                            GS_PS->HandleCurrentHPChanged(StatComp);
+                        }
+                    }
+                }
+            }
+        }
     }
-    bGameEnded = true;
 
     FString NextLevelName;
 
@@ -254,7 +445,7 @@ void AGS_InGameGM::EndGame(EGameResult Result)
     {
         UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: Not All Seekers dead. Traveling to BossLevel."));
         SetGameResultOnAllPlayers(EGameResult::GR_InProgress);
-        NextLevelName = TEXT("BossLevel");
+        NextLevelName = TEXT("testbosslevel");
 
         AGS_InGameGS* InGameGS = GetGameState<AGS_InGameGS>();
         if (InGameGS)
@@ -268,11 +459,42 @@ void AGS_InGameGM::EndGame(EGameResult Result)
         }
     }
 
+    for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+    {
+        APlayerController* PC = It->Get();
+        if (PC)
+        {
+            PC->DisableInput(nullptr);
+        }
+    }
+    
+    // **중요: Seamless Travel 전에 동적으로 스폰된 모든 던전 액터를 파괴합니다.**
+    for (TWeakObjectPtr<AActor> ActorPtr : SpawnedDungeonActors)
+    {
+        if (ActorPtr.IsValid())
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Destroying dynamically spawned dungeon actor: %s"), *ActorPtr->GetName());
+            ActorPtr->Destroy(); // 서버에서 액터 파괴
+        }
+        else
+        {
+            // 이미 유효하지 않은 포인터 (이미 파괴되었거나, 월드가 정리된 경우 등)
+            UE_LOG(LogTemp, Warning, TEXT("Attempted to destroy invalid dungeon actor pointer."));
+        }
+    }
+    SpawnedDungeonActors.Empty(); // 리스트 비우기
+
     if (!NextLevelName.IsEmpty())
     {
         FTimerHandle TravelDelayHandle;
-        GetWorldTimerManager().SetTimer(TravelDelayHandle, [this, NextLevelName]() {
-            GetWorld()->ServerTravel(NextLevelName + "?listen", true);
+        TWeakObjectPtr<AGS_InGameGM> WeakThis = this;
+        
+        GetWorldTimerManager().SetTimer(TravelDelayHandle, [WeakThis, NextLevelName]() {
+            if (WeakThis.IsValid())
+            {
+                WeakThis->GetWorld()->FlushLevelStreaming(EFlushLevelStreamingType::Full);
+                WeakThis->GetWorld()->ServerTravel(NextLevelName + "?listen", true);
+            }
         }, 3.f, false);
     }
 }
@@ -296,10 +518,7 @@ void AGS_InGameGM::HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, 
         *PlayerState->GetPlayerName(),
         bIsAlive ? TEXT("True") : TEXT("False"));
 
-    if (!bIsAlive)
-    {
-        CheckAllPlayersDead();
-    }
+    CheckAllPlayersDead();
 }
 
 void AGS_InGameGM::CheckAllPlayersDead()
@@ -326,14 +545,7 @@ void AGS_InGameGM::CheckAllPlayersDead()
     if (PlayerCount > 0 && bAllPlayersDead)
     {
         UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: All relevant players are dead!"));
-        if (bMatchHasStarted)
-        {
-            EndGame(EGameResult::GR_SeekersLost);
-        }
-        else
-        {
-            UE_LOG(LogTemp, Log, TEXT("AGS_InGameGM: All dead check triggered, but match not started yet. Ignoring EndGame."));
-        }
+        EndGame(EGameResult::GR_SeekersLost);
     }
     else
     {

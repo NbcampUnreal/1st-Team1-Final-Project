@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
 #include "System/GS_PlayerRole.h"
+#include "DungeonEditor/Data/GS_DungeonEditorTypes.h"
+#include "ResourceSystem/Aether/GS_AetherComp.h"
 #include "GS_PlayerState.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRoleChangedSignature, EPlayerRole, NewRole);
@@ -25,6 +27,13 @@ public:
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
     virtual void CopyProperties(APlayerState* OtherPlayerState) override;
     virtual void SeamlessTravelTo(APlayerState* NewPlayerState) override;
+
+	// Steam Avatar
+    UFUNCTION(BlueprintCallable, Category = "Avatar")
+    void FetchMySteamAvatar();
+
+    UPROPERTY(Replicated, BlueprintReadOnly, Category = "Avatar")
+    UTexture2D* MySteamAvatar;
 
     // 역할
     UPROPERTY(ReplicatedUsing = OnRep_PlayerRole, BlueprintReadOnly, Category = "Lobby")
@@ -50,6 +59,20 @@ public:
     UFUNCTION(Server, Reliable, WithValidation)
     void Server_SetGuardianJob(EGuardianJob NewJob);
 
+    UPROPERTY(/*Replicated*/)
+    TArray<FDESaveData> ObjectData;
+    UFUNCTION(Server, Reliable)
+	void Server_SetObjectData(const TArray<FDESaveData>& InObjectData);
+    FString CurrentSaveSlotName = TEXT("Preset_0");
+
+    //AetherComp 추가 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+    TObjectPtr<UGS_AetherComp> AetherComp;
+
+    UGS_AetherComp* GetAetherComp() const;
+
+
+    // 준비
     UPROPERTY(ReplicatedUsing = OnRep_IsReady, BlueprintReadOnly, Category = "Lobby")
     bool bIsReady;
     UFUNCTION()
@@ -69,7 +92,7 @@ public:
 
     //상태
     float CurrentHealth;
-    UPROPERTY(ReplicatedUsing = OnRep_IsAlive)
+    UPROPERTY(ReplicatedUsing = OnRep_IsAlive, EditAnywhere, BlueprintReadWrite, Category = "PlayerStatus")
     bool bIsAlive = true;
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Game Result")
     EGameResult CurrentGameResult;
@@ -82,7 +105,9 @@ public:
     void SetupStatCompBinding(UGS_StatComp* InStatComp);
     void OnPawnStatInitialized();
 
-protected:
+    UFUNCTION(BlueprintCallable, Category = "PlayerState")
+    void SetPlayerRole(EPlayerRole NewRole);
+
     UFUNCTION()
     void HandleCurrentHPChanged(UGS_StatComp* StatComp);
 

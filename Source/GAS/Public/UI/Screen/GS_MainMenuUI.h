@@ -6,20 +6,20 @@
 #include "Blueprint/UserWidget.h"
 #include "GS_MainMenuUI.generated.h"
 
+class UGS_OptionMenuUI;
 class UGS_CommonTwoBtnPopup;
 class UScaleBox;
 class UUserWidget;
 class UButton;
 class UTextBlock;
 class UCanvasPanel;
+class UOverlay;
+class UGS_JoinFriendListWidget;
 
 UCLASS()
 class GAS_API UGS_MainMenuUI : public UUserWidget
 {
 	GENERATED_BODY()
-
-protected:
-	virtual void NativeConstruct() override;
 
 public:
 	UPROPERTY(meta = (BindWidget))
@@ -27,9 +27,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UUserWidget* CreditButton;
 	UPROPERTY(meta = (BindWidget))
-	UUserWidget* ExitButton;
+	UUserWidget* TutorialButton;
 	UPROPERTY(meta = (BindWidget))
-	UUserWidget* SettingButton;
+	UUserWidget* ExitButton;
 	UPROPERTY(meta = (BindWidget))
 	UScaleBox* PlayBtnPopUp;
 	UPROPERTY(meta = (BindWidget))
@@ -38,9 +38,17 @@ public:
 	UUserWidget* GuardianButton;
 	UPROPERTY(meta = (BindWidget))
 	UUserWidget* CustomGameButton;
-
+	UPROPERTY(meta = (BindWidget))
+	UUserWidget* FriendListButton;
+	UPROPERTY(meta = (BindWidget))
+	UOverlay* FriendListOverlay;
 	UPROPERTY(meta = (BindWidget))
 	UGS_CommonTwoBtnPopup* ExitPopUp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Friend")
+	TSubclassOf<UGS_JoinFriendListWidget> FriendListWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UGS_JoinFriendListWidget> FriendListWidgetInstance;
 
 	bool bIsPlayButtonClicked = false;
 
@@ -50,7 +58,14 @@ public:
 	void OnCustomGameButtonClicked();
 	UFUNCTION()
 	void OnExitButtonClicked();
-
+	
 	void OnExitPopupYesButtonClicked();
 	void OnExitPopupNoButtonClicked();
+	UFUNCTION()
+	void OnFriendListButtonClicked();
+
+	void OnTutorialButtonClicked();
+
+protected:
+	virtual void NativeConstruct() override;
 };

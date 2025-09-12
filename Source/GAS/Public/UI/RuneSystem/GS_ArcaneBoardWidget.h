@@ -11,8 +11,12 @@ class UUniformGridPanel;
 class UGS_RuneInventoryWidget;
 class UGS_StatPanelWidget;
 class UGS_RuneGridCellWidget;
-class UGS_ArcaneBoardManager;
 class UGS_DragVisualWidget;
+class UGS_RuneTooltipWidget;
+class UGS_ArcaneBoardManager;
+class UGS_ArcaneBoardLPS;
+class UGS_CommonTwoBtnPopup;
+class UButton;
 
 /**
  * 아케인 보드 메인 위젯
@@ -31,13 +35,16 @@ public:
 	//마우스 이벤트
 	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
-
+	
 	//기본 기능
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void SetBoardManager(UGS_ArcaneBoardManager* InBoardManager);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	UGS_ArcaneBoardManager* GetBoardManager() const;
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void RefreshForCurrCharacter();
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void GenerateGridLayout();
@@ -49,19 +56,13 @@ public:
 	void InitStatPanel();
 
 	UFUNCTION()
-	void OnStatsChanged(const FGS_StatRow& NewStats);
+	void OnStatsChanged(const FArcaneBoardStats& NewStats);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void UpdateGridPreview(uint8 RuneID, const FIntPoint& GridPos);
+	void UpdateGridPreview(uint8 RuneID, const FIntPoint& ReferenceCellPos);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void UpdateGridVisuals();
-
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void ApplyChanges();
-
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	void ResetBoard();
 
 	//룬 선택 관련 함수
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
@@ -91,13 +92,35 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void OnApplyButtonClicked();
 
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	FVector2D GetGridCellSize() const;
+
+	//툴팁
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void RequestShowTooltip(uint8 RuneID, const FVector2D& MousePos);
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void HideTooltip();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void CancelTooltipRequest();
+
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 
-	class UButton* ApplyButton;
+	UButton* ApplyButton;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	class UButton* ResetButton;
+	UButton* ResetButton;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UButton* PresetButton1;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UButton* PresetButton2;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	UButton* PresetButton3;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 
@@ -133,7 +156,83 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
 	UGS_DragVisualWidget* SelectionVisualWidget;
 
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	void PositionDragVisualAtMouse();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	FVector2D GetArcaneBoardCellSize() const;
+
+	//툴팁
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ArcaneBoard")
+	TSubclassOf<UGS_RuneTooltipWidget> TooltipWidgetClass;
+
+	UPROPERTY(BlueprintReadWrite, Category = "ArcaneBoard")
+	UGS_RuneTooltipWidget* RuneTooltipWidget;
+
+	FTimerHandle TooltipDelayTimer;
+
+	// 룬 시스템 사운드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	class USoundBase* RunePickupSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* RunePlaceSuccessSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* RunePlaceFailSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* RuneCancelSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* RuneConnectionBonusSound;
+
+	// 프리셋 관련
+	UPROPERTY()
+	int32 PendingPresetIndex;
+
+	UFUNCTION()
+	void OnPresetButton1Clicked();
+
+	UFUNCTION()
+	void OnPresetButton2Clicked();
+
+	UFUNCTION()
+	void OnPresetButton3Clicked();
+
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard|Preset")
+	void UpdatePresetButtonVisuals();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ArcaneBoard")
+	TSubclassOf<UGS_CommonTwoBtnPopup> PresetSaveConfirmPopupClass;
+
+	UPROPERTY()
+	UGS_CommonTwoBtnPopup* PresetSaveConfirmPopup;
+
 private:
-	void BindManagerEvents();
-	void UnbindManagerEvents();
+	void BindToLPS();
+	void UnbindFromLPS();
+
+	UPROPERTY()
+	UGS_ArcaneBoardLPS* ArcaneBoardLPS;
+
+	UPROPERTY()
+	UGS_RuneGridCellWidget* LastClickedCell;
+
+	//툴팁
+	uint8 CurrTooltipRuneID;
+
+	void ShowTooltip(uint8 RuneID, const FVector2D& MousePos);
+	bool ShouldShowTooltip() const;
+	bool IsMouseOverTooltipWidget(const FVector2D& ScreenPos);
+
+	// 프리셋 관련
+	void ShowPresetSaveConfirmPopup(int32 TargetPresetIndex);
+	void SwitchToPreset(int32 PresetIndex);
+
+	UFUNCTION()
+	void OnPresetSaveYes();
+
+	UFUNCTION()
+	void OnPresetSaveNo();
 };

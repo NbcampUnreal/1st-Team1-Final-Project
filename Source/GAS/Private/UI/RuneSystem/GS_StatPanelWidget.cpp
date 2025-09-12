@@ -76,7 +76,7 @@ void UGS_StatPanelWidget::InitStatList(UGS_ArcaneBoardManager* InBoardManager)
 	}
 }
 
-void UGS_StatPanelWidget::UpdateStats(const FGS_StatRow& RuneStats)
+void UGS_StatPanelWidget::UpdateStats(const FArcaneBoardStats& RuneStats)
 {
 	if (!IsValid(BoardManager) || !IsValid(StatDataTable))
 	{
@@ -90,9 +90,10 @@ void UGS_StatPanelWidget::UpdateStats(const FGS_StatRow& RuneStats)
 
 		if (IsValid(StatWidget))
 		{
-			float RuneValue = GetStatValueByName(RuneStats, StatName);
+			float RuneValue = GetStatValueByName(RuneStats.RuneStats, StatName);
+			float BonusValue = GetStatValueByName(RuneStats.BonusStats, StatName);
 
-			StatWidget->SetRuneStatData(RuneValue, 0.0f);
+			StatWidget->SetRuneStatData(RuneValue, BonusValue);
 		}
 	}
 }

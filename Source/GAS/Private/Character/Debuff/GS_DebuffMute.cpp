@@ -28,4 +28,5 @@ void UGS_DebuffMute::OnApply()
 
 void UGS_DebuffMute::OnExpire()
 {
+	Super::OnExpire();
 }

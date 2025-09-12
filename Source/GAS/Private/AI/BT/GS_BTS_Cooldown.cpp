@@ -2,7 +2,7 @@
 
 
 #include "AI/BT/GS_BTS_Cooldown.h"
-#include "AIController.h"
+#include "AI/GS_AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatComp.h"
@@ -32,10 +32,10 @@ void UGS_BTS_Cooldown::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMe
 	const float NowTime = OwnerComp.GetWorld()->GetTimeSeconds();
 	
 	UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
-	const float LastTime = Blackboard->GetValueAsFloat(TEXT("LastAttackTime"));
+	const float LastTime = Blackboard->GetValueAsFloat(AGS_AIController::LastAttackTimeKey);
 	const float AttackSpeed = Character->GetStatComp()->GetAttackSpeed();
 	const bool bCanAttack = (NowTime - LastTime) >= AttackSpeed;
-	
-	Blackboard->SetValueAsBool(TEXT("bCanAttack"), bCanAttack);
+
+	Blackboard->SetValueAsBool(AGS_AIController::CanAttackKey, bCanAttack);
 	
 }

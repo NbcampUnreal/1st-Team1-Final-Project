@@ -20,10 +20,14 @@ protected:
 
 	TSubclassOf<AGS_SeekerMerciArrow> ArrowClass;
 	UAnimMontage* SkillAnimMontages;
+	bool bMouseLeftClicked = false;
+	bool bMouseRightClicked = false;
 
 	virtual void OnRightClick(const struct FInputActionInstance& Instance) override;
 	virtual void OnLeftClick(const struct FInputActionInstance& Instance) override;
 	virtual void OnRightClickRelease(const struct FInputActionInstance& Instance) override;
 	virtual void OnLeftClickRelease(const struct FInputActionInstance& Instance) override;
+	virtual void OnRoll(const struct FInputActionInstance& Instance) override;
 	virtual void OnScroll(const struct FInputActionInstance& Instance) override;
+	virtual void OnKeyReset(const struct FInputActionInstance& Instance) override;
 };

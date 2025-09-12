@@ -24,20 +24,39 @@ void UGS_DrakharAnimInstance::AnimNotify_ComboAttack()
 
 void UGS_DrakharAnimInstance::AnimNotify_Reset()
 {
-	Drakhar->ServerRPCResetValue();
+	if (!Drakhar->HasAuthority())
+	{
+		Drakhar->ServerRPCResetValue();
+	}
+}
+
+void UGS_DrakharAnimInstance::AnimNotify_ShootEnergy()
+{
+	Drakhar->ComboLastAttack();
 }
 
 void UGS_DrakharAnimInstance::AnimNotify_EarthquakeCheck()
-{	
-	Drakhar->ServerRPCEarthquakeAttackCheck();
+{
+	if (!Drakhar->HasAuthority())
+	{
+		Drakhar->ServerRPCEarthquakeAttackCheck();
+	}
 }
 
 void UGS_DrakharAnimInstance::AnimNotify_DraconicFury()
 {
-	Drakhar->ServerRPCSpawnDraconicFury();
+	if (!Drakhar->HasAuthority())
+	{
+		Drakhar->ServerRPCSpawnDraconicFury();
+	}
 }
 
-void UGS_DrakharAnimInstance::AnimNotify_CtrlSkillEnd()
+// void UGS_DrakharAnimInstance::AnimNotify_CtrlSkillEnd()
+// {
+// 	Drakhar->ServerRPCStopCtrl();
+// }
+
+void UGS_DrakharAnimInstance::AnimNotify_FinishCtrlSkill()
 {
-	Drakhar->ServerRPCStopCtrl();
+	Drakhar->FinishCtrlSkill();
 }

@@ -1,12 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Character/Component/GS_FootManagerComponent.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/DecalComponent.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "AkGameplayStatics.h"
 #include "AkAudioDevice.h"
 #include "AkComponent.h"
@@ -58,6 +60,25 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	FootDecalLifeSpan = 10.0f;
 	DecalRotationOffsetYaw = 180.0f;
 
+	// Initialize water effect properties
+	bEnableWaterEffects = true;
+	WaterSplashScale = 1.0f;
+	DeepWaterThreshold = 20.0f;
+	MaxConcurrentWaterEffects = 3;
+
+	// Initialize water VFX systems with default PS_Splash
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> DefaultWaterSplash(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
+	if (DefaultWaterSplash.Succeeded())
+	{
+		WaterSplashEffect = DefaultWaterSplash.Object;
+		DeepWaterSplashEffect = DefaultWaterSplash.Object; // Default to same effect
+	}
+
+	// Initialize additional water VFX (can be set in Blueprint)
+	WaterRippleEffect = nullptr;
+	WaterBubbleEffect = nullptr;
+	WaterMistEffect = nullptr;
+
 	// Set default switch group name
 	SwitchGroupName = TEXT("FootSteps");
 
@@ -68,6 +89,7 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	SurfaceSwitchValues.Add(SurfaceType3, TEXT("Metal"));
 	SurfaceSwitchValues.Add(SurfaceType4, TEXT("Stone"));
 	SurfaceSwitchValues.Add(SurfaceType5, TEXT("Lava"));
+	SurfaceSwitchValues.Add(SurfaceType6, TEXT("Water"));
 
 	// Initialize foot dust effects with asset references
 	// Note: Asset paths should be adjusted based on your project structure
@@ -98,6 +120,13 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	{
 		FootDustEffects.Add(SurfaceType5, LavaEffect.Object);
 	}
+
+	// Water splash effect
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> WaterEffect(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
+	if (WaterEffect.Succeeded())
+	{
+		FootDustEffects.Add(SurfaceType6, WaterEffect.Object);
+	}
 }
 
 // Called when the game starts
@@ -105,7 +134,6 @@ void UGS_FootManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// Cache the skeletal mesh component for performance
 	CachedSkeletalMesh = GetOwnerSkeletalMesh();
 	
 	if (!CachedSkeletalMesh)
@@ -120,7 +148,6 @@ void UGS_FootManagerComponent::HandleFootstep(EFootStep Foot)
 	// Early return if no valid skeletal mesh
 	if (!CachedSkeletalMesh)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GS_FootManagerComponent: No valid SkeletalMeshComponent for footstep"));
 		return;
 	}
 
@@ -170,6 +197,16 @@ void UGS_FootManagerComponent::HandleFootstep(EFootStep Foot)
 	SpawnFootDustEffect(SurfaceType, HitLocation, HitNormal);
 }
 
+void UGS_FootManagerComponent::OverrideFootDustEffect(UNiagaraSystem* VFXSystem)
+{
+	OverriddenFootDustEffect = VFXSystem;
+}
+
+void UGS_FootManagerComponent::ClearFootDustEffectOverride()
+{
+	OverriddenFootDustEffect = nullptr;
+}
+
 void UGS_FootManagerComponent::HandleFoleyEvent()
 {
 	// Early return if auto detection is disabled
@@ -181,17 +218,14 @@ void UGS_FootManagerComponent::HandleFoleyEvent()
 	// Early return if no valid skeletal mesh
 	if (!CachedSkeletalMesh)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GS_FootManagerComponent: No valid SkeletalMeshComponent for foley event"));
 		return;
 	}
 
 	// Check if character is moving fast enough to trigger footsteps
 	if (AActor* Owner = GetOwner())
 	{
-		// Get character velocity
 		FVector CharacterVelocity;
 		
-		// Try to get velocity from Character or Pawn
 		if (ACharacter* Character = Cast<ACharacter>(Owner))
 		{
 			CharacterVelocity = Character->GetVelocity();
@@ -202,7 +236,6 @@ void UGS_FootManagerComponent::HandleFoleyEvent()
 		}
 		else
 		{
-			// Fallback: calculate velocity from position change
 			static FVector PreviousLocation = Owner->GetActorLocation();
 			const FVector CurrentLocation = Owner->GetActorLocation();
 			const float DeltaTime = GetWorld()->GetDeltaSeconds();
@@ -219,20 +252,16 @@ void UGS_FootManagerComponent::HandleFoleyEvent()
 			PreviousLocation = CurrentLocation;
 		}
 
-		// Calculate horizontal speed (ignore Z component for footsteps)
 		const float HorizontalSpeed = FVector(CharacterVelocity.X, CharacterVelocity.Y, 0.0f).Size();
 		
-		// Don't trigger footsteps if moving too slowly
 		if (HorizontalSpeed < MinimumMovementSpeed)
 		{
 			return;
 		}
 	}
 
-	// Detect which foot should trigger the footstep effect
 	EFootStep DetectedFoot = DetectActiveFootstep();
 	
-	// Trigger footstep for the detected foot
 	HandleFootstep(DetectedFoot);
 }
 
@@ -240,7 +269,7 @@ EFootStep UGS_FootManagerComponent::DetectActiveFootstep()
 {
 	if (!CachedSkeletalMesh)
 	{
-		return EFootStep::LeftFoot; // Default fallback
+		return EFootStep::LeftFoot;
 	}
 
 	// Get foot socket locations
@@ -298,33 +327,40 @@ bool UGS_FootManagerComponent::PerformFootTrace(EFootStep Foot, FHitResult& OutH
 	// Get foot socket name based on foot type
 	const FName SocketName = GetFootSocketName(Foot);
 	
-	// Check if socket exists
+	// Check if socket exists (cache this check for better performance)
 	if (!CachedSkeletalMesh->DoesSocketExist(SocketName))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GS_FootManagerComponent: Socket %s does not exist on skeletal mesh"), 
-			*SocketName.ToString());
 		return false;
 	}
 
-	// Get socket world location and rotation
+	// Get socket world location
 	const FVector SocketLocation = CachedSkeletalMesh->GetSocketLocation(SocketName);
 	const FVector TraceStart = SocketLocation;
 	const FVector TraceEnd = SocketLocation + FVector(0.0f, 0.0f, -TraceDistance);
 
-	// Setup trace parameters
+	// Setup optimized trace parameters
 	FCollisionQueryParams TraceParams(FName("FootTrace"), false, GetOwner());
 	TraceParams.bReturnPhysicalMaterial = true;
+	TraceParams.bTraceComplex = false;  // 성능 최적화: Simple collision 사용
+	
+	// 성능 최적화: 불필요한 오브젝트 제외
+	TraceParams.AddIgnoredActor(GetOwner());  // 자기 자신 제외
+	
+	// 추가 최적화: ResponseParams 설정으로 특정 오브젝트 타입만 체크
+	FCollisionResponseParams ResponseParams;
+	ResponseParams.CollisionResponse.SetResponse(ECC_Pawn, ECR_Ignore);
+	ResponseParams.CollisionResponse.SetResponse(ECC_Vehicle, ECR_Ignore);
 
-	// Perform line trace
+	// Perform optimized line trace
 	const bool bHit = GetWorld()->LineTraceSingleByChannel(
 		OutHitResult,
 		TraceStart,
 		TraceEnd,
 		TraceChannel,
-		TraceParams
+		TraceParams,
+		ResponseParams
 	);
 
-	// Draw debug visualization only if console variable is enabled
 	#if WITH_EDITOR
 	if (CVarShowFootstepDebug.GetValueOnGameThread() > 0)
 	{
@@ -334,7 +370,6 @@ bool UGS_FootManagerComponent::PerformFootTrace(EFootStep Foot, FHitResult& OutH
 		if (bHit)
 		{
 			DrawDebugPoint(GetWorld(), OutHitResult.Location, 8.0f, FColor::Yellow, false, 2.0f);
-			// Add surface normal visualization
 			DrawDebugLine(GetWorld(), OutHitResult.Location, OutHitResult.Location + (OutHitResult.Normal * 20.0f), FColor::Blue, false, 2.0f, 0, 1.0f);
 		}
 	}
@@ -343,8 +378,14 @@ bool UGS_FootManagerComponent::PerformFootTrace(EFootStep Foot, FHitResult& OutH
 	return bHit;
 }
 
-void UGS_FootManagerComponent::SpawnFootstepDecal(EPhysicalSurface /*Surface*/, const FVector& Location, const FVector& Normal, EFootStep Foot)
+void UGS_FootManagerComponent::SpawnFootstepDecal(EPhysicalSurface Surface, const FVector& Location, const FVector& Normal, EFootStep Foot)
 {
+	// Water surface doesn't create footprint decals, only splash effects
+	if (Surface == SurfaceType6) // Water surface
+	{
+		return;
+	}
+
 	UMaterialInterface* DecalMaterial = (Foot == EFootStep::LeftFoot) ? LeftFootDecal : RightFootDecal;
 	if (!DecalMaterial)
 	{
@@ -354,9 +395,7 @@ void UGS_FootManagerComponent::SpawnFootstepDecal(EPhysicalSurface /*Surface*/, 
 	// Normal 방향으로 1.0f만큼 올려서 Z파이팅 방지
 	const FVector DecalSpawnLocation = Location + Normal * 1.0f;
 
-	// 발 소켓 이름 가져오기
 	const FName SocketName = GetFootSocketName(Foot);
-	// 소켓의 회전값 가져오기
 	const FRotator SocketRotation = CachedSkeletalMesh->GetSocketRotation(SocketName);
 
 	// Normal 대신 고정된 Up 벡터를 사용하여 일관된 방향 계산
@@ -391,6 +430,17 @@ void UGS_FootManagerComponent::SpawnFootstepDecal(EPhysicalSurface /*Surface*/, 
 
 void UGS_FootManagerComponent::PlayFootstepSound(EPhysicalSurface Surface, const FVector& Location)
 {
+	if (!FAkAudioDevice::IsInitialized())
+	{
+		return;
+	}
+
+	FAkAudioDevice* AkAudioDevice = FAkAudioDevice::Get();
+	if (!AkAudioDevice)
+	{
+		return;
+	}
+
 	// Check if we have a footstep sound event
 	if (!FootstepSoundEvent)
 	{
@@ -405,66 +455,77 @@ void UGS_FootManagerComponent::PlayFootstepSound(EPhysicalSurface Surface, const
 	}
 
 	// Set switch value before playing sound
-	if (FAkAudioDevice* AudioDevice = FAkAudioDevice::Get())
-	{
-		AudioDevice->SetSwitch(
-			*SwitchGroupName,
-			**SwitchValue,
-			GetOwner()
-		);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("GS_FootManagerComponent: AudioDevice is NULL!"));
-		return;
-	}
+	AkAudioDevice->SetSwitch(
+		*SwitchGroupName,
+		**SwitchValue,
+		GetOwner()
+	);
 
-	// Play sound using the AkComponent (same Game Object that has the Switch set)
 	UAkComponent* AkComp = GetOwner()->FindComponentByClass<UAkComponent>();
 	if (!AkComp)
 	{
-		UE_LOG(LogTemp, Error, TEXT("GS_FootManagerComponent: No AkComponent found on owner %s. Please add an AkComponent to the character."), 
-			*GetOwner()->GetName());
 		return;
 	}
 
-	// Set the AkComponent's location to the footstep location for 3D positioning
 	AkComp->SetWorldLocation(Location);
 
-	// Play sound using the AkComponent
 	const int32 PlayingID = AkComp->PostAkEvent(FootstepSoundEvent);
 
 	if (PlayingID != AK_INVALID_PLAYING_ID)
 	{
-		// Call blueprint delegate
 		OnFootSoundPlayed.Broadcast(Surface, Location);
 	}
 }
 
 void UGS_FootManagerComponent::SpawnFootDustEffect(EPhysicalSurface Surface, const FVector& Location, const FVector& Normal)
 {
-	// Find VFX system for this surface
-	UNiagaraSystem* const* VFXSystem = FootDustEffects.Find(Surface);
-	if (!VFXSystem || !*VFXSystem)
+	// Water surface special handling with enhanced VFX system
+	if (Surface == SurfaceType6) // Water surface
 	{
-		// No VFX configured for this surface type
+		if (!bEnableWaterEffects)
+		{
+			return; // Water effects disabled
+		}
+
+		// Use enhanced water VFX system
+		// Estimate water depth based on trace distance (simple approximation)
+		const float EstimatedWaterDepth = 10.0f; // Default depth, can be improved with additional tracing
+		SpawnCombinedWaterEffects(Location, EstimatedWaterDepth);
 		return;
 	}
 
-	// Calculate effect rotation to align with surface normal
+	// Default behavior for non-water surfaces
+	UNiagaraSystem* VFXToSpawn = nullptr;
+
+	if (OverriddenFootDustEffect)
+	{
+		VFXToSpawn = OverriddenFootDustEffect;
+	}
+	else
+	{
+		UNiagaraSystem* const* FoundVFX = FootDustEffects.Find(Surface);
+		if (FoundVFX && *FoundVFX)
+		{
+			VFXToSpawn = *FoundVFX;
+		}
+	}
+
+	if (!VFXToSpawn)
+	{
+		return;
+	}
+
 	const FRotator EffectRotation = FRotationMatrix::MakeFromZ(Normal).Rotator();
 
-	// Spawn Niagara effect at location
 	UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		GetWorld(),
-		*VFXSystem,
+		VFXToSpawn,
 		Location,
 		EffectRotation
 	);
 
 	if (SpawnedEffect)
 	{
-		// Call blueprint event
 		OnFootDustSpawned(Surface, Location);
 	}
 }
@@ -478,7 +539,6 @@ FName UGS_FootManagerComponent::GetFootSocketName(EFootStep Foot) const
 	case EFootStep::RightFoot:
 		return RightFootSocketName;
 	default:
-		UE_LOG(LogTemp, Error, TEXT("GS_FootManagerComponent: Invalid foot type"));
 		return NAME_None;
 	}
 }
@@ -490,12 +550,155 @@ USkeletalMeshComponent* UGS_FootManagerComponent::GetOwnerSkeletalMesh() const
 		return nullptr;
 	}
 
-	// Try to get from Character first (most common case)
 	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
 	{
 		return Character->GetMesh();
 	}
 
-	// Fallback: search for any SkeletalMeshComponent
 	return GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+}
+
+void UGS_FootManagerComponent::TestWaterFootstep()
+{
+	// Force play water footstep sound
+	PlayFootstepSound(SurfaceType6, GetOwner()->GetActorLocation());
+	
+	// Force spawn water splash effect
+	const FVector Location = GetOwner()->GetActorLocation();
+	const FVector Normal = FVector::UpVector;
+	SpawnFootDustEffect(SurfaceType6, Location, Normal);
+}
+
+int32 UGS_FootManagerComponent::GetCurrentSurfaceType()
+{
+	if (!CachedSkeletalMesh)
+	{
+		return -1;
+	}
+
+	// Perform trace to detect current surface
+	FHitResult HitResult;
+	if (!PerformFootTrace(EFootStep::LeftFoot, HitResult))
+	{
+		return -1;
+	}
+
+	// Get the physical surface from hit result
+	EPhysicalSurface SurfaceType = SurfaceType_Default;
+	if (HitResult.PhysMaterial.IsValid())
+	{
+		SurfaceType = UPhysicalMaterial::DetermineSurfaceType(HitResult.PhysMaterial.Get());
+	}
+
+	return (int32)SurfaceType;
+}
+
+void UGS_FootManagerComponent::SetWaterVFX(int32 EffectType, UNiagaraSystem* NiagaraSystem)
+{
+	switch (EffectType)
+	{
+	case 0: // Splash
+		WaterSplashEffect = NiagaraSystem;
+		break;
+	case 1: // Deep Water
+		DeepWaterSplashEffect = NiagaraSystem;
+		break;
+	case 2: // Ripple
+		WaterRippleEffect = NiagaraSystem;
+		break;
+	case 3: // Bubble
+		WaterBubbleEffect = NiagaraSystem;
+		break;
+	case 4: // Mist
+		WaterMistEffect = NiagaraSystem;
+		break;
+	default:
+		break;
+	}
+}
+
+UNiagaraSystem* UGS_FootManagerComponent::GetWaterEffectByDepth(float WaterDepth)
+{
+	// Choose effect based on water depth
+	if (WaterDepth >= DeepWaterThreshold && DeepWaterSplashEffect)
+	{
+		return DeepWaterSplashEffect;
+	}
+	else if (WaterSplashEffect)
+	{
+		return WaterSplashEffect;
+	}
+	
+	// Fallback to FootDustEffects map
+	UNiagaraSystem* const* FoundVFX = FootDustEffects.Find(SurfaceType6);
+	return (FoundVFX && *FoundVFX) ? *FoundVFX : nullptr;
+}
+
+void UGS_FootManagerComponent::SpawnCombinedWaterEffects(const FVector& Location, float WaterDepth)
+{
+	if (!bEnableWaterEffects)
+	{
+		return;
+	}
+
+	const FVector Normal = FVector::UpVector;
+	const FRotator EffectRotation = FRotationMatrix::MakeFromZ(Normal).Rotator();
+	int32 SpawnedEffects = 0;
+
+	// 1. Main water splash effect (always spawn)
+	UNiagaraSystem* MainEffect = GetWaterEffectByDepth(WaterDepth);
+	if (MainEffect && SpawnedEffects < MaxConcurrentWaterEffects)
+	{
+		UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			MainEffect,
+			Location,
+			EffectRotation
+		);
+		
+		if (SpawnedEffect)
+		{
+			SpawnedEffect->SetWorldScale3D(FVector(WaterSplashScale));
+			SpawnedEffects++;
+		}
+	}
+
+	// 2. Water ripple effect (optional)
+	if (WaterRippleEffect && SpawnedEffects < MaxConcurrentWaterEffects)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			WaterRippleEffect,
+			Location + FVector(0, 0, -2.0f), // Slightly lower for ripples
+			EffectRotation
+		);
+		SpawnedEffects++;
+	}
+
+	// 3. Water bubble effect for deep water (optional)
+	if (WaterDepth >= DeepWaterThreshold && WaterBubbleEffect && SpawnedEffects < MaxConcurrentWaterEffects)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			WaterBubbleEffect,
+			Location + FVector(FMath::RandRange(-5.0f, 5.0f), FMath::RandRange(-5.0f, 5.0f), 0),
+			EffectRotation
+		);
+		SpawnedEffects++;
+	}
+
+	// 4. Water mist effect (optional)
+	if (WaterMistEffect && SpawnedEffects < MaxConcurrentWaterEffects)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			WaterMistEffect,
+			Location + FVector(0, 0, 5.0f), // Slightly higher for mist
+			EffectRotation
+		);
+		SpawnedEffects++;
+	}
+
+	// Trigger Blueprint event
+	OnFootDustSpawned(SurfaceType6, Location);
 } 

@@ -4,18 +4,26 @@
 #include "System/GameMode/GS_CustomLobbyGM.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Component/GS_StatComp.h"
+#include "System/SteamAvatarHelper.h"
+#include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
+#include "Kismet/GameplayStatics.h"
+#include "DungeonEditor/Data/GS_DungeonEditorTypes.h"
+#include "System/GameMode/GS_BossLevelGM.h"
+#include "System/GameMode/GS_InGameGM.h"
 
 AGS_PlayerState::AGS_PlayerState()
-    : CurrentPlayerRole(EPlayerRole::PR_None)
+    : CurrentPlayerRole(EPlayerRole::PR_Seeker)
     , CurrentSeekerJob(ESeekerJob::Merci)
     , CurrentGuardianJob(EGuardianJob::Drakhar)
     , CurrentGameResult(EGameResult::GR_InProgress)
     , bIsReady(false)
 	, CurrentHealth(99999.f)
-	, bIsAlive(true)
 	, BoundStatComp(nullptr)
 {
     bReplicates = true;
+
+    //AetherComp 연결
+    AetherComp = CreateDefaultSubobject<UGS_AetherComp>(TEXT("Aether"));
 }
 
 void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -27,19 +35,28 @@ void AGS_PlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
     DOREPLIFETIME(AGS_PlayerState, CurrentGameResult);
     DOREPLIFETIME(AGS_PlayerState, bIsReady);
     DOREPLIFETIME(AGS_PlayerState, bIsAlive);
+    DOREPLIFETIME(AGS_PlayerState, MySteamAvatar);
+    /*DOREPLIFETIME(AGS_PlayerState, ObjectData);*/
 }
 
 void AGS_PlayerState::BeginPlay()
 {
     Super::BeginPlay();
+
+    APlayerController* PC = GetPlayerController();
+    if (PC && PC->IsLocalController())
+    {
+        FetchMySteamAvatar();
+    }
+    //에테르 값 초기화
+    AetherComp->InitializeMaxAmount(250.f);
+
 }
 
 void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
 {
     Super::CopyProperties(NewPlayerState);
 
-    // this  == Old PlayerState
-    // NewPlayerState == Newly-created PlayerState
     if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
     {
         // 다음 맵으로 넘길 애들 추가 까먹지 말기!!!!!!!!
@@ -50,6 +67,11 @@ void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
         NewPS->CurrentHealth = CurrentHealth;
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
+        NewPS->MySteamAvatar = MySteamAvatar;
+        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        {
+            NewPS->ObjectData = ObjectData;
+        }
     }
 }
 
@@ -57,7 +79,6 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
 {
     Super::SeamlessTravelTo(NewPlayerState);
 
-    // 여기서는 this == Old, NewPlayerState == New 와 동일.
     if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
     {
         // 다음 맵으로 넘길 애들 추가 까먹지 말기!!!!!!!!
@@ -68,15 +89,28 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
         NewPS->CurrentHealth = CurrentHealth;
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
+        NewPS->MySteamAvatar = MySteamAvatar;
+        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        {
+            NewPS->ObjectData = ObjectData;
+        }
+    }
+}
+
+void AGS_PlayerState::FetchMySteamAvatar()
+{
+    FUniqueNetIdRepl MySteamId = USteamAvatarHelper::GetLocalSteamID();
+
+    if (MySteamId.IsValid())
+    {
+        MySteamAvatar = USteamAvatarHelper::GetSteamAvatar(MySteamId, ESteamAvatarSize::SteamAvatar_Large);
     }
 }
 
 void AGS_PlayerState::InitializeDefaults()
 {
-    CurrentPlayerRole = EPlayerRole::PR_Seeker;
-    CurrentSeekerJob = ESeekerJob::Merci;
-	CurrentGuardianJob = EGuardianJob::Drakhar;
 	CurrentGameResult = EGameResult::GR_InProgress;
+	CurrentHealth = 99999.f;
     bIsReady = false;
     bIsAlive = true;
 
@@ -118,6 +152,7 @@ void AGS_PlayerState::OnPawnStatInitialized()
             UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): OnPawnStatInitialized - Found StatComp: %s on Pawn %s"),
                 *GetName(), *StatComp->GetName(), *MyPawn->GetName());
 
+            StatComp->SetCurrentHealth(this->CurrentHealth, true);
             SetupStatCompBinding(StatComp);
             UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): StatComp binding successful! from OnPawnStatInitialized"), *GetName()); // 성공 로그
         }
@@ -161,9 +196,12 @@ void AGS_PlayerState::HandleCurrentHPChanged(UGS_StatComp* StatComp)
 
         if (HasAuthority())
         {
-            if (CurrentHealth <= 0.f && bIsAlive)
+            if (GetWorld()->GetAuthGameMode() && GetWorld()->GetAuthGameMode()->HasMatchStarted())
             {
-                SetIsAlive(false);
+                if (CurrentHealth <= 0.f && bIsAlive)
+                {
+                    SetIsAlive(false);
+                }
             }
         }
     }
@@ -183,15 +221,21 @@ void AGS_PlayerState::SetIsAlive(bool bNewIsAlive)
     {
         bIsAlive = bNewIsAlive;
 
-        // 서버에서 델리게이트 브로드캐스트
+        if (AGameMode* GM = GetWorld()->GetAuthGameMode<AGameMode>())
+        {
+            if (AGS_BossLevelGM* BGM = Cast<AGS_BossLevelGM>(GM))
+            {
+                BGM->HandlePlayerAliveStatusChanged(this, bIsAlive);
+            }
+            else if (AGS_InGameGM* IGM = Cast<AGS_InGameGM>(GM))
+            {
+                IGM->HandlePlayerAliveStatusChanged(this, bIsAlive);
+            }
+        }
+
         OnPlayerAliveStatusChangedDelegate.Broadcast(this, bIsAlive);
 
-        // 서버에서도 OnRep_IsAlive를 호출하여 서버 측 로직을 동일하게 처리할 수 있음 (선택 사항)
-        // OnRep_IsAlive(); 
-
-        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) SetIsAlive called on Server. New State: %s"),
-            *GetName(),
-            bIsAlive ? TEXT("True") : TEXT("False"));
+        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) SetIsAlive called on Server. New State: %s"), *GetName(), bIsAlive ? TEXT("True") : TEXT("False"));
     }
 }
 
@@ -203,6 +247,11 @@ void AGS_PlayerState::Server_SetPlayerRole_Implementation(EPlayerRole NewRole)
 		UE_LOG(LogTemp, Warning, TEXT("Server: Player %s changed role from %s to %s"), *GetPlayerName(), *UEnum::GetValueAsString(CurrentPlayerRole), *UEnum::GetValueAsString(NewRole));
         CurrentPlayerRole = NewRole;
         OnRep_PlayerRole();
+
+        if (AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        {
+            GM->HandlePlayerStateUpdated(this);
+        }
 
         if (bIsReady)
         {
@@ -228,6 +277,11 @@ void AGS_PlayerState::Server_SetSeekerJob_Implementation(ESeekerJob NewJob)
 		CurrentSeekerJob = NewJob;
 		OnRep_SeekerJob();
 
+        if (AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        {
+            GM->HandlePlayerStateUpdated(this);
+        }
+
         if (bIsReady)
         {
             Server_SetReadyStatus(false);
@@ -252,11 +306,22 @@ void AGS_PlayerState::Server_SetGuardianJob_Implementation(EGuardianJob NewJob)
 		CurrentGuardianJob = NewJob;
 		OnRep_GuardianJob();
 
+        if (AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        {
+            GM->HandlePlayerStateUpdated(this);
+        }
+
         if (bIsReady)
         {
             Server_SetReadyStatus(false);
         }
 	}
+}
+
+void AGS_PlayerState::Server_SetObjectData_Implementation(const TArray<FDESaveData>& InObjectData)
+{
+    this->ObjectData = InObjectData; 
+    UE_LOG(LogTemp, Warning, TEXT("Server: Received and stored %d dungeon data objects for player %s."), ObjectData.Num(), *GetPlayerName());
 }
 
 void AGS_PlayerState::OnRep_IsReady()
@@ -279,4 +344,15 @@ void AGS_PlayerState::Server_SetReadyStatus_Implementation(bool bNewReadyStatus)
             GM->UpdatePlayerReadyStatus(this, bIsReady);
         }
     }
+}
+
+void AGS_PlayerState::SetPlayerRole(EPlayerRole NewRole)
+{
+// ... existing code ...
+
+}
+
+UGS_AetherComp* AGS_PlayerState::GetAetherComp() const
+{
+    return AetherComp;
 }

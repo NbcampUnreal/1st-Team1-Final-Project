@@ -3,10 +3,16 @@
 #include "AkGameplayStatics.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_StatRow.h"
-#include "Character/Player/Guardian/GS_Guardian.h"
+#include "Character/Player/Monster/GS_Monster.h"
 #include "RuneSystem/GS_EnumUtils.h"
+#include "RuneSystem/GS_ArcaneBoardLPS.h"
+#include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
+#include "Kismet/GameplayStatics.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UGS_StatComp::UGS_StatComp()
 {
@@ -25,6 +31,27 @@ void UGS_StatComp::BeginPlay()
 {
 	Super::BeginPlay();
 
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	APlayerController* PC = Cast<APlayerController>(OwnerCharacter->GetController());
+	if (PC && PC->IsLocalController())
+	{
+		if (UGS_ArcaneBoardLPS* LPS = PC->GetLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+		{
+			if (UGS_ArcaneBoardManager* Manager = LPS->GetOrCreateBoardManager())
+			{
+				FArcaneBoardStats AppliedStats = Manager->AppliedBoardStats;
+				FGS_StatRow RuneStats = AppliedStats.RuneStats+ AppliedStats.BonusStats;
+				UpdateStat(RuneStats);
+
+				UE_LOG(LogTemp, Warning, TEXT("StatComp BeginPlay: 룬 스탯 적용 완료"));
+			}
+		}
+	}
 }
 
 void UGS_StatComp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -32,6 +59,7 @@ void UGS_StatComp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);	
 
 	DOREPLIFETIME(ThisClass, CurrentHealth);
+	DOREPLIFETIME(ThisClass, bIsInvincible);
 }
 
 void UGS_StatComp::InitStat(FName RowName)
@@ -52,14 +80,37 @@ void UGS_StatComp::InitStat(FName RowName)
 		AttackSpeed = FoundRow->ATS;
 
 		CurrentHealth = MaxHealth;
+		//UE_LOG(LogTemp, Warning, TEXT("StatComp InitStat 성공: RowName=%s, HP=%.1f, ATK=%.1f, DEF=%.1f, AGL=%.1f, ATS=%.1f"),
+		//	*RowName.ToString(), MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
 	}
 
 	//set move speed
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-	OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed *= Agility;
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed *= Agility;
+	}
 }
 
-void UGS_StatComp::UpdateStat(const FGS_StatRow& RuneStats)
+void UGS_StatComp::ChangeStat(const FGS_StatRow& InChangeStat)
+{
+	MaxHealth += InChangeStat.HP;
+	AttackPower += InChangeStat.ATK;
+	Defense += InChangeStat.DEF;
+	Agility += InChangeStat.AGL;
+	AttackSpeed += InChangeStat.ATS;
+}
+
+void UGS_StatComp::ResetStat(const FGS_StatRow& InChangeStat)
+{
+	MaxHealth -= InChangeStat.HP;
+	AttackPower -= InChangeStat.ATK;
+	Defense -= InChangeStat.DEF;
+	Agility -= InChangeStat.AGL;
+	AttackSpeed -= InChangeStat.ATS;
+}
+
+void UGS_StatComp::UpdateStat_Implementation(const FGS_StatRow& RuneStats)
 {
 	//update stats by rune system
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
@@ -75,8 +126,6 @@ void UGS_StatComp::UpdateStat(const FGS_StatRow& RuneStats)
 		Agility = FoundRow->AGL + RuneStats.AGL;
 		AttackSpeed = FoundRow->ATS + RuneStats.ATS;
 
-		CurrentHealth = MaxHealth;
-
 		UE_LOG(LogTemp, Log, TEXT("캐릭터 스탯 업데이트 - HP: %.1f, ATK: %.1f, DEF: %.1f, AGL: %.1f, ATS: %.1f"),
 			MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
 	}
@@ -88,6 +137,11 @@ void UGS_StatComp::UpdateStat(const FGS_StatRow& RuneStats)
 
 float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
 {
+	if (bIsInvincible)
+	{
+		return 0.f;
+	}
+
 	float Damage = 0.f;
 	float DamagedCharacterDefense = InDamagedCharacter->GetStatComp()->GetDefense();
 	float DamageCauserAttack = InDamageCauser->GetStatComp()->GetAttackPower();
@@ -107,33 +161,47 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 	
 	//update health
 	CurrentHealth = InHealth;
-	OnCurrentHPChanged.Broadcast(this);
 	
 	//healing
 	if (bIsHealing)
 	{
-		
+		if (CurrentHealth >= MaxHealth)
+		{
+			CurrentHealth = MaxHealth;
+		}
 	}
 	//damaged
-	else
-	{
-		//[TODO] play take damage montage
-		if (!TakeDamageMontages.IsEmpty())
-		{
-			MulticastRPCPlayTakeDamageMontage();
-		}
+    else
+    {
+        // 피격 사운드는 항상 재생
+        MulticastRPCPlayTakeDamageMontage();
+
+        // 몬스터인 경우 Hurt 사운드 즉시 재생(서버 권한에서만 멀티캐스트 트리거)
+        if (AGS_Monster* DamagedMonster = Cast<AGS_Monster>(GetOwner()))
+        {
+            if (IsValid(DamagedMonster) && IsValid(DamagedMonster->MonsterAudioComponent))
+            {
+                DamagedMonster->MonsterAudioComponent->PlayHurtSound();
+            }
+        }
 
 		//dead
 		if (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("death"));
 			CurrentHealth = 0.f;
-	
+
 			AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
 			if (IsValid(OwnerCharacter))
 			{
 				OwnerCharacter->OnDeath();
 			}
+			else if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(GetOwner()))
+			{
+				AetherExtractor->DestroyAetherExtractor();
+			}
+
+
 		}
 		else if (CurrentHealth <= KINDA_SMALL_NUMBER)
 		{
@@ -141,6 +209,8 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 			CurrentHealth = 0.f;
 		}
 	}
+	
+	OnCurrentHPChanged.Broadcast(this);
 }
 
 void UGS_StatComp::SetMaxHealth(float InMaxHealth)
@@ -171,35 +241,33 @@ void UGS_StatComp::SetAttackSpeed(float InAttackSpeed)
 void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 {
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-
-	// 죽은 상태가 아닐 때만 히트 사운드 재생
-	if (HitSoundEvent && CanPlayHitSound() && CurrentHealth > KINDA_SMALL_NUMBER)
-	{
-		UAkGameplayStatics::PostEvent(HitSoundEvent, OwnerCharacter, 0, FOnAkPostEventCallback());
-		LastHitSoundTime = GetWorld()->GetTimeSeconds();
-	}
 	
-	int32 idx = FMath::RandRange(0, TakeDamageMontages.Num() - 1);
-	UAnimMontage* AnimMontage = TakeDamageMontages[idx];
-
-	if (IsValid(OwnerCharacter))
+	// 피격 애니메이션 재생 (몬스터만)
+	if (TakeDamageMontages.Num() > 0)
 	{
-		if (Cast<AGS_Guardian>(OwnerCharacter)->GuardianState != EGuardianState::None)
+		int32 idx = FMath::RandRange(0, TakeDamageMontages.Num() - 1);
+		UAnimMontage* AnimMontage = TakeDamageMontages[idx];
+
+		if (IsValid(OwnerCharacter))
 		{
-			//OwnerCharacter->PlayAnimMontage(AnimMontage, 2.f);
-		}
-		if (OwnerCharacter->HasAuthority())
-		{
-			//stop character during damage animation
-			//CharacterWalkSpeed = OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed;
-			//OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = 0.f;
-		}
-		
-		if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
-		{
-			FOnMontageBlendingOutStarted BlendOut;
-			BlendOut.BindUObject(this, &UGS_StatComp::OnDamageMontageEnded);
-			AnimInstance->Montage_SetBlendingOutDelegate(BlendOut, AnimMontage);
+			if (AGS_Monster* Monster = Cast<AGS_Monster>(OwnerCharacter))
+			{
+				Monster->PlayAnimMontage(AnimMontage);
+
+				if (Monster->HasAuthority())
+				{
+					//stop character during damage animation
+					CharacterWalkSpeed = Monster->GetCharacterMovement()->MaxWalkSpeed;
+					Monster->GetCharacterMovement()->MaxWalkSpeed = 0.f;
+				}
+
+				if (UAnimInstance* AnimInstance = Monster->GetMesh()->GetAnimInstance())
+				{
+					FOnMontageBlendingOutStarted BlendOut;
+					BlendOut.BindUObject(this, &UGS_StatComp::OnDamageMontageEnded);
+					AnimInstance->Montage_SetBlendingOutDelegate(BlendOut, AnimMontage);
+				}
+			}
 		}
 	}
 }
@@ -207,6 +275,11 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 void UGS_StatComp::OnRep_CurrentHealth()
 {
 	OnCurrentHPChanged.Broadcast(this);
+}
+
+void UGS_StatComp::SetInvincible(bool bEnable)
+{
+	bIsInvincible = bEnable;
 }
 
 void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -221,7 +294,7 @@ void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	if (OwnerCharacter->HasAuthority())
 	{
 		//can move
-		//OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CharacterWalkSpeed;
+		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CharacterWalkSpeed;
 	}
 }
 
@@ -237,13 +310,18 @@ void UGS_StatComp::ServerRPCHeal_Implementation(float InHealAmount)
     SetCurrentHealth(NewHealth, true);
 }
 
-bool UGS_StatComp::CanPlayHitSound() const
+ECharacterClass UGS_StatComp::MapCharacterTypeToCharacterClass(ECharacterType CharacterType)
 {
-	if (!GetWorld())
+	switch (CharacterType)
 	{
-		return false;
+	case ECharacterType::Ares:
+		return ECharacterClass::Ares;
+	case ECharacterType::Chan:
+		return ECharacterClass::Chan;
+	case ECharacterType::Merci:
+		return ECharacterClass::Merci;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("MapCharacterTypeToCharacterClass: 알 수 없는 캐릭터 타입, 기본값 Ares 반환"));
+		return ECharacterClass::Ares;
 	}
-	
-	float CurrentTime = GetWorld()->GetTimeSeconds();
-	return (CurrentTime - LastHitSoundTime) >= HitSoundCooldownTime;
 }

@@ -3,10 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/GS_BasePlayerController.h"
 #include "RTSCommand.h"
 #include "AkGameplayStatics.h"
-#include "AkAudioEvent.h"
 #include "GS_RTSController.generated.h"
 
 struct FInputActionInstance;
@@ -26,11 +25,13 @@ struct FUnitGroup
 	TArray<AGS_Monster*> Units;
 };
 
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, const TArray<AGS_Monster*>&, NewSelection);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRTSCommandChanged, ERTSCommand, NewCommand);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedUnitsSkillChanged, bool, bAnyUnitHasSkill);
 
 UCLASS()
-class GAS_API AGS_RTSController : public APlayerController
+class GAS_API AGS_RTSController : public AGS_BasePlayerController
 {
 	GENERATED_BODY()
 
@@ -51,6 +52,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* StopAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* HoldAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* SkillAction;
@@ -66,6 +70,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	UInputAction* ShiftAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	UInputAction* DoubleClickAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	TArray<UInputAction*> GroupKeyActions;
@@ -74,14 +81,26 @@ public:
 	TArray<UInputAction*> CameraKeyActions;
 
 	// 선택 변경 델리게이트
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Selection")
+	UPROPERTY(BlueprintAssignable, Category="Selection")
 	FOnSelectionChanged OnSelectionChanged;
 
 	UPROPERTY(BlueprintAssignable, Category="Command")
 	FOnRTSCommandChanged OnRTSCommandChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Selection")
+	FOnSelectedUnitsSkillChanged OnSelectedUnitsSkillChanged;
+
+	virtual AActor* GetViewTarget() const override;
+	
 	// 현재 선택된 유닛들
+	UFUNCTION(BlueprintCallable)
 	const TArray<AGS_Monster*>& GetUnitSelection() const { return UnitSelection; }
+
+	UFUNCTION(BlueprintCallable)
+	bool IsCtrlDown() const { return bCtrlDown; }
+	
+	UFUNCTION(BlueprintCallable)
+	bool IsShiftDown() const { return bShiftDown; }
 	
 	// 카메라 이동 입력 처리
 	void CameraMove(const FInputActionValue& InputValue);
@@ -91,6 +110,7 @@ public:
 	void OnCommandMove(const FInputActionValue& Value);
 	void OnCommandAttack(const FInputActionValue& Value);
 	void OnCommandStop(const FInputActionValue& Value);
+	void OnCommandHold(const FInputActionValue& Value);
 	void OnCommandSkill(const FInputActionValue& Value);
 
 	// 실제 구현 + HUD 버튼 클릭시
@@ -102,6 +122,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="RTS")
 	void StopSelectedUnits();
+	
+	UFUNCTION(BlueprintCallable, Category="RTS")
+	void HoldSelectedUnits();
 
 	UFUNCTION(BlueprintCallable, Category="RTS")
 	void SkillSelectedUnits();
@@ -112,9 +135,18 @@ public:
 	void OnRightMousePressed(const FInputActionValue& InputValue);
 
 	// 유닛 선택
+	UFUNCTION(BlueprintCallable)
 	void AddUnitToSelection(AGS_Monster* Unit);
+	
 	void AddMultipleUnitsToSelection(const TArray<AGS_Monster*>& Units); // 다중 선택
+
+	UFUNCTION(BlueprintCallable)
+	void SelectSameTypeFromSelection(AGS_Monster* Unit);
+	
+	UFUNCTION(BlueprintCallable)
 	void RemoveUnitFromSelection(AGS_Monster* Unit);
+
+	UFUNCTION(BlueprintCallable)
 	void ClearUnitSelection();
 
 	// 부대 지정, 호출 
@@ -136,7 +168,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MoveCameraViaMinimap(const FVector& WorldLocation);
 
-	UFUNCTION(BlueprintPure)
+	UFUNCTION(BlueprintCallable)
 	ERTSCommand GetCurrentCommand() const { return CurrentCommand; }
 	
 	// Server
@@ -153,18 +185,34 @@ public:
 	void Server_RTSStop(const TArray<AGS_Monster*>& Units);
 
 	UFUNCTION(Server, Reliable)
-	void Server_RTSSkill(const TArray<AGS_Monster*>& Units, const FVector& TargetLoc);
+	void Server_RTSHold(const TArray<AGS_Monster*>& Units);
 
-	// UI 반응 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandButtonSound;
+	UFUNCTION(Server, Reliable)
+	void Server_RTSSkill(const TArray<AGS_Monster*>& Units);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandCancelSound;
+	UFUNCTION(Server, Reliable)
+	void Server_NotifyPlayerIsReady();
 
+	// Client
+	UFUNCTION(Client, Reliable)
+	void Client_StartGame();
+	// UFUNCTION(Client, Reliable)
+	// void Client_HideDungeonElements();
+
+	UFUNCTION()
+	void HideDungeonElements();
+	
 	// UI 버튼 클릭 함수
 	UFUNCTION(BlueprintCallable, Category="RTS")
 	void OnEscapeButtonClicked();
+
+	bool HasAnySelectedUnitSkill() const;
+	
+	UFUNCTION(BlueprintCallable, Category="Cursor")
+	void SetRTSCursor(const FName& CursorPath);
+
+	UFUNCTION()
+	void HandleSeekerHover(bool bIsHover);
 
 protected:
 	virtual void BeginPlay() override;
@@ -196,12 +244,27 @@ private:
 
 	bool bCtrlDown;
 	bool bShiftDown;
+	int32 MaxSelectableUnits;
 	
 	UPROPERTY()
 	TMap<int32, FVector> SavedCameraPositions; // 카메라 저장 위치
 
 	UPROPERTY(EditAnywhere, Category="UI")
 	TSubclassOf<UUserWidget> RTSWidgetClass;
+
+	bool bSeekerHovered;
+	bool bShowAttackCursor;
+	FName DefaultCursorPath;
+	FName CommandCursorPath;
+	FName AttackCommandCursorPath;
+	FName SeekerAttackCursorPath;
+	FName ScrollUpCursorPath;
+	FName ScrollDownCursorPath;
+	FName ScrollLeftCursorPath;
+	FName ScrollRightCursorPath;
+
+	UPROPERTY()
+	FTimerHandle AttackCursorTimerHandle;
 
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
@@ -218,4 +281,8 @@ private:
 
 	UFUNCTION()
 	void OnSelectedUnitDead(AGS_Monster* Monster);
+
+	void UpdateCursorForCommand();
+	void UpdateCursorForEdgeScroll();
+	void ShowAttackCursor();
 };

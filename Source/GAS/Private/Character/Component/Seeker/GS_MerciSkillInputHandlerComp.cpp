@@ -16,25 +16,50 @@ UGS_MerciSkillInputHandlerComp::UGS_MerciSkillInputHandlerComp()
 
 void UGS_MerciSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
+	if (bMouseLeftClicked)
+	{
+		return;
+	}
+	
 	Super::OnRightClick(Instance);
+
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+
+	if (MerciCharacter->IsDead())
+	{
+		return;
+	}
 
 	if (!bCtrlHeld)
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+		MerciCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
 	}
 	else
 	{
-		
+		MerciCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	}
+
+	bMouseRightClicked = true;
 }
 
 void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
+	if (bMouseRightClicked)
+	{
+		return;
+	}
+	
 	Super::OnLeftClick(Instance);
+	
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
 
 	if (!bCtrlHeld)
 	{
-		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 		if(MerciCharacter->ComboSkillDrawMontage)
 		{
 			MerciCharacter->DrawBow(MerciCharacter->ComboSkillDrawMontage);
@@ -42,42 +67,102 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+		OwnerCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
 	}
+
+	bMouseLeftClicked = true;
 }
 
 void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
 {
+	bMouseRightClicked = false;
+	
 	Super::OnRightClickRelease(Instance);
+
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+
+	if (MerciCharacter->IsDead())
+	{
+		return;
+	}
+
+	/*if (!MerciCharacter->GetSkillInputControl().CanInputRC)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Left Release Lock"));
+		return;
+	}*/
+	
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{
-		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+		MerciCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Aiming);
 	}
 	else
 	{
-		
 	}
 }
 
 void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
 {
+	bMouseLeftClicked = false;
+	
 	Super::OnLeftClickRelease(Instance);
+
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("LeftRelease"));
+	
 	if (!bWasCtrlHeldWhenLeftClicked)
 	{
-		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-		if (MerciCharacter->NormalArrowClass)
+		if (MerciCharacter->NormalArrowClass) // 왜 NormalArrowClass 로 만 해놓은 것일까..?
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Is NormalArrowClass"));
 			MerciCharacter->ReleaseArrow(MerciCharacter->NormalArrowClass);
 		}
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Moving);
+		OwnerCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Moving);
+	}
+}
+
+void UGS_MerciSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instance)
+{
+	Super::OnRoll(Instance);
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+	
+	/*if (!MerciCharacter->GetSkillInputControl().CanInputRoll)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Roll Lock"));
+		return;
+	}*/
+
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+	
+	Super::OnRoll(Instance);
+	
+	if (MerciCharacter)
+	{
+		MerciCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Rolling);
 	}
 }
 
 void UGS_MerciSkillInputHandlerComp::OnScroll(const FInputActionInstance& Instance)
 {
+	Super::OnScroll(Instance);
+	
+	if (OwnerCharacter->IsDead())
+	{
+		return;
+	}
+
 	float ScrollValue = Instance.GetValue().Get<float>();
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (ScrollValue > 0.f)
@@ -88,4 +173,9 @@ void UGS_MerciSkillInputHandlerComp::OnScroll(const FInputActionInstance& Instan
 	{
 		MerciCharacter->Server_ChangeArrowType(-1);
 	}
+}
+
+void UGS_MerciSkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& Instance)
+{
+	Super::OnKeyReset(Instance);
 }

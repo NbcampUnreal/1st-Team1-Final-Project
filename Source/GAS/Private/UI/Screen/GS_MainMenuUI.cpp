@@ -1,12 +1,16 @@
 #include "UI/Screen/GS_MainMenuUI.h"
 
 #include "CommonButtonBase.h"
+#include "Blueprint/WidgetTree.h"
 #include "Components/ScaleBox.h"
 #include "Components/TextBlock.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "System/PlayerController/GS_MainMenuPC.h"
 #include "UI/Common/CustomCommonButton.h"
 #include "UI/Common//GS_CommonTwoBtnPopup.h"
+#include "UI/Screen/Option/GS_OptionMenuUI.h"
+#include "UI/Popup/GS_JoinFriendListWidget.h"
+#include "Components/Overlay.h"
 
 void UGS_MainMenuUI::NativeConstruct()
 {
@@ -19,7 +23,6 @@ void UGS_MainMenuUI::NativeConstruct()
 			PlayButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnPlayButtonClicked);
 		}
 	}
-	else UE_LOG(LogTemp, Error, TEXT("UGS_MainMenuUI: PlayButton is not bound in Blueprint!"));
 
 	if (CustomGameButton)
 	{
@@ -28,7 +31,6 @@ void UGS_MainMenuUI::NativeConstruct()
 			CustomGameButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnCustomGameButtonClicked);
 		}
 	}
-	else UE_LOG(LogTemp, Error, TEXT("UGS_MainMenuUI: CustomGameButton is not bound in Blueprint!"));
 
 	if (ExitButton)
 	{
@@ -37,9 +39,23 @@ void UGS_MainMenuUI::NativeConstruct()
 			ExitButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnExitButtonClicked);
 		}
 	}
-	else UE_LOG(LogTemp, Error, TEXT("UGS_MainMenuUI: ExitButton is not bound in Blueprint!"));
 
+	if (FriendListButton)
+	{
+		if (UCommonButtonBase* FriendListButtonBase = Cast<UCommonButtonBase>(FriendListButton))
+		{
+			FriendListButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnFriendListButtonClicked);
+		}
+	}
 
+	if (TutorialButton)
+	{
+		if (UCommonButtonBase* TutorialButtonBase = Cast<UCommonButtonBase>(TutorialButton))
+		{
+			TutorialButtonBase->OnClicked().AddUObject(this, &UGS_MainMenuUI::OnTutorialButtonClicked);
+		}
+	}
+	
 	//텍스트 초기 설정
 	//if (PlayText) PlayText->SetText(FText::FromString(TEXT("Play")));
 
@@ -70,6 +86,10 @@ void UGS_MainMenuUI::OnPlayButtonClicked()
 		{
 			CreditButton->SetVisibility(ESlateVisibility::Hidden);
 		}
+		if (TutorialButton)
+		{
+			TutorialButton->SetVisibility(ESlateVisibility::Hidden);
+		}
 		bIsPlayButtonClicked = true;
 	}
 	else
@@ -85,6 +105,10 @@ void UGS_MainMenuUI::OnPlayButtonClicked()
 		if (CreditButton)
 		{
 			CreditButton->SetVisibility(ESlateVisibility::Visible);
+		}
+		if (TutorialButton)
+		{
+			TutorialButton->SetVisibility(ESlateVisibility::Visible);
 		}
 		bIsPlayButtonClicked = false;
 	}
@@ -120,4 +144,41 @@ void UGS_MainMenuUI::OnExitPopupYesButtonClicked()
 
 void UGS_MainMenuUI::OnExitPopupNoButtonClicked()
 {
+}
+
+void UGS_MainMenuUI::OnFriendListButtonClicked()
+{
+	if (!FriendListOverlay) return;
+
+	if (!FriendListWidgetInstance)
+	{
+		if (FriendListWidgetClass)
+		{
+			FriendListWidgetInstance = CreateWidget<UGS_JoinFriendListWidget>(GetOwningPlayer(), FriendListWidgetClass);
+			if (FriendListWidgetInstance)
+			{
+				FriendListOverlay->AddChild(FriendListWidgetInstance);
+				FriendListOverlay->SetVisibility(ESlateVisibility::Visible);
+				return;
+			}
+		}
+	}
+
+	if (FriendListOverlay->GetVisibility() == ESlateVisibility::Collapsed)
+	{
+		FriendListOverlay->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		FriendListOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void UGS_MainMenuUI::OnTutorialButtonClicked()
+{
+	AGS_MainMenuPC* PC = GetOwningPlayer<AGS_MainMenuPC>();
+	if (PC)
+	{
+		PC->ShowTutorialUI();
+	}
 }

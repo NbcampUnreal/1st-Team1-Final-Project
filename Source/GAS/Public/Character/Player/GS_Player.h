@@ -8,8 +8,10 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UGS_SteamNameWidgetComp;
+class FAkAudioDevice;
 
-USTRUCT(BlueprintType)
+/*USTRUCT(BlueprintType)
 struct FCharacterWantsToMove
 {
 	GENERATED_BODY()
@@ -25,7 +27,7 @@ struct FCharacterWantsToMove
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
 	bool WantsToStrafe = false;
-};
+};*/
 
 USTRUCT(BlueprintType)
 struct FSkillInputControl
@@ -36,7 +38,23 @@ struct FSkillInputControl
 	bool CanInputLC = true; // Left Click
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Control")
 	bool CanInputRC = true; // Right Click
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Control")
+	bool CanInputRoll = true; // SpaceBar;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Control")
+	bool CanInputCtrl = true; // Ctrl
 };
+
+/*UENUM(BlueprintType)
+enum class EInputFlag : uint8
+{
+	None = 0,
+	CanInputLC = (1 << 0),
+	CanInputRC = (1 << 1),
+	CanInputRoll = (1 << 2),
+	CanInputLeftClick = (1 << 3)
+};
+
+ENUM_CLASS_FLAGS(EInputFlag)*/
 
 UCLASS()
 class GAS_API AGS_Player : public AGS_Character
@@ -46,18 +64,17 @@ class GAS_API AGS_Player : public AGS_Character
 public:
 	AGS_Player();
 
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
-	virtual void PossessedBy(AController* NewController) override;
-
-	//component;
+	// component
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Components")
 	TObjectPtr<USpringArmComponent> SpringArmComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Components")
 	TObjectPtr<UCameraComponent> CameraComp;
 
-	// [시야방해]
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TObjectPtr<UGS_SteamNameWidgetComp> SteamNameWidgetComp;
+	
+	// 시야방해
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Components", meta = (AllowPrivateAccess = "true"))
 	class UPostProcessComponent* PostProcessComponent;
 
@@ -66,6 +83,36 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Vision")
 	UMaterialInterface* PostProcessMat;
+
+	UPROPERTY()
+	UCurveFloat* ObscureCurve; // 외부에서 세팅할 수 있음
+
+	// variable
+	UPROPERTY()
+	float WalkSpeed;
+
+	UPROPERTY()
+	float RunSpeed;
+
+	// Wants To Move
+	/*UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	FCharacterWantsToMove WantsToMove;*/
+
+	// 오디오 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* AkComponent;
+
+	// 머리 위치 오디오 리스너 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* HeadAudioListenerComponent;
+
+	// 머리 위치로 사용할 소켓/본 후보 목록 (상위에서부터 우선순위)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	TArray<FName> HeadListenerCandidates;
+
+	// 후보를 찾지 못했을 때 적용할 Z 오프셋(머리 높이 추정치)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	float HeadListenerZOffset = 180.0f;
 
 	UFUNCTION(Client, Reliable)
 	void Client_StartVisionObscured();
@@ -76,37 +123,15 @@ public:
 	void Client_StopVisionObscured();
 
 	void StopVisionObscured();
-
-	FTimeline ObscureTimeline;
-
+	
 	UFUNCTION()
 	void HandleTimelineProgress(float Value);
 
 	UFUNCTION()
 	void OnTimelineFinished();
 
-	UPROPERTY()
-	UCurveFloat* ObscureCurve; // 외부에서 세팅할 수 있음
-
-	bool bIsObscuring = false;
-
-	//variable
-	UPROPERTY()
-	float WalkSpeed;
-
-	UPROPERTY()
-	float RunSpeed;
-
-	//Wants To Move
-	UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	FCharacterWantsToMove WantsToMove;
-
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetUseControllerRotationYaw(bool UseControlRotationYaw);
-
-	// 오디오 컴포넌트
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
-	UAkComponent* AkComponent;
 
 	// 사운드 재생 함수들
 	UFUNCTION(BlueprintCallable, Category = "Audio")
@@ -118,6 +143,9 @@ public:
 	// 오디오 관련 함수들
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void SetupLocalAudioListener();
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void SetupHeadAudioListener();
     
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	bool IsLocalPlayer() const;
@@ -131,19 +159,35 @@ public:
 	virtual void OnDeath() override;
 	
 	// Skll Input Control
-	void SetSkillInputControl(bool CanLeftClick, bool CanRightClick);
-
+	void SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick, bool CanCtrlClick = true);
 	FSkillInputControl GetSkillInputControl();
+	
+	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }
+	virtual void SetCanUseSkill(bool bCanUse) override;
 
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void PossessedBy(AController* NewController) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	FCharacterWantsToMove GetWantsToMove();
-
+	virtual void BeginDestroy() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_SkillComp> SkillComp;
 private:
+	// Input Control Flag
 	UPROPERTY(Replicated)
 	FSkillInputControl SkillInputControl;
+	
+	FTimeline ObscureTimeline;
+
+	bool bIsObscuring;
+
+	void UpdateSteamNameWidgetRotation();
+
+	// 오디오 디바이스 캐싱
+	FAkAudioDevice* CachedAudioDevice = nullptr;
+
 };

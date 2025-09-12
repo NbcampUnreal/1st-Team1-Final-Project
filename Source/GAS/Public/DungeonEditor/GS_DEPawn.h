@@ -32,7 +32,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
@@ -48,4 +48,6 @@ public:
 	void ClickRMB(const FInputActionValue& Value);
 	UFUNCTION()
 	void ReleasedRMB(const FInputActionValue& Value);
+	UFUNCTION()
+	void ClickDelete(const FInputActionValue& Value);
 };

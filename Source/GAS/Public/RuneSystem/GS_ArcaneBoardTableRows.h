@@ -18,10 +18,16 @@ struct FRuneTableRow : public FTableRowBase
 	uint8 RuneID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText RuneName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText Description;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<FIntPoint, UTexture2D*> RuneShape;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<FIntPoint, UTexture2D*> ConnectedRuneShape;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FIntPoint RuneSize;

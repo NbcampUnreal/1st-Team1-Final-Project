@@ -1,9 +1,12 @@
 #include "UI/Screen/GS_CustomLobbyUI.h"
 #include "Components/TextBlock.h"
 #include "System/PlayerController/GS_CustomLobbyPC.h"
+#include "RuneSystem/GS_ArcaneBoardLPS.h"
 #include "CommonUI/Public/CommonButtonBase.h"
 #include "UI/Common/CustomCommonButton.h"
 #include "UI/Common/GS_CommonTwoBtnPopup.h"
+#include "UI/Popup/GS_FriendListWidget.h"
+#include "Components/Overlay.h"
 #include "System/GS_GameInstance.h"
 
 
@@ -48,6 +51,14 @@ void UGS_CustomLobbyUI::NativeConstruct()
 		if (UCommonButtonBase* BackButtonBase = Cast<UCommonButtonBase>(BackButton))
 		{
 			BackButtonBase->OnClicked().AddUObject(this, &UGS_CustomLobbyUI::OnBackButtonClicked);
+		}
+	}
+
+	if (FriendListButton)
+	{
+		if (UCommonButtonBase* FriendListButtonBase = Cast<UCommonButtonBase>(FriendListButton))
+		{
+			FriendListButtonBase->OnClicked().AddUObject(this, &UGS_CustomLobbyUI::OnFriendListButtonClicked);
 		}
 	}
 
@@ -116,7 +127,10 @@ void UGS_CustomLobbyUI::OnBackButtonClicked()
 	{
 		if (PC->HasCurrentModalWidget())
 		{
-			PC->ClearCurrentModalWidget();
+			if (!PC->CheckAndShowUnsavedChangesConfirm())
+			{
+				PC->ClearCurrentModalWidget();
+			}
 			return;
 		}
 	}
@@ -124,6 +138,34 @@ void UGS_CustomLobbyUI::OnBackButtonClicked()
 	CommonPopUpUI->SetDescription(FText::FromString(TEXT("세션을 나가시겠습니까?")));
 	CommonPopUpUI->OnYesClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupYesButtonClicked);
 	CommonPopUpUI->OnNoClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupNoButtonClicked);
+}
+
+void UGS_CustomLobbyUI::OnFriendListButtonClicked()
+{
+	if (!FriendListOverlay) return;
+
+	if (!FriendListWidgetInstance)
+	{
+		if (FriendListWidgetClass)
+		{
+			FriendListWidgetInstance = CreateWidget<UGS_FriendListWidget>(GetOwningPlayer(), FriendListWidgetClass);
+			if (FriendListWidgetInstance)
+			{
+				FriendListOverlay->AddChild(FriendListWidgetInstance);
+				FriendListOverlay->SetVisibility(ESlateVisibility::Visible);
+				return;
+			}
+		}
+	}
+
+	if (FriendListOverlay->GetVisibility() == ESlateVisibility::Collapsed)
+	{
+		FriendListOverlay->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		FriendListOverlay->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
 void UGS_CustomLobbyUI::UpdateRoleSpecificText(EPlayerRole NewRole)
@@ -231,3 +273,18 @@ void UGS_CustomLobbyUI::OnBackPopupNoButtonClicked()
 	CommonPopUpUI->SetVisibility(ESlateVisibility::Hidden);
 }
 
+void UGS_CustomLobbyUI::ShowPerkSaveConfirmPopup()
+{
+	if (CommonPopUpUI)
+	{
+		CommonPopUpUI->SetVisibility(ESlateVisibility::Visible);
+		CommonPopUpUI->SetDescription(FText::FromString(TEXT("변경사항을\n저장하시겠습니까?")));
+
+		AGS_CustomLobbyPC* PC = GetOwningPlayer<AGS_CustomLobbyPC>();
+		if (PC)
+		{
+			CommonPopUpUI->OnYesClicked.BindUObject(PC, &AGS_CustomLobbyPC::OnPerkSaveYes);
+			CommonPopUpUI->OnNoClicked.BindUObject(PC, &AGS_CustomLobbyPC::OnPerkSaveNo);
+		}
+	}
+}

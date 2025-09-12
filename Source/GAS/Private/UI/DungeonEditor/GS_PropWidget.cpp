@@ -37,7 +37,16 @@ void UGS_PropWidget::NativeConstruct()
 		SwitcherButton2->OnClicked.AddDynamic(this, &UGS_PropWidget::PressedSwitcherBtn2);
 		if (SwitcherTitle2)
 		{
-			SwitcherTitle2->SetText(UGS_EnumUtils::GetEnumAsText<EObjectType>(EObjectType::Monster));			
+			SwitcherTitle2->SetText(UGS_EnumUtils::GetEnumAsText<EObjectType>(EObjectType::Monster));
+		}
+	}
+
+	if (SwitcherButton3)
+	{
+		SwitcherButton3->OnClicked.AddDynamic(this, &UGS_PropWidget::PressedSwitcherBtn3);
+		if (SwitcherTitle3)
+		{
+			SwitcherTitle3->SetText(UGS_EnumUtils::GetEnumAsText<EObjectType>(EObjectType::DoorAndWall));
 		}
 	}
 	
@@ -86,6 +95,11 @@ void UGS_PropWidget::PressedSwitcherBtn1()
 void UGS_PropWidget::PressedSwitcherBtn2()
 {
 	SwitchBundle(EObjectType::Monster);
+}
+
+void UGS_PropWidget::PressedSwitcherBtn3()
+{
+	SwitchBundle(EObjectType::DoorAndWall);
 }
 
 void UGS_PropWidget::InitializeBundleSwitcher()
@@ -150,6 +164,11 @@ void UGS_PropWidget::SwitchBundle(EObjectType InObjectType)
 	case EObjectType::Monster:
 		OpenButton(EObjectType::Monster);
 		BundleSwitcher->SetActiveWidgetIndex((UINT)EObjectType::Monster);
+		break;
+
+	case EObjectType::DoorAndWall:
+		OpenButton(EObjectType::DoorAndWall);
+		BundleSwitcher->SetActiveWidgetIndex((UINT)EObjectType::DoorAndWall);
 		break;
 		
 	default:

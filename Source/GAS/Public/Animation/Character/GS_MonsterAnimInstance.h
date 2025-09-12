@@ -13,5 +13,8 @@ UCLASS()
 class GAS_API UGS_MonsterAnimInstance : public UGS_AnimInstance
 {
 	GENERATED_BODY()
-	
+
+public:
+	UFUNCTION()
+	void AnimNotify_SpawnProjectile();
 };

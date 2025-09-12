@@ -4,6 +4,20 @@
   "BasePlatform": "Windows",
   "PluginLibs": [
    {
+    "LibName": "Wwise Parametric EQ",
+    "LibId": "6881283",
+    "Type": "Effect",
+    "DLL": "AkParametricEQ",
+    "StaticLib": "AkParametricEQFX"
+   },
+   {
+    "LibName": "Wwise Delay",
+    "LibId": "6946819",
+    "Type": "Effect",
+    "DLL": "AkDelay",
+    "StaticLib": "AkDelayFX"
+   },
+   {
     "LibName": "Wwise Compressor",
     "LibId": "7077891",
     "Type": "Effect",
@@ -49,6 +63,6 @@
     "Type": "AudioDevice"
    }
   ],
-  "FileHash": "{FFC02D5E-020E-D8C1-1BF2-DA344E52A206}"
+  "FileHash": "{E03C6C87-B80B-11A8-A2B8-81364C2B03F6}"
  }
 }

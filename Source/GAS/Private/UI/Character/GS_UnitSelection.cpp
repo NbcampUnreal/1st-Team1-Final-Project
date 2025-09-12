@@ -5,6 +5,7 @@
 #include "AI/RTS/GS_RTSController.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/UniformGridPanel.h"
@@ -51,13 +52,45 @@ void UGS_UnitSelection::HandleSelectionChanged(const TArray<AGS_Monster*>& NewSe
 
 			OnHPChanged(StatComp); 
 		}
+
+		if (UGS_DebuffComp* DebuffComp = Monster->GetDebuffComp())
+		{
+			if (BoundDebuffComp != DebuffComp)
+			{
+				if (BoundDebuffComp.IsValid())
+				{
+					BoundDebuffComp->OnDebuffListUpdated.RemoveAll(this);
+				}
+				
+				DebuffComp->OnDebuffListUpdated.AddUObject(this, &UGS_UnitSelection::OnDebuffChanged);
+				BoundDebuffComp = DebuffComp;
+			}
+
+			OnDebuffChanged(DebuffComp->GetDebuffList()); 
+		}
+
+		if (UGS_MonsterSkillComp* SkillComp = Monster->GetMonsterSkillComp())
+		{
+			if (BoundSkillComp != SkillComp)
+			{
+				if (BoundSkillComp.IsValid()) 
+				{
+					BoundSkillComp->OnMonsterSkillCooldownChanged.RemoveAll(this);
+				}
+
+				SkillComp->OnMonsterSkillCooldownChanged.AddDynamic(this, &UGS_UnitSelection::OnSkillCooldownChanged);
+				BoundSkillComp = SkillComp;
+
+				OnSkillCooldownChanged(SkillComp->GetSkillCooldownRemaining(), SkillComp->GetSkillMaxCooltime());
+			}
+		}
 	}
 	else
 	{
 		SelectionSwitcher->SetActiveWidgetIndex(1);
 		MultiIconsGrid->ClearChildren();
 
-		const int32 Cols = 5;  
+		const int32 Cols = 6;  
 		int32 Index = 0;
 		for (AGS_Monster* Monster : NewSelection)
 		{
@@ -82,7 +115,40 @@ void UGS_UnitSelection::OnHPChanged(UGS_StatComp* InStatComp)
 	HPText->SetText(FText::FromString(FString::Printf(TEXT("%d"),FMath::RoundToInt(InStatComp->GetCurrentHealth()))));
 }
 
+void UGS_UnitSelection::OnDebuffChanged(const TArray<FDebuffRepInfo>& List)
+{
+	static const UEnum* EnumPtr = StaticEnum<EDebuffType>();
+	TArray<FString> DebuffNames;
+	
+	for (const FDebuffRepInfo& Debuff : List)
+	{
+		FText Display = EnumPtr->GetDisplayNameTextByValue(int64(Debuff.Type));
+		DebuffNames.Add(Display.ToString());
+	}
+	
+	FString Result = FString::Join(DebuffNames, TEXT(" | "));
+	DebuffText->SetText(FText::FromString(Result));
+}
+
 AGS_RTSController* UGS_UnitSelection::GetRTSController() const
 {
 	return Cast<AGS_RTSController>(GetOwningPlayer());
+}
+
+void UGS_UnitSelection::OnSkillCooldownChanged(float CooldownRemaining, float TotalCooldown)
+{
+	if (!SkillCooldownText)
+	{
+		return;
+	}
+
+	if (CooldownRemaining <= 0.0f)
+	{
+		SkillCooldownText->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		SkillCooldownText->SetText(FText::FromString(FString::Printf(TEXT("%d"), FMath::RoundToInt(CooldownRemaining))));
+		SkillCooldownText->SetVisibility(ESlateVisibility::Visible);
+	}
 }

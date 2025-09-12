@@ -13,6 +13,7 @@
 
 // Forward Declarations
 class UNiagaraSystem;
+class UNiagaraComponent;
 class UAkAudioEvent;
 class UMaterialInterface;
 
@@ -58,6 +59,19 @@ public:
 	void HandleFootstep(EFootStep Foot);
 
 	/**
+	 * 특정 Niagara 시스템으로 발자국 먼지 효과를 강제.
+	 * @param VFXSystem 오버라이드할 Niagara 시스템. nullptr을 전달하면 오버라이드가 해제.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep")
+	void OverrideFootDustEffect(UNiagaraSystem* VFXSystem);
+
+	/**
+	 * 발자국 먼지 효과 오버라이드를 해제하고 원래 로직으로 되돌림림.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep")
+	void ClearFootDustEffectOverride();
+
+	/**
 	 * FoleyEvent와 호환되는 자동 발걸음 처리 함수
 	 * 발의 위치와 속도를 분석하여 자동으로 발걸음 감지
 	 */
@@ -69,6 +83,42 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Footstep")
 	void ToggleAutoDetection(bool bEnable) { bAutoDetectionEnabled = bEnable; }
+
+	/**
+	 * 물 소리 테스트용 함수 - 강제로 물 표면 발걸음 재생
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep|Debug")
+	void TestWaterFootstep();
+
+	/**
+	 * 현재 서 있는 표면 타입을 반환하는 디버그 함수
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep|Debug")
+	int32 GetCurrentSurfaceType();
+
+	/**
+	 * 물 관련 나이아가라 VFX 동적 설정 함수
+	 * @param EffectType 설정할 이펙트 타입 (0: Splash, 1: DeepWater, 2: Ripple, 3: Bubble, 4: Mist)
+	 * @param NiagaraSystem 설정할 나이아가라 시스템
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep|Water VFX")
+	void SetWaterVFX(int32 EffectType, UNiagaraSystem* NiagaraSystem);
+
+	/**
+	 * 물 깊이에 따른 적절한 이펙트 선택
+	 * @param WaterDepth 물 깊이 (cm)
+	 * @return 선택된 나이아가라 시스템
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep|Water VFX")
+	UNiagaraSystem* GetWaterEffectByDepth(float WaterDepth);
+
+	/**
+	 * 모든 물 이펙트를 한번에 스폰 (조합 효과)
+	 * @param Location 스폰 위치
+	 * @param WaterDepth 물 깊이
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Footstep|Water VFX")
+	void SpawnCombinedWaterEffects(const FVector& Location, float WaterDepth = 10.0f);
 
 protected:
 	// Called when the game starts
@@ -129,6 +179,42 @@ protected:
 	/** 물리 표면별 먼지 VFX 맵 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Assets")
 	TMap<TEnumAsByte<EPhysicalSurface>, UNiagaraSystem*> FootDustEffects;
+
+	/** 물 표면에서의 특별한 처리 활성화 여부 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water")
+	bool bEnableWaterEffects = true;
+
+	/** 물 표면에서의 물보라 크기 배율 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water", meta = (ClampMin = "0.1", ClampMax = "5.0"))
+	float WaterSplashScale = 1.0f;
+
+	/** 물 관련 나이아가라 VFX 시스템들 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX")
+	UNiagaraSystem* WaterSplashEffect;
+
+	/** 깊은 물에서의 나이아가라 VFX */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX")
+	UNiagaraSystem* DeepWaterSplashEffect;
+
+	/** 물 파동 나이아가라 VFX */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX")
+	UNiagaraSystem* WaterRippleEffect;
+
+	/** 물 거품 나이아가라 VFX */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX")
+	UNiagaraSystem* WaterBubbleEffect;
+
+	/** 물 안개 나이아가라 VFX */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX")
+	UNiagaraSystem* WaterMistEffect;
+
+	/** 물 깊이에 따른 이펙트 전환 임계값 (cm) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX", meta = (ClampMin = "1.0", ClampMax = "100.0"))
+	float DeepWaterThreshold = 20.0f;
+
+	/** 물 이펙트 동시 재생 개수 제한 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Footstep|Water VFX", meta = (ClampMin = "1", ClampMax = "5"))
+	int32 MaxConcurrentWaterEffects = 3;
 
 	// ======== Blueprint Events  ========
 
@@ -219,6 +305,10 @@ private:
 	/** 캐시된 스켈레탈 메시 컴포넌트 */
 	UPROPERTY()
 	USkeletalMeshComponent* CachedSkeletalMesh;
+
+	/** 오버라이드된 발자국 먼지 VFX */
+	UPROPERTY()
+	UNiagaraSystem* OverriddenFootDustEffect;
 
 	// ======== Socket Names ========
 

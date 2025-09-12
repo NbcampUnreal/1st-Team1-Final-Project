@@ -3,8 +3,10 @@
 
 #include "UI/RuneSystem/GS_RuneGridCellWidget.h"
 #include "UI/RuneSystem/GS_ArcaneBoardWidget.h"
+#include "RuneSystem/GS_ArcaneBoardManager.h"
 #include "Components/Image.h"
 #include "Components/Border.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 
 UGS_RuneGridCellWidget::UGS_RuneGridCellWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -17,6 +19,29 @@ void UGS_RuneGridCellWidget::NativeConstruct()
 	Super::NativeConstruct();
 }
 
+void UGS_RuneGridCellWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+
+	if (ParentBoardWidget)
+	{
+		if(CellData.PlacedRuneID > 0)
+		{
+			FVector2D MousePos = InMouseEvent.GetScreenSpacePosition();
+			if (APlayerController* PC = GetOwningPlayer())
+			{
+				FGeometry ScreenGeometry = UWidgetLayoutLibrary::GetPlayerScreenWidgetGeometry(PC);
+				MousePos = ScreenGeometry.AbsoluteToLocal(MousePos);
+			}
+			ParentBoardWidget->RequestShowTooltip(CellData.PlacedRuneID, MousePos);
+		}
+		else
+		{
+			ParentBoardWidget->HideTooltip();
+		}
+	}
+}
+
 void UGS_RuneGridCellWidget::InitCell(const FGridCellData& InCellData, UGS_ArcaneBoardWidget* InParentBoard)
 {
 	ParentBoardWidget = InParentBoard;
@@ -27,7 +52,11 @@ void UGS_RuneGridCellWidget::InitCell(const FGridCellData& InCellData, UGS_Arcan
 void UGS_RuneGridCellWidget::SetCellData(const FGridCellData& InCellData)
 {
 	CellData = InCellData;
-	SetRuneTexture(CellData.RuneTextureFrag);
+
+	UTexture2D* TextureToUse = CellData.bIsConnected && CellData.ConnectedRuneTextureFrag ?
+		CellData.ConnectedRuneTextureFrag : CellData.RuneTextureFrag;
+
+	SetRuneTexture(TextureToUse);
 
 	if (CellData.bIsSpecialCell)
 	{
@@ -61,6 +90,11 @@ void UGS_RuneGridCellWidget::SetPreviewVisualState(EGridCellVisualState NewState
 			CellBG->SetVisibility(ESlateVisibility::Hidden);
 			PreviewImage->SetVisibility(ESlateVisibility::Visible);
 			PreviewImage->SetColorAndOpacity(FLinearColor(0.f, 1.f, 0.f, 0.2f));
+			break;
+		case EGridCellVisualState::ReplaceExisting:
+			CellBG->SetVisibility(ESlateVisibility::Hidden);
+			PreviewImage->SetVisibility(ESlateVisibility::Visible);
+			PreviewImage->SetColorAndOpacity(FLinearColor(1.f, 0.65f, 0.f, 0.2f)); // 주황색
 			break;
 		case EGridCellVisualState::Invalid:
 			CellBG->SetVisibility(ESlateVisibility::Hidden);

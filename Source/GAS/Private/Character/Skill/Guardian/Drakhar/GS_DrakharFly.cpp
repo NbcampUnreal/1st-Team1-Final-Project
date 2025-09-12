@@ -1,7 +1,8 @@
-﻿#include "Character/Skill/Guardian/Drakhar/GS_DrakharFly.h"
-
-#include "Character/GS_Character.h"
+#include "Character/Skill/Guardian/Drakhar/GS_DrakharFly.h"
+#include "Character/Player/GS_Player.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 UGS_DrakharFly::UGS_DrakharFly()
 {
@@ -12,6 +13,8 @@ UGS_DrakharFly::UGS_DrakharFly()
 
 void UGS_DrakharFly::ActiveSkill()
 {
+	Super::ActiveSkill();
+	
 	if (!CanActive())
 	{
 		return;
@@ -23,29 +26,34 @@ void UGS_DrakharFly::ActiveSkill()
 
 	bIsFlying = true;
 	
-	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
+	if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter))
 	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ready, true);
+		Drakhar->MulticastRPC_OnFlyStart();
 	}
+	
 	ExecuteSkillEffect();
 }
 
-void UGS_DrakharFly::DeactiveSkill()
+void UGS_DrakharFly::OnSkillCanceledByDebuff()
 {
 	bIsFlying = false;
-
-	if (OwnerCharacter && OwnerCharacter->GetSkillComp())
+	
+	if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter))
 	{
-		OwnerCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Ready, false);
+		Drakhar->MulticastRPC_OnFlyEnd();
+		Drakhar->GuardianDoSkillState = EGuardianDoSkill::None;
+		Drakhar->GuardianState = EGuardianCtrlState::CtrlEnd;
 	}
-
+	
 	ExecuteSkillEffect();
 }
+
 
 void UGS_DrakharFly::ExecuteSkillEffect()
 {
 	if (bIsFlying)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("drakhar Fly Skill Execute Effect"));
 		OwnerCharacter->MulticastRPCPlaySkillMontage(SkillAnimMontages[0]);
 	}
 	else

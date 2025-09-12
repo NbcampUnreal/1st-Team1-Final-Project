@@ -1,59 +1,58 @@
 ﻿#include "UI/Character/GS_HPBoardWidget.h"
 
 #include "Character/GS_Character.h"
+#include "Character/Player/GS_Player.h"
 #include "Components/VerticalBox.h"
 #include "GameFramework/GameStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "System/GS_PlayerState.h"
 #include "UI/Character/GS_HPWidget.h"
+#include "UI/Character/GS_PlayerInfoWidget.h"
 
 void UGS_HPBoardWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT]--------------Start???")));
-
-	InitBoardWidget();
+	if (IsValid(GetOwningPlayer()->GetPawn()))
+	{
+		OwningCharacter = Cast<AGS_Character>(GetOwningPlayer()->GetPawn());
+	}
+	
+	FTimerHandle WidgetTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(WidgetTimerHandle, this, &UGS_HPBoardWidget::InitBoardWidget, 3.f);
 }
 
 void UGS_HPBoardWidget::InitBoardWidget()
 {
-	if (!IsValid(HPWidgetClass) || !IsValid(HPWidgetList))
+	if (!IsValid(PlayerInfoWidgetClass) || !IsValid(PlayerInfoWidgetList))
 	{
 		return;
 	}
-
-	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT]--------------Init???")));
-
-	HPWidgetList->ClearChildren();
+	
+	PlayerInfoWidgetList->ClearChildren();
 
 	AGameStateBase* GS = UGameplayStatics::GetGameState(this);
 	if (IsValid(GS))
 	{
-		TArray<APlayerState*> PSA = GS->PlayerArray;
-
+		TArray<APlayerState*> PSA = GS->PlayerArray; 
 		for (APlayerState* PS : PSA)
 		{
-			UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT]--------------find PS???")));
-			
 			AGS_PlayerState* GSPS = Cast<AGS_PlayerState>(PS);
 			if (IsValid(GSPS))
 			{
-				UGS_HPWidget* HPWidget = CreateWidget<UGS_HPWidget>(this, HPWidgetClass);
-				if (IsValid(HPWidget))
+				UGS_PlayerInfoWidget* PlayerInfoWidget = CreateWidget<UGS_PlayerInfoWidget>(this, PlayerInfoWidgetClass);
+				if (IsValid(PlayerInfoWidget))
 				{
-					UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT]--------------find HPWidget???")));
-					UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT]----%s--------find GSPS???"),*GSPS->GetName()));
-					
-					AGS_Character* Character = Cast<AGS_Character>(GSPS->GetPawn());
-					if (IsValid(Character))
+					AGS_Player* Player = Cast<AGS_Player>(GSPS->GetPawn());
+					if (IsValid(Player) && Player != OwningCharacter)
 					{
-						UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT]-----%s-------Find Character???"),*Character->GetName()));
-						UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT]-------------Find Character???")));
-
-						HPWidget->SetOwningActor(Character);
-						HPWidget->InitializeHPWidget(Character->GetStatComp());
-						HPWidgetList->AddChildToVerticalBox(HPWidget);
+						if (GSPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+						{
+							continue;
+						}
+						PlayerInfoWidget->SetOwningActor(Player);
+						PlayerInfoWidget->InitializePlayerInfoWidget(Player);
+						PlayerInfoWidgetList->AddChildToVerticalBox(PlayerInfoWidget);
 					}
 				}
 			}

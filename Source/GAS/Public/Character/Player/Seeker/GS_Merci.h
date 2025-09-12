@@ -7,12 +7,14 @@
 #include "Character/Interface/GS_AttackInterface.h"
 #include "AkGameplayTypes.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrowNormal.h"
+#include "Animation/Character/E_SeekerAnim.h"
 #include "GS_Merci.generated.h"
 
 class AGS_SeekerMerciArrow;
 class UAkComponent;
 class UGS_ArrowTypeWidget;
 class UNiagaraSystem;
+class UGS_CrossHairImage;
 
 UCLASS()
 class GAS_API AGS_Merci : public AGS_Seeker, public IGS_AttackInterface
@@ -33,6 +35,8 @@ public:
 	virtual void LeftClickPressed_Implementation() override;
 	virtual void LeftClickRelease_Implementation() override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	// 화살 발사 VFX
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayArrowShotVFX(FVector Location, FRotator Rotation, int32 NumArrows);
@@ -40,11 +44,19 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayArrowShotSound();
 
+	// getter
+	UFUNCTION(BlueprintCallable, Category = "Arrow")
+	int32 GetMaxAxeArrows();
+
+	UFUNCTION(BlueprintCallable, Category = "Arrow")
+	int32 GetMaxChildArrows();
+
+	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
-	UUserWidget* WidgetCrosshair;
+	UGS_CrossHairImage* WidgetCrosshair;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess="true"))
 	USkeletalMeshComponent* Quiver;
@@ -87,6 +99,35 @@ public:
 
 	void SetArrowTypeWidget(UGS_ArrowTypeWidget* Widget) { ArrowTypeWidget = Widget; }
 
+	// Auto Aiming
+	void SetAutoAimTarget(AActor* Target);
+
+	// Camera Control
+	UFUNCTION(Client, Reliable)
+	void Client_StartZoom();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StopZoom();
+
+	//Crosshair
+	UFUNCTION(BlueprintCallable, Category = "Crosshair")
+	void SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget);
+
+	UFUNCTION(Client, Reliable)
+	void Client_UpdateCrosshairAim(bool bAiming);
+
+	UFUNCTION(Client, Reliable)
+	void Client_ShowCrosshairHitFeedback();
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlayHitFeedbackSound();
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlayArrowEmptySound();
+
+	UFUNCTION(Client, Reliable)
+	void Client_UpdateTargetUI(AActor* NewTarget, AActor* OldTarget);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -115,19 +156,7 @@ protected:
 	UFUNCTION()
 	void UpdateZoom(float Alpha);
 
-	// 활 관련 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
-	UAkAudioEvent* BowPullSound; // 활 당길 때(클릭)
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
-	UAkAudioEvent* BowReleaseSound; // 활 놓을 때(릴리즈)
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
-	UAkAudioEvent* ArrowShotSound; // 활 놓을 때(릴리즈)
-
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
-
-	// [화살 관리]
 	
 private:
 	UGS_ArrowTypeWidget* ArrowTypeWidget;
@@ -144,20 +173,13 @@ private:
 	void Multicast_PlayDrawMontage(UAnimMontage* Montage);
 
 	UFUNCTION(Client, Reliable)
-	void Client_SetWidgetVisibility(bool bVisible);
-
-	UFUNCTION(Client, Reliable)
-	void Client_StartZoom();
-
-	UFUNCTION(Client, Reliable)
-	void Client_StopZoom();
+	void Client_SetWidgetVisibility(bool bVisible);	
 
 	UFUNCTION(Client, Reliable)
 	void Client_PlaySound(UAkComponent* SoundComp);
 
 	bool bIsFullyDrawn = false;
-
-
+	
 	// [화살 관리]
 	int32 MaxAxeArrows = 5;
 	int32 MaxChildArrows = 3;
@@ -189,4 +211,16 @@ private:
 
 	UFUNCTION()
 	void RegenChildArrow();
+
+	// Auto Aiming
+	UPROPERTY(ReplicatedUsing = OnRep_AutoAimTarget)
+	AActor* AutoAimTarget;
+
+	UFUNCTION()
+	void OnRep_AutoAimTarget();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Client_DrawDebugSphere(FVector Loc, float Radius, FColor Color, float Duration);
+
+	bool Zooming = false;
 };

@@ -7,6 +7,9 @@ State	ID	Name	State Group			Notes
 	979765101	Win	GameTheme			
 	1160234136	Normal	GameTheme			
 
+Game Parameter	ID	Name			Wwise Object Path	Notes
+	3474855001	Occlusion_Disable			\Default Work Unit\Occlusion_Disable	
+
 Audio Bus	ID	Name			Wwise Object Path	Notes
 	3803692087	Master Audio Bus			\Default Work Unit\Master Audio Bus	
 

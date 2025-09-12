@@ -3,15 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/GS_BasePlayerController.h"
 #include "Character/GS_Character.h"
+#include "UI/Character/GS_CrossHairImage.h"
+#include "Character/Skill/ESkill.h"
 #include "GS_TpsController.generated.h"
 
+class UGS_GameInstance;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
-USTRUCT(BlueprintType)
+/*USTRUCT(BlueprintType)
 struct FControlValue
 {
 	GENERATED_BODY()
@@ -38,10 +41,10 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool bCanMoveRight;
-};
+};*/
 
 UCLASS()
-class GAS_API AGS_TpsController : public APlayerController
+class GAS_API AGS_TpsController : public AGS_BasePlayerController
 {
 	GENERATED_BODY()
 
@@ -88,10 +91,14 @@ public:
 	void PageUp(const FInputActionValue& InputValue);
 	void PageDown(const FInputActionValue& InputValue);
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void AddWidget();
 	void InitControllerPerWorld();
 
+	UFUNCTION(Server, Reliable)
+	void Server_NotifyPlayerIsReady();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StartGame();
+	
 	//[Spectate Other Player]
 	UFUNCTION(Server, Unreliable)
 	void ServerRPCSpectatePlayer();
@@ -113,9 +120,67 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Control")
 	FRotator LastRotatorInMoving;
 
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Control")
+	FVector2D MoveInputValue;
+
+	UFUNCTION(Server, Reliable)
+	void Server_CacheMoveInputValue(FVector2D InputValue);
+
+	UFUNCTION(BlueprintCallable)
+	void TestFunction();
+	
+	//마우스 민감도 관련 함수
+	UFUNCTION(BlueprintCallable, Category = "Settings")
+	float GetCurrentMouseSensitivity() const;
+
+	//메르시 크로스헤어 위젯
+	UFUNCTION(BlueprintCallable, Category = "UI")
+	UGS_CrossHairImage* GetCrosshairWidget() const { return CrosshairWidget; }
+
+	// Auto Moving (KCY)
+	void StartAutoMoveForward();
+	void StopAutoMoveForward();
+	
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void PostSeamlessTravel() override;
 	virtual void BeginPlayingState() override;
+
+	//게임 인스턴스 참조
+	UPROPERTY(BlueprintReadOnly, Category = "Settings")
+	UGS_GameInstance* GameInstance;
+
+	//메르시 크로스헤어 위젯
+	UPROPERTY(BlueprintReadOnly, Category = "UI")
+	UGS_CrossHairImage* CrosshairWidget;
+
+	void SnapCameraToCharacterYaw();
+
+private:
+	// Auto Moving (KCY)
+	FTimerHandle AutoMoveTickHandle;
+	
+	UPROPERTY(Replicated)
+	bool bIsAutoMoving = false;
+
+	void AutoMoveTick();
+	void ApplyChargeCameraSettings(bool bCharging);
+	void SaveOriginalCameraSettings();
+	void RestoreOriginalCameraSettings();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StartAutoMoveForward();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StopAutoMoveForward();
+
+	// 돌진 시 원래 카메라 설정 저장용 (KCY)
+	bool bOriginalUseControllerRotationYaw = true;
+	bool bOriginalOrientRotationToMovement = false;
+	bool bOriginalUsePawnControlRotation = true;
+	bool bOriginalEnableCameraLag = true;
+	bool bOriginalEnableCameraRotationLag = true;
+	bool bOriginalInheritYaw = true;
 };

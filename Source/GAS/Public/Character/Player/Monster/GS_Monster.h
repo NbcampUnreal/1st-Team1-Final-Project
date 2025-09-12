@@ -7,13 +7,13 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "AkGameplayStatics.h"
 #include "MonsterDataAsset.h"
-#include "Weapon/GS_Weapon.h"
-#include "Components/SphereComponent.h"
-#include "Character/Player/GS_Player.h"
 #include "Sound/GS_MonsterAudioComponent.h"
 #include "GS_Monster.generated.h"
 
+class UWidgetComponent;
+class UGS_MonsterSkillComp;
 class UGS_MonsterAnimInstance;
+class UGS_DebuffVFXComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMonsterDead, AGS_Monster*, DeadUnit);
 
@@ -24,9 +24,12 @@ class GAS_API AGS_Monster : public AGS_Character
 
 public:
 	AGS_Monster();
+	
+	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
+	bool bCommandLocked;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RVO")
-	float AvoidanceRadius = 200.0f;
+	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
+	bool bSelectionLocked;
 	
 	UPROPERTY(EditAnywhere, Category = "AI")
 	UBehaviorTree* BTAsset;
@@ -37,39 +40,29 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackMontage;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* ClickSoundEvent;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* MoveSoundEvent;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Data")
 	UMonsterDataAsset* MonsterData;
-
-	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
-	bool bCommandLocked = false;
-
-	UPROPERTY(Replicated, BlueprintReadOnly, Category="RTS")
-	bool bSelectionLocked = false;
 
 	UPROPERTY(BlueprintAssignable, Category="Dead")
 	FOnMonsterDead OnMonsterDead;
 
-	// ===================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
+	TObjectPtr<UWidgetComponent> SkillCooldownWidgetComp;
+	
 	// 전투 음악 관련 (BGM 이벤트만 유지, 트리거는 제거)
-	// ===================
-
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAkAudioEvent* CombatMusicEvent;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAkAudioEvent* CombatMusicStopEvent;
-
-	// ===================
+	
 	// 몬스터 오디오 컴포넌트
-	// ===================
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	class UGS_MonsterAudioComponent* MonsterAudioComponent;
+	
+	// 디버프 VFX 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
+	UGS_DebuffVFXComponent* DebuffVFXComponent;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();
@@ -77,7 +70,9 @@ public:
 	FORCEINLINE bool IsCommandable() const { return !bCommandLocked; }
 	FORCEINLINE bool IsSelectable() const { return !bSelectionLocked; }
 	
-	void SetSelected(bool bIsSelected, bool bPlaySound = true);
+	void SetSelected(bool bSelected, bool bPlaySound = true);
+	
+	virtual void SetCanUseSkill(bool bCanUse) override;
 
 	UFUNCTION(BlueprintCallable, Category = "AI")
 	virtual void Attack();
@@ -96,21 +91,47 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Data")
 	FText GetTypeName() const { return MonsterData ? MonsterData->TypeName : FText::GetEmpty(); }
+
+	FORCEINLINE UGS_MonsterSkillComp* GetMonsterSkillComp() const { return MonsterSkillComp; }
+
+	UFUNCTION(BlueprintCallable, Category = "Skill")
+	virtual void UseSkill();
+
+	void ShowTargetUI(bool bIsActive);
 	
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void PostInitializeComponents() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual void Tick(float DeltaTime) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+  
 
-	virtual void OnDeath() override;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Skill")
+	TObjectPtr<UGS_MonsterSkillComp> MonsterSkillComp;
 	
 	UPROPERTY()
 	TObjectPtr<UGS_MonsterAnimInstance> MonsterAnim;
-	
-	UPROPERTY(VisibleAnywhere)
-	UDecalComponent* SelectionDecal;
 
 	UPROPERTY(VisibleAnywhere)
 	UAkComponent* AkComponent;
-}; 
+
+	// 몬스터 조준 3D UI
+	UPROPERTY(EditDefaultsOnly, Category="UI")
+	UWidgetComponent* TargetedUIComponent;
+
+	void HandleDelayedDestroy();
+	virtual void OnDeath() override;
+
+	UFUNCTION()
+	void HandleSkillCooldownChanged(float InCurrentCoolTime, float InMaxCoolTime);
+
+	virtual FLinearColor GetCurrentDecalColor() override;
+	virtual void UpdateDecal() override;
+	virtual bool ShowDecal() override;
+	
+private:
+	bool bIsSelected;
+
+	void UpdateSkillCooldownWidget();
+};

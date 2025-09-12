@@ -3,63 +3,78 @@
 
 #include "Character/Component/Seeker/GS_ChanSkillInputHandlerComp.h"
 #include "Character/Skill/GS_SkillComp.h"
-#include "Character/GS_Character.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 
 void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Instance)
 {
-	Super::OnRightClick(Instance);
+	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
 
-	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputRC)
+	if (OwnerCharacter->IsDead())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Right Click Lock"));
 		return;
 	}
 	
+	Super::OnRightClick(Instance);
+
 	if (!bCtrlHeld)
 	{
-		if (!OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
-		{
-			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
-		}
+		ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
 	}
 	else
 	{
-		OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
+		ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	}
 }
 
 void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Instance)
 {
 	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
-
-	if (!Cast<AGS_Player>(OwnerCharacter)->GetSkillInputControl().CanInputLC)
+	if (OwnerCharacter->IsDead())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Left Click Lock"));
 		return;
 	}
+	
+	Super::OnLeftClick(Instance);
 	
 	if (!bCtrlHeld)
 	{
 		if (ChanCharacter)
 		{
-			if (OwnerCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
+			if (ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
 			{
-				OwnerCharacter->GetSkillComp()->TrySkillCommand(ESkillSlot::Aiming);
+				ChanCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Aiming);
 			}
 			else
 			{
-				ChanCharacter->OnComboAttack();
-			} 
+				ChanCharacter->Server_OnComboAttack();
+			}
 		}
 	}
 	else
 	{
 		if (ChanCharacter)
 		{
-			//ChanCharacter->Multicast_SetUseControllerRotationYaw(false);
-			OwnerCharacter->GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+			ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
 		}
 	}
+}
+
+void UGS_ChanSkillInputHandlerComp::OnRoll(const struct FInputActionInstance& Instance)
+{
+	AGS_Chan* ChanCharacter = Cast<AGS_Chan>(OwnerCharacter);
+	
+	Super::OnRoll(Instance);
+	
+	if (ChanCharacter)
+	{
+		ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Rolling);
+	}
+
+	return;
+}
+
+void UGS_ChanSkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& Instance)
+{
+	Super::OnKeyReset(Instance);
 }
 

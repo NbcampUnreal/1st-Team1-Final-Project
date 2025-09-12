@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -18,8 +18,11 @@ class GAS_API UGS_SeekerSkillBase : public UGS_SkillBase
 	
 protected:
 	virtual void ActiveSkill() override;
-	virtual void DeactiveSkill() override;
+	virtual void OnSkillCanceledByDebuff() override;
+	virtual void OnSkillAnimationEnd() override;
 	virtual void ApplyEffectToGuardian(AGS_Guardian* Target);
 	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target);
 	virtual void ExecuteSkillEffect() override;
+
+	FName CalRollDirection();
 };

@@ -1,6 +1,7 @@
 ﻿#include "Animation/Notifies/GS_ANS_DrakharDash.h"
 
 #include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Character/Skill/GS_SkillComp.h"
 
 void UGS_ANS_DrakharDash::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
@@ -23,6 +24,10 @@ void UGS_ANS_DrakharDash::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequ
 		if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner))
 		{
 			//attack and moving
+			if (Drakhar->HasAuthority())
+			{
+				return;
+			}
 			Drakhar->ServerRPCDoDash(FrameDeltaTime);
 		}
 	}
@@ -36,9 +41,19 @@ void UGS_ANS_DrakharDash::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeque
 	{
 		if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(Owner))
 		{
-			Drakhar->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			//데미지 처리
+			if (Drakhar->HasAuthority())
+			{
+				return;
+			}
+			//damage
 			Drakhar->ServerRPCEndDash();
+			//Drakhar->ClientGuardianDoSkillState = EGuardianDoSkill::None;
+
+			/*if (Drakhar->GetLocalRole() == ENetRole::ROLE_AutonomousProxy)
+			{
+				Drakhar->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ready);
+			}*/
 		}
 	}
+	
 }

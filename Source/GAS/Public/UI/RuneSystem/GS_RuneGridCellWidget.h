@@ -10,9 +10,10 @@
 UENUM(BlueprintType)
 enum class EGridCellVisualState : uint8
 {
-    Normal      UMETA(DisplayName = "Normal"),
-    Valid       UMETA(DisplayName = "Valid"),
-    Invalid     UMETA(DisplayName = "Invalid")
+    Normal          UMETA(DisplayName = "Normal"),
+    Valid           UMETA(DisplayName = "Valid"),
+    Invalid         UMETA(DisplayName = "Invalid"),
+    ReplaceExisting UMETA(DisplayName = "ReplaceExisting")
 };
 
 class UImage;
@@ -31,6 +32,8 @@ public:
 
     virtual void NativeConstruct() override;
 
+    virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+    
     UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
     void InitCell(const FGridCellData& InCellData, UGS_ArcaneBoardWidget* InParentBoard);
 

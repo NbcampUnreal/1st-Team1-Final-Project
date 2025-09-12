@@ -9,6 +9,18 @@
 #include "GS_PawnMappingDataAsset.generated.h"
 
 USTRUCT(BlueprintType)
+struct FWeaponMeshPair
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName SocketName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	USkeletalMesh* WeaponSkeletalMeshClass;
+};
+
+USTRUCT(BlueprintType)
 struct FAssetToSpawn
 {
     GENERATED_BODY()
@@ -17,16 +29,31 @@ struct FAssetToSpawn
     TSubclassOf<APawn> PawnClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    TSubclassOf<AActor> DefaultActor;
+    TSubclassOf<AActor> DisplayActorClass; // SKM 레플리케이션 용
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    TObjectPtr<UAnimMontage> ReadyPose;
+    USkeletalMesh* SkeletalMeshClass;
+	
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+    TSubclassOf<UAnimInstance> Lobby_AnimBlueprintClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    TObjectPtr<UAnimMontage> WinPose;
+    TObjectPtr<UAnimationAsset> WinPose;
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
-    TObjectPtr<UAnimMontage> LosePose;
+    TObjectPtr<UAnimationAsset> LosePose;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+    TObjectPtr<UTexture2D> AvatarTexture;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+    TObjectPtr<UTexture2D> ClassIconTexture;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+	TArray<FWeaponMeshPair> WeaponMeshList;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Setup")
+	TArray<USkeletalMesh*> SubSkeletalMeshList;
 };
 
 UCLASS(BlueprintType)

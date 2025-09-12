@@ -5,7 +5,6 @@
 #include "AI/GS_AIController.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/GS_Character.h"
-#include "BehaviorTree/BlackboardComponent.h"
 
 void UGS_DebuffConfuse::OnApply() 
 {
