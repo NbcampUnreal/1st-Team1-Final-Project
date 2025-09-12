@@ -36,12 +36,6 @@ void UGS_AresSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	
 	AGS_Ares* Ares = Cast<AGS_Ares>(OwnerCharacter);
 	
-	/*if (!(Ares->GetSkillInputControl().CanInputLC))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Left Click Lock"));
-		return;
-	}*/
-	
 	if (OwnerCharacter->IsDead())
 	{
 		return;

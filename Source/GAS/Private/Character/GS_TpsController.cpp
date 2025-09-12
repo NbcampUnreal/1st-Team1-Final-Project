@@ -214,8 +214,23 @@ void AGS_TpsController::InitControllerPerWorld()
 	}
 }
 
+void AGS_TpsController::Client_PrepareForMatchStart_Implementation()
+{
+	// 로딩 스크린 제거되기 전에 먼저 수행되어야 할 것들 여기 넣기.
+	FTimerHandle PTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(PTimerHandle, this, &AGS_TpsController::OnIntroFinished, 3.0f, false);
+}
+
+void AGS_TpsController::OnIntroFinished()
+{
+	// 로딩 스크린 제거되기 전에 수행되어야 하지만 우선순위가 낮은 것들 여기 넣기. 없으면 이 함수 지워도 됨
+	UE_LOG(LogTemp, Warning, TEXT("OnIntroFinished() 호출"));
+	Server_NotifyPlayerIsReady();
+}
+
 void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Server_NotifyPlayerIsReady_Implementation() 호출"));
 	if (AGS_BaseGM* GM = GetWorld()->GetAuthGameMode<AGS_BaseGM>())
 	{
 		GM->NotifyPlayerIsReady(this);
@@ -224,8 +239,15 @@ void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
 
 void AGS_TpsController::Client_StartGame_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("준비 완료. TODO: 화면 가리개 제거"));
-	//TODO: 로딩스크린 제거
+	UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!!!!!!Client_StartGame_Implementation() 호출!!!!!!!!!!!!!!!!!!!!!!!!!"));
+	TryCreatingPlayerWidget();
+
+	if (LoadingScreenWidgetInstance)
+	{
+		LoadingScreenWidgetInstance->RemoveFromParent();
+		LoadingScreenWidgetInstance = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("로딩 스크린 제거 완료"));
+	}
 }
 
 void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
@@ -274,6 +296,7 @@ void AGS_TpsController::Server_CacheMoveInputValue_Implementation(FVector2D Inpu
 
 void AGS_TpsController::TestFunction()
 {
+	UE_LOG(LogTemp, Warning, TEXT("=================TestFunction 호출==================="));
 	AGS_Character* GS_Character = Cast<AGS_Character>(GetPawn());
 	if (IsValid(GS_Character))
 	{		
@@ -325,6 +348,10 @@ void AGS_TpsController::TestFunction()
 			}
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("TestFunction 호출 시 Pawn이 유효하지 않습니다!"));
+	}
 }
 
 void AGS_TpsController::StartAutoMoveForward()
@@ -337,6 +364,34 @@ void AGS_TpsController::StopAutoMoveForward()
 {
 	bIsAutoMoving = false;
 	Client_StopAutoMoveForward();
+}
+
+void AGS_TpsController::TryCreatingPlayerWidget()
+{
+	// GetPawn()으로 Pawn이 유효한지 확인
+	if (GetPawn())
+	{
+		// Pawn이 유효하면 TestFunction()을 호출하고 타이머를 정리
+		TestFunction();
+		if (GetWorld() && WaitForPawnTimerHandle.IsValid())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(WaitForPawnTimerHandle);
+		}
+	}
+	else
+	{
+		// Pawn이 아직 유효하지 않으면 0.2초 후에 이 함수를 다시 시도하도록 타이머 설정
+		UE_LOG(LogTemp, Warning, TEXT("UI 위젯을 생성하기 위해 Pawn을 기다리는 중..."));
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				WaitForPawnTimerHandle,
+				this,
+				&AGS_TpsController::TryCreatingPlayerWidget,
+				0.2f,
+				false);
+		}
+	}
 }
 
 void AGS_TpsController::Client_StartAutoMoveForward_Implementation()
@@ -550,6 +605,30 @@ void AGS_TpsController::PostSeamlessTravel()
 {
 	Super::PostSeamlessTravel();
 
+	if (IsLocalController())
+	{
+		if (LoadingScreenWidgetClass)
+		{
+			if (LoadingScreenWidgetInstance)
+			{
+				LoadingScreenWidgetInstance->RemoveFromParent();
+				LoadingScreenWidgetInstance = nullptr;
+			}
+
+			LoadingScreenWidgetInstance = CreateWidget<UUserWidget>(this, LoadingScreenWidgetClass);
+
+			if (LoadingScreenWidgetInstance)
+			{
+				LoadingScreenWidgetInstance->AddToViewport(100);
+				UE_LOG(LogTemp, Warning, TEXT("로딩 스크린 성공적으로 생성"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LoadingScreenWidgetClass is not set"));
+		}
+	}
+
 	InitControllerPerWorld();
 }
 
@@ -560,7 +639,6 @@ void AGS_TpsController::BeginPlayingState()
 	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s) --- BeginPlayingState CALLED ---"), *GetNameSafe(this));
 	if (IsLocalController())
 	{
-		Server_NotifyPlayerIsReady();
-		TestFunction();
+		//TestFunction();
 	}
 }

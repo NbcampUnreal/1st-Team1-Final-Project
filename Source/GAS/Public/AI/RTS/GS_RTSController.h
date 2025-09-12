@@ -196,6 +196,10 @@ public:
 	// Client
 	UFUNCTION(Client, Reliable)
 	void Client_StartGame();
+
+	UFUNCTION(Client, Reliable)
+	void Client_PrepareForMatchStart();
+
 	// UFUNCTION(Client, Reliable)
 	// void Client_HideDungeonElements();
 
@@ -218,6 +222,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void Tick(float DeltaTime) override;
+	virtual void PostSeamlessTravel() override;
 
 private:
 	// 입력 상태
@@ -266,6 +271,13 @@ private:
 	UPROPERTY()
 	FTimerHandle AttackCursorTimerHandle;
 
+	//로딩 스크린
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> LoadingScreenWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> LoadingScreenWidgetInstance;
+
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
 	FVector2D GetFinalDirection() const;
@@ -285,4 +297,6 @@ private:
 	void UpdateCursorForCommand();
 	void UpdateCursorForEdgeScroll();
 	void ShowAttackCursor();
+
+	void OnIntroFinished();
 };
