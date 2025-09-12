@@ -112,7 +112,7 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 	}
 
 	
-	// 가장 먼저 활 시위를 당길 수 있는 상황인지를 판단
+	// 가장 먼저 활 시위를 당길  수 있는 상황인지를 판단
 	if (!GetSkillComp()->IsSkillAllowed(ESkillSlot::Combo))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, IsSkillAllowed == false"));
@@ -133,12 +133,12 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 	}
 
 	if (!GetDrawState())
-	{
-		Multicast_PlayDrawMontage(DrawMontage);
-
+	{		
 		// 활 상태 업데이트
 		SetDrawState(true);
 		SetAimState(false);
+		
+		Multicast_PlayDrawMontage(DrawMontage);
 		Multicast_SetMustTurnInPlace(true);
 		
 		// 활 당기는 사운드 재생 (SeekerAudioComponent에서 처리)
@@ -643,6 +643,22 @@ int32 AGS_Merci::GetMaxAxeArrows()
 int32 AGS_Merci::GetMaxChildArrows()
 {
 	return MaxChildArrows;
+}
+
+void AGS_Merci::SetMouseRightClickFlag(bool bClicked)
+{
+	if (UGS_MerciSkillInputHandlerComp* MerciSkillInputHandlerComp = Cast<UGS_MerciSkillInputHandlerComp>(SkillInputHandlerComponent))
+	{
+		MerciSkillInputHandlerComp->SetMouseRightClickFlag(bClicked);
+	}
+}
+
+void AGS_Merci::SetMouseLeftClickFlag(bool bClicked)
+{
+	if (UGS_MerciSkillInputHandlerComp* MerciSkillInputHandlerComp = Cast<UGS_MerciSkillInputHandlerComp>(SkillInputHandlerComponent))
+	{
+		MerciSkillInputHandlerComp->SetMouseLeftClickFlag(bClicked);
+	}
 }
 
 void AGS_Merci::OnRep_CurrentArrowType()
