@@ -239,6 +239,7 @@ void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
 
 void AGS_TpsController::Client_StartGame_Implementation()
 {
+	UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!!!!!!Client_StartGame_Implementation() 호출!!!!!!!!!!!!!!!!!!!!!!!!!"));
 	TestFunction();
 
 	if (LoadingScreenWidgetInstance)
@@ -295,6 +296,7 @@ void AGS_TpsController::Server_CacheMoveInputValue_Implementation(FVector2D Inpu
 
 void AGS_TpsController::TestFunction()
 {
+	UE_LOG(LogTemp, Warning, TEXT("=================TestFunction 호출==================="));
 	AGS_Character* GS_Character = Cast<AGS_Character>(GetPawn());
 	if (IsValid(GS_Character))
 	{		
@@ -571,26 +573,6 @@ void AGS_TpsController::PostSeamlessTravel()
 {
 	Super::PostSeamlessTravel();
 
-	InitControllerPerWorld();
-}
-
-void AGS_TpsController::BeginPlayingState()
-{
-	Super::BeginPlayingState();
-
-	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s) --- BeginPlayingState CALLED ---"), *GetNameSafe(this));
-	if (IsLocalController())
-	{
-		//TestFunction();
-	}
-}
-
-void AGS_TpsController::ReceivedPlayer()
-{
-	Super::ReceivedPlayer();
-
-	UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@@ ReceivedPlayer() 호출 @@@@@@@@@@@@@@@@@"));
-
 	if (IsLocalController())
 	{
 		if (LoadingScreenWidgetClass)
@@ -613,5 +595,18 @@ void AGS_TpsController::ReceivedPlayer()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("LoadingScreenWidgetClass is not set"));
 		}
+	}
+
+	InitControllerPerWorld();
+}
+
+void AGS_TpsController::BeginPlayingState()
+{
+	Super::BeginPlayingState();
+
+	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s) --- BeginPlayingState CALLED ---"), *GetNameSafe(this));
+	if (IsLocalController())
+	{
+		//TestFunction();
 	}
 }
