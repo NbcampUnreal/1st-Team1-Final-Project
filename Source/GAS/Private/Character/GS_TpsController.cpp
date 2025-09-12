@@ -240,7 +240,7 @@ void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
 void AGS_TpsController::Client_StartGame_Implementation()
 {
 	UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!!!!!!Client_StartGame_Implementation() 호출!!!!!!!!!!!!!!!!!!!!!!!!!"));
-	TestFunction();
+	TryCreatingPlayerWidget();
 
 	if (LoadingScreenWidgetInstance)
 	{
@@ -348,6 +348,10 @@ void AGS_TpsController::TestFunction()
 			}
 		}
 	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("TestFunction 호출 시 Pawn이 유효하지 않습니다!"));
+	}
 }
 
 void AGS_TpsController::StartAutoMoveForward()
@@ -360,6 +364,34 @@ void AGS_TpsController::StopAutoMoveForward()
 {
 	bIsAutoMoving = false;
 	Client_StopAutoMoveForward();
+}
+
+void AGS_TpsController::TryCreatingPlayerWidget()
+{
+	// GetPawn()으로 Pawn이 유효한지 확인
+	if (GetPawn())
+	{
+		// Pawn이 유효하면 TestFunction()을 호출하고 타이머를 정리
+		TestFunction();
+		if (GetWorld() && WaitForPawnTimerHandle.IsValid())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(WaitForPawnTimerHandle);
+		}
+	}
+	else
+	{
+		// Pawn이 아직 유효하지 않으면 0.2초 후에 이 함수를 다시 시도하도록 타이머 설정
+		UE_LOG(LogTemp, Warning, TEXT("UI 위젯을 생성하기 위해 Pawn을 기다리는 중..."));
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				WaitForPawnTimerHandle,
+				this,
+				&AGS_TpsController::TryCreatingPlayerWidget,
+				0.2f,
+				false);
+		}
+	}
 }
 
 void AGS_TpsController::Client_StartAutoMoveForward_Implementation()
