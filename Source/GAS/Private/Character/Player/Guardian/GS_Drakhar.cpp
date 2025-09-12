@@ -8,6 +8,7 @@
 #include "Weapon/Projectile/Guardian/GS_DrakharProjectile.h"
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
+#include "AkGameplayStatics.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -21,6 +22,8 @@
 #include "Character/Component/GS_DrakharVFXComponent.h"
 #include "Character/Component/GS_DrakharSFXComponent.h"
 #include "Character/F_GS_DamageEvent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
@@ -78,6 +81,7 @@ AGS_Drakhar::AGS_Drakhar()
 	DraconicProjectileImpactSoundEvent = nullptr;
 	DraconicProjectileExplosionSoundEvent = nullptr;
 	AttackHitSoundEvent = nullptr;
+	ComboFinisherSoundEvent = nullptr;
 	FeverModeStartSoundEvent = nullptr;
 
 	// AkComponent 추가
@@ -286,6 +290,61 @@ void AGS_Drakhar::OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNo
 	}
 }
 
+void AGS_Drakhar::MeleeAttackCheck()
+{
+	if (HasAuthority())
+	{
+		GuardianState = EGuardianCtrlState::CtrlEnd;
+
+		const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+		const float MeleeAttackRange = 200.f;
+		const float MeleeAttackRadius = 200.f;
+		
+		TSet<AGS_Character*> DamagedCharacters = DetectPlayerInRange(Start, MeleeAttackRange, MeleeAttackRadius);
+		
+		// 각 플레이어에게 개별적으로 데미지 적용 및 혈흔 이펙트 처리
+		for (AGS_Character* DamagedCharacter : DamagedCharacters)
+		{
+			if (IsValid(DamagedCharacter))
+			{
+				UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
+				if (IsValid(DamagedCharacterStat))
+				{
+					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
+					FGS_DamageEvent DamageEvent;
+					DamageEvent.HitReactType = EHitReactType::DamageOnly;
+					
+					float ActualDamage = DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
+					
+					// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생 (기본 콤보는 1.0 스케일)
+					if (ActualDamage > 0.0f)
+					{
+						FVector HitLocation = DamagedCharacter->GetActorLocation();
+						FVector HitNormal = (HitLocation - GetActorLocation()).GetSafeNormal();
+						Multicast_PlayBloodEffect(HitLocation, HitNormal, 1.0f);
+					}
+					
+					// 히트 스톱 효과
+					MulticastRPCApplyHitStop(DamagedCharacter);
+					
+					// 서버에서 피버 게이지 증가
+					if (!GetIsFeverMode())
+					{
+						SetFeverGauge(10.f);
+					}
+					else if (GetIsFeverMode())
+					{
+						bIsAttckingDuringFever = true;
+						ResetIsAttackingDuringFeverMode();
+					}
+					
+					// 히트 사운드 재생
+					MulticastPlayAttackHitSound();
+				}
+			}
+		}
+	}
+}
 
 void AGS_Drakhar::ComboLastAttack()
 {
@@ -296,16 +355,35 @@ void AGS_Drakhar::ComboLastAttack()
 		const float PlusDamage = 20.f;
 
 		TSet<AGS_Character*> DamagedPlayers = DetectPlayerInRange(Start, 200.f, Radius);
-		ApplyDamageToDetectedPlayer(DamagedPlayers, PlusDamage);
-
-		for(AGS_Character* DamagedPlayer : DamagedPlayers)
+		
+		// 각 플레이어에게 개별적으로 데미지 적용 및 혈흔 이펙트 처리
+		for (AGS_Character* DamagedPlayer : DamagedPlayers)
 		{
-			if(IsValid(DamagedPlayer))
+			if (IsValid(DamagedPlayer))
 			{
-				MulticastRPC_PlayAttackHitVFX(DamagedPlayer->GetActorLocation());
+				UGS_StatComp* DamagedCharacterStat = DamagedPlayer->GetStatComp();
+				if (IsValid(DamagedCharacterStat))
+				{
+					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedPlayer);
+					FGS_DamageEvent DamageEvent;
+					DamageEvent.HitReactType = EHitReactType::DamageOnly;
+					
+					float ActualDamage = DamagedPlayer->TakeDamage(Damage + PlusDamage, DamageEvent, GetController(), this);
+					
+					// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생 (마지막 공격은 더 큰 스케일)
+					if (ActualDamage > 0.0f)
+					{
+						FVector HitLocation = DamagedPlayer->GetActorLocation();
+						FVector HitNormal = (HitLocation - GetActorLocation()).GetSafeNormal();
+						Multicast_PlayBloodEffect(HitLocation, HitNormal, 1.5f); // 마지막 공격은 1.5배 스케일
+					}
+					
+					MulticastRPC_PlayAttackHitVFX(DamagedPlayer->GetActorLocation());
+					MulticastPlayAttackHitSound();
+				}
 			}
 		}
-
+		
 		if (IsFeverMode)
 		{
 			FeverComoLastAttack();
@@ -376,8 +454,17 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter, SkillCoefficient);
 
 		FGS_DamageEvent DamageEvent;
-		DamageEvent.HitReactType = EHitReactType::Interrupt;
-		DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+		DamageEvent.HitReactType = EHitReactType::DamageOnly; // 가드 풀리지 않도록 변경
+		
+		float ActualDamage = DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+
+		// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생
+		if (ActualDamage > 0.0f)
+		{
+			FVector HitLocation = DamagedCharacter->GetActorLocation();
+			FVector HitNormal = (HitLocation - GetActorLocation()).GetSafeNormal();
+			Multicast_PlayBloodEffect(HitLocation, HitNormal, 1.2f); // 대시 공격
+		}
 
 		if (IsFeverMode)
 		{
@@ -446,6 +533,19 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 		FGS_DamageEvent DamageEvent;
 		if (IsValid(DamagedCharacter))
 		{
+			DamageEvent.HitReactType = EHitReactType::DamageOnly; // 가드 풀리지 않도록 변경
+			
+			// 실제 데미지 적용
+			float ActualDamage = DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+			
+			// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생
+			if (ActualDamage > 0.0f)
+			{
+				FVector HitLocation = DamagedCharacter->GetActorLocation();
+				FVector HitNormal = FVector::UpVector; // 어스퀘이크는 위쪽에서 아래로
+				Multicast_PlayBloodEffect(HitLocation, HitNormal, 1.3f);
+			}
+			
 			if (IsFeverMode)
 			{
 				DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
@@ -455,8 +555,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			{
 				MulticastPlayEarthquakeImpactVFX(DamagedCharacter->GetActorLocation());
 			}
-			DamageEvent.HitReactType = EHitReactType::Interrupt;
-			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+			
 			// === 어스퀘이크 스킬 히트 사운드 재생 ===
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
 			MulticastPlayAttackHitSound();
@@ -671,12 +770,38 @@ void AGS_Drakhar::FeverComoLastAttack()
 		{
 			DamagedSeekers.Append(DetectPlayerInRange(PillarLocation, 0.f, PillarRadius));
 		}
-		ApplyDamageToDetectedPlayer(DamagedSeekers, 20.f);
+		
+		// 각 플레이어에게 개별적으로 데미지 적용 및 혈흔 이펙트 처리
 		for (const auto& DamagedSeeker : DamagedSeekers)
 		{
-			MulticastRPC_PlayAttackHitVFX(DamagedSeeker->GetActorLocation());
-			DamagedSeeker->LaunchCharacter(FVector(0.f, 0.f, 500.f), true, true);
+			if (IsValid(DamagedSeeker))
+			{
+				// 데미지 계산 및 적용
+				UGS_StatComp* DamagedCharacterStat = DamagedSeeker->GetStatComp();
+				if (IsValid(DamagedCharacterStat))
+				{
+					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedSeeker);
+					FGS_DamageEvent DamageEvent;
+					DamageEvent.HitReactType = EHitReactType::DamageOnly;
+					
+					float ActualDamage = DamagedSeeker->TakeDamage(Damage + 20.f, DamageEvent, GetController(), this);
+					
+					// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생
+					if (ActualDamage > 0.0f)
+					{
+						FVector HitLocation = DamagedSeeker->GetActorLocation();
+						FVector HitNormal = FVector::UpVector; // 피버 콤보는 위에서 아래로
+						Multicast_PlayBloodEffect(HitLocation, HitNormal, 1.4f);
+					}
+					
+					MulticastRPC_PlayAttackHitVFX(DamagedSeeker->GetActorLocation());
+					DamagedSeeker->LaunchCharacter(FVector(0.f, 0.f, 500.f), true, true);
+				}
+			}
 		}
+		
+		// 피버모드 콤보 막타에서만 추가 레이어링 사운드 재생
+		MulticastPlayComboFinisherSound();
 	}
 }
 
@@ -798,6 +923,28 @@ void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
 	}
 	
 	SFXComponent->PlayAttackHitSound();
+}
+
+void AGS_Drakhar::MulticastPlayComboFinisherSound_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	if (ComboFinisherSoundEvent)
+	{
+		UAkGameplayStatics::PostEvent(
+			ComboFinisherSoundEvent, 
+			this,
+			0,
+			FOnAkPostEventCallback()
+		);
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Drakhar ComboFinisherSoundEvent is null"));
+	}
 }
 
 void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
@@ -930,4 +1077,43 @@ void AGS_Drakhar::MulticastPlayEarthquakeImpactVFX_Implementation(const FVector&
 void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
 {
 	if(VFXComponent) VFXComponent->StopDustCloudVFX();
+}
+
+void AGS_Drakhar::Multicast_PlayBloodEffect_Implementation(FVector HitLocation, FVector HitNormal, float Scale)
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	UNiagaraSystem* EffectToPlay = BloodEffectSystem;
+	
+	// BloodEffectSystem이 없으면 기본 혈흔 이펙트 사용
+	if (!EffectToPlay)
+	{
+		EffectToPlay = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/VFX/RealisticBlood/Burst/Niagara/NS_BloodBurst_High.NS_BloodBurst_High"));
+	}
+	
+	if (EffectToPlay && GetWorld())
+	{
+		// 혈흔 이펙트의 회전을 충돌 법선에 맞춰 설정
+		FRotator EffectRotation = FRotationMatrix::MakeFromZ(HitNormal).Rotator();
+		
+		// 스케일 적용
+		FVector BloodScale = FVector(Scale, Scale, Scale);
+		
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			EffectToPlay,
+			HitLocation,
+			EffectRotation,
+			BloodScale,
+			true,
+			true
+		);
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Drakhar BloodEffect could not be loaded or spawned"));
+	}
 }

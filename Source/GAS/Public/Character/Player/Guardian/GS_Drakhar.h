@@ -49,6 +49,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> FeverDraconicProjectile;
 
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	UNiagaraSystem* BloodEffectSystem;
+
 	//[fever mode]
 	FOnCurrentFeverGaugeChangedDelegate OnCurrentFeverGaugeChanged;
 	UPROPERTY()
@@ -63,6 +66,9 @@ public:
 	virtual void CtrlStop() override;
 	virtual void LeftMouse() override;
 	virtual void RightMouse() override;
+	
+	//[Attack Functions]
+	virtual void MeleeAttackCheck() override;
 	
 	//[COMBO ATTACK]
 	void SetNextComboAttackSection(FName InSectionName);
@@ -164,6 +170,7 @@ public:
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicFurySkillSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicProjectileSound(const FVector& Location);
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayAttackHitSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboFinisherSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStartSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartWingRushVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStopWingRushVFX();
@@ -182,6 +189,8 @@ public:
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnEarthquakeStart();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFeverModeStart();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFeverModeEnd();
+	
+	UFUNCTION(NetMulticast, Reliable) void Multicast_PlayBloodEffect(FVector HitLocation, FVector HitNormal, float Scale);
 	
 	// === Blueprint Events ===
 	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Fly", meta = (DisplayName = "On Fly Start"))
@@ -281,6 +290,8 @@ public:
 	UAkAudioEvent* DraconicProjectileExplosionSoundEvent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Impact")
 	UAkAudioEvent* AttackHitSoundEvent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Combo")
+	UAkAudioEvent* ComboFinisherSoundEvent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Fever")
 	UAkAudioEvent* FeverModeStartSoundEvent;
 	
