@@ -145,6 +145,10 @@ public:
 	// Auto Moving (KCY)
 	void StartAutoMoveForward();
 	void StopAutoMoveForward();
+
+	// Pawn 유효성 검사를 위한 타이머 및 함수 추가
+	void TryCreatingPlayerWidget();
+	FTimerHandle WaitForPawnTimerHandle;
 	
 
 protected:
