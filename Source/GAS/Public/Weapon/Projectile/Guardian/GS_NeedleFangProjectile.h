@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Weapon/Projectile/GS_WeaponProjectile.h"
 #include "AkAudioEvent.h"
+#include "NiagaraSystem.h"
 #include "GS_NeedleFangProjectile.generated.h"
 
 /**
@@ -21,9 +22,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Projectile")
 	float ProjectileLifeTime;
 
-	// 히트 사운드 이벤트
 	UPROPERTY(EditDefaultsOnly, Category = "Sound")
 	UAkAudioEvent* HitSoundEvent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	UNiagaraSystem* BloodEffectSystem;
 
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse,
@@ -38,7 +41,9 @@ private:
 	UFUNCTION() 
 	void HandleProjectileDestroy();
 
-	// 히트 사운드 재생 함수
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayHitSound(FVector HitLocation);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayBloodEffect(FVector HitLocation, FVector HitNormal);
 };

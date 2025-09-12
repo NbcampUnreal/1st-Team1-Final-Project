@@ -7,6 +7,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Character/F_GS_DamageEvent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 AGS_SmallClaw::AGS_SmallClaw()
 {
@@ -66,9 +68,60 @@ void AGS_SmallClaw::OnAttackBiteboxOverlap(UPrimitiveComponent* OverlappedCompon
 		
 		float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
 		FGS_DamageEvent DamageEvent;
-		DamageEvent.HitReactType = EHitReactType::Interrupt;
-		OtherActor->TakeDamage(Damage, DamageEvent, GetController(), this);
+		DamageEvent.HitReactType = EHitReactType::DamageOnly;
+		
+		// 실제 데미지를 적용하고 결과를 확인
+		float ActualDamage = OtherActor->TakeDamage(Damage, DamageEvent, GetController(), this);
+		
+		// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생
+		if (ActualDamage > 0.0f)
+		{
+			// 혈흔 이펙트 재생 - 깨물기 지점에서 재생
+			FVector HitLocation = SweepResult.bBlockingHit ? FVector(SweepResult.ImpactPoint) : DamagedCharacter->GetActorLocation();
+			FVector HitNormal = SweepResult.bBlockingHit ? FVector(SweepResult.ImpactNormal) : FVector::UpVector;
+			
+			Multicast_PlayBloodEffect(HitLocation, HitNormal);
+		}
 	
 		BiteCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void AGS_SmallClaw::Multicast_PlayBloodEffect_Implementation(FVector HitLocation, FVector HitNormal)
+{
+	// 데디케이티드 서버에서는 이펙트 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	UNiagaraSystem* EffectToPlay = BloodEffectSystem;
+	
+	// BloodEffectSystem이 없으면 기본 혈흔 이펙트 사용
+	if (!EffectToPlay)
+	{
+		EffectToPlay = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/VFX/RealisticBlood/Burst/Niagara/NS_BloodBurst_High.NS_BloodBurst_High"));
+	}
+	
+	if (EffectToPlay && GetWorld())
+	{
+		// 혈흔 이펙트의 회전을 충돌 법선에 맞춰 설정
+		FRotator EffectRotation = FRotationMatrix::MakeFromZ(HitNormal).Rotator();
+		
+		FVector BloodScale = FVector(0.8f, 0.8f, 0.8f);
+		
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			EffectToPlay,
+			HitLocation,
+			EffectRotation,
+			BloodScale,
+			true,
+			true
+		);
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SmallClaw BloodEffect could not be loaded or spawned"));
 	}
 }

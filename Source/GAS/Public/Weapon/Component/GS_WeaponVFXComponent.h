@@ -18,7 +18,8 @@ enum class EWeaponVFXType : uint8
 	Trail			UMETA(DisplayName = "Trail"),			// 무기 궤적
 	Charge			UMETA(DisplayName = "Charge"),			// 차징 이펙트
 	SpecialAttack	UMETA(DisplayName = "Special Attack"),	// 특수 공격
-	Enchant			UMETA(DisplayName = "Enchant")			// 인챈트 효과
+	Enchant			UMETA(DisplayName = "Enchant"),			// 인챈트 효과
+	Slash			UMETA(DisplayName = "Slash")			// 베기 이펙트
 };
 
 // 시커 타입별 아우라 이펙트 정의
@@ -77,10 +78,6 @@ class GAS_API UGS_WeaponVFXComponent : public UActorComponent
 
 public:
 	UGS_WeaponVFXComponent();
-
-	// ======================
-	// VFX 설정 (블루프린트)
-	// ======================
 	
 	// 공통 VFX 설정 Data Asset
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Settings")
@@ -97,10 +94,6 @@ public:
 	// 무기에 붙일 소켓 이름 (비어있으면 Root에 붙음)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Settings")
 	FName AttachSocketName = NAME_None;
-
-	// ======================
-	// 아우라 VFX 제어 함수
-	// ======================
 	
 	// 아우라 VFX 활성화 (히트 감지 시 호출)
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
@@ -114,6 +107,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
 	bool IsHitAuraActive() const;
 
+	// 슬래시 VFX 재생 (충돌 감지 시 호출)
+	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
+	void PlaySlashVFX(const FHitResult& HitResult, ESeekerAuraType AttackerSeekerType);
+	
 	// ======================
 	// 확장 VFX 기능들
 	// ======================
@@ -168,6 +165,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DeactivateHitAura();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlaySlashVFX(FVector ImpactPoint, FVector WeaponVelocity, ESeekerAuraType SeekerType);
+	
 	// 확장 VFX용 멀티캐스트 함수들
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ActivateTrailVFX(bool bActivate, ESeekerAuraType SeekerType);

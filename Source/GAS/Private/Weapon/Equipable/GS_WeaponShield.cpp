@@ -184,7 +184,15 @@ void AGS_WeaponShield::OnAttackHit(UPrimitiveComponent* OverlappedComponent, AAc
 	// 1. 기본 VFX는 항상 재생
 	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 
-	// 2. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
+	// 2. 슬래시 이펙트 재생 (혈흔 이펙트)
+	if (WeaponVFXComponent)
+	{
+		// 공격자(OwnerChar)의 시커 타입을 직접 전달
+		ESeekerAuraType AttackerAuraType = GetSeekerAuraType(OwnerChar);
+		WeaponVFXComponent->PlaySlashVFX(CorrectHitResult, AttackerAuraType);
+	}
+
+	// 3. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
 	TriggerHitAuraOnHit(Damaged);
 
 	// 3. '찬'의 3번째 공격일 경우 추가 효과(사운드, VFX) 재생
@@ -610,12 +618,11 @@ void AGS_WeaponShield::OnDefenseHit(UPrimitiveComponent* OverlappedComponent, AA
 
 	if (!Attacker || !Defender || !Attacker->IsEnemy(Defender))
 	{
-		// 적이 아닌 대상을 막은 경우
-		Multicast_PlayHitVFX(TargetType, CorrectHitResult);
+		// 적이 아닌 대상을 막은 경우 - VFX 제거 (가드 상태에서는 혈흔 이펙트 없음)
 		return;
 	}
 
-	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
+	// 방어 시에는 Hit Seeker VFX 출력하지 않음 (가드 상태)
 
 	if (AGS_Chan* Chan = Cast<AGS_Chan>(Defender))
 	{

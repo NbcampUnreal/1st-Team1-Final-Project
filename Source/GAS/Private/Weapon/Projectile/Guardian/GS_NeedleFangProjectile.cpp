@@ -10,6 +10,8 @@
 #include "Character/F_GS_DamageEvent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/HitResult.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 AGS_NeedleFangProjectile::AGS_NeedleFangProjectile()
 {
@@ -35,14 +37,20 @@ void AGS_NeedleFangProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
 	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
 	if (DamagedCharacter && OwnerCharacter && DamagedCharacter->IsEnemy(OwnerCharacter) && DamagedCharacter->GetStatComp())
 	{
-		// 히트 사운드 재생
 		Multicast_PlayHitSound(Hit.ImpactPoint);
         
 		UGS_StatComp* DamagedStat = DamagedCharacter->GetStatComp();
 		float Damage = DamagedStat->CalculateDamage(OwnerCharacter, DamagedCharacter);
 		FGS_DamageEvent DamageEvent;
-		DamageEvent.HitReactType = EHitReactType::Interrupt;
-		DamagedCharacter->TakeDamage(Damage, DamageEvent, GetOwner()->GetInstigatorController(), this);
+		DamageEvent.HitReactType = EHitReactType::DamageOnly;
+		
+		float ActualDamage = DamagedCharacter->TakeDamage(Damage, DamageEvent, GetOwner()->GetInstigatorController(), this);
+		
+		// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생
+		if (ActualDamage > 0.0f)
+		{
+			Multicast_PlayBloodEffect(Hit.ImpactPoint, Hit.ImpactNormal);
+		}
 	}
 	
 	Destroy();
@@ -55,7 +63,6 @@ void AGS_NeedleFangProjectile::HandleProjectileDestroy()
 
 void AGS_NeedleFangProjectile::Multicast_PlayHitSound_Implementation(FVector HitLocation)
 {
-	// 데디케이티드 서버에서는 사운드 재생하지 않음
 	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
 	{
 		return;
@@ -73,5 +80,41 @@ void AGS_NeedleFangProjectile::Multicast_PlayHitSound_Implementation(FVector Hit
 	else 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("NeedleFang HitSoundEvent is null"));
+	}
+}
+
+void AGS_NeedleFangProjectile::Multicast_PlayBloodEffect_Implementation(FVector HitLocation, FVector HitNormal)
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	UNiagaraSystem* EffectToPlay = BloodEffectSystem;
+	
+	// BloodEffectSystem이 없으면 기본 혈흔 이펙트 사용
+	if (!EffectToPlay)
+	{
+		EffectToPlay = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/VFX/RealisticBlood/Burst/Niagara/NS_BloodBurst_High.NS_BloodBurst_High"));
+	}
+	
+	if (EffectToPlay && GetWorld())
+	{
+		// 혈흔 이펙트의 회전을 충돌 법선에 맞춰 설정
+		FRotator EffectRotation = FRotationMatrix::MakeFromZ(HitNormal).Rotator();
+		
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			EffectToPlay,
+			HitLocation,
+			EffectRotation,
+			FVector(1.0f, 1.0f, 1.0f), // 기본 스케일
+			true,
+			true
+		);
+	}
+	else 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("NeedleFang BloodEffect could not be loaded or spawned"));
 	}
 }
