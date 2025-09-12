@@ -123,10 +123,7 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 	// DrawBow 가 Client 외에 Server 에서 호출될 일이 있나? Client 에서 해당 함수가 호출되었다면 이미 쥐에서 Return 으로 막히는 거 아닌가?
 	if (!GetDrawState())
 	{
-		if (WidgetCrosshair)
-		{
-			WidgetCrosshair->PlayAimAnim(true);
-		}
+		Client_UpdateCrosshairAim(true);
 
 		// 줌 시작
 		if(!GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
@@ -162,6 +159,8 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		Server_ReleaseArrow(ArrowClass, SpreadAngleDeg, NumArrows);
 		return;
 	}
+
+	Client_UpdateCrosshairAim(false);
 	
 	if (GetSkillComp()->IsSkillActive(ESkillSlot::Rolling))
 	{
@@ -271,12 +270,12 @@ void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow
 	// 현재 화살 수량 체크
 	if (CurrentArrowType == EArrowType::Axe && CurrentAxeArrows <= 0)
 	{
-		Multicast_PlayArrowEmptySound(); // 빈 화살 사운드 재생
+		Client_PlayArrowEmptySound();
 		return;
 	}
 	if (CurrentArrowType == EArrowType::Child && CurrentChildArrows <= 0)
 	{
-		Multicast_PlayArrowEmptySound(); // 빈 화살 사운드 재생
+		Client_PlayArrowEmptySound();
 		return;
 	}
 
@@ -428,12 +427,6 @@ void AGS_Merci::Server_ChangeArrowType_Implementation(int32 Direction)
 
 	CurrentArrowType = static_cast<EArrowType>(CurrentIndex);
 
-	// 화살 타입 변경 사운드 재생
-	if (SeekerAudioComponent)
-	{
-		SeekerAudioComponent->PlayArrowTypeChangeSound();
-	}
-
 	UE_LOG(LogTemp, Log, TEXT("Arrow Changed to: %d"), CurrentIndex);
 }
 
@@ -531,6 +524,14 @@ void AGS_Merci::SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget)
 		{
 			WidgetCrosshair->UpdateArrowCnt(EArrowType::Child, CurrentChildArrows);
 		}
+	}
+}
+
+void AGS_Merci::Client_UpdateCrosshairAim_Implementation(bool bAiming)
+{
+	if (WidgetCrosshair)
+	{
+		WidgetCrosshair->PlayAimAnim(bAiming);
 	}
 }
 
@@ -786,18 +787,18 @@ void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 	}
 }
 
-void AGS_Merci::Multicast_PlayArrowEmptySound_Implementation()
-{
-	if (SeekerAudioComponent)
-	{
-		SeekerAudioComponent->PlayArrowEmptySound();
-	}
-}
-
 void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
 {
 	if (SeekerAudioComponent)
 	{
 		SeekerAudioComponent->PlayHitFeedbackSound();
+	}
+}
+
+void AGS_Merci::Client_PlayArrowEmptySound_Implementation()
+{
+	if (SeekerAudioComponent)
+	{
+		SeekerAudioComponent->PlayArrowEmptySound();
 	}
 }

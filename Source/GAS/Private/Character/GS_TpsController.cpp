@@ -214,8 +214,23 @@ void AGS_TpsController::InitControllerPerWorld()
 	}
 }
 
+void AGS_TpsController::Client_PrepareForMatchStart_Implementation()
+{
+	// 로딩 스크린 제거되기 전에 먼저 수행되어야 할 것들 여기 넣기.
+	FTimerHandle PTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(PTimerHandle, this, &AGS_TpsController::OnIntroFinished, 3.0f, false);
+}
+
+void AGS_TpsController::OnIntroFinished()
+{
+	// 로딩 스크린 제거되기 전에 수행되어야 하지만 우선순위가 낮은 것들 여기 넣기. 없으면 이 함수 지워도 됨
+	UE_LOG(LogTemp, Warning, TEXT("OnIntroFinished() 호출"));
+	Server_NotifyPlayerIsReady();
+}
+
 void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Server_NotifyPlayerIsReady_Implementation() 호출"));
 	if (AGS_BaseGM* GM = GetWorld()->GetAuthGameMode<AGS_BaseGM>())
 	{
 		GM->NotifyPlayerIsReady(this);
@@ -224,8 +239,14 @@ void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
 
 void AGS_TpsController::Client_StartGame_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("준비 완료. TODO: 화면 가리개 제거"));
-	//TODO: 로딩스크린 제거
+	TestFunction();
+
+	if (LoadingScreenWidgetInstance)
+	{
+		LoadingScreenWidgetInstance->RemoveFromParent();
+		LoadingScreenWidgetInstance = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("로딩 스크린 제거 완료"));
+	}
 }
 
 void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
@@ -560,7 +581,37 @@ void AGS_TpsController::BeginPlayingState()
 	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s) --- BeginPlayingState CALLED ---"), *GetNameSafe(this));
 	if (IsLocalController())
 	{
-		Server_NotifyPlayerIsReady();
-		TestFunction();
+		//TestFunction();
+	}
+}
+
+void AGS_TpsController::ReceivedPlayer()
+{
+	Super::ReceivedPlayer();
+
+	UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@@ PostInitializeComponents() 호출 @@@@@@@@@@@@@@@@@"));
+
+	if (IsLocalController())
+	{
+		if (LoadingScreenWidgetClass)
+		{
+			if (LoadingScreenWidgetInstance)
+			{
+				LoadingScreenWidgetInstance->RemoveFromParent();
+				LoadingScreenWidgetInstance = nullptr;
+			}
+
+			LoadingScreenWidgetInstance = CreateWidget<UUserWidget>(this, LoadingScreenWidgetClass);
+
+			if (LoadingScreenWidgetInstance)
+			{
+				LoadingScreenWidgetInstance->AddToViewport(100);
+				UE_LOG(LogTemp, Warning, TEXT("로딩 스크린 성공적으로 생성"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LoadingScreenWidgetClass is not set"));
+		}
 	}
 }

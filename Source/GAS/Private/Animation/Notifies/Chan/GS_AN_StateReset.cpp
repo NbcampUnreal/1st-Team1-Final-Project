@@ -20,6 +20,7 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 			}
 
 			Character->CanChangeSeekerGait = true;
+			Character->CanAcceptComboInput = true;
 			Character->SetMoveControlValue(true, true);
 			Character->SetLookControlValue(true, true);
 

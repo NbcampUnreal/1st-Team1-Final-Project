@@ -45,6 +45,32 @@ void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
+void AGS_Chan::ResetCurrentStamina()
+{
+	CurrentStamina = MaxStamina;
+}
+
+void AGS_Chan::SetCurrentStamina(float NewValue, bool SetbyDamage)
+{
+	CurrentStamina = FMath::Clamp(NewValue, 0.f, MaxStamina);
+	Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
+	// UI 반영
+	/*if (SetbyDamage)
+	{
+		Client_UpdateChanAimingSkillBarDealy(CurrentStamina / MaxStamina);
+	}
+	else
+	{
+		Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
+	}*/
+
+	// 스테미나가 다 떨어지면 스킬
+	if (CurrentStamina <= 0.f && SkillComp && CurrentStamina > 0.f) // 직전 값 기준 체크
+	{
+		SkillComp->Server_TryDeactiveSkill(ESkillSlot::Aiming);
+	}
+}
+
 // Called when the game starts or when spawned
 void AGS_Chan::BeginPlay()
 {
@@ -55,6 +81,8 @@ void AGS_Chan::BeginPlay()
 
 	UltimateCollision->OnComponentBeginOverlap.AddDynamic(this, &AGS_Chan::OnUltimateOverlap);
 
+	CurrentStamina = MaxStamina;
+	MaxHealth = GetStatComp()->GetMaxHealth();
 }
 
 void AGS_Chan::OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -172,6 +200,14 @@ void AGS_Chan::Client_UpdateChanAimingSkillBar_Implementation(float Stamina)
 	}
 }
 
+void AGS_Chan::Client_UpdateChanAimingSkillBarDealy_Implementation(float Stamina)
+{
+	if (ChanAimingSkillBarWidget)
+	{
+		ChanAimingSkillBarWidget->SetAimingProgressByDamage(Stamina);
+	}
+}
+
 void AGS_Chan::Client_ChanAimingSkillBar_Implementation(bool bShow)
 {
 	if (ChanAimingSkillBarWidget)
@@ -197,7 +233,7 @@ float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 {
 	float ActualDamage = DamageAmount;
 	
-	// 방어 상태일 때는 데미지를 아예 받지 않음 (피격 애니메이션 방지)
+	// 방어 상태일 때는 스테미나 감소 (피격 애니메이션 방지)
 	if (bIsDefending)
 	{
 		// 방어 효과음 재생
@@ -211,10 +247,19 @@ float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 		
 		// 방어 성공 시 데미지 0으로 설정하여 피격 애니메이션 방지
 		ActualDamage = 0.0f;
+
+		// 스테미나 감소
+		if (MaxHealth > 0.f)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Stamina Damage In"));
+			float StaminaDamage = DamageAmount * (MaxStamina / MaxHealth);
+			SetCurrentStamina(CurrentStamina - StaminaDamage, true);
+		}
 	}
 	else
 	{
 		// 방어 상태가 아닐 때만 부모 클래스의 TakeDamage 호출
+		//UE_LOG(LogTemp, Warning, TEXT("Normal Damage In"));
 		ActualDamage = Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
 	}
 

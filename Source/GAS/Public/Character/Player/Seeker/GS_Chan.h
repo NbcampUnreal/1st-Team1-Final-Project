@@ -81,6 +81,9 @@ public:
 	void Client_UpdateChanAimingSkillBar(float Stamina);
 
 	UFUNCTION(Client, Reliable)
+	void Client_UpdateChanAimingSkillBarDealy(float Stamina);
+
+	UFUNCTION(Client, Reliable)
 	void Client_ChanAimingSkillBar(bool bShow);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
@@ -100,6 +103,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Chan|Defense")
 	void SetDefending(bool bDefending);
 
+	// 스테미나 관리
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
+	float MaxStamina = 100.f;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Chan|Stamina")
+	float CurrentStamina = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
+	float StaminaDrainRate = 0.1f;
+
+	float GetCurrentStamina() const { return CurrentStamina; }
+	void ResetCurrentStamina();
+	void SetCurrentStamina(float NewValue, bool SetbyDamage = false);
+	bool HasEnoughStamina(float Cost) const { return CurrentStamina >= Cost; }
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -113,4 +131,10 @@ protected:
 
 private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;
+
+	// 스테미나 관리
+	FTimerHandle StaminaDrainHandle;
+
+	// 체력 관리
+	float MaxHealth;
 };
