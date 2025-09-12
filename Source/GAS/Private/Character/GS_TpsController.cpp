@@ -589,7 +589,7 @@ void AGS_TpsController::ReceivedPlayer()
 {
 	Super::ReceivedPlayer();
 
-	UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@@ PostInitializeComponents() 호출 @@@@@@@@@@@@@@@@@"));
+	UE_LOG(LogTemp, Warning, TEXT("@@@@@@@@@@@@@@@ ReceivedPlayer() 호출 @@@@@@@@@@@@@@@@@"));
 
 	if (IsLocalController())
 	{
