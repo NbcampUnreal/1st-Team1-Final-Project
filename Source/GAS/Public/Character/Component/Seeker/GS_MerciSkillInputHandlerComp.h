@@ -20,7 +20,10 @@ protected:
 
 	TSubclassOf<AGS_SeekerMerciArrow> ArrowClass;
 	UAnimMontage* SkillAnimMontages;
+
+	UPROPERTY(Replicated)
 	bool bMouseLeftClicked = false;
+	UPROPERTY(Replicated)
 	bool bMouseRightClicked = false;
 
 	virtual void OnRightClick(const struct FInputActionInstance& Instance) override;
@@ -30,4 +33,9 @@ protected:
 	virtual void OnRoll(const struct FInputActionInstance& Instance) override;
 	virtual void OnScroll(const struct FInputActionInstance& Instance) override;
 	virtual void OnKeyReset(const struct FInputActionInstance& Instance) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+public:
+	void SetMouseLeftClickFlag(bool bClicked);
+	void SetMouseRightClickFlag(bool bClicked);
 };
