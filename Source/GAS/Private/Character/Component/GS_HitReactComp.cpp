@@ -6,7 +6,6 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Character/Player/Seeker/GS_Merci.h"
 #include "Character/Skill/GS_SkillBase.h"
 
 
@@ -40,13 +39,6 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 		{
 			
 		}
-
-		AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter);
-		if (OwnerSeeker)
-		{
-			OwnerSeeker->SetAimState(false);
-			OwnerSeeker->SetDrawState(false);
-		}       
 	}
 }
 

@@ -15,10 +15,9 @@ protected:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	virtual void HandleMatchHasStarted() override;
 
 	UPROPERTY()
-	TArray<TObjectPtr<APlayerState>> GameplayReadyPlayers;
+	TSet<TObjectPtr<APlayerState>> ReadyPlayers;
 	
 public:
 	/**모든 플레이어 준비완료되면 게임 시작 브로드캐스트*/

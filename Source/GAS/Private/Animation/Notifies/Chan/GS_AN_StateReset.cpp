@@ -3,7 +3,6 @@
 
 #include "Animation/Notifies/Chan/GS_AN_StateReset.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Character/Player/Seeker/GS_Merci.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 
 void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
@@ -28,6 +27,9 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 			Character->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 
 			Character->GetSkillComp()->ResetAllowedSkillsMask();
+			
+			Character->SetAimState(false);
+			Character->SetDrawState(false);
 		}
 	}
 }

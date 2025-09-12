@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
+#include "System/GS_BaseGM.h"
 #include "System/GS_PlayerRole.h"
 #include "GS_ResultGM.generated.h"
 
@@ -10,7 +10,7 @@ class AGS_SpawnSlot;
 class AGS_PlayerState;
 
 UCLASS()
-class GAS_API AGS_ResultGM : public AGameMode
+class GAS_API AGS_ResultGM : public AGS_BaseGM
 {
 	GENERATED_BODY()
 	

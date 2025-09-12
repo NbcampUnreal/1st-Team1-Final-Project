@@ -146,7 +146,7 @@ public:
 
 	FTimerHandle AttackSoundResetTimerHandle;
 
-	// Weapon  
+	// Weapon
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	UChildActorComponent* Weapon;
 

@@ -93,11 +93,6 @@ public:
 
 	void InitControllerPerWorld();
 
-	UFUNCTION(Client, Reliable)
-	void Client_PrepareForMatchStart();
-
-	void OnIntroFinished();
-
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyPlayerIsReady();
 
@@ -145,10 +140,6 @@ public:
 	// Auto Moving (KCY)
 	void StartAutoMoveForward();
 	void StopAutoMoveForward();
-
-	// Pawn 유효성 검사를 위한 타이머 및 함수 추가
-	void TryCreatingPlayerWidget();
-	FTimerHandle WaitForPawnTimerHandle;
 	
 
 protected:
@@ -164,13 +155,6 @@ protected:
 	//메르시 크로스헤어 위젯
 	UPROPERTY(BlueprintReadOnly, Category = "UI")
 	UGS_CrossHairImage* CrosshairWidget;
-
-	//로딩 스크린
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UUserWidget> LoadingScreenWidgetClass;
-
-	UPROPERTY()
-	TObjectPtr<UUserWidget> LoadingScreenWidgetInstance;
 
 	void SnapCameraToCharacterYaw();
 
