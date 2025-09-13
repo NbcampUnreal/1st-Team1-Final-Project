@@ -10,6 +10,7 @@
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Character/Player/Seeker/GS_Merci.h"
+#include "VFX/GS_VFX_FunctionLibrary.h"
 
 UGS_WeaponVFXComponent::UGS_WeaponVFXComponent()
 {
@@ -503,27 +504,16 @@ void UGS_WeaponVFXComponent::Multicast_PlaySlashVFX_Implementation(FVector Impac
 
 	// Slash Effect
 	UNiagaraSystem* SlashVFX = GetWeaponVFX(EWeaponVFXType::Slash, SeekerType);
-	if (SlashVFX)
+	
+	// 무기 속도가 너무 낮으면 슬래시 이펙트를 표시하지 않음 (오차 방지)
+	if (SlashVFX && !WeaponVelocity.IsNearlyZero(1.f))
 	{
-		// 무기 속도가 너무 낮으면 슬래시 이펙트를 표시하지 않음 (오차 방지)
-		if (!WeaponVelocity.IsNearlyZero(1.f))
-		{
-			// 슬래시 이펙트가 무기의 이동 방향을 따라 그려지도록 회전 설정
-			const FRotator SlashRotation = WeaponVelocity.Rotation();
-			const FVector Scale = GetVFXScale(EWeaponVFXType::Slash, SeekerType);
+		// 슬래시 이펙트가 무기의 이동 방향을 따라 그려지도록 회전 설정
+		const FRotator SlashRotation = WeaponVelocity.Rotation();
+		const FVector ScaleVector = GetVFXScale(EWeaponVFXType::Slash, SeekerType);
 
-			UNiagaraComponent* SpawnedSlashVFX = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-				GetWorld(),
-				SlashVFX,
-				ImpactPoint,
-				SlashRotation
-			);
-
-			if(SpawnedSlashVFX)
-			{
-				SpawnedSlashVFX->SetWorldScale3D(Scale);
-			}
-		}
+		// 공통 함수 호출
+		UGS_VFX_FunctionLibrary::PlayBloodEffect(this, SlashVFX, ImpactPoint, SlashRotation, ScaleVector.X);
 	}
 }
 

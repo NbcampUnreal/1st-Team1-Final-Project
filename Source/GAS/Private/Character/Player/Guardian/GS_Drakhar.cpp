@@ -24,6 +24,7 @@
 #include "Character/F_GS_DamageEvent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "VFX/GS_VFX_FunctionLibrary.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
@@ -1081,39 +1082,5 @@ void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
 
 void AGS_Drakhar::Multicast_PlayBloodEffect_Implementation(FVector HitLocation, FVector HitNormal, float Scale)
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
-	{
-		return;
-	}
-
-	UNiagaraSystem* EffectToPlay = BloodEffectSystem;
-	
-	// BloodEffectSystem이 없으면 기본 혈흔 이펙트 사용
-	if (!EffectToPlay)
-	{
-		EffectToPlay = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/VFX/RealisticBlood/Burst/Niagara/NS_BloodBurst_High.NS_BloodBurst_High"));
-	}
-	
-	if (EffectToPlay && GetWorld())
-	{
-		// 혈흔 이펙트의 회전을 충돌 법선에 맞춰 설정
-		FRotator EffectRotation = FRotationMatrix::MakeFromZ(HitNormal).Rotator();
-		
-		// 스케일 적용
-		FVector BloodScale = FVector(Scale, Scale, Scale);
-		
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-			GetWorld(),
-			EffectToPlay,
-			HitLocation,
-			EffectRotation,
-			BloodScale,
-			true,
-			true
-		);
-	}
-	else 
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Drakhar BloodEffect could not be loaded or spawned"));
-	}
+	UGS_VFX_FunctionLibrary::PlayBloodEffect(this, BloodEffectSystem, HitLocation, FRotationMatrix::MakeFromZ(HitNormal).Rotator(), Scale);
 }
