@@ -102,8 +102,8 @@ void AGS_RTSController::BeginPlay()
 	//[Aether] 준비 완료 시 broadcast
 	if (IsValid(AetherComp))
 	{
-		//AetherComp->InitializeMaxAmount(250.f);
 		OnAetherCompReady.Broadcast(AetherComp);
+		
 	}
 	for (TActorIterator<AGS_AetherExtractor> It(GetWorld()); It; ++It)
 	{
@@ -114,6 +114,10 @@ void AGS_RTSController::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("[RTSController::BeginPlay] Authority=%d, AetherComp=%s"),
 		HasAuthority(),
 		*GetNameSafe(AetherComp));
+	if (HasAuthority() && IsValid(AetherComp))
+	{
+		AetherComp->InitializeMaxAmount(AetherComp->GetMaxAmount());
+	}
 }
 
 void AGS_RTSController::SetupInputComponent()

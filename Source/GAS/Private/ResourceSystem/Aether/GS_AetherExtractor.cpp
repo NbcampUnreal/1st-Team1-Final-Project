@@ -173,10 +173,25 @@ void AGS_AetherExtractor::SetHPTextWidget(UGS_HPText* InHPTextWidget)
 void AGS_AetherExtractor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	if (HPTextWidgetComp)
+	{
+		if (UGS_HPText* HPText = Cast<UGS_HPText>(HPTextWidgetComp->GetWidget()))
+		{
+			if (StatComp)
+			{
+				StatComp->OnCurrentHPChanged.RemoveAll(HPText);
+			}
+		}
+	}
+
+
 	if (!GetWorld())
 	{
 		return;
 	}
+
+
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; It++)
 	{
 		if (APlayerController* PC = It->Get())
