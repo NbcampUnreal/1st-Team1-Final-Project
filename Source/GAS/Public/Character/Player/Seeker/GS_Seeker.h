@@ -88,6 +88,9 @@ public:
 	EGait GetLastSeekerGait();
 
 	UFUNCTION()
+	void StateReset();
+
+	UFUNCTION()
 	void OnRep_SeekerGait();
 
 	// AnimInstnace Slot State Value 
