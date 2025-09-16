@@ -279,6 +279,23 @@ EGait AGS_Seeker::GetLastSeekerGait()
 	return LastSeekerGait;
 }
 
+void AGS_Seeker::StateReset()
+{
+	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+	}
+
+	CanChangeSeekerGait = true;
+	CanAcceptComboInput = true;
+	SetMoveControlValue(true, true);
+	SetLookControlValue(true, true);
+
+	Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+
+	GetSkillComp()->ResetAllowedSkillsMask();
+}
+
 const FName AGS_Seeker::HPRatioParamName = TEXT("HPRatio");
 const FName AGS_Seeker::EffectIntensityParamName = TEXT("EffectIntensity");
 
