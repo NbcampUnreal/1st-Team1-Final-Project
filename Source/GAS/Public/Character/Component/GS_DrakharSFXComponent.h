@@ -28,6 +28,7 @@ public:
 	void PlayDraconicProjectileSound(const FVector& Location);
 	void PlayAttackHitSound();
 	void PlayFeverModeStartSound();
+	void PlayHurtSound();
 	void HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter);
 
 private:
@@ -36,6 +37,7 @@ private:
 
 	// 사운드 중복 재생 방지
 	bool bDraconicFurySoundPlayed;
+	bool bHurtSoundPlayed;
 
 	// === Wwise 관련 헬퍼 함수 ===
 	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);

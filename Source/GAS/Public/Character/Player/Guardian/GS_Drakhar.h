@@ -172,6 +172,7 @@ public:
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayAttackHitSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboFinisherSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStartSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayHurtSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartWingRushVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStopWingRushVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartDustVFX();
@@ -294,6 +295,8 @@ public:
 	UAkAudioEvent* ComboFinisherSoundEvent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Fever")
 	UAkAudioEvent* FeverModeStartSoundEvent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Impact")
+	UAkAudioEvent* HurtSoundEvent;
 	
 	FORCEINLINE UGS_DrakharVFXComponent* GetVFXComponent() const { return VFXComponent; }
 	FORCEINLINE UGS_DrakharSFXComponent* GetSFXComponent() const { return SFXComponent; }

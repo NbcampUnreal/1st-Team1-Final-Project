@@ -84,6 +84,7 @@ AGS_Drakhar::AGS_Drakhar()
 	AttackHitSoundEvent = nullptr;
 	ComboFinisherSoundEvent = nullptr;
 	FeverModeStartSoundEvent = nullptr;
+	HurtSoundEvent = nullptr;
 
 	// AkComponent 추가
 	if (!FindComponentByClass<UAkComponent>())
@@ -184,6 +185,12 @@ void AGS_Drakhar::OnDamageStart()
 	
 	//timer start
 	GetWorld()->GetTimerManager().SetTimer(HealthDelayTimer,this,&AGS_Drakhar::BeginHealRegeneration,5.f,false);
+	
+	// 피격 사운드 재생
+	if (HasAuthority())
+	{
+		MulticastPlayHurtSound();
+	}
 }
 
 void AGS_Drakhar::Ctrl()
@@ -951,6 +958,11 @@ void AGS_Drakhar::MulticastPlayComboFinisherSound_Implementation()
 void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
 {
 	if (SFXComponent) SFXComponent->PlayFeverModeStartSound();
+}
+
+void AGS_Drakhar::MulticastPlayHurtSound_Implementation()
+{
+	if (SFXComponent) SFXComponent->PlayHurtSound();
 }
 
 void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
