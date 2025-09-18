@@ -51,12 +51,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Arrow")
 	int32 GetMaxChildArrows();
 
-	// Set Mouse Click Flag
-	UFUNCTION()
-	void SetMouseRightClickFlag(bool bClicked);
-	void SetMouseLeftClickFlag(bool bClicked);
-	
-
 	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;

@@ -77,7 +77,7 @@ public:
 	
 	//[attck check function]
 	UFUNCTION()
-	void MeleeAttackCheck();
+	virtual void MeleeAttackCheck();
 	
 	//check player in attack range
 	TSet<AGS_Character*> DetectPlayerInRange(const FVector& Start, float SkillRange, float Radius);

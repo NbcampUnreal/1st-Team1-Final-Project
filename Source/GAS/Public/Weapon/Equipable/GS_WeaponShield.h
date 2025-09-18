@@ -55,6 +55,15 @@ public:
 		const FHitResult& SweepResult
 	);
 
+	// 방어용 콜리전 종료 이벤트
+	UFUNCTION()
+	void OnDefenseEndOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex
+	);
+
 	// 공격용 콜리전 제어
 	UFUNCTION()
 	void EnableAttackHit();
@@ -98,6 +107,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
 	UAkAudioEvent* HitStructureSoundEvent;
 
+	// 가드 성공 사운드 에셋들
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio|Defense")
+	UAkAudioEvent* GuardSuccessPawnSoundEvent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio|Defense")
+	UAkAudioEvent* GuardSuccessStructureSoundEvent;
+
 	// 히트 VFX 에셋들
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
 	UNiagaraSystem* HitPawnVFX;
@@ -105,9 +121,20 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
 	UNiagaraSystem* HitStructureVFX;
 
+	// 가드 성공 VFX 에셋들
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Defense")
+	UNiagaraSystem* GuardSuccessPawnVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Defense")
+	UNiagaraSystem* GuardSuccessStructureVFX;
+
 	// 공격용 히트 액터 목록 (중복 히트 방지)
 	UPROPERTY()
 	TSet<AActor*> AttackHitActors;
+
+	// 방어용 히트 액터 목록 (중복 히트 방지)
+	UPROPERTY()
+	TSet<AActor*> DefenseHitActors;
 
 	// 방어용 콜리전
 	UPROPERTY(VisibleAnywhere, Category = "Defense")
@@ -129,6 +156,8 @@ protected:
 	virtual EShieldHitTargetType DetermineTargetType(AActor* OtherActor) const;
 	virtual void PlayHitSound(EShieldHitTargetType TargetType, const FHitResult& SweepResult);
 	virtual void PlayHitVFX(EShieldHitTargetType TargetType, const FHitResult& SweepResult);
+	virtual void PlayGuardSuccessVFX(EShieldHitTargetType TargetType, const FHitResult& SweepResult);
+	virtual void PlayGuardSuccessSound(EShieldHitTargetType TargetType, const FHitResult& SweepResult);
 
 	// RTS 모드 지원을 위한 리스너 위치 가져오기
 	bool GetListenerLocation(FVector& OutLocation) const;
@@ -152,4 +181,14 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySpecialHitVFX(class UNiagaraSystem* VFXToPlay, const FHitResult& HitResult);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayGuardSuccessVFX(EShieldHitTargetType TargetType, const FHitResult& SweepResult);
+	bool Multicast_PlayGuardSuccessVFX_Validate(EShieldHitTargetType TargetType, const FHitResult& SweepResult);
+	void Multicast_PlayGuardSuccessVFX_Implementation(EShieldHitTargetType TargetType, const FHitResult& SweepResult);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayGuardSuccessSound(EShieldHitTargetType TargetType, const FHitResult& SweepResult);
+	bool Multicast_PlayGuardSuccessSound_Validate(EShieldHitTargetType TargetType, const FHitResult& SweepResult);
+	void Multicast_PlayGuardSuccessSound_Implementation(EShieldHitTargetType TargetType, const FHitResult& SweepResult);
 };

@@ -6,7 +6,6 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Character/Player/Seeker/GS_Merci.h"
 #include "Character/Skill/GS_SkillBase.h"
 
 
