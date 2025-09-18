@@ -335,6 +335,12 @@ void AGS_Drakhar::MeleeAttackCheck()
 					// 히트 스톱 효과
 					MulticastRPCApplyHitStop(DamagedCharacter);
 					
+					// 공격 성공 시 공격자에게 카메라 쉐이크 적용
+					if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+					{
+						Client_PlayAttackSuccessShake(AttackerPC);
+					}
+					
 					// 서버에서 피버 게이지 증가
 					if (!GetIsFeverMode())
 					{
@@ -388,6 +394,14 @@ void AGS_Drakhar::ComboLastAttack()
 					
 					MulticastRPC_PlayAttackHitVFX(DamagedPlayer->GetActorLocation());
 					MulticastPlayAttackHitSound();
+					
+					// 공격 성공 시 공격자에게 강한 카메라 쉐이크 적용
+					if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+					{
+						FGS_CameraShakeInfo StrongAttackShake = AttackSuccessShake;
+						StrongAttackShake.Intensity *= 1.8f; // 마지막 콤보는 더 강한 쉐이크
+						Client_PlayAttackSuccessShakeWithInfo(AttackerPC, StrongAttackShake);
+					}
 				}
 			}
 		}
@@ -481,6 +495,14 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 
 		MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
 		MulticastPlayAttackHitSound();
+		
+		// 공격 성공 시 공격자에게 카메라 쉐이크 적용
+		if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+		{
+			FGS_CameraShakeInfo DashAttackShake = AttackSuccessShake;
+			DashAttackShake.Intensity *= 1.2f; // 대시 공격은 약간 강한 쉐이크
+			Client_PlayAttackSuccessShakeWithInfo(AttackerPC, DashAttackShake);
+		}
 
 		FVector DrakharPos = GetActorLocation();
 		FVector DamagedPos = DamagedCharacter->GetActorLocation();

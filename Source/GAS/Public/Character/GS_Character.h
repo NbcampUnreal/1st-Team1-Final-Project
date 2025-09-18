@@ -5,12 +5,14 @@
 #include "GameFramework/Character.h"
 #include "Character/E_Character.h"
 #include "Component/GS_HitReactComp.h"
+#include "Character/Component/GS_CameraShakeTypes.h"
 #include "GS_Character.generated.h"
 
 class UGS_StatComp;
 class UGS_SkillComp;
 class UGS_DebuffComp;
 class UGS_HitReactComp;
+class UGS_CameraShakeComponent;
 class UGS_HPTextWidgetComp;
 class UGS_PlayerInfoWidget;
 class UGS_HPText;
@@ -73,6 +75,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	ECharacterType CharacterType;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_HitReactComp> HitReactComp;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_CameraShakeComponent> CameraShakeComp;
+
+	// EditAnywhere, BlueprintReadOnly, Category = "Effects|CameraShake"
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects|CameraShake")
+	FGS_CameraShakeInfo TakeDamageShake;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects|CameraShake")
+	FGS_CameraShakeInfo AttackSuccessShake;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
 	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
 	
@@ -84,6 +99,16 @@ public:
 	//serverRPC
 	UFUNCTION(Server, Reliable)
 	void ServerRPCMeleeAttack(AGS_Character* InDamagedCharacter);
+
+	//clientRPC for camera shake
+	UFUNCTION(Client, Reliable)
+	void Client_PlayTakeDamageShake(APlayerController* TargetPC);
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlayAttackSuccessShake(APlayerController* TargetPC);
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlayAttackSuccessShakeWithInfo(APlayerController* TargetPC, const FGS_CameraShakeInfo& CustomShakeInfo);
 
 	//character death play ragdoll
 	UFUNCTION(NetMulticast, Reliable)
@@ -151,9 +176,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_StatComp> StatComp;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UGS_HitReactComp> HitReactComp;
 	
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TArray<FWeaponSlot> WeaponSlots;
