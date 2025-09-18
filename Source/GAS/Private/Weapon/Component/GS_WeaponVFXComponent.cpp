@@ -6,6 +6,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
+#include "Engine/HitResult.h"
 #include "Net/UnrealNetwork.h"
 #include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Player/Seeker/GS_Ares.h"
@@ -208,6 +209,16 @@ void UGS_WeaponVFXComponent::PlaySpecialAttackVFX(ESeekerAuraType SeekerType)
 	}
 
 	Multicast_PlaySpecialAttackVFX(SeekerType);
+}
+
+void UGS_WeaponVFXComponent::PlayGuardSuccessVFX(const FHitResult& HitResult, ESeekerAuraType DefenderSeekerType)
+{
+	if (!GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	Multicast_PlayGuardSuccessVFX(HitResult.ImpactPoint, HitResult.ImpactNormal, DefenderSeekerType);
 }
 
 void UGS_WeaponVFXComponent::ActivateEnchantVFX(ESeekerAuraType SeekerType, float Duration)
@@ -455,6 +466,53 @@ void UGS_WeaponVFXComponent::Multicast_PlaySpecialAttackVFX_Implementation(ESeek
 				GetVFXLocationOffset(EWeaponVFXType::SpecialAttack, SeekerType),
 				GetVFXRotationOffset(EWeaponVFXType::SpecialAttack, SeekerType),
 				EAttachLocation::KeepRelativeOffset,
+				true
+			);
+		}
+	}
+}
+
+void UGS_WeaponVFXComponent::Multicast_PlayGuardSuccessVFX_Implementation(FVector ImpactPoint, FVector ImpactNormal, ESeekerAuraType DefenderSeekerType)
+{
+	if (!IsValidForVFXOperation())
+	{
+		return;
+	}
+
+	UNiagaraSystem* VFXSystem = GetWeaponVFX(EWeaponVFXType::GuardSuccess, DefenderSeekerType);
+	if (VFXSystem && GetWorld())
+	{
+		// 방패 메시 컴포넌트에 부착
+		USceneComponent* MeshComponent = GetWeaponMeshComponent();
+		if (MeshComponent)
+		{
+			// 방패 중앙에서 이펙트 재생
+			UNiagaraComponent* VFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+				VFXSystem,
+				MeshComponent,
+				AttachSocketName,
+				GetVFXLocationOffset(EWeaponVFXType::GuardSuccess, DefenderSeekerType),
+				ImpactNormal.Rotation() + GetVFXRotationOffset(EWeaponVFXType::GuardSuccess, DefenderSeekerType),
+				EAttachLocation::KeepRelativeOffset,
+				true
+			);
+			
+			// 스케일 별도 설정
+			if (VFXComponent)
+			{
+				VFXComponent->SetRelativeScale3D(GetVFXScale(EWeaponVFXType::GuardSuccess, DefenderSeekerType));
+			}
+		}
+		else
+		{
+			// 메시 컴포넌트가 없으면 충돌 지점에서 재생
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				VFXSystem,
+				ImpactPoint,
+				ImpactNormal.Rotation(),
+				FVector(1.0f),
+				true,
 				true
 			);
 		}

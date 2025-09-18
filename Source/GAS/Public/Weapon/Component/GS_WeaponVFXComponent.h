@@ -19,7 +19,8 @@ enum class EWeaponVFXType : uint8
 	Charge			UMETA(DisplayName = "Charge"),			// 차징 이펙트
 	SpecialAttack	UMETA(DisplayName = "Special Attack"),	// 특수 공격
 	Enchant			UMETA(DisplayName = "Enchant"),			// 인챈트 효과
-	Slash			UMETA(DisplayName = "Slash")			// 베기 이펙트
+	Slash			UMETA(DisplayName = "Slash"),			// 베기 이펙트
+	GuardSuccess	UMETA(DisplayName = "Guard Success")	// 방어 성공 이펙트
 };
 
 // 시커 타입별 아우라 이펙트 정의
@@ -123,13 +124,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
 	void ActivateChargeVFX(float ChargeLevel = 1.0f);
 
-	// 특수 공격 이펙트 (일회성)
+	// 특수 공격 이펙트
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
 	void PlaySpecialAttackVFX(ESeekerAuraType SeekerType);
 
 	// 인챈트 이펙트
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
 	void ActivateEnchantVFX(ESeekerAuraType SeekerType, float Duration = -1.0f);
+
+	// 가드 성공 이펙트
+	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
+	void PlayGuardSuccessVFX(const FHitResult& HitResult, ESeekerAuraType DefenderSeekerType);
 
 	// 모든 VFX 정리
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
@@ -180,6 +185,9 @@ private:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ActivateEnchantVFX(ESeekerAuraType SeekerType, float Duration);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayGuardSuccessVFX(FVector ImpactPoint, FVector ImpactNormal, ESeekerAuraType DefenderSeekerType);
 
 	// ======================
 	// VFX 관리 시스템
