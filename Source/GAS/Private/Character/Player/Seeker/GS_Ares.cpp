@@ -75,6 +75,27 @@ void AGS_Ares::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
 	// GS_SeekerAudioComponent의 PlayAresComboAttackSoundWithExtra 함수에서 
 	// 추가 사운드가 자동으로 재생되므로 별도 처리 불필요
 	// 필요시 여기서 추가 로직 구현 가능
+	
+	// 공격 성공 시 공격자에게 카메라 쉐이크 적용 (Ares 전용)
+	if (HasAuthority())
+	{
+		if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+		{
+			// 4번째 공격(마지막 공격)은 더 강한 쉐이크 적용
+			if (ComboIndex == 4)
+			{
+				// 강한 공격 성공 쉐이크 (마지막 콤보)
+				FGS_CameraShakeInfo StrongAttackShake = AttackSuccessShake;
+				StrongAttackShake.Intensity *= 1.6f; // Ares 마지막 공격 강도
+				Client_PlayAttackSuccessShakeWithInfo(AttackerPC, StrongAttackShake);
+			}
+			else
+			{
+				// 일반 공격 성공 쉐이크
+				Client_PlayAttackSuccessShake(AttackerPC);
+			}
+		}
+	}
 }
 
 float AGS_Ares::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)

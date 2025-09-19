@@ -9,6 +9,7 @@ UGS_DrakharSFXComponent::UGS_DrakharSFXComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	bDraconicFurySoundPlayed = false;
+	bHurtSoundPlayed = false;
 }
 
 void UGS_DrakharSFXComponent::BeginPlay()
@@ -20,24 +21,33 @@ void UGS_DrakharSFXComponent::BeginPlay()
 // === 사운드 재생 함수 구현 ===
 void UGS_DrakharSFXComponent::PlayComboAttackSound()
 {
-	if(OwnerDrakhar) PlaySoundEvent(OwnerDrakhar->ComboAttackSoundEvent);
+	if(OwnerDrakhar) 
+	{
+		PlaySoundEvent(OwnerDrakhar->ComboAttackSoundEvent, OwnerDrakhar->GetActorLocation());
+	}
 }
 
 void UGS_DrakharSFXComponent::PlayDashSkillSound()
 {
-	if(OwnerDrakhar) PlaySoundEvent(OwnerDrakhar->DashSkillSoundEvent);
+	if(OwnerDrakhar) 
+	{
+		PlaySoundEvent(OwnerDrakhar->DashSkillSoundEvent, OwnerDrakhar->GetActorLocation());
+	}
 }
 
 void UGS_DrakharSFXComponent::PlayEarthquakeSkillSound()
 {
-	if(OwnerDrakhar) PlaySoundEvent(OwnerDrakhar->EarthquakeSkillSoundEvent);
+	if(OwnerDrakhar) 
+	{
+		PlaySoundEvent(OwnerDrakhar->EarthquakeSkillSoundEvent, OwnerDrakhar->GetActorLocation());
+	}
 }
 
 void UGS_DrakharSFXComponent::PlayDraconicFurySkillSound()
 {
 	if (!bDraconicFurySoundPlayed && OwnerDrakhar)
 	{
-		PlaySoundEvent(OwnerDrakhar->DraconicFurySkillSoundEvent);
+		PlaySoundEvent(OwnerDrakhar->DraconicFurySkillSoundEvent, OwnerDrakhar->GetActorLocation());
 		bDraconicFurySoundPlayed = true;
 
 		FTimerHandle ResetSoundTimer;
@@ -65,12 +75,31 @@ void UGS_DrakharSFXComponent::PlayAttackHitSound()
 		return;
 	}
 	
-	PlaySoundEvent(OwnerDrakhar->AttackHitSoundEvent);
+	PlaySoundEvent(OwnerDrakhar->AttackHitSoundEvent, OwnerDrakhar->GetActorLocation());
 }
 
 void UGS_DrakharSFXComponent::PlayFeverModeStartSound()
 {
-	if(OwnerDrakhar) PlaySoundEvent(OwnerDrakhar->FeverModeStartSoundEvent);
+	if(OwnerDrakhar) 
+	{
+		PlaySoundEvent(OwnerDrakhar->FeverModeStartSoundEvent, OwnerDrakhar->GetActorLocation());
+	}
+}
+
+void UGS_DrakharSFXComponent::PlayHurtSound()
+{
+	if (!bHurtSoundPlayed && OwnerDrakhar)
+	{
+		PlaySoundEvent(OwnerDrakhar->HurtSoundEvent, OwnerDrakhar->GetActorLocation());
+		bHurtSoundPlayed = true;
+
+		// N초 후에 다시 재생 가능하도록 설정
+		FTimerHandle ResetHurtSoundTimer;
+		GetWorld()->GetTimerManager().SetTimer(ResetHurtSoundTimer, [this]()
+		{
+			bHurtSoundPlayed = false;
+		}, 1.0f, false);
+	}
 }
 
 void UGS_DrakharSFXComponent::HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter)

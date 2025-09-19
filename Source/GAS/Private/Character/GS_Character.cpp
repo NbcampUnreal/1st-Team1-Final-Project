@@ -11,6 +11,7 @@
 #include "AkGameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/Component/GS_HitReactComp.h"
+#include "Character/Component/GS_CameraShakeComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "AI/RTS/GS_RTSController.h"
@@ -26,6 +27,7 @@ AGS_Character::AGS_Character()
 	StatComp = CreateDefaultSubobject<UGS_StatComp>(TEXT("StatComp"));
 	DebuffComp = CreateDefaultSubobject<UGS_DebuffComp>(TEXT("DebuffComp"));
 	HitReactComp = CreateDefaultSubobject<UGS_HitReactComp>(TEXT("HitReactComp"));
+	CameraShakeComp = CreateDefaultSubobject<UGS_CameraShakeComponent>(TEXT("CameraShakeComp"));
 	
 	HPTextWidgetComp = CreateDefaultSubobject<UGS_HPTextWidgetComp>(TEXT("TextWidgetComp"));
 	HPTextWidgetComp->SetupAttachment(RootComponent);
@@ -163,6 +165,14 @@ float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	//when damage input start -> for drakhar 6/24
 	OnDamageStart();
 
+	if (HasAuthority())
+	{
+		if (APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			Client_PlayTakeDamageShake(PC);
+		}
+	}
+
 	if (CanHitReact)
 	{
 		EHitReactType HitReactType = EHitReactType::DamageOnly;
@@ -265,7 +275,37 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 			float Damage = DamagedCharacterStat->CalculateDamage(this, InDamagedCharacter);
 			FDamageEvent DamageEvent;
 			InDamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
+			
+			// 공격이 성공했을 때 공격자에게 카메라 쉐이크 적용
+			if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+			{
+				Client_PlayAttackSuccessShake(AttackerPC);
+			}
 		}
+	}
+}
+
+void AGS_Character::Client_PlayTakeDamageShake_Implementation(APlayerController* TargetPC)
+{
+	if (TargetPC && TargetPC->IsLocalController() && TakeDamageShake.ShakeClass)
+	{
+		TargetPC->ClientStartCameraShake(TakeDamageShake.ShakeClass, TakeDamageShake.Intensity);
+	}
+}
+
+void AGS_Character::Client_PlayAttackSuccessShake_Implementation(APlayerController* TargetPC)
+{
+	if (TargetPC && TargetPC->IsLocalController() && AttackSuccessShake.ShakeClass)
+	{
+		TargetPC->ClientStartCameraShake(AttackSuccessShake.ShakeClass, AttackSuccessShake.Intensity);
+	}
+}
+
+void AGS_Character::Client_PlayAttackSuccessShakeWithInfo_Implementation(APlayerController* TargetPC, const FGS_CameraShakeInfo& CustomShakeInfo)
+{
+	if (TargetPC && TargetPC->IsLocalController() && CustomShakeInfo.ShakeClass)
+	{
+		TargetPC->ClientStartCameraShake(CustomShakeInfo.ShakeClass, CustomShakeInfo.Intensity);
 	}
 }
 

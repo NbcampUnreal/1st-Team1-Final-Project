@@ -109,6 +109,27 @@ void AGS_SeekerMerciArrowNormal::ProcessDamageLogic(ETargetType TargetType, cons
 		// 데미지 적용 후 대상 기록 (중복 방지)
 		DamagedActors.Add(HitActor);
 
+		// 화살 적중 성공 시 공격자(Merci)에게 카메라 쉐이크 적용
+		if (AGS_Character* OwnerChar = Cast<AGS_Character>(GetOwner()))
+		{
+			if (APlayerController* AttackerPC = Cast<APlayerController>(OwnerChar->GetController()))
+			{
+				// 화살 타입에 따라 다른 강도의 쉐이크 적용
+				if (ArrowType == EArrowType::Axe)
+				{
+					// 도끼 화살은 더 강한 쉐이크 (방어력 무시)
+					FGS_CameraShakeInfo AxeArrowShake = OwnerChar->AttackSuccessShake;
+					AxeArrowShake.Intensity *= 1.3f;
+					OwnerChar->Client_PlayAttackSuccessShakeWithInfo(AttackerPC, AxeArrowShake);
+				}
+				else
+				{
+					// 일반/자식 화살은 기본 쉐이크
+					OwnerChar->Client_PlayAttackSuccessShake(AttackerPC);
+				}
+			}
+		}
+
 		UE_LOG(LogTemp, Warning, TEXT("Damage Applied: %.2f to %s (ArrowType: %d)"),
 			DamageToApply, *HitActor->GetName(), (int32)ArrowType);
 	}
