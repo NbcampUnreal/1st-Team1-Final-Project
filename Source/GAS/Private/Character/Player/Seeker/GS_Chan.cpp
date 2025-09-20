@@ -43,6 +43,8 @@ AGS_Chan::AGS_Chan()
 void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_Chan, bIsDefending);
 }
 
 void AGS_Chan::ResetCurrentStamina()
@@ -69,6 +71,22 @@ void AGS_Chan::SetCurrentStamina(float NewValue, bool SetbyDamage)
 	{
 		SkillComp->Server_TryDeactiveSkill(ESkillSlot::Aiming);
 	}
+}
+
+void AGS_Chan::DrainStaminaTick()
+{
+	SetCurrentStamina(CurrentStamina - StaminaDrainRate * 0.1f, false);
+	if (CurrentStamina <= 0.f)
+	{
+		SetDefending(false);
+
+		// 기본 애니메이션
+		Multicast_PlaySkillMontage(TakeDownShieldMontage, FName("LoopEnd"));
+	}
+}
+
+void AGS_Chan::RegenStaminaTick()
+{
 }
 
 // Called when the game starts or when spawned
@@ -300,7 +318,11 @@ void AGS_Chan::SetDefending(bool bDefending)
 {
 	if (HasAuthority())
 	{
+		if (bIsDefending == bDefending) return;
+
 		bIsDefending = bDefending;
+
+		GetWorldTimerManager().ClearTimer(StaminaHandle);
 		
 		// 방패의 방어용 콜리전 제어
 		for (int32 i = 0; i < 5; ++i)
@@ -311,6 +333,9 @@ void AGS_Chan::SetDefending(bool bDefending)
 				{
 					// 방어 시작 - 방어용 콜리전 활성화
 					Shield->ServerEnableDefenseHit();
+
+					// 스테미나 감소
+					GetWorldTimerManager().SetTimer(StaminaHandle, this, &AGS_Chan::DrainStaminaTick, 0.1f, true);
 				}
 				else
 				{

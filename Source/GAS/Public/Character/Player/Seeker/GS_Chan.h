@@ -103,7 +103,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Chan|Defense")
 	void SetDefending(bool bDefending);
 
+	// =============
 	// 스테미나 관리
+	// =============
+
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
 	float MaxStamina = 100.f;
 
@@ -113,10 +116,18 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
 	float StaminaDrainRate = 0.1f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
+	float StaminaRegenRate = 1.0f;
+
 	float GetCurrentStamina() const { return CurrentStamina; }
 	void ResetCurrentStamina();
 	void SetCurrentStamina(float NewValue, bool SetbyDamage = false);
 	bool HasEnoughStamina(float Cost) const { return CurrentStamina >= Cost; }
+	void DrainStaminaTick();
+	void RegenStaminaTick();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
+	UAnimMontage* TakeDownShieldMontage;
 
 protected:
 	// Called when the game starts or when spawned
@@ -133,7 +144,7 @@ private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;
 
 	// 스테미나 관리
-	FTimerHandle StaminaDrainHandle;
+	FTimerHandle StaminaHandle;
 
 	// 체력 관리
 	float MaxHealth;

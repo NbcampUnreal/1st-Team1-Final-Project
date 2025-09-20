@@ -40,7 +40,7 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	{
 		if (ChanCharacter)
 		{
-			if (ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Aiming))
+			if (ChanCharacter->bIsDefending)
 			{
 				ChanCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Aiming);
 			}
