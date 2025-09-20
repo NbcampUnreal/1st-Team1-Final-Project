@@ -18,7 +18,16 @@ void UGS_ChanSkillInputHandlerComp::OnRightClick(const FInputActionInstance& Ins
 
 	if (!bCtrlHeld)
 	{
-		ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
+		if (ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
+		{
+			ChanCharacter->GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+			
+		}
+		else
+		{
+			ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ready);
+		}
+		
 	}
 	else
 	{
@@ -40,9 +49,9 @@ void UGS_ChanSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Inst
 	{
 		if (ChanCharacter)
 		{
-			if (ChanCharacter->bIsDefending)
+			if (ChanCharacter->GetSkillComp()->IsSkillActive(ESkillSlot::Ready))
 			{
-				ChanCharacter->GetSkillComp()->Server_TrySkillCommand(ESkillSlot::Aiming);
+				ChanCharacter->GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
 			}
 			else
 			{
