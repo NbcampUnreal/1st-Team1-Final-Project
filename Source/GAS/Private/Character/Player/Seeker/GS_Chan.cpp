@@ -87,6 +87,11 @@ void AGS_Chan::DrainStaminaTick()
 
 void AGS_Chan::RegenStaminaTick()
 {
+	SetCurrentStamina(CurrentStamina + StaminaRegenRate * 0.1f, false);
+	if (CurrentStamina >= MaxStamina)
+	{
+		GetWorldTimerManager().ClearTimer(StaminaHandle);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -341,6 +346,8 @@ void AGS_Chan::SetDefending(bool bDefending)
 				{
 					// 방어 해제 - 방어용 콜리전 비활성화
 					Shield->ServerDisableDefenseHit();
+
+					GetWorldTimerManager().SetTimer(StaminaHandle, this, &AGS_Chan::RegenStaminaTick, 0.05f, true);
 				}
 				break;
 			}
