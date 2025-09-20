@@ -194,7 +194,7 @@ void UGS_ChanAimingSkill::InterruptSkill()
 	OwnerPlayer->SetDefending(false);
 
 	OwnerPlayer->SetCurrentStamina(0.f);
-	OwnerPlayer->Client_ChanAimingSkillBar(false);
+	//OwnerPlayer->Client_ChanAimingSkillBar(false);
 }
 
 
@@ -288,7 +288,7 @@ void UGS_ChanAimingSkill::StartHoldUp()
 		OwnerChan->SetDefending(true);
 
 		// UI 표시
-		OwnerChan->Client_ChanAimingSkillBar(true);
+		//OwnerChan->Client_ChanAimingSkillBar(true);
 	}
 }
 
@@ -330,7 +330,7 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		// UI 숨기기
-		OwnerPlayer->Client_ChanAimingSkillBar(false);
+		//OwnerPlayer->Client_ChanAimingSkillBar(false);
 
 		// 방어 상태 비활성화 (스킬 완전 종료 시)
 		OwnerPlayer->SetDefending(false);

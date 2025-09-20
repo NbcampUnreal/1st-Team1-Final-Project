@@ -114,7 +114,7 @@ public:
 	float CurrentStamina = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
-	float StaminaDrainRate = 0.1f;
+	float StaminaDrainRate = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
 	float StaminaRegenRate = 1.0f;

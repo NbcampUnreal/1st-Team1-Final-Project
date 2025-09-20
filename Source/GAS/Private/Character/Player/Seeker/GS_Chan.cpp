@@ -335,7 +335,7 @@ void AGS_Chan::SetDefending(bool bDefending)
 					Shield->ServerEnableDefenseHit();
 
 					// 스테미나 감소
-					GetWorldTimerManager().SetTimer(StaminaHandle, this, &AGS_Chan::DrainStaminaTick, 0.1f, true);
+					GetWorldTimerManager().SetTimer(StaminaHandle, this, &AGS_Chan::DrainStaminaTick, 0.05f, true);
 				}
 				else
 				{
