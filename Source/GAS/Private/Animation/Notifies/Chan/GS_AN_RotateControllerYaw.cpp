@@ -37,14 +37,14 @@ void UGS_AN_RotateControllerYaw::Notify(USkeletalMeshComponent* MeshComp, UAnimS
             constexpr float MaxRange = 1800.f; // 전방 거리
             constexpr float AimRadius = 45.f; // 두께
             const FVector Start = PlayerEyeLocation;
-            const FVector End = PlayerEyeLocation + ViewDirection * MaxRange; // 이 식이 이해가지 않음. // SJE
+            const FVector End = PlayerEyeLocation + ViewDirection * MaxRange;
 
             // Collision Channel.
             FCollisionObjectQueryParams ObjTypes;
             ObjTypes.AddObjectTypesToQuery(ECC_Pawn); // 추후 몬스터 커스텀 채널로 변경.
 
             // List of collision channel to ignore.
-            FCollisionQueryParams IgnoreCollisionQueryParams(SCENE_QUERY_STAT(BasicAttackAimAssist), false, Seeker); // 해당 생성자 이해가지 않음. // SJE
+            FCollisionQueryParams IgnoreCollisionQueryParams(SCENE_QUERY_STAT(BasicAttackAimAssist), false, Seeker);
             IgnoreCollisionQueryParams.AddIgnoredActor(Seeker); // 자기 자신 무시. // 추후 몬스터 커스틈 채널로 변경하여 해당 로직 삭제.
 
             // Sphere Sweep.
@@ -102,7 +102,6 @@ void UGS_AN_RotateControllerYaw::Notify(USkeletalMeshComponent* MeshComp, UAnimS
 
                 const FRotator DesiredYawOnly(0.f, (To - From).Rotation().Yaw, 0.f);
                 Seeker->SetActorRotation(DesiredYawOnly);
-                //TpsController->SetControlRotation(DesiredYawOnly);
 
                 // Debugging
                 /*if (Seeker->HasAuthority())

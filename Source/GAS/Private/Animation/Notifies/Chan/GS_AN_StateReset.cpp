@@ -3,8 +3,6 @@
 
 #include "Animation/Notifies/Chan/GS_AN_StateReset.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-/*#include "Character/Player/Seeker/GS_Merci.h"
-#include "Animation/Character/GS_SeekerAnimInstance.h"*/ // SJE
 
 void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	const FAnimNotifyEventReference& EventReference)
@@ -15,19 +13,6 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 	{
 		if (Seeker->HasAuthority())
 		{
-			/*if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(Character->GetMesh()->GetAnimInstance()))
-			{
-				Character->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
-			}
-
-			Character->CanChangeSeekerGait = true;
-			Character->CanAcceptComboInput = true;
-			Character->SetMoveControlValue(true, true);
-			Character->SetLookControlValue(true, true);
-
-			Character->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
-
-			Character->GetSkillComp()->ResetAllowedSkillsMask();*/ // SJE
 			Seeker->StateReset();
 		}
 	}

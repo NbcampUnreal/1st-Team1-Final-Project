@@ -356,19 +356,11 @@ void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 
 void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)
 {
-	/*if (!HasAuthority())
-	{
-		PlayAnimMontage(SkillMontage);
-	}*/ // SJE
 	PlayAnimMontage(SkillMontage);
 }
 
 void AGS_Character::MulicastRPCStopCurrentSkillMontage_Implementation(UAnimMontage* CurrentSkillMontage)
 {
-	/*if (!HasAuthority())
-	{
-		StopAnimMontage(CurrentSkillMontage);
-	}*/ // SJE
 	StopAnimMontage(CurrentSkillMontage);
 }
 
