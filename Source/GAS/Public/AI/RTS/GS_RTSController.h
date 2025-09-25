@@ -6,6 +6,7 @@
 #include "Character/GS_BasePlayerController.h"
 #include "RTSCommand.h"
 #include "AkGameplayStatics.h"
+#include "ResourceSystem/Aether/GS_AetherComp.h"
 #include "GS_RTSController.generated.h"
 
 struct FInputActionInstance;
@@ -14,6 +15,7 @@ class AGS_Monster;
 class AGS_Character;
 class UInputMappingContext;
 class UInputAction;
+class UGS_AetherComp;
 
 // 지정된 부대 
 USTRUCT(BlueprintType)
@@ -29,6 +31,8 @@ struct FUnitGroup
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, const TArray<AGS_Monster*>&, NewSelection);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRTSCommandChanged, ERTSCommand, NewCommand);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedUnitsSkillChanged, bool, bAnyUnitHasSkill);
+//[Aether]
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAetherCompReady, UGS_AetherComp*, AetherComp);
 
 UCLASS()
 class GAS_API AGS_RTSController : public AGS_BasePlayerController
@@ -89,6 +93,14 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Selection")
 	FOnSelectedUnitsSkillChanged OnSelectedUnitsSkillChanged;
+
+	//[Aether]AetherComp + 생성 완료 알리는 델리게이트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource")
+	TObjectPtr<UGS_AetherComp> AetherComp;
+
+	UPROPERTY(BlueprintAssignable, Category="Resource")
+	FOnAetherCompReady OnAetherCompReady;
+
 
 	virtual AActor* GetViewTarget() const override;
 	
@@ -213,6 +225,9 @@ public:
 
 	UFUNCTION()
 	void HandleSeekerHover(bool bIsHover);
+
+	//[Aether]AetherComp 추가 
+	UGS_AetherComp* GetAetherComp() const;
 
 protected:
 	virtual void BeginPlay() override;

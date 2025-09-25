@@ -482,6 +482,16 @@ void AGS_TpsController::ApplyChargeCameraSettings(bool bCharging)
 	SetLookControlValue(false, false);
 }
 
+void AGS_TpsController::Client_DrawAimAssistDebug_Implementation(const FVector& Start, const FVector& End,
+	const FVector& TargetLocation, float Duration)
+{
+	if (UWorld* World = GetWorld())
+	{
+		DrawDebugLine(World, Start, End, FColor::Yellow, false, Duration, 0, 1.5f);
+		DrawDebugSphere(World, TargetLocation, 24.f, 12, FColor::Red, false, Duration);
+	}
+}
+
 void AGS_TpsController::BeginPlay()
 {
 	Super::BeginPlay();
