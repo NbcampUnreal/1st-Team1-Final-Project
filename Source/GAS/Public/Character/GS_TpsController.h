@@ -149,8 +149,11 @@ public:
 	// Pawn 유효성 검사를 위한 타이머 및 함수 추가
 	void TryCreatingPlayerWidget();
 	FTimerHandle WaitForPawnTimerHandle;
-	
 
+	// Debug
+	UFUNCTION(Client, Unreliable)
+	void Client_DrawAimAssistDebug(const FVector& Start, const FVector& End, const FVector& TargetLocation, float Duration); // SJE
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
