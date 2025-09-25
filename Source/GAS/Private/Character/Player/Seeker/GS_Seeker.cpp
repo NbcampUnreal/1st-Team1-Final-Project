@@ -187,9 +187,6 @@ void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AGS_Seeker::SetAimState(bool IsAim)
 {
-	/*FSeekerState NewState = SeekerState;
-	NewState.IsAim = IsAim;*/ // SJE
-
 	SeekerState.IsAim = IsAim;
 	
 	// 시커 오디오 컴포넌트에 조준 상태 변경 알림
@@ -205,7 +202,6 @@ void AGS_Seeker::SetAimState(bool IsAim)
 			SeekerAudioComponent->SetSeekerAudioState(ESeekerAudioState::Idle);
 		}
 	}
-	/*SeekerState = NewState;*/
 }
 
 bool AGS_Seeker::GetAimState()
