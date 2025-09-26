@@ -17,6 +17,7 @@
 #include "AI/RTS/GS_RTSController.h"
 #include "Character/Player/GS_Player.h"
 #include "Components/DecalComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
 #include "Character/F_GS_DamageEvent.h"
 
@@ -352,6 +353,9 @@ void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 {
 	 GetMesh()->SetSimulatePhysics(true);
 	 GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+
+	 // 콜리전 비활성화하여 몬스터가 더 이상 죽은 캐릭터를 타겟으로 하지 않도록 함
+	 GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)

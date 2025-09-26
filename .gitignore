@@ -33,3 +33,4 @@ Saved/
 
 
 Plugins/GameLiftPlugin/
+hell -c git status --porcelain
