@@ -5,6 +5,7 @@
 #include "Sound/GS_UIAudioSystem.h"
 #include "Sound/GS_EnvironmentAudioSystem.h"
 #include "AkAudioDevice.h"
+#include "UObject/UObjectGlobals.h"
 
 UGS_AudioManager::UGS_AudioManager()
 {
@@ -70,10 +71,16 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("일부 오디오 에셋이 누락되었지만 시스템을 계속 진행합니다."));
 	}
+
+	// 맵 전환 시 BGM 정지를 위한 델리게이트 바인딩
+	FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UGS_AudioManager::OnPreLoadMap);
 }
 
 void UGS_AudioManager::Deinitialize()
 {
+	// 델리게이트 해제
+	FCoreUObjectDelegates::PreLoadMap.RemoveAll(this);
+	
 	// 메모리 해제 처리
 	UIAudio = nullptr;
 	EnvironmentAudio = nullptr;
@@ -153,6 +160,40 @@ bool UGS_AudioManager::ValidateAudioAssets()
 	
 	UE_LOG(LogTemp, Log, TEXT("모든 오디오 에셋이 성공적으로 로드되었습니다."));
 	return true;
+}
+
+void UGS_AudioManager::OnPreLoadMap(const FString& MapName)
+{
+	if (!IsAudioProcessingAllowed())
+	{
+		return;
+	}
+	
+	if (bIsMapBGMPlaying)
+	{
+		StopMapBGM(nullptr);
+	}
+
+	if (CurrentCombatMusicStartEvent)
+	{
+		AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+
+		if (CurrentCombatMusicStopEvent)
+		{
+			UAkGameplayStatics::PostEvent(CurrentCombatMusicStopEvent, TargetActor, 0, FOnAkPostEventCallback());
+		}
+		else
+		{
+			// StopEvent가 없는 경우, 재생중인 액터의 모든 사운드를 중지
+			if (TargetActor)
+			{
+				UAkGameplayStatics::StopActor(TargetActor);
+			}
+		}
+		
+		CurrentCombatMusicStartEvent = nullptr;
+		CurrentCombatMusicStopEvent = nullptr;
+	}
 }
 
 // === 멀티플레이어 지원 헬퍼 ===
