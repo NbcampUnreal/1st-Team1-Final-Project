@@ -42,7 +42,7 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 		if (MerciCharacter)
 		{
-			MerciCharacter->Client_StartZoom();
+			MerciCharacter->Client_StartZoom(10.f); // Set Merci Aim Mode Duration on Ultimate Skill
 		}
 
 		// 타이머 설정
