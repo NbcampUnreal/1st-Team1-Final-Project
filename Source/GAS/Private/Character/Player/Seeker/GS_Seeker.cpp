@@ -160,6 +160,11 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 
 void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (IsValid(SeekerAudioComponent))
+	{
+		SeekerAudioComponent->SetComponentTickEnabled(false);
+	}
+
 	if (GetWorldTimerManager().IsTimerActive(LowHealthEffectTimer))
 	{
 		GetWorldTimerManager().ClearTimer(LowHealthEffectTimer);

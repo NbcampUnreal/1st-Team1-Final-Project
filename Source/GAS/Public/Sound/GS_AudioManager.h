@@ -130,4 +130,9 @@ private:
 	* @return 결정된 타겟 액터. RTS 모드이거나 적절한 Pawn이 없는 경우 nullptr을 반환할 수 있습니다.
 	*/
 	AActor* GetTargetActorForPlayback(AActor* Context = nullptr);
+
+	/**
+	 * @brief 맵 로딩 시작 시 호출되어 BGM을 정지시킵니다.
+	 */
+	void OnPreLoadMap(const FString& MapName);
 };

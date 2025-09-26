@@ -113,6 +113,17 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (IsValid(MonsterAudioComponent))
+	{
+		MonsterAudioComponent->SetComponentTickEnabled(false);
+	}
+
+	if (IsValid(AkComponent))
+	{
+		AkComponent->SetComponentTickEnabled(false);
+		AkComponent->Stop();
+	}
+
 	// if (SkillCooldownWidgetComp && SkillCooldownWidgetComp->GetBodySetup())
 	// {
 	// 	SkillCooldownWidgetComp->DestroyPhysicsState();
