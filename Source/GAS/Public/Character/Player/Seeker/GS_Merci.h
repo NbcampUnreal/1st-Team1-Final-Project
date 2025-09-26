@@ -61,6 +61,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess="true"))
 	USkeletalMeshComponent* Quiver;
 
+	// Attack
 	UFUNCTION(BlueprintCallable)
 	void DrawBow(UAnimMontage* DrawMontage);
 
@@ -75,13 +76,15 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
-
+	
+	// Arrow
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AGS_SeekerMerciArrow> NormalArrowClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AGS_SeekerMerciArrow> SmokeArrowClass;
 
+	// Animation
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimMontage* ComboSkillDrawMontage;
 
@@ -91,6 +94,7 @@ public:
 	void OnDrawMontageEnded();
 	
 	bool GetIsFullyDrawn() { return bIsFullyDrawn; }
+	
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_DrawDebugLine(FVector Start, FVector End, FColor Color = FColor::Green);
 
@@ -104,7 +108,7 @@ public:
 
 	// Camera Control
 	UFUNCTION(Client, Reliable)
-	void Client_StartZoom();
+	void Client_StartZoom(float Duration);
 
 	UFUNCTION(Client, Reliable)
 	void Client_StopZoom();
@@ -145,8 +149,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack", meta = (AllowPrivateAccess = "true"))
 	FVector MultiShotVFXOffset = FVector::ZeroVector;
-
-
+	
 	// 타임라인 관련
 	FTimeline ZoomTimeline;
 
@@ -159,6 +162,8 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 	
 private:
+	FTimerHandle ReverseTimerHandle;
+	
 	UGS_ArrowTypeWidget* ArrowTypeWidget;
 
 	bool bWidgetVisibility = false;

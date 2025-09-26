@@ -44,7 +44,7 @@ void UGS_AN_RotateControllerYaw::Notify(USkeletalMeshComponent* MeshComp, UAnimS
             ObjTypes.AddObjectTypesToQuery(ECC_Pawn); // 추후 몬스터 커스텀 채널로 변경.
 
             // List of collision channel to ignore.
-            FCollisionQueryParams IgnoreCollisionQueryParams(SCENE_QUERY_STAT(BasicAttackAimAssist), false, Seeker);
+            FCollisionQueryParams IgnoreCollisionQueryParams(SCENE_QUERY_STAT(BasicAttackAimAssist), false, Seeker); // FName 태그, 복잡 충돌 사용 여부, 초기 무시 대상 액터
             IgnoreCollisionQueryParams.AddIgnoredActor(Seeker); // 자기 자신 무시. // 추후 몬스터 커스틈 채널로 변경하여 해당 로직 삭제.
 
             // Sphere Sweep.
@@ -104,10 +104,26 @@ void UGS_AN_RotateControllerYaw::Notify(USkeletalMeshComponent* MeshComp, UAnimS
                 Seeker->SetActorRotation(DesiredYawOnly);
 
                 // Debugging
-                /*if (Seeker->HasAuthority())
+                if (Seeker->HasAuthority())
                 {
                     TpsController->Client_DrawAimAssistDebug(Start, End, TargetActor->GetActorLocation(), 1.0f);
-                }*/
+                    if (UCapsuleComponent* Capsule = TargetActor->FindComponentByClass<UCapsuleComponent>())
+                    {
+                        DrawDebugCapsule(
+                            World,
+                            Capsule->GetComponentLocation(),
+                            Capsule->GetScaledCapsuleHalfHeight(),
+                            Capsule->GetScaledCapsuleRadius(),
+                            Capsule->GetComponentQuat(),
+                            FColor::Green,
+                            false,
+                            1.0f);
+                    }
+                    else
+                    {
+                        UE_LOG(LogTemp, Warning, TEXT("No Capsule")); // SJE
+                    }
+                }
             }
             else
             {

@@ -93,13 +93,6 @@ public:
 	UFUNCTION()
 	void OnRep_SeekerGait();
 
-	// AnimInstnace Slot State Value 
-	/*UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsUpperBodySlot(bool bUpperBodySlot);*/
-
-	/*UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);*/
-
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetMontageSlot(ESeekerMontageSlot InputMontageSlot);
 	
