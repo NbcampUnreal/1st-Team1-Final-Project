@@ -335,7 +335,7 @@ void AGS_TpsController::StartAutoMoveForward()
 
 void AGS_TpsController::StopAutoMoveForward()
 {
-	bIsAutoMoving = false;
+	//bIsAutoMoving = false;
 	Client_StopAutoMoveForward();
 }
 
@@ -378,6 +378,11 @@ void AGS_TpsController::SnapCameraToCharacterYaw()
 		FRotator CharacterRotation = MyPawn->GetActorRotation();
 		SetControlRotation(CharacterRotation);
 	}
+}
+
+void AGS_TpsController::SetIsAutoMoving(bool InIsAutoMoving)
+{
+	bIsAutoMoving = InIsAutoMoving;
 }
 
 void AGS_TpsController::AutoMoveTick()

@@ -141,6 +141,7 @@ public:
 	void StartAutoMoveForward();
 	void StopAutoMoveForward();
 	
+	void SetIsAutoMoving(bool InIsAutoMoving);
 
 protected:
 	virtual void BeginPlay() override;
