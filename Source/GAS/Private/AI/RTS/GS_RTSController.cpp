@@ -10,7 +10,6 @@
 #include "AI/RTS/GS_RTSHUD.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
-#include "AkGameplayStatics.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
@@ -277,6 +276,7 @@ void AGS_RTSController::OnLeftMousePressed()
 		ToggleOnShiftClick();
 		return;
 	}
+	
 	UE_LOG(LogTemp, Log, TEXT("--- OnLeftMousePressed: Command=%d"), static_cast<int32>(CurrentCommand));
 	
 	FHitResult Hit;
@@ -311,6 +311,23 @@ void AGS_RTSController::OnLeftMousePressed()
 		}
 		break;
 	default:
+		if (bHit)
+		{
+			if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(Hit.GetActor()))
+			{
+				ClearUnitSelection();
+				SelectedSeeker = Seeker;
+				OnSeekerSelectionChanged.Broadcast(SelectedSeeker);
+				return;
+			}
+		}
+
+		if (SelectedSeeker)
+		{
+			SelectedSeeker = nullptr;
+			OnSeekerSelectionChanged.Broadcast(nullptr);
+		}
+		
 		if (AGS_RTSHUD* HUD = Cast<AGS_RTSHUD>(GetHUD()))
 		{
 			HUD->StartSelection();
@@ -892,7 +909,10 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -922,7 +942,10 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -951,7 +974,10 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -981,7 +1007,10 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -1011,7 +1040,10 @@ void AGS_RTSController::Server_RTSHold_Implementation(const TArray<AGS_Monster*>
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -1039,7 +1071,10 @@ void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{

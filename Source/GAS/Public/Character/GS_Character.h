@@ -5,6 +5,7 @@
 #include "GameFramework/Character.h"
 #include "Character/E_Character.h"
 #include "Component/GS_HitReactComp.h"
+#include "CharacterDataAsset.h"
 #include "Character/Component/GS_CameraShakeTypes.h"
 #include "GS_Character.generated.h"
 
@@ -90,6 +91,21 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
 	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Data")
+	UCharacterDataAsset* CharacterData;
+
+	UFUNCTION(BlueprintCallable, Category="Data")
+	UTexture2D* GetPortrait() const { return CharacterData ? CharacterData->Portrait : nullptr; }
+	
+	UFUNCTION(BlueprintCallable, Category="Data")
+	FText GetMonsterName() const { return CharacterData ? CharacterData->CharacterName : FText::GetEmpty(); }
+
+	UFUNCTION(BlueprintCallable, Category="Data")
+	FText GetDescription() const { return CharacterData ? CharacterData->Description : FText::GetEmpty(); }
+
+	UFUNCTION(BlueprintCallable, Category="Data")
+	FText GetTypeName() const { return CharacterData ? CharacterData->TypeName : FText::GetEmpty(); }
 	
 	//getter
 	FORCEINLINE UGS_StatComp* GetStatComp() const { return StatComp; }

@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Runtime/Engine/Classes/Engine/DataAsset.h"
-#include "MonsterDataAsset.generated.h"
+#include "CharacterDataAsset.generated.h"
 
 /**
  * 
  */
 UCLASS(BlueprintType)
-class GAS_API UMonsterDataAsset : public UPrimaryDataAsset
+class GAS_API UCharacterDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 	
@@ -19,7 +19,7 @@ public:
 	UTexture2D* Portrait;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="UI")
-	FText MonsterName;
+	FText CharacterName;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="UI")
 	FText Description;

@@ -29,6 +29,7 @@ struct FUnitGroup
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, const TArray<AGS_Monster*>&, NewSelection);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSeekerSelectionChanged, AGS_Seeker*, NewSeeker);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRTSCommandChanged, ERTSCommand, NewCommand);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedUnitsSkillChanged, bool, bAnyUnitHasSkill);
 //[Aether]
@@ -94,13 +95,15 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Selection")
 	FOnSelectedUnitsSkillChanged OnSelectedUnitsSkillChanged;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnSeekerSelectionChanged OnSeekerSelectionChanged;
+	
 	//[Aether]AetherComp + 생성 완료 알리는 델리게이트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource")
 	TObjectPtr<UGS_AetherComp> AetherComp;
 
 	UPROPERTY(BlueprintAssignable, Category="Resource")
 	FOnAetherCompReady OnAetherCompReady;
-
 
 	virtual AActor* GetViewTarget() const override;
 	
@@ -253,6 +256,9 @@ private:
 
 	UPROPERTY()
 	TArray<AGS_Monster*> UnitSelection; // 현재 선택된 유닛
+
+	UPROPERTY()
+	AGS_Seeker* SelectedSeeker; 
 
 	UPROPERTY()
 	TArray<FUnitGroup> UnitGroups; // 지정된 부대
