@@ -128,7 +128,7 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		// 줌 시작
 		if(!GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
 		{
-			Client_StartZoom();
+			Client_StartZoom(5.f);
 		}
 	}
 
@@ -171,7 +171,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	// 줌 중지
 	if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
 	{
-		Client_StopZoom();
+		//Client_StopZoom();
 	}
 	
 	// 몽타주 정지
@@ -443,6 +443,8 @@ void AGS_Merci::SetAutoAimTarget(AActor* Target)
 	}
 }
 
+
+
 void AGS_Merci::UpdateZoom(float Alpha)
 {
 	if (!SpringArmComp)
@@ -495,14 +497,26 @@ void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
 	}
 }
 
-void AGS_Merci::Client_StartZoom_Implementation()
+void AGS_Merci::Client_StartZoom_Implementation(float Duration)
 {
 	ZoomTimeline.Play(); // 줌인
+
+	GetWorldTimerManager().ClearTimer(ReverseTimerHandle);
+
+	GetWorldTimerManager().SetTimer(
+		ReverseTimerHandle,
+		this,
+		&AGS_Merci::Client_StopZoom,
+		Duration, // AimMode 유지 시간.
+		false
+	);
 }
 
 void AGS_Merci::Client_StopZoom_Implementation()
 {
 	ZoomTimeline.Reverse(); // 줌아웃
+
+	GetWorldTimerManager().ClearTimer(ReverseTimerHandle);
 }
 
 void AGS_Merci::SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget)
