@@ -61,11 +61,19 @@ void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 {
 	Super::OnSkillAnimationEnd();
 
-	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	UE_LOG(LogTemp, Warning, TEXT("OnSkillAnimationEnd ChanUltimateSkill"));
+	if(AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+		OwnerPlayer->SetMoveControlValue(true, true);
+		OwnerPlayer->CanChangeSeekerGait = true;
+	}
 	
-	OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
-	OwnerPlayer->SetMoveControlValue(true, true);
-	OwnerPlayer->CanChangeSeekerGait = true;
+	if(AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController()))
+	{
+		Controller->SetIsAutoMoving(false);
+		//Controller->SetLookControlValue(true, true);
+	}
 
 	// 스킬 상태 업데이트
 	SetIsActive(false);
@@ -278,14 +286,14 @@ void UGS_ChanUltimateSkill::EndCharge()
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[2]);
 		}
 	}
-			else // 구조물이 아닌 곳에 부딪혔을 때
+	else // 구조물이 아닌 곳에 부딪혔을 때
+	{
+		if (OwnerPlayer && SkillAnimMontages[1])
 		{
-			if (OwnerPlayer && SkillAnimMontages[1])
-			{
-				// 애니메이션 재생 (방패 공격은 애님님노티파이로 처리)
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
-			}
+			// 애니메이션 재생 (방패 공격은 애님님노티파이로 처리)
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
 		}
+	}
 
 	DeactiveSkill();
 }

@@ -92,10 +92,7 @@ void UGS_AresUltimateSkill::BecomeBerserker()
 	}
 
 	// 1. 데미지 무효화
-	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
-	{
-		StatComp->SetInvincible(true);
-	}
+	OwnerCharacter->SetInvincible(true);
 
 	// 2~3. 스탯 변경
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
@@ -130,20 +127,18 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 		}
 	}
 
+	// 무적 상태 해제
+	OwnerCharacter->SetInvincible(false);
+
 	// 스탯 복원
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
 	{
-		StatComp->SetInvincible(false);
 		StatComp->ResetStat(BuffAmount);
 	}
 
 	// 쿨타임 복원
 	if (UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp())
 	{
-		/*if (UGS_SkillBase* MovingSkill = SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving))
-		{
-			SkillComp->ResetCooldownModifier(ESkillSlot::Moving);
-		}*/
 		SkillComp->ResetCooldownModifier(ESkillSlot::Moving);
 		OriginalMovingSkillCooltime = -1.f; // 초기화
 	}

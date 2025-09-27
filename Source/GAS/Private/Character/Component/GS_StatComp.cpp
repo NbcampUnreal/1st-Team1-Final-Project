@@ -59,7 +59,6 @@ void UGS_StatComp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);	
 
 	DOREPLIFETIME(ThisClass, CurrentHealth);
-	DOREPLIFETIME(ThisClass, bIsInvincible);
 }
 
 void UGS_StatComp::InitStat(FName RowName)
@@ -137,11 +136,6 @@ void UGS_StatComp::UpdateStat_Implementation(const FGS_StatRow& RuneStats)
 
 float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
 {
-	if (bIsInvincible)
-	{
-		return 0.f;
-	}
-
 	float Damage = 0.f;
 	float DamagedCharacterDefense = InDamagedCharacter->GetStatComp()->GetDefense();
 	float DamageCauserAttack = InDamageCauser->GetStatComp()->GetAttackPower();
@@ -277,11 +271,6 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 void UGS_StatComp::OnRep_CurrentHealth()
 {
 	OnCurrentHPChanged.Broadcast(this);
-}
-
-void UGS_StatComp::SetInvincible(bool bEnable)
-{
-	bIsInvincible = bEnable;
 }
 
 void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted)
