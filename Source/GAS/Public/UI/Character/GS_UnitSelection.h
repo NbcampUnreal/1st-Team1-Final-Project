@@ -61,6 +61,9 @@ private:
 	void HandleSelectionChanged(const TArray<AGS_Monster*>& NewSelection);
 
 	UFUNCTION()
+	void HandleSeekerSelectionChanged(AGS_Seeker* NewSeeker);
+
+	UFUNCTION()
 	void OnHPChanged(UGS_StatComp* InStatComp);
 
 	UFUNCTION()          

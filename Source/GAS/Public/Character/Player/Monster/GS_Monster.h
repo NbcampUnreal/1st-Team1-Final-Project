@@ -6,7 +6,6 @@
 #include "Character/GS_Character.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "AkGameplayStatics.h"
-#include "MonsterDataAsset.h"
 #include "Sound/GS_MonsterAudioComponent.h"
 #include "GS_Monster.generated.h"
 
@@ -39,9 +38,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackMontage;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Data")
-	UMonsterDataAsset* MonsterData;
 
 	UPROPERTY(BlueprintAssignable, Category="Dead")
 	FOnMonsterDead OnMonsterDead;
@@ -79,18 +75,6 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayAttackMontage();
-
-	UFUNCTION(BlueprintCallable, Category="Data")
-	UTexture2D* GetPortrait() const { return MonsterData ? MonsterData->Portrait : nullptr; }
-	
-	UFUNCTION(BlueprintCallable, Category="Data")
-	FText GetMonsterName() const { return MonsterData ? MonsterData->MonsterName : FText::GetEmpty(); }
-
-	UFUNCTION(BlueprintCallable, Category="Data")
-	FText GetDescription() const { return MonsterData ? MonsterData->Description : FText::GetEmpty(); }
-
-	UFUNCTION(BlueprintCallable, Category="Data")
-	FText GetTypeName() const { return MonsterData ? MonsterData->TypeName : FText::GetEmpty(); }
 
 	FORCEINLINE UGS_MonsterSkillComp* GetMonsterSkillComp() const { return MonsterSkillComp; }
 

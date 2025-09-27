@@ -5,6 +5,7 @@
 #include "AI/RTS/GS_RTSController.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
@@ -19,13 +20,17 @@ void UGS_UnitSelection::NativeConstruct()
 	if (AGS_RTSController* RTSController = GetRTSController())
 	{
 		RTSController->OnSelectionChanged.AddDynamic(this, &UGS_UnitSelection::HandleSelectionChanged);
+		RTSController->OnSeekerSelectionChanged.AddDynamic(this, &UGS_UnitSelection::HandleSeekerSelectionChanged);
 		HandleSelectionChanged(RTSController->GetUnitSelection());
 	}
 }
 
 void UGS_UnitSelection::HandleSelectionChanged(const TArray<AGS_Monster*>& NewSelection)
 {
-	if (!SelectionSwitcher) return;
+	if (!SelectionSwitcher)
+	{
+		return;
+	}
 
 	if (NewSelection.Num() == 1)
 	{
@@ -107,6 +112,42 @@ void UGS_UnitSelection::HandleSelectionChanged(const TArray<AGS_Monster*>& NewSe
 			MultiIconsGrid->AddChildToUniformGrid(W, Row, Col);
 			++Index;
 		}
+	}
+}
+
+void UGS_UnitSelection::HandleSeekerSelectionChanged(AGS_Seeker* NewSeeker)
+{
+	if (!SelectionSwitcher)
+	{
+		return;
+	}
+	
+	if (!NewSeeker)
+	{
+		return;
+	}
+	
+	SelectionSwitcher->SetActiveWidgetIndex(0);
+
+	PortraitImage->SetBrushFromTexture(NewSeeker->GetPortrait());
+	NameText->SetText(NewSeeker->GetMonsterName());
+	DescText->SetText(NewSeeker->GetDescription());
+	TypeText->SetText(NewSeeker->GetTypeName());
+
+	if (UGS_StatComp* StatComp = NewSeeker->GetStatComp())
+	{
+		if (BoundStatComp != StatComp)
+		{
+			if (BoundStatComp.IsValid())
+			{
+				BoundStatComp->OnCurrentHPChanged.RemoveAll(this);
+			}
+				
+			StatComp->OnCurrentHPChanged.AddUObject(this, &UGS_UnitSelection::OnHPChanged);
+			BoundStatComp = StatComp;
+		}
+
+		OnHPChanged(StatComp); 
 	}
 }
 
