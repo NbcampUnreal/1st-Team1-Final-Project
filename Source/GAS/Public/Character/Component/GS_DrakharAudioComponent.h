@@ -2,19 +2,19 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GS_DrakharSFXComponent.generated.h"
+#include "GS_DrakharAudioComponent.generated.h"
 
 class UAkAudioEvent;
 class UAkComponent;
 class AGS_Drakhar;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class GAS_API UGS_DrakharSFXComponent : public UActorComponent
+class GAS_API UGS_DrakharAudioComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UGS_DrakharSFXComponent();
+	UGS_DrakharAudioComponent();
 
 protected:
 	virtual void BeginPlay() override;
