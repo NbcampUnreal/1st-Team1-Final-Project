@@ -285,9 +285,12 @@ EGait AGS_Seeker::GetLastSeekerGait()
 
 void AGS_Seeker::StateReset()
 {
-	if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+	if (GetMesh() && GetMesh()->GetAnimInstance())
 	{
-		Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+		if (UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance()))
+		{
+			Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+		}
 	}
 
 	CanChangeSeekerGait = true;

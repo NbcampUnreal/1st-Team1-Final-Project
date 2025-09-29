@@ -38,11 +38,17 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 		}
 		else if (ReactType == EHitReactType::Additive)
 		{
-			OwnerSeeker->StateReset();
+			if (OwnerSeeker)
+			{
+				OwnerSeeker->StateReset();
+			}
 		}
 		else if (ReactType == EHitReactType::DamageOnly)
 		{
-			OwnerSeeker->StateReset();
+			if (OwnerSeeker)
+			{
+				OwnerSeeker->StateReset();
+			}
 		}
 
 
