@@ -783,41 +783,11 @@ void AGS_Seeker::Server_RestKey_Implementation()
 
 void AGS_Seeker::Multicast_PlaySound_Implementation(UAkAudioEvent* SoundToPlay)
 {
-	// 데디케이티드 서버에서는 사운드 재생하지 않음
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	if (SeekerAudioComponent && IsValid(SeekerAudioComponent))
 	{
-		return;
+		SeekerAudioComponent->PlayGenericSound(SoundToPlay);
 	}
 
-	if (!SoundToPlay)
-	{
-		return;
-	}
-
-	if (!FAkAudioDevice::Get())
-	{
-		return;
-	}
-
-	UAkComponent* AkComp = FindComponentByClass<UAkComponent>();
-	if (!AkComp)
-	{
-		// AkComponent가 없으면 새로 생성
-		AkComp = NewObject<UAkComponent>(this);
-		if (AkComp && GetRootComponent())
-		{
-			AkComp->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-			AkComp->RegisterComponent();
-		}
-	}
-	
-	if (!AkComp)
-	{			
-		return;
-	}
-
-	// 실제 사운드 재생
-	AkComp->PostAkEvent(SoundToPlay);
 }
 
 void AGS_Seeker::OnHoverBegin()

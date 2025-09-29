@@ -8,7 +8,7 @@
 class UGS_DrakharFeverGauge;
 class AGS_DrakharProjectile;
 class UGS_DrakharVFXComponent;
-class UGS_DrakharSFXComponent;
+class UGS_DrakharAudioComponent;
 class UGS_FootManagerComponent;
 class UArrowComponent;
 class UNiagaraSystem;
@@ -212,7 +212,7 @@ protected:
 	UGS_DrakharVFXComponent* VFXComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
-	UGS_DrakharSFXComponent* SFXComponent;
+	UGS_DrakharAudioComponent* AudioComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	UGS_FootManagerComponent* FootManagerComponent;
@@ -299,7 +299,7 @@ public:
 	UAkAudioEvent* HurtSoundEvent;
 	
 	FORCEINLINE UGS_DrakharVFXComponent* GetVFXComponent() const { return VFXComponent; }
-	FORCEINLINE UGS_DrakharSFXComponent* GetSFXComponent() const { return SFXComponent; }
+	FORCEINLINE UGS_DrakharAudioComponent* GetAudioComponent() const { return AudioComponent; }
 
 private:
 	//move spring arm for flying

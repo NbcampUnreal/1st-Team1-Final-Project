@@ -20,7 +20,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_DrakharFeverGauge.h"
 #include "Character/Component/GS_DrakharVFXComponent.h"
-#include "Character/Component/GS_DrakharSFXComponent.h"
+#include "Character/Component/GS_DrakharAudioComponent.h"
 #include "Character/F_GS_DamageEvent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
@@ -31,7 +31,7 @@ AGS_Drakhar::AGS_Drakhar()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	VFXComponent = CreateDefaultSubobject<UGS_DrakharVFXComponent>(TEXT("VFXComponent"));
-	SFXComponent = CreateDefaultSubobject<UGS_DrakharSFXComponent>(TEXT("SFXComponent"));
+	AudioComponent = CreateDefaultSubobject<UGS_DrakharAudioComponent>(TEXT("AudioComponent"));
 	FootManagerComponent = CreateDefaultSubobject<UGS_FootManagerComponent>(TEXT("FootManagerComponent"));
 	
 	// === 어스퀘이크 카메라 쉐이크 기본값 설정 ===
@@ -916,27 +916,27 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 
 void AGS_Drakhar::MulticastPlayComboAttackSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayComboAttackSound();
+	if (AudioComponent) AudioComponent->PlayComboAttackSound();
 }
 
 void AGS_Drakhar::MulticastPlayDashSkillSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayDashSkillSound();
+	if (AudioComponent) AudioComponent->PlayDashSkillSound();
 }
 
 void AGS_Drakhar::MulticastPlayEarthquakeSkillSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayEarthquakeSkillSound();
+	if (AudioComponent) AudioComponent->PlayEarthquakeSkillSound();
 }
 
 void AGS_Drakhar::MulticastPlayDraconicFurySkillSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayDraconicFurySkillSound();
+	if (AudioComponent) AudioComponent->PlayDraconicFurySkillSound();
 }
 
 void AGS_Drakhar::MulticastPlayDraconicProjectileSound_Implementation(const FVector& Location)
 {
-	if (SFXComponent) SFXComponent->PlayDraconicProjectileSound(Location);
+	if (AudioComponent) AudioComponent->PlayDraconicProjectileSound(Location);
 }
 
 void AGS_Drakhar::OnRep_FeverGauge()
@@ -946,13 +946,12 @@ void AGS_Drakhar::OnRep_FeverGauge()
 
 void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
 {
-	if (!SFXComponent)
+	if (!AudioComponent)
 	{
-		UE_LOG(LogTemp, Error, TEXT("MulticastPlayAttackHitSound: SFXComponent is null"));
 		return;
 	}
 	
-	SFXComponent->PlayAttackHitSound();
+	AudioComponent->PlayAttackHitSound();
 }
 
 void AGS_Drakhar::MulticastPlayComboFinisherSound_Implementation()
@@ -962,29 +961,46 @@ void AGS_Drakhar::MulticastPlayComboFinisherSound_Implementation()
 		return;
 	}
 
-	if (ComboFinisherSoundEvent)
+	// 사운드 이벤트 유효성 검사
+	if (!ComboFinisherSoundEvent)
 	{
-		UAkGameplayStatics::PostEvent(
-			ComboFinisherSoundEvent, 
-			this,
-			0,
-			FOnAkPostEventCallback()
-		);
+		return;
 	}
-	else 
+
+	// 멀티플레이어 환경에서 Wwise 시스템 안전성 체크
+	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+	if (!AudioDevice)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Drakhar ComboFinisherSoundEvent is null"));
+		return;
 	}
+
+	if (!AudioDevice->IsInitialized())
+	{
+		return;
+	}
+
+	// Actor 유효성 검사
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	UAkGameplayStatics::PostEvent(
+		ComboFinisherSoundEvent, 
+		this,
+		0,
+		FOnAkPostEventCallback()
+	);
 }
 
 void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayFeverModeStartSound();
+	if (AudioComponent) AudioComponent->PlayFeverModeStartSound();
 }
 
 void AGS_Drakhar::MulticastPlayHurtSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayHurtSound();
+	if (AudioComponent) AudioComponent->PlayHurtSound();
 }
 
 void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
@@ -1044,7 +1060,7 @@ void AGS_Drakhar::MulticastPlayDraconicProjectileImpactEffects_Implementation(
 	const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
 {
 	if (VFXComponent) VFXComponent->HandleDraconicProjectileImpact(ImpactLocation, ImpactNormal, bHitCharacter);
-	if (SFXComponent) SFXComponent->HandleDraconicProjectileImpact(ImpactLocation, bHitCharacter);
+	if (AudioComponent) AudioComponent->HandleDraconicProjectileImpact(ImpactLocation, bHitCharacter);
 }
 
 void AGS_Drakhar::MulticastPlayFeverEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)

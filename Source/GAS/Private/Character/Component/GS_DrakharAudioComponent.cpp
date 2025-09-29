@@ -1,25 +1,25 @@
-#include "Character/Component/GS_DrakharSFXComponent.h"
+#include "Character/Component/GS_DrakharAudioComponent.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
 #include "AkGameplayStatics.h"
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-UGS_DrakharSFXComponent::UGS_DrakharSFXComponent()
+UGS_DrakharAudioComponent::UGS_DrakharAudioComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	bDraconicFurySoundPlayed = false;
 	bHurtSoundPlayed = false;
 }
 
-void UGS_DrakharSFXComponent::BeginPlay()
+void UGS_DrakharAudioComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	OwnerDrakhar = Cast<AGS_Drakhar>(GetOwner());
 }
 
 // === 사운드 재생 함수 구현 ===
-void UGS_DrakharSFXComponent::PlayComboAttackSound()
+void UGS_DrakharAudioComponent::PlayComboAttackSound()
 {
 	if(OwnerDrakhar) 
 	{
@@ -27,7 +27,7 @@ void UGS_DrakharSFXComponent::PlayComboAttackSound()
 	}
 }
 
-void UGS_DrakharSFXComponent::PlayDashSkillSound()
+void UGS_DrakharAudioComponent::PlayDashSkillSound()
 {
 	if(OwnerDrakhar) 
 	{
@@ -35,7 +35,7 @@ void UGS_DrakharSFXComponent::PlayDashSkillSound()
 	}
 }
 
-void UGS_DrakharSFXComponent::PlayEarthquakeSkillSound()
+void UGS_DrakharAudioComponent::PlayEarthquakeSkillSound()
 {
 	if(OwnerDrakhar) 
 	{
@@ -43,7 +43,7 @@ void UGS_DrakharSFXComponent::PlayEarthquakeSkillSound()
 	}
 }
 
-void UGS_DrakharSFXComponent::PlayDraconicFurySkillSound()
+void UGS_DrakharAudioComponent::PlayDraconicFurySkillSound()
 {
 	if (!bDraconicFurySoundPlayed && OwnerDrakhar)
 	{
@@ -58,12 +58,12 @@ void UGS_DrakharSFXComponent::PlayDraconicFurySkillSound()
 	}
 }
 
-void UGS_DrakharSFXComponent::PlayDraconicProjectileSound(const FVector& Location)
+void UGS_DrakharAudioComponent::PlayDraconicProjectileSound(const FVector& Location)
 {
 	if(OwnerDrakhar) PlaySoundEvent(OwnerDrakhar->DraconicProjectileSoundEvent, Location);
 }
 
-void UGS_DrakharSFXComponent::PlayAttackHitSound()
+void UGS_DrakharAudioComponent::PlayAttackHitSound()
 {
 	if (!OwnerDrakhar)
 	{
@@ -78,7 +78,7 @@ void UGS_DrakharSFXComponent::PlayAttackHitSound()
 	PlaySoundEvent(OwnerDrakhar->AttackHitSoundEvent, OwnerDrakhar->GetActorLocation());
 }
 
-void UGS_DrakharSFXComponent::PlayFeverModeStartSound()
+void UGS_DrakharAudioComponent::PlayFeverModeStartSound()
 {
 	if(OwnerDrakhar) 
 	{
@@ -86,7 +86,7 @@ void UGS_DrakharSFXComponent::PlayFeverModeStartSound()
 	}
 }
 
-void UGS_DrakharSFXComponent::PlayHurtSound()
+void UGS_DrakharAudioComponent::PlayHurtSound()
 {
 	if (!bHurtSoundPlayed && OwnerDrakhar)
 	{
@@ -102,7 +102,7 @@ void UGS_DrakharSFXComponent::PlayHurtSound()
 	}
 }
 
-void UGS_DrakharSFXComponent::HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter)
+void UGS_DrakharAudioComponent::HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter)
 {
 	if (!OwnerDrakhar) return;
 	
@@ -114,48 +114,86 @@ void UGS_DrakharSFXComponent::HandleDraconicProjectileImpact(const FVector& Impa
 }
 
 // === Wwise 헬퍼 함수 구현 ===
-void UGS_DrakharSFXComponent::PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location)
+void UGS_DrakharAudioComponent::PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location)
 {
-	if (!OwnerDrakhar) return;
+	// 멀티플레이어 환경에서 안전성 체크 강화
+	if (!OwnerDrakhar)
+	{
+		return;
+	}
     
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) return;
-
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+	
+	// 사운드 이벤트 유효성 검사
 	if (!SoundEvent)
 	{
 		return;
 	}
 
-	if (!FAkAudioDevice::Get())
+	// Wwise 오디오 디바이스 초기화 상태 확인
+	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+	if (!AudioDevice)
 	{
 		return;
 	}
 
+	// 오디오 디바이스가 초기화되었는지 확인
+	if (!AudioDevice->IsInitialized())
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검사
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	// 위치 기반 사운드 재생
 	if (Location != FVector::ZeroVector)
 	{
-		UAkGameplayStatics::PostEventAtLocation(SoundEvent, Location, FRotator::ZeroRotator, GetWorld());
+		if (IsValid(SoundEvent) && World->IsValidLowLevel())
+		{
+			UAkGameplayStatics::PostEventAtLocation(SoundEvent, Location, FRotator::ZeroRotator, World);
+		}
 	}
 	else
 	{
 		UAkComponent* AkComp = GetOrCreateAkComponent();
-		if (AkComp)
+		if (AkComp && IsValid(AkComp))
 		{
 			AkComp->PostAkEvent(SoundEvent);
 		}
 	}
 }
 
-UAkComponent* UGS_DrakharSFXComponent::GetOrCreateAkComponent()
+UAkComponent* UGS_DrakharAudioComponent::GetOrCreateAkComponent()
 {
-	if (!OwnerDrakhar) return nullptr;
+	if (!OwnerDrakhar) 
+	{
+		return nullptr;
+	}
+
+	if (!IsValid(OwnerDrakhar))
+	{
+		return nullptr;
+	}
 
 	UAkComponent* AkComp = OwnerDrakhar->FindComponentByClass<UAkComponent>();
 	if (!AkComp)
 	{
-		AkComp = NewObject<UAkComponent>(OwnerDrakhar, TEXT("RuntimeAkAudioComponent"));
-		if (AkComp)
+		if (OwnerDrakhar->GetRootComponent() && IsValid(OwnerDrakhar->GetRootComponent()))
 		{
-			AkComp->SetupAttachment(OwnerDrakhar->GetRootComponent());
-			AkComp->RegisterComponent();
+			AkComp = NewObject<UAkComponent>(OwnerDrakhar, TEXT("RuntimeAkAudioComponent"));
+			if (AkComp && IsValid(AkComp))
+			{
+				AkComp->SetupAttachment(OwnerDrakhar->GetRootComponent());
+				AkComp->RegisterComponent();
+			}
 		}
 	}
 	return AkComp;

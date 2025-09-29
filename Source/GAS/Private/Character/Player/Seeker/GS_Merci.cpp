@@ -795,7 +795,12 @@ void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRot
 
 void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 {
-	if (SeekerAudioComponent)
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	if (SeekerAudioComponent && IsValid(SeekerAudioComponent))
 	{
 		SeekerAudioComponent->PlayArrowShotSound();
 	}
@@ -803,7 +808,7 @@ void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 
 void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
 {
-	if (SeekerAudioComponent)
+	if (SeekerAudioComponent && IsValid(SeekerAudioComponent))
 	{
 		SeekerAudioComponent->PlayHitFeedbackSound();
 	}
@@ -811,7 +816,7 @@ void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
 
 void AGS_Merci::Client_PlayArrowEmptySound_Implementation()
 {
-	if (SeekerAudioComponent)
+	if (SeekerAudioComponent && IsValid(SeekerAudioComponent))
 	{
 		SeekerAudioComponent->PlayArrowEmptySound();
 	}

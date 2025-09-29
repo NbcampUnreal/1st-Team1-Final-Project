@@ -189,6 +189,12 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
     
     AkPlayingID NewPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerMonster, 0, FOnAkPostEventCallback());
     RegisterPlayingID(NewPlayingID);
+
+    // Combat 사운드인 경우 PlayingID 추적
+    /*if (SoundTypeToTrigger == EMonsterAudioState::Combat)
+    {
+        CurrentCombatPlayingID = NewPlayingID;
+    }*/
 }
 
 void UGS_MonsterAudioComponent::PlayHurtSound()
@@ -230,6 +236,26 @@ void UGS_MonsterAudioComponent::PlaySwingSound()
     Multicast_PlaySwingSound();
 }
 
+/*void UGS_MonsterAudioComponent::StopSwingSound()
+{
+    if (!GetOwner() || !GetOwner()->HasAuthority())
+    {
+        return;
+    }
+
+    Multicast_StopSwingSound();
+}*/
+
+/*void UGS_MonsterAudioComponent::StopCombatSound()
+{
+    if (!GetOwner() || !GetOwner()->HasAuthority())
+    {
+        return;
+    }
+
+    Multicast_StopCombatSound();
+}*/
+
 AGS_Seeker* UGS_MonsterAudioComponent::FindNearestSeeker() const
 {
     if (!GetWorld() || !OwnerMonster) return nullptr;
@@ -257,7 +283,8 @@ AGS_Seeker* UGS_MonsterAudioComponent::FindNearestSeeker() const
         for (const FOverlapResult& Result : OverlapResults)
         {
             AGS_Seeker* Seeker = Cast<AGS_Seeker>(Result.GetActor());
-            if (Seeker)
+            // [주석처리] 죽은 시커 제외 로직
+            if (Seeker /*&& !Seeker->IsDead()*/)  // 죽은 시커는 제외
             {
                 float DistanceSq = FVector::DistSquared(MonsterLocation, Seeker->GetActorLocation());
                 if (DistanceSq < MinDistanceSq)
@@ -352,8 +379,53 @@ void UGS_MonsterAudioComponent::Multicast_PlaySwingSound_Implementation()
         
         AkPlayingID SwingPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerMonster, 0, FOnAkPostEventCallback());
         RegisterPlayingID(SwingPlayingID);
+        // CurrentSwingPlayingID = SwingPlayingID;
     }
 }
+
+/*void UGS_MonsterAudioComponent::Multicast_StopSwingSound_Implementation()
+{
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+
+    if (!OwnerMonster || !GetWorld())
+    {
+        return;
+    }
+
+    // 현재 재생 중인 스윙 사운드만 선별적으로 중단
+    if (CurrentSwingPlayingID != 0 && FAkAudioDevice::Get())
+    {
+        FAkAudioDevice::Get()->StopPlayingID(CurrentSwingPlayingID);
+        CurrentSwingPlayingID = 0;
+    }
+}*/
+
+/*void UGS_MonsterAudioComponent::Multicast_StopCombatSound_Implementation()
+{
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+
+    if (!OwnerMonster || !GetWorld())
+    {
+        return;
+    }
+
+    // Combat 사운드 타이머 먼저 중단하여 새로운 Combat 사운드 재생 방지
+    StopSoundTimer();
+
+    // 현재 재생 중인 모든 Combat 사운드를 중단 (반복 재생으로 여러 개가 있을 수 있음)
+    if (OwnerMonster)
+    {
+        // Combat 사운드 이벤트를 사용해서 Stop 이벤트 호출 (만약 Stop 이벤트가 있다면)
+        UAkAudioEvent* CombatSoundToStop = GetSoundEvent(EMonsterAudioState::Combat);
+        if (CombatSoundToStop)
+        {
+            StopAllActiveSounds();
+        }
+    }
+
+    // PlayingID 초기화
+    CurrentCombatPlayingID = 0;
+}*/
 
 void UGS_MonsterAudioComponent::PlayRTSCommandSound(ERTSCommandSoundType CommandType)
 {

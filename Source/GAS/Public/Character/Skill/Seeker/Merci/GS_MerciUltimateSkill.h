@@ -30,7 +30,7 @@ private:
 	float AutoAimTickInterval = 0.2f;
 
 	void AutoAimingStart();
-	float AutoAimingStateTime = 20.0f;
+	float AutoAimingStateTime = 10.0f;
 
 	AActor* FindCloseTarget();
 	UPROPERTY()
