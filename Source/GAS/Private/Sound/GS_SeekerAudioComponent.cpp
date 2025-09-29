@@ -185,6 +185,23 @@ void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudi
         LocalLastSoundPlayTimes.Emplace(SoundTypeToTrigger, CurrentTime);
     }
     
+    // 멀티플레이어 환경에서 안전성 체크 강화
+    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+    if (!AudioDevice)
+    {
+        return;
+    }
+
+    if (!AudioDevice->IsInitialized())
+    {
+        return;
+    }
+
+    if (!IsValid(SoundEvent) || !IsValid(OwnerSeeker))
+    {
+        return;
+    }
+
     AkPlayingID NewPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerSeeker, 0, FOnAkPostEventCallback());
     RegisterPlayingID(NewPlayingID);
 }
@@ -284,8 +301,16 @@ void UGS_SeekerAudioComponent::Multicast_PlayBowDrawSound_Implementation()
         // RTS 모드에 따른 Distance Scaling 설정
         SetDistanceScaling(bRTS);
         
-        AkPlayingID BowPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
-        RegisterPlayingID(BowPlayingID);
+        // 멀티플레이어 환경에서 안전성 체크
+        if (IsValid(SoundToPlay) && IsValid(OwnerSeeker))
+        {
+            FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+            if (AudioDevice && AudioDevice->IsInitialized())
+            {
+                AkPlayingID BowPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
+                RegisterPlayingID(BowPlayingID);
+            }
+        }
     }
 }
 
@@ -361,8 +386,16 @@ void UGS_SeekerAudioComponent::Multicast_PlayBowReleaseSound_Implementation()
         // RTS 모드에 따른 Distance Scaling 설정
         SetDistanceScaling(bRTS);
         
-        AkPlayingID ReleasePlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
-        RegisterPlayingID(ReleasePlayingID);
+        // 멀티플레이어 환경에서 안전성 체크
+        if (IsValid(SoundToPlay) && IsValid(OwnerSeeker))
+        {
+            FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+            if (AudioDevice && AudioDevice->IsInitialized())
+            {
+                AkPlayingID ReleasePlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
+                RegisterPlayingID(ReleasePlayingID);
+            }
+        }
     }
 }
 
@@ -517,20 +550,38 @@ void UGS_SeekerAudioComponent::PlaySoundAtLocation(UAkAudioEvent* SoundEvent, co
         return;
     }
 
-    if (!FAkAudioDevice::Get())
+    // 멀티플레이어 환경에서 Wwise 오디오 시스템 안전성 체크
+    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+    if (!AudioDevice)
+    {
+        return;
+    }
+
+    if (!AudioDevice->IsInitialized())
+    {
+        return;
+    }
+
+    // 월드 컨텍스트 유효성 검사
+    UWorld* World = GetWorld();
+    if (!World)
     {
         return;
     }
 
     if (Location != FVector::ZeroVector)
     {
-        UAkGameplayStatics::PostEventAtLocation(SoundEvent, Location, FRotator::ZeroRotator, GetWorld());
+        // PostEventAtLocation 호출 전 추가 안전성 검사
+        if (IsValid(SoundEvent) && World->IsValidLowLevel())
+        {
+            UAkGameplayStatics::PostEventAtLocation(SoundEvent, Location, FRotator::ZeroRotator, World);
+        }
     }
     else
     {
         // 위치가 Zero Vector면 Owner 위치에서 재생
         UAkComponent* AkComp = GetOrCreateAkComponent();
-        if (AkComp)
+        if (AkComp && IsValid(AkComp) && IsValid(GetOwner()))
         {
             AkPlayingID LocationPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, GetOwner(), 0, FOnAkPostEventCallback());
             RegisterPlayingID(LocationPlayingID);
@@ -787,18 +838,26 @@ void UGS_SeekerAudioComponent::PlayFinalAttackSound(UAkAudioEvent* ExtraSound)
 
 void UGS_SeekerAudioComponent::PlayGenericSound(UAkAudioEvent* SoundToPlay, bool bPlayOnLocalOnly)
 {
-    if (!SoundToPlay) return;
+	// 데디케이티드 서버에서는 오디오 처리 불필요
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
 
-    if (bPlayOnLocalOnly || GetWorld()->GetNetMode() == NM_Standalone)
-    {
-        AkPlayingID GenericPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, GetOwner(), 0, FOnAkPostEventCallback());
-        RegisterPlayingID(GenericPlayingID);
-    }
-    else
-    {
-        // 멀티플레이어에서는 RPC를 통해 동기화 필요
-        // 필요한 경우 별도의 RPC 함수 추가
-    }
+	if (!SoundToPlay || !IsValid(GetOwner()))
+	{
+		return;
+	}
+
+	// Wwise 시스템 안전성 체크
+	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+	if (!AudioDevice || !AudioDevice->IsInitialized())
+	{
+		return;
+	}
+	
+	AkPlayingID GenericPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, GetOwner(), 0, FOnAkPostEventCallback());
+	RegisterPlayingID(GenericPlayingID);
 }
 
 void UGS_SeekerAudioComponent::ResetAttackSoundSequence()
