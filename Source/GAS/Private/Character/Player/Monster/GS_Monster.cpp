@@ -12,7 +12,7 @@
 #include "Sound/GS_CharacterAudioSystem.h"
 #include "EngineUtils.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Character/GS_Character.h"
+// #include "Character/GS_Character.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "DrawDebugHelpers.h"
@@ -21,7 +21,7 @@
 #include "Character/Component/GS_DebuffVFXComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/WidgetComponent.h"
-#include "BehaviorTree/BlackboardComponent.h"
+// #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -244,7 +244,7 @@ void AGS_Monster::Attack()
 	if (HasAuthority())
 	{
 		// 타겟이 죽었는지 확인
-		if (AGS_AIController* AIController = Cast<AGS_AIController>(GetController()))
+		/*if (AGS_AIController* AIController = Cast<AGS_AIController>(GetController()))
 		{
 			UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
 			if (Blackboard)
@@ -262,7 +262,7 @@ void AGS_Monster::Attack()
 					}
 				}
 			}
-		}
+		}*/
 
 		// 공격 모션 시작 시 전투/스윙 사운드 트리거 (서버)
 		if (MonsterAudioComponent)

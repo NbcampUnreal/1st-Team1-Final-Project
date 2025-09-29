@@ -5,7 +5,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Player/Monster/GS_Monster.h"
-#include "Character/GS_Character.h"
+// #include "Character/GS_Character.h"
 #include "Navigation/CrowdFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -100,7 +100,7 @@ void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 	}
 
 	// 현재 타겟이 죽었는지 확인하고 클리어
-	if (AActor* CurrentTarget = Cast<AActor>(Blackboard->GetValueAsObject(TargetActorKey)))
+	/*if (AActor* CurrentTarget = Cast<AActor>(Blackboard->GetValueAsObject(TargetActorKey)))
 	{
 		if (AGS_Character* CurrentCharacter = Cast<AGS_Character>(CurrentTarget))
 		{
@@ -109,7 +109,7 @@ void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 				ClearCurrentTarget();
 			}
 		}
-	}
+	}*/
 
 	// 지금 시야 감지 범위 안에 있는 타겟들
 	TArray<AActor*> Targets;
@@ -133,13 +133,13 @@ void AGS_AIController::TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimul
 	for (AActor* Target : Targets)
 	{
 		// 죽은 캐릭터는 타겟에서 제외
-		if (AGS_Character* CandidateChar = Cast<AGS_Character>(Target))
+		/*if (AGS_Character* CandidateChar = Cast<AGS_Character>(Target))
 		{
 			if (CandidateChar->IsDead())
 			{
 				continue;
 			}
-		}
+		}*/
 
 		const float Dist = FVector::DistSquared(ControlledPawn->GetActorLocation(),	Target->GetActorLocation());
 		if (Dist < ClosestDist)

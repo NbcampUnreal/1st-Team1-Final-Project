@@ -143,12 +143,12 @@ public:
     void PlaySwingSound();
 
     // 스윙 사운드 중단
-    UFUNCTION(BlueprintCallable, Category = "Monster Audio|Swing")
+    /*UFUNCTION(BlueprintCallable, Category = "Monster Audio|Swing")
     void StopSwingSound();
 
     // Combat 사운드 중단
     UFUNCTION(BlueprintCallable, Category = "Monster Audio|Combat")
-    void StopCombatSound();
+    void StopCombatSound();*/
 
     // RTS 커맨드 사운드
     UFUNCTION(BlueprintCallable, Category = "Monster Audio|RTS")
@@ -205,12 +205,12 @@ private:
     void Multicast_PlaySwingSound();
 
     // 스윙 사운드 중단 멀티캐스트 RPC
-    UFUNCTION(NetMulticast, Reliable)
+    /*UFUNCTION(NetMulticast, Reliable)
     void Multicast_StopSwingSound();
 
     // Combat 사운드 중단 멀티캐스트 RPC
     UFUNCTION(NetMulticast, Reliable)
-    void Multicast_StopCombatSound();
+    void Multicast_StopCombatSound();*/
 
     TMap<EMonsterAudioState, float> LocalLastSoundPlayTimes;
 
@@ -225,9 +225,9 @@ private:
     float LocalLastSwingPlayTime = -1000.0f;
 
     // 공격 관련 사운드 PlayingID 추적
-    UPROPERTY(Transient)
+    /*UPROPERTY(Transient)
     uint32 CurrentSwingPlayingID = 0;
 
     UPROPERTY(Transient)
-    uint32 CurrentCombatPlayingID = 0;
+    uint32 CurrentCombatPlayingID = 0;*/
 }; 

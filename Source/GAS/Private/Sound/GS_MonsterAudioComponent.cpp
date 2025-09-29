@@ -191,10 +191,10 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
     RegisterPlayingID(NewPlayingID);
 
     // Combat 사운드인 경우 PlayingID 추적
-    if (SoundTypeToTrigger == EMonsterAudioState::Combat)
+    /*if (SoundTypeToTrigger == EMonsterAudioState::Combat)
     {
         CurrentCombatPlayingID = NewPlayingID;
-    }
+    }*/
 }
 
 void UGS_MonsterAudioComponent::PlayHurtSound()
@@ -236,7 +236,7 @@ void UGS_MonsterAudioComponent::PlaySwingSound()
     Multicast_PlaySwingSound();
 }
 
-void UGS_MonsterAudioComponent::StopSwingSound()
+/*void UGS_MonsterAudioComponent::StopSwingSound()
 {
     if (!GetOwner() || !GetOwner()->HasAuthority())
     {
@@ -244,9 +244,9 @@ void UGS_MonsterAudioComponent::StopSwingSound()
     }
 
     Multicast_StopSwingSound();
-}
+}*/
 
-void UGS_MonsterAudioComponent::StopCombatSound()
+/*void UGS_MonsterAudioComponent::StopCombatSound()
 {
     if (!GetOwner() || !GetOwner()->HasAuthority())
     {
@@ -254,7 +254,7 @@ void UGS_MonsterAudioComponent::StopCombatSound()
     }
 
     Multicast_StopCombatSound();
-}
+}*/
 
 AGS_Seeker* UGS_MonsterAudioComponent::FindNearestSeeker() const
 {
@@ -283,7 +283,8 @@ AGS_Seeker* UGS_MonsterAudioComponent::FindNearestSeeker() const
         for (const FOverlapResult& Result : OverlapResults)
         {
             AGS_Seeker* Seeker = Cast<AGS_Seeker>(Result.GetActor());
-            if (Seeker && !Seeker->IsDead())  // 죽은 시커는 제외
+            // [주석처리] 죽은 시커 제외 로직
+            if (Seeker /*&& !Seeker->IsDead()*/)  // 죽은 시커는 제외
             {
                 float DistanceSq = FVector::DistSquared(MonsterLocation, Seeker->GetActorLocation());
                 if (DistanceSq < MinDistanceSq)
@@ -378,11 +379,11 @@ void UGS_MonsterAudioComponent::Multicast_PlaySwingSound_Implementation()
         
         AkPlayingID SwingPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerMonster, 0, FOnAkPostEventCallback());
         RegisterPlayingID(SwingPlayingID);
-        CurrentSwingPlayingID = SwingPlayingID;
+        // CurrentSwingPlayingID = SwingPlayingID;
     }
 }
 
-void UGS_MonsterAudioComponent::Multicast_StopSwingSound_Implementation()
+/*void UGS_MonsterAudioComponent::Multicast_StopSwingSound_Implementation()
 {
     if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
 
@@ -397,9 +398,9 @@ void UGS_MonsterAudioComponent::Multicast_StopSwingSound_Implementation()
         FAkAudioDevice::Get()->StopPlayingID(CurrentSwingPlayingID);
         CurrentSwingPlayingID = 0;
     }
-}
+}*/
 
-void UGS_MonsterAudioComponent::Multicast_StopCombatSound_Implementation()
+/*void UGS_MonsterAudioComponent::Multicast_StopCombatSound_Implementation()
 {
     if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
 
@@ -424,7 +425,7 @@ void UGS_MonsterAudioComponent::Multicast_StopCombatSound_Implementation()
 
     // PlayingID 초기화
     CurrentCombatPlayingID = 0;
-}
+}*/
 
 void UGS_MonsterAudioComponent::PlayRTSCommandSound(ERTSCommandSoundType CommandType)
 {
