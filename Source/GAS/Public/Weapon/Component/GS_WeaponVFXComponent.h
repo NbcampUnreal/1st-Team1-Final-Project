@@ -215,6 +215,7 @@ private:
 	FTimerHandle EnchantTimerHandle;
 	FTimerHandle EnchantCleanupTimerHandle;
 	FTimerHandle BloodEffectDelayTimerHandle;
+	FTimerHandle TrailCleanupTimerHandle;
 	
 	// VFX 자동 제거 타이머 콜백
 	void DeactivateHitAuraTimerCallback();
@@ -228,6 +229,7 @@ private:
 	// VFX 컴포넌트 상태 관리
 	bool bHitAuraDeactivating;
 	bool bEnchantDeactivating;
+	bool bTrailDeactivating;
 
 	// 혈흔 이펙트 딜레이용 변수들
 	FVector DelayedHitLocation;
@@ -252,4 +254,22 @@ private:
 	
 	// 현재 소유자의 시커 타입 자동 감지
 	ESeekerAuraType GetOwnerSeekerType() const;
+	
+	// 소유자 시커 타입 캐싱 (무기 장착 시 호출)
+	void CacheOwnerSeekerType();
+	
+	// ======================
+	// 성능 최적화 캐시
+	// ======================
+	
+	// 캐싱된 무기 메시 컴포넌트
+	UPROPERTY()
+	TObjectPtr<USceneComponent> CachedWeaponMeshComponent;
+	
+	// 캐싱된 소유자 시커 타입
+	ESeekerAuraType CachedOwnerSeekerType;
+	
+	// 캐싱된 기본 Slash VFX (런타임 로딩 방지)
+	UPROPERTY()
+	TObjectPtr<UNiagaraSystem> CachedFallbackSlashVFX;
 };
