@@ -9,6 +9,8 @@
 #include "AI/RTS/GS_RTSController.h"
 #include "AkComponent.h"
 #include "AkAudioDevice.h"
+#include "VFX/GS_VFX_FunctionLibrary.h"
+#include "Components/SkeletalMeshComponent.h"
 
 AGS_TrapBase::AGS_TrapBase()
 {
@@ -329,6 +331,19 @@ void AGS_TrapBase::HandleTrapDamage(AActor* OtherActor)
 
 	DamagedSeeker->TakeDamage(TrapData.Effect.Damage, DamageEvent, nullptr, this);
 
+	// 혈흔 이펙트 재생 (시커의 메시 위치에서)
+	if (USkeletalMeshComponent* SeekerMesh = DamagedSeeker->GetMesh())
+	{
+		// 메시의 중앙 위치 가져오기 (Pelvis 본 또는 루트 본)
+		FVector HitLocation = SeekerMesh->GetSocketLocation(FName("pelvis"));
+		if (HitLocation.IsNearlyZero())
+		{
+			HitLocation = SeekerMesh->GetComponentLocation();
+		}
+		
+		Multicast_PlayTrapHitBloodEffect(HitLocation);
+	}
+
 }
 
 void AGS_TrapBase::HandleTrapAreaDamage(const TArray<AActor*>& AffectedActors)
@@ -363,6 +378,15 @@ void AGS_TrapBase::Server_CustomTrapEffect_Implementation(AActor* TargetActor)
 void AGS_TrapBase::CustomTrapEffect_Implementation(AActor* TargetActor)
 {
 
+}
+
+void AGS_TrapBase::Multicast_PlayTrapHitBloodEffect_Implementation(FVector HitLocation)
+{
+	// 함정 데이터에서 혈흔 이펙트 가져오기 (개별 함정에서 오버라이드 가능)
+	UNiagaraSystem* BloodEffectToUse = TrapData.TrapHitBloodEffect;
+
+	// 혈흔 이펙트 재생
+	UGS_VFX_FunctionLibrary::PlayBloodEffect(this, BloodEffectToUse, HitLocation, FRotator::ZeroRotator, 1.0f);
 }
 
 //플레이어가 안에 있는 경우 밀쳐내는 함수

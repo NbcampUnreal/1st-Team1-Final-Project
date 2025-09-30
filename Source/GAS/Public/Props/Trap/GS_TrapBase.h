@@ -11,6 +11,8 @@
 #include "Sound/GS_AudioComponentBase.h"
 #include "GS_TrapBase.generated.h"
 
+class UNiagaraSystem;
+
 // Forward declarations
 class UAkAudioEvent;
 class UBoxComponent;
@@ -171,9 +173,15 @@ public:
 	//HitReactType 결정하는 함수
 	virtual EHitReactType GetHitReactType() const;
 
-	//Trap Motion
+	// 혈흔 이펙트 재생 (멀티캐스트)
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayTrapHitBloodEffect(FVector HitLocation);
+	void Multicast_PlayTrapHitBloodEffect_Implementation(FVector HitLocation);
+
 	class UGS_TrapMotionCompBase* GetValidMotionComponent() const;
 	virtual bool CanStartMotion() const;
+
+protected:
 	AGS_TrapManager* GetTrapManager() const;
 
 	void LoadTrapData();

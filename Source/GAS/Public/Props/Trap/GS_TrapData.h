@@ -6,6 +6,7 @@
 
 // Forward declarations
 class UAkAudioEvent;
+class UNiagaraSystem;
 
 //함정 배치 위치 분류
 UENUM(BlueprintType)
@@ -88,5 +89,12 @@ struct FTrapData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio|RTS")
 	UAkAudioEvent* DeactivationSound_RTS = nullptr;
+
+	// ===================
+	// VFX Systems
+	// ===================
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	UNiagaraSystem* TrapHitBloodEffect = nullptr;  // 함정 타격 시 혈흔 이펙트
 
 };
