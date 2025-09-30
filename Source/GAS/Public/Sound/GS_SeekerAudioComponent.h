@@ -514,9 +514,7 @@ private:
     UFUNCTION(BlueprintPure, Category = "Seeker Audio|Helpers")
     int32 ValidateAndConvertComboIndex(int32 ComboIndex, int32 ArraySize) const;
     
-    /** 모드별 사운드 이벤트 선택 */
-    UFUNCTION(BlueprintPure, Category = "Seeker Audio|Helpers")
-    UAkAudioEvent* SelectSoundEventByMode(UAkAudioEvent* TPSSound, UAkAudioEvent* RTSSound, bool bUseRTSMode = false) const;
+    // SelectSoundEventByMode는 부모 클래스 (GS_AudioComponentBase)에 구현됨
 
     // DT_SkillSet에서 스킬 정보 조회
     const struct FSkillInfo* GetSkillInfoFromDataTable(ESkillSlot SkillSlot) const;

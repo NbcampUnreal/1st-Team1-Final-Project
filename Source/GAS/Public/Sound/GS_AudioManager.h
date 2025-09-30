@@ -135,4 +135,9 @@ private:
 	 * @brief 맵 로딩 시작 시 호출되어 BGM을 정지시킵니다.
 	 */
 	void OnPreLoadMap(const FString& MapName);
+
+	/**
+	 * @brief 현재 재생 중인 전투 음악을 정지합니다.
+	 */
+	void StopCurrentCombatMusic(AActor* Context);
 };

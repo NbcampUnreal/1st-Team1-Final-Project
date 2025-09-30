@@ -158,7 +158,6 @@ bool UGS_AudioManager::ValidateAudioAssets()
 		return false;
 	}
 	
-	UE_LOG(LogTemp, Log, TEXT("모든 오디오 에셋이 성공적으로 로드되었습니다."));
 	return true;
 }
 
@@ -168,31 +167,29 @@ void UGS_AudioManager::OnPreLoadMap(const FString& MapName)
 	{
 		return;
 	}
+		
+	AActor* TargetActor = GetTargetActorForPlayback(nullptr);
 	
+	// 1. 맵 BGM 정지
 	if (bIsMapBGMPlaying)
 	{
 		StopMapBGM(nullptr);
 	}
 
+	// 2. 전투 BGM 정지 (헬퍼 함수 활용)
 	if (CurrentCombatMusicStartEvent)
 	{
-		AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+		StopCurrentCombatMusic(TargetActor);
 
-		if (CurrentCombatMusicStopEvent)
-		{
-			UAkGameplayStatics::PostEvent(CurrentCombatMusicStopEvent, TargetActor, 0, FOnAkPostEventCallback());
-		}
-		else
-		{
-			// StopEvent가 없는 경우, 재생중인 액터의 모든 사운드를 중지
-			if (TargetActor)
-			{
-				UAkGameplayStatics::StopActor(TargetActor);
-			}
-		}
-		
+		// 상태 초기화
 		CurrentCombatMusicStartEvent = nullptr;
 		CurrentCombatMusicStopEvent = nullptr;
+	}
+	
+	// 3. RTPC를 기본값(100)으로 리셋 (다음 맵에서 맵 BGM이 정상 재생되도록)
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, 0.0f);
 	}
 }
 
@@ -320,6 +317,30 @@ void UGS_AudioManager::SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context,
 
 // === 통합 전투 시스템 ===
 
+void UGS_AudioManager::StopCurrentCombatMusic(AActor* Context)
+{
+	if (!Context)
+	{
+		return;
+	}
+
+	// 기존 전투 음악이 없으면 조기 종료
+	if (!CurrentCombatMusicStartEvent)
+	{
+		return;
+	}
+
+	// StopEvent가 있으면 사용, 없으면 Actor 전체 정지
+	if (CurrentCombatMusicStopEvent)
+	{
+		UAkGameplayStatics::PostEvent(CurrentCombatMusicStopEvent, Context, 0, FOnAkPostEventCallback());
+	}
+	else
+	{
+		UAkGameplayStatics::StopActor(Context);
+	}
+}
+
 void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* CombatMusicStartEvent, UAkAudioEvent* CombatMusicStopEvent, float FadeTime)
 {
 	if (!Context || !CombatMusicStartEvent)
@@ -330,58 +351,43 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
 	if (!IsAudioProcessingAllowed())
 	{
+		// 서버에서는 전투 음악 상태만 저장
 		CurrentCombatMusicStartEvent = CombatMusicStartEvent;
 		CurrentCombatMusicStopEvent = CombatMusicStopEvent;
 		return;
 	}
 
-	// 기존에 재생 중인 전투 음악이 있다면 정지
-	if (CurrentCombatMusicStartEvent && CurrentCombatMusicStopEvent)
-	{
-		UAkGameplayStatics::PostEvent(CurrentCombatMusicStopEvent, Context, 0, FOnAkPostEventCallback());
-	}
-	else if (CurrentCombatMusicStartEvent)
-	{
-		UAkGameplayStatics::StopActor(Context);
-	}
+	// 1. 기존 전투 음악 정지
+	StopCurrentCombatMusic(Context);
 
-	// 게임 모드에 따른 조건부 타겟 액터 결정 (맵 BGM 정지용)
-	AActor* MapBGMTargetActor = GetTargetActorForPlayback();
-
-	// 클라이언트 환경에서는 맵 BGM을 즉시 강제 정지
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_Client)
-	{
-		if (MapBGMVolumeRTPC)
-		{
-			SetRTPCValue(MapBGMVolumeRTPC, 0.0f, MapBGMTargetActor, 0.0f);
-		}
-		StopMapBGM(MapBGMTargetActor);
-	}
-	else // 단독 실행 및 리슨 서버 환경에서는 페이드 아웃
-	{
-		FadeOutAndStopMapBGM(nullptr, FadeTime);
-	}
-
+	// 2. 전투 음악 상태 저장
 	CurrentCombatMusicStartEvent = CombatMusicStartEvent;
 	CurrentCombatMusicStopEvent = CombatMusicStopEvent;
 
-	// 클라이언트에서는 즉시, 그 외에는 페이드 시간에 맞춰 전투 BGM 시작
-	float DelayTime = (GetWorld() && GetWorld()->GetNetMode() == NM_Client) ? 0.1f : FadeTime;
-
-	FTimerHandle CombatBGMHandle;
-	GetWorld()->GetTimerManager().SetTimer(CombatBGMHandle, [this, Context, CombatMusicStartEvent]()
+	// 3. 맵 BGM RTPC를 즉시 0으로 설정 (전투 BGM이 들리도록)
+	AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+	if (MapBGMVolumeRTPC)
 	{
-		if (Context && CombatMusicStartEvent)
-		{
-			UAkGameplayStatics::PostEvent(CombatMusicStartEvent, Context, 0, FOnAkPostEventCallback());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("UGS_AudioManager::StartCombatSequence - Timer: Failed to start combat BGM (Context: %s, Event: %s)"), 
-				   Context ? *Context->GetName() : TEXT("NULL"), 
-				   CombatMusicStartEvent ? *CombatMusicStartEvent->GetName() : TEXT("NULL"));
-		}
-	}, DelayTime, false);
+		SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, 0.0f);
+	}
+
+	// 4. 전투 BGM 즉시 시작
+	if (Context && CombatMusicStartEvent)
+	{
+		UAkGameplayStatics::PostEvent(CombatMusicStartEvent, Context, 0, FOnAkPostEventCallback());
+	}
+
+	// 5. 맵 BGM은 나중에 정리 (이미 RTPC가 0이므로 안 들림)
+	if (bIsMapBGMPlaying)
+	{
+		FTimerHandle MapBGMStopHandle;
+		GetWorld()->GetTimerManager().SetTimer(MapBGMStopHandle,
+			[this, TargetActor]()
+			{
+				StopMapBGM(TargetActor);
+			},
+			0.5f, false);
+	}
 }
 
 void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatMusicStopEvent, float FadeTime)
@@ -399,32 +405,37 @@ void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatM
 		return;
 	}
 
-	// 게임 모드에 따른 조건부 타겟 액터 결정
+	// 1. 전투 BGM 정지
 	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
-	// 전투 BGM 정지 처리
-	if (CombatMusicStopEvent)
+	// 제공된 StopEvent 우선, 없으면 저장된 StopEvent 사용
+	UAkAudioEvent* StopEventToUse = CombatMusicStopEvent ? CombatMusicStopEvent : CurrentCombatMusicStopEvent;
+
+	if (StopEventToUse)
 	{
-		UAkGameplayStatics::PostEvent(CombatMusicStopEvent, TargetActor, 0, FOnAkPostEventCallback());
+		UAkGameplayStatics::PostEvent(StopEventToUse, TargetActor, 0, FOnAkPostEventCallback());
 	}
-	else if (CurrentCombatMusicStopEvent)
+	else if (CurrentCombatMusicStartEvent && TargetActor)
 	{
-		UAkGameplayStatics::PostEvent(CurrentCombatMusicStopEvent, TargetActor, 0, FOnAkPostEventCallback());
-	}
-	else if (CurrentCombatMusicStartEvent)
-	{
-		if (TargetActor)
-		{
-			UAkGameplayStatics::StopActor(TargetActor);
-		}
+		// StopEvent가 없으면 Actor 전체 정지
+		UAkGameplayStatics::StopActor(TargetActor);
 	}
 
-	// 현재 전투 시퀀스 정보 초기화
+	// 2. 전투 음악 상태 초기화
 	CurrentCombatMusicStartEvent = nullptr;
 	CurrentCombatMusicStopEvent = nullptr;
 
-	// 맵 BGM 복원
-	FadeInAndStartMapBGM(Context, FadeTime);
+	// 3. MapBGMVolume RTPC를 100으로 설정 (맵 BGM이 들리도록)
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, FadeTime * 1000.0f);
+	}
+
+	// 4. 맵 BGM 복원 (RTPC가 이미 올라가고 있으므로 즉시 시작)
+	if (!bIsMapBGMPlaying)
+	{
+		StartMapBGM(TargetActor);
+	}
 }
 
 // === 멀티플레이어 지원 함수들 ===
@@ -440,69 +451,71 @@ void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
 	{
 		return;
 	}
-	
-	// 게임 모드에 따른 조건부 타겟 액터 결정
+
 	AActor* TargetActor = GetTargetActorForPlayback(Context);
-	
-	if (!MapBGMVolumeRTPC)
+
+	// RTPC가 없거나 FadeTime이 0이면 즉시 정지
+	if (!MapBGMVolumeRTPC || FadeTime <= 0.0f)
 	{
 		StopMapBGM(TargetActor);
 		return;
 	}
-	
+
+	// 볼륨 페이드 아웃
 	SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, FadeTime * 1000.0f);
-	
-	if (FadeTime <= 0.0f)
-	{
-		StopMapBGM(TargetActor);
-		return;
-	}
-	
-	// 기존 페이드아웃 타이머가 있다면 취소
+
+	// 기존 타이머 취소
 	if (GetWorld()->GetTimerManager().IsTimerActive(MapBGMFadeOutTimerHandle))
 	{
 		GetWorld()->GetTimerManager().ClearTimer(MapBGMFadeOutTimerHandle);
 	}
-	
-	GetWorld()->GetTimerManager().SetTimer(MapBGMFadeOutTimerHandle, [this, TargetActor]()
-	{
-		StopMapBGM(TargetActor);
-	}, FadeTime, false);
+
+	// FadeTime 후 정지
+	GetWorld()->GetTimerManager().SetTimer(MapBGMFadeOutTimerHandle,
+		[this, TargetActor]()
+		{
+			StopMapBGM(TargetActor);
+		},
+		FadeTime, false);
 }
 
 void UGS_AudioManager::FadeInAndStartMapBGM(AActor* Context, float FadeTime)
 {
-	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
 	if (!IsAudioProcessingAllowed())
 	{
 		return;
 	}
 
-	// 게임 모드에 따른 조건부 타겟 액터 결정
 	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
-	// 맵 BGM이 이미 재생 중인지 확인
+	// 1. BGM 시작 (아직 재생 중이 아니면)
 	if (!bIsMapBGMPlaying)
 	{
 		StartMapBGM(TargetActor);
 	}
 	
-	// 기존 페이드인 타이머가 있다면 취소
+	// 2. 볼륨 페이드인 (RTPC가 있고 BGM이 재생 중이면)
+	if (!bIsMapBGMPlaying || !MapBGMVolumeRTPC)
+	{
+		return;
+	}
+
+	// 기존 타이머 취소
 	if (GetWorld()->GetTimerManager().IsTimerActive(MapBGMFadeInTimerHandle))
 	{
 		GetWorld()->GetTimerManager().ClearTimer(MapBGMFadeInTimerHandle);
 	}
 
-	// 볼륨 페이드인
-	if (bIsMapBGMPlaying && MapBGMVolumeRTPC)
-	{
-		SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, 0.0f);
-		GetWorld()->GetTimerManager().SetTimer(MapBGMFadeInTimerHandle, [this, TargetActor, FadeTime]()
+	// 볼륨 0으로 설정 후 페이드인
+	SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, 0.0f);
+	
+	GetWorld()->GetTimerManager().SetTimer(MapBGMFadeInTimerHandle, 
+		[this, TargetActor, FadeTime]()
 		{
 			if (MapBGMVolumeRTPC && bIsMapBGMPlaying)
 			{
 				SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, FadeTime * 1000.0f);
 			}
-		}, 0.1f, false);
-	}
+		}, 
+		0.1f, false);
 }

@@ -230,4 +230,19 @@ private:
 
     UPROPERTY(Transient)
     uint32 CurrentCombatPlayingID = 0;*/
+
+    // ===================
+    // FindNearestSeeker 캐싱 시스템
+    // ===================
+    
+    /** 캐싱된 가장 가까운 시커 */
+    UPROPERTY(Transient)
+    mutable TWeakObjectPtr<AGS_Seeker> CachedNearestSeeker;
+    
+    /** 마지막 Seeker 검색 시간 */
+    UPROPERTY(Transient)
+    mutable float LastSeekerSearchTime = -1000.0f;
+    
+    /** Seeker 캐시 유효 시간 (초) */
+    static constexpr float SeekerCacheValidDuration = 0.5f;
 }; 
