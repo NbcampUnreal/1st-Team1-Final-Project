@@ -214,16 +214,25 @@ private:
 	FTimerHandle HitAuraCleanupTimerHandle;
 	FTimerHandle EnchantTimerHandle;
 	FTimerHandle EnchantCleanupTimerHandle;
+	FTimerHandle BloodEffectDelayTimerHandle;
 	
 	// VFX 자동 제거 타이머 콜백
 	void DeactivateHitAuraTimerCallback();
 	void CleanupHitAuraTimerCallback();
 	void DeactivateEnchantTimerCallback();
 	void CleanupEnchantTimerCallback();
+
+	// 혈흔 이펙트 딜레이 콜백
+	void DelayedBloodEffect();
 	
 	// VFX 컴포넌트 상태 관리
 	bool bHitAuraDeactivating;
 	bool bEnchantDeactivating;
+
+	// 혈흔 이펙트 딜레이용 변수들
+	FVector DelayedHitLocation;
+	FVector DelayedHitNormal;
+	float DelayedScale;
 	
 	// 안전한 VFX 컴포넌트 정리
 	void CleanupHitAuraVFXComponent();

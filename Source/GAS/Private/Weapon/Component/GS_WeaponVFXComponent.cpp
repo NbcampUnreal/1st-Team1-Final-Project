@@ -52,13 +52,11 @@ void UGS_WeaponVFXComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UGS_WeaponVFXComponent::ActivateHitAura(ESeekerAuraType SeekerType)
 {
-	// 서버에서만 처리
 	if (!GetOwner()->HasAuthority())
 	{
 		return;
 	}
 
-	// 안전성 검사
 	if (!IsValidForVFXOperation())
 	{
 		return;
@@ -119,19 +117,16 @@ void UGS_WeaponVFXComponent::ActivateHitAura(ESeekerAuraType SeekerType)
 
 void UGS_WeaponVFXComponent::DeactivateHitAura()
 {
-	// 서버에서만 처리
 	if (!GetOwner()->HasAuthority())
 	{
 		return;
 	}
 
-	// 안전성 검사
 	if (!IsValidForVFXOperation())
 	{
 		return;
 	}
 
-	// 타이머 정리
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().ClearTimer(HitAuraTimerHandle);
@@ -152,13 +147,11 @@ bool UGS_WeaponVFXComponent::IsHitAuraActive() const
 
 void UGS_WeaponVFXComponent::PlaySlashVFX(const FHitResult& HitResult, ESeekerAuraType AttackerSeekerType)
 {
-	// 서버에서만 처리
 	if (!GetOwner()->HasAuthority())
 	{
 		return;
 	}
 
-	// 안전성 검사
 	if (!IsValidForVFXOperation())
 	{
 		return;
@@ -171,7 +164,6 @@ void UGS_WeaponVFXComponent::PlaySlashVFX(const FHitResult& HitResult, ESeekerAu
 		WeaponVelocity = HitResult.ImpactNormal * -100.0f; 
 	}
 	
-	// 멀티캐스트로 모든 클라이언트에 이펙트 재생 요청
 	Multicast_PlaySlashVFX(HitResult.ImpactPoint, WeaponVelocity, AttackerSeekerType);
 }
 
@@ -283,7 +275,6 @@ void UGS_WeaponVFXComponent::Multicast_ActivateHitAura_Implementation(ESeekerAur
 		GetWorld()->GetTimerManager().ClearTimer(HitAuraCleanupTimerHandle);
 	}
 	
-	// 비활성화 상태 리셋
 	bHitAuraDeactivating = false;
 
 	// 무기 메시 컴포넌트 가져오기
@@ -293,7 +284,6 @@ void UGS_WeaponVFXComponent::Multicast_ActivateHitAura_Implementation(ESeekerAur
 		return;
 	}
 
-	// 잠시 대기하여 이전 정리 작업 완료 보장
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().SetTimerForNextTick([this, VFXSystem, MeshComponent, LocationOffset, RotationOffset, Scale, SeekerType]()
@@ -562,7 +552,7 @@ void UGS_WeaponVFXComponent::Multicast_PlaySlashVFX_Implementation(FVector Impac
 
 	// Slash Effect
 	UNiagaraSystem* SlashVFX = GetWeaponVFX(EWeaponVFXType::Slash, SeekerType);
-	
+
 	// 무기 속도가 너무 낮으면 슬래시 이펙트를 표시하지 않음 (오차 방지)
 	if (SlashVFX && !WeaponVelocity.IsNearlyZero(1.f))
 	{
@@ -570,18 +560,26 @@ void UGS_WeaponVFXComponent::Multicast_PlaySlashVFX_Implementation(FVector Impac
 		const FRotator SlashRotation = WeaponVelocity.Rotation();
 		const FVector ScaleVector = GetVFXScale(EWeaponVFXType::Slash, SeekerType);
 
-		// 공통 함수 호출
-		UGS_VFX_FunctionLibrary::PlayBloodEffect(this, SlashVFX, ImpactPoint, SlashRotation, ScaleVector.X);
+		DelayedHitLocation = ImpactPoint;  // 위치 저장
+		DelayedHitNormal = WeaponVelocity.GetSafeNormal(); 
+		DelayedScale = ScaleVector.X;
+
+		// 타이머 설정 (딜레이 후 DelayedBloodEffect 호출)
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				BloodEffectDelayTimerHandle,
+				this,
+				&UGS_WeaponVFXComponent::DelayedBloodEffect,
+				0.125f,  // 조정 가능한 딜레이
+				false
+			);
+		}
 	}
 }
 
-// ======================
-// 타이머 콜백 함수들
-// ======================
-
 void UGS_WeaponVFXComponent::DeactivateHitAuraTimerCallback()
 {
-	// 서버에서 비활성화 처리
 	if (GetOwner()->HasAuthority())
 	{
 		DeactivateHitAura();
@@ -590,7 +588,6 @@ void UGS_WeaponVFXComponent::DeactivateHitAuraTimerCallback()
 
 void UGS_WeaponVFXComponent::CleanupHitAuraTimerCallback()
 {
-	// 완전한 정리 (클라이언트에서도 실행)
 	CleanupHitAuraVFXComponent();
 	bHitAuraDeactivating = false;
 	CurrentAuraType = ESeekerAuraType::Default;
@@ -598,20 +595,19 @@ void UGS_WeaponVFXComponent::CleanupHitAuraTimerCallback()
 
 void UGS_WeaponVFXComponent::DeactivateEnchantTimerCallback()
 {
-	// 부드러운 비활성화 시작
 	SoftDeactivateEnchant();
 }
 
 void UGS_WeaponVFXComponent::CleanupEnchantTimerCallback()
 {
-	// 완전한 정리 (클라이언트에서도 실행)
 	CleanupEnchantVFXComponent();
 	bEnchantDeactivating = false;
 }
 
-// ======================
-// 정리 함수들
-// ======================
+void UGS_WeaponVFXComponent::DelayedBloodEffect()
+{
+	UGS_VFX_FunctionLibrary::PlayBloodEffect(this, GetWeaponVFX(EWeaponVFXType::Slash, GetOwnerSeekerType()), DelayedHitLocation, DelayedHitNormal.Rotation(), DelayedScale);
+}
 
 void UGS_WeaponVFXComponent::CleanupHitAuraVFXComponent()
 {
@@ -622,13 +618,8 @@ void UGS_WeaponVFXComponent::CleanupHitAuraVFXComponent()
 	}
 }
 
-// ======================
-// 부드러운 VFX 비활성화 함수들
-// ======================
-
 void UGS_WeaponVFXComponent::SoftDeactivateHitAura()
 {
-	// 이미 비활성화 중이면 무시
 	if (bHitAuraDeactivating)
 	{
 		return;
@@ -636,10 +627,8 @@ void UGS_WeaponVFXComponent::SoftDeactivateHitAura()
 
 	bHitAuraDeactivating = true;
 
-	// 멀티캐스트로 부드러운 비활성화 시작
 	Multicast_DeactivateHitAura();
 
-	// 2초 후 완전 정리 (나이아가라 시스템이 자연스럽게 끝날 시간)
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().SetTimer(HitAuraCleanupTimerHandle, this, &UGS_WeaponVFXComponent::CleanupHitAuraTimerCallback, 2.0f, false);
@@ -648,7 +637,6 @@ void UGS_WeaponVFXComponent::SoftDeactivateHitAura()
 
 void UGS_WeaponVFXComponent::SoftDeactivateEnchant()
 {
-	// 이미 비활성화 중이면 무시
 	if (bEnchantDeactivating)
 	{
 		return;
@@ -656,13 +644,11 @@ void UGS_WeaponVFXComponent::SoftDeactivateEnchant()
 
 	bEnchantDeactivating = true;
 
-	// 나이아가라 VFX를 부드럽게 비활성화
 	if (EnchantVFXComponent && IsValid(EnchantVFXComponent))
 	{
 		EnchantVFXComponent->Deactivate();
 	}
 
-	// 2초 후 완전 정리
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().SetTimer(EnchantCleanupTimerHandle, this, &UGS_WeaponVFXComponent::CleanupEnchantTimerCallback, 2.0f, false);
