@@ -127,7 +127,7 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
 {
     // 데디케이티드 서버에서는 오디오 처리 불필요
     if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
-    
+
     if (!OwnerMonster || !GetWorld())
     {
         return;
@@ -139,30 +139,36 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
         return;
     }
 
-    // RTS 모드와 TPS 모드에 따른 거리 체크
+    // RTS 모드 체크 (모든 사운드에 공통 적용)
     const bool bRTS = IsRTSMode();
-    const float MaxDistance = GetMaxDistanceForMode(bRTS);
-    
-    float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
-    
-    // RTS 모드에서는 화면 시야각 기반 체크, TPS 모드에서는 거리 기반 체크
-    if (bRTS)
+
+    // 죽음 사운드는 거리/시야각 체크 없이 항상 재생
+    if (SoundTypeToTrigger != EMonsterAudioState::Death)
     {
-        // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
-        if (!IsInViewFrustum(OwnerMonster->GetActorLocation()))
+        // RTS 모드와 TPS 모드에 따른 거리 체크
+        const float MaxDistance = GetMaxDistanceForMode(bRTS);
+
+        float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
+
+        // RTS 모드에서는 화면 시야각 기반 체크, TPS 모드에서는 거리 기반 체크
+        if (bRTS)
         {
-            return;
+            // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
+            if (!IsInViewFrustum(OwnerMonster->GetActorLocation()))
+            {
+                return;
+            }
+        }
+        else
+        {
+            // TPS 모드: 기존 거리 기반 체크
+            if (DistanceToListener > MaxDistance)
+            {
+                return;
+            }
         }
     }
-    else
-    {
-        // TPS 모드: 기존 거리 기반 체크
-        if (DistanceToListener > MaxDistance)
-        {
-            return;
-        }
-    }
-    
+
     UAkAudioEvent* SoundEvent = GetSoundEvent(SoundTypeToTrigger);
     if (!SoundEvent)
     {
@@ -210,6 +216,9 @@ void UGS_MonsterAudioComponent::PlayDeathSound()
 {
     if (GetOwner() && GetOwner()->HasAuthority())
     {
+        // 죽음 사운드 재생 전에 현재 재생 중인 모든 사운드 중단
+        StopAllActiveSounds();
+
         SetMonsterAudioState(EMonsterAudioState::Death);
         PlaySound(EMonsterAudioState::Death, true);
     }
