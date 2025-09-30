@@ -18,7 +18,6 @@
  */
 
 class UGS_UIAudioSystem;
-class UGS_EnvironmentAudioSystem;
 
 UCLASS()
 class GAS_API UGS_AudioManager : public UGameInstanceSubsystem
@@ -36,9 +35,6 @@ public:
 	// Sub-system 접근
 	UFUNCTION(BlueprintCallable, Category = "Audio|Manager")
 	class UGS_UIAudioSystem* GetUIAudio() const { return UIAudio; }
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|Manager")
-	class UGS_EnvironmentAudioSystem* GetEnvironmentAudio() const { return EnvironmentAudio; }
 
 	// Wwise 이벤트 호출 래퍼
 	UFUNCTION(BlueprintCallable, Category = "Audio|Manager")
@@ -87,9 +83,6 @@ private:
 	// 생성된·파괴 주기는 GameInstance와 동기화
 	UPROPERTY()
 	UGS_UIAudioSystem* UIAudio;
-
-	UPROPERTY()
-	UGS_EnvironmentAudioSystem* EnvironmentAudio;
 
 	// 맵 BGM 상태 관리
 	bool bIsMapBGMPlaying;

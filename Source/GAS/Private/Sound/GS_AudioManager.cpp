@@ -3,7 +3,6 @@
 
 #include "Sound/GS_AudioManager.h"
 #include "Sound/GS_UIAudioSystem.h"
-#include "Sound/GS_EnvironmentAudioSystem.h"
 #include "AkAudioDevice.h"
 #include "UObject/UObjectGlobals.h"
 
@@ -14,7 +13,6 @@ UGS_AudioManager::UGS_AudioManager()
 
 	// 포인터 멤버 초기화
 	UIAudio = nullptr;
-	EnvironmentAudio = nullptr;
 
 	// 맵 BGM 멤버 초기화
 	MapBGMEvent = nullptr;
@@ -61,7 +59,6 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	// 오디오 시스템 인스턴스 생성
 	UIAudio = NewObject<UGS_UIAudioSystem>(this);
-	EnvironmentAudio = NewObject<UGS_EnvironmentAudioSystem>(this);
 
 	// 맵 BGM 상태 초기화
 	bIsMapBGMPlaying = false;
@@ -83,7 +80,6 @@ void UGS_AudioManager::Deinitialize()
 	
 	// 메모리 해제 처리
 	UIAudio = nullptr;
-	EnvironmentAudio = nullptr;
 
 	// 맵 BGM 상태 정리
 	bIsMapBGMPlaying = false;
