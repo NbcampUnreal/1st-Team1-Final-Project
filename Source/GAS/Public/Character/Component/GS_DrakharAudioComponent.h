@@ -1,15 +1,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "Sound/GS_AudioComponentBase.h"
 #include "GS_DrakharAudioComponent.generated.h"
 
 class UAkAudioEvent;
-class UAkComponent;
 class AGS_Drakhar;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class GAS_API UGS_DrakharAudioComponent : public UActorComponent
+/**
+ * 드라카르(가디언) 전용 오디오 컴포넌트
+ * GS_AudioComponentBase를 상속받아 공통 기능 활용
+ */
+UCLASS( ClassGroup=(Audio), meta=(BlueprintSpawnableComponent) )
+class GAS_API UGS_DrakharAudioComponent : public UGS_AudioComponentBase
 {
 	GENERATED_BODY()
 
@@ -41,5 +44,4 @@ private:
 
 	// === Wwise 관련 헬퍼 함수 ===
 	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);
-	UAkComponent* GetOrCreateAkComponent();
 }; 

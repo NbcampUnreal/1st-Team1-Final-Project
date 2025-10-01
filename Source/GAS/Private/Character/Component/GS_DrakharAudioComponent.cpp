@@ -116,39 +116,21 @@ void UGS_DrakharAudioComponent::HandleDraconicProjectileImpact(const FVector& Im
 // === Wwise 헬퍼 함수 구현 ===
 void UGS_DrakharAudioComponent::PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location)
 {
-	// 멀티플레이어 환경에서 안전성 체크 강화
-	if (!OwnerDrakhar)
+	// 기본 체크
+	if (!OwnerDrakhar || !SoundEvent)
 	{
 		return;
 	}
     
+	// 데디케이티드 서버에서는 오디오 처리 불필요
 	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
-	{
-		return;
-	}
-	
-	// 사운드 이벤트 유효성 검사
-	if (!SoundEvent)
 	{
 		return;
 	}
 
 	// Wwise 오디오 디바이스 초기화 상태 확인
 	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-	if (!AudioDevice)
-	{
-		return;
-	}
-
-	// 오디오 디바이스가 초기화되었는지 확인
-	if (!AudioDevice->IsInitialized())
-	{
-		return;
-	}
-
-	// 월드 컨텍스트 유효성 검사
-	UWorld* World = GetWorld();
-	if (!World)
+	if (!AudioDevice || !AudioDevice->IsInitialized())
 	{
 		return;
 	}
@@ -156,45 +138,15 @@ void UGS_DrakharAudioComponent::PlaySoundEvent(UAkAudioEvent* SoundEvent, const 
 	// 위치 기반 사운드 재생
 	if (Location != FVector::ZeroVector)
 	{
-		if (IsValid(SoundEvent) && World->IsValidLowLevel())
-		{
-			UAkGameplayStatics::PostEventAtLocation(SoundEvent, Location, FRotator::ZeroRotator, World);
-		}
+		UAkGameplayStatics::PostEventAtLocation(SoundEvent, Location, FRotator::ZeroRotator, GetWorld());
 	}
 	else
 	{
+		// 부모 클래스의 GetOrCreateAkComponent 사용
 		UAkComponent* AkComp = GetOrCreateAkComponent();
-		if (AkComp && IsValid(AkComp))
+		if (AkComp)
 		{
 			AkComp->PostAkEvent(SoundEvent);
 		}
 	}
-}
-
-UAkComponent* UGS_DrakharAudioComponent::GetOrCreateAkComponent()
-{
-	if (!OwnerDrakhar) 
-	{
-		return nullptr;
-	}
-
-	if (!IsValid(OwnerDrakhar))
-	{
-		return nullptr;
-	}
-
-	UAkComponent* AkComp = OwnerDrakhar->FindComponentByClass<UAkComponent>();
-	if (!AkComp)
-	{
-		if (OwnerDrakhar->GetRootComponent() && IsValid(OwnerDrakhar->GetRootComponent()))
-		{
-			AkComp = NewObject<UAkComponent>(OwnerDrakhar, TEXT("RuntimeAkAudioComponent"));
-			if (AkComp && IsValid(AkComp))
-			{
-				AkComp->SetupAttachment(OwnerDrakhar->GetRootComponent());
-				AkComp->RegisterComponent();
-			}
-		}
-	}
-	return AkComp;
 } 

@@ -9,7 +9,6 @@
 #include "Animation/Character/GS_MonsterAnimInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "Sound/GS_AudioManager.h"
-#include "Sound/GS_CharacterAudioSystem.h"
 #include "EngineUtils.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 // #include "Character/GS_Character.h"
@@ -152,15 +151,22 @@ void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AGS_Monster::OnDeath()
 {
 	Super::OnDeath();
-	
+
 	if (MonsterAudioComponent)
 	{
 		MonsterAudioComponent->PlayDeathSound();
 	}
-	
+
 	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
 	{
 		MoveComp->DisableMovement();
+	}
+
+	// 즉시 콜리전 비활성화하여 공격이 더 이상 들어오지 않도록 처리
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
 	}
 	
 	// 주변의 모든 Seeker에게 이 몬스터 제거 알림

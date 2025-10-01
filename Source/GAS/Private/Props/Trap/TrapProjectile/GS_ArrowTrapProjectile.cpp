@@ -12,6 +12,7 @@
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "AI/RTS/GS_RTSController.h"
+#include "VFX/GS_VFX_FunctionLibrary.h"
 
 AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
 {
@@ -62,6 +63,13 @@ void AGS_ArrowTrapProjectile::BeginPlay()
 void AGS_ArrowTrapProjectile::Init(AGS_NonTrigTrapBase* InTrap)
 {
 	OwningTrap = InTrap;
+
+	// 함정의 혈흔 이펙트 설정 (직접 설정이 없으면 함정 데이터에서 가져오기)
+	if (!BloodEffectOverride && OwningTrap)
+	{
+		BloodEffectOverride = OwningTrap->TrapData.TrapHitBloodEffect;
+	}
+
 	if (HasAuthority())
 	{
 		CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AGS_ArrowTrapProjectile::OnBeginOverlap);
@@ -210,6 +218,9 @@ void AGS_ArrowTrapProjectile::PlayHitVFX(EArrowHitType HitType, const FVector& I
 	{
 		case EArrowHitType::Player:
 			VFXToPlay = PlayerHitVFX;
+
+			// 혈흔 이펙트 재생
+			UGS_VFX_FunctionLibrary::PlayBloodEffect(this, BloodEffectOverride, ImpactPoint, FRotationMatrix::MakeFromZ(ImpactNormal).Rotator(), 1.0f);
 			break;
 		case EArrowHitType::Wall:
 		case EArrowHitType::Other:

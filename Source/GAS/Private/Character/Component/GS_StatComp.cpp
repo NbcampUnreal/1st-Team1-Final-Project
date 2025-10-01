@@ -179,8 +179,11 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
         {
             if (IsValid(DamagedMonster) && IsValid(DamagedMonster->MonsterAudioComponent))
             {
-                // 몬스터가 죽지 않았을 때만 타격 소리 재생
-                if (DamagedMonster->MonsterAudioComponent->GetCurrentAudioState() != EMonsterAudioState::Death)
+                // 이번 데미지로 몬스터가 죽을지 미리 체크
+                bool bWillDieFromThisDamage = (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER);
+
+                // 몬스터가 죽지 않을 때만 타격 소리 재생
+                if (DamagedMonster->MonsterAudioComponent->GetCurrentAudioState() != EMonsterAudioState::Death && !bWillDieFromThisDamage)
                 {
                     DamagedMonster->MonsterAudioComponent->PlayHurtSound();
                 }

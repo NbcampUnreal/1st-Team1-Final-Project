@@ -38,6 +38,10 @@ public:
 	UPROPERTY()
 	TObjectPtr<UGS_ProjectilePoolComp> OwningPool;
 
+	// 혈흔 이펙트 (함정 데이터에서 가져오거나 직접 설정)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
+	UNiagaraSystem* BloodEffectOverride;
+
 	FTimerHandle LifeSpanHandle;
 
 	// Arrow By Sound 관련 변수들

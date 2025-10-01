@@ -127,7 +127,7 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
 {
     // 데디케이티드 서버에서는 오디오 처리 불필요
     if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
-    
+
     if (!OwnerMonster || !GetWorld())
     {
         return;
@@ -139,30 +139,36 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
         return;
     }
 
-    // RTS 모드와 TPS 모드에 따른 거리 체크
+    // RTS 모드 체크 (모든 사운드에 공통 적용)
     const bool bRTS = IsRTSMode();
-    const float MaxDistance = GetMaxDistanceForMode(bRTS);
-    
-    float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
-    
-    // RTS 모드에서는 화면 시야각 기반 체크, TPS 모드에서는 거리 기반 체크
-    if (bRTS)
+
+    // 죽음 사운드는 거리/시야각 체크 없이 항상 재생
+    if (SoundTypeToTrigger != EMonsterAudioState::Death)
     {
-        // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
-        if (!IsInViewFrustum(OwnerMonster->GetActorLocation()))
+        // RTS 모드와 TPS 모드에 따른 거리 체크
+        const float MaxDistance = GetMaxDistanceForMode(bRTS);
+
+        float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
+
+        // RTS 모드에서는 화면 시야각 기반 체크, TPS 모드에서는 거리 기반 체크
+        if (bRTS)
         {
-            return;
+            // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
+            if (!IsInViewFrustum(OwnerMonster->GetActorLocation()))
+            {
+                return;
+            }
+        }
+        else
+        {
+            // TPS 모드: 기존 거리 기반 체크
+            if (DistanceToListener > MaxDistance)
+            {
+                return;
+            }
         }
     }
-    else
-    {
-        // TPS 모드: 기존 거리 기반 체크
-        if (DistanceToListener > MaxDistance)
-        {
-            return;
-        }
-    }
-    
+
     UAkAudioEvent* SoundEvent = GetSoundEvent(SoundTypeToTrigger);
     if (!SoundEvent)
     {
@@ -210,6 +216,9 @@ void UGS_MonsterAudioComponent::PlayDeathSound()
 {
     if (GetOwner() && GetOwner()->HasAuthority())
     {
+        // 죽음 사운드 재생 전에 현재 재생 중인 모든 사운드 중단
+        StopAllActiveSounds();
+
         SetMonsterAudioState(EMonsterAudioState::Death);
         PlaySound(EMonsterAudioState::Death, true);
     }
@@ -258,18 +267,43 @@ void UGS_MonsterAudioComponent::PlaySwingSound()
 
 AGS_Seeker* UGS_MonsterAudioComponent::FindNearestSeeker() const
 {
-    if (!GetWorld() || !OwnerMonster) return nullptr;
+    if (!GetWorld() || !OwnerMonster)
+    {
+        return nullptr;
+    }
 
+    const float CurrentTime = GetWorld()->GetTimeSeconds();
+
+    // 1. 캐시 유효성 체크
+    if ((CurrentTime - LastSeekerSearchTime) < SeekerCacheValidDuration)
+    {
+        // 캐시된 Seeker가 여전히 유효한지 확인
+        if (CachedNearestSeeker.IsValid())
+        {
+            // 캐시된 Seeker가 여전히 AlertDistance 안에 있는지 확인
+            const float DistanceSq = FVector::DistSquared(
+                OwnerMonster->GetActorLocation(),
+                CachedNearestSeeker->GetActorLocation()
+            );
+            
+            if (DistanceSq <= FMath::Square(AudioConfig.AlertDistance))
+            {
+                return CachedNearestSeeker.Get();
+            }
+        }
+    }
+
+    // 2. 캐시가 만료되었거나 유효하지 않음 - 새로 검색
     AGS_Seeker* NearestSeeker = nullptr;
     float MinDistanceSq = FLT_MAX;
-    FVector MonsterLocation = OwnerMonster->GetActorLocation();
+    const FVector MonsterLocation = OwnerMonster->GetActorLocation();
 
     TArray<FOverlapResult> OverlapResults;
     FCollisionShape Sphere = FCollisionShape::MakeSphere(AudioConfig.AlertDistance);
     FCollisionQueryParams QueryParams;
     QueryParams.AddIgnoredActor(OwnerMonster);
 
-    bool bHasOverlap = GetWorld()->OverlapMultiByChannel(
+    const bool bHasOverlap = GetWorld()->OverlapMultiByChannel(
         OverlapResults,
         MonsterLocation,
         FQuat::Identity,
@@ -286,7 +320,7 @@ AGS_Seeker* UGS_MonsterAudioComponent::FindNearestSeeker() const
             // [주석처리] 죽은 시커 제외 로직
             if (Seeker /*&& !Seeker->IsDead()*/)  // 죽은 시커는 제외
             {
-                float DistanceSq = FVector::DistSquared(MonsterLocation, Seeker->GetActorLocation());
+                const float DistanceSq = FVector::DistSquared(MonsterLocation, Seeker->GetActorLocation());
                 if (DistanceSq < MinDistanceSq)
                 {
                     MinDistanceSq = DistanceSq;
@@ -295,6 +329,10 @@ AGS_Seeker* UGS_MonsterAudioComponent::FindNearestSeeker() const
             }
         }
     }
+
+    // 3. 캐시 업데이트
+    CachedNearestSeeker = NearestSeeker;
+    LastSeekerSearchTime = CurrentTime;
 
     return NearestSeeker;
 }
@@ -326,60 +364,26 @@ void UGS_MonsterAudioComponent::PlayCombatSound()
 
 void UGS_MonsterAudioComponent::Multicast_PlaySwingSound_Implementation()
 {
-    // 데디케이티드 서버에서는 오디오 처리 불필요
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
-    
-    if (!OwnerMonster || !GetWorld())
+    // 통합 체크 및 Distance Scaling 설정
+    if (!PrepareMulticastSound(OwnerMonster, false))
     {
         return;
     }
 
-    FVector ListenerLocation;
-    if (!GetListenerLocation(ListenerLocation))
-    {
-        return;
-    }
-
-    const bool bRTS = IsRTSMode();
-    const float MaxDistance = GetMaxDistanceForMode(bRTS);
-    
-    const float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
-    
-    // RTS 모드에서는 화면 시야각 기반 체크, TPS 모드에서는 거리 기반 체크
-    if (bRTS)
-    {
-        // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
-        if (!IsInViewFrustum(OwnerMonster->GetActorLocation()))
-        {
-            return;
-        }
-    }
-    else
-    {
-        // TPS 모드: 기존 거리 기반 체크
-        if (DistanceToListener > MaxDistance)
-        {
-            return;
-        }
-    }
-
+    // 로컬 쿨다운 체크
     const float CurrentTime = GetWorld()->GetTimeSeconds();
-    const float LastTime = LocalLastSwingPlayTime;
-    if (CurrentTime - LastTime < SwingResetTime * LocalSoundCooldownMultiplier)
+    if (CurrentTime - LocalLastSwingPlayTime < SwingResetTime * LocalSoundCooldownMultiplier)
     {
         return;
     }
     LocalLastSwingPlayTime = CurrentTime;
 
-    UAkAudioEvent* SoundToPlay = bRTS ? RTS_SwingSound : SwingSound;
+    // 모드별 사운드 선택 및 재생
+    UAkAudioEvent* SoundToPlay = SelectSoundEventByMode(SwingSound, RTS_SwingSound);
     if (SoundToPlay)
     {
-        // RTS 모드에 따른 Distance Scaling 설정 (통일된 시스템 사용)
-        SetDistanceScaling(bRTS);
-        
         AkPlayingID SwingPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerMonster, 0, FOnAkPostEventCallback());
         RegisterPlayingID(SwingPlayingID);
-        // CurrentSwingPlayingID = SwingPlayingID;
     }
 }
 

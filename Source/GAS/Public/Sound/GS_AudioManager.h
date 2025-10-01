@@ -18,7 +18,6 @@
  */
 
 class UGS_UIAudioSystem;
-class UGS_EnvironmentAudioSystem;
 
 UCLASS()
 class GAS_API UGS_AudioManager : public UGameInstanceSubsystem
@@ -36,9 +35,6 @@ public:
 	// Sub-system 접근
 	UFUNCTION(BlueprintCallable, Category = "Audio|Manager")
 	class UGS_UIAudioSystem* GetUIAudio() const { return UIAudio; }
-
-	UFUNCTION(BlueprintCallable, Category = "Audio|Manager")
-	class UGS_EnvironmentAudioSystem* GetEnvironmentAudio() const { return EnvironmentAudio; }
 
 	// Wwise 이벤트 호출 래퍼
 	UFUNCTION(BlueprintCallable, Category = "Audio|Manager")
@@ -88,9 +84,6 @@ private:
 	UPROPERTY()
 	UGS_UIAudioSystem* UIAudio;
 
-	UPROPERTY()
-	UGS_EnvironmentAudioSystem* EnvironmentAudio;
-
 	// 맵 BGM 상태 관리
 	bool bIsMapBGMPlaying;
 
@@ -135,4 +128,9 @@ private:
 	 * @brief 맵 로딩 시작 시 호출되어 BGM을 정지시킵니다.
 	 */
 	void OnPreLoadMap(const FString& MapName);
+
+	/**
+	 * @brief 현재 재생 중인 전투 음악을 정지합니다.
+	 */
+	void StopCurrentCombatMusic(AActor* Context);
 };

@@ -605,6 +605,89 @@ void UGS_AudioComponentBase::InitializeAudioRTPCs()
     SetUnifiedRTPCValue(OcclusionDisableRTPC, 0.0f);
 }
 
+// ==========================
+// Multicast RPC 최적화 헬퍼
+// ==========================
+
+bool UGS_AudioComponentBase::ShouldPlayMulticastSound(AActor* SourceActor, bool& OutIsRTSMode, FVector& OutListenerLocation, bool bSkipViewFrustumCheck) const
+{
+    // 1. 데디케이티드 서버에서는 오디오 처리 불필요
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+    {
+        return false;
+    }
+
+    // 2. Owner 및 World 유효성 체크
+    if (!SourceActor || !GetWorld())
+    {
+        return false;
+    }
+
+    // 3. 리스너 위치 가져오기
+    if (!GetListenerLocation(OutListenerLocation))
+    {
+        return false;
+    }
+
+    // 4. RTS 모드 확인
+    OutIsRTSMode = IsRTSMode();
+    const float MaxDistance = GetMaxDistanceForMode(OutIsRTSMode);
+
+    // 5. 소스 위치 가져오기
+    const FVector SourceLocation = SourceActor->GetActorLocation();
+    const float DistanceToListener = FVector::Dist(SourceLocation, OutListenerLocation);
+
+    // 6. 모드별 거리/시야각 체크
+    if (OutIsRTSMode)
+    {
+        // RTS 모드: ViewFrustum 체크 (화면에 보이는지 확인)
+        if (!bSkipViewFrustumCheck && !IsInViewFrustum(SourceLocation))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        // TPS 모드: 거리 기반 체크
+        if (DistanceToListener > MaxDistance)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool UGS_AudioComponentBase::PrepareMulticastSound(AActor* SourceActor, bool bSkipViewFrustumCheck)
+{
+    bool bIsRTSMode = false;
+    FVector ListenerLocation;
+
+    // 통합 체크 수행
+    if (!ShouldPlayMulticastSound(SourceActor, bIsRTSMode, ListenerLocation, bSkipViewFrustumCheck))
+    {
+        return false;
+    }
+
+    // Distance Scaling 자동 설정
+    SetDistanceScaling(bIsRTSMode);
+
+    return true;
+}
+
+UAkAudioEvent* UGS_AudioComponentBase::SelectSoundEventByMode(UAkAudioEvent* TPSSound, UAkAudioEvent* RTSSound, bool bUseRTSMode) const
+{
+    const bool bRTS = bUseRTSMode || IsRTSMode();
+    
+    if (bRTS)
+    {
+        // RTS 사운드가 있으면 사용, 없으면 TPS 사운드로 폴백
+        return RTSSound ? RTSSound : TPSSound;
+    }
+    
+    return TPSSound;
+}
+
 // ===========
 // 방 관련 함수
 // ===========
