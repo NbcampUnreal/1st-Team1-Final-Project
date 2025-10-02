@@ -97,6 +97,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Data")
 	UTexture2D* GetPortrait() const { return CharacterData ? CharacterData->Portrait : nullptr; }
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "State", meta = (AllowPrivateAccess), Replicated)
+	bool bLockRotationToController = false; // Idle 상태에도 bUseControllerRotationYaw 를 true 로 두기 위한 flag.
+
+	UFUNCTION(BlueprintCallable, Category = "State")
+	bool GetIsLockedRotationToController();
+
+	UFUNCTION(BlueprintCallable, Category = "State")
+	void SetIsLockedRotationToController(bool InputIsRotationRoController);
 	
 	UFUNCTION(BlueprintCallable, Category="Data")
 	FText GetMonsterName() const { return CharacterData ? CharacterData->CharacterName : FText::GetEmpty(); }

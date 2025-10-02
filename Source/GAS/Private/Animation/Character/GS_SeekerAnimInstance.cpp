@@ -75,7 +75,12 @@ void UGS_SeekerAnimInstance::UpdateEssentialValue_Implementation()
 }
 
 void UGS_SeekerAnimInstance::UpdateState_Implementation()
-{	
+{
+	if (!ChooserInputObj)
+	{
+		return;
+	}
+	
 	// Set Rotation Mode
 	LastRotationMode = ChooserInputObj->RotationMode;
 	if (OwnerCharacterMovement->bOrientRotationToMovement)
@@ -89,25 +94,24 @@ void UGS_SeekerAnimInstance::UpdateState_Implementation()
 
 	// Set Movement State
 	ChooserInputObj->LastMovementState = ChooserInputObj->MovementState;
-	if (ChooserInputObj->IsMoving())
+	if (ChooserInputObj->IsMoving() )
 	{
 		OwnerCharacter->bUseControllerRotationYaw = true;
 		ChooserInputObj->MovementState = EMovementState::Moving;
-		if (ChooserInputObj)
-		{
-			ChooserInputObj->MovementState = EMovementState::Moving;
-		}
 	}
 	else
 	{
-		OwnerCharacter->bUseControllerRotationYaw = false;
-		ChooserInputObj->MovementState = EMovementState::Idle;
-		if (ChooserInputObj)
+		if (OwnerCharacter->GetIsLockedRotationToController())
 		{
-			ChooserInputObj->MovementState = EMovementState::Idle;
+			OwnerCharacter->bUseControllerRotationYaw = true;
 		}
+		else
+		{
+			OwnerCharacter->bUseControllerRotationYaw = false;
+		}
+		ChooserInputObj->MovementState = EMovementState::Idle;
 	}
-
+	
 	// Set Gait State
 	LastGait = ChooserInputObj->Gait;
 }

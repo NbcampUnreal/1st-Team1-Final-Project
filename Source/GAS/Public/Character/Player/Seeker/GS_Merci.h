@@ -108,10 +108,10 @@ public:
 
 	// Camera Control
 	UFUNCTION(Client, Reliable)
-	void Client_StartZoom(float Duration);
+	void Client_StartZoom();
 
 	UFUNCTION(Client, Reliable)
-	void Client_StopZoom();
+	void Client_StopZoom(float Duration);
 
 	//Crosshair
 	UFUNCTION(BlueprintCallable, Category = "Crosshair")
@@ -152,6 +152,8 @@ protected:
 	
 	// 타임라인 관련
 	FTimeline ZoomTimeline;
+
+	void ZoomTimelineReverse();
 
 	UPROPERTY(EditAnywhere)
 	UCurveFloat* ZoomCurve;
