@@ -17,6 +17,7 @@ class AGS_PlayerState;
 class UGS_DebuffVFXComponent;
 class AGS_Monster;
 class UGS_SeekerAudioComponent;
+class UUserWidget;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -304,6 +305,18 @@ private:
 	UPROPERTY()
 	FTimerHandle LowHealthEffectTimer;
 
+	// 가디언 감지 상태
+	UPROPERTY(Replicated)
+	bool bIsDetectedByGuardian = false;
+
+	// ==========================================
+	// 가디언 감지 HUD 시스템
+	// ==========================================
+
+	/** 감지 HUD 위젯 클래스 */
+	UPROPERTY(EditDefaultsOnly, Category = "UI|Detection")
+	TSubclassOf<class UUserWidget> DetectionHUDWidgetClass;
+
 	void StartCombatMusic();
 	void StopCombatMusic();
 
@@ -339,7 +352,38 @@ public:
 	// 근접/원거리 체크 (하위 호환성)
 	UFUNCTION(BlueprintPure, Category = "Seeker Type")
 	bool IsMeleeSeeker() const { return IsChan() || IsAres(); }
-	
+
 	UFUNCTION(BlueprintPure, Category = "Seeker Type")
 	bool IsRangedSeeker() const { return IsMerci(); }
+
+	// ==========================================
+	// 가디언 감지 HUD 시스템
+	// ==========================================
+
+	/** 가디언이 시커를 감지했을 때 호출 (public 인터페이스) */
+	UFUNCTION(BlueprintCallable, Category = "Detection")
+	void OnDetectedByGuardian(bool bIsDetected);
+
+	/** 현재 가디언에게 감지되었는지 확인 */
+	UFUNCTION(BlueprintPure, Category = "Detection")
+	bool IsDetectedByGuardian() const { return bIsDetectedByGuardian; }
+
+	/** 감지 HUD 위젯 인스턴스 (블루프린트 접근용) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI|Detection")
+	class UUserWidget* DetectionHUDWidget;
+
+	/** 감지 상태 변경 시 HUD 업데이트 */
+	void UpdateDetectionHUD();
+
+private:
+	/** 서버 RPC */
+	UFUNCTION(Server, Reliable)
+	void Server_OnDetectedByGuardian(bool bIsDetected);
+	
+	/** 클라이언트 RPC */
+	UFUNCTION(Client, Reliable)
+	void Client_OnDetectedByGuardian(bool bIsDetected);
+	
+	/** 감지 상태 변경 시 시각적/청각적 효과 업데이트 */
+	void UpdateDetectionEffects();
 };

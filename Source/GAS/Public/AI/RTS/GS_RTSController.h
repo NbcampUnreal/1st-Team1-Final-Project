@@ -13,6 +13,7 @@ struct FInputActionInstance;
 struct FInputActionValue;
 class AGS_Monster;
 class AGS_Character;
+class AGS_Seeker;
 class UInputMappingContext;
 class UInputAction;
 class UGS_AetherComp;
@@ -287,6 +288,15 @@ private:
 	UPROPERTY()
 	FTimerHandle AttackCursorTimerHandle;
 
+	// 시커 감지 시스템
+	UPROPERTY()
+	TArray<AGS_Seeker*> DetectedSeekers;
+	
+	UPROPERTY(EditAnywhere, Category = "Detection")
+	float DetectionUpdateInterval = 0.5f;
+	
+	FTimerHandle DetectionTimerHandle;
+
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
 	FVector2D GetFinalDirection() const;
@@ -306,4 +316,13 @@ private:
 	void UpdateCursorForCommand();
 	void UpdateCursorForEdgeScroll();
 	void ShowAttackCursor();
+	
+	// 시커 감지 시스템
+	void UpdateSeekerDetection();
+	bool IsSeekerInCameraView(AGS_Seeker* Seeker);
+	void NotifySeekerDetection(AGS_Seeker* Seeker, bool bIsDetected);
+
+	// 서버로 감지 상태를 알리는 RPC
+	UFUNCTION(Server, Reliable)
+	void Server_NotifySeekerDetection(AGS_Seeker* Seeker, bool bIsDetected);
 };

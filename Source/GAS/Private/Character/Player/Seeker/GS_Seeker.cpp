@@ -156,6 +156,7 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, CurrentComboIndex);
 	//DOREPLIFETIME(AGS_Seeker, bComboEnded);
 	DOREPLIFETIME(AGS_Seeker, SeekerState);
+	DOREPLIFETIME(AGS_Seeker, bIsDetectedByGuardian);
 }
 
 void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -815,4 +816,72 @@ FLinearColor AGS_Seeker::GetCurrentDecalColor()
 bool AGS_Seeker::ShowDecal()
 {
 	return true;
+}
+
+// ==========================================
+// 가디언 감지 시스템
+// ==========================================
+
+void AGS_Seeker::OnDetectedByGuardian(bool bIsDetected)
+{
+	// 이제 항상 서버에서 호출됨
+	if (HasAuthority())
+	{
+		bIsDetectedByGuardian = bIsDetected;
+		Client_OnDetectedByGuardian(bIsDetected);
+	}
+}
+
+void AGS_Seeker::Server_OnDetectedByGuardian_Implementation(bool bIsDetected)
+{
+	// 서버에서 상태 업데이트 후 클라이언트에 전파
+	bIsDetectedByGuardian = bIsDetected;
+	Client_OnDetectedByGuardian(bIsDetected);
+}
+
+void AGS_Seeker::Client_OnDetectedByGuardian_Implementation(bool bIsDetected)
+{
+	// 로컬 플레이어의 시커에만 효과 적용
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	if (bIsDetectedByGuardian != bIsDetected)
+	{
+		bIsDetectedByGuardian = bIsDetected;
+
+		// 시각적 효과 업데이트
+		UpdateDetectionEffects();
+
+		// 청각적 피드백 (UI 사운드)
+		if (bIsDetected && SeekerAudioComponent)
+		{
+			SeekerAudioComponent->PlayDetectionWarningSound();
+		}
+		else if (!bIsDetected && SeekerAudioComponent)
+		{
+			SeekerAudioComponent->PlayDetectionClearedSound();
+		}
+	}
+}
+
+void AGS_Seeker::UpdateDetectionEffects()
+{
+	if (bIsDetectedByGuardian)
+	{
+		// 감지되었을 때 - 블루프린트에서 HUD 위젯 표시
+		// BP_Seeker에서 이벤트 바인딩하여 처리
+		UpdateDetectionHUD();
+	}
+	else
+	{
+		// 감지 해제 시 - 블루프린트에서 HUD 위젯 숨김
+		UpdateDetectionHUD();
+	}
+}
+
+void AGS_Seeker::UpdateDetectionHUD()
+{
+	// 실제 HUD 표시/숨김은 블루프린트에서 이벤트로 처리됨
 }

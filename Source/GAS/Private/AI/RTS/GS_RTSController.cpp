@@ -117,6 +117,18 @@ void AGS_RTSController::BeginPlay()
 	{
 		AetherComp->InitializeMaxAmount(AetherComp->GetMaxAmount());
 	}
+	
+	// 시커 감지 타이머 시작 (로컬 컨트롤러만)
+	if (!HasAuthority() && IsLocalController())
+	{
+		GetWorldTimerManager().SetTimer(
+			DetectionTimerHandle,
+			this,
+			&AGS_RTSController::UpdateSeekerDetection,
+			DetectionUpdateInterval,
+			true
+		);
+	}
 }
 
 void AGS_RTSController::SetupInputComponent()
@@ -1152,4 +1164,97 @@ void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)
 UGS_AetherComp* AGS_RTSController::GetAetherComp() const
 {
 	return AetherComp;
+}
+
+// ==========================================
+// 시커 감지 시스템
+// ==========================================
+
+void AGS_RTSController::UpdateSeekerDetection()
+{
+	if (!CameraActor)
+	{
+		return;
+	}
+
+	// 현재 카메라 시야 안에 있는 시커들 찾기
+	TArray<AGS_Seeker*> CurrentVisibleSeekers;
+
+	for (TActorIterator<AGS_Seeker> It(GetWorld()); It; ++It)
+	{
+		AGS_Seeker* Seeker = *It;
+		if (IsValid(Seeker) && !Seeker->IsDead())
+		{
+			if (IsSeekerInCameraView(Seeker))
+			{
+				CurrentVisibleSeekers.Add(Seeker);
+			}
+		}
+	}
+
+	// 새로 감지된 시커들 처리
+	for (AGS_Seeker* Seeker : CurrentVisibleSeekers)
+	{
+		if (!DetectedSeekers.Contains(Seeker))
+		{
+			DetectedSeekers.Add(Seeker);
+			NotifySeekerDetection(Seeker, true);
+		}
+	}
+
+	// 더 이상 감지되지 않는 시커들 처리
+	TArray<AGS_Seeker*> SeekersToRemove;
+	for (AGS_Seeker* Seeker : DetectedSeekers)
+	{
+		if (!CurrentVisibleSeekers.Contains(Seeker))
+		{
+			SeekersToRemove.Add(Seeker);
+		}
+	}
+
+	for (AGS_Seeker* Seeker : SeekersToRemove)
+	{
+		DetectedSeekers.Remove(Seeker);
+		NotifySeekerDetection(Seeker, false);
+	}
+}
+
+bool AGS_RTSController::IsSeekerInCameraView(AGS_Seeker* Seeker)
+{
+	if (!CameraActor || !Seeker)
+	{
+		return false;
+	}
+
+	// 카메라 시야 경계 계산
+	FBox2D ViewBounds = CameraActor->GetSimpleViewBounds();
+
+	// 시커의 위치를 2D로 변환
+	FVector SeekerLocation = Seeker->GetActorLocation();
+	FVector2D Seeker2DLocation(SeekerLocation.X, SeekerLocation.Y);
+
+	// 시커가 카메라 시야 안에 있는지 확인
+	return ViewBounds.IsInside(Seeker2DLocation);
+}
+
+void AGS_RTSController::NotifySeekerDetection(AGS_Seeker* Seeker, bool bIsDetected)
+{
+	if (!Seeker)
+	{
+		return;
+	}
+
+	// 서버 RPC 호출
+	Server_NotifySeekerDetection(Seeker, bIsDetected);
+}
+
+void AGS_RTSController::Server_NotifySeekerDetection_Implementation(AGS_Seeker* Seeker, bool bIsDetected)
+{
+    if (!Seeker)
+    {
+        return;
+    }
+
+    // 이제 서버 권한으로 시커 함수 호출
+    Seeker->OnDetectedByGuardian(bIsDetected);
 }
