@@ -111,6 +111,7 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		return;
 	}
 
+	SetIsLockedRotationToController(true);
 	
 	// 가장 먼저 활 시위를 당길 수 있는 상황인지를 판단
 	if (!GetSkillComp()->IsSkillAllowed(ESkillSlot::Combo))
@@ -128,7 +129,7 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		// 줌 시작
 		if(!GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
 		{
-			Client_StartZoom(5.f);
+			Client_StartZoom();
 		}
 	}
 
@@ -160,6 +161,8 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		return;
 	}
 
+	SetIsLockedRotationToController(false);
+
 	Client_UpdateCrosshairAim(false);
 	
 	if (GetSkillComp()->IsSkillActive(ESkillSlot::Rolling))
@@ -171,7 +174,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	// 줌 중지
 	if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
 	{
-		//Client_StopZoom();
+		Client_StopZoom(5.f);
 	}
 	
 	// 몽타주 정지
@@ -444,6 +447,10 @@ void AGS_Merci::SetAutoAimTarget(AActor* Target)
 }
 
 
+void AGS_Merci::ZoomTimelineReverse()
+{
+	ZoomTimeline.Reverse();
+}
 
 void AGS_Merci::UpdateZoom(float Alpha)
 {
@@ -497,26 +504,24 @@ void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
 	}
 }
 
-void AGS_Merci::Client_StartZoom_Implementation(float Duration)
+void AGS_Merci::Client_StartZoom_Implementation()
 {
 	ZoomTimeline.Play(); // 줌인
 
 	GetWorldTimerManager().ClearTimer(ReverseTimerHandle);
+}
 
+void AGS_Merci::Client_StopZoom_Implementation(float Duration)
+{
 	GetWorldTimerManager().SetTimer(
 		ReverseTimerHandle,
 		this,
-		&AGS_Merci::Client_StopZoom,
-		Duration, // AimMode 유지 시간.
+		&AGS_Merci::ZoomTimelineReverse,
+		Duration,
 		false
-	);
-}
-
-void AGS_Merci::Client_StopZoom_Implementation()
-{
-	ZoomTimeline.Reverse(); // 줌아웃
-
-	GetWorldTimerManager().ClearTimer(ReverseTimerHandle);
+		);
+	
+	//GetWorldTimerManager().ClearTimer(ReverseTimerHandle);
 }
 
 void AGS_Merci::SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget)
@@ -605,7 +610,7 @@ float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 		// 활 쏘기 줌 아웃 (궁극기 상태가 아닐 때만)
 		if (!this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
 		{
-			Client_StopZoom();
+			Client_StopZoom(0.f);
 		}
 
 		// 활 쏘기 조준 상태 해제

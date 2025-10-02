@@ -102,6 +102,7 @@ void UGS_AN_RotateControllerYaw::Notify(USkeletalMeshComponent* MeshComp, UAnimS
 
                 const FRotator DesiredYawOnly(0.f, (To - From).Rotation().Yaw, 0.f);
                 Seeker->SetActorRotation(DesiredYawOnly);
+                TpsController->SetControlRotation(DesiredYawOnly);
 
                 // Debugging
                 if (Seeker->HasAuthority())

@@ -40,9 +40,10 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 
 		// 줌인 효과
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
+
 		if (MerciCharacter)
 		{
-			MerciCharacter->Client_StartZoom(10.f); // Set Merci Aim Mode Duration on Ultimate Skill
+			MerciCharacter->Client_StartZoom(); // Set Merci Aim Mode Duration on Ultimate Skill
 		}
 
 		// 타이머 설정
@@ -229,7 +230,7 @@ void UGS_MerciUltimateSkill::DeactiveSkill()
 		AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 		if (MerciCharacter)
 		{
-			MerciCharacter->Client_StopZoom();
+			MerciCharacter->Client_StopZoom(0.f);
 		}
 
 		// 타이머 정리

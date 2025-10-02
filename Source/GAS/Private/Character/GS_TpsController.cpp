@@ -103,7 +103,7 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 				NewPitch = FMath::ClampAngle(NewPitch, PitchMin, PitchMax);
 
 				CurrentRot.Pitch = NewPitch;
-				SetControlRotation(CurrentRot);
+				SetControlRotation(CurrentRot); // SJE
 				
 				//ControlledPawn->AddControllerPitchInput(InputAxisVector.Y * SensitivityMultiplier);
 			}

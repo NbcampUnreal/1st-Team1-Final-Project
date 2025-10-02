@@ -106,6 +106,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
+	DOREPLIFETIME(AGS_Character, bLockRotationToController);
 }
 
 
@@ -218,6 +219,16 @@ void AGS_Character::DisableHitReact(bool bAllowHitReact)
 void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+bool AGS_Character::GetIsLockedRotationToController()
+{
+	return bLockRotationToController;
+}
+
+void AGS_Character::SetIsLockedRotationToController(bool InputIsRotationRoController)
+{
+	bLockRotationToController = InputIsRotationRoController;
 }
 
 void AGS_Character::OnDeath()

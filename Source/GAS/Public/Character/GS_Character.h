@@ -90,6 +90,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
 	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "State", meta = (AllowPrivateAccess), Replicated)
+	bool bLockRotationToController = false; // Idle 상태에도 bUseControllerRotationYaw 를 true 로 두기 위한 flag.
+
+	UFUNCTION(BlueprintCallable, Category = "State")
+	bool GetIsLockedRotationToController();
+
+	UFUNCTION(BlueprintCallable, Category = "State")
+	void SetIsLockedRotationToController(bool InputIsRotationRoController);
 	
 	//getter
 	FORCEINLINE UGS_StatComp* GetStatComp() const { return StatComp; }
