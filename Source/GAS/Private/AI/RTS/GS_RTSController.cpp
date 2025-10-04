@@ -1216,6 +1216,8 @@ void AGS_RTSController::UpdateSeekerDetection()
 	{
 		DetectedSeekers.Remove(Seeker);
 		NotifySeekerDetection(Seeker, false);
+
+		LastSeekerNotifyTimes.Remove(Seeker);
 	}
 }
 
@@ -1244,6 +1246,18 @@ void AGS_RTSController::NotifySeekerDetection(AGS_Seeker* Seeker, bool bIsDetect
 		return;
 	}
 
+	// RPC 쿨다운 체크: 동일한 시커에 대해 너무 자주 호출되는 것을 방지
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	float* LastNotifyTime = LastSeekerNotifyTimes.Find(Seeker);
+
+	if (LastNotifyTime && (CurrentTime - *LastNotifyTime) < DetectionRPCCooldown)
+	{
+		return;
+	}
+
+	// 마지막 호출 시간 갱신
+	LastSeekerNotifyTimes.Add(Seeker, CurrentTime);
+
 	// 서버 RPC 호출
 	Server_NotifySeekerDetection(Seeker, bIsDetected);
 }
@@ -1255,6 +1269,19 @@ void AGS_RTSController::Server_NotifySeekerDetection_Implementation(AGS_Seeker* 
         return;
     }
 
-    // 이제 서버 권한으로 시커 함수 호출
+    // 서버 검증: 기본적인 거리 기반 검증
+    // 서버는 카메라 정보가 없으므로 세밀한 시야각 검증 불가. 대신 최대 거리 내에 있는지만 확인
+    if (CameraActor)
+    {
+        const float MaxDetectionDistance = 5000.0f; // 최대 감지 거리
+        float DistanceToSeeker = FVector::Dist(CameraActor->GetActorLocation(), Seeker->GetActorLocation());
+
+        if (bIsDetected && DistanceToSeeker > MaxDetectionDistance)
+        {
+            return; // 너무 먼 거리의 감지 요청은 무시
+        }
+    }
+
+    // 클라이언트의 판단을 신뢰하여 상태 변경
     Seeker->OnDetectedByGuardian(bIsDetected);
 }

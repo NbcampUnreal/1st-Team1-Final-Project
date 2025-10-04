@@ -41,4 +41,15 @@ public:
 	// 간단한 뷰포트 경계 계산 (기존 컴포넌트 활용)
 	UFUNCTION(BlueprintCallable, Category = "Camera")
 	FBox2D GetSimpleViewBounds() const;
+
+private:
+	// 캐싱된 뷰 경계
+	mutable FBox2D CachedViewBounds;
+	mutable FVector LastCameraLocation;
+	mutable FRotator LastCameraRotation;
+	mutable float LastArmLength;
+	mutable bool bViewBoundsCacheValid = false;
+
+	// 캐시 무효화 체크
+	bool HasCameraChanged() const;
 };

@@ -306,8 +306,19 @@ private:
 	FTimerHandle LowHealthEffectTimer;
 
 	// 가디언 감지 상태
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_IsDetectedByGuardian)
 	bool bIsDetectedByGuardian = false;
+
+	UFUNCTION()
+	void OnRep_IsDetectedByGuardian();
+
+	// 감지 사운드 쿨다운 (마지막 재생 시간 추적)
+	UPROPERTY()
+	float LastDetectionSoundTime = 0.0f;
+
+	// 감지 사운드 최소 간격 (초)
+	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "0.5", ClampMax = "5.0"))
+	float DetectionSoundCooldown = 5.0f;
 
 	// ==========================================
 	// 가디언 감지 HUD 시스템
@@ -376,14 +387,6 @@ public:
 	void UpdateDetectionHUD();
 
 private:
-	/** 서버 RPC */
-	UFUNCTION(Server, Reliable)
-	void Server_OnDetectedByGuardian(bool bIsDetected);
-	
-	/** 클라이언트 RPC */
-	UFUNCTION(Client, Reliable)
-	void Client_OnDetectedByGuardian(bool bIsDetected);
-	
 	/** 감지 상태 변경 시 시각적/청각적 효과 업데이트 */
 	void UpdateDetectionEffects();
 };

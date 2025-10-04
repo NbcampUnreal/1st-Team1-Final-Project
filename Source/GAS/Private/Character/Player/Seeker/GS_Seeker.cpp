@@ -687,27 +687,20 @@ void AGS_Seeker::StartCombatMusic()
 
 void AGS_Seeker::ClientRPCStopCombatMusic_Implementation()
 {
-	// 죽었을 때는 IsLocallyControlled() 체크를 하지 않음
-	//UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() called for %s"), *GetName());
-
 	// AudioManager 가져오기
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() - Calling EndCombatSequence"));
-			
 			// 현재 재생 중인 전투 BGM 이벤트 가져오기 (가장 마지막에 추가된 몬스터 기준 또는 다른 로직)
 			UAkAudioEvent* CombatStopEventToUse = nullptr;
 			if (AudioManager->GetCurrentCombatMusicStopEvent()) // AudioManager에 저장된 StopEvent가 우선
 			{
 				CombatStopEventToUse = AudioManager->GetCurrentCombatMusicStopEvent();
-				UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic - Using StopEvent from AudioManager: %s"), *CombatStopEventToUse->GetName());
 			}
 			else if (!NearbyMonsters.IsEmpty() && NearbyMonsters.Last()->CombatMusicStopEvent) // 몬스터 배열에서 가져오기
 			{
 				CombatStopEventToUse = NearbyMonsters.Last()->CombatMusicStopEvent;
-				UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic - Using StopEvent from Last Monster: %s"), *CombatStopEventToUse->GetName());
 			}
 
 			// EndCombatSequence 호출 시 CombatStopEvent도 전달
@@ -818,28 +811,21 @@ bool AGS_Seeker::ShowDecal()
 	return true;
 }
 
-// ==========================================
+// ================
 // 가디언 감지 시스템
-// ==========================================
+// ================
 
 void AGS_Seeker::OnDetectedByGuardian(bool bIsDetected)
 {
-	// 이제 항상 서버에서 호출됨
+	// 서버에서만 호출되어야 함
 	if (HasAuthority())
 	{
+		// 상태 변경 시 자동으로 OnRep_IsDetectedByGuardian이 모든 클라이언트에서 호출됨
 		bIsDetectedByGuardian = bIsDetected;
-		Client_OnDetectedByGuardian(bIsDetected);
 	}
 }
 
-void AGS_Seeker::Server_OnDetectedByGuardian_Implementation(bool bIsDetected)
-{
-	// 서버에서 상태 업데이트 후 클라이언트에 전파
-	bIsDetectedByGuardian = bIsDetected;
-	Client_OnDetectedByGuardian(bIsDetected);
-}
-
-void AGS_Seeker::Client_OnDetectedByGuardian_Implementation(bool bIsDetected)
+void AGS_Seeker::OnRep_IsDetectedByGuardian()
 {
 	// 로컬 플레이어의 시커에만 효과 적용
 	if (!IsLocallyControlled())
@@ -847,22 +833,29 @@ void AGS_Seeker::Client_OnDetectedByGuardian_Implementation(bool bIsDetected)
 		return;
 	}
 
-	if (bIsDetectedByGuardian != bIsDetected)
+	// 시각적 효과 업데이트 (항상 실행)
+	UpdateDetectionEffects();
+
+	// 청각적 피드백
+	if (!SeekerAudioComponent)
 	{
-		bIsDetectedByGuardian = bIsDetected;
+		return;
+	}
 
-		// 시각적 효과 업데이트
-		UpdateDetectionEffects();
+	float CurrentTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	float TimeSinceLastSound = CurrentTime - LastDetectionSoundTime;
 
-		// 청각적 피드백 (UI 사운드)
-		if (bIsDetected && SeekerAudioComponent)
+	if (bIsDetectedByGuardian)
+	{
+		if (TimeSinceLastSound >= DetectionSoundCooldown)
 		{
 			SeekerAudioComponent->PlayDetectionWarningSound();
 		}
-		else if (!bIsDetected && SeekerAudioComponent)
-		{
-			SeekerAudioComponent->PlayDetectionClearedSound();
-		}
+	}
+	else
+	{
+		SeekerAudioComponent->PlayDetectionClearedSound();
+		LastDetectionSoundTime = CurrentTime;
 	}
 }
 
