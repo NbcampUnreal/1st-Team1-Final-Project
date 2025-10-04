@@ -17,6 +17,7 @@ class AGS_PlayerState;
 class UGS_DebuffVFXComponent;
 class AGS_Monster;
 class UGS_SeekerAudioComponent;
+class UUserWidget;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -183,6 +184,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	UMaterialInterface* LowHealthEffectMaterial;
+
+	// ================
+	// 가디언 감지 스크린 효과
+	// ================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Detection|Effects")
+	UPostProcessComponent* DetectionPostProcessComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Detection|Effects")
+	UMaterialInterface* DetectionEffectMaterial; // MPP_Detect
 	
 	UFUNCTION()
 	void HandleLowHealthEffect(UGS_StatComp* InStatComp);
@@ -252,6 +262,10 @@ protected:
 	UPROPERTY()
 	UMaterialInstanceDynamic* LowHealthDynamicMaterial;
 
+	// 감지 효과용 동적 머티리얼
+	UPROPERTY()
+	UMaterialInstanceDynamic* DetectionDynamicMaterial;
+
 	// 카메라 매니저 참조 추가
 	UPROPERTY()
 	APlayerCameraManager* LocalCameraManager;
@@ -304,6 +318,36 @@ private:
 	UPROPERTY()
 	FTimerHandle LowHealthEffectTimer;
 
+	// 가디언 감지 상태
+	UPROPERTY(ReplicatedUsing = OnRep_IsDetectedByGuardian)
+	bool bIsDetectedByGuardian = false;
+
+	UFUNCTION()
+	void OnRep_IsDetectedByGuardian();
+
+	// 감지 사운드 쿨다운 (마지막 재생 시간 추적)
+	UPROPERTY()
+	float LastDetectionSoundTime = 0.0f;
+
+	// 감지 사운드 최소 간격 (초)
+	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "0.5", ClampMax = "5.0"))
+	float DetectionSoundCooldown = 5.0f;
+
+	// 화면 중앙 근접도 (0.0 = 가장자리, 1.0 = 중앙)
+	UPROPERTY(ReplicatedUsing = OnRep_DetectionIntensity)
+	float DetectionIntensity = 0.0f;
+
+	UFUNCTION()
+	void OnRep_DetectionIntensity();
+
+	// ==========================================
+	// 가디언 감지 HUD 시스템
+	// ==========================================
+
+	/** 감지 HUD 위젯 클래스 */
+	UPROPERTY(EditDefaultsOnly, Category = "UI|Detection")
+	TSubclassOf<class UUserWidget> DetectionHUDWidgetClass;
+
 	void StartCombatMusic();
 	void StopCombatMusic();
 
@@ -339,7 +383,41 @@ public:
 	// 근접/원거리 체크 (하위 호환성)
 	UFUNCTION(BlueprintPure, Category = "Seeker Type")
 	bool IsMeleeSeeker() const { return IsChan() || IsAres(); }
-	
+
 	UFUNCTION(BlueprintPure, Category = "Seeker Type")
 	bool IsRangedSeeker() const { return IsMerci(); }
+
+	// ==========================================
+	// 가디언 감지 HUD 시스템
+	// ==========================================
+
+	/** 가디언이 시커를 감지했을 때 호출 (public 인터페이스) */
+	UFUNCTION(BlueprintCallable, Category = "Detection")
+	void OnDetectedByGuardian(bool bIsDetected);
+
+	/** 현재 가디언에게 감지되었는지 확인 */
+	UFUNCTION(BlueprintPure, Category = "Detection")
+	bool IsDetectedByGuardian() const { return bIsDetectedByGuardian; }
+
+	/** 화면 중앙 근접도 설정 (서버에서 호출) */
+	UFUNCTION(BlueprintCallable, Category = "Detection")
+	void SetDetectionIntensity(float Intensity);
+
+	/** 현재 감지 강도 확인 */
+	UFUNCTION(BlueprintPure, Category = "Detection")
+	float GetDetectionIntensity() const { return DetectionIntensity; }
+
+	/** 감지 HUD 위젯 인스턴스 (블루프린트 접근용) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI|Detection")
+	class UUserWidget* DetectionHUDWidget;
+
+	/** 감지 상태 변경 시 HUD 업데이트 */
+	void UpdateDetectionHUD();
+
+private:
+	/** 감지 상태 변경 시 시각적/청각적 효과 업데이트 */
+	void UpdateDetectionEffects();
+
+	/** 화면 중앙 근접도 기반 포스트 프로세스 효과 업데이트 */
+	void UpdateDetectionPostProcessEffect(float Intensity);
 };

@@ -44,11 +44,17 @@ AGS_Seeker::AGS_Seeker()
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	GetMesh()->bOnlyAllowAutonomousTickPose = false;
 
-	// Post Process Component 생성 및 설정
+	// Post Process Component 생성 (Low Health)
 	LowHealthPostProcessComp = CreateDefaultSubobject<UPostProcessComponent>(TEXT("LowHealthPostProcessComp"));
 	LowHealthPostProcessComp->SetupAttachment(CameraComp);
 	LowHealthPostProcessComp->bEnabled = false;
 	LowHealthPostProcessComp->Priority = 10;
+
+	// Post Process Component 생성 (가디언 감지 - MPP_Detect)
+	DetectionPostProcessComp = CreateDefaultSubobject<UPostProcessComponent>(TEXT("DetectionPostProcessComp"));
+	DetectionPostProcessComp->SetupAttachment(CameraComp);
+	DetectionPostProcessComp->bEnabled = false;
+	DetectionPostProcessComp->Priority = 11; // Low Health보다 높은 우선순위
 
 	// =======================
 	// 디버프 VFX 컴포넌트 생성
@@ -156,6 +162,8 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, CurrentComboIndex);
 	//DOREPLIFETIME(AGS_Seeker, bComboEnded);
 	DOREPLIFETIME(AGS_Seeker, SeekerState);
+	DOREPLIFETIME(AGS_Seeker, bIsDetectedByGuardian);
+	DOREPLIFETIME(AGS_Seeker, DetectionIntensity);
 }
 
 void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -311,6 +319,8 @@ void AGS_Seeker::InitializeCameraManager()
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
 		LocalCameraManager = PC->PlayerCameraManager;
+
+		// Low Health 머티리얼 초기화
 		if (LocalCameraManager && LowHealthEffectMaterial)
 		{
 			LowHealthDynamicMaterial = UMaterialInstanceDynamic::Create(LowHealthEffectMaterial, this);
@@ -321,9 +331,25 @@ void AGS_Seeker::InitializeCameraManager()
 				{
 					UE_LOG(LogTemp, Warning, TEXT("HPRatio 파라미터가 머티리얼에 존재하지 않습니다."));
 				}
-				
+
 				LowHealthPostProcessComp->Settings.WeightedBlendables.Array.Empty();
 				LowHealthPostProcessComp->Settings.AddBlendable(LowHealthDynamicMaterial, 1.0f);
+			}
+		}
+
+		// MPP_Detect 머티리얼 초기화
+		if (LocalCameraManager && DetectionEffectMaterial)
+		{
+			DetectionDynamicMaterial = UMaterialInstanceDynamic::Create(DetectionEffectMaterial, this);
+			if (DetectionDynamicMaterial)
+			{
+				DetectionPostProcessComp->Settings.WeightedBlendables.Array.Empty();
+				DetectionPostProcessComp->Settings.AddBlendable(DetectionDynamicMaterial, 1.0f);
+
+				// 초기 강도 0으로 설정
+				DetectionDynamicMaterial->SetScalarParameterValue(TEXT("DetectionIntensity"), 0.0f);
+
+				UE_LOG(LogTemp, Log, TEXT("[Detection] MPP_Detect 머티리얼 초기화 완료"));
 			}
 		}
 	}
@@ -686,27 +712,20 @@ void AGS_Seeker::StartCombatMusic()
 
 void AGS_Seeker::ClientRPCStopCombatMusic_Implementation()
 {
-	// 죽었을 때는 IsLocallyControlled() 체크를 하지 않음
-	//UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() called for %s"), *GetName());
-
 	// AudioManager 가져오기
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic() - Calling EndCombatSequence"));
-			
 			// 현재 재생 중인 전투 BGM 이벤트 가져오기 (가장 마지막에 추가된 몬스터 기준 또는 다른 로직)
 			UAkAudioEvent* CombatStopEventToUse = nullptr;
 			if (AudioManager->GetCurrentCombatMusicStopEvent()) // AudioManager에 저장된 StopEvent가 우선
 			{
 				CombatStopEventToUse = AudioManager->GetCurrentCombatMusicStopEvent();
-				UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic - Using StopEvent from AudioManager: %s"), *CombatStopEventToUse->GetName());
 			}
 			else if (!NearbyMonsters.IsEmpty() && NearbyMonsters.Last()->CombatMusicStopEvent) // 몬스터 배열에서 가져오기
 			{
 				CombatStopEventToUse = NearbyMonsters.Last()->CombatMusicStopEvent;
-				UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StopCombatMusic - Using StopEvent from Last Monster: %s"), *CombatStopEventToUse->GetName());
 			}
 
 			// EndCombatSequence 호출 시 CombatStopEvent도 전달
@@ -815,4 +834,124 @@ FLinearColor AGS_Seeker::GetCurrentDecalColor()
 bool AGS_Seeker::ShowDecal()
 {
 	return true;
+}
+
+// ================
+// 가디언 감지 시스템
+// ================
+
+void AGS_Seeker::OnDetectedByGuardian(bool bIsDetected)
+{
+	// 서버에서만 호출되어야 함
+	if (HasAuthority())
+	{
+		// 상태 변경 시 자동으로 OnRep_IsDetectedByGuardian이 모든 클라이언트에서 호출됨
+		bIsDetectedByGuardian = bIsDetected;
+
+		// 감지 해제 시 강도도 0으로 초기화
+		if (!bIsDetected)
+		{
+			DetectionIntensity = 0.0f;
+		}
+	}
+}
+
+void AGS_Seeker::SetDetectionIntensity(float Intensity)
+{
+	if (HasAuthority())
+	{
+		DetectionIntensity = FMath::Clamp(Intensity, 0.0f, 1.0f);
+	}
+}
+
+void AGS_Seeker::OnRep_IsDetectedByGuardian()
+{
+	// 로컬 플레이어의 시커에만 효과 적용
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	// 시각적 효과 업데이트 (항상 실행)
+	UpdateDetectionEffects();
+
+	// 청각적 피드백
+	if (!SeekerAudioComponent)
+	{
+		return;
+	}
+
+	float CurrentTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	float TimeSinceLastSound = CurrentTime - LastDetectionSoundTime;
+
+	if (bIsDetectedByGuardian)
+	{
+		if (TimeSinceLastSound >= DetectionSoundCooldown)
+		{
+			SeekerAudioComponent->PlayDetectionWarningSound();
+		}
+	}
+	else
+	{
+		SeekerAudioComponent->PlayDetectionClearedSound();
+		LastDetectionSoundTime = CurrentTime;
+	}
+}
+
+void AGS_Seeker::OnRep_DetectionIntensity()
+{
+	// 로컬 플레이어의 시커에만 포스트 프로세스 효과 적용
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	// 포스트 프로세스 효과 강도 업데이트
+	UpdateDetectionPostProcessEffect(DetectionIntensity);
+}
+
+void AGS_Seeker::UpdateDetectionEffects()
+{
+	if (bIsDetectedByGuardian)
+	{
+		// 감지되었을 때 - 블루프린트에서 HUD 위젯 표시
+		// BP_Seeker에서 이벤트 바인딩하여 처리
+		UpdateDetectionHUD();
+
+		// 감지 전용 포스트 프로세스 활성화
+		if (DetectionPostProcessComp)
+		{
+			DetectionPostProcessComp->bEnabled = true;
+		}
+	}
+	else
+	{
+		// 감지 해제 시 - 블루프린트에서 HUD 위젯 숨김
+		UpdateDetectionHUD();
+
+		// 감지 전용 포스트 프로세스 비활성화
+		if (DetectionPostProcessComp)
+		{
+			DetectionPostProcessComp->bEnabled = false;
+		}
+
+		// 효과 강도 0으로 초기화
+		UpdateDetectionPostProcessEffect(0.0f);
+	}
+}
+
+void AGS_Seeker::UpdateDetectionPostProcessEffect(float Intensity)
+{
+	if (!IsLocallyControlled() || !DetectionDynamicMaterial)
+	{
+		return;
+	}
+
+	// MPP_Detect 머티리얼 파라미터 업데이트
+	DetectionDynamicMaterial->SetScalarParameterValue(TEXT("DetectionIntensity"), Intensity);
+}
+
+void AGS_Seeker::UpdateDetectionHUD()
+{
+	// 실제 HUD 표시/숨김은 블루프린트에서 이벤트로 처리됨
 }

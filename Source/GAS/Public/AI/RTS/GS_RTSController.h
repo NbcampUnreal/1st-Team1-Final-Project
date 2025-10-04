@@ -13,6 +13,7 @@ struct FInputActionInstance;
 struct FInputActionValue;
 class AGS_Monster;
 class AGS_Character;
+class AGS_Seeker;
 class UInputMappingContext;
 class UInputAction;
 class UGS_AetherComp;
@@ -287,6 +288,22 @@ private:
 	UPROPERTY()
 	FTimerHandle AttackCursorTimerHandle;
 
+	// 시커 감지 시스템
+	UPROPERTY()
+	TArray<AGS_Seeker*> DetectedSeekers;
+
+	UPROPERTY(EditAnywhere, Category = "Detection")
+	float DetectionUpdateInterval = 0.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Detection", meta = (ClampMin = "0.1", ClampMax = "1.0"))
+	float DetectionRPCCooldown = 0.2f; // RPC 최소 간격 (초)
+
+	FTimerHandle DetectionTimerHandle;
+
+	// RPC 쿨다운 추적용 맵
+	UPROPERTY()
+	TMap<AGS_Seeker*, float> LastSeekerNotifyTimes;
+
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
 	FVector2D GetFinalDirection() const;
@@ -306,4 +323,20 @@ private:
 	void UpdateCursorForCommand();
 	void UpdateCursorForEdgeScroll();
 	void ShowAttackCursor();
+	
+	// 시커 감지 시스템
+	void UpdateSeekerDetection();
+	bool IsSeekerInCameraView(AGS_Seeker* Seeker);
+	void NotifySeekerDetection(AGS_Seeker* Seeker, bool bIsDetected);
+
+	// 서버로 감지 상태를 알리는 RPC
+	UFUNCTION(Server, Reliable)
+	void Server_NotifySeekerDetection(AGS_Seeker* Seeker, bool bIsDetected);
+
+	// 화면 중앙과의 거리 계산 (0.0 = 중앙, 1.0 = 가장자리)
+	float CalculateSeekerDistanceFromScreenCenter(AGS_Seeker* Seeker);
+
+	// 시커 근접도 업데이트 (서버 RPC)
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateSeekerProximity(AGS_Seeker* Seeker, float DistanceFromCenter);
 };

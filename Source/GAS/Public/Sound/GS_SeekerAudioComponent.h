@@ -205,6 +205,18 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Common Sounds", meta = (DisplayName = "Default Skill Event"))
     UAkAudioEvent* SkillEvent = nullptr;
 
+    // ===================
+    // UI Sounds
+    // ===================
+    
+    /** 가디언 감지 경고음 (UI Sound) */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|UI Sounds", meta = (DisplayName = "🔔 Detection Warning Sound"))
+    USoundBase* DetectionWarningSound = nullptr;
+    
+    /** 가디언 감지 해제 안도음 (UI Sound) */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|UI Sounds", meta = (DisplayName = "✅ Detection Cleared Sound"))
+    USoundBase* DetectionClearedSound = nullptr;
+
 public:
     // ===================
     // 시커 상태 관리
@@ -260,6 +272,18 @@ public:
     /** 타격 피드백 사운드 재생 (메르시 전용) */
     UFUNCTION(BlueprintCallable, Category = "Seeker Audio|Merci Only", meta = (CallInEditor = "true"))
     void PlayHitFeedbackSound();
+
+    // ===================
+    // UI 사운드 함수 (가디언 감지 시스템)
+    // ===================
+    
+    /** 가디언 감지 경고음 재생 (UI Sound) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|UI Sounds")
+    void PlayDetectionWarningSound();
+    
+    /** 가디언 감지 해제 안도음 재생 (UI Sound) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|UI Sounds")
+    void PlayDetectionClearedSound();
 
     // ===================
     // 스킬 관련 함수
@@ -514,8 +538,6 @@ private:
     UFUNCTION(BlueprintPure, Category = "Seeker Audio|Helpers")
     int32 ValidateAndConvertComboIndex(int32 ComboIndex, int32 ArraySize) const;
     
-    // SelectSoundEventByMode는 부모 클래스 (GS_AudioComponentBase)에 구현됨
-
     // DT_SkillSet에서 스킬 정보 조회
     const struct FSkillInfo* GetSkillInfoFromDataTable(ESkillSlot SkillSlot) const;
 

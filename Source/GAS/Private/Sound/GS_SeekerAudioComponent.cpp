@@ -17,6 +17,8 @@
 #include "Character/GS_Character.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Component/GS_StatComp.h"
+#include "Sound/SoundBase.h"
+#include "Components/AudioComponent.h"
 
 
 UGS_SeekerAudioComponent::UGS_SeekerAudioComponent()
@@ -1719,4 +1721,35 @@ int32 UGS_SeekerAudioComponent::ValidateAndConvertComboIndex(int32 ComboIndex, i
     }
     
     return ArrayIndex;
+}
+
+// ==========================================
+// UI 사운드 함수 (가디언 감지 시스템)
+// ==========================================
+
+void UGS_SeekerAudioComponent::PlayDetectionWarningSound()
+{
+    if (!DetectionWarningSound)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("DetectionWarningSound is not set!"));
+        return;
+    }
+    
+    if (OwnerSeeker && OwnerSeeker->IsLocallyControlled())
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), DetectionWarningSound);
+    }
+}
+
+void UGS_SeekerAudioComponent::PlayDetectionClearedSound()
+{
+    if (!DetectionClearedSound)
+    {
+        return;
+    }
+    
+    if (OwnerSeeker && OwnerSeeker->IsLocallyControlled())
+    {
+        UGameplayStatics::PlaySound2D(GetWorld(), DetectionClearedSound);
+    }
 }

@@ -541,7 +541,7 @@ void UGS_MonsterAudioComponent::CheckForStateChanges()
             {
                 SetMonsterAudioState(EMonsterAudioState::Death); 
             }
-            return; 
+            return;
         }
     }
     
