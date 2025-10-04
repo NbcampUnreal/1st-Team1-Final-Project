@@ -1188,6 +1188,12 @@ void AGS_RTSController::UpdateSeekerDetection()
 			if (IsSeekerInCameraView(Seeker))
 			{
 				CurrentVisibleSeekers.Add(Seeker);
+
+				// 화면 중앙과의 거리 계산 (0.0 = 중앙, 1.0 = 가장자리)
+				float DistanceFromCenter = CalculateSeekerDistanceFromScreenCenter(Seeker);
+
+				// 서버에 거리 정보 전송
+				Server_UpdateSeekerProximity(Seeker, DistanceFromCenter);
 			}
 		}
 	}
@@ -1216,6 +1222,9 @@ void AGS_RTSController::UpdateSeekerDetection()
 	{
 		DetectedSeekers.Remove(Seeker);
 		NotifySeekerDetection(Seeker, false);
+
+		// 감지 해제 시 거리 1.0 (최대값)으로 설정
+		Server_UpdateSeekerProximity(Seeker, 1.0f);
 
 		LastSeekerNotifyTimes.Remove(Seeker);
 	}
@@ -1284,4 +1293,46 @@ void AGS_RTSController::Server_NotifySeekerDetection_Implementation(AGS_Seeker* 
 
     // 클라이언트의 판단을 신뢰하여 상태 변경
     Seeker->OnDetectedByGuardian(bIsDetected);
+}
+
+float AGS_RTSController::CalculateSeekerDistanceFromScreenCenter(AGS_Seeker* Seeker)
+{
+	if (!CameraActor || !Seeker)
+	{
+		return 1.0f; // 최대 거리 반환
+	}
+
+	// 화면 경계 가져오기
+	FBox2D ViewBounds = CameraActor->GetSimpleViewBounds();
+	FVector2D Center = ViewBounds.GetCenter();
+
+	// 시커의 2D 위치
+	FVector SeekerLocation = Seeker->GetActorLocation();
+	FVector2D Seeker2D(SeekerLocation.X, SeekerLocation.Y);
+
+	// 화면 크기 계산
+	FVector2D ViewSize = ViewBounds.GetSize();
+	float MaxDistance = ViewSize.Size() * 0.5f; // 대각선 거리의 절반
+
+	// 중앙으로부터의 거리 계산
+	float Distance = FVector2D::Distance(Center, Seeker2D);
+
+	// 0.0 (중앙) ~ 1.0 (가장자리)로 정규화
+	float NormalizedDistance = FMath::Clamp(Distance / MaxDistance, 0.0f, 1.0f);
+
+	return NormalizedDistance;
+}
+
+void AGS_RTSController::Server_UpdateSeekerProximity_Implementation(AGS_Seeker* Seeker, float DistanceFromCenter)
+{
+	if (!Seeker)
+	{
+		return;
+	}
+
+	// 거리 값을 강도로 변환 (0.0 = 중앙 = 최대 강도, 1.0 = 가장자리 = 최소 강도)
+	float Intensity = 1.0f - DistanceFromCenter;
+
+	// 시커에 강도 설정
+	Seeker->SetDetectionIntensity(Intensity);
 }

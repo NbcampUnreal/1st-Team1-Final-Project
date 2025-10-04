@@ -332,4 +332,11 @@ private:
 	// 서버로 감지 상태를 알리는 RPC
 	UFUNCTION(Server, Reliable)
 	void Server_NotifySeekerDetection(AGS_Seeker* Seeker, bool bIsDetected);
+
+	// 화면 중앙과의 거리 계산 (0.0 = 중앙, 1.0 = 가장자리)
+	float CalculateSeekerDistanceFromScreenCenter(AGS_Seeker* Seeker);
+
+	// 시커 근접도 업데이트 (서버 RPC)
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateSeekerProximity(AGS_Seeker* Seeker, float DistanceFromCenter);
 };
