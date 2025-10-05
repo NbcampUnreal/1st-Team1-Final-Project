@@ -17,7 +17,7 @@
 #include "DrawDebugHelpers.h"
 #include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "Sound/GS_MonsterAudioComponent.h"
-#include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Character/Component/GS_VFXComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/WidgetComponent.h"
 // #include "BehaviorTree/BlackboardComponent.h"
@@ -44,9 +44,9 @@ AGS_Monster::AGS_Monster()
 	
 	// 몬스터 오디오 컴포넌트 생성
 	MonsterAudioComponent = CreateDefaultSubobject<UGS_MonsterAudioComponent>("MonsterAudioComponent");
-	
-	// 디버프 VFX 컴포넌트 생성
-	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
+
+	// VFX 컴포넌트 생성 (디버프 등 모든 VFX)
+	VFXComponent = CreateDefaultSubobject<UGS_VFXComponent>("VFXComponent");
 
 	// UI 컴포넌트 생성 및 초기화
 	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));

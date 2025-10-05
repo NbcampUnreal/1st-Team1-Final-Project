@@ -152,7 +152,7 @@ void UGS_BossHP::InitGuardianHPWidget()
 				OnFeverModeChanged(bLastFeverMode);
 				
 				// 드라카의 VFX 컴포넌트 OnFeverModeChanged와 연동
-				if (UGS_DrakharVFXComponent* VFXComp = Drakhar->GetVFXComponent())
+				if (UGS_DrakharVFXComponent* VFXComp = Drakhar->GetDrakharVFXComponent())
 				{
 					// VFX 컴포넌트를 통해 즉각적인 피버모드 변경 감지 (멀티플레이 최적화)
 					GetWorld()->GetTimerManager().SetTimer(FeverModeCheckTimer, this, &UGS_BossHP::CheckFeverModeStatus, 0.5f, true);

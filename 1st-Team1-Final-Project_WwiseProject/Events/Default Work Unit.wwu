@@ -2111,6 +2111,28 @@
 										</Folder>
 									</ChildrenList>
 								</Folder>
+								<Event Name="EV_PotionSippin" ID="{0960A90B-D49D-42D6-BE63-0838B5CE21D1}">
+									<ChildrenList>
+										<Action Name="" ID="{A84EBBD5-6241-4E4A-916F-EE1106931459}" ShortID="123370416">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_PotionSippin" ID="{B2D7AE28-2486-4D8F-BFA6-A7294640809B}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_PotionSippin_End" ID="{E9CEFABE-C0C0-4EC6-9889-C8D830E21CBF}">
+									<ChildrenList>
+										<Action Name="" ID="{4C9F81A8-C0BE-4A09-A7F1-8F4689A542D3}" ShortID="411701703">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_PotionSippin_End" ID="{3C517DAC-49E6-408B-89A6-4BD501F184B4}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
 						</Folder>
 						<Folder Name="Guardian" ID="{7CBF914E-41B2-4CD1-9126-AC8B89994918}" ShortID="893317789">

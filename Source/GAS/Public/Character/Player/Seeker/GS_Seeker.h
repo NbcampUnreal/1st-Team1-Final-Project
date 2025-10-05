@@ -14,7 +14,7 @@ class UPostProcessComponent;
 class UMaterialInterface;
 class UGS_StatComp;
 class AGS_PlayerState;
-class UGS_DebuffVFXComponent;
+class UGS_VFXComponent;
 class AGS_Monster;
 class UGS_SeekerAudioComponent;
 class UUserWidget;
@@ -198,10 +198,10 @@ public:
 	void HandleLowHealthEffect(UGS_StatComp* InStatComp);
 
 	// =======================
-	// 디버프 VFX 컴포넌트
+	// VFX 컴포넌트 (디버프, 힐링 등 모든 VFX)
 	// =======================
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
-	UGS_DebuffVFXComponent* DebuffVFXComponent;
+	UGS_VFXComponent* VFXComponent;
 
 	// =======================
 	// 시커 오디오 컴포넌트 (RTS/TPS 지원)

@@ -18,6 +18,7 @@ public:
 	UGS_HealSkill();
 
 	virtual void ActiveSkill() override;
+	virtual void DeactiveSkill() override;
 	virtual bool CanActive() const override; // 포션 개수와 체력 상태를 고려한 활성화 가능 여부
 
 protected:
@@ -75,4 +76,9 @@ public:
 	// 포션 부족 시 쿨다운 효과 표시
 	void ShowPotionDepletedEffect();
 
+	// ===================
+	// VFX/SFX 참고
+	// ===================
+	// VFX: DT_SkillSet의 Skill Cast VFX, Skill Impact VFX 등을 사용
+	// SFX: DT_SkillSet의 사운드 이벤트를 PlaySkillStartSound()로 재생
 };

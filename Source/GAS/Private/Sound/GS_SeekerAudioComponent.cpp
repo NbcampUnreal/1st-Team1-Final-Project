@@ -566,12 +566,13 @@ const struct FSkillInfo* UGS_SeekerAudioComponent::GetSkillInfoFromDataTable(ESk
     // 스킬 슬롯에 따라 적절한 스킬 정보 반환
     switch (SkillSlot)
     {
-        case ESkillSlot::Ready:    return &SkillSet->ReadySkill;
-        case ESkillSlot::Aiming:   return &SkillSet->AimingSkill;
-        case ESkillSlot::Moving:   return &SkillSet->MovingSkill;
-        case ESkillSlot::Ultimate: return &SkillSet->UltimateSkill;
-        case ESkillSlot::Rolling:  return &SkillSet->RollingSkill;
-        default:                   return nullptr;
+        case ESkillSlot::Ready:      return &SkillSet->ReadySkill;
+        case ESkillSlot::Aiming:     return &SkillSet->AimingSkill;
+        case ESkillSlot::Moving:     return &SkillSet->MovingSkill;
+        case ESkillSlot::Ultimate:   return &SkillSet->UltimateSkill;
+        case ESkillSlot::Rolling:    return &SkillSet->RollingSkill;
+        case ESkillSlot::HealPotion: return &SkillSet->HealPotionSkill;
+        default:                     return nullptr;
     }
 }
 

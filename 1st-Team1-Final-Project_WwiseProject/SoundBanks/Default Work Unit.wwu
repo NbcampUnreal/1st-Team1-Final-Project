@@ -38,6 +38,7 @@
 						<ObjectRef Name="EV_NeedleFang_Shot" ID="{D5FB5933-2F9E-4265-BBF0-828FF4BF9D19}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_UI_Mon_IronFang" ID="{AB0A7ABE-8A84-4275-86C6-9F0D6055EC06}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Merci_FogArrow" ID="{9BD57FF9-A12E-42CC-B094-B13239741389}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_PotionSippin" ID="{0960A90B-D49D-42D6-BE63-0838B5CE21D1}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresDashSkill_Hit_RTS" ID="{F2FE15FB-F0D3-4303-9E69-57DE5E51BFF5}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_UI_Mon_IronFang_Attack" ID="{05C664A9-8858-4308-9826-1B444CCD290E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Merci_Hit_RTS" ID="{2C9F47AB-5F15-432C-A354-4D6D8A7DEDB1}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -204,6 +205,7 @@
 						<ObjectRef Name="Voice_Chan_Die" ID="{B5D9F3B7-56D1-4E7E-B266-A42C91017124}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_MineExplode_RTS" ID="{3B4EC7E8-6F73-4E80-9E21-A33F6C6CBA78}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_Arrow_By" ID="{3AF9A3F0-DE14-4EB3-AA03-2EBCC8FB07A2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_PotionSippin_End" ID="{E9CEFABE-C0C0-4EC6-9889-C8D830E21CBF}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresUltimateLoop_Stop_RTS" ID="{A2E5CB98-DAFE-4ECB-8DED-4BE838AD5C76}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_ChanHitWall" ID="{8151B500-BECD-4ED7-B5E7-B09771D5C0BC}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_MapBGM_Play" ID="{97CFC085-71D5-4ED9-898C-E53752C8E96F}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>

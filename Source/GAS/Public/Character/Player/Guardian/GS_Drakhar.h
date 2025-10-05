@@ -209,7 +209,7 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
-	UGS_DrakharVFXComponent* VFXComponent;
+	UGS_DrakharVFXComponent* DrakharVFXComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	UGS_DrakharAudioComponent* AudioComponent;
@@ -298,7 +298,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Impact")
 	UAkAudioEvent* HurtSoundEvent;
 	
-	FORCEINLINE UGS_DrakharVFXComponent* GetVFXComponent() const { return VFXComponent; }
+	FORCEINLINE UGS_DrakharVFXComponent* GetDrakharVFXComponent() const { return DrakharVFXComponent; }
 	FORCEINLINE UGS_DrakharAudioComponent* GetAudioComponent() const { return AudioComponent; }
 
 private:

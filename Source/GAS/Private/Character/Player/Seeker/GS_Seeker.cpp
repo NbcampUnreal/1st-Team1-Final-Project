@@ -23,7 +23,7 @@
 #include "Camera/PlayerCameraManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
-#include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Character/Component/GS_VFXComponent.h"
 #include "Animation/Character/Seeker/GS_ChooserInputObj.h"
 #include "Character/GS_TpsController.h"
 #include "Character/Skill/GS_SkillComp.h"
@@ -57,9 +57,9 @@ AGS_Seeker::AGS_Seeker()
 	DetectionPostProcessComp->Priority = 11; // Low Health보다 높은 우선순위
 
 	// =======================
-	// 디버프 VFX 컴포넌트 생성
+	// VFX 컴포넌트 생성 (디버프, 힐링 등 모든 VFX)
 	// =======================
-	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
+	VFXComponent = CreateDefaultSubobject<UGS_VFXComponent>("VFXComponent");
 
 	// =======================
 	// 시커 오디오 컴포넌트 생성 (RTS/TPS 지원)
@@ -113,10 +113,19 @@ void AGS_Seeker::BeginPlay()
 		CombatTrigger->OnComponentEndOverlap.AddDynamic(this, &AGS_Seeker::OnCombatTriggerEndOverlap);
 	}
 
+	// Generate Overlap Events 활성화 (화살 함정 충돌 처리를 위해 필요)
+	if (GetMesh())
+	{
+		if (!GetMesh()->GetGenerateOverlapEvents())
+		{
+			GetMesh()->SetGenerateOverlapEvents(true);
+		}
+	}
+
 	if (IsLocallyControlled())
 	{
 		InitializeCameraManager();
-		
+
 		// 스탯 컴포넌트 가져와서 델리게이트 바인딩
 		if (UGS_StatComp* FoundStatComp = FindComponentByClass<UGS_StatComp>())
 		{
