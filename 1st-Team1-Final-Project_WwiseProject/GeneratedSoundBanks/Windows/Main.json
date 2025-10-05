@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{FFDDD445-0D20-D250-B7F8-B867F3D9C49E}",
+    "Hash": "{519EAC74-E5A1-067A-E89D-6095671E27CB}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -238,6 +238,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Ancient_Game_Item_Pick_Up_3_Action_Hit_Tap_Impact_Airy_Magic_.wav",
       "CachePath": "86/{86BCC787-7896-A5DC-34C9-11CB3C5F7B34}.wem"
+     },
+     {
+      "Id": "111489786",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_PotionSippin.wav",
+      "CachePath": "A8/{A83C8AF6-13FD-B430-2BE7-08B71496301D}.wem"
      },
      {
       "Id": "111629751",
@@ -2142,6 +2150,14 @@
       "Location": "Memory",
       "ShortName": "FootstepsConcrete.wav",
       "CachePath": "CA/{CAAFAB44-DA9A-54E9-E276-6B019EE9A9E3}.wem"
+     },
+     {
+      "Id": "969585286",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "SFX_PotionSippin_End.wav",
+      "CachePath": "ED/{ED49BABE-1077-3144-6382-B5EA95B645E7}.wem"
      },
      {
       "Id": "980125505",
@@ -6050,6 +6066,34 @@
       ]
      },
      {
+      "Id": "2548588035",
+      "Name": "EV_PotionSippin",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_PotionSippin",
+      "GUID": "{0960A90B-D49D-42D6-BE63-0838B5CE21D1}",
+      "DurationType": "OneShot",
+      "DurationMin": "2.9913483",
+      "DurationMax": "3.0086768",
+      "MediaRefs": [
+       {
+        "Id": "111489786"
+       }
+      ]
+     },
+     {
+      "Id": "1369219461",
+      "Name": "EV_PotionSippin_End",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_PotionSippin_End",
+      "GUID": "{E9CEFABE-C0C0-4EC6-9889-C8D830E21CBF}",
+      "DurationType": "OneShot",
+      "DurationMin": "0.6413188",
+      "DurationMax": "0.64503384",
+      "MediaRefs": [
+       {
+        "Id": "969585286"
+       }
+      ]
+     },
+     {
       "Id": "397878477",
       "Name": "EV_UI_Mon_IronFang",
       "ObjectPath": "\\Events\\Default Work Unit\\Monster\\RTS_UISound\\EV_UI_Mon_IronFang",
@@ -7991,6 +8035,6 @@
     ]
    }
   ],
-  "FileHash": "{384ABDC9-3230-AC2B-77F6-20F6C9591085}"
+  "FileHash": "{F3794B31-9D29-82DE-949D-AACF9A5A37D3}"
  }
 }

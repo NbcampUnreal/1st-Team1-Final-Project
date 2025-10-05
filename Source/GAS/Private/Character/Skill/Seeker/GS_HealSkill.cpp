@@ -3,9 +3,8 @@
 #include "Character/Skill/Seeker/GS_HealSkill.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Component/GS_StatComp.h"
-#include "Character/Component/GS_VFXComponent.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "NiagaraSystem.h"
 
 UGS_HealSkill::UGS_HealSkill()
 {
@@ -48,19 +47,35 @@ void UGS_HealSkill::ActiveSkill()
 
 	if (OwnerCharacter)
 	{
+		// 체력 회복 (서버 권한)
 		UGS_StatComp* StatComp = OwnerCharacter->GetStatComp();
 		if (StatComp)
 		{
 			StatComp->ServerRPCHeal(HealAmount);
 		}
 
-		// VFX 재생 (모든 클라이언트에서 표시)
-		if (UGS_VFXComponent* VFXComp = OwnerCharacter->FindComponentByClass<UGS_VFXComponent>())
+		// VFX 재생 (모든 클라이언트에 동기화)
+		if (OwningComp)
 		{
-			if (HealVFXSystem)
+			// Cast VFX: 스킬 시전 시 플레이어 위치에 표시
+			if (SkillCastVFX)
 			{
-				VFXComp->PlayOneShotVFX(HealVFXSystem, OwnerCharacter->GetActorLocation(), HealVFXScale);
+				OwningComp->Multicast_PlayCastVFX(CurrentSkillType, OwnerCharacter->GetActorLocation(), OwnerCharacter->GetActorRotation());
 			}
+
+			// Impact VFX: 힐링 효과를 플레이어에게 표시
+			if (SkillImpactVFX)
+			{
+				OwningComp->Multicast_PlayImpactVFX(CurrentSkillType, OwnerCharacter->GetActorLocation());
+			}
+		}
+
+		// SFX 재생 (모든 클라이언트에 동기화)
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>())
+		{
+			// Multicast RPC 직접 호출 (CanSendRPC 체크 우회)
+			// AudioEventType 0 = 스킬 시작 사운드
+			AudioComp->Multicast_RequestSkillAudio(CurrentSkillType, 0, OwnerCharacter->GetActorLocation());
 		}
 	}
 
@@ -76,6 +91,23 @@ void UGS_HealSkill::ActiveSkill()
 	
 	// 스킬 사용 후 비활성화
 	DeactiveSkill();
+}
+
+void UGS_HealSkill::DeactiveSkill()
+{
+	// 부모 클래스의 DeactiveSkill 호출
+	Super::DeactiveSkill();
+
+	// 서버 권한에서만 종료 사운드 재생 (Multicast로 모든 클라이언트에 동기화)
+	if (OwnerCharacter && OwnerCharacter->HasAuthority())
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>())
+		{
+			// Multicast RPC 직접 호출 (CanSendRPC 체크 우회)
+			// AudioEventType 1 = 스킬 종료 사운드
+			AudioComp->Multicast_RequestSkillAudio(CurrentSkillType, 1, OwnerCharacter->GetActorLocation());
+		}
+	}
 }
 
 bool UGS_HealSkill::CanActive() const

@@ -18,6 +18,7 @@ public:
 	UGS_HealSkill();
 
 	virtual void ActiveSkill() override;
+	virtual void DeactiveSkill() override;
 	virtual bool CanActive() const override; // 포션 개수와 체력 상태를 고려한 활성화 가능 여부
 
 protected:
@@ -76,14 +77,8 @@ public:
 	void ShowPotionDepletedEffect();
 
 	// ===================
-	// VFX/SFX 설정
+	// VFX/SFX 참고
 	// ===================
-
-	// 힐링 VFX 시스템
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Heal|VFX")
-	UNiagaraSystem* HealVFXSystem;
-
-	// 힐링 VFX 스케일
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Heal|VFX")
-	FVector HealVFXScale = FVector(1.0f, 1.0f, 1.0f);
+	// VFX: DT_SkillSet의 Skill Cast VFX, Skill Impact VFX 등을 사용
+	// SFX: DT_SkillSet의 사운드 이벤트를 PlaySkillStartSound()로 재생
 };
