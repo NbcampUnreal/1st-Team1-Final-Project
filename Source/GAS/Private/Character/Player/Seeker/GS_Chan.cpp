@@ -75,7 +75,7 @@ void AGS_Chan::SetCurrentStamina(float NewValue, bool SetbyDamage)
 void AGS_Chan::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	SetReplicateMovement(true);
 	GetMesh()->SetIsReplicated(true);
 

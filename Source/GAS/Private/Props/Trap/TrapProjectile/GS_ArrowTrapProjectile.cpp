@@ -90,9 +90,10 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 
 	// 히트 타입 결정
 	EArrowHitType HitType = DetermineHitType(OtherActor, SweepResult);
-	
+
 	// 시커에 대한 데미지 처리
 	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
+
 	if (Seeker && OtherComp == Seeker->GetMesh() && OwningTrap)
 	{
 		// 시커에게만 데미지 적용
@@ -100,10 +101,10 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 		{
 			OwningTrap->HandleTrapDamage(OtherActor);
 		}
-		
+
 		// 히트 효과 처리
 		Multicast_PlayHitEffects(HitType, SweepResult.ImpactPoint, SweepResult.ImpactNormal);
-		
+
 		// 화살 박히기 처리
 		StickWithVisualOnly(SweepResult);
 		return;

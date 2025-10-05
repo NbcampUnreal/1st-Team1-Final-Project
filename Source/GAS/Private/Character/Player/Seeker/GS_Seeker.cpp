@@ -113,10 +113,19 @@ void AGS_Seeker::BeginPlay()
 		CombatTrigger->OnComponentEndOverlap.AddDynamic(this, &AGS_Seeker::OnCombatTriggerEndOverlap);
 	}
 
+	// Generate Overlap Events 활성화 (화살 함정 충돌 처리를 위해 필요)
+	if (GetMesh())
+	{
+		if (!GetMesh()->GetGenerateOverlapEvents())
+		{
+			GetMesh()->SetGenerateOverlapEvents(true);
+		}
+	}
+
 	if (IsLocallyControlled())
 	{
 		InitializeCameraManager();
-		
+
 		// 스탯 컴포넌트 가져와서 델리게이트 바인딩
 		if (UGS_StatComp* FoundStatComp = FindComponentByClass<UGS_StatComp>())
 		{
