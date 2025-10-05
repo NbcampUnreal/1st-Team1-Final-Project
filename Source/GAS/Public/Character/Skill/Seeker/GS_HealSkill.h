@@ -75,4 +75,15 @@ public:
 	// 포션 부족 시 쿨다운 효과 표시
 	void ShowPotionDepletedEffect();
 
+	// ===================
+	// VFX/SFX 설정
+	// ===================
+
+	// 힐링 VFX 시스템
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Heal|VFX")
+	UNiagaraSystem* HealVFXSystem;
+
+	// 힐링 VFX 스케일
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Heal|VFX")
+	FVector HealVFXScale = FVector(1.0f, 1.0f, 1.0f);
 };

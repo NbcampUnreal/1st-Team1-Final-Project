@@ -30,7 +30,14 @@ AGS_Drakhar::AGS_Drakhar()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
-	VFXComponent = CreateDefaultSubobject<UGS_DrakharVFXComponent>(TEXT("VFXComponent"));
+	// Guardian의 VFXComponent를 제거하고 Drakhar 전용 컴포넌트로 교체
+	if (VFXComponent)
+	{
+		VFXComponent->DestroyComponent();
+		VFXComponent = nullptr;
+	}
+	
+	DrakharVFXComponent = CreateDefaultSubobject<UGS_DrakharVFXComponent>(TEXT("DrakharVFXComponent"));
 	AudioComponent = CreateDefaultSubobject<UGS_DrakharAudioComponent>(TEXT("AudioComponent"));
 	FootManagerComponent = CreateDefaultSubobject<UGS_FootManagerComponent>(TEXT("FootManagerComponent"));
 	
@@ -1011,39 +1018,39 @@ void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
 // === 나이아가라 VFX 함수 구현 ===
 void AGS_Drakhar::MulticastStartWingRushVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StartWingRushVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StartWingRushVFX();
 }
 
 void AGS_Drakhar::MulticastStopWingRushVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StopWingRushVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StopWingRushVFX();
 }
 
 void AGS_Drakhar::MulticastStartDustVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StartDustVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StartDustVFX();
 }
 
 void AGS_Drakhar::MulticastStopDustVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StopDustVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StopDustVFX();
 }
 
 // === 어스퀘이크 지면 균열 VFX 제어 함수 ===
 void AGS_Drakhar::MulticastStartGroundCrackVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StartGroundCrackVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StartGroundCrackVFX();
 }
 
 void AGS_Drakhar::MulticastStopGroundCrackVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StopGroundCrackVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StopGroundCrackVFX();
 }
 
 // === 어스퀘이크 먼지 구름 VFX 제어 함수 ===
 void AGS_Drakhar::MulticastStartDustCloudVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StartDustCloudVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StartDustCloudVFX();
 }
 
 // === DraconicFury 투사체 충돌 처리 함수 구현 ===
@@ -1059,51 +1066,51 @@ void AGS_Drakhar::HandleDraconicProjectileImpact(const FVector& ImpactLocation, 
 void AGS_Drakhar::MulticastPlayDraconicProjectileImpactEffects_Implementation(
 	const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
 {
-	if (VFXComponent) VFXComponent->HandleDraconicProjectileImpact(ImpactLocation, ImpactNormal, bHitCharacter);
+	if (DrakharVFXComponent) DrakharVFXComponent->HandleDraconicProjectileImpact(ImpactLocation, ImpactNormal, bHitCharacter);
 	if (AudioComponent) AudioComponent->HandleDraconicProjectileImpact(ImpactLocation, bHitCharacter);
 }
 
 void AGS_Drakhar::MulticastPlayFeverEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
 {
-	if (VFXComponent) VFXComponent->PlayFeverEarthquakeImpactVFX(ImpactLocation);
+	if (DrakharVFXComponent) DrakharVFXComponent->PlayFeverEarthquakeImpactVFX(ImpactLocation);
 }
 
 void AGS_Drakhar::MulticastRPC_OnFlyStart_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnFlyStart();
+	if (DrakharVFXComponent) DrakharVFXComponent->OnFlyStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnFlyEnd_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnFlyEnd();
+	if (DrakharVFXComponent) DrakharVFXComponent->OnFlyEnd();
 }
 
 void AGS_Drakhar::MulticastRPC_OnUltimateStart_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnUltimateStart();
+	if (DrakharVFXComponent) DrakharVFXComponent->OnUltimateStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnEarthquakeStart_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnEarthquakeStart();
+	if (DrakharVFXComponent) DrakharVFXComponent->OnEarthquakeStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnFeverModeStart_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnFeverModeChanged(true);
+	if (DrakharVFXComponent) DrakharVFXComponent->OnFeverModeChanged(true);
 	BP_OnFeverModeStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnFeverModeEnd_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnFeverModeChanged(false);
+	if (DrakharVFXComponent) DrakharVFXComponent->OnFeverModeChanged(false);
 	BP_OnFeverModeEnd();
 }
 
 void AGS_Drakhar::OnRep_IsFeverMode()
 {
-	if (VFXComponent) VFXComponent->OnFeverModeChanged(IsFeverMode);
-	
+	if (DrakharVFXComponent) DrakharVFXComponent->OnFeverModeChanged(IsFeverMode);
+
 	// 클라이언트에서도 블루프린트 이벤트 호출
 	if (IsFeverMode)
 	{
@@ -1117,17 +1124,17 @@ void AGS_Drakhar::OnRep_IsFeverMode()
 
 void AGS_Drakhar::MulticastRPC_PlayAttackHitVFX_Implementation(FVector ImpactPoint)
 {
-	if (VFXComponent) VFXComponent->PlayAttackHitVFX(ImpactPoint);
+	if (DrakharVFXComponent) DrakharVFXComponent->PlayAttackHitVFX(ImpactPoint);
 }
 
 void AGS_Drakhar::MulticastPlayEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
 {
-	if (VFXComponent) VFXComponent->PlayEarthquakeImpactVFX(ImpactLocation);
+	if (DrakharVFXComponent) DrakharVFXComponent->PlayEarthquakeImpactVFX(ImpactLocation);
 }
 
 void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
 {
-	if(VFXComponent) VFXComponent->StopDustCloudVFX();
+	if(DrakharVFXComponent) DrakharVFXComponent->StopDustCloudVFX();
 }
 
 void AGS_Drakhar::Multicast_PlayBloodEffect_Implementation(FVector HitLocation, FVector HitNormal, float Scale)

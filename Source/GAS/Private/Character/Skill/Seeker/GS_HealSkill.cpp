@@ -3,7 +3,9 @@
 #include "Character/Skill/Seeker/GS_HealSkill.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Component/GS_StatComp.h"
+#include "Character/Component/GS_VFXComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "NiagaraSystem.h"
 
 UGS_HealSkill::UGS_HealSkill()
 {
@@ -50,6 +52,15 @@ void UGS_HealSkill::ActiveSkill()
 		if (StatComp)
 		{
 			StatComp->ServerRPCHeal(HealAmount);
+		}
+
+		// VFX 재생 (모든 클라이언트에서 표시)
+		if (UGS_VFXComponent* VFXComp = OwnerCharacter->FindComponentByClass<UGS_VFXComponent>())
+		{
+			if (HealVFXSystem)
+			{
+				VFXComp->PlayOneShotVFX(HealVFXSystem, OwnerCharacter->GetActorLocation(), HealVFXScale);
+			}
 		}
 	}
 
