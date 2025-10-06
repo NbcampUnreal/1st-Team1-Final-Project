@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "System/GS_BaseGM.h"
+#include "GameFramework/GameMode.h"
 #include "GS_CustomLobbyGM.generated.h"
 
 class AGS_SpawnSlot;
@@ -11,7 +11,7 @@ class UGS_PawnMappingDataAsset;
 class AGS_LobbyDisplayActor;
 
 UCLASS()
-class GAS_API AGS_CustomLobbyGM : public AGS_BaseGM
+class GAS_API AGS_CustomLobbyGM : public AGameMode
 {
 	GENERATED_BODY()
 	
@@ -24,6 +24,9 @@ public:
 	void HandlePlayerReadyInLobby(APlayerController* PlayerController);
 	virtual void Logout(AController* Exiting) override;
 	void UpdatePlayerReadyStatus(APlayerState* Player, bool bIsReady);
+
+	/** 클라이언트의 요청을 받아 GameSessionId를 찾아 보내줍니다. */
+	void RequestGameSessionIdForClient(APlayerController* RequestingController);
 
 protected:
 	void CheckAllPlayersReady();

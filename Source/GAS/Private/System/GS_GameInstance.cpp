@@ -11,6 +11,7 @@
 #include "System/Save/GS_OptionSettinsSaveGame.h"
 #include "GameFramework/GameStateBase.h"
 #include "System/PlayerController/GS_MainMenuPC.h"
+#include "Async/Async.h"
 
 DEFINE_LOG_CATEGORY(GameServerLog);
 
@@ -63,9 +64,6 @@ void UGS_GameInstance::Init()
         if (SessionInterface.IsValid())
         {
             UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: SessionInterface is VALID. Binding delegates."));
-            CreateSessionCompleteDelegate = FOnCreateSessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnCreateSessionComplete);
-            FindSessionsCompleteDelegate = FOnFindSessionsCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnFindSessionsComplete);
-            JoinSessionCompleteDelegate = FOnJoinSessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnJoinSessionComplete);
             DestroySessionCompleteDelegateForInvite = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnDestroySessionCompleteForInvite);
             OnSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UGS_GameInstance::OnSessionUserInviteAccepted_Impl);
             OnDestroySessionCompleteDelegateForCleanup = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnDestroySessionCompleteForCleanup);
@@ -102,13 +100,7 @@ void UGS_GameInstance::Init()
     {
         UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Init() - This is a Dedicated Server Instance. Attempting to host a session."));
 
-#if WITH_GAMELIFT
-        // GameLift 빌드인 경우: GameLift SDK를 초기화하고 GameLift의 지시를 기다린다.
         InitGameLift();
-#else
-        // 일반 데디 서버 빌드인 경우: 직접 스팀 세션을 호스팅한다.
-        GSHostSession(DefaultMaxLobbyPlayers, NAME_GameSession, DefaultLobbyMapName, DefaultLobbyGameModePath);
-#endif
     }
     else
     {
@@ -140,38 +132,32 @@ void UGS_GameInstance::LeaveCurrentSessionAndJoin(APlayerController* RequestingP
     if (!SessionInterface.IsValid())
     {
         UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance::LeaveCurrentSessionAndJoin - SessionInterface is invalid. Attempting to join directly."));
-        GSJoinSession(RequestingPlayer, SearchResultToJoin); // SessionInterface가 없으면 직접 Join 시도
         return;
     }
 
-    // NAME_GameSession은 호스트/참여 시 사용한 세션 이름이어야 함
     FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
-    if (CurrentSession != nullptr && CurrentSession->SessionState != EOnlineSessionState::NoSession) // NoSession이 아니거나, Pending 등 다른 상태일 때도 파괴 시도
+    if (CurrentSession != nullptr && CurrentSession->SessionState != EOnlineSessionState::NoSession)
     {
-        if (DestroySessionCompleteDelegateForInviteHandle.IsValid()) // 이미 진행 중인 작업이 있다면? 보통은 없어야 함.
-        {
-            SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateForInviteHandle);
-            DestroySessionCompleteDelegateForInviteHandle.Reset();
-            UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::LeaveCurrentSessionAndJoin - Cleared existing DestroySessionCompleteDelegateForInviteHandle."));
-        }
+        // 현재 세션이 있으므로, 파괴를 요청하고 콜백(OnDestroySessionCompleteForInvite)을 기다립니다.
+        // 이 부분은 이미 코드가 올바르게 작성되어 있을 것입니다.
+        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::LeaveCurrentSessionAndJoin - Leaving current session to join another."));
         DestroySessionCompleteDelegateForInviteHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateForInvite);
-
-        if (!SessionInterface->DestroySession(NAME_GameSession))
-        {
-            UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::LeaveCurrentSessionAndJoin - DestroySession call failed immediately. Clearing delegate and attempting to join directly."));
-            if (DestroySessionCompleteDelegateForInviteHandle.IsValid())
-            {
-                SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateForInviteHandle);
-                DestroySessionCompleteDelegateForInviteHandle.Reset();
-            }
-            GSJoinSession(PlayerJoiningFromInvite.Get(), InviteSessionToJoinAfterDestroy);
-        }
-        // 성공적으로 DestroySession 호출 시, OnDestroySessionCompleteForInvite 콜백 대기
+        SessionInterface->DestroySession(NAME_GameSession);
     }
     else
     {
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::LeaveCurrentSessionAndJoin - Player is not in a known session or session state is NoSession. Joining invite session directly."));
-        GSJoinSession(RequestingPlayer, SearchResultToJoin);
+        // 현재 참여 중인 세션이 없으므로, 바로 초대받은 세션으로 참여를 시도합니다.
+        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::LeaveCurrentSessionAndJoin - No current session. Joining invite session directly."));
+        
+        FString GameLiftSessionId;
+        if (SearchResultToJoin.Session.SessionSettings.Get(FName(TEXT("GameLiftSessionId")), GameLiftSessionId) && !GameLiftSessionId.IsEmpty())
+        {
+            JoinGameLiftSessionByID(GameLiftSessionId); // 새로 만든 GameLift 접속 함수 호출
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::LeaveCurrentSessionAndJoin - Could not find GameLiftSessionId in invite."));
+        }
     }
 }
 
@@ -185,14 +171,17 @@ void UGS_GameInstance::OnDestroySessionCompleteForInvite(FName SessionName, bool
         DestroySessionCompleteDelegateForInviteHandle.Reset();
     }
 
-    APlayerController* PC = PlayerJoiningFromInvite.Get();
-    if (PC && InviteSessionToJoinAfterDestroy.IsValid())
+    if (InviteSessionToJoinAfterDestroy.IsValid())
     {
-        GSJoinSession(PC, InviteSessionToJoinAfterDestroy);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnDestroySessionCompleteForInvite - PlayerController or InviteSessionToJoinAfterDestroy became invalid after session destruction. Cannot join."));
+        FString GameLiftSessionId;
+        if (InviteSessionToJoinAfterDestroy.Session.SessionSettings.Get(FName(TEXT("GameLiftSessionId")), GameLiftSessionId) && !GameLiftSessionId.IsEmpty())
+        {
+            JoinGameLiftSessionByID(GameLiftSessionId); // 새로 만든 GameLift 접속 함수 호출
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnDestroySessionCompleteForInvite - Could not find GameLiftSessionId in invite after destroying session."));
+        }
     }
     PlayerJoiningFromInvite = nullptr;
 }
@@ -203,26 +192,110 @@ void UGS_GameInstance::OnSessionUserInviteAccepted_Impl(const bool bWasSuccessfu
 
     if (bWasSuccessful && InviteResult.IsValid())
     {
-        bJoiningFromInvite = true;
-        APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), ControllerId); // ControllerId 사용
-        if (PC)
+        // 1. InviteResult에서 GameLift 세션 ID를 추출합니다.
+        //    이것은 초대자가 초대장에 세션 ID를 어떻게 심었는지에 따라 달라집니다.
+        //    일반적으로 ConnectString에 저장됩니다.
+        FString ConnectString;
+        if (SessionInterface->GetResolvedConnectString(InviteResult, NAME_Default, ConnectString))
         {
-            UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnSessionUserInviteAccepted_Impl - Player %s accepting invite. Attempting to leave current session (if any) and join."), *PC->GetName());
-            if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(PC))
+            // 예시: ConnectString이 "GameLiftSessionId=gsess-xxxx" 형태라고 가정
+            FString GameLiftSessionId = UGameplayStatics::ParseOption(ConnectString, TEXT("GameLiftSessionId"));
+
+            if (!GameLiftSessionId.IsEmpty())
             {
-                MPC->ShowLoadingScreen();
+                UE_LOG(LogTemp, Log, TEXT("Extracted GameLift Session ID from invite: %s"), *GameLiftSessionId);
+
+                // 2. 추출한 ID로 GameLift 세션에 참여하는 새로운 함수 호출
+                JoinGameLiftSessionByID(GameLiftSessionId);
             }
-            LeaveCurrentSessionAndJoin(PC, InviteResult);
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Could not find GameLiftSessionId in invite connect string."));
+            }
+        }
+    }
+}
+
+void UGS_GameInstance::JoinGameLiftSessionByID(const FString& GameLiftSessionId)
+{
+    UE_LOG(LogTemp, Log, TEXT("Attempting to join GameLift session by ID: %s"), *GameLiftSessionId);
+    if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController()))
+    {
+        MPC->ShowLoadingScreen(); // 로딩 UI 표시
+    }
+
+    // --- 백엔드 서비스와 통신하는 부분 ---
+    // 실제로는 AWS Lambda와 API Gateway를 사용하여 이 부분을 구현해야 합니다.
+
+    // 1. 플레이어의 Steam 인증 티켓을 가져옵니다.
+    FString SteamAuthTicket;
+    IOnlineIdentityPtr Identity = IOnlineSubsystem::Get()->GetIdentityInterface();
+    if (Identity.IsValid())
+    {
+        SteamAuthTicket = Identity->GetAuthToken(0);
+    }
+
+    if (SteamAuthTicket.IsEmpty())
+    {
+        UE_LOG(LogTemp, Error, TEXT("Failed to get Steam Auth Ticket. Cannot join session."));
+        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController()))
+        {
+            MPC->HideLoadingScreen();
+        }
+        return;
+    }
+
+    // 2. 백엔드 서비스의 URL을 설정합니다. (직접 구축한 API Gateway의 엔드포인트로 변경해야 합니다)
+    FString BackendUrl = TEXT("https://your-api-gateway-endpoint.com/join"); // <--- 이 URL을 실제 URL로 변경하세요.
+
+    // 3. HTTP 요청을 생성합니다.
+    TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(BackendUrl);
+    Request->SetVerb("POST");
+    Request->SetHeader("Content-Type", "application/json");
+
+    // Body에 GameLiftSessionId와 플레이어의 Steam 인증 티켓을 담습니다.
+    FString RequestBody = FString::Printf(TEXT("{\"SessionId\": \"%s\", \"SteamTicket\": \"%s\"}"), *GameLiftSessionId, *SteamAuthTicket);
+    Request->SetContentAsString(RequestBody);
+
+    // 4. 요청 완료 콜백을 바인딩합니다.
+    Request->OnProcessRequestComplete().BindLambda([this](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
+    {
+        if (bWasSuccessful && Response.IsValid() && Response->GetResponseCode() == 200)
+        {
+            // 1. 백엔드로부터 받은 JSON 응답을 파싱합니다.
+            TSharedPtr<FJsonObject> JsonObject;
+            TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
+            if (FJsonSerializer::Deserialize(Reader, JsonObject))
+            {
+                FString IpAddress = JsonObject->GetStringField("IpAddress");
+                FString Port = JsonObject->GetStringField("Port");
+                FString PlayerSessionId = JsonObject->GetStringField("PlayerSessionId");
+
+                // 2. 최종 접속 문자열을 만들어 서버로 이동합니다.
+                FString ConnectString = FString::Printf(TEXT("%s:%s?PlayerSessionId=%s"), *IpAddress, *Port, *PlayerSessionId);
+                
+                UE_LOG(LogTemp, Log, TEXT("Successfully got connection info. Traveling to: %s"), *ConnectString);
+                
+                APlayerController* PC = GetFirstLocalPlayerController();
+                if (PC)
+                {
+                     PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
+                }
+            }
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance::OnSessionUserInviteAccepted_Impl - Could not get PlayerController for ControllerId: %d"), ControllerId);
+            UE_LOG(LogTemp, Error, TEXT("Failed to get connection info from backend."));
+            if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController()))
+            {
+                MPC->HideLoadingScreen();
+            }
         }
-    }
-    else
-    {
-        // ... (실패 로그) ...
-    }
+    });
+
+    // 7. HTTP 요청을 보냅니다.
+    Request->ProcessRequest();
 }
 
 void UGS_GameInstance::HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
@@ -301,21 +374,6 @@ void UGS_GameInstance::Shutdown()
     // Clear all delegate handles
     if (SessionInterface.IsValid())
     {
-        if (CreateSessionCompleteDelegateHandle.IsValid())
-        {
-            SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
-            CreateSessionCompleteDelegateHandle.Reset();
-        }
-        if (FindSessionsCompleteDelegateHandle.IsValid())
-        {
-            SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
-            FindSessionsCompleteDelegateHandle.Reset();
-        }
-        if (JoinSessionCompleteDelegateHandle.IsValid())
-        {
-            SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
-            JoinSessionCompleteDelegateHandle.Reset();
-        }
 		if (DestroySessionCompleteDelegateForInviteHandle.IsValid())
 		{
 			SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateForInviteHandle);
@@ -330,326 +388,7 @@ void UGS_GameInstance::Shutdown()
     Super::Shutdown();
 }
 
-void UGS_GameInstance::GSHostSession(int32 MaxPlayers, FName SessionCustomName, const FString& MapName, const FString& GameModePath)
-{
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: HostSession() CALLED - MaxPlayers: %d, SessionName: %s, Map: %s, GameMode: %s"), MaxPlayers, *SessionCustomName.ToString(), *MapName, *GameModePath);
-    if (!SessionInterface.IsValid())
-    {
-        UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance::HostSession - Session interface is not valid. Cannot Host Sesison."));
-        return;
-    }
-
-    HostSessionSettings = MakeShareable(new FOnlineSessionSettings());
-    HostSessionSettings->NumPublicConnections = 1; //이거 나중에 1로 바꾸기
-    HostSessionSettings->NumPrivateConnections = 0;//MaxPlayers - HostSessionSettings->NumPublicConnections;
-    HostSessionSettings->bShouldAdvertise = false;
-    HostSessionSettings->bIsLANMatch = false;
-    HostSessionSettings->bUsesPresence = true; // 스팀데디에서 이거 반드시 꺼야됨
-    HostSessionSettings->bUseLobbiesIfAvailable = true;  //bUsesPresence 값이랑 동일해야함
-    HostSessionSettings->bAllowJoinViaPresence = true;
-    HostSessionSettings->bAllowJoinInProgress = true;
-    HostSessionSettings->bAllowInvites = true;
-    HostSessionSettings->bIsDedicated = IsDedicatedServerInstance();
-    HostSessionSettings->Set(SETTING_MAPNAME, MapName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-    HostSessionSettings->Set(SETTING_GAMEMODE, GameModePath, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
-	HostSessionSettings->Set(SEARCH_KEYWORDS, FString("IINGSSpartaFinal"), EOnlineDataAdvertisementType::ViaOnlineService);
-
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::HostSession - SessionSettings: PublicSlots=%d, PrivateSlots=%d, bIsDedicated=%s"),
-        HostSessionSettings->NumPublicConnections, HostSessionSettings->NumPrivateConnections, HostSessionSettings->bIsDedicated ? TEXT("true") : TEXT("false"));
-
-    if (!CreateSessionCompleteDelegateHandle.IsValid())
-    {
-        CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::HostSession - CreateSessionCompleteDelegateHandle BOUND."));
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::HostSession - CreateSessionCompleteDelegateHandle was ALREADY VALID. This might indicate a previous operation wasn't cleaned up properly."));
-    }
-
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::HostSession - Attempting to create session: %s"), *SessionCustomName.ToString());
-    if (!SessionInterface->CreateSession(0, SessionCustomName, *HostSessionSettings))
-    {
-        UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance::HostSession - Call to CreateSession failed immediately for session: %s."), *SessionCustomName.ToString());
-        if (CreateSessionCompleteDelegateHandle.IsValid())
-        {
-            SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
-            CreateSessionCompleteDelegateHandle.Reset();
-            UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::HostSession - CreateSessionCompleteDelegateHandle CLEARED due to immediate CreateSession failure."));
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::HostSession - CreateSession call initiated for session: %s. Waiting for OnCreateSessionComplete callback."), *SessionCustomName.ToString());
-    }
-}
-
-void UGS_GameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
-{
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: OnCreateSessionComplete() CALLED - SessionName: %s, Success: %s"), *SessionName.ToString(), bWasSuccessful ? TEXT("true") : TEXT("false"));
-    if (SessionInterface.IsValid() && CreateSessionCompleteDelegateHandle.IsValid())
-    {
-        SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
-        CreateSessionCompleteDelegateHandle.Reset();
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnCreateSessionComplete - Delegate handle CLEARED."));
-    }
-
-    if (bWasSuccessful)
-    {
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Session '%s' created successfully on the backend."), *SessionName.ToString());
-		if (SessionInterface.IsValid())
-		{
-			SessionInterface->StartSession(SessionName);
-			UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Session '%s' started successfully."), *SessionName.ToString());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance: SessionInterface is not valid when starting session '%s'."), *SessionName.ToString());
-		}
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance: Failed to create session '%s' on the backend."), *SessionName.ToString());
-    }
-}
-
-void UGS_GameInstance::GSFindSession(APlayerController* RequestingPlayer)
-{
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: FindSession() CALLED by Player: %s"), RequestingPlayer ? *RequestingPlayer->GetName() : TEXT("Unknown"));
-    if (!RequestingPlayer || !SessionInterface.IsValid())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::FindSession - Invalid player controller or session interface. Aborting."));
-        return;
-    }
-    PlayerSearchingSession = RequestingPlayer;
-
-    SessionSearchSettings = MakeShareable(new FOnlineSessionSearch());
-    SessionSearchSettings->MaxSearchResults = 7777;
-    SessionSearchSettings->bIsLanQuery = false;
-    SessionSearchSettings->QuerySettings.SearchParams.Remove(SEARCH_PRESENCE);
-	SessionSearchSettings->QuerySettings.Set(SEARCH_KEYWORDS, FString("IINGSSpartaFinal"), EOnlineComparisonOp::Equals);
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::FindSession - SearchSettings: MaxResults=%d, LANQuery=%s, PresenceQuery=%s"),
-        SessionSearchSettings->MaxSearchResults, SessionSearchSettings->bIsLanQuery ? TEXT("true") : TEXT("false"), TEXT("true"));
-
-
-    if (!FindSessionsCompleteDelegateHandle.IsValid())
-    {
-        FindSessionsCompleteDelegateHandle = SessionInterface->AddOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegate);
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::FindSession - FindSessionsCompleteDelegateHandle BOUND."));
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::FindSession - FindSessionsCompleteDelegateHandle was ALREADY VALID."));
-    }
-
-    ULocalPlayer* LocalPlayer = RequestingPlayer->GetLocalPlayer();
-    int32 ControllerIdToSearch = LocalPlayer ? LocalPlayer->GetControllerId() : 0;
-
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::FindSession - Player %s (Controller ID: %d) initiating FindSessions..."), *RequestingPlayer->GetName(), ControllerIdToSearch);
-    if (!SessionInterface->FindSessions(ControllerIdToSearch, SessionSearchSettings.ToSharedRef()))
-    {
-        UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance::FindSession - Call to FindSessions failed immediately."));
-        if (FindSessionsCompleteDelegateHandle.IsValid())
-        {
-            SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
-            FindSessionsCompleteDelegateHandle.Reset();
-            UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::FindSession - FindSessionsCompleteDelegateHandle CLEARED due to immediate FindSessions failure."));
-        }
-        PlayerSearchingSession = nullptr;
-    }
-    else
-    {
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::FindSession - FindSessions call initiated. Waiting for OnFindSessionsComplete callback."));
-    }
-}
-
-void UGS_GameInstance::OnFindSessionsComplete(bool bWasSuccessful)
-{
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: OnFindSessionsComplete() CALLED - Success: %s"), bWasSuccessful ? TEXT("true") : TEXT("false"));
-
-    if (SessionInterface.IsValid() && FindSessionsCompleteDelegateHandle.IsValid())
-    {
-        SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
-        FindSessionsCompleteDelegateHandle.Reset();
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnFindSessionsComplete - Delegate handle CLEARED."));
-    }
-
-    APlayerController* PC = PlayerSearchingSession.Get();
-
-    if (!PC)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnFindSessionsComplete - PlayerSearchingSession (PlayerController) is no longer valid. Aborting."));
-        return;
-    }
-
-    if (bWasSuccessful && SessionSearchSettings.IsValid())
-    {
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnFindSessionsComplete - Found %d sessions."), SessionSearchSettings->SearchResults.Num());
-        if (SessionSearchSettings->SearchResults.Num() > 0)
-        {
-            bool bFoundSuitableSession = false;
-            for (const FOnlineSessionSearchResult& SearchResult : SessionSearchSettings->SearchResults)
-            {
-                if (SearchResult.IsValid() && SearchResult.Session.SessionSettings.bIsDedicated && SearchResult.Session.NumOpenPublicConnections > 0)
-                {
-                    FString CustomKeyCheck;
-                    bool bCustomKeyFound = SearchResult.Session.SessionSettings.Get(SEARCH_KEYWORDS, CustomKeyCheck);
-
-                    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnFindSessionsComplete - Checking SessionID: %s, OwningUser: %s, OpenPublic: %d, CustomKeyFound: %s, CustomKeyValue: %s"),
-                        *SearchResult.GetSessionIdStr(),
-                        *SearchResult.Session.OwningUserName,
-                        SearchResult.Session.NumOpenPublicConnections,
-                        bCustomKeyFound ? TEXT("true") : TEXT("false"),
-                        bCustomKeyFound ? *CustomKeyCheck : TEXT("N/A"));
-
-                    if (bCustomKeyFound && CustomKeyCheck == TEXT("IINGSSpartaFinal"))
-                    {
-                        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnFindSessionsComplete - YOUR DEDICATED session with matching custom key found! Attempting to join."));
-
-                        SessionToJoin = SearchResult;
-                        GSJoinSession(PC, SearchResult);
-                        bFoundSuitableSession = true;
-                        return;
-                    }
-                }
-                else
-                {
-                    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnFindSessionsComplete - Session %s is NOT suitable (IsValid: %s, IsDedicated: %s, OpenPublicSlots: %d)."),
-                        *SearchResult.GetSessionIdStr(),
-                        SearchResult.IsValid() ? TEXT("true") : TEXT("false"),
-                        SearchResult.IsValid() && SearchResult.Session.SessionSettings.bIsDedicated ? TEXT("true") : TEXT("false"),
-                        SearchResult.IsValid() ? SearchResult.Session.NumOpenPublicConnections : -1
-                    );
-                }
-            }
-            if (!bFoundSuitableSession)
-            {
-                UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnFindSessionsComplete - No suitable DEDICATED sessions found after filtering all %d results."), SessionSearchSettings->SearchResults.Num());
-                PlayerSearchingSession = nullptr;
-            }
-        }
-        else
-        {
-            UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnFindSessionsComplete - No sessions found in search results (Num: 0)."));
-            PlayerSearchingSession = nullptr;
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnFindSessionsComplete - FindSessions bWasSuccessful is false or SessionSearchSettings is invalid."));
-        PlayerSearchingSession = nullptr;
-    }
-}
-
-void UGS_GameInstance::GSJoinSession(APlayerController* RequestingPlayer, const FOnlineSessionSearchResult& SearchResultToJoin)
-{
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::JoinSession() CALLED by Player: %s for SessionID: %s"),
-        RequestingPlayer ? *RequestingPlayer->GetName() : TEXT("Unknown"),
-        *SearchResultToJoin.GetSessionIdStr()
-    );
-
-    if (!RequestingPlayer || !SessionInterface.IsValid() || !SearchResultToJoin.IsValid())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::JoinSession - Invalid parameters. RequestingPlayer: %s, SessionInterface: %s, SearchResultToJoin: %s. Aborting."),
-            RequestingPlayer ? TEXT("Valid") : TEXT("NULL"),
-            SessionInterface.IsValid() ? TEXT("Valid") : TEXT("NULL"),
-            SearchResultToJoin.IsValid() ? TEXT("Valid") : TEXT("NULL")
-        );
-        PlayerSearchingSession = nullptr;
-        return;
-    }
-
-    PlayerSearchingSession = RequestingPlayer;
-
-    if (JoinSessionCompleteDelegateHandle.IsValid())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::JoinSession - Clearing existing JoinSessionCompleteDelegateHandle."));
-        SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
-        JoinSessionCompleteDelegateHandle.Reset();
-    }
-    JoinSessionCompleteDelegateHandle = SessionInterface->AddOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegate);
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::JoinSession - JoinSessionCompleteDelegateHandle BOUND."));
-
-    ULocalPlayer* LocalPlayer = RequestingPlayer->GetLocalPlayer();
-    int32 ControllerIdToJoin = LocalPlayer ? LocalPlayer->GetControllerId() : 0;
-
-    UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::JoinSession - Attempting to join session: %s with Controller ID: %d"), *SearchResultToJoin.GetSessionIdStr(), ControllerIdToJoin);
-    if (!SessionInterface->JoinSession(ControllerIdToJoin, NAME_GameSession, SearchResultToJoin))
-    {
-        UE_LOG(LogTemp, Error, TEXT("UGS_GameInstance::JoinSession - Call to JoinSession failed immediately for session: %s"), *SearchResultToJoin.GetSessionIdStr());
-        if (JoinSessionCompleteDelegateHandle.IsValid())
-        {
-            SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
-            JoinSessionCompleteDelegateHandle.Reset();
-            UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::JoinSession - JoinSessionCompleteDelegateHandle CLEARED due to immediate JoinSession failure."));
-        }
-        PlayerSearchingSession = nullptr;
-    }
-    else
-    {
-        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::JoinSession - JoinSession call initiated for session: %s. Waiting for OnJoinSessionComplete callback."), *SearchResultToJoin.GetSessionIdStr());
-    }
-}
-
-void UGS_GameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
-{
-    UE_LOG(LogTemp, Log, TEXT("================ OnJoinSessionComplete CALLED ================"));
-    UE_LOG(LogTemp, Log, TEXT("SessionName: %s"), *SessionName.ToString());
-
-    FString ResultStr;
-    switch (Result)
-    {
-    case EOnJoinSessionCompleteResult::Success: ResultStr = TEXT("Success"); break;
-    case EOnJoinSessionCompleteResult::SessionIsFull: ResultStr = TEXT("SessionIsFull"); break;
-    case EOnJoinSessionCompleteResult::SessionDoesNotExist: ResultStr = TEXT("SessionDoesNotExist"); break;
-    case EOnJoinSessionCompleteResult::CouldNotRetrieveAddress: ResultStr = TEXT("CouldNotRetrieveAddress"); break;
-    case EOnJoinSessionCompleteResult::AlreadyInSession: ResultStr = TEXT("AlreadyInSession"); break;
-    case EOnJoinSessionCompleteResult::UnknownError: default: ResultStr = TEXT("UnknownError"); break;
-    }
-    UE_LOG(LogTemp, Log, TEXT("Join Result: %s"), *ResultStr);
-
-    APlayerController* PC = PlayerSearchingSession.Get();
-    PlayerSearchingSession = nullptr;
-
-    if (SessionInterface.IsValid() && JoinSessionCompleteDelegateHandle.IsValid())
-    {
-        SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
-        JoinSessionCompleteDelegateHandle.Reset();
-        UE_LOG(LogTemp, Log, TEXT("OnJoinSessionComplete - Delegate handle CLEARED."));
-    }
-
-    if (Result == EOnJoinSessionCompleteResult::Success && PC)
-    {
-        UE_LOG(LogTemp, Log, TEXT("Join successful! Attempting to get connect string..."));
-        FString ConnectString;
-
-        if (SessionInterface->GetResolvedConnectString(SessionName, ConnectString))
-        {
-            if (bJoiningFromInvite)
-            {
-                ConnectString += TEXT("?bIsFromInvite=true");
-                bJoiningFromInvite = false; // 플래그 사용 후 반드시 초기화
-                UE_LOG(LogTemp, Log, TEXT("OnJoinSessionComplete - Appended invite flag. New ConnectString: %s"), *ConnectString);
-            }
-            UE_LOG(LogTemp, Log, TEXT(">>>>>>>>> Resolved ConnectString: [ %s ] <<<<<<<<<"), *ConnectString);
-            PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
-        }
-        else
-        {
-            HandleNetworkFailure(GetWorld(), nullptr, ENetworkFailure::ConnectionLost, TEXT("GetResolvedConnectString failed."));
-            UE_LOG(LogTemp, Error, TEXT("!!!!!!!! GetResolvedConnectString FAILED. Cannot travel. !!!!!!!!"));
-        }
-    }
-    else
-    {
-        HandleNetworkFailure(GetWorld(), nullptr, ENetworkFailure::ConnectionLost, TEXT("JoinSession failed with result: ") + ResultStr);
-        UE_LOG(LogTemp, Error, TEXT("!!!!!!!! JoinSession FAILED or PlayerController is invalid. Result: %s"), *ResultStr);
-    }
-
-    UE_LOG(LogTemp, Log, TEXT("================ OnJoinSessionComplete END ================"));
-}
-
-void UGS_GameInstance::GSLeaveSession(APlayerController* RequestingPlayer)
+void UGS_GameInstance::GSLeaveSession(APlayerController* RequestingPlayer) //NetDriver 상관 없이 필요함
 {
     if (!SessionInterface.IsValid())
     {
@@ -786,17 +525,19 @@ void UGS_GameInstance::InitGameLift()
                 // 1. GameLift에 세션이 활성화되었음을 먼저 알림
                 GameLiftSdkModule->ActivateGameSession();
 
-                // 2. 이제 이 정보를 바탕으로 OSS(스팀)에 세션을 등록하여 소셜 기능 활성화
-                // 주의: 이 세션은 일반 서버 목록에 노출(Advertise)되지 않도록 설정하는 것이 일반적이다.
-                // GameLift가 매치메이킹을 담당하므로, 스팀 서버 브라우저를 통한 접속은 막고
-                // 친구 초대나 현재 플레이 중인 게임 참가 기능만 허용하기 위함이다.
-                UE_LOG(LogTemp, Log, TEXT("Registering session with OnlineSubsystem (Steam) for social features."));
-        
-                // GSHostSession 함수 내부의 FOnlineSessionSettings에서
-                // bShouldAdvertise = false; // 서버 목록에 노출 안 함
-                // bAllowJoinViaPresence = true; // 친구 목록의 '게임 참가' 허용
-                // 와 같이 설정하면 좋다.
-                GSHostSession(DefaultMaxLobbyPlayers, NAME_GameSession, DefaultLobbyMapName, DefaultLobbyGameModePath);
+                // 2. 스팀 세션 생성(GSHostSession) 대신, 서버가 직접 로비 레벨로 이동
+                AsyncTask(ENamedThreads::GameThread, [=, this]()
+                {
+                    UWorld* World = GetWorld();
+                    if (World)
+                    {
+                        FURL TravelURL;
+                        TravelURL.Map = DefaultLobbyMapName;
+                        TravelURL.AddOption(TEXT("listen"));
+                        World->ServerTravel(TravelURL.ToString(), true);
+                        UE_LOG(GameServerLog, Log, TEXT("Server traveling to map: %s"), *DefaultLobbyMapName);
+                    }
+                });
             });
 
 

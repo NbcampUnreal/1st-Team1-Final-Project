@@ -18,7 +18,6 @@ void AGS_MainMenuPC::HandleCustomGameRequest()
 	if (GI)
 	{
 		ShowLoadingScreen();
-		GI->GSFindSession(this);
 	}
 }
 

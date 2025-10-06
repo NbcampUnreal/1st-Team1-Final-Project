@@ -22,7 +22,7 @@
 #include "System/GS_SpawnSlot.h"
 #include "Character/Player/GS_PawnMappingDataAsset.h"
 #include <DungeonEditor/Data/GS_DungeonEditorSaveGame.h>
-
+#include "OnlineSessionSettings.h"
 #include "Engine/DirectionalLight.h"
 #include "Serialization/BufferArchive.h"
 
@@ -32,6 +32,7 @@ AGS_CustomLobbyPC::AGS_CustomLobbyPC()
 	, CurrentModalWidget(nullptr)
 	, PendingWork(EPendingWork::None)
 {
+	OnCreatePresenceSessionCompleteDelegate = FOnCreateSessionCompleteDelegate::CreateUObject(this, &AGS_CustomLobbyPC::OnCreatePresenceSessionComplete);
 }
 
 void AGS_CustomLobbyPC::BeginPlay()
@@ -93,8 +94,8 @@ void AGS_CustomLobbyPC::OnRep_PlayerState()
 
 		if (!bHasSetInitialRichPresence)
 		{
-			UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: PlayerState replicated. Setting initial Rich Presence."));
-			UpdateRichPresenceForServerInvite();
+			UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: PlayerState replicated. 서버로부터 GameSessionId 요청 중."));
+			Server_RequestGameSessionId();
 			bHasSetInitialRichPresence = true;
 		}
 	}
@@ -103,6 +104,113 @@ void AGS_CustomLobbyPC::OnRep_PlayerState()
 		UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC::OnRep_PlayerState - PlayerState changed after initial setup for PC: %s. Re-evaluating bindings/UI."), *GetNameSafe(this));
 		TryBindToPlayerStateDelegates();
 	}
+}
+
+void AGS_CustomLobbyPC::UpdateRichPresenceForGameLiftSession(const FString& GameSessionId)
+{
+	if (!IsLocalController() || GameSessionId.IsEmpty()) return;
+
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub)
+	{
+		IOnlinePresencePtr PresenceInterface = OnlineSub->GetPresenceInterface();
+		IOnlineIdentityPtr IdentityInterface = OnlineSub->GetIdentityInterface();
+		IOnlineSessionPtr SessionInterface = OnlineSub->GetSessionInterface();
+
+		if (PresenceInterface.IsValid() && IdentityInterface.IsValid() && SessionInterface.IsValid())
+		{
+			TSharedPtr<const FUniqueNetId> UserId = IdentityInterface->GetUniquePlayerId(0);
+			if (UserId.IsValid())
+			{
+				FOnlineUserPresenceStatus PresenceStatus;
+				PresenceStatus.State = EOnlinePresenceState::Online;
+				PresenceStatus.StatusStr = FString(TEXT("로비에서 대기 중")); // 표시될 상태 메시지
+
+				// GameLift 세션 ID를 Rich Presence 속성에 추가합니다.
+				PresenceStatus.Properties.Add(TEXT("GameLiftSessionId"), FVariantData(GameSessionId));
+                
+				PresenceInterface->SetPresence(*UserId, PresenceStatus);
+				UE_LOG(LogTemp, Log, TEXT("Rich Presence updated with GameSessionId: %s"), *GameSessionId);
+
+
+				// 2. 안정적인 참가를 위해 Online Session 정보 업데이트 또는 생성
+				FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
+				if (CurrentSession)
+				{
+					// 세션이 이미 존재하면 GameLiftSessionId만 업데이트합니다.
+					UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: Found existing session, updating with GameLiftSessionId."));
+					CurrentSession->SessionSettings.Set(FName(TEXT("GameLiftSessionId")), GameSessionId, EOnlineDataAdvertisementType::ViaOnlineService);
+					SessionInterface->UpdateSession(NAME_GameSession, CurrentSession->SessionSettings, true);
+				}
+				else
+				{
+					// 세션이 없으면 친구 초대를 위한 'Presence' 세션을 새로 생성합니다.
+					UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: No session found. Creating a new 'presence' session for invites."));
+					
+					TSharedPtr<FOnlineSessionSettings> SessionSettings = MakeShareable(new FOnlineSessionSettings());
+					SessionSettings->NumPublicConnections = 0; // 호스트 서버가 아니므로 0
+					SessionSettings->bShouldAdvertise = true;
+					SessionSettings->bIsLANMatch = false;
+					SessionSettings->bIsDedicated = false;
+					SessionSettings->bUsesPresence = true;
+					SessionSettings->bUseLobbiesIfAvailable = true;
+					
+					SessionSettings->bAllowJoinInProgress = true;
+					SessionSettings->bAllowJoinViaPresence = true;
+					SessionSettings->bAllowInvites = true;
+
+
+					
+					SessionSettings->Set(FName(TEXT("GAS_LOBBY")), FString(TEXT("1")), EOnlineDataAdvertisementType::ViaOnlineService);
+					// 가장 중요한 데이터: GameLift 세션 ID를 세션 설정에 저장합니다.
+					SessionSettings->Set(FName(TEXT("GameLiftSessionId")), GameSessionId, EOnlineDataAdvertisementType::ViaOnlineService);
+
+					// 세션 생성 완료 콜백을 위한 델리게이트 핸들 등록
+					OnCreatePresenceSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(OnCreatePresenceSessionCompleteDelegate);
+
+					const ULocalPlayer* LocalPlayer = GetLocalPlayer();
+					if (!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *SessionSettings))
+					{
+						// 세션 생성 시작에 실패하면 델리게이트 핸들을 즉시 정리합니다.
+						UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyPC: Failed to start session creation process."));
+						SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(OnCreatePresenceSessionCompleteDelegateHandle);
+					}
+				}
+			}
+		}
+	}
+}
+
+void AGS_CustomLobbyPC::OnCreatePresenceSessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	UE_LOG(LogTemp, Log, TEXT("AGS_CustomLobbyPC: Presence session creation finished. SessionName: %s, Successful: %s"), *SessionName.ToString(), bWasSuccessful ? TEXT("true") : TEXT("false"));
+
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr SessionInterface = OnlineSub->GetSessionInterface();
+		if (SessionInterface.IsValid())
+		{
+			// 사용이 끝난 델리게이트 핸들을 정리합니다.
+			SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(OnCreatePresenceSessionCompleteDelegateHandle);
+		}
+	}
+}
+
+void AGS_CustomLobbyPC::Server_RequestGameSessionId_Implementation()
+{
+	// GameMode를 가져와서 GameSessionId를 요청하는 함수를 호출합니다.
+	AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>();
+	if (GM)
+	{
+		GM->RequestGameSessionIdForClient(this);
+	}
+}
+
+void AGS_CustomLobbyPC::Client_ReceiveGameSessionId_Implementation(const FString& GameSessionId)
+{
+	UE_LOG(LogTemp, Log, TEXT("Client received GameSessionId from server: %s"), *GameSessionId);
+	UpdateRichPresenceForGameLiftSession(GameSessionId);
 }
 
 void AGS_CustomLobbyPC::Server_NotifyPlayerReadyInLobby_Implementation()

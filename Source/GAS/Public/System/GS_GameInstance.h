@@ -7,6 +7,8 @@
 #include "OnlineSessionSettings.h"
 #include "GameLiftServerSDK.h"
 #include "Interfaces/OnlineFriendsInterface.h"
+#include "HttpModule.h"
+#include "Interfaces/IHttpResponse.h"
 #include "GS_GameInstance.generated.h"
 
 class APlayerController;
@@ -28,19 +30,8 @@ public:
     UGS_GameInstance();
     virtual void Init() override;
     virtual void Shutdown() override;
-
-
-    //서버 생성, 참여
-
-    UFUNCTION(BlueprintCallable, Category = "Network|Session")
-    void GSHostSession(int32 MaxPlayers, FName SessionCustomName, const FString& MapName, const FString& GameModePath);
-
-    UFUNCTION(BlueprintCallable, Category = "Network|Session")
-    void GSFindSession(APlayerController* RequestingPlayer);
-
-    //UFUNCTION(BlueprintCallable, Category = "Network|Session")
-    void GSJoinSession(APlayerController* RequestingPlayer, const FOnlineSessionSearchResult& SearchResultToJoin);
-
+    void JoinGameLiftSessionByID(const FString& GameLiftSessionId);
+    
 protected:
     IOnlineSessionPtr SessionInterface;
     FOnlineSessionSearchResult SessionToJoin;
@@ -113,6 +104,9 @@ protected:
     FDelegateHandle OnDestroySessionCompleteDelegateHandleForCleanup;
     void OnDestroySessionCompleteForCleanup(FName SessionName, bool bWasSuccessful);
 
+
+
+    
     //세션 생명주기 관리
 public:
     UPROPERTY(BlueprintAssignable, Category = "Session")

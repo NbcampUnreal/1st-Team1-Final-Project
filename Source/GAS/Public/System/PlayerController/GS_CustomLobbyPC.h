@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "System/GS_PlayerRole.h"
 #include "System/GameState/GS_CustomLobbyGS.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "GS_CustomLobbyPC.generated.h"
 
 class ADirectionalLight;
@@ -33,6 +34,15 @@ class GAS_API AGS_CustomLobbyPC : public AGS_DEController
 public:
 	AGS_CustomLobbyPC();
 
+	/** 서버로부터 받은 GameSessionId를 사용하여 Steam Rich Presence를 업데이트 */
+	void UpdateRichPresenceForGameLiftSession(const FString& GameSessionId);
+	/** 서버에 GameSessionId를 요청하는 RPC */
+	UFUNCTION(Server, Reliable)
+	void Server_RequestGameSessionId();
+	/** 서버가 클라이언트에게 GameSessionId를 보내주는 RPC */
+	UFUNCTION(Client, Reliable)
+	void Client_ReceiveGameSessionId(const FString& GameSessionId);
+
 protected:
 	virtual void BeginPlay() override;
 	//virtual void SetupInputComponent() override; // 키보드 기능. 나중에 esc 넣을때 주석 해제
@@ -40,6 +50,8 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyPlayerReadyInLobby();
 
+	void OnCreatePresenceSessionComplete(FName SessionName, bool bWasSuccessful);
+	
 	UPROPERTY()
 	AGS_PlayerState* CachedPlayerState;
 
@@ -47,6 +59,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Actors")
 	TObjectPtr<ADirectionalLight> LobbyDirectionalLight;
+
+	FOnCreateSessionCompleteDelegate OnCreatePresenceSessionCompleteDelegate;
+	FDelegateHandle OnCreatePresenceSessionCompleteDelegateHandle;
 	
 	//ui 관련
 	UPROPERTY(EditDefaultsOnly, Category = "UI")

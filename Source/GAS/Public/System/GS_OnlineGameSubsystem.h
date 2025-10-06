@@ -17,6 +17,7 @@ class GAS_API UGS_OnlineGameSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	UGS_OnlineGameSubsystem();
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 
@@ -27,17 +28,21 @@ public:
 	FOnJoinSuccess OnJoinSuccess;
 	FOnJoinFailure OnJoinFailure;
 
+	/** 세션 검색이 완료되었을 때 호출될 델리게이트 */
+	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;
+
+	/** OnFindSessionsCompleteDelegate의 델리게이트 핸들 */
+	FDelegateHandle OnFindSessionsCompleteDelegateHandle;
+
+	/** 세션 검색이 완료되었을 때 호출될 콜백 함수 */
+	void OnFindSessionsComplete(bool bWasSuccessful);
+	
 private:
 	void OnReadFriendsListComplete_Callback(int32 LocalUserNum, bool bWasSuccessful, const FString& ListName, const FString& ErrorStr);
-	void OnFindFriendSessionComplete(int32 LocalUserNum, bool bWasSuccessful, const TArray<FOnlineSessionSearchResult>& SearchResults);
-	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 	IOnlineSubsystem* OnlineSubsystem;
 	IOnlineSessionPtr SessionInterface;
 	IOnlineFriendsPtr FriendsInterface;
-
-	FDelegateHandle FindFriendSessionCompleteDelegateHandle;
-	FDelegateHandle JoinSessionCompleteDelegateHandle;
-
-	TSharedPtr<const FUniqueNetId> FriendToJoinId;
+	
+	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 };

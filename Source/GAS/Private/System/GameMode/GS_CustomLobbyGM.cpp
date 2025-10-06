@@ -12,6 +12,9 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/Character/GS_LobbyAnimInstance.h"
 #include "Character/Player/GS_LobbyDisplayActor.h"
+#if WITH_GAMELIFT
+#include "GameLiftServerSDK.h"
+#endif
 
 AGS_CustomLobbyGM::AGS_CustomLobbyGM()
 {
@@ -27,18 +30,33 @@ void AGS_CustomLobbyGM::PreLogin(const FString& Options, const FString& Address,
     Super::PreLogin(Options, Address, UniqueId, ErrorMessage);
     if (!ErrorMessage.IsEmpty()) return;
 
-    if (GameState)
-    {
-        const bool bIsFromInvite = Options.Contains(TEXT("bIsFromInvite=true"));
-        if (GameState->PlayerArray.Num() >= 1 && !bIsFromInvite)
-        {
-            ErrorMessage = TEXT("Server is full.");
-        }
-	}
-    else
-    {
-        ErrorMessage = TEXT("Server is not ready.");
-    }
+//#if WITH_GAMELIFT
+//    // 1. 접속 URL(Options)에서 PlayerSessionId를 파싱합니다.
+//    const FString PlayerSessionId = UGameplayStatics::ParseOption(Options, TEXT("PlayerSessionId"));
+//
+//    if (PlayerSessionId.IsEmpty())
+//    {
+//        ErrorMessage = TEXT("Access Denied: No PlayerSessionId provided.");
+//        return;
+//    }
+//
+//    // 2. GameLift SDK를 통해 PlayerSessionId의 유효성을 검사합니다.
+//    FGameLiftServerSDKModule* GameLiftSdkModule = &FModuleManager::LoadModuleChecked<FGameLiftServerSDKModule>(FName("GameLiftServerSDK"));
+//    FGameLiftGenericOutcome Outcome = GameLiftSdkModule->AcceptPlayerSession(PlayerSessionId);
+//
+//    if (!Outcome.IsSuccess())
+//    {
+//        // GameLift가 이 플레이어 세션을 거부함 (유효하지 않거나, 이미 사용되었거나 등)
+//        ErrorMessage = FString::Printf(TEXT("Access Denied: %s"), *Outcome.GetError().m_errorMessage);
+//    }
+//    else
+//    {
+//        UE_LOG(LogTemp, Log, TEXT("Player with PlayerSessionId %s accepted."), *PlayerSessionId);
+//    }
+//#else
+//    // GameLift를 사용하지 않는 환경(예: 내부망 테스트)에서는 아무나 접속을 허용합니다.
+//    UE_LOG(LogTemp, Log, TEXT("Non-GameLift environment: Player accepted without validation."));
+//#endif
 }
 
 void AGS_CustomLobbyGM::BeginPlay()
@@ -150,6 +168,36 @@ void AGS_CustomLobbyGM::UpdatePlayerReadyStatus(APlayerState* Player, bool bIsRe
         }
         CheckAllPlayersReady();
     }
+}
+
+void AGS_CustomLobbyGM::RequestGameSessionIdForClient(APlayerController* RequestingController)
+{
+    AGS_CustomLobbyPC* PC = Cast<AGS_CustomLobbyPC>(RequestingController);
+    if (!PC) return;
+
+#if WITH_GAMELIFT
+    // 1. GameLift SDK 모듈을 가져옵니다.
+    FGameLiftServerSDKModule* GameLiftSdkModule = &FModuleManager::LoadModuleChecked<FGameLiftServerSDKModule>(FName("GameLiftServerSDK"));
+    
+    // 2. GetGameSessionId() 함수를 직접 호출합니다.
+    FGameLiftStringOutcome GameSessionIdOutcome = GameLiftSdkModule->GetGameSessionId();
+
+    // 3. 호출 결과를 확인하고, 성공 시 ID를 클라이언트로 보냅니다.
+    if (GameSessionIdOutcome.IsSuccess())
+    {
+        FString GameSessionId = GameSessionIdOutcome.GetResult();
+        PC->Client_ReceiveGameSessionId(GameSessionId);
+    }
+    else
+    {
+        // 세션이 아직 활성화되지 않았거나 다른 이유로 실패한 경우
+        UE_LOG(LogTemp, Warning, TEXT("AGS_CustomLobbyGM: Could not get GameSessionId. It may not be active yet."));
+        PC->Client_ReceiveGameSessionId(TEXT("")); // 클라이언트에게 빈 문자열을 보내 실패를 알림
+    }
+#else
+    // GameLift가 아닌 환경 (예: 내부망 테스트)
+    PC->Client_ReceiveGameSessionId(TEXT("NON-GAMELIFT-SESSION"));
+#endif
 }
 
 void AGS_CustomLobbyGM::CheckAllPlayersReady()
