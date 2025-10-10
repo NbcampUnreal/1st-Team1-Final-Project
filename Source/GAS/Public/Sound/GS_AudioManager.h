@@ -54,6 +54,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "맵 BGM 페이드인 후 재생"))
 	void FadeInAndStartMapBGM(AActor* Context, float FadeTime = 2.0f);
 
+	// === BGM 볼륨 설정 ===
+	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "BGM 볼륨 설정"))
+	void SetBGMVolume(float Volume);
+
+	// 현재 BGM 볼륨 가져오기
+	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "현재 BGM 볼륨 가져오기"))
+	float GetCurrentBGMVolume() const { return CurrentBGMVolume; }
+
 	// === 통합 전투 시퀀스 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio|Combat", meta = (DisplayName = "전투 시퀀스 시작", ToolTip = "맵 BGM을 페이드아웃/정지하고 전투 BGM을 시작합니다."))
 	void StartCombatSequence(AActor* Context, UAkAudioEvent* CombatMusicStartEvent, UAkAudioEvent* CombatMusicStopEvent, float FadeTime = 2.0f);
@@ -101,6 +109,9 @@ private:
 	// 맵 BGM 페이드인/아웃 타이머 핸들
 	FTimerHandle MapBGMFadeInTimerHandle;
 	FTimerHandle MapBGMFadeOutTimerHandle;
+
+	// 현재 BGM 볼륨 (0.0 ~ 1.0)
+	float CurrentBGMVolume;
 
 	// RTPC 헬퍼 함수
 	void SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context, float InterpolationTime = 0.0f);

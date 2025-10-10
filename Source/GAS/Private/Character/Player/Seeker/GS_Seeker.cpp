@@ -357,8 +357,6 @@ void AGS_Seeker::InitializeCameraManager()
 
 				// 초기 강도 0으로 설정
 				DetectionDynamicMaterial->SetScalarParameterValue(TEXT("DetectionIntensity"), 0.0f);
-
-				UE_LOG(LogTemp, Log, TEXT("[Detection] MPP_Detect 머티리얼 초기화 완료"));
 			}
 		}
 	}

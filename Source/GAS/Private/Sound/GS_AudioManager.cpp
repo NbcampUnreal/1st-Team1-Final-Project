@@ -11,6 +11,9 @@ UGS_AudioManager::UGS_AudioManager()
 	// 맵 BGM 상태 초기화
 	bIsMapBGMPlaying = false;
 
+	// BGM 볼륨 초기화
+	CurrentBGMVolume = 1.0f;
+
 	// 포인터 멤버 초기화
 	UIAudio = nullptr;
 
@@ -224,10 +227,10 @@ void UGS_AudioManager::StartMapBGM(AActor* Context)
 	// 게임 모드에 따른 조건부 타겟 액터 결정
 	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
-	// RTPC 볼륨을 먼저 1.0으로 설정
+	// RTPC 볼륨을 현재 볼륨으로 설정
 	if (MapBGMVolumeRTPC)
 	{
-		SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, 0.0f);
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, 0.0f);
 	}
 
 	// 실제 BGM 시작
@@ -287,6 +290,7 @@ void UGS_AudioManager::SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context,
 {
 	if (!RTPC)
 	{
+		UE_LOG(LogTemp, Error, TEXT("[AudioManager] SetRTPCValue: RTPC가 nullptr입니다!"));
 		return;
 	}
 
@@ -301,14 +305,40 @@ void UGS_AudioManager::SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context,
 		
 		if (Result != AK_Success)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("RTPC 설정 실패: %s = %.0f (Result: %d)"), 
+			UE_LOG(LogTemp, Error, TEXT("[AudioManager] RTPC 설정 실패: %s = %.0f (Result: %d)"), 
 				   *RTPC->GetName(), WwiseValue, (int32)Result);
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("SetRTPCValue: Wwise AudioDevice를 찾을 수 없습니다."));
+		UE_LOG(LogTemp, Error, TEXT("[AudioManager] Wwise AudioDevice를 찾을 수 없습니다!"));
 	}
+}
+
+// === BGM 볼륨 설정 ===
+
+void UGS_AudioManager::SetBGMVolume(float Volume)
+{
+	// 볼륨 값을 0.0~1.0 범위로 클램프하고 저장
+	CurrentBGMVolume = FMath::Clamp(Volume, 0.0f, 1.0f);
+	
+	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
+	if (!IsAudioProcessingAllowed())
+	{
+		return;
+	}
+
+	if (!MapBGMVolumeRTPC)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[AudioManager] MapBGMVolumeRTPC가 유효하지 않습니다!"));
+		return;
+	}
+
+	// 게임 모드에 따른 조건부 타겟 액터 결정
+	AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+
+	// RTPC 값 설정 (SetRTPCValue가 0~100 범위로 자동 변환함)
+	SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, 0.0f);
 }
 
 // === 통합 전투 시스템 ===
@@ -360,11 +390,11 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 	CurrentCombatMusicStartEvent = CombatMusicStartEvent;
 	CurrentCombatMusicStopEvent = CombatMusicStopEvent;
 
-	// 3. 맵 BGM RTPC를 즉시 0으로 설정 (전투 BGM이 들리도록)
+	// 3. 맵 BGM 즉시 정지
 	AActor* TargetActor = GetTargetActorForPlayback(nullptr);
-	if (MapBGMVolumeRTPC)
+	if (bIsMapBGMPlaying)
 	{
-		SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, 0.0f);
+		StopMapBGM(TargetActor);
 	}
 
 	// 4. 전투 BGM 즉시 시작
@@ -373,16 +403,10 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 		UAkGameplayStatics::PostEvent(CombatMusicStartEvent, Context, 0, FOnAkPostEventCallback());
 	}
 
-	// 5. 맵 BGM은 나중에 정리 (이미 RTPC가 0이므로 안 들림)
-	if (bIsMapBGMPlaying)
+	// 5. 전투 BGM에 현재 볼륨 적용 (Wwise에서 Music Bus에 RTPC가 연결되어 있어야 함)
+	if (MapBGMVolumeRTPC)
 	{
-		FTimerHandle MapBGMStopHandle;
-		GetWorld()->GetTimerManager().SetTimer(MapBGMStopHandle,
-			[this, TargetActor]()
-			{
-				StopMapBGM(TargetActor);
-			},
-			0.5f, false);
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, 0.0f);
 	}
 }
 
@@ -421,10 +445,10 @@ void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatM
 	CurrentCombatMusicStartEvent = nullptr;
 	CurrentCombatMusicStopEvent = nullptr;
 
-	// 3. MapBGMVolume RTPC를 100으로 설정 (맵 BGM이 들리도록)
+	// 3. MapBGMVolume RTPC를 현재 볼륨으로 설정 (맵 BGM이 들리도록)
 	if (MapBGMVolumeRTPC)
 	{
-		SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, FadeTime * 1000.0f);
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, FadeTime * 1000.0f);
 	}
 
 	// 4. 맵 BGM 복원 (RTPC가 이미 올라가고 있으므로 즉시 시작)
