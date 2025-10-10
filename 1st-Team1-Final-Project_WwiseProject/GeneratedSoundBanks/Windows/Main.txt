@@ -232,7 +232,6 @@ Switch	ID	Name	Switch Group			Notes
 Game Parameter	ID	Name			Wwise Object Path	Notes
 	181543522	LowHPSound			\Default Work Unit\LowHPSound	
 	1111830101	Distance_Volume			\Default Work Unit\Distance_Volume	
-	3561306875	MapBGMVolume			\Default Work Unit\MapBGMVolume	
 	3868840468	RTS_Base_20m			\Default Work Unit\RTS_Base_20m	
 
 Effect plug-ins	ID	Name	Type				Notes
@@ -351,7 +350,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	91323249	Hit02	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\36\{3639BF15-FE93-C243-E683-9D2D4DC7E276}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_MonsterSound\SFX_MeleeHit_Sword_RTS\SwordHit_02\Hit02		75552
 	100862515	ChanFinalAttackSound0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\41\{411CD87B-DE55-7F55-3F9F-26BC860EC44D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Chan\EV_ChanFinalAttackSound\ChanFinalAttackSound0		356512
 	107540085	SFX_SpikeTrap	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\86\{86BCC787-7896-A5DC-34C9-11CB3C5F7B34}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TPS\CystalWall\SFX_CrystalWallTrap\SFX_SpikeTrap		317612
-	111489786	SFX_PotionSippin	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A8\{A83C8AF6-13FD-B430-2BE7-08B71496301D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\SFX_PotionSippin		529340
+	111489786	SFX_PotionSippin	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\63\{63003E3C-1743-E4C6-E38B-A1138B1BFF2D}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\SFX_PotionSippin		529340
 	111629751	SFX_StoneTrap	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\7E\{7E07AC9F-F30E-09DA-F3DF-F9A47465E64A}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TPS\CystalWall\SFX_CrystalWallTrap_Warning\SFX_StoneTrap		151828
 	112081368	FootstepsDirt2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\C7\{C732EA7A-9736-F45C-4D0B-C55C65DB5D11}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\FootstepsDirt2		92188
 	115710175	FX_MagicShot__impact_01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F0\{F0480A02-813A-386C-7ADC-922FCCB3A630}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Projectile\SFX_NeedleFang_Shot\FX_MagicShot__impact_01		375476
@@ -590,7 +589,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	966061855	Stone_Accent	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A6\{A6D862F0-1670-A224-50F0-B3B9E780F4F3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TPS\StoneDoor\SFX_StoneDooor_Close\Stone_Accent		201204
 	966363054	Shield_whoosh	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\AB\{ABFD22F9-4870-56DA-131D-5AE7C5FC0264}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\EV_ChanAggroSkill_RTS\Chan_Grunt\Shield_whoosh		376812
 	969253722	FootstepsConcrete	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CA\{CAAFAB44-DA9A-54E9-E276-6B019EE9A9E3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Stone\FootstepsConcrete		49540
-	969585286	SFX_PotionSippin_End	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\ED\{ED49BABE-1077-3144-6382-B5EA95B645E7}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\SFX_PotionSippin_End		113548
+	969585286	SFX_PotionSippin_End	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\C9\{C920EEE9-A0A6-6453-DD1F-FF597C306831}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\SFX_PotionSippin_End		113548
 	980125505	StoneImpact0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\79\{794CC665-93DE-15BC-079F-A02180991290}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TPS\CystalWall\SFX_CystalCeilTrap_Warning\StoneImpact0		148796
 	992284103	AttackVoice0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\3E\{3EDE4200-BC9D-C236-1B10-7BD0E0BD4236}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\EV_AresSlashSkill_RTS\AttackVoice0		37520
 	993356452	Hit01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\FD\{FD348C57-0C66-C7B7-5FC5-DDE2903260D8}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_MonsterSound\SFX_MeleeHit_Sword_RTS\SwordHit_01\Hit01		117692
