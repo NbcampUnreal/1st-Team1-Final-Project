@@ -26,4 +26,12 @@ protected:
 
 private:
 	virtual void DeactiveSkill() override;
+
+	UFUNCTION()
+	void HandleStaminaDepleted(bool bByDamage);
+
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	int32 DeactiveMontageIndex;
 };

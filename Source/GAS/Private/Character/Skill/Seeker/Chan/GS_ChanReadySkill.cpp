@@ -44,7 +44,20 @@ void UGS_ChanReadySkill::ActiveSkill()
 
 		// 방어 상태 활성화
 		OwnerPlayer->SetDefending(true);
+
+		if (UAnimInstance* AnimInstance = OwnerPlayer->GetMesh()->GetAnimInstance())
+		{
+			// 중복 등록 방지
+			AnimInstance->OnMontageEnded.RemoveDynamic(this, &UGS_ChanReadySkill::OnMontageEnded);
+			AnimInstance->OnMontageEnded.AddDynamic(this, &UGS_ChanReadySkill::OnMontageEnded);
+		}
+
+		// 스테미나 이벤트 구독
+		OwnerPlayer->OnStaminaDepleted.AddUniqueDynamic(this, &UGS_ChanReadySkill::HandleStaminaDepleted);
 	}
+
+	// DeactiveMontageIndex 초기화
+	DeactiveMontageIndex = 0;
 }
 
 void UGS_ChanReadySkill::OnSkillCanceledByDebuff()
@@ -60,6 +73,7 @@ void UGS_ChanReadySkill::OnSkillCanceledByDebuff()
 
 void UGS_ChanReadySkill::OnSkillAnimationEnd()
 {
+	UE_LOG(LogTemp, Error, TEXT("OnSkillAnimationEnd - ChanReadySkill"));
 	Super::OnSkillAnimationEnd();
 
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
@@ -103,6 +117,42 @@ void UGS_ChanReadySkill::InterruptSkill()
 	OwnerPlayer->SetDefending(false);
 }
 
+void UGS_ChanReadySkill::HandleStaminaDepleted(bool bByDamage)
+{
+	if (bByDamage)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Stamina 0 - Cause Damage"));
+		// 기본 애니메이션
+		DeactiveMontageIndex = 1;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Stamina 0 - Cause Drain"));
+		// 기본 애니메이션
+		DeactiveMontageIndex = 0;
+	}
+}
+
+void UGS_ChanReadySkill::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (!OwnerCharacter) return;
+
+	if (SkillAnimMontages.Contains(Montage))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Montage Ended: %s (Interrupted: %s)"),
+			*Montage->GetName(),
+			bInterrupted ? TEXT("True") : TEXT("False"));
+
+		// 애니메이션 종료 처리 (Notify가 빠졌을 경우에도 안전하게)
+		OnSkillAnimationEnd();
+
+		if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
+		{
+			AnimInstance->OnMontageEnded.RemoveDynamic(this, &UGS_ChanReadySkill::OnMontageEnded);
+		}
+	}
+}
+
 void UGS_ChanReadySkill::DeactiveSkill()
 {
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
@@ -111,7 +161,18 @@ void UGS_ChanReadySkill::DeactiveSkill()
 		OwnerPlayer->SetCanHitReact(true);
 		OwnerPlayer->CanChangeSeekerGait = true;
 		OwnerPlayer->SetSeekerGait(EGait::Run);
-		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("LoopEnd"));
+
+		// 애니메이션 재생
+		FName SectionName = NAME_None;
+		if (DeactiveMontageIndex == 0)
+		{
+			SectionName = FName("LoopEnd");
+		}
+		else if (DeactiveMontageIndex == 1)
+		{
+			OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+		}
+		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[DeactiveMontageIndex], SectionName);
 
 		// 방어 상태 비활성화 (스킬 완전 종료 시)
 		OwnerPlayer->SetDefending(false);
@@ -120,3 +181,4 @@ void UGS_ChanReadySkill::DeactiveSkill()
 	// 스킬 상태 업데이트
 	Super::DeactiveSkill();
 }
+

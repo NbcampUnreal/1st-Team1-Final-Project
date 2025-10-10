@@ -52,37 +52,25 @@ void AGS_Chan::ResetCurrentStamina()
 	CurrentStamina = MaxStamina;
 }
 
-void AGS_Chan::SetCurrentStamina(float NewValue, bool SetbyDamage)
+void AGS_Chan::SetCurrentStamina(float NewValue, bool bByDamage)
 {
 	CurrentStamina = FMath::Clamp(NewValue, 0.f, MaxStamina);
 	Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
-	// UI 반영
-	/*if (SetbyDamage)
-	{
-		Client_UpdateChanAimingSkillBarDealy(CurrentStamina / MaxStamina);
-	}
-	else
-	{
-		Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
-	}*/
 
-	// 스테미나가 다 떨어지면 스킬
-	if (CurrentStamina <= 0.f && SkillComp && CurrentStamina > 0.f) // 직전 값 기준 체크
+	// 스테미나가 다 떨어지면 애니메이션 설정 후 Deactive
+	if (HasAuthority())
 	{
-		SkillComp->Server_TryDeactiveSkill(ESkillSlot::Aiming);
+		if (CurrentStamina <= 0.f && SkillComp) // 직전 값 기준 체크
+		{
+			OnStaminaDepleted.Broadcast(bByDamage);
+			SkillComp->Server_TryDeactiveSkill(ESkillSlot::Ready);
+		}
 	}
 }
 
 void AGS_Chan::DrainStaminaTick()
 {
 	SetCurrentStamina(CurrentStamina - StaminaDrainRate * 0.1f, false);
-	if (CurrentStamina <= 0.f)
-	{
-		SetDefending(false);
-
-		// 기본 애니메이션
-		Multicast_PlaySkillMontage(TakeDownShieldMontage, FName("LoopEnd"));
-	}
 }
 
 void AGS_Chan::RegenStaminaTick()

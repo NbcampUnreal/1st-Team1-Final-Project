@@ -61,7 +61,7 @@ void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 {
 	Super::OnSkillAnimationEnd();
 
-	UE_LOG(LogTemp, Warning, TEXT("OnSkillAnimationEnd ChanUltimateSkill"));
+	UE_LOG(LogTemp, Error, TEXT("OnSkillAnimationEnd ChanUltimateSkill"));
 	if(AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
@@ -72,7 +72,7 @@ void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 	if(AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController()))
 	{
 		Controller->SetIsAutoMoving(false);
-		//Controller->SetLookControlValue(true, true);
+		Controller->SetLookControlValue(true, true);
 	}
 
 	// 스킬 상태 업데이트

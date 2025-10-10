@@ -12,6 +12,8 @@ class AGS_WeaponAxe;
 class UGS_ChanAimingSkillBar;
 class UAkAudioEvent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaminaDepleted, bool, bByDamage);
+
 UCLASS()
 class GAS_API AGS_Chan : public AGS_Seeker
 {
@@ -106,6 +108,8 @@ public:
 	// =============
 	// 스테미나 관리
 	// =============
+	UPROPERTY(BlueprintAssignable, Category = "Stamina")
+	FOnStaminaDepleted OnStaminaDepleted;
 
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
 	float MaxStamina = 100.f;
