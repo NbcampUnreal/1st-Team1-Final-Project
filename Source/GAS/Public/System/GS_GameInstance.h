@@ -138,6 +138,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Settings")
     void LoadSettings();
 
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    float GetBGMVolume() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    void SetBGMVolume(float NewVolume);
+
  private:
      UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
      float MouseSensitivity;
@@ -147,4 +153,7 @@ public:
 
      UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
      float MaxSensitivity;
+
+     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+     float BGMVolume;
 };

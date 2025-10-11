@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{519EAC74-E5A1-067A-E89D-6095671E27CB}",
+    "Hash": "{0C3651D4-8D58-248A-1E94-5D94BA11AD76}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -245,7 +245,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_PotionSippin.wav",
-      "CachePath": "A8/{A83C8AF6-13FD-B430-2BE7-08B71496301D}.wem"
+      "CachePath": "63/{63003E3C-1743-E4C6-E38B-A1138B1BFF2D}.wem"
      },
      {
       "Id": "111629751",
@@ -2157,7 +2157,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_PotionSippin_End.wav",
-      "CachePath": "ED/{ED49BABE-1077-3144-6382-B5EA95B645E7}.wem"
+      "CachePath": "C9/{C920EEE9-A0A6-6453-DD1F-FF597C306831}.wem"
      },
      {
       "Id": "980125505",
@@ -7931,12 +7931,6 @@
       "GUID": "{CE0DA21D-B039-4D70-A62B-0321CD32566D}"
      },
      {
-      "Id": "3561306875",
-      "Name": "MapBGMVolume",
-      "ObjectPath": "\\Game Parameters\\Default Work Unit\\MapBGMVolume",
-      "GUID": "{2F3E4FB8-0714-4169-BAB2-33AE6207B7C7}"
-     },
-     {
       "Id": "3868840468",
       "Name": "RTS_Base_20m",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\RTS_Base_20m",
@@ -8035,6 +8029,6 @@
     ]
    }
   ],
-  "FileHash": "{F3794B31-9D29-82DE-949D-AACF9A5A37D3}"
+  "FileHash": "{0FFFF7B5-4719-B77C-E4C0-711E843B3A95}"
  }
 }
