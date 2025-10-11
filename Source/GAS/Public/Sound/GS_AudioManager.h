@@ -87,6 +87,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Audio|Map BGM", meta = (DisplayName = "맵 BGM 볼륨 RTPC"))
 	UAkRtpc* MapBGMVolumeRTPC;
 
+	// === 네이티브 오디오 시스템 지원 ===
+	UPROPERTY(EditDefaultsOnly, Category = "Audio|Map BGM", meta = (DisplayName = "BGM 사운드 클래스"))
+	USoundClass* BGMSoundClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio|Map BGM", meta = (DisplayName = "BGM 사운드 믹스"))
+	USoundMix* BGMSoundMix;
+
 private:
 	// 생성된·파괴 주기는 GameInstance와 동기화
 	UPROPERTY()
@@ -115,6 +122,9 @@ private:
 
 	// RTPC 헬퍼 함수
 	void SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context, float InterpolationTime = 0.0f);
+
+	// 네이티브 사운드 클래스 볼륨 조절 헬퍼 함수
+	void SetNativeSoundClassVolume(float Volume);
 
 	/**
 	* @brief 오디오 에셋의 유효성을 검사합니다.
