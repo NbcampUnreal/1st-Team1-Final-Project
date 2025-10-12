@@ -963,41 +963,10 @@ void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
 
 void AGS_Drakhar::MulticastPlayComboFinisherSound_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
-	{
-		return;
-	}
-
-	// 사운드 이벤트 유효성 검사
-	if (!ComboFinisherSoundEvent)
-	{
-		return;
-	}
-
-	// 멀티플레이어 환경에서 Wwise 시스템 안전성 체크
-	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-	if (!AudioDevice)
-	{
-		return;
-	}
-
-	if (!AudioDevice->IsInitialized())
-	{
-		return;
-	}
-
-	// Actor 유효성 검사
-	if (!IsValid(this))
-	{
-		return;
-	}
-
-	UAkGameplayStatics::PostEvent(
-		ComboFinisherSoundEvent, 
-		this,
-		0,
-		FOnAkPostEventCallback()
-	);
+    if (AudioComponent)
+    {
+        AudioComponent->PlayComboFinisherSound();
+    }
 }
 
 void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()

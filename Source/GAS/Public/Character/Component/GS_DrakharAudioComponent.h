@@ -32,6 +32,7 @@ public:
 	void PlayAttackHitSound();
 	void PlayFeverModeStartSound();
 	void PlayHurtSound();
+	void PlayComboFinisherSound();
 	void HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter);
 
 private:
@@ -41,6 +42,13 @@ private:
 	// 사운드 중복 재생 방지
 	bool bDraconicFurySoundPlayed;
 	bool bHurtSoundPlayed;
+
+	// 쿨다운 값
+	UPROPERTY(EditDefaultsOnly, Category = "Audio|Cooldown", meta=(ClampMin="0.1"))
+	float DraconicFurySoundCooldown = 7.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio|Cooldown", meta=(ClampMin="0.1"))
+	float HurtSoundCooldown = 1.0f;
 
 	// === Wwise 관련 헬퍼 함수 ===
 	void PlaySoundEvent(UAkAudioEvent* SoundEvent, const FVector& Location = FVector::ZeroVector);

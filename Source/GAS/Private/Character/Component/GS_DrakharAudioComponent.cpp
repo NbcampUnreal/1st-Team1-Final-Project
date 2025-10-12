@@ -51,10 +51,10 @@ void UGS_DrakharAudioComponent::PlayDraconicFurySkillSound()
 		bDraconicFurySoundPlayed = true;
 
 		FTimerHandle ResetSoundTimer;
-		GetWorld()->GetTimerManager().SetTimer(ResetSoundTimer, [this]()
+        GetWorld()->GetTimerManager().SetTimer(ResetSoundTimer, [this]()
 		{
 			bDraconicFurySoundPlayed = false;
-		}, 7.0f, false);
+        }, DraconicFurySoundCooldown, false);
 	}
 }
 
@@ -95,10 +95,10 @@ void UGS_DrakharAudioComponent::PlayHurtSound()
 
 		// N초 후에 다시 재생 가능하도록 설정
 		FTimerHandle ResetHurtSoundTimer;
-		GetWorld()->GetTimerManager().SetTimer(ResetHurtSoundTimer, [this]()
+        GetWorld()->GetTimerManager().SetTimer(ResetHurtSoundTimer, [this]()
 		{
 			bHurtSoundPlayed = false;
-		}, 1.0f, false);
+        }, HurtSoundCooldown, false);
 	}
 }
 
@@ -111,6 +111,35 @@ void UGS_DrakharAudioComponent::HandleDraconicProjectileImpact(const FVector& Im
 	{
 		PlaySoundEvent(SoundToPlay, ImpactLocation);
 	}
+}
+
+void UGS_DrakharAudioComponent::PlayComboFinisherSound()
+{
+    if (!OwnerDrakhar)
+    {
+        return;
+    }
+    if (!OwnerDrakhar->ComboFinisherSoundEvent)
+    {
+        return;
+    }
+    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+    {
+        return;
+    }
+
+    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+    if (!AudioDevice || !AudioDevice->IsInitialized())
+    {
+        return;
+    }
+
+    UAkGameplayStatics::PostEvent(
+        OwnerDrakhar->ComboFinisherSoundEvent,
+        OwnerDrakhar,
+        0,
+        FOnAkPostEventCallback()
+    );
 }
 
 // === Wwise 헬퍼 함수 구현 ===

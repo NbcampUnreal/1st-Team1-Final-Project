@@ -49,6 +49,16 @@ class GAS_API UGS_DrakharVFXComponent : public UActorComponent
 public:
 	UGS_DrakharVFXComponent();
 
+	// 파라미터명 상수화
+	static const FName Param_DashDirection;
+	static const FName Param_DashSpeed;
+	static const FName Param_Scale;
+	static const FName Param_CrackIntensity;
+	static const FName Param_CrackRadius;
+	static const FName Param_DustIntensity;
+	static const FName Param_DustRadius;
+	static const FName Param_WindStrength;
+
 	// ======================
 	// 디버프 VFX 제어 함수
 	// ======================
@@ -152,6 +162,19 @@ protected:
 
 	// Flying Dust VFX 위치 업데이트 타이머
 	FTimerHandle FlyingDustUpdateTimerHandle;
+
+	// 타이머/클린업 지연
+	UPROPERTY(EditDefaultsOnly, Category = "VFX|Timing", meta=(ClampMin="0.01"))
+	float FlyingDustUpdateInterval = 0.1f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX|Timing", meta=(ClampMin="0.01"))
+	float WingRushCleanupDelay = 2.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX|Timing", meta=(ClampMin="0.01"))
+	float DustCleanupDelay = 1.5f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX|Timing", meta=(ClampMin="0.01"))
+	float GroundCrackCleanupDelay = 3.0f;
 
 	// Flying Dust VFX 위치 업데이트 (Timer 콜백)
 	void UpdateFlyingDustVFXLocation();
