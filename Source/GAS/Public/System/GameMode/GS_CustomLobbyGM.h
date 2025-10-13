@@ -43,6 +43,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
 	int32 MinPlayersToStart = 1;
 
+private:
+	UPROPERTY()
+	TMap<FString, FString> PendingPlayerSessions;
+
 	//폰 배치
 public:
 	void HandlePlayerStateUpdated(AGS_PlayerState* UpdatedPlayerState);

@@ -9,6 +9,10 @@
 #include "Interfaces/OnlineFriendsInterface.h"
 #include "HttpModule.h"
 #include "Interfaces/IHttpResponse.h"
+#include "TimerManager.h"
+#include "OnlineSubsystem.h"
+#include "OnlineSubsystemSteam.h"
+#include "ThirdParty/Steamworks/Steamv157/sdk/public/steam/steam_api.h"
 #include "GS_GameInstance.generated.h"
 
 class APlayerController;
@@ -62,7 +66,19 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Network|Session Settings")
     int32 DefaultMaxLobbyPlayers;
 
-    // 세션 나가기
+    // ================================커스텀 게임을 위한 세션 자동 생성================================
+public:
+    void StartGameSessionPlacement(); // "커스텀 게임" 버튼이 호출할 함수
+
+private:
+    void OnStartPlacementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+    void PollPlacementStatus();
+    void OnPollPlacementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+
+    FTimerHandle PollPlacementTimerHandle;
+    FString CurrentPlacementId;
+    
+    // ================================세션 나가기================================
 public:
 	UFUNCTION(BlueprintCallable, Category = "Network|Session")
 	void GSLeaveSession(APlayerController* RequestingPlayer);
@@ -75,7 +91,7 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Network|Session Settings")
     FString MainMenuMapPath;
 
-    // 스팀 오버레이 초대
+    // ================================스팀 오버레이 초대================================
 protected:
     FString PendingConnectStringFromCmd;
 public:
@@ -107,7 +123,7 @@ protected:
 
 
     
-    //세션 생명주기 관리
+    // ================================세션 생명주기 관리================================
 public:
     UPROPERTY(BlueprintAssignable, Category = "Session")
     FOnPlayerCountChangedDelegate OnPlayerCountChanged;
@@ -116,12 +132,12 @@ private:
     UFUNCTION()
     void HandlePlayerCountChanged();
 
-    //타이머 넘기기
+    // ================================타이머 넘기기================================
 public:
     UPROPERTY(BlueprintReadWrite, Category = "Timer")
     float RemainingTime;
 
-    //플레이어 옵션 세팅
+    // ================================플레이어 옵션 세팅================================
 public:
     UFUNCTION(BlueprintCallable, Category = "Settings")
     float GetMouseSensitivity() const;
@@ -145,11 +161,16 @@ public:
      UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
      float MaxSensitivity;
 
-    //AWS GameLift
+    // ================================AWS GameLift================================
 private:
     void InitGameLift();
     void SetServerParameters(FServerParameters& OutServerParameters);
 
     TSharedPtr<FProcessParameters> ProcessParameters;
+
+    // ================================Steam Ticket================================
+private:
+    // 이전에 사용했던 티켓의 핸들을 저장할 변수
+    HAuthTicket LastAuthTicketHandle;
     
 };

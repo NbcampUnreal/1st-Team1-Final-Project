@@ -1,5 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+using System.IO;
 using UnrealBuildTool;
 
 public class GAS : ModuleRules
@@ -35,7 +36,8 @@ public class GAS : ModuleRules
             "NavigationSystem",
             "MediaAssets",
             "HTTP",
-            "Json"
+            "Json",
+            "GameplayTags"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
@@ -47,6 +49,16 @@ public class GAS : ModuleRules
 
             // Steamworks 라이브러리를 링크합니다.
             AddEngineThirdPartyPrivateStaticDependencies(Target, "Steamworks");
+        }
+        
+        bool bUseGameLiftAutomation = true; // EC2 버전을 빌드할 때는 true, 내부망 버전을 빌드할 때는 false로 변경
+        if (bUseGameLiftAutomation)
+        {
+	        PrivateDefinitions.Add("WITH_GAMELIFT_AUTOMATION=1");
+        }
+        else
+        {
+	        PrivateDefinitions.Add("WITH_GAMELIFT_AUTOMATION=0");
         }
 
         if (Target.bBuildEditor)
