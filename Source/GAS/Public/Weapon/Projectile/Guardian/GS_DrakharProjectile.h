@@ -114,14 +114,26 @@ protected:
 	float FallbackGroundZPosition = -1000.0f;
 
 private:
+	// === 타이머 핸들 ===
+
 	// 인디케이터 활성화 타이머 핸들 (레벨 전환 시 정리용)
 	FTimerHandle IndicatorActivateTimerHandle;
+
+	// 투사체 파괴 타이머 핸들 (레벨 전환 시 정리용)
+	FTimerHandle DestroyTimerHandle;
+
+	// 인디케이터 컴포넌트 정리 타이머 핸들 (레벨 전환 시 정리용)
+	FTimerHandle IndicatorCleanupTimerHandle;
+
+	// === 상태 플래그 ===
 
 	// 중복 충돌 방지 플래그
 	bool bHasHitTarget;
 
 	// 인디케이터 스케일 캐싱 (성능 최적화)
 	float CachedIndicatorScale;
+
+	// === 헬퍼 함수 ===
 
 	// 안전한 정리를 위한 헬퍼 함수
 	void CleanupIndicator();
@@ -132,4 +144,18 @@ private:
 
 	// 투사체 파괴 함수
 	void SafeDestroyProjectile();
+
+	// === 타이머 콜백 함수 ===
+
+	// 인디케이터 활성화
+	UFUNCTION()
+	void ActivateIndicator();
+
+	// 딜레이 후 투사체 파괴
+	UFUNCTION()
+	void DelayedDestroy();
+
+	// 인디케이터 컴포넌트 정리
+	UFUNCTION()
+	void CleanupIndicatorComponent();
 };

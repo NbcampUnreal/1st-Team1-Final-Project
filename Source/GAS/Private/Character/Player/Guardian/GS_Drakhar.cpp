@@ -183,6 +183,7 @@ void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	SafeClearTimer(ResetAttackTimer);
 	SafeClearTimer(HealthRegenTimer);
 	SafeClearTimer(HealthDelayTimer);
+	SafeClearTimer(DraconicAttackTimer);  // 궁극기 타이머 추가
 }
 
 void AGS_Drakhar::OnDamageStart()
@@ -745,13 +746,15 @@ void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
 	GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	MulticastRPC_OnUltimateStart();
 
-	// 타이머 설정 (레벨 전환 시 크래시 방지)
+	// 타이머 설정 (레벨 전환 시 크래시 방지) - 멤버 변수 사용
 	UWorld* World = GetWorld();
 	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
 	{
-		FTimerHandle DraconicFuryEndTimer;
+		// 기존 타이머가 있다면 먼저 정리
+		SafeClearTimer(DraconicAttackTimer);
+
 		World->GetTimerManager().SetTimer(
-			DraconicFuryEndTimer,
+			DraconicAttackTimer,  // 멤버 변수 사용!
 			this,
 			&AGS_Drakhar::EndDraconicFury,
 			DraconicAttackPersistenceTime,
@@ -770,11 +773,19 @@ void AGS_Drakhar::EndDraconicFury()
 	UE_LOG(LogTemp, Warning, TEXT("Draconic Fury Skill End"));
 	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT] Draconic Fury Skill End")));
 
-	GetSkillComp()->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
+	// 컴포넌트 안전성 체크
+	if (UGS_SkillComp* Skill = GetSkillComp())
+	{
+		Skill->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
+	}
+
 	GuardianState = EGuardianCtrlState::CtrlEnd;
 
 	MoveSpeed = NormalMoveSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+	{
+		Movement->MaxWalkSpeed = MoveSpeed;
+	}
 }
 
 void AGS_Drakhar::SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGaugeWidget)
@@ -800,7 +811,7 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 		{
 			CurrentFeverGauge = 0.f;
 
-			GetWorldTimerManager().ClearTimer(FeverTimer);
+			SafeClearTimer(FeverTimer);
 			if (IsFeverMode)
 			{
 				FGS_StatRow Stat;
@@ -831,7 +842,7 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 
 void AGS_Drakhar::ResetIsAttackingDuringFeverMode()
 {
-	GetWorldTimerManager().ClearTimer(ResetAttackTimer);
+	SafeClearTimer(ResetAttackTimer);
 	UWorld* TimerWorld = GetWorld();
 	if (TimerWorld && TimerWorld->IsValidLowLevel() && !TimerWorld->bIsTearingDown)
 	{
@@ -971,7 +982,7 @@ void AGS_Drakhar::HealRegeneration()
 
 void AGS_Drakhar::StopHealRegeneration()
 {
-	GetWorld()->GetTimerManager().ClearTimer(HealthRegenTimer);
+	SafeClearTimer(HealthRegenTimer);
 }
 
 void AGS_Drakhar::GenerateDraconicFuryTargets()

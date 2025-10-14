@@ -53,6 +53,8 @@ void AGS_DrakharProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	// 안전한 타이머 정리 - 레벨 전환 시 크래시 방지
 	SafeClearTimer(IndicatorActivateTimerHandle);
+	SafeClearTimer(DestroyTimerHandle);
+	SafeClearTimer(IndicatorCleanupTimerHandle);
 
 	// 인디케이터 정리 (메모리 누수 방지)
 	CleanupIndicator();
@@ -84,20 +86,21 @@ void AGS_DrakharProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherAct
 	// 충돌 처리
 	const bool bHitCharacter = TryApplyDamageToCharacter(OtherActor);
 
-	// 소유자에게 충돌 이벤트 알림 (안전한 호출)
+	// 소유자에게 충돌 이벤트 알림
 	NotifyOwnerOfImpact(Hit, bHitCharacter);
 
 	// 정리 및 파괴 (딜레이를 두어 이펙트 완료 보장)
-	FTimerHandle DestroyTimerHandle;
 	UWorld* World = GetWorld();
 	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
 	{
+		// 기존 타이머가 있다면 먼저 정리
+		SafeClearTimer(DestroyTimerHandle);
+
+		// 멤버 함수를 사용한 타이머 설정
 		World->GetTimerManager().SetTimer(
 			DestroyTimerHandle,
-			[this]()
-			{
-				SafeDestroyProjectile();
-			},
+			this,
+			&AGS_DrakharProjectile::DelayedDestroy,
 			0.1f, // 0.1초 딜레이로 이펙트 완료 보장
 			false
 		);
@@ -332,7 +335,7 @@ bool AGS_DrakharProjectile::FindGroundLocation(const FVector& TraceStartPoint, F
 
 	// 실패 시 Fallback 위치 사용
 	OutGroundLocation = FVector(TraceStartPoint.X, TraceStartPoint.Y, FallbackGroundZPosition);
-	return false;
+	return false; 
 }
 
 // === 인디케이터 나이아가라 컴포넌트 생성 및 설정 (성능 최적화) ===
@@ -414,23 +417,19 @@ void AGS_DrakharProjectile::ScheduleIndicatorActivation()
 	}
 
 	UWorld* World = GetWorld();
-	if (!World)
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
 	{
 		return;
 	}
 
-	// 약한 참조로 크래시 방지
-	TWeakObjectPtr<UNiagaraComponent> WeakIndicator = IndicatorComponent;
+	// 기존 타이머가 있다면 먼저 정리
+	SafeClearTimer(IndicatorActivateTimerHandle);
 
+	// 멤버 함수를 사용한 타이머 설정
 	World->GetTimerManager().SetTimer(
 		IndicatorActivateTimerHandle,
-		[WeakIndicator]()
-		{
-			if (WeakIndicator.IsValid() && !WeakIndicator->IsBeingDestroyed())
-			{
-				WeakIndicator->Activate(true);
-			}
-		},
+		this,
+		&AGS_DrakharProjectile::ActivateIndicator,
 		IndicatorActivationDelay,
 		false
 	);
@@ -493,25 +492,17 @@ void AGS_DrakharProjectile::CleanupIndicator()
 		IndicatorComponent->DeactivateImmediate();
 
 		// 시스템이 완전히 정지할 때까지 대기 후 파괴
-		FTimerHandle CleanupTimerHandle;
 		UWorld* World = GetWorld();
 		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
 		{
-			// 약한 참조를 통한 안전한 캡처
-			TWeakObjectPtr<AGS_DrakharProjectile> WeakThis(this);
+			// 기존 타이머가 있다면 먼저 정리
+			SafeClearTimer(IndicatorCleanupTimerHandle);
+
+			// 멤버 함수를 사용한 타이머 설정
 			World->GetTimerManager().SetTimer(
-				CleanupTimerHandle,
-				[WeakThis]()
-				{
-					AGS_DrakharProjectile* StrongThis = WeakThis.Get();
-					if (StrongThis && StrongThis->IndicatorComponent &&
-						IsValid(StrongThis->IndicatorComponent) &&
-						!StrongThis->IndicatorComponent->IsBeingDestroyed())
-					{
-						StrongThis->IndicatorComponent->DestroyComponent();
-						StrongThis->IndicatorComponent = nullptr;
-					}
-				},
+				IndicatorCleanupTimerHandle,
+				this,
+				&AGS_DrakharProjectile::CleanupIndicatorComponent,
 				0.1f, // 0.1초 후 정리
 				false
 			);
@@ -572,4 +563,50 @@ void AGS_DrakharProjectile::SafeDestroyProjectile()
 
 	// 투사체 파괴
 	Destroy();
+}
+
+// === 인디케이터 활성화 (타이머 콜백) ===
+void AGS_DrakharProjectile::ActivateIndicator()
+{
+	// 생명주기 및 월드 검증
+	if (!IsValid(this) || !IsWorldContextValid())
+	{
+		return;
+	}
+
+	// 인디케이터 컴포넌트 검증 및 활성화
+	if (IndicatorComponent && IsValid(IndicatorComponent) && !IndicatorComponent->IsBeingDestroyed())
+	{
+		IndicatorComponent->Activate(true);
+	}
+}
+
+// === 딜레이 후 투사체 파괴 (타이머 콜백) ===
+void AGS_DrakharProjectile::DelayedDestroy()
+{
+	// 생명주기 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 투사체 파괴 수행
+	SafeDestroyProjectile();
+}
+
+// === 인디케이터 컴포넌트 정리 (타이머 콜백) ===
+void AGS_DrakharProjectile::CleanupIndicatorComponent()
+{
+	// 생명주기 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 인디케이터 컴포넌트 검증 및 파괴
+	if (IndicatorComponent && IsValid(IndicatorComponent) && !IndicatorComponent->IsBeingDestroyed())
+	{
+		IndicatorComponent->DestroyComponent();
+		IndicatorComponent = nullptr;
+	}
 }
