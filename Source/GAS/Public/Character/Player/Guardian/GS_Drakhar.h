@@ -257,6 +257,10 @@ public:
 	UNiagaraSystem* FeverDraconicProjectileImpactVFX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Fever Projectile Explosion VFX"))
 	UNiagaraSystem* FeverDraconicProjectileExplosionVFX;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Normal Mode Indicator VFX"))
+	UNiagaraSystem* DraconicFuryIndicatorVFX;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Fever Mode Indicator VFX"))
+	UNiagaraSystem* FeverDraconicFuryIndicatorVFX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever Footstep VFX"))
 	UNiagaraSystem* FeverFootstepVFX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Flying Dust VFX"))
@@ -300,6 +304,13 @@ public:
 	
 	FORCEINLINE UGS_DrakharVFXComponent* GetDrakharVFXComponent() const { return DrakharVFXComponent; }
 	FORCEINLINE UGS_DrakharAudioComponent* GetAudioComponent() const { return AudioComponent; }
+
+	// 궁극기 타겟 배열 접근자 (인디케이터용)
+	FORCEINLINE const TArray<FTransform>& GetDraconicFuryTargetArray() const { return DraconicFuryTargetArray; }
+	FORCEINLINE const FVector& GetFeverModeDraconicFurySpawnLocation() const { return FeverModeDraconicFurySpawnLocation; }
+
+	// 궁극기 타겟 생성 함수 (public으로 노출)
+	void GenerateDraconicFuryTargets();
 
 private:
 	//move spring arm for flying

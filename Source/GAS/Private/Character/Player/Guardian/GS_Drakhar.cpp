@@ -653,30 +653,46 @@ void AGS_Drakhar::StopCtrl()
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 {
 	MulticastPlayDraconicFurySkillSound();
-	
+
 	FActorSpawnParameters Params;
 	Params.Instigator = this;
 	Params.Owner = this;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	
+
 	if (IsFeverMode)
 	{
-		FeverModeDraconicFurySpawnLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f,0.f, 600.f);
+		// 이미 생성된 피버 모드 위치 사용 (GenerateDraconicFuryTargets()에서 생성됨)
 		FRotator SpawnRotation = GetActorRotation();
 		float RandomPitch = FMath::FRandRange(-35.f, -30.f);
 		SpawnRotation.Pitch += RandomPitch;
 		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(FeverDraconicProjectile, FeverModeDraconicFurySpawnLocation, SpawnRotation, Params);
+		
+		if (DrakharProjectile && FeverDraconicFuryIndicatorVFX)
+		{
+			// 피버 모드 인디케이터 VFX 설정 (더 큰 반경)
+			float FeverIndicatorRadius = 250.0f * 1.5f; // 피버 모드는 1.5배 반경
+			DrakharProjectile->SetIndicatorVFX(FeverDraconicFuryIndicatorVFX, FeverIndicatorRadius);
+		}
 	}
 	else
 	{
-		GetRandomDraconicFuryTarget();
-
-		int32 Index = FMath::RandRange(0, DraconicFuryTargetArray.Num() - 1);
-		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[Index].GetLocation(), DraconicFuryTargetArray[Index].Rotator(), Params);
-		
-		if (DrakharProjectile)
+		// 이미 생성된 타겟 배열 사용 (GenerateDraconicFuryTargets()에서 생성됨)
+		if (DraconicFuryTargetArray.Num() > 0)
 		{
-			MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
+			int32 Index = FMath::RandRange(0, DraconicFuryTargetArray.Num() - 1);
+			AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[Index].GetLocation(), DraconicFuryTargetArray[Index].Rotator(), Params);
+
+			if (DrakharProjectile)
+			{
+				// 일반 모드 인디케이터 VFX 설정
+				if (DraconicFuryIndicatorVFX)
+				{
+					float NormalIndicatorRadius = 250.0f; // 일반 모드 반경
+					DrakharProjectile->SetIndicatorVFX(DraconicFuryIndicatorVFX, NormalIndicatorRadius);
+				}
+				
+				MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
+			}
 		}
 	}
 }
@@ -895,6 +911,20 @@ void AGS_Drakhar::HealRegeneration()
 void AGS_Drakhar::StopHealRegeneration()
 {
 	GetWorld()->GetTimerManager().ClearTimer(HealthRegenTimer);
+}
+
+void AGS_Drakhar::GenerateDraconicFuryTargets()
+{
+	// 피버 모드일 경우 피버 모드 위치 생성
+	if (IsFeverMode)
+	{
+		FeverModeDraconicFurySpawnLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 600.f);
+	}
+	// 일반 모드일 경우 5개의 랜덤 위치 생성
+	else
+	{
+		GetRandomDraconicFuryTarget();
+	}
 }
 
 void AGS_Drakhar::GetRandomDraconicFuryTarget()
