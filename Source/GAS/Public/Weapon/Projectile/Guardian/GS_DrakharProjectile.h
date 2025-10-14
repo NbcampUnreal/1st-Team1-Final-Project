@@ -116,8 +116,20 @@ protected:
 private:
 	// 인디케이터 활성화 타이머 핸들 (레벨 전환 시 정리용)
 	FTimerHandle IndicatorActivateTimerHandle;
-	
+
+	// 중복 충돌 방지 플래그
+	bool bHasHitTarget;
+
+	// 인디케이터 스케일 캐싱 (성능 최적화)
+	float CachedIndicatorScale;
+
 	// 안전한 정리를 위한 헬퍼 함수
 	void CleanupIndicator();
 	bool IsWorldContextValid() const;
+
+	// 타이머 정리 함수 (레벨 전환 시 크래시 방지)
+	void SafeClearTimer(FTimerHandle& TimerHandle);
+
+	// 투사체 파괴 함수
+	void SafeDestroyProjectile();
 };

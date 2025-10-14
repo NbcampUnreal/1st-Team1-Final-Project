@@ -178,10 +178,11 @@ void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	GetWorldTimerManager().ClearTimer(FeverTimer);
-	GetWorldTimerManager().ClearTimer(ResetAttackTimer);
-	GetWorldTimerManager().ClearTimer(HealthRegenTimer);
-	GetWorldTimerManager().ClearTimer(HealthDelayTimer);
+	// 타이머 정리 (레벨 전환 시 크래시 방지)
+	SafeClearTimer(FeverTimer);
+	SafeClearTimer(ResetAttackTimer);
+	SafeClearTimer(HealthRegenTimer);
+	SafeClearTimer(HealthDelayTimer);
 }
 
 void AGS_Drakhar::OnDamageStart()
@@ -190,8 +191,12 @@ void AGS_Drakhar::OnDamageStart()
 
 	StopHealRegeneration();
 	
-	//timer start
-	GetWorld()->GetTimerManager().SetTimer(HealthDelayTimer,this,&AGS_Drakhar::BeginHealRegeneration,5.f,false);
+	//timer start (타이머 설정)
+	UWorld* World = GetWorld();
+	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+	{
+		World->GetTimerManager().SetTimer(HealthDelayTimer, this, &AGS_Drakhar::BeginHealRegeneration, 5.f, false);
+	}
 	
 	// 피격 사운드 재생
 	if (HasAuthority())
@@ -652,6 +657,19 @@ void AGS_Drakhar::StopCtrl()
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 {
+	// 월드 검증 및 생명주기 체크
+	if (!IsWorldContextValid() || !IsValid(this))
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	// 사운드 재생 (월드 검증 후)
 	MulticastPlayDraconicFurySkillSound();
 
 	FActorSpawnParameters Params;
@@ -661,12 +679,14 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 
 	if (IsFeverMode)
 	{
-		// 이미 생성된 피버 모드 위치 사용 (GenerateDraconicFuryTargets()에서 생성됨)
+		// 피버 모드: 드라카의 현재 위치 기준으로 앞쪽에 투사체 소환
+		FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 600.f);
 		FRotator SpawnRotation = GetActorRotation();
 		float RandomPitch = FMath::FRandRange(-35.f, -30.f);
 		SpawnRotation.Pitch += RandomPitch;
-		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(FeverDraconicProjectile, FeverModeDraconicFurySpawnLocation, SpawnRotation, Params);
-		
+
+		AGS_DrakharProjectile* DrakharProjectile = World->SpawnActor<AGS_DrakharProjectile>(FeverDraconicProjectile, SpawnLocation, SpawnRotation, Params);
+
 		if (DrakharProjectile && FeverDraconicFuryIndicatorVFX)
 		{
 			// 피버 모드 인디케이터 VFX 설정 (더 큰 반경)
@@ -676,29 +696,47 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 	}
 	else
 	{
-		// 이미 생성된 타겟 배열 사용 (GenerateDraconicFuryTargets()에서 생성됨)
-		if (DraconicFuryTargetArray.Num() > 0)
-		{
-			int32 Index = FMath::RandRange(0, DraconicFuryTargetArray.Num() - 1);
-			AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[Index].GetLocation(), DraconicFuryTargetArray[Index].Rotator(), Params);
+		// 일반 모드: 드라카의 현재 위치 기준으로 랜덤 위치에 투사체 소환
+		FVector BaseLocation = GetActorLocation();
+		FVector RandomOffset = GetActorForwardVector() * 200.f + FVector(
+			FMath::FRandRange(-300.f, 300.f),
+			FMath::FRandRange(-300.f, 300.f),
+			FMath::FRandRange(500.f, 600.f)
+		);
 
-			if (DrakharProjectile)
+		FVector SpawnLocation = BaseLocation + RandomOffset;
+		FRotator SpawnRotation = GetActorRotation();
+		float RandomPitch = FMath::FRandRange(-35.f, -30.f);
+		SpawnRotation.Pitch += RandomPitch;
+
+		AGS_DrakharProjectile* DrakharProjectile = World->SpawnActor<AGS_DrakharProjectile>(
+			DraconicProjectile,
+			SpawnLocation,
+			SpawnRotation,
+			Params
+		);
+
+		if (DrakharProjectile)
+		{
+			if (DraconicFuryIndicatorVFX)
 			{
-				// 일반 모드 인디케이터 VFX 설정
-				if (DraconicFuryIndicatorVFX)
-				{
-					float NormalIndicatorRadius = 250.0f; // 일반 모드 반경
-					DrakharProjectile->SetIndicatorVFX(DraconicFuryIndicatorVFX, NormalIndicatorRadius);
-				}
-				
-				MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
+				float NormalIndicatorRadius = 250.0f; // 일반 모드 반경
+				DrakharProjectile->SetIndicatorVFX(DraconicFuryIndicatorVFX, NormalIndicatorRadius);
 			}
+
+			MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
 		}
 	}
 }
 
 void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
 {
+	// 월드 검증 및 생명주기 체크
+	if (!IsWorldContextValid() || !IsValid(this))
+	{
+		return;
+	}
+
 	if (GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
 	{
 		return;
@@ -707,20 +745,31 @@ void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
 	GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	MulticastRPC_OnUltimateStart();
 
-	FTimerHandle DraconicFuryEndTimer;
-	GetWorld()->GetTimerManager().SetTimer(
-		DraconicFuryEndTimer,
-		this,
-		&AGS_Drakhar::EndDraconicFury,
-		DraconicAttackPersistenceTime,
-		false);
+	// 타이머 설정 (레벨 전환 시 크래시 방지)
+	UWorld* World = GetWorld();
+	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+	{
+		FTimerHandle DraconicFuryEndTimer;
+		World->GetTimerManager().SetTimer(
+			DraconicFuryEndTimer,
+			this,
+			&AGS_Drakhar::EndDraconicFury,
+			DraconicAttackPersistenceTime,
+			false);
+	}
 }
 
 void AGS_Drakhar::EndDraconicFury()
 {
+	// 월드 검증 및 생명주기 체크
+	if (!IsWorldContextValid() || !IsValid(this))
+	{
+		return;
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("Draconic Fury Skill End"));
 	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT] Draconic Fury Skill End")));
-	
+
 	GetSkillComp()->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
 	GuardianState = EGuardianCtrlState::CtrlEnd;
 
@@ -783,7 +832,11 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 void AGS_Drakhar::ResetIsAttackingDuringFeverMode()
 {
 	GetWorldTimerManager().ClearTimer(ResetAttackTimer);
-	GetWorldTimerManager().SetTimer(ResetAttackTimer, this, &AGS_Drakhar::StartIsAttackingTimer, 3.f, false);
+	UWorld* TimerWorld = GetWorld();
+	if (TimerWorld && TimerWorld->IsValidLowLevel() && !TimerWorld->bIsTearingDown)
+	{
+		TimerWorld->GetTimerManager().SetTimer(ResetAttackTimer, this, &AGS_Drakhar::StartIsAttackingTimer, 3.f, false);
+	}
 }
 
 void AGS_Drakhar::StartIsAttackingTimer()
@@ -872,7 +925,11 @@ void AGS_Drakhar::StartFeverMode()
 
 void AGS_Drakhar::DecreaseFeverGauge()
 {
-	GetWorldTimerManager().SetTimer(FeverTimer, this, &AGS_Drakhar::MinusFeverGaugeValue, 1.f, true);
+	UWorld* FeverWorld = GetWorld();
+	if (FeverWorld && FeverWorld->IsValidLowLevel() && !FeverWorld->bIsTearingDown)
+	{
+		FeverWorld->GetTimerManager().SetTimer(FeverTimer, this, &AGS_Drakhar::MinusFeverGaugeValue, 1.f, true);
+	}
 }
 
 void AGS_Drakhar::MinusFeverGaugeValue()
@@ -896,7 +953,11 @@ void AGS_Drakhar::BeginHealRegeneration()
 	bIsDamaged = false;
 	
 	//health regeneration start
-	GetWorld()->GetTimerManager().SetTimer(HealthRegenTimer, this, &AGS_Drakhar::HealRegeneration,1.f,true);
+	UWorld* RegenWorld = GetWorld();
+	if (RegenWorld && RegenWorld->IsValidLowLevel() && !RegenWorld->bIsTearingDown)
+	{
+		RegenWorld->GetTimerManager().SetTimer(HealthRegenTimer, this, &AGS_Drakhar::HealRegeneration, 1.f, true);
+	}
 }
 
 void AGS_Drakhar::HealRegeneration()
@@ -1139,4 +1200,29 @@ void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
 void AGS_Drakhar::Multicast_PlayBloodEffect_Implementation(FVector HitLocation, FVector HitNormal, float Scale)
 {
 	UGS_VFX_FunctionLibrary::PlayBloodEffect(this, BloodEffectSystem, HitLocation, FRotationMatrix::MakeFromZ(HitNormal).Rotator(), Scale);
+}
+
+// === 월드 컨텍스트 검증 함수 ===
+bool AGS_Drakhar::IsWorldContextValid() const
+{
+	UWorld* World = GetWorld();
+	return World &&
+		   World->IsValidLowLevel() &&
+		   !World->bIsTearingDown &&
+		   IsValid(World) &&
+		   IsValid(this);
+}
+
+// === 타이머 정리 함수 ===
+void AGS_Drakhar::SafeClearTimer(FTimerHandle& TimerHandle)
+{
+	if (TimerHandle.IsValid())
+	{
+		UWorld* World = GetWorld();
+		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+		{
+			World->GetTimerManager().ClearTimer(TimerHandle);
+		}
+		TimerHandle.Invalidate();
+	}
 }

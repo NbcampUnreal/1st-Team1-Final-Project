@@ -20,6 +20,8 @@ AGS_DrakharProjectile::AGS_DrakharProjectile()
 	IndicatorVFX = nullptr;
 	IndicatorComponent = nullptr;
 	IndicatorRadius = 250.0f;
+	bHasHitTarget = false;
+	CachedIndicatorScale = 1.0f; // 이전 스케일 값을 저장할 멤버 변수
 }
 
 void AGS_DrakharProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -49,29 +51,19 @@ void AGS_DrakharProjectile::BeginPlay()
 
 void AGS_DrakharProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	// 타이머 정리
-	if (UWorld* World = GetWorld())
-	{
-		if (World->IsValidLowLevel() && !World->bIsTearingDown)
-		{
-			FTimerManager& TimerManager = World->GetTimerManager();
-			if (IndicatorActivateTimerHandle.IsValid())
-			{
-				TimerManager.ClearTimer(IndicatorActivateTimerHandle);
-				IndicatorActivateTimerHandle.Invalidate();
-			}
-		}
-	}
-	
+	// 안전한 타이머 정리 - 레벨 전환 시 크래시 방지
+	SafeClearTimer(IndicatorActivateTimerHandle);
+
+	// 인디케이터 정리 (메모리 누수 방지)
 	CleanupIndicator();
-	
+
 	Super::EndPlay(EndPlayReason);
 }
 
 void AGS_DrakharProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	// Early return: 레벨 전환 중 체크
-	if (!IsWorldContextValid())
+	// Early return: 레벨 전환 중 체크 및 생명주기 검증
+	if (!IsWorldContextValid() || !IsValid(this))
 	{
 		return;
 	}
@@ -82,15 +74,39 @@ void AGS_DrakharProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherAct
 		return;
 	}
 
+	// 중복 충돌 방지 (이미 파괴된 상태인지 확인)
+	if (bHasHitTarget)
+	{
+		return;
+	}
+	bHasHitTarget = true;
+
 	// 충돌 처리
 	const bool bHitCharacter = TryApplyDamageToCharacter(OtherActor);
 
-	// 소유자에게 충돌 이벤트 알림
+	// 소유자에게 충돌 이벤트 알림 (안전한 호출)
 	NotifyOwnerOfImpact(Hit, bHitCharacter);
 
-	// 정리 및 파괴
-	CleanupIndicator();
-	Destroy();
+	// 정리 및 파괴 (딜레이를 두어 이펙트 완료 보장)
+	FTimerHandle DestroyTimerHandle;
+	UWorld* World = GetWorld();
+	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+	{
+		World->GetTimerManager().SetTimer(
+			DestroyTimerHandle,
+			[this]()
+			{
+				SafeDestroyProjectile();
+			},
+			0.1f, // 0.1초 딜레이로 이펙트 완료 보장
+			false
+		);
+	}
+	else
+	{
+		// 월드가 유효하지 않으면 즉시 정리
+		SafeDestroyProjectile();
+	}
 }
 
 // === 캐릭터에게 데미지 적용 시도 ===
@@ -163,12 +179,12 @@ void AGS_DrakharProjectile::SetIndicatorVFX(UNiagaraSystem* InIndicatorVFX, floa
 {
 	IndicatorVFX = InIndicatorVFX;
 	IndicatorRadius = InIndicatorRadius;
-	
+
 	// VFX 설정 완료
-	
+
 	// 서버에서만 VFX가 설정되면 즉시 인디케이터 생성
 	// 클라이언트는 OnRep_IndicatorVFX에서 생성
-	if (HasAuthority())
+	if (HasAuthority() && IsWorldContextValid())
 	{
 		SpawnGroundIndicator();
 	}
@@ -177,11 +193,11 @@ void AGS_DrakharProjectile::SetIndicatorVFX(UNiagaraSystem* InIndicatorVFX, floa
 void AGS_DrakharProjectile::OnRep_IndicatorVFX()
 {
 	// 레벨 전환 중에는 VFX 생성하지 않음
-	if (!IsWorldContextValid())
+	if (!IsWorldContextValid() || !IndicatorVFX)
 	{
 		return;
 	}
-		
+
 	// 클라이언트에서 리플리케이트된 VFX로 인디케이터 생성
 	SpawnGroundIndicator();
 }
@@ -248,22 +264,32 @@ bool AGS_DrakharProjectile::PredictProjectileImpactLocation(FVector& OutImpactLo
 	return false;
 }
 
-// === 특정 지점에서 지면을 찾아 위치 반환 ===
+// === 특정 지점에서 지면을 찾아 위치 반환 (성능 최적화) ===
 bool AGS_DrakharProjectile::FindGroundLocation(const FVector& TraceStartPoint, FVector& OutGroundLocation)
 {
 	UWorld* World = GetWorld();
 	if (!World)
 	{
+		OutGroundLocation = FVector(TraceStartPoint.X, TraceStartPoint.Y, FallbackGroundZPosition);
 		return false;
 	}
 
-	// 트레이스 시작/끝 지점 설정
+	// 빠른 실패 체크를 위한 조기 반환
+	if (!IsWorldContextValid())
+	{
+		OutGroundLocation = FVector(TraceStartPoint.X, TraceStartPoint.Y, FallbackGroundZPosition);
+		return false;
+	}
+
+	// 트레이스 시작/끝 지점 설정 (캐싱으로 최적화)
 	const FVector GroundTraceStart = FVector(TraceStartPoint.X, TraceStartPoint.Y, TraceStartPoint.Z + GroundTraceUpOffset);
 	const FVector GroundTraceEnd = FVector(TraceStartPoint.X, TraceStartPoint.Y, TraceStartPoint.Z - GroundTraceDownOffset);
 
-	// 충돌 쿼리 파라미터 설정
+	// 쿼리 파라미터 설정 (멀티플레이 안전성을 위해 매번 생성)
 	FCollisionQueryParams GroundParams;
 	GroundParams.AddIgnoredActor(this);
+
+	// 동적 무시 액터 추가 (변경될 수 있으므로 매번 체크)
 	if (GetInstigator())
 	{
 		GroundParams.AddIgnoredActor(GetInstigator());
@@ -273,7 +299,7 @@ bool AGS_DrakharProjectile::FindGroundLocation(const FVector& TraceStartPoint, F
 		GroundParams.AddIgnoredActor(GetOwner());
 	}
 
-	// 투사체의 모든 컴포넌트 무시
+	// 투사체의 모든 컴포넌트 무시 (멀티플레이 환경에서 안전하게 매번 생성)
 	TArray<UPrimitiveComponent*> ProjectileComponents;
 	GetComponents<UPrimitiveComponent>(ProjectileComponents);
 	for (UPrimitiveComponent* Component : ProjectileComponents)
@@ -286,39 +312,21 @@ bool AGS_DrakharProjectile::FindGroundLocation(const FVector& TraceStartPoint, F
 
 	FHitResult GroundHit;
 
-	// 1차 시도: WorldStatic 오브젝트만 감지
+	// 1차 시도: WorldStatic 오브젝트만 감지 (가장 일반적인 경우)
 	FCollisionObjectQueryParams ObjectParams;
 	ObjectParams.AddObjectTypesToQuery(ECC_WorldStatic);
 
-	bool bGroundFound = World->LineTraceSingleByObjectType(
-		GroundHit,
-		GroundTraceStart,
-		GroundTraceEnd,
-		ObjectParams,
-		GroundParams
-	);
-
-	if (bGroundFound)
+	if (World->LineTraceSingleByObjectType(GroundHit, GroundTraceStart, GroundTraceEnd, ObjectParams, GroundParams))
 	{
 		OutGroundLocation = GroundHit.ImpactPoint;
-		// WorldStatic 지면 발견
 		return true;
 	}
 
-	// 2차 시도: WorldDynamic도 포함
+	// 2차 시도: WorldDynamic도 포함 (덜 일반적인 경우)
 	ObjectParams.AddObjectTypesToQuery(ECC_WorldDynamic);
-	bGroundFound = World->LineTraceSingleByObjectType(
-		GroundHit,
-		GroundTraceStart,
-		GroundTraceEnd,
-		ObjectParams,
-		GroundParams
-	);
-
-	if (bGroundFound)
+	if (World->LineTraceSingleByObjectType(GroundHit, GroundTraceStart, GroundTraceEnd, ObjectParams, GroundParams))
 	{
 		OutGroundLocation = GroundHit.ImpactPoint;
-		// WorldDynamic 지면 발견
 		return true;
 	}
 
@@ -327,12 +335,35 @@ bool AGS_DrakharProjectile::FindGroundLocation(const FVector& TraceStartPoint, F
 	return false;
 }
 
-// === 인디케이터 나이아가라 컴포넌트 생성 및 설정 ===
+// === 인디케이터 나이아가라 컴포넌트 생성 및 설정 (성능 최적화) ===
 void AGS_DrakharProjectile::CreateAndConfigureIndicator(const FVector& Location)
 {
 	UWorld* World = GetWorld();
-	if (!World || !IndicatorVFX)
+	if (!World || !IndicatorVFX || !IsWorldContextValid())
 	{
+		return;
+	}
+
+	// 이미 생성된 인디케이터가 있는지 확인 (중복 생성 방지)
+	if (IndicatorComponent && IsValid(IndicatorComponent) && !IndicatorComponent->IsBeingDestroyed())
+	{
+		// 기존 인디케이터 위치 업데이트 (멀티플레이 안전성 보장)
+		FVector CurrentLocation = IndicatorComponent->GetComponentLocation();
+		if (!CurrentLocation.Equals(Location, 1.0f)) // 위치 비교 오차 허용
+		{
+			IndicatorComponent->SetWorldLocation(Location);
+		}
+
+		// 스케일 업데이트 (반경이 변경되었을 가능성)
+		const float CurrentScale = IndicatorRadius / DefaultIndicatorRadius;
+
+		// 이전 스케일 값과 비교 (캐싱된 값 사용)
+		if (!FMath::IsNearlyEqual(CurrentScale, CachedIndicatorScale))
+		{
+			IndicatorComponent->SetVectorParameter(FName("Scale_All"), FVector(CurrentScale, CurrentScale, CurrentScale));
+			IndicatorComponent->SetFloatParameter(FName("CurrentScale"), CurrentScale);
+			CachedIndicatorScale = CurrentScale; // 캐시 업데이트
+		}
 		return;
 	}
 
@@ -355,13 +386,18 @@ void AGS_DrakharProjectile::CreateAndConfigureIndicator(const FVector& Location)
 		return;
 	}
 
-	// 스케일 계산 및 적용
+	// 스케일 계산 및 적용 (현재 스케일도 저장)
 	const float Scale = IndicatorRadius / DefaultIndicatorRadius;
 	IndicatorComponent->SetVectorParameter(FName("Scale_All"), FVector(Scale, Scale, Scale));
+	IndicatorComponent->SetFloatParameter(FName("CurrentScale"), Scale);
+	CachedIndicatorScale = Scale; // 캐시 초기화
 
-	// 나이아가라 파라미터 설정
-	IndicatorComponent->SetFloatParameter(FName("SpawnDelay"), IndicatorSpawnDelay);
-	IndicatorComponent->SetFloatParameter(FName("InitialAlpha"), 0.0f);
+	// 나이아가라 파라미터 설정 (캐싱으로 최적화)
+	static const FName SpawnDelayName = FName("SpawnDelay");
+	static const FName InitialAlphaName = FName("InitialAlpha");
+
+	IndicatorComponent->SetFloatParameter(SpawnDelayName, IndicatorSpawnDelay);
+	IndicatorComponent->SetFloatParameter(InitialAlphaName, 0.0f);
 
 	// 투사체와 함께 관리하기 위해 AutoDestroy 비활성화
 	IndicatorComponent->SetAutoDestroy(false);
@@ -400,16 +436,20 @@ void AGS_DrakharProjectile::ScheduleIndicatorActivation()
 	);
 }
 
-// === 지면에 인디케이터 생성 (메인 함수) ===
+// === 지면에 인디케이터 생성 ===
 void AGS_DrakharProjectile::SpawnGroundIndicator()
 {
-	// Early return: 월드 검증
-	if (!IsWorldContextValid())
+	// Early return: 월드 검증 및 생명주기 체크
+	if (!IsWorldContextValid() || !IsValid(this))
 	{
 		return;
 	}
 
 	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
 
 	// Early return: 데디케이티드 서버에서는 VFX 불필요
 	if (World->GetNetMode() == NM_DedicatedServer)
@@ -444,35 +484,92 @@ void AGS_DrakharProjectile::SpawnGroundIndicator()
 void AGS_DrakharProjectile::CleanupIndicator()
 {
 	// 타이머 정리
-	if (IndicatorActivateTimerHandle.IsValid())
-	{
-		if (UWorld* World = GetWorld())
-		{
-			if (World->IsValidLowLevel() && !World->bIsTearingDown)
-			{
-				World->GetTimerManager().ClearTimer(IndicatorActivateTimerHandle);
-			}
-		}
-		IndicatorActivateTimerHandle.Invalidate();
-	}
-	
+	SafeClearTimer(IndicatorActivateTimerHandle);
+
 	// 나이아가라 컴포넌트 정리
 	if (IndicatorComponent && IsValid(IndicatorComponent) && !IndicatorComponent->IsBeingDestroyed())
 	{
-		// 먼저 비활성화하여 부드러운 종료
+		// 먼저 비활성화하여 부드러운 종료 (메모리 해제 보장)
 		IndicatorComponent->DeactivateImmediate();
-		
-		// 그 다음 파괴
-		IndicatorComponent->DestroyComponent();
+
+		// 시스템이 완전히 정지할 때까지 대기 후 파괴
+		FTimerHandle CleanupTimerHandle;
+		UWorld* World = GetWorld();
+		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+		{
+			// 약한 참조를 통한 안전한 캡처
+			TWeakObjectPtr<AGS_DrakharProjectile> WeakThis(this);
+			World->GetTimerManager().SetTimer(
+				CleanupTimerHandle,
+				[WeakThis]()
+				{
+					AGS_DrakharProjectile* StrongThis = WeakThis.Get();
+					if (StrongThis && StrongThis->IndicatorComponent &&
+						IsValid(StrongThis->IndicatorComponent) &&
+						!StrongThis->IndicatorComponent->IsBeingDestroyed())
+					{
+						StrongThis->IndicatorComponent->DestroyComponent();
+						StrongThis->IndicatorComponent = nullptr;
+					}
+				},
+				0.1f, // 0.1초 후 정리
+				false
+			);
+		}
+		else
+		{
+			// 월드가 유효하지 않으면 즉시 정리
+			if (IndicatorComponent && IsValid(IndicatorComponent) && !IndicatorComponent->IsBeingDestroyed())
+			{
+				IndicatorComponent->DestroyComponent();
+			}
+			IndicatorComponent = nullptr;
+		}
+	}
+	else
+	{
+		// 이미 정리되었거나 유효하지 않으면 nullptr로 설정
 		IndicatorComponent = nullptr;
 	}
 }
 
+// === 타이머 정리 함수 ===
+void AGS_DrakharProjectile::SafeClearTimer(FTimerHandle& TimerHandle)
+{
+	if (TimerHandle.IsValid())
+	{
+		UWorld* World = GetWorld();
+		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+		{
+			World->GetTimerManager().ClearTimer(TimerHandle);
+		}
+		TimerHandle.Invalidate();
+	}
+}
+
+// === 월드 컨텍스트 검증 함수 ===
 bool AGS_DrakharProjectile::IsWorldContextValid() const
 {
 	UWorld* World = GetWorld();
-	return World && 
-	       World->IsValidLowLevel() && 
-	       !World->bIsTearingDown && 
-	       IsValid(World);
+	return World &&
+		   World->IsValidLowLevel() &&
+		   !World->bIsTearingDown &&
+		   IsValid(World) &&
+		   IsValid(this);
+}
+
+// === 투사체 파괴 함수 (이펙트 완료 보장) ===
+void AGS_DrakharProjectile::SafeDestroyProjectile()
+{
+	// 추가 안전성 체크 (이미 파괴 중인지 확인)
+	if (!IsValid(this) || IsActorBeingDestroyed())
+	{
+		return;
+	}
+
+	// 인디케이터 정리 (메모리 누수 방지)
+	CleanupIndicator();
+
+	// 투사체 파괴
+	Destroy();
 }

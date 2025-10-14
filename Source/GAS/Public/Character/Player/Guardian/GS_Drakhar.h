@@ -374,4 +374,10 @@ private:
 	
 	UFUNCTION()
 	void OnRep_IsFeverMode();
+
+	// 월드 컨텍스트 검증 함수 (레벨 전환 시 크래시 방지)
+	bool IsWorldContextValid() const;
+
+	// 타이머 정리 함수 (레벨 전환 시 크래시 방지)
+	void SafeClearTimer(FTimerHandle& TimerHandle);
 };
