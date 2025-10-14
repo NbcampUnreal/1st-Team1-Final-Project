@@ -85,6 +85,11 @@ void AGS_Chan::BeginPlay()
 	MaxHealth = GetStatComp()->GetMaxHealth();
 }
 
+void AGS_Chan::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+}
+
 void AGS_Chan::OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (UGS_ChanUltimateSkill* Skill = Cast<UGS_ChanUltimateSkill>(
@@ -116,41 +121,11 @@ void AGS_Chan::MulticastPlayComboSection()
 {
 	Super::MulticastPlayComboSection();
 
-	// 3번째 공격(Attack3)에서만 방패 콜리전 활성화
-	if (HasAuthority() && CurrentComboIndex == 3)
-	{
-		// 방패 찾기 및 활성화
-		bool bShieldFound = false;
-		for (int32 i = 0; i < 5; ++i)
-		{
-			if (AGS_WeaponShield* Shield = Cast<AGS_WeaponShield>(GetWeaponByIndex(i)))
-			{
-				Shield->ServerEnableHit();
-				bShieldFound = true;
-				
-				// 0.8초 후 비활성화 (방패 공격 지속 시간을 좀 더 길게)
-				GetWorldTimerManager().ClearTimer(ShieldDisableTimer);
-				GetWorldTimerManager().SetTimer(ShieldDisableTimer, [Shield]()
-				{
-					if (Shield && IsValid(Shield))
-					{
-						Shield->ServerDisableHit();
-					}
-				}, 0.8f, false);
-				break;
-			}
-		}
-		
-		if (!bShieldFound)
-		{
-			UE_LOG(LogTemp, Error, TEXT("[Chan] Shield not found in any weapon slot!"));
-		}
-	}
+	// 방패 콜리전은 GS_AN_ShieldAttack AnimNotify에서 처리
 
 	// 오디오 컴포넌트를 통해 찬 전용 콤보 공격 사운드 재생
 	if (SeekerAudioComponent)
 	{
-		// 현재 콤보 인덱스를 가져와서 적절한 사운드 재생
 		SeekerAudioComponent->PlayChanComboAttackSound(CurrentComboIndex);
 	}
 }
