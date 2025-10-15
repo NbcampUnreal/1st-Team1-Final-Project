@@ -142,6 +142,14 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Monster Audio|Swing")
     void PlaySwingSound();
 
+    // 스윙 사운드 중단
+    /*UFUNCTION(BlueprintCallable, Category = "Monster Audio|Swing")
+    void StopSwingSound();
+
+    // Combat 사운드 중단
+    UFUNCTION(BlueprintCallable, Category = "Monster Audio|Combat")
+    void StopCombatSound();*/
+
     // RTS 커맨드 사운드
     UFUNCTION(BlueprintCallable, Category = "Monster Audio|RTS")
     void PlayRTSCommandSound(ERTSCommandSoundType CommandType);
@@ -196,6 +204,14 @@ private:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_PlaySwingSound();
 
+    // 스윙 사운드 중단 멀티캐스트 RPC
+    /*UFUNCTION(NetMulticast, Reliable)
+    void Multicast_StopSwingSound();
+
+    // Combat 사운드 중단 멀티캐스트 RPC
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_StopCombatSound();*/
+
     TMap<EMonsterAudioState, float> LocalLastSoundPlayTimes;
 
     UPROPERTY(Transient) 
@@ -207,4 +223,26 @@ private:
 
     UPROPERTY(Transient)
     float LocalLastSwingPlayTime = -1000.0f;
+
+    // 공격 관련 사운드 PlayingID 추적
+    /*UPROPERTY(Transient)
+    uint32 CurrentSwingPlayingID = 0;
+
+    UPROPERTY(Transient)
+    uint32 CurrentCombatPlayingID = 0;*/
+
+    // ===================
+    // FindNearestSeeker 캐싱 시스템
+    // ===================
+    
+    /** 캐싱된 가장 가까운 시커 */
+    UPROPERTY(Transient)
+    mutable TWeakObjectPtr<AGS_Seeker> CachedNearestSeeker;
+    
+    /** 마지막 Seeker 검색 시간 */
+    UPROPERTY(Transient)
+    mutable float LastSeekerSearchTime = -1000.0f;
+    
+    /** Seeker 캐시 유효 시간 (초) */
+    static constexpr float SeekerCacheValidDuration = 0.5f;
 }; 

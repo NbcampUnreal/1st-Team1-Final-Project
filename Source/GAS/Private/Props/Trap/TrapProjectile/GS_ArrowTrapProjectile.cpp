@@ -12,6 +12,7 @@
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "AI/RTS/GS_RTSController.h"
+#include "VFX/GS_VFX_FunctionLibrary.h"
 
 AGS_ArrowTrapProjectile::AGS_ArrowTrapProjectile()
 {
@@ -62,6 +63,13 @@ void AGS_ArrowTrapProjectile::BeginPlay()
 void AGS_ArrowTrapProjectile::Init(AGS_NonTrigTrapBase* InTrap)
 {
 	OwningTrap = InTrap;
+
+	// 함정의 혈흔 이펙트 설정 (직접 설정이 없으면 함정 데이터에서 가져오기)
+	if (!BloodEffectOverride && OwningTrap)
+	{
+		BloodEffectOverride = OwningTrap->TrapData.TrapHitBloodEffect;
+	}
+
 	if (HasAuthority())
 	{
 		CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AGS_ArrowTrapProjectile::OnBeginOverlap);
@@ -82,9 +90,10 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 
 	// 히트 타입 결정
 	EArrowHitType HitType = DetermineHitType(OtherActor, SweepResult);
-	
+
 	// 시커에 대한 데미지 처리
 	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
+
 	if (Seeker && OtherComp == Seeker->GetMesh() && OwningTrap)
 	{
 		// 시커에게만 데미지 적용
@@ -92,10 +101,10 @@ void AGS_ArrowTrapProjectile::OnBeginOverlap(
 		{
 			OwningTrap->HandleTrapDamage(OtherActor);
 		}
-		
+
 		// 히트 효과 처리
 		Multicast_PlayHitEffects(HitType, SweepResult.ImpactPoint, SweepResult.ImpactNormal);
-		
+
 		// 화살 박히기 처리
 		StickWithVisualOnly(SweepResult);
 		return;
@@ -210,6 +219,9 @@ void AGS_ArrowTrapProjectile::PlayHitVFX(EArrowHitType HitType, const FVector& I
 	{
 		case EArrowHitType::Player:
 			VFXToPlay = PlayerHitVFX;
+
+			// 혈흔 이펙트 재생
+			UGS_VFX_FunctionLibrary::PlayBloodEffect(this, BloodEffectOverride, ImpactPoint, FRotationMatrix::MakeFromZ(ImpactNormal).Rotator(), 1.0f);
 			break;
 		case EArrowHitType::Wall:
 		case EArrowHitType::Other:

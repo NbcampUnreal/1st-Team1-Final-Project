@@ -181,6 +181,41 @@ protected:
 	/** 특정 위치에 있는 Room을 찾는 함수 */
 	AGS_RoomBase* FindRoomAtLocation(const FVector& Location) const;
 
+	// ==========================
+	// Multicast RPC 최적화 헬퍼
+	// ==========================
+
+	/**
+	 * Multicast RPC에서 사운드 재생 가능 여부를 종합적으로 체크하는 헬퍼 함수
+	 * 
+	 * @param SourceActor 사운드 발생 액터
+	 * @param OutIsRTSMode RTS 모드 여부 (출력)
+	 * @param OutListenerLocation 리스너 위치 (출력)
+	 * @param bSkipViewFrustumCheck ViewFrustum 체크를 건너뛸지 여부 (피격/죽음 사운드 등)
+	 * @return 사운드를 재생해야 하면 true, 그렇지 않으면 false
+	 */
+	bool ShouldPlayMulticastSound(AActor* SourceActor, bool& OutIsRTSMode, FVector& OutListenerLocation, bool bSkipViewFrustumCheck = false) const;
+
+	/**
+	 * Multicast RPC 사운드 재생 전처리 (간소화 버전)
+	 * Distance Scaling을 자동으로 설정하고 재생 가능 여부만 반환
+	 * 
+	 * @param SourceActor 사운드 발생 액터
+	 * @param bSkipViewFrustumCheck ViewFrustum 체크를 건너뛸지 여부
+	 * @return 사운드를 재생해야 하면 true
+	 */
+	bool PrepareMulticastSound(AActor* SourceActor, bool bSkipViewFrustumCheck = false);
+
+	/**
+	 * 모드별 사운드 이벤트 선택 (TPS/RTS 자동 폴백)
+	 * 
+	 * @param TPSSound TPS 모드 사운드
+	 * @param RTSSound RTS 모드 사운드
+	 * @param bUseRTSMode 강제로 RTS 모드 사용 (기본값은 자동 감지)
+	 * @return 선택된 사운드 이벤트 (RTS가 없으면 TPS로 폴백)
+	 */
+	UAkAudioEvent* SelectSoundEventByMode(UAkAudioEvent* TPSSound, UAkAudioEvent* RTSSound, bool bUseRTSMode = false) const;
+
 	// ===============
 	// 메모리 관리 헬퍼
 	// ===============

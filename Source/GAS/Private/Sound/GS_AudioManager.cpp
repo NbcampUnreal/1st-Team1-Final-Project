@@ -3,17 +3,23 @@
 
 #include "Sound/GS_AudioManager.h"
 #include "Sound/GS_UIAudioSystem.h"
-#include "Sound/GS_EnvironmentAudioSystem.h"
 #include "AkAudioDevice.h"
+#include "UObject/UObjectGlobals.h"
+#include "Sound/SoundClass.h"
+#include "Sound/SoundMix.h"
+#include "AudioDevice.h"
+#include "Kismet/GameplayStatics.h"
 
 UGS_AudioManager::UGS_AudioManager()
 {
 	// 맵 BGM 상태 초기화
 	bIsMapBGMPlaying = false;
 
+	// BGM 볼륨 초기화
+	CurrentBGMVolume = 1.0f;
+
 	// 포인터 멤버 초기화
 	UIAudio = nullptr;
-	EnvironmentAudio = nullptr;
 
 	// 맵 BGM 멤버 초기화
 	MapBGMEvent = nullptr;
@@ -52,6 +58,30 @@ UGS_AudioManager::UGS_AudioManager()
 	{
 		MapBGMVolumeRTPC = MapBGMVolumeRTPCFinder.Object;
 	}
+
+	// 네이티브 BGM 사운드 클래스 로드
+	static ConstructorHelpers::FObjectFinder<USoundClass> BGMSoundClassFinder(TEXT("/Game/WwiseAudio/SC_BGM.SC_BGM"));
+	if (BGMSoundClassFinder.Succeeded())
+	{
+		BGMSoundClass = BGMSoundClassFinder.Object;
+	}
+	else
+	{
+		BGMSoundClass = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("[AudioManager] SC_BGM을 찾을 수 없습니다. 네이티브 오디오 볼륨 조절이 비활성화됩니다."));
+	}
+
+	// 네이티브 BGM 사운드 믹스 로드
+	static ConstructorHelpers::FObjectFinder<USoundMix> BGMSoundMixFinder(TEXT("/Game/WwiseAudio/SM_BGM.SM_BGM"));
+	if (BGMSoundMixFinder.Succeeded())
+	{
+		BGMSoundMix = BGMSoundMixFinder.Object;
+	}
+	else
+	{
+		BGMSoundMix = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("[AudioManager] SM_BGM을 찾을 수 없습니다. 네이티브 오디오 볼륨 조절이 비활성화됩니다."));
+	}
 }
 
 void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
@@ -60,7 +90,6 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	// 오디오 시스템 인스턴스 생성
 	UIAudio = NewObject<UGS_UIAudioSystem>(this);
-	EnvironmentAudio = NewObject<UGS_EnvironmentAudioSystem>(this);
 
 	// 맵 BGM 상태 초기화
 	bIsMapBGMPlaying = false;
@@ -70,13 +99,18 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("일부 오디오 에셋이 누락되었지만 시스템을 계속 진행합니다."));
 	}
+
+	// 맵 전환 시 BGM 정지를 위한 델리게이트 바인딩
+	FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UGS_AudioManager::OnPreLoadMap);
 }
 
 void UGS_AudioManager::Deinitialize()
 {
+	// 델리게이트 해제
+	FCoreUObjectDelegates::PreLoadMap.RemoveAll(this);
+	
 	// 메모리 해제 처리
 	UIAudio = nullptr;
-	EnvironmentAudio = nullptr;
 
 	// 맵 BGM 상태 정리
 	bIsMapBGMPlaying = false;
@@ -151,8 +185,39 @@ bool UGS_AudioManager::ValidateAudioAssets()
 		return false;
 	}
 	
-	UE_LOG(LogTemp, Log, TEXT("모든 오디오 에셋이 성공적으로 로드되었습니다."));
 	return true;
+}
+
+void UGS_AudioManager::OnPreLoadMap(const FString& MapName)
+{
+	if (!IsAudioProcessingAllowed())
+	{
+		return;
+	}
+		
+	AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+	
+	// 1. 맵 BGM 정지
+	if (bIsMapBGMPlaying)
+	{
+		StopMapBGM(nullptr);
+	}
+
+	// 2. 전투 BGM 정지 (헬퍼 함수 활용)
+	if (CurrentCombatMusicStartEvent)
+	{
+		StopCurrentCombatMusic(TargetActor);
+
+		// 상태 초기화
+		CurrentCombatMusicStartEvent = nullptr;
+		CurrentCombatMusicStopEvent = nullptr;
+	}
+	
+	// 3. RTPC를 기본값(100)으로 리셋 (다음 맵에서 맵 BGM이 정상 재생되도록)
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, 0.0f);
+	}
 }
 
 // === 멀티플레이어 지원 헬퍼 ===
@@ -190,10 +255,10 @@ void UGS_AudioManager::StartMapBGM(AActor* Context)
 	// 게임 모드에 따른 조건부 타겟 액터 결정
 	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
-	// RTPC 볼륨을 먼저 1.0으로 설정
+	// RTPC 볼륨을 현재 볼륨으로 설정
 	if (MapBGMVolumeRTPC)
 	{
-		SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, 0.0f);
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, 0.0f);
 	}
 
 	// 실제 BGM 시작
@@ -253,6 +318,7 @@ void UGS_AudioManager::SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context,
 {
 	if (!RTPC)
 	{
+		UE_LOG(LogTemp, Error, TEXT("[AudioManager] SetRTPCValue: RTPC가 nullptr입니다!"));
 		return;
 	}
 
@@ -267,17 +333,72 @@ void UGS_AudioManager::SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context,
 		
 		if (Result != AK_Success)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("RTPC 설정 실패: %s = %.0f (Result: %d)"), 
+			UE_LOG(LogTemp, Error, TEXT("[AudioManager] RTPC 설정 실패: %s = %.0f (Result: %d)"), 
 				   *RTPC->GetName(), WwiseValue, (int32)Result);
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("SetRTPCValue: Wwise AudioDevice를 찾을 수 없습니다."));
+		UE_LOG(LogTemp, Error, TEXT("[AudioManager] Wwise AudioDevice를 찾을 수 없습니다!"));
 	}
 }
 
+// === BGM 볼륨 설정 ===
+
+void UGS_AudioManager::SetBGMVolume(float Volume)
+{
+	// 볼륨 값을 0.0~1.0 범위로 클램프하고 저장
+	CurrentBGMVolume = FMath::Clamp(Volume, 0.0f, 1.0f);
+
+	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
+	if (!IsAudioProcessingAllowed())
+	{
+		return;
+	}
+
+	// === 1. Wwise BGM 볼륨 조절 ===
+	if (MapBGMVolumeRTPC)
+	{
+		// 게임 모드에 따른 조건부 타겟 액터 결정
+		AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+
+		// RTPC 값 설정 (SetRTPCValue가 0~100 범위로 자동 변환함)
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, 0.0f);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[AudioManager] MapBGMVolumeRTPC가 설정되지 않았습니다. Wwise BGM 볼륨 조절 건너뜀."));
+	}
+
+	// === 2. 네이티브 오디오 시스템 BGM 볼륨 조절 ===
+	SetNativeSoundClassVolume(CurrentBGMVolume);
+}
+
 // === 통합 전투 시스템 ===
+
+void UGS_AudioManager::StopCurrentCombatMusic(AActor* Context)
+{
+	if (!Context)
+	{
+		return;
+	}
+
+	// 기존 전투 음악이 없으면 조기 종료
+	if (!CurrentCombatMusicStartEvent)
+	{
+		return;
+	}
+
+	// StopEvent가 있으면 사용, 없으면 Actor 전체 정지
+	if (CurrentCombatMusicStopEvent)
+	{
+		UAkGameplayStatics::PostEvent(CurrentCombatMusicStopEvent, Context, 0, FOnAkPostEventCallback());
+	}
+	else
+	{
+		UAkGameplayStatics::StopActor(Context);
+	}
+}
 
 void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* CombatMusicStartEvent, UAkAudioEvent* CombatMusicStopEvent, float FadeTime)
 {
@@ -289,58 +410,37 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
 	if (!IsAudioProcessingAllowed())
 	{
+		// 서버에서는 전투 음악 상태만 저장
 		CurrentCombatMusicStartEvent = CombatMusicStartEvent;
 		CurrentCombatMusicStopEvent = CombatMusicStopEvent;
 		return;
 	}
 
-	// 기존에 재생 중인 전투 음악이 있다면 정지
-	if (CurrentCombatMusicStartEvent && CurrentCombatMusicStopEvent)
-	{
-		UAkGameplayStatics::PostEvent(CurrentCombatMusicStopEvent, Context, 0, FOnAkPostEventCallback());
-	}
-	else if (CurrentCombatMusicStartEvent)
-	{
-		UAkGameplayStatics::StopActor(Context);
-	}
+	// 1. 기존 전투 음악 정지
+	StopCurrentCombatMusic(Context);
 
-	// 게임 모드에 따른 조건부 타겟 액터 결정 (맵 BGM 정지용)
-	AActor* MapBGMTargetActor = GetTargetActorForPlayback();
-
-	// 클라이언트 환경에서는 맵 BGM을 즉시 강제 정지
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_Client)
-	{
-		if (MapBGMVolumeRTPC)
-		{
-			SetRTPCValue(MapBGMVolumeRTPC, 0.0f, MapBGMTargetActor, 0.0f);
-		}
-		StopMapBGM(MapBGMTargetActor);
-	}
-	else // 단독 실행 및 리슨 서버 환경에서는 페이드 아웃
-	{
-		FadeOutAndStopMapBGM(nullptr, FadeTime);
-	}
-
+	// 2. 전투 음악 상태 저장
 	CurrentCombatMusicStartEvent = CombatMusicStartEvent;
 	CurrentCombatMusicStopEvent = CombatMusicStopEvent;
 
-	// 클라이언트에서는 즉시, 그 외에는 페이드 시간에 맞춰 전투 BGM 시작
-	float DelayTime = (GetWorld() && GetWorld()->GetNetMode() == NM_Client) ? 0.1f : FadeTime;
-
-	FTimerHandle CombatBGMHandle;
-	GetWorld()->GetTimerManager().SetTimer(CombatBGMHandle, [this, Context, CombatMusicStartEvent]()
+	// 3. 맵 BGM 즉시 정지
+	AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+	if (bIsMapBGMPlaying)
 	{
-		if (Context && CombatMusicStartEvent)
-		{
-			UAkGameplayStatics::PostEvent(CombatMusicStartEvent, Context, 0, FOnAkPostEventCallback());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("UGS_AudioManager::StartCombatSequence - Timer: Failed to start combat BGM (Context: %s, Event: %s)"), 
-				   Context ? *Context->GetName() : TEXT("NULL"), 
-				   CombatMusicStartEvent ? *CombatMusicStartEvent->GetName() : TEXT("NULL"));
-		}
-	}, DelayTime, false);
+		StopMapBGM(TargetActor);
+	}
+
+	// 4. 전투 BGM 즉시 시작
+	if (Context && CombatMusicStartEvent)
+	{
+		UAkGameplayStatics::PostEvent(CombatMusicStartEvent, Context, 0, FOnAkPostEventCallback());
+	}
+
+	// 5. 전투 BGM에 현재 볼륨 적용 (Wwise에서 Music Bus에 RTPC가 연결되어 있어야 함)
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, 0.0f);
+	}
 }
 
 void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatMusicStopEvent, float FadeTime)
@@ -358,32 +458,37 @@ void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatM
 		return;
 	}
 
-	// 게임 모드에 따른 조건부 타겟 액터 결정
+	// 1. 전투 BGM 정지
 	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
-	// 전투 BGM 정지 처리
-	if (CombatMusicStopEvent)
+	// 제공된 StopEvent 우선, 없으면 저장된 StopEvent 사용
+	UAkAudioEvent* StopEventToUse = CombatMusicStopEvent ? CombatMusicStopEvent : CurrentCombatMusicStopEvent;
+
+	if (StopEventToUse)
 	{
-		UAkGameplayStatics::PostEvent(CombatMusicStopEvent, TargetActor, 0, FOnAkPostEventCallback());
+		UAkGameplayStatics::PostEvent(StopEventToUse, TargetActor, 0, FOnAkPostEventCallback());
 	}
-	else if (CurrentCombatMusicStopEvent)
+	else if (CurrentCombatMusicStartEvent && TargetActor)
 	{
-		UAkGameplayStatics::PostEvent(CurrentCombatMusicStopEvent, TargetActor, 0, FOnAkPostEventCallback());
-	}
-	else if (CurrentCombatMusicStartEvent)
-	{
-		if (TargetActor)
-		{
-			UAkGameplayStatics::StopActor(TargetActor);
-		}
+		// StopEvent가 없으면 Actor 전체 정지
+		UAkGameplayStatics::StopActor(TargetActor);
 	}
 
-	// 현재 전투 시퀀스 정보 초기화
+	// 2. 전투 음악 상태 초기화
 	CurrentCombatMusicStartEvent = nullptr;
 	CurrentCombatMusicStopEvent = nullptr;
 
-	// 맵 BGM 복원
-	FadeInAndStartMapBGM(Context, FadeTime);
+	// 3. MapBGMVolume RTPC를 현재 볼륨으로 설정 (맵 BGM이 들리도록)
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, FadeTime * 1000.0f);
+	}
+
+	// 4. 맵 BGM 복원 (RTPC가 이미 올라가고 있으므로 즉시 시작)
+	if (!bIsMapBGMPlaying)
+	{
+		StartMapBGM(TargetActor);
+	}
 }
 
 // === 멀티플레이어 지원 함수들 ===
@@ -399,69 +504,107 @@ void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
 	{
 		return;
 	}
-	
-	// 게임 모드에 따른 조건부 타겟 액터 결정
+
 	AActor* TargetActor = GetTargetActorForPlayback(Context);
-	
-	if (!MapBGMVolumeRTPC)
+
+	// RTPC가 없거나 FadeTime이 0이면 즉시 정지
+	if (!MapBGMVolumeRTPC || FadeTime <= 0.0f)
 	{
 		StopMapBGM(TargetActor);
 		return;
 	}
-	
+
+	// 볼륨 페이드 아웃
 	SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, FadeTime * 1000.0f);
-	
-	if (FadeTime <= 0.0f)
-	{
-		StopMapBGM(TargetActor);
-		return;
-	}
-	
-	// 기존 페이드아웃 타이머가 있다면 취소
+
+	// 기존 타이머 취소
 	if (GetWorld()->GetTimerManager().IsTimerActive(MapBGMFadeOutTimerHandle))
 	{
 		GetWorld()->GetTimerManager().ClearTimer(MapBGMFadeOutTimerHandle);
 	}
-	
-	GetWorld()->GetTimerManager().SetTimer(MapBGMFadeOutTimerHandle, [this, TargetActor]()
-	{
-		StopMapBGM(TargetActor);
-	}, FadeTime, false);
+
+	// FadeTime 후 정지
+	GetWorld()->GetTimerManager().SetTimer(MapBGMFadeOutTimerHandle,
+		[this, TargetActor]()
+		{
+			StopMapBGM(TargetActor);
+		},
+		FadeTime, false);
 }
 
 void UGS_AudioManager::FadeInAndStartMapBGM(AActor* Context, float FadeTime)
 {
-	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
 	if (!IsAudioProcessingAllowed())
 	{
 		return;
 	}
 
-	// 게임 모드에 따른 조건부 타겟 액터 결정
 	AActor* TargetActor = GetTargetActorForPlayback(Context);
 
-	// 맵 BGM이 이미 재생 중인지 확인
+	// 1. BGM 시작 (아직 재생 중이 아니면)
 	if (!bIsMapBGMPlaying)
 	{
 		StartMapBGM(TargetActor);
 	}
 	
-	// 기존 페이드인 타이머가 있다면 취소
+	// 2. 볼륨 페이드인 (RTPC가 있고 BGM이 재생 중이면)
+	if (!bIsMapBGMPlaying || !MapBGMVolumeRTPC)
+	{
+		return;
+	}
+
+	// 기존 타이머 취소
 	if (GetWorld()->GetTimerManager().IsTimerActive(MapBGMFadeInTimerHandle))
 	{
 		GetWorld()->GetTimerManager().ClearTimer(MapBGMFadeInTimerHandle);
 	}
 
-	// 볼륨 페이드인
-	if (bIsMapBGMPlaying && MapBGMVolumeRTPC)
-	{
-		SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, 0.0f);
-		GetWorld()->GetTimerManager().SetTimer(MapBGMFadeInTimerHandle, [this, TargetActor, FadeTime]()
+	// 볼륨 0으로 설정 후 페이드인
+	SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, 0.0f);
+
+	GetWorld()->GetTimerManager().SetTimer(MapBGMFadeInTimerHandle,
+		[this, TargetActor, FadeTime]()
 		{
 			if (MapBGMVolumeRTPC && bIsMapBGMPlaying)
 			{
 				SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, FadeTime * 1000.0f);
 			}
-		}, 0.1f, false);
+		},
+		0.1f, false);
+}
+
+// === 네이티브 사운드 클래스 볼륨 조절 ===
+
+void UGS_AudioManager::SetNativeSoundClassVolume(float Volume)
+{
+	// Sound Class와 Sound Mix가 설정되지 않았으면 조기 종료
+	if (!BGMSoundClass || !BGMSoundMix)
+	{
+		return;
 	}
+
+	// 월드 유효성 검사
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	// Sound Class 볼륨 설정 (0.0 ~ 1.0 범위)
+	const float ClampedVolume = FMath::Clamp(Volume, 0.0f, 1.0f);
+
+	// UE5 표준 방식: Sound Mix를 통해 Sound Class 볼륨 조절
+	// FadeInTime = 0.1초, Duration = -1 (영구 적용)
+	UGameplayStatics::SetSoundMixClassOverride(
+		World,
+		BGMSoundMix,
+		BGMSoundClass,
+		ClampedVolume,  // Volume
+		1.0f,           // Pitch (변경 안 함)
+		0.1f,           // FadeInTime
+		true            // bApplyToChildren (자식 SoundClass에도 적용)
+	);
+
+	// Sound Mix 활성화
+	UGameplayStatics::PushSoundMixModifier(World, BGMSoundMix);
 }

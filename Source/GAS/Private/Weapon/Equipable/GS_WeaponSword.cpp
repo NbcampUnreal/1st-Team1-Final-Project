@@ -7,6 +7,7 @@
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Player/Seeker/GS_Ares.h"
+#include "Character/Player/Seeker/GS_Chan.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Components/BoxComponent.h"
 #include "Engine/DamageEvents.h"
@@ -118,6 +119,7 @@ void AGS_WeaponSword::ServerDisableHit_Implementation()
 void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	
 	if (!HasAuthority())
 	{
 		return;
@@ -159,7 +161,6 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 	{
 		if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(OtherActor))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("[AGS_WeaponSword]OnHit is called"));
 			float Damage = Attacker->GetStatComp()->GetAttackPower();
 			FGS_DamageEvent DamageEvent;
 			AetherExtractor->TakeDamageBySeeker(Damage, OwnerChar);
@@ -176,13 +177,40 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 
 	// --- 여기서부터는 유효한 적을 타격한 경우 ---
 	
-	// 1. 기본 VFX는 항상 재생
 	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 
-	// 2. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
+	// 데미지 계산 먼저 수행
+	UGS_StatComp* DamagedStat = Damaged->GetStatComp();
+	if (!DamagedStat) 
+	{
+		return;	
+	}
+
+	float Damage = DamagedStat->CalculateDamage(Attacker, Damaged);
+	
+	// 2. 슬래시 이펙트 재생 (실제 데미지가 발생할 때만, 찬이 방어 중이 아닐 때만)
+	bool bShouldPlaySlashVFX = (Damage > 0.0f && WeaponVFXComponent);
+	
+	// 찬이 방어 상태인지 확인하여 혈흔 이펙트 제거
+	if (AGS_Chan* ChanTarget = Cast<AGS_Chan>(Damaged))
+	{
+		if (ChanTarget->bIsDefending)
+		{
+			bShouldPlaySlashVFX = false; // 찬이 가드 상태일 때는 혈흔 이펙트 없음
+		}
+	}
+	
+	if (bShouldPlaySlashVFX)
+	{
+		// 공격자(OwnerChar)의 시커 타입을 직접 전달
+		ESeekerAuraType AttackerAuraType = GetSeekerAuraType(OwnerChar);
+		WeaponVFXComponent->PlaySlashVFX(CorrectHitResult, AttackerAuraType);
+	}
+	
+	// 3. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
 	TriggerHitAuraOnHit(Damaged);
 
-	// 3. '아레스'의 특수 공격일 경우 추가 효과(사운드, VFX) 재생
+	// 4. '아레스'의 특수 공격일 경우 추가 효과(사운드, VFX) 재생
 	if (AGS_Ares* Ares = Cast<AGS_Ares>(Attacker))
 	{
 		if (Ares->CurrentComboIndex == 4)
@@ -198,13 +226,6 @@ void AGS_WeaponSword::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 		}
 	}
 	
-	UGS_StatComp* DamagedStat = Damaged->GetStatComp();
-	if (!DamagedStat) 
-	{
-		return;	
-	}
-
-	float Damage = DamagedStat->CalculateDamage(Attacker, Damaged);
 	FVector ShotDir = (Damaged->GetActorLocation() - OwnerChar->GetActorLocation()).GetSafeNormal();
 	/*FPointDamageEvent DamageEvent;
 	DamageEvent.ShotDirection = ShotDir;

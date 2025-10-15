@@ -40,12 +40,44 @@ USpringArmComponent* AGS_RTSCamera::GetSpringArmComponent() const
 	return FindComponentByClass<USpringArmComponent>();
 }
 
-FBox2D AGS_RTSCamera::GetSimpleViewBounds() const
+bool AGS_RTSCamera::HasCameraChanged() const
 {
-	// 기존 컴포넌트들을 활용한 간단한 뷰포트 경계 계산
 	UCameraComponent* CameraComp = GetCameraComponent();
 	USpringArmComponent* SpringArmComp = GetSpringArmComponent();
-	
+
+	if (!CameraComp || !SpringArmComp)
+	{
+		return true;
+	}
+
+	FVector CurrentLocation = CameraComp->GetComponentLocation();
+	FRotator CurrentRotation = CameraComp->GetComponentRotation();
+	float CurrentArmLength = SpringArmComp->TargetArmLength;
+
+	// 위치/회전/줌이 변경되었는지 체크 (오차 허용)
+	const float LocationTolerance = 1.0f; // 1cm
+	const float RotationTolerance = 0.1f; // 0.1도
+	const float ArmLengthTolerance = 1.0f; // 1cm
+
+	bool bLocationChanged = !CurrentLocation.Equals(LastCameraLocation, LocationTolerance);
+	bool bRotationChanged = !CurrentRotation.Equals(LastCameraRotation, RotationTolerance);
+	bool bArmLengthChanged = FMath::Abs(CurrentArmLength - LastArmLength) > ArmLengthTolerance;
+
+	return bLocationChanged || bRotationChanged || bArmLengthChanged;
+}
+
+FBox2D AGS_RTSCamera::GetSimpleViewBounds() const
+{
+	// 캐시가 유효하고 카메라가 변경되지 않았으면 캐시 반환
+	if (bViewBoundsCacheValid && !HasCameraChanged())
+	{
+		return CachedViewBounds;
+	}
+
+	// 카메라 컴포넌트 가져오기
+	UCameraComponent* CameraComp = GetCameraComponent();
+	USpringArmComponent* SpringArmComp = GetSpringArmComponent();
+
 	if (!CameraComp || !SpringArmComp)
 	{
 		// 컴포넌트가 없으면 기본값 반환
@@ -55,17 +87,69 @@ FBox2D AGS_RTSCamera::GetSimpleViewBounds() const
 			FVector2D(CameraLocation.X + 1000.0f, CameraLocation.Y + 1000.0f)
 		);
 	}
-	
-	// 카메라 위치와 스프링 암 정보를 활용한 계산
+
+	// 실제 카메라 투영을 고려한 정확한 계산
 	FVector CameraLocation = CameraComp->GetComponentLocation();
-	float ArmLength = SpringArmComp->TargetArmLength;
-	
-	// 카메라 높이와 각도를 고려한 간단한 계산
-	float ViewDistance = ArmLength * 1.5f; // 스프링 암 길이의 1.5배
-	
-	return FBox2D(
-		FVector2D(CameraLocation.X - ViewDistance, CameraLocation.Y - ViewDistance),
-		FVector2D(CameraLocation.X + ViewDistance, CameraLocation.Y + ViewDistance)
-	);
+	FRotator CameraRotation = CameraComp->GetComponentRotation();
+
+	// FOV와 종횡비 가져오기
+	float FOV = CameraComp->FieldOfView;
+	float AspectRatio = CameraComp->AspectRatio > 0.0f ? CameraComp->AspectRatio : 16.0f / 9.0f;
+
+	// 카메라 높이 (Z축)
+	float CameraHeight = CameraLocation.Z;
+
+	// 카메라 피치 각도 (아래를 보는 각도)
+	float PitchRadians = FMath::DegreesToRadians(FMath::Abs(CameraRotation.Pitch));
+
+	// 지면까지의 거리 계산 (삼각함수 사용)
+	float GroundDistance = CameraHeight / FMath::Tan(PitchRadians);
+
+	// 수평 FOV 계산 (세로 FOV를 종횡비로 변환)
+	float HorizontalFOV = 2.0f * FMath::Atan(FMath::Tan(FMath::DegreesToRadians(FOV) * 0.5f) * AspectRatio);
+
+	// 화면 중앙에서 좌우 끝까지의 거리
+	float HalfWidth = GroundDistance * FMath::Tan(HorizontalFOV * 0.5f);
+
+	// 화면 중앙에서 상하 끝까지의 거리
+	float HalfHeight = GroundDistance * FMath::Tan(FMath::DegreesToRadians(FOV) * 0.5f);
+
+	// 카메라 회전(Yaw)을 고려한 방향 벡터
+	FVector ForwardVector = CameraRotation.Vector();
+	FVector RightVector = FRotationMatrix(CameraRotation).GetScaledAxis(EAxis::Y);
+
+	// 화면 중앙 지점 (지면에 투영)
+	FVector GroundCenter = CameraLocation + ForwardVector * GroundDistance;
+	GroundCenter.Z = 0.0f; // 지면으로 투영
+
+	// 2D 경계 계산 (회전 고려)
+	FVector2D Center2D(GroundCenter.X, GroundCenter.Y);
+	FVector2D Right2D(RightVector.X, RightVector.Y);
+	Right2D.Normalize();
+	FVector2D Forward2D(ForwardVector.X, ForwardVector.Y);
+	Forward2D.Normalize();
+
+	// 4개 코너 계산
+	FVector2D TopLeft = Center2D + Forward2D * HalfHeight - Right2D * HalfWidth;
+	FVector2D TopRight = Center2D + Forward2D * HalfHeight + Right2D * HalfWidth;
+	FVector2D BottomLeft = Center2D - Forward2D * HalfHeight - Right2D * HalfWidth;
+	FVector2D BottomRight = Center2D - Forward2D * HalfHeight + Right2D * HalfWidth;
+
+	// AABB (Axis-Aligned Bounding Box) 계산
+	float MinX = FMath::Min(FMath::Min(TopLeft.X, TopRight.X), FMath::Min(BottomLeft.X, BottomRight.X));
+	float MaxX = FMath::Max(FMath::Max(TopLeft.X, TopRight.X), FMath::Max(BottomLeft.X, BottomRight.X));
+	float MinY = FMath::Min(FMath::Min(TopLeft.Y, TopRight.Y), FMath::Min(BottomLeft.Y, BottomRight.Y));
+	float MaxY = FMath::Max(FMath::Max(TopLeft.Y, TopRight.Y), FMath::Max(BottomLeft.Y, BottomRight.Y));
+
+	FBox2D ResultBounds = FBox2D(FVector2D(MinX, MinY), FVector2D(MaxX, MaxY));
+
+	// 캐시 업데이트
+	CachedViewBounds = ResultBounds;
+	LastCameraLocation = CameraLocation;
+	LastCameraRotation = CameraRotation;
+	LastArmLength = SpringArmComp->TargetArmLength;
+	bViewBoundsCacheValid = true;
+
+	return ResultBounds;
 }
 

@@ -67,10 +67,7 @@ void AGS_RTSHUD::StopSelection()
 	if (SelectionOfActors.Num() > 0)
 	{
 		RTSController->ClearUnitSelection();
-		for (AGS_Monster* Actor : SelectionOfActors)
-		{
-			RTSController->AddUnitToSelection(Actor);
-		}
+		RTSController->AddMultipleUnitsToSelection(SelectionOfActors);
 	}	
 }
 

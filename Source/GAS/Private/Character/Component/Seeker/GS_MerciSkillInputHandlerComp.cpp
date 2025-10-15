@@ -7,7 +7,6 @@
 #include "Character/Player/Seeker/GS_Merci.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
 #include "EnhancedInputComponent.h"
-#include "Net/UnrealNetwork.h"
 
 
 UGS_MerciSkillInputHandlerComp::UGS_MerciSkillInputHandlerComp()
@@ -76,11 +75,6 @@ void UGS_MerciSkillInputHandlerComp::OnLeftClick(const FInputActionInstance& Ins
 
 void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInstance& Instance)
 {
-	if (!bMouseRightClicked)
-	{
-		return;
-	}
-	
 	bMouseRightClicked = false;
 	
 	Super::OnRightClickRelease(Instance);
@@ -109,23 +103,11 @@ void UGS_MerciSkillInputHandlerComp::OnRightClickRelease(const FInputActionInsta
 
 void UGS_MerciSkillInputHandlerComp::OnLeftClickRelease(const FInputActionInstance& Instance)
 {
-	if (!bMouseLeftClicked)
-	{
-		return;
-	}
-
-	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-
-	if(!(MerciCharacter->GetDrawState() || MerciCharacter->GetAimState()))
-	{
-		return;
-	}
-	
 	bMouseLeftClicked = false;
 	
 	Super::OnLeftClickRelease(Instance);
 
-	
+	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 
 	if (OwnerCharacter->IsDead())
 	{
@@ -196,21 +178,4 @@ void UGS_MerciSkillInputHandlerComp::OnScroll(const FInputActionInstance& Instan
 void UGS_MerciSkillInputHandlerComp::OnKeyReset(const struct FInputActionInstance& Instance)
 {
 	Super::OnKeyReset(Instance);
-}
-
-void UGS_MerciSkillInputHandlerComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UGS_MerciSkillInputHandlerComp, bMouseLeftClicked);
-	DOREPLIFETIME(UGS_MerciSkillInputHandlerComp, bMouseRightClicked);
-}
-
-void UGS_MerciSkillInputHandlerComp::SetMouseLeftClickFlag(bool bClicked)
-{
-	bMouseLeftClicked = bClicked;
-}
-
-void UGS_MerciSkillInputHandlerComp::SetMouseRightClickFlag(bool bClicked)
-{
-	bMouseRightClicked = bClicked;
 }

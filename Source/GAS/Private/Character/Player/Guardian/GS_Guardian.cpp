@@ -9,7 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Character/Component/GS_CameraShakeComponent.h"
-#include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Character/Component/GS_VFXComponent.h"
 #include "Props/Interactables/GS_BridgePiece.h"
 #include "Components/WidgetComponent.h"
 
@@ -24,9 +24,9 @@ AGS_Guardian::AGS_Guardian()
 
 	//boss monster tag for user widget
 	Tags.Add("Guardian");
-	
-	//디버프 VFX 컴포넌트 생성
-	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
+
+	// VFX 컴포넌트 생성 (디버프 등 모든 VFX) - Drakhar는 생성자에서 이를 제거하고 자체 컴포넌트 사용
+	VFXComponent = CreateDefaultSubobject<UGS_VFXComponent>("VFXComponent");
 
 	// 컴포넌트 생성 및 초기화
 	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));

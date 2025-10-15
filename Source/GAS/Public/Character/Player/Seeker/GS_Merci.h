@@ -51,12 +51,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Arrow")
 	int32 GetMaxChildArrows();
 
-	// Set Mouse Click Flag
-	UFUNCTION()
-	void SetMouseRightClickFlag(bool bClicked);
-	void SetMouseLeftClickFlag(bool bClicked);
-	
-
 	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;
@@ -67,6 +61,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess="true"))
 	USkeletalMeshComponent* Quiver;
 
+	// Attack
 	UFUNCTION(BlueprintCallable)
 	void DrawBow(UAnimMontage* DrawMontage);
 
@@ -81,13 +76,15 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
-
+	
+	// Arrow
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AGS_SeekerMerciArrow> NormalArrowClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AGS_SeekerMerciArrow> SmokeArrowClass;
 
+	// Animation
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimMontage* ComboSkillDrawMontage;
 
@@ -97,6 +94,7 @@ public:
 	void OnDrawMontageEnded();
 	
 	bool GetIsFullyDrawn() { return bIsFullyDrawn; }
+	
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_DrawDebugLine(FVector Start, FVector End, FColor Color = FColor::Green);
 
@@ -113,7 +111,7 @@ public:
 	void Client_StartZoom();
 
 	UFUNCTION(Client, Reliable)
-	void Client_StopZoom();
+	void Client_StopZoom(float Duration);
 
 	//Crosshair
 	UFUNCTION(BlueprintCallable, Category = "Crosshair")
@@ -151,10 +149,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack", meta = (AllowPrivateAccess = "true"))
 	FVector MultiShotVFXOffset = FVector::ZeroVector;
-
-
+	
 	// 타임라인 관련
 	FTimeline ZoomTimeline;
+
+	void ZoomTimelineReverse();
 
 	UPROPERTY(EditAnywhere)
 	UCurveFloat* ZoomCurve;
@@ -165,6 +164,8 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 	
 private:
+	FTimerHandle ReverseTimerHandle;
+	
 	UGS_ArrowTypeWidget* ArrowTypeWidget;
 
 	bool bWidgetVisibility = false;

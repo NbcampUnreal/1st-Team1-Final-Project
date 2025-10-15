@@ -66,6 +66,7 @@ AGS_WeaponShield::AGS_WeaponShield()
 	DefenseHitBox->SetBoxExtent(FVector(100.0f, 140.0f, 170.0f));
 	DefenseHitBox->SetRelativeLocation(FVector(30.0f, 0.0f, 0.0f));
 	DefenseHitBox->OnComponentBeginOverlap.AddDynamic(this, &AGS_WeaponShield::OnDefenseHit);
+	DefenseHitBox->OnComponentEndOverlap.AddDynamic(this, &AGS_WeaponShield::OnDefenseEndOverlap);
 }
 
 void AGS_WeaponShield::PostInitializeComponents()
@@ -99,6 +100,7 @@ void AGS_WeaponShield::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	// 히트 액터 목록 정리
 	AttackHitActors.Empty();
+	DefenseHitActors.Empty();
 
 	// Tick 비활성화
 	SetActorTickEnabled(false);
@@ -111,13 +113,14 @@ void AGS_WeaponShield::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	// 주기적으로 AttackHitActors 정리 (메모리 누수 방지)
+	// 주기적으로 히트 액터 목록 정리 (메모리 누수 방지)
 	static float CleanupTimer = 0.0f;
 	CleanupTimer += DeltaTime;
-	if (CleanupTimer >= 5.0f)
+	if (CleanupTimer >= 1.5f) // 1.5초로 단축하여 연속 공격 시 가드 이펙트가 다시 나올 수 있도록 함
 	{
 		CleanupTimer = 0.0f;
 		AttackHitActors.Empty();
+		DefenseHitActors.Empty();
 	}
 }
 
@@ -184,7 +187,15 @@ void AGS_WeaponShield::OnAttackHit(UPrimitiveComponent* OverlappedComponent, AAc
 	// 1. 기본 VFX는 항상 재생
 	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 
-	// 2. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
+	// 2. 슬래시 이펙트 재생 (혈흔 이펙트)
+	if (WeaponVFXComponent)
+	{
+		// 공격자(OwnerChar)의 시커 타입을 직접 전달
+		ESeekerAuraType AttackerAuraType = GetSeekerAuraType(OwnerChar);
+		WeaponVFXComponent->PlaySlashVFX(CorrectHitResult, AttackerAuraType);
+	}
+
+	// 3. 아우라 이펙트 트리거 (가디언이나 몬스터를 타격했을 때)
 	TriggerHitAuraOnHit(Damaged);
 
 	// 3. '찬'의 3번째 공격일 경우 추가 효과(사운드, VFX) 재생
@@ -324,6 +335,57 @@ void AGS_WeaponShield::PlayHitVFX(EShieldHitTargetType TargetType, const FHitRes
 	}
 }
 
+void AGS_WeaponShield::PlayGuardSuccessVFX(EShieldHitTargetType TargetType, const FHitResult& SweepResult)
+{
+	UNiagaraSystem* VFXToPlay = nullptr;
+
+	switch (TargetType)
+	{
+	case EShieldHitTargetType::Guardian:
+	case EShieldHitTargetType::DungeonMonster:
+		VFXToPlay = GuardSuccessPawnVFX;
+		break;
+	case EShieldHitTargetType::Structure:
+		VFXToPlay = GuardSuccessStructureVFX;
+		break;
+	case EShieldHitTargetType::Seeker:
+	case EShieldHitTargetType::Other:
+		break;
+	default:
+		break;
+	}
+
+	if (VFXToPlay && GetWorld())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_WeaponShield::PlayGuardSuccessVFX - Playing common guard VFX: %s"), *VFXToPlay->GetName());
+		// 방패 중앙에서 이펙트 재생
+		FVector ShieldCenter = ShieldMeshComponent->GetComponentLocation();
+		FRotator ShieldRotation = ShieldMeshComponent->GetComponentRotation();
+		
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			VFXToPlay,
+			ShieldCenter,
+			ShieldRotation,
+			FVector(1.2f), // 방패 이펙트는 약간 크게
+			true,
+			true
+		);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_WeaponShield::PlayGuardSuccessVFX - Common guard VFX is not set or World is invalid."));
+	}
+
+	// WeaponVFXComponent를 통한 시커별 개별 가드 이펙트도 재생
+	if (WeaponVFXComponent && OwnerChar)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AGS_WeaponShield::PlayGuardSuccessVFX - Calling WeaponVFXComponent->PlayGuardSuccessVFX"));
+		ESeekerAuraType DefenderAuraType = GetSeekerAuraType(OwnerChar);
+		WeaponVFXComponent->PlayGuardSuccessVFX(SweepResult, DefenderAuraType);
+	}
+}
+
 // 멀티캐스트 함수 구현
 bool AGS_WeaponShield::Multicast_PlayHitSound_Validate(EShieldHitTargetType TargetType, const FHitResult& SweepResult)
 {
@@ -377,6 +439,92 @@ void AGS_WeaponShield::Multicast_PlaySpecialHitVFX_Implementation(UNiagaraSystem
 			true
 		);
 	}
+}
+
+bool AGS_WeaponShield::Multicast_PlayGuardSuccessVFX_Validate(EShieldHitTargetType TargetType, const FHitResult& SweepResult)
+{
+	return true;
+}
+
+void AGS_WeaponShield::Multicast_PlayGuardSuccessVFX_Implementation(EShieldHitTargetType TargetType, const FHitResult& SweepResult)
+{
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	PlayGuardSuccessVFX(TargetType, SweepResult);
+}
+
+void AGS_WeaponShield::PlayGuardSuccessSound(EShieldHitTargetType TargetType, const FHitResult& SweepResult)
+{
+	UAkAudioEvent* SoundEventToPlay = nullptr;
+
+	switch (TargetType)
+	{
+	case EShieldHitTargetType::Guardian:
+	case EShieldHitTargetType::DungeonMonster:
+		SoundEventToPlay = GuardSuccessPawnSoundEvent;
+		break;
+	case EShieldHitTargetType::Structure:
+		SoundEventToPlay = GuardSuccessStructureSoundEvent;
+		break;
+	case EShieldHitTargetType::Seeker:
+	case EShieldHitTargetType::Other:
+		break;
+	default:
+		break;
+	}
+
+	if (SoundEventToPlay && GetWorld())
+	{
+		FVector ListenerLocation;
+		if (GetListenerLocation(ListenerLocation))
+		{
+			// RTS 모드와 TPS 모드에 따른 거리 체크
+			const bool bRTS = IsRTSMode();
+			const float MaxDistance = bRTS ? 10000.0f : 2000.0f; // RTS: 100m, TPS: 20m
+
+			const float DistanceToListener = FVector::Dist(SweepResult.ImpactPoint, ListenerLocation);
+
+			if (DistanceToListener <= MaxDistance)
+			{
+				UAkGameplayStatics::PostEventAtLocation(
+					SoundEventToPlay,
+					SweepResult.ImpactPoint,
+					FRotator::ZeroRotator,
+					GetWorld()
+				);
+			}
+		}
+		else
+		{
+			// Fallback: 리스너 위치를 찾지 못할 경우 거리 체크 없이 재생
+			UAkGameplayStatics::PostEventAtLocation(
+				SoundEventToPlay,
+				SweepResult.ImpactPoint,
+				FRotator::ZeroRotator,
+				GetWorld()
+			);
+		}
+	}
+}
+
+bool AGS_WeaponShield::Multicast_PlayGuardSuccessSound_Validate(EShieldHitTargetType TargetType, const FHitResult& SweepResult)
+{
+	return true;
+}
+
+void AGS_WeaponShield::Multicast_PlayGuardSuccessSound_Implementation(EShieldHitTargetType TargetType, const FHitResult& SweepResult)
+{
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition())
+	{
+		return;
+	}
+
+	PlayGuardSuccessSound(TargetType, SweepResult);
 }
 
 void AGS_WeaponShield::EnableAttackHit()
@@ -580,13 +728,11 @@ void AGS_WeaponShield::OnDefenseHit(UPrimitiveComponent* OverlappedComponent, AA
 		return;
 	}
 
+
 	// 충돌한 컴포넌트가 몬스터의 무기/공격 콜리전인지 확인
 	FString ComponentName = OtherComp->GetName();
 	if (!ComponentName.Contains(TEXT("Bite")) && 
-		!ComponentName.Contains(TEXT("Weapon")) && 
-		!ComponentName.Contains(TEXT("Attack")) &&
-		!ComponentName.Contains(TEXT("Claw")) &&
-		!ComponentName.Contains(TEXT("Fang")))
+		!ComponentName.Contains(TEXT("HitBox")))
 	{
 		return;
 	}
@@ -597,32 +743,51 @@ void AGS_WeaponShield::OnDefenseHit(UPrimitiveComponent* OverlappedComponent, AA
 		return;
 	}
 
+	// 실제 공격자(캐릭터)를 찾습니다. OtherActor는 무기일 수 있습니다.
+	AActor* AttackerActor = OtherActor->GetOwner();
+	if (!AttackerActor)
+	{
+		// Owner가 없는 경우 OtherActor 자체가 공격 주체일 수 있습니다 (몬스터의 신체 일부 등)
+		AttackerActor = OtherActor;
+	}
+
+	// 중복 방어 히트 방지
+	if (DefenseHitActors.Contains(AttackerActor))
+	{
+		return;
+	}
+
+	DefenseHitActors.Add(AttackerActor);
+
 	// 맞은 대상 구분
-	EShieldHitTargetType TargetType = DetermineTargetType(OtherActor);
+	EShieldHitTargetType TargetType = DetermineTargetType(AttackerActor);
 
 	FHitResult CorrectHitResult = CreateCorrectHitResult(SweepResult, bFromSweep);
 
-	// 방어 사운드 재생
-	Multicast_PlayHitSound(TargetType, CorrectHitResult);
-	
-	AGS_Character* Attacker = Cast<AGS_Character>(OtherActor); // 공격자
+	AGS_Character* Attacker = Cast<AGS_Character>(AttackerActor); // 공격자
 	AGS_Character* Defender = OwnerChar; // 방어자
 
 	if (!Attacker || !Defender || !Attacker->IsEnemy(Defender))
 	{
-		// 적이 아닌 대상을 막은 경우
-		Multicast_PlayHitVFX(TargetType, CorrectHitResult);
 		return;
 	}
 
-	Multicast_PlayHitVFX(TargetType, CorrectHitResult);
-
-	if (AGS_Chan* Chan = Cast<AGS_Chan>(Defender))
+	// 찬이 방어 상태일 때만 가드 성공으로 인정
+	AGS_Chan* Chan = Cast<AGS_Chan>(Defender);
+	if (!Chan || !Chan->bIsDefending)
 	{
-		if (UGS_SeekerAudioComponent* SeekerAudio = Chan->GetComponentByClass<UGS_SeekerAudioComponent>())
-		{
-			SeekerAudio->PlayDefenseSound();
-		}
+		return;
+	}
+	
+	// === 가드 성공 이펙트 재생 ===
+	// 방어 성공 시 방패에서 이펙트와 사운드 재생
+	Multicast_PlayGuardSuccessVFX(TargetType, CorrectHitResult);
+	Multicast_PlayGuardSuccessSound(TargetType, CorrectHitResult);
+
+	// 찬 전용 추가 방어 사운드 (시커 오디오 컴포넌트)
+	if (UGS_SeekerAudioComponent* SeekerAudio = Chan->GetComponentByClass<UGS_SeekerAudioComponent>())
+	{
+		SeekerAudio->PlayDefenseSound();
 	}
 	
 	// 방어 성공 시 몬스터 공격 콜리전을 비활성화하여 데미지 전달 방지
@@ -646,6 +811,30 @@ void AGS_WeaponShield::OnDefenseHit(UPrimitiveComponent* OverlappedComponent, AA
 	}
 }
 
+void AGS_WeaponShield::OnDefenseEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// 레벨 전환 시 null 참조 방지
+	if (!IsValidForLevelTransition() || !OtherActor)
+	{
+		return;
+	}
+
+	// 실제 공격자(캐릭터)를 찾습니다
+	AActor* AttackerActor = OtherActor->GetOwner();
+	if (!AttackerActor)
+	{
+		AttackerActor = OtherActor;
+	}
+
+	// 방어용 히트 액터 목록에서 제거하여 다음 공격 시 가드 이펙트가 다시 나올 수 있도록 함
+	DefenseHitActors.Remove(AttackerActor);
+}
+
 void AGS_WeaponShield::EnableDefenseHit()
 {
 	// 레벨 전환 중인 경우 안전하게 종료
@@ -659,6 +848,10 @@ void AGS_WeaponShield::EnableDefenseHit()
 	{
 		DefenseHitBox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
+	
+	// 방어용 히트 액터 목록 초기화 (새로운 방어 시작 시)
+	DefenseHitActors.Empty();
+	
 	SetActorTickEnabled(true);
 }
 

@@ -111,8 +111,9 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		return;
 	}
 
+	SetIsLockedRotationToController(true);
 	
-	// 가장 먼저 활 시위를 당길  수 있는 상황인지를 판단
+	// 가장 먼저 활 시위를 당길 수 있는 상황인지를 판단
 	if (!GetSkillComp()->IsSkillAllowed(ESkillSlot::Combo))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Server_OnComboAttack, IsSkillAllowed == false"));
@@ -133,12 +134,12 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 	}
 
 	if (!GetDrawState())
-	{		
+	{
+		Multicast_PlayDrawMontage(DrawMontage);
+
 		// 활 상태 업데이트
 		SetDrawState(true);
 		SetAimState(false);
-		
-		Multicast_PlayDrawMontage(DrawMontage);
 		Multicast_SetMustTurnInPlace(true);
 		
 		// 활 당기는 사운드 재생 (SeekerAudioComponent에서 처리)
@@ -160,6 +161,8 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		return;
 	}
 
+	SetIsLockedRotationToController(false);
+
 	Client_UpdateCrosshairAim(false);
 	
 	if (GetSkillComp()->IsSkillActive(ESkillSlot::Rolling))
@@ -171,7 +174,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	// 줌 중지
 	if (!(this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate)))
 	{
-		Client_StopZoom();
+		Client_StopZoom(5.f);
 	}
 	
 	// 몽타주 정지
@@ -443,6 +446,12 @@ void AGS_Merci::SetAutoAimTarget(AActor* Target)
 	}
 }
 
+
+void AGS_Merci::ZoomTimelineReverse()
+{
+	ZoomTimeline.Reverse();
+}
+
 void AGS_Merci::UpdateZoom(float Alpha)
 {
 	if (!SpringArmComp)
@@ -498,11 +507,21 @@ void AGS_Merci::Client_SetWidgetVisibility_Implementation(bool bVisible)
 void AGS_Merci::Client_StartZoom_Implementation()
 {
 	ZoomTimeline.Play(); // 줌인
+
+	GetWorldTimerManager().ClearTimer(ReverseTimerHandle);
 }
 
-void AGS_Merci::Client_StopZoom_Implementation()
+void AGS_Merci::Client_StopZoom_Implementation(float Duration)
 {
-	ZoomTimeline.Reverse(); // 줌아웃
+	GetWorldTimerManager().SetTimer(
+		ReverseTimerHandle,
+		this,
+		&AGS_Merci::ZoomTimelineReverse,
+		Duration,
+		false
+		);
+	
+	//GetWorldTimerManager().ClearTimer(ReverseTimerHandle);
 }
 
 void AGS_Merci::SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget)
@@ -591,7 +610,7 @@ float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 		// 활 쏘기 줌 아웃 (궁극기 상태가 아닐 때만)
 		if (!this->GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
 		{
-			Client_StopZoom();
+			Client_StopZoom(0.f);
 		}
 
 		// 활 쏘기 조준 상태 해제
@@ -637,22 +656,6 @@ int32 AGS_Merci::GetMaxAxeArrows()
 int32 AGS_Merci::GetMaxChildArrows()
 {
 	return MaxChildArrows;
-}
-
-void AGS_Merci::SetMouseRightClickFlag(bool bClicked)
-{
-	if (UGS_MerciSkillInputHandlerComp* MerciSkillInputHandlerComp = Cast<UGS_MerciSkillInputHandlerComp>(SkillInputHandlerComponent))
-	{
-		MerciSkillInputHandlerComp->SetMouseRightClickFlag(bClicked);
-	}
-}
-
-void AGS_Merci::SetMouseLeftClickFlag(bool bClicked)
-{
-	if (UGS_MerciSkillInputHandlerComp* MerciSkillInputHandlerComp = Cast<UGS_MerciSkillInputHandlerComp>(SkillInputHandlerComponent))
-	{
-		MerciSkillInputHandlerComp->SetMouseLeftClickFlag(bClicked);
-	}
 }
 
 void AGS_Merci::OnRep_CurrentArrowType()
@@ -797,7 +800,12 @@ void AGS_Merci::Multicast_PlayArrowShotVFX_Implementation(FVector Location, FRot
 
 void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 {
-	if (SeekerAudioComponent)
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	if (SeekerAudioComponent && IsValid(SeekerAudioComponent))
 	{
 		SeekerAudioComponent->PlayArrowShotSound();
 	}
@@ -805,7 +813,7 @@ void AGS_Merci::Multicast_PlayArrowShotSound_Implementation()
 
 void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
 {
-	if (SeekerAudioComponent)
+	if (SeekerAudioComponent && IsValid(SeekerAudioComponent))
 	{
 		SeekerAudioComponent->PlayHitFeedbackSound();
 	}
@@ -813,7 +821,7 @@ void AGS_Merci::Client_PlayHitFeedbackSound_Implementation()
 
 void AGS_Merci::Client_PlayArrowEmptySound_Implementation()
 {
-	if (SeekerAudioComponent)
+	if (SeekerAudioComponent && IsValid(SeekerAudioComponent))
 	{
 		SeekerAudioComponent->PlayArrowEmptySound();
 	}

@@ -75,7 +75,7 @@ void AGS_Chan::SetCurrentStamina(float NewValue, bool SetbyDamage)
 void AGS_Chan::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	SetReplicateMovement(true);
 	GetMesh()->SetIsReplicated(true);
 
@@ -161,6 +161,27 @@ void AGS_Chan::Multicast_OnAttackHit_Implementation(int32 ComboIndex)
 	if (ComboIndex == 4 && SeekerAudioComponent)
 	{
 		SeekerAudioComponent->PlayChanFinalAttackSound();
+	}
+	
+	// 공격 성공 시 공격자에게 카메라 쉐이크 적용 (Chan 전용)
+	if (HasAuthority())
+	{
+		if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+		{
+			// 4번째 공격(마지막 공격)은 더 강한 쉐이크 적용
+			if (ComboIndex == 4)
+			{
+				// 강한 공격 성공 쉐이크 (마지막 콤보)
+				FGS_CameraShakeInfo StrongAttackShake = AttackSuccessShake;
+				StrongAttackShake.Intensity *= 1.5f; // 강도 1.5배 증가
+				Client_PlayAttackSuccessShakeWithInfo(AttackerPC, StrongAttackShake);
+			}
+			else
+			{
+				// 일반 공격 성공 쉐이크
+				Client_PlayAttackSuccessShake(AttackerPC);
+			}
+		}
 	}
 }
 

@@ -6,14 +6,13 @@
 #include "Character/GS_Character.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "AkGameplayStatics.h"
-#include "MonsterDataAsset.h"
 #include "Sound/GS_MonsterAudioComponent.h"
 #include "GS_Monster.generated.h"
 
 class UWidgetComponent;
 class UGS_MonsterSkillComp;
 class UGS_MonsterAnimInstance;
-class UGS_DebuffVFXComponent;
+class UGS_VFXComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMonsterDead, AGS_Monster*, DeadUnit);
 
@@ -39,9 +38,6 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UAnimMontage* AttackMontage;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Data")
-	UMonsterDataAsset* MonsterData;
 
 	UPROPERTY(BlueprintAssignable, Category="Dead")
 	FOnMonsterDead OnMonsterDead;
@@ -60,9 +56,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	class UGS_MonsterAudioComponent* MonsterAudioComponent;
 	
-	// 디버프 VFX 컴포넌트
+	// VFX 컴포넌트 (디버프 등 모든 VFX)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
-	UGS_DebuffVFXComponent* DebuffVFXComponent;
+	UGS_VFXComponent* VFXComponent;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_OnDeath();
@@ -79,18 +75,6 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayAttackMontage();
-
-	UFUNCTION(BlueprintCallable, Category="Data")
-	UTexture2D* GetPortrait() const { return MonsterData ? MonsterData->Portrait : nullptr; }
-	
-	UFUNCTION(BlueprintCallable, Category="Data")
-	FText GetMonsterName() const { return MonsterData ? MonsterData->MonsterName : FText::GetEmpty(); }
-
-	UFUNCTION(BlueprintCallable, Category="Data")
-	FText GetDescription() const { return MonsterData ? MonsterData->Description : FText::GetEmpty(); }
-
-	UFUNCTION(BlueprintCallable, Category="Data")
-	FText GetTypeName() const { return MonsterData ? MonsterData->TypeName : FText::GetEmpty(); }
 
 	FORCEINLINE UGS_MonsterSkillComp* GetMonsterSkillComp() const { return MonsterSkillComp; }
 

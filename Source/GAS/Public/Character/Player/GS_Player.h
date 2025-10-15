@@ -11,24 +11,6 @@ class UCameraComponent;
 class UGS_SteamNameWidgetComp;
 class FAkAudioDevice;
 
-/*USTRUCT(BlueprintType)
-struct FCharacterWantsToMove
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
-	bool WantsToSprint = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
-	bool WantsToWalk = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
-	bool WantsToAim = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
-	bool WantsToStrafe = false;
-};*/
-
 USTRUCT(BlueprintType)
 struct FSkillInputControl
 {
@@ -43,18 +25,6 @@ struct FSkillInputControl
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Control")
 	bool CanInputCtrl = true; // Ctrl
 };
-
-/*UENUM(BlueprintType)
-enum class EInputFlag : uint8
-{
-	None = 0,
-	CanInputLC = (1 << 0),
-	CanInputRC = (1 << 1),
-	CanInputRoll = (1 << 2),
-	CanInputLeftClick = (1 << 3)
-};
-
-ENUM_CLASS_FLAGS(EInputFlag)*/
 
 UCLASS()
 class GAS_API AGS_Player : public AGS_Character
@@ -93,10 +63,6 @@ public:
 
 	UPROPERTY()
 	float RunSpeed;
-
-	// Wants To Move
-	/*UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	FCharacterWantsToMove WantsToMove;*/
 
 	// 오디오 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
@@ -165,7 +131,7 @@ public:
 	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }
 	virtual void SetCanUseSkill(bool bCanUse) override;
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;

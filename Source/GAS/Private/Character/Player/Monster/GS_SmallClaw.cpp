@@ -7,6 +7,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Character/F_GS_DamageEvent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+#include "VFX/GS_VFX_FunctionLibrary.h"
 
 AGS_SmallClaw::AGS_SmallClaw()
 {
@@ -66,9 +69,25 @@ void AGS_SmallClaw::OnAttackBiteboxOverlap(UPrimitiveComponent* OverlappedCompon
 		
 		float Damage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter);
 		FGS_DamageEvent DamageEvent;
-		DamageEvent.HitReactType = EHitReactType::Interrupt;
-		OtherActor->TakeDamage(Damage, DamageEvent, GetController(), this);
+		DamageEvent.HitReactType = EHitReactType::DamageOnly;
+		
+		float ActualDamage = OtherActor->TakeDamage(Damage, DamageEvent, GetController(), this);
+		
+		// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생
+		if (ActualDamage > 0.0f)
+		{
+			// 혈흔 이펙트 재생 - 깨물기 지점에서 재생
+			FVector HitLocation = SweepResult.bBlockingHit ? FVector(SweepResult.ImpactPoint) : DamagedCharacter->GetActorLocation();
+			FVector HitNormal = SweepResult.bBlockingHit ? FVector(SweepResult.ImpactNormal) : FVector::UpVector;
+			
+			Multicast_PlayBloodEffect(HitLocation, HitNormal);
+		}
 	
 		BiteCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+}
+
+void AGS_SmallClaw::Multicast_PlayBloodEffect_Implementation(FVector HitLocation, FVector HitNormal)
+{
+	UGS_VFX_FunctionLibrary::PlayBloodEffect(this, BloodEffectSystem, HitLocation, FRotationMatrix::MakeFromZ(HitNormal).Rotator(), 0.8f);
 }

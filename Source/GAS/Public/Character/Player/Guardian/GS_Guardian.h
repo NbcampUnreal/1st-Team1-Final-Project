@@ -7,7 +7,7 @@
 #include "GS_Guardian.generated.h"
 
 class UGS_DrakharAnimInstance;
-class UGS_DebuffVFXComponent;
+class UGS_VFXComponent;
 class UGS_CameraShakeComponent;
 class UWidgetComponent;
 
@@ -54,9 +54,9 @@ public:
 	UPROPERTY(ReplicatedUsing=OnRep_MoveSpeed)
 	float MoveSpeed;
 	
-	// 디버프 VFX 컴포넌트
+	// VFX 컴포넌트 (디버프 등 모든 VFX) - Drakhar는 자체 VFX 컴포넌트 사용
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
-	UGS_DebuffVFXComponent* DebuffVFXComponent;
+	UGS_VFXComponent* VFXComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UGS_CameraShakeComponent> CameraShakeComponent;
@@ -77,7 +77,7 @@ public:
 	
 	//[attck check function]
 	UFUNCTION()
-	void MeleeAttackCheck();
+	virtual void MeleeAttackCheck();
 	
 	//check player in attack range
 	TSet<AGS_Character*> DetectPlayerInRange(const FVector& Start, float SkillRange, float Radius);

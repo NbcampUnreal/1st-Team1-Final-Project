@@ -18,7 +18,9 @@ enum class EWeaponVFXType : uint8
 	Trail			UMETA(DisplayName = "Trail"),			// 무기 궤적
 	Charge			UMETA(DisplayName = "Charge"),			// 차징 이펙트
 	SpecialAttack	UMETA(DisplayName = "Special Attack"),	// 특수 공격
-	Enchant			UMETA(DisplayName = "Enchant")			// 인챈트 효과
+	Enchant			UMETA(DisplayName = "Enchant"),			// 인챈트 효과
+	Slash			UMETA(DisplayName = "Slash"),			// 베기 이펙트
+	GuardSuccess	UMETA(DisplayName = "Guard Success")	// 방어 성공 이펙트
 };
 
 // 시커 타입별 아우라 이펙트 정의
@@ -77,10 +79,6 @@ class GAS_API UGS_WeaponVFXComponent : public UActorComponent
 
 public:
 	UGS_WeaponVFXComponent();
-
-	// ======================
-	// VFX 설정 (블루프린트)
-	// ======================
 	
 	// 공통 VFX 설정 Data Asset
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Settings")
@@ -97,10 +95,6 @@ public:
 	// 무기에 붙일 소켓 이름 (비어있으면 Root에 붙음)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Settings")
 	FName AttachSocketName = NAME_None;
-
-	// ======================
-	// 아우라 VFX 제어 함수
-	// ======================
 	
 	// 아우라 VFX 활성화 (히트 감지 시 호출)
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
@@ -114,6 +108,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
 	bool IsHitAuraActive() const;
 
+	// 슬래시 VFX 재생 (충돌 감지 시 호출)
+	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
+	void PlaySlashVFX(const FHitResult& HitResult, ESeekerAuraType AttackerSeekerType);
+	
 	// ======================
 	// 확장 VFX 기능들
 	// ======================
@@ -126,13 +124,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
 	void ActivateChargeVFX(float ChargeLevel = 1.0f);
 
-	// 특수 공격 이펙트 (일회성)
+	// 특수 공격 이펙트
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
 	void PlaySpecialAttackVFX(ESeekerAuraType SeekerType);
 
 	// 인챈트 이펙트
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
 	void ActivateEnchantVFX(ESeekerAuraType SeekerType, float Duration = -1.0f);
+
+	// 가드 성공 이펙트
+	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
+	void PlayGuardSuccessVFX(const FHitResult& HitResult, ESeekerAuraType DefenderSeekerType);
 
 	// 모든 VFX 정리
 	UFUNCTION(BlueprintCallable, Category = "WeaponVFX")
@@ -168,6 +170,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DeactivateHitAura();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlaySlashVFX(FVector ImpactPoint, FVector WeaponVelocity, ESeekerAuraType SeekerType);
+	
 	// 확장 VFX용 멀티캐스트 함수들
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ActivateTrailVFX(bool bActivate, ESeekerAuraType SeekerType);
@@ -180,6 +185,9 @@ private:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ActivateEnchantVFX(ESeekerAuraType SeekerType, float Duration);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayGuardSuccessVFX(FVector ImpactPoint, FVector ImpactNormal, ESeekerAuraType DefenderSeekerType);
 
 	// ======================
 	// VFX 관리 시스템
@@ -206,16 +214,27 @@ private:
 	FTimerHandle HitAuraCleanupTimerHandle;
 	FTimerHandle EnchantTimerHandle;
 	FTimerHandle EnchantCleanupTimerHandle;
+	FTimerHandle BloodEffectDelayTimerHandle;
+	FTimerHandle TrailCleanupTimerHandle;
 	
 	// VFX 자동 제거 타이머 콜백
 	void DeactivateHitAuraTimerCallback();
 	void CleanupHitAuraTimerCallback();
 	void DeactivateEnchantTimerCallback();
 	void CleanupEnchantTimerCallback();
+
+	// 혈흔 이펙트 딜레이 콜백
+	void DelayedBloodEffect();
 	
 	// VFX 컴포넌트 상태 관리
 	bool bHitAuraDeactivating;
 	bool bEnchantDeactivating;
+	bool bTrailDeactivating;
+
+	// 혈흔 이펙트 딜레이용 변수들
+	FVector DelayedHitLocation;
+	FVector DelayedHitNormal;
+	float DelayedScale;
 	
 	// 안전한 VFX 컴포넌트 정리
 	void CleanupHitAuraVFXComponent();
@@ -235,4 +254,22 @@ private:
 	
 	// 현재 소유자의 시커 타입 자동 감지
 	ESeekerAuraType GetOwnerSeekerType() const;
+	
+	// 소유자 시커 타입 캐싱 (무기 장착 시 호출)
+	void CacheOwnerSeekerType();
+	
+	// ======================
+	// 성능 최적화 캐시
+	// ======================
+	
+	// 캐싱된 무기 메시 컴포넌트
+	UPROPERTY()
+	TObjectPtr<USceneComponent> CachedWeaponMeshComponent;
+	
+	// 캐싱된 소유자 시커 타입
+	ESeekerAuraType CachedOwnerSeekerType;
+	
+	// 캐싱된 기본 Slash VFX (런타임 로딩 방지)
+	UPROPERTY()
+	TObjectPtr<UNiagaraSystem> CachedFallbackSlashVFX;
 };

@@ -8,7 +8,7 @@
 class UGS_DrakharFeverGauge;
 class AGS_DrakharProjectile;
 class UGS_DrakharVFXComponent;
-class UGS_DrakharSFXComponent;
+class UGS_DrakharAudioComponent;
 class UGS_FootManagerComponent;
 class UArrowComponent;
 class UNiagaraSystem;
@@ -49,6 +49,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<AGS_DrakharProjectile> FeverDraconicProjectile;
 
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	UNiagaraSystem* BloodEffectSystem;
+
 	//[fever mode]
 	FOnCurrentFeverGaugeChangedDelegate OnCurrentFeverGaugeChanged;
 	UPROPERTY()
@@ -63,6 +66,9 @@ public:
 	virtual void CtrlStop() override;
 	virtual void LeftMouse() override;
 	virtual void RightMouse() override;
+	
+	//[Attack Functions]
+	virtual void MeleeAttackCheck() override;
 	
 	//[COMBO ATTACK]
 	void SetNextComboAttackSection(FName InSectionName);
@@ -164,7 +170,9 @@ public:
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicFurySkillSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicProjectileSound(const FVector& Location);
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayAttackHitSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboFinisherSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStartSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayHurtSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartWingRushVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStopWingRushVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartDustVFX();
@@ -183,6 +191,8 @@ public:
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFeverModeStart();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFeverModeEnd();
 	
+	UFUNCTION(NetMulticast, Reliable) void Multicast_PlayBloodEffect(FVector HitLocation, FVector HitNormal, float Scale);
+	
 	// === Blueprint Events ===
 	UFUNCTION(BlueprintImplementableEvent, Category = "Skill|Fly", meta = (DisplayName = "On Fly Start"))
 	void BP_OnFlyStart();
@@ -199,10 +209,10 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
-	UGS_DrakharVFXComponent* VFXComponent;
+	UGS_DrakharVFXComponent* DrakharVFXComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
-	UGS_DrakharSFXComponent* SFXComponent;
+	UGS_DrakharAudioComponent* AudioComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component", meta = (AllowPrivateAccess = "true"))
 	UGS_FootManagerComponent* FootManagerComponent;
@@ -281,11 +291,15 @@ public:
 	UAkAudioEvent* DraconicProjectileExplosionSoundEvent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Impact")
 	UAkAudioEvent* AttackHitSoundEvent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Combo")
+	UAkAudioEvent* ComboFinisherSoundEvent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Fever")
 	UAkAudioEvent* FeverModeStartSoundEvent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Impact")
+	UAkAudioEvent* HurtSoundEvent;
 	
-	FORCEINLINE UGS_DrakharVFXComponent* GetVFXComponent() const { return VFXComponent; }
-	FORCEINLINE UGS_DrakharSFXComponent* GetSFXComponent() const { return SFXComponent; }
+	FORCEINLINE UGS_DrakharVFXComponent* GetDrakharVFXComponent() const { return DrakharVFXComponent; }
+	FORCEINLINE UGS_DrakharAudioComponent* GetAudioComponent() const { return AudioComponent; }
 
 private:
 	//move spring arm for flying

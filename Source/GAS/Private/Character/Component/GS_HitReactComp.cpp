@@ -6,7 +6,6 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
-#include "Character/Player/Seeker/GS_Merci.h"
 #include "Character/Skill/GS_SkillBase.h"
 
 
@@ -21,12 +20,13 @@ UGS_HitReactComp::UGS_HitReactComp()
 void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirection)
 {
 	FName Section = CalculateHitDirection(HitDirection);
-
-	if (AGS_Player* OwnerCharacter = Cast<AGS_Player>(GetOwner()))
+	AGS_Player* OwnerCharacter = Cast<AGS_Player>(GetOwner());
+	AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter);
+	if (OwnerCharacter)
 	{
 		if (ReactType == EHitReactType::Interrupt)
 		{
-			if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+			if (OwnerSeeker)
 			{
 				OwnerSeeker->GetSkillComp()->SkillsInterrupt();
 
@@ -38,15 +38,25 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 		}
 		else if (ReactType == EHitReactType::Additive)
 		{
-			
+			if (OwnerSeeker)
+			{
+				OwnerSeeker->StateReset();
+			}
+		}
+		else if (ReactType == EHitReactType::DamageOnly)
+		{
+			if (OwnerSeeker)
+			{
+				OwnerSeeker->StateReset();
+			}
 		}
 
-		AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter);
+
 		if (OwnerSeeker)
 		{
 			OwnerSeeker->SetAimState(false);
 			OwnerSeeker->SetDrawState(false);
-		}       
+		}
 	}
 }
 

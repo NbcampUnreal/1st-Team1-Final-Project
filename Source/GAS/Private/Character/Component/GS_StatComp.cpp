@@ -173,15 +173,20 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 	//damaged
     else
     {
-        // 피격 사운드는 항상 재생
         MulticastRPCPlayTakeDamageMontage();
 
-        // 몬스터인 경우 Hurt 사운드 즉시 재생(서버 권한에서만 멀티캐스트 트리거)
         if (AGS_Monster* DamagedMonster = Cast<AGS_Monster>(GetOwner()))
         {
             if (IsValid(DamagedMonster) && IsValid(DamagedMonster->MonsterAudioComponent))
             {
-                DamagedMonster->MonsterAudioComponent->PlayHurtSound();
+                // 이번 데미지로 몬스터가 죽을지 미리 체크
+                bool bWillDieFromThisDamage = (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER);
+
+                // 몬스터가 죽지 않을 때만 타격 소리 재생
+                if (DamagedMonster->MonsterAudioComponent->GetCurrentAudioState() != EMonsterAudioState::Death && !bWillDieFromThisDamage)
+                {
+                    DamagedMonster->MonsterAudioComponent->PlayHurtSound();
+                }
             }
         }
 

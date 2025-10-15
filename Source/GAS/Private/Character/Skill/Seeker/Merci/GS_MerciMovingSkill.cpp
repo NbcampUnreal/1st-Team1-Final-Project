@@ -31,6 +31,7 @@ void UGS_MerciMovingSkill::ActiveSkill()
 
 		// 활 당기기
 		MerciCharacter->DrawBow(SkillAnimMontages[0]);
+		MerciCharacter->Client_StartZoom();
 	}
 }
 

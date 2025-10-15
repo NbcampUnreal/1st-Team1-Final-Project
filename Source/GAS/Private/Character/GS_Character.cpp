@@ -11,11 +11,13 @@
 #include "AkGameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/Component/GS_HitReactComp.h"
+#include "Character/Component/GS_CameraShakeComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "AI/RTS/GS_RTSController.h"
 #include "Character/Player/GS_Player.h"
 #include "Components/DecalComponent.h"
+// #include "Components/CapsuleComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
 #include "Character/F_GS_DamageEvent.h"
 
@@ -26,6 +28,7 @@ AGS_Character::AGS_Character()
 	StatComp = CreateDefaultSubobject<UGS_StatComp>(TEXT("StatComp"));
 	DebuffComp = CreateDefaultSubobject<UGS_DebuffComp>(TEXT("DebuffComp"));
 	HitReactComp = CreateDefaultSubobject<UGS_HitReactComp>(TEXT("HitReactComp"));
+	CameraShakeComp = CreateDefaultSubobject<UGS_CameraShakeComponent>(TEXT("CameraShakeComp"));
 	
 	HPTextWidgetComp = CreateDefaultSubobject<UGS_HPTextWidgetComp>(TEXT("TextWidgetComp"));
 	HPTextWidgetComp->SetupAttachment(RootComponent);
@@ -104,6 +107,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
+	DOREPLIFETIME(AGS_Character, bLockRotationToController);
 }
 
 
@@ -157,11 +161,25 @@ void AGS_Character::BeginDestroy()
 
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	// 이미 죽은 캐릭터는 추가 데미지를 받지 않음
+	if (IsDead())
+	{
+		return 0.0f;
+	}
+
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	float CurrentHealth = StatComp->GetCurrentHealth();
 
 	//when damage input start -> for drakhar 6/24
 	OnDamageStart();
+
+	if (HasAuthority())
+	{
+		if (APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			Client_PlayTakeDamageShake(PC);
+		}
+	}
 
 	if (CanHitReact)
 	{
@@ -208,6 +226,16 @@ void AGS_Character::DisableHitReact(bool bAllowHitReact)
 void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+bool AGS_Character::GetIsLockedRotationToController()
+{
+	return bLockRotationToController;
+}
+
+void AGS_Character::SetIsLockedRotationToController(bool InputIsRotationRoController)
+{
+	bLockRotationToController = InputIsRotationRoController;
 }
 
 void AGS_Character::OnDeath()
@@ -265,7 +293,37 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 			float Damage = DamagedCharacterStat->CalculateDamage(this, InDamagedCharacter);
 			FDamageEvent DamageEvent;
 			InDamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
+			
+			// 공격이 성공했을 때 공격자에게 카메라 쉐이크 적용
+			if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+			{
+				Client_PlayAttackSuccessShake(AttackerPC);
+			}
 		}
+	}
+}
+
+void AGS_Character::Client_PlayTakeDamageShake_Implementation(APlayerController* TargetPC)
+{
+	if (TargetPC && TargetPC->IsLocalController() && TakeDamageShake.ShakeClass)
+	{
+		TargetPC->ClientStartCameraShake(TakeDamageShake.ShakeClass, TakeDamageShake.Intensity);
+	}
+}
+
+void AGS_Character::Client_PlayAttackSuccessShake_Implementation(APlayerController* TargetPC)
+{
+	if (TargetPC && TargetPC->IsLocalController() && AttackSuccessShake.ShakeClass)
+	{
+		TargetPC->ClientStartCameraShake(AttackSuccessShake.ShakeClass, AttackSuccessShake.Intensity);
+	}
+}
+
+void AGS_Character::Client_PlayAttackSuccessShakeWithInfo_Implementation(APlayerController* TargetPC, const FGS_CameraShakeInfo& CustomShakeInfo)
+{
+	if (TargetPC && TargetPC->IsLocalController() && CustomShakeInfo.ShakeClass)
+	{
+		TargetPC->ClientStartCameraShake(CustomShakeInfo.ShakeClass, CustomShakeInfo.Intensity);
 	}
 }
 
@@ -312,23 +370,18 @@ void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 {
 	 GetMesh()->SetSimulatePhysics(true);
 	 GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+
+	 // 콜리전 비활성화하여 몬스터가 더 이상 죽은 캐릭터를 타겟으로 하지 않도록 함
+	 // GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)
 {
-	/*if (!HasAuthority())
-	{
-		PlayAnimMontage(SkillMontage);
-	}*/ // SJE
 	PlayAnimMontage(SkillMontage);
 }
 
 void AGS_Character::MulicastRPCStopCurrentSkillMontage_Implementation(UAnimMontage* CurrentSkillMontage)
 {
-	/*if (!HasAuthority())
-	{
-		StopAnimMontage(CurrentSkillMontage);
-	}*/ // SJE
 	StopAnimMontage(CurrentSkillMontage);
 }
 
