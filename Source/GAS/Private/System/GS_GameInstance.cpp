@@ -68,7 +68,7 @@ void UGS_GameInstance::Init()
             OnSessionUserInviteAcceptedDelegate = FOnSessionUserInviteAcceptedDelegate::CreateUObject(this, &UGS_GameInstance::OnSessionUserInviteAccepted_Impl);
             OnDestroySessionCompleteDelegateForCleanup = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnDestroySessionCompleteForCleanup);
             LeaveSessionCompleteDelegate = FOnDestroySessionCompleteDelegate::CreateUObject(this, &UGS_GameInstance::OnLeaveSessionComplete);
-            OnPlayerCountChanged.AddDynamic(this, &UGS_GameInstance::HandlePlayerCountChanged);
+            //OnPlayerCountChanged.AddDynamic(this, &UGS_GameInstance::HandlePlayerCountChanged);
             if (OnSessionUserInviteAcceptedDelegate.IsBound()) //FOnSessionUserInviteAcceptedDelegate는 게임 인스턴스 초기화 시점부터 계속 리스닝해야 하므로 Init()에서 핸들까지 등록
             {
                 OnSessionUserInviteAcceptedDelegateHandle = SessionInterface->AddOnSessionUserInviteAcceptedDelegate_Handle(OnSessionUserInviteAcceptedDelegate);
@@ -113,15 +113,12 @@ void UGS_GameInstance::LeaveCurrentSessionAndJoin(APlayerController* RequestingP
     FNamedOnlineSession* CurrentSession = SessionInterface->GetNamedSession(NAME_GameSession);
     if (CurrentSession != nullptr && CurrentSession->SessionState != EOnlineSessionState::NoSession)
     {
-        // 현재 세션이 있으므로, 파괴를 요청하고 콜백(OnDestroySessionCompleteForInvite)을 기다립니다.
-        // 이 부분은 이미 코드가 올바르게 작성되어 있을 것입니다.
         UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::LeaveCurrentSessionAndJoin - Leaving current session to join another."));
         DestroySessionCompleteDelegateForInviteHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateForInvite);
         SessionInterface->DestroySession(NAME_GameSession);
     }
     else
     {
-        // 현재 참여 중인 세션이 없으므로, 바로 초대받은 세션으로 참여를 시도합니다.
         UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::LeaveCurrentSessionAndJoin - No current session. Joining invite session directly."));
         
         FString GameLiftSessionId;
@@ -315,23 +312,6 @@ void UGS_GameInstance::OnDestroySessionCompleteForCleanup(FName SessionName, boo
     {
         SessionInterfacePtr->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionCompleteDelegateHandleForCleanup);
         OnDestroySessionCompleteDelegateHandleForCleanup.Reset();
-    }
-}
-
-void UGS_GameInstance::HandlePlayerCountChanged()
-{
-    UWorld* World = GetWorld();
-    if (World && (World->GetNetMode() == NM_DedicatedServer))
-    {
-        AGameStateBase* GS = World->GetGameState();
-        if (GS && GS->PlayerArray.Num() == 0)
-        {
-            UE_LOG(LogTemp, Log, TEXT("Last player left. Terminating game session."));
-
-            // GameLift SDK 모듈을 가져와서 ProcessEnding()을 호출합니다.
-            FGameLiftServerSDKModule* GameLiftSdkModule = &FModuleManager::LoadModuleChecked<FGameLiftServerSDKModule>(FName("GameLiftServerSDK"));
-            GameLiftSdkModule->ProcessEnding();
-        }
     }
 }
 
@@ -773,6 +753,62 @@ void UGS_GameInstance::GSLeaveSession(APlayerController* RequestingPlayer) //Net
     }
 }
 
+void UGS_GameInstance::CheckIfLastPlayerAndTerminate()
+{
+    UWorld* World = GetWorld();
+    if (World && (World->GetNetMode() == ENetMode::NM_DedicatedServer || World->GetNetMode() == ENetMode::NM_ListenServer))
+    {
+        AGameStateBase* GS = World->GetGameState();
+        
+        // Logout 함수는 플레이어 컨트롤러가 GameState의 PlayerArray에서 실제로 제거되기 전에 호출
+        // 플레이어 수가 1명이라면, 마지막 플레이어가 로그아웃하는 과정임을 의미
+        if (GS && GS->PlayerArray.Num() == 1)
+        {
+            UE_LOG(LogTemp, Log, TEXT("Last player has left the game session. Calling ProcessEnding()."));
+            
+#if WITH_GAMELIFT_AUTOMATION
+            FGameLiftServerSDKModule* GameLiftSdkModule = &FModuleManager::LoadModuleChecked<FGameLiftServerSDKModule>(FName("GameLiftServerSDK"));
+            if (GameLiftSdkModule)
+            {
+                GameLiftSdkModule->ProcessEnding();
+            }
+#endif
+        }
+        else if (GS)
+        {
+            UE_LOG(LogTemp, Log, TEXT("A player has left. Players remaining: %d"), GS->PlayerArray.Num() - 1);
+        }
+    }
+}
+
+void UGS_GameInstance::StorePlayerSession(const FUniqueNetIdRepl& PlayerId, const FString& PlayerSessionId)
+{
+    if (PlayerId.IsValid() && !PlayerSessionId.IsEmpty())
+    {
+        // FUniqueNetId를 문자열로 변환하여 Key로 사용합니다.
+        PlayerSessionLinks.Add(PlayerId.ToString(), PlayerSessionId);
+        UE_LOG(LogTemp, Log, TEXT("GameInstance: Stored PlayerSession '%s' for Player '%s'"), *PlayerSessionId, *PlayerId.ToString());
+    }
+}
+
+FString UGS_GameInstance::RemoveAndGetPlayerSession(const FUniqueNetIdRepl& PlayerId)
+{
+    if (PlayerId.IsValid())
+    {
+        const FString PlayerIdString = PlayerId.ToString();
+        
+        FString* FoundSessionIdPtr = PlayerSessionLinks.Find(PlayerIdString);
+
+        if (FoundSessionIdPtr != nullptr)
+        {
+            const FString FoundSessionId = *FoundSessionIdPtr;
+            PlayerSessionLinks.Remove(PlayerIdString);
+            return FoundSessionId;
+        }
+    }
+    return FString();
+}
+
 void UGS_GameInstance::OnLeaveSessionComplete(FName SessionName, bool bWasSuccessful)
 {
     UE_LOG(LogTemp, Log, TEXT("OnLeaveSessionComplete: SessionName: %s, Success: %d"), *SessionName.ToString(), bWasSuccessful);
@@ -974,3 +1010,4 @@ void UGS_GameInstance::SetServerParameters(FServerParameters& OutServerParameter
     UE_LOG(GameServerLog, Log, TEXT(">>>> Process ID: %s"), *OutServerParameters.m_processId);
     UE_LOG(GameServerLog, SetColor, TEXT("%s"), COLOR_NONE);
 }
+

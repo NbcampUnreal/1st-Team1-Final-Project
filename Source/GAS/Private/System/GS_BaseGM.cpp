@@ -5,22 +5,35 @@
 #include "GameFramework/PlayerController.h"
 #include "AI/RTS/GS_RTSController.h"
 #include "Character/GS_TpsController.h"
-
-void AGS_BaseGM::PostLogin(APlayerController* NewPlayer)
-{
-    Super::PostLogin(NewPlayer);
-
-    if (UGS_GameInstance* GI = GetGameInstance<UGS_GameInstance>())
-    {
-        GI->OnPlayerCountChanged.Broadcast();
-    }
-}
+#if WITH_GAMELIFT
+#include "GameLiftServerSDK.h"
+#endif
 
 void AGS_BaseGM::Logout(AController* Exiting)
 {
+#if WITH_GAMELIFT
+    if (Exiting && Exiting->PlayerState)
+    {
+        UGS_GameInstance* GI = GetGameInstance<UGS_GameInstance>();
+        if (GI)
+        {
+            FString PlayerSessionId = GI->RemoveAndGetPlayerSession(Exiting->PlayerState->GetUniqueId());
+            if (!PlayerSessionId.IsEmpty())
+            {
+                FGameLiftServerSDKModule* GameLiftSdkModule = FModuleManager::GetModulePtr<FGameLiftServerSDKModule>(TEXT("GameLiftServerSDK"));
+                if (GameLiftSdkModule)
+                {
+                    GameLiftSdkModule->RemovePlayerSession(PlayerSessionId);
+                    UE_LOG(LogTemp, Log, TEXT("CustomLobbyGM: Removed PlayerSession '%s' for player '%s'"), *PlayerSessionId, *Exiting->PlayerState->GetPlayerName());
+                }
+            }
+        }
+    }
+#endif
+    
     if (UGS_GameInstance* GI = GetGameInstance<UGS_GameInstance>())
     {
-        GI->OnPlayerCountChanged.Broadcast();
+        GI->CheckIfLastPlayerAndTerminate();
     }
 
     Super::Logout(Exiting);
@@ -49,7 +62,7 @@ void AGS_BaseGM::NotifyPlayerIsReady(AController* PlayerController)
     }
 }
 
-void AGS_BaseGM::StartMatchWhenAllReady()
+void AGS_BaseGM::StartMatchWhenAllReady() // Travel 시작해주는 함수 아니고 Travel 직후 매치 시작 알림 함수임.
 {
     UE_LOG(LogTemp, Warning, TEXT("All players are ready! Broadcasting to clients to start the match."));
 

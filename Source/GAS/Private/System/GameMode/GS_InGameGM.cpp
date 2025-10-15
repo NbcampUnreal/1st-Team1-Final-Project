@@ -343,7 +343,8 @@ void AGS_InGameGM::Logout(AController* Exiting)
     Super::Logout(Exiting);
 
     // 플레이어가 나갔을 때도 생존자 확인
-    CheckAllPlayersDead();
+    FTimerHandle TimerHandle;
+    GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AGS_InGameGM::CheckAllPlayersDead, 1.f, false);
 }
 
 void AGS_InGameGM::BindToPlayerState(APlayerController* PlayerController)

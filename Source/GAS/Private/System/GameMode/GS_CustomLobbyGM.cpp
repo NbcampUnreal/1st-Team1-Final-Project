@@ -168,6 +168,12 @@ void AGS_CustomLobbyGM::PostLogin(APlayerController* NewPlayer)
     if (Result.IsSuccess())
     {
         UE_LOG(LogTemp, Log, TEXT("AcceptPlayerSession Success for PlayerSessionId: %s"), *PlayerSessionId);
+        
+        UGS_GameInstance* GI = GetGameInstance<UGS_GameInstance>();
+        if (GI && NewPlayer->PlayerState)
+        {
+            GI->StorePlayerSession(NewPlayer->PlayerState->GetUniqueId(), PlayerSessionId);
+        }
     }
     else
     {
@@ -254,6 +260,26 @@ void AGS_CustomLobbyGM::HandlePlayerReadyInLobby(APlayerController* PlayerContro
 
 void AGS_CustomLobbyGM::Logout(AController* Exiting)
 {
+#if WITH_GAMELIFT
+    if (Exiting && Exiting->PlayerState)
+    {
+        UGS_GameInstance* GI = GetGameInstance<UGS_GameInstance>();
+        if (GI)
+        {
+            FString PlayerSessionId = GI->RemoveAndGetPlayerSession(Exiting->PlayerState->GetUniqueId());
+            if (!PlayerSessionId.IsEmpty())
+            {
+                FGameLiftServerSDKModule* GameLiftSdkModule = FModuleManager::GetModulePtr<FGameLiftServerSDKModule>(TEXT("GameLiftServerSDK"));
+                if (GameLiftSdkModule)
+                {
+                    GameLiftSdkModule->RemovePlayerSession(PlayerSessionId);
+                    UE_LOG(LogTemp, Log, TEXT("CustomLobbyGM: Removed PlayerSession '%s' for player '%s'"), *PlayerSessionId, *Exiting->PlayerState->GetPlayerName());
+                }
+            }
+        }
+    }
+#endif
+    
     AGS_PlayerState* PS = Cast<AGS_PlayerState>(Exiting->PlayerState);
     if (PS)
     {
@@ -266,6 +292,11 @@ void AGS_CustomLobbyGM::Logout(AController* Exiting)
         }
 
         CheckAllPlayersReady();
+    }
+
+    if (UGS_GameInstance* GI = GetGameInstance<UGS_GameInstance>())
+    {
+        GI->CheckIfLastPlayerAndTerminate();
     }
 
     Super::Logout(Exiting);

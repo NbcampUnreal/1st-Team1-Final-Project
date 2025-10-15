@@ -43,20 +43,6 @@ protected:
     UPROPERTY()
     TWeakObjectPtr<APlayerController> PlayerSearchingSession;
 
-    TSharedPtr<FOnlineSessionSettings> HostSessionSettings;
-    FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
-    FDelegateHandle CreateSessionCompleteDelegateHandle;
-    void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
-
-    TSharedPtr<FOnlineSessionSearch> SessionSearchSettings;
-    FOnFindSessionsCompleteDelegate FindSessionsCompleteDelegate;
-    FDelegateHandle FindSessionsCompleteDelegateHandle;
-    void OnFindSessionsComplete(bool bWasSuccessful);
-
-    FOnJoinSessionCompleteDelegate JoinSessionCompleteDelegate;
-    FDelegateHandle JoinSessionCompleteDelegateHandle;
-    void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
-
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Network|Session Settings")
     FString DefaultLobbyMapName;
 
@@ -69,6 +55,7 @@ protected:
     // ================================커스텀 게임을 위한 세션 자동 생성================================
 public:
     void StartGameSessionPlacement(); // "커스텀 게임" 버튼이 호출할 함수
+    void OnSteamAuthTicketReady(const FString& HexTicket);
 
 private:
     void OnStartPlacementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
@@ -82,6 +69,9 @@ private:
 public:
 	UFUNCTION(BlueprintCallable, Category = "Network|Session")
 	void GSLeaveSession(APlayerController* RequestingPlayer);
+
+    UFUNCTION(BlueprintCallable, Category = "Network|Session")
+    void CheckIfLastPlayerAndTerminate();
 
 protected:
     FOnDestroySessionCompleteDelegate LeaveSessionCompleteDelegate;
@@ -119,19 +109,27 @@ protected:
     FOnDestroySessionCompleteDelegate OnDestroySessionCompleteDelegateForCleanup;
     FDelegateHandle OnDestroySessionCompleteDelegateHandleForCleanup;
     void OnDestroySessionCompleteForCleanup(FName SessionName, bool bWasSuccessful);
-
-
-
     
-    // ================================세션 생명주기 관리================================
+    // ================================AWS GameLift================================
+private:
+    void InitGameLift();
+    void SetServerParameters(FServerParameters& OutServerParameters);
+
+    TSharedPtr<FProcessParameters> ProcessParameters;
+
+    // ================================Steam Ticket================================
+private:
+    // 이전에 사용했던 티켓의 핸들을 저장할 변수
+    HAuthTicket LastAuthTicketHandle;
+
+    // ================================플레이어 정보 저장================================
 public:
-    UPROPERTY(BlueprintAssignable, Category = "Session")
-    FOnPlayerCountChangedDelegate OnPlayerCountChanged;
+    void StorePlayerSession(const FUniqueNetIdRepl& PlayerId, const FString& PlayerSessionId);
+    FString RemoveAndGetPlayerSession(const FUniqueNetIdRepl& PlayerId);
 
 private:
-    UFUNCTION()
-    void HandlePlayerCountChanged();
-
+    TMap<FString, FString> PlayerSessionLinks;
+    
     // ================================타이머 넘기기================================
 public:
     UPROPERTY(BlueprintReadWrite, Category = "Timer")
@@ -151,26 +149,14 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Settings")
     void LoadSettings();
 
- private:
-     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
-     float MouseSensitivity;
-
-     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
-     float MinSensitivity;
-
-     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
-     float MaxSensitivity;
-
-    // ================================AWS GameLift================================
 private:
-    void InitGameLift();
-    void SetServerParameters(FServerParameters& OutServerParameters);
+    UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+    float MouseSensitivity;
 
-    TSharedPtr<FProcessParameters> ProcessParameters;
+    UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+    float MinSensitivity;
 
-    // ================================Steam Ticket================================
-private:
-    // 이전에 사용했던 티켓의 핸들을 저장할 변수
-    HAuthTicket LastAuthTicketHandle;
-    
+    UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+    float MaxSensitivity;
+
 };
