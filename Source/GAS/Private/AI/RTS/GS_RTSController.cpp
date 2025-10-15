@@ -10,7 +10,6 @@
 #include "AI/RTS/GS_RTSHUD.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Blueprint/UserWidget.h"
-#include "AkGameplayStatics.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
@@ -18,7 +17,9 @@
 #include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "Sound/GS_AudioManager.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
 #include "System/GameMode/GS_InGameGM.h"
+
 
 
 AGS_RTSController::AGS_RTSController()
@@ -46,6 +47,14 @@ AGS_RTSController::AGS_RTSController()
 	ScrollDownCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_D"));
 	ScrollLeftCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_L"));
 	ScrollRightCursorPath = FName(TEXT("UI/RTS/Cursor/Icon_Cursor_Scroll_R"));
+
+	//[Aether] AetherComp 연결
+	AetherComp = CreateDefaultSubobject<UGS_AetherComp>(TEXT("AetherComp"));
+}
+
+AActor* AGS_RTSController::GetViewTarget() const
+{
+	return Super::GetViewTarget();
 }
 
 void AGS_RTSController::BeginPlay()
@@ -88,6 +97,38 @@ void AGS_RTSController::BeginPlay()
 	}
 	
 	Server_NotifyPlayerIsReady();
+
+	//[Aether] 준비 완료 시 broadcast
+	if (IsValid(AetherComp))
+	{
+		OnAetherCompReady.Broadcast(AetherComp);
+		
+	}
+	for (TActorIterator<AGS_AetherExtractor> It(GetWorld()); It; ++It)
+	{
+		It->RegisterRTSController(this);
+
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[RTSController::BeginPlay] Authority=%d, AetherComp=%s"),
+		HasAuthority(),
+		*GetNameSafe(AetherComp));
+	if (HasAuthority() && IsValid(AetherComp))
+	{
+		AetherComp->InitializeMaxAmount(AetherComp->GetMaxAmount());
+	}
+	
+	// 시커 감지 타이머 시작 (로컬 컨트롤러만)
+	if (!HasAuthority() && IsLocalController())
+	{
+		GetWorldTimerManager().SetTimer(
+			DetectionTimerHandle,
+			this,
+			&AGS_RTSController::UpdateSeekerDetection,
+			DetectionUpdateInterval,
+			true
+		);
+	}
 }
 
 void AGS_RTSController::SetupInputComponent()
@@ -167,10 +208,6 @@ void AGS_RTSController::CameraMoveEnd()
 void AGS_RTSController::OnCommandMove(const FInputActionValue& Value)
 {
 	MoveSelectedUnits();
-		if (CommandButtonSound)
-	{
-		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
-	}
 }
 
 void AGS_RTSController::MoveSelectedUnits()
@@ -183,10 +220,6 @@ void AGS_RTSController::MoveSelectedUnits()
 void AGS_RTSController::OnCommandAttack(const FInputActionValue& Value)
 {
 	AttackSelectedUnits();
-	if (CommandButtonSound)
-	{
-		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
-	}
 }
 
 void AGS_RTSController::AttackSelectedUnits()
@@ -199,10 +232,6 @@ void AGS_RTSController::AttackSelectedUnits()
 void AGS_RTSController::OnCommandStop(const FInputActionValue& Value)
 {
 	StopSelectedUnits();
-	if (CommandButtonSound)
-	{
-		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
-	}
 }
 
 void AGS_RTSController::StopSelectedUnits()
@@ -218,10 +247,6 @@ void AGS_RTSController::StopSelectedUnits()
 void AGS_RTSController::OnCommandHold(const FInputActionValue& Value)
 {
 	HoldSelectedUnits();
-	if (CommandButtonSound)
-	{
-		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
-	}
 }
 
 void AGS_RTSController::HoldSelectedUnits()
@@ -237,10 +262,6 @@ void AGS_RTSController::HoldSelectedUnits()
 void AGS_RTSController::OnCommandSkill(const FInputActionValue& Value)
 {
 	SkillSelectedUnits();
-	if (CommandButtonSound)
-	{
-		UAkGameplayStatics::PostEvent(CommandButtonSound, this, 0, FOnAkPostEventCallback());
-	}
 }
 
 void AGS_RTSController::SkillSelectedUnits()
@@ -267,6 +288,7 @@ void AGS_RTSController::OnLeftMousePressed()
 		ToggleOnShiftClick();
 		return;
 	}
+	
 	UE_LOG(LogTemp, Log, TEXT("--- OnLeftMousePressed: Command=%d"), static_cast<int32>(CurrentCommand));
 	
 	FHitResult Hit;
@@ -301,6 +323,23 @@ void AGS_RTSController::OnLeftMousePressed()
 		}
 		break;
 	default:
+		if (bHit)
+		{
+			if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(Hit.GetActor()))
+			{
+				ClearUnitSelection();
+				SelectedSeeker = Seeker;
+				OnSeekerSelectionChanged.Broadcast(SelectedSeeker);
+				return;
+			}
+		}
+
+		if (SelectedSeeker)
+		{
+			SelectedSeeker = nullptr;
+			OnSeekerSelectionChanged.Broadcast(nullptr);
+		}
+		
 		if (AGS_RTSHUD* HUD = Cast<AGS_RTSHUD>(GetHUD()))
 		{
 			HUD->StartSelection();
@@ -373,10 +412,6 @@ void AGS_RTSController::OnEscapeButtonClicked()
 {
 	if (CurrentCommand != ERTSCommand::None)
 	{
-		if (CommandCancelSound)
-		{
-			UAkGameplayStatics::PostEvent(CommandCancelSound, this, 0, FOnAkPostEventCallback());
-		}
 		CurrentCommand = ERTSCommand::None;
 		OnRTSCommandChanged.Broadcast(CurrentCommand);
 	}
@@ -462,6 +497,20 @@ void AGS_RTSController::InitCameraActor()
 	if (CameraActor && GetViewTarget() != CameraActor) 
 	{
 		SetViewTarget(CameraActor);
+	}
+}
+
+void AGS_RTSController::HideDungeonElements()
+{
+	UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그]===== CLIENT RPC RECEIVED on %s! ====="), *GetName());
+	if (CameraActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] RTSCamera is valid. Hiding walls."));
+		CameraActor->HideWallAndCeiling();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[숨김 처리 로그] 으악! 실패!! 카메라 액터가 없음."));
 	}
 }
 
@@ -872,7 +921,10 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -884,11 +936,14 @@ void AGS_RTSController::Server_RTSMove_Implementation(const TArray<AGS_Monster*>
 				BlackboardComp->ClearValue(AGS_AIController::TargetActorKey);
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, false);
 
-				// 첫 번째 유닛만 이동 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                // 첫 번째 유닛만 이동 사운드 재생
+                if (i == 0)
+                {
+                    if (Unit->MonsterAudioComponent)
+                    {
+                        Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Move);
+                    }
+                }
 			}
 		}
 	}
@@ -899,7 +954,10 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -910,11 +968,14 @@ void AGS_RTSController::Server_RTSAttackMove_Implementation(const TArray<AGS_Mon
 				BlackboardComp->SetValueAsVector (AGS_AIController::MoveLocationKey, Dest);
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, false);
 
-				// 첫 번째 유닛만 공격 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                // 첫 번째 유닛만 공격 사운드 재생
+                if (i == 0)
+                {
+                    if (Unit->MonsterAudioComponent)
+                    {
+                        Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Attack);
+                    }
+                }
 			}
 		}
 	}
@@ -925,7 +986,10 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -937,11 +1001,14 @@ void AGS_RTSController::Server_RTSAttack_Implementation(const TArray<AGS_Monster
 				BlackboardComp->ClearValue(AGS_AIController::MoveLocationKey);
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, true);
 
-				// 첫 번째 유닛만 공격 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                // 첫 번째 유닛만 공격 사운드 재생
+                if (i == 0)
+                {
+                    if (Unit->MonsterAudioComponent)
+                    {
+                        Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Attack);
+                    }
+                }
 			}
 		}
 	}
@@ -952,7 +1019,10 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -964,11 +1034,14 @@ void AGS_RTSController::Server_RTSStop_Implementation(const TArray<AGS_Monster*>
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::None));
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, false);
 
-				// 첫 번째 유닛만 정지 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                // 첫 번째 유닛만 정지 소리 재생 (Move 사운드 재활용)
+                if (i == 0)
+                {
+                    if (Unit->MonsterAudioComponent)
+                    {
+                        Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Move);
+                    }
+                }
 			}
 		}
 	}
@@ -979,7 +1052,10 @@ void AGS_RTSController::Server_RTSHold_Implementation(const TArray<AGS_Monster*>
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -989,11 +1065,14 @@ void AGS_RTSController::Server_RTSHold_Implementation(const TArray<AGS_Monster*>
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Hold));
 				BlackboardComp->SetValueAsBool(AGS_AIController::TargetLockedKey, false);
 
-				// 첫 번째 유닛만 정지 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+                // 첫 번째 유닛만 정지 소리 재생 (Move 사운드 재활용)
+                if (i == 0)
+                {
+                    if (Unit->MonsterAudioComponent)
+                    {
+                        Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Move);
+                    }
+                }
 			}
 		}
 	}
@@ -1004,7 +1083,10 @@ void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*
 	for (int32 i = 0; i < Units.Num(); ++i)
 	{
 		AGS_Monster* Unit = Units[i];
-		if (!IsValid(Unit)) continue;
+		if (!IsValid(Unit))
+		{
+			continue;
+		}
 		
 		if (AGS_AIController* AIController = Cast<AGS_AIController>(Unit->GetController()))
 		{
@@ -1013,11 +1095,11 @@ void AGS_RTSController::Server_RTSSkill_Implementation(const TArray<AGS_Monster*
 				BlackboardComp->ClearValue(AGS_AIController::CommandKey);
 				BlackboardComp->SetValueAsEnum(AGS_AIController::CommandKey, static_cast<uint8>(ERTSCommand::Skill));
 
-				// 첫 번째 유닛만 스킬 소리 재생
-				if (i == 0 && Unit->MoveSoundEvent)
-				{
-					UAkGameplayStatics::PostEvent(Unit->MoveSoundEvent, Unit, 0, FOnAkPostEventCallback());
-				}
+				// 첫 번째 유닛만 스킬 소리 재생 (Move 사운드 재활용)
+                if (i == 0 && Unit->MonsterAudioComponent)
+                {
+                    Unit->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Move);
+                }
 			}
 		}
 	}
@@ -1068,5 +1150,189 @@ bool AGS_RTSController::IsSelectable(AGS_Monster* Monster) const
 
 void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)
 {
-	RemoveUnitFromSelection(Monster);
+    if (IsValid(Monster))
+    {
+        if (Monster->MonsterAudioComponent)
+        {
+            Monster->MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Death);
+        }
+    }
+    RemoveUnitFromSelection(Monster);
+}
+
+//[Aether] 에테르 반환
+UGS_AetherComp* AGS_RTSController::GetAetherComp() const
+{
+	return AetherComp;
+}
+
+// ==========================================
+// 시커 감지 시스템
+// ==========================================
+
+void AGS_RTSController::UpdateSeekerDetection()
+{
+	if (!CameraActor)
+	{
+		return;
+	}
+
+	// 현재 카메라 시야 안에 있는 시커들 찾기
+	TArray<AGS_Seeker*> CurrentVisibleSeekers;
+
+	for (TActorIterator<AGS_Seeker> It(GetWorld()); It; ++It)
+	{
+		AGS_Seeker* Seeker = *It;
+		if (IsValid(Seeker) && !Seeker->IsDead())
+		{
+			if (IsSeekerInCameraView(Seeker))
+			{
+				CurrentVisibleSeekers.Add(Seeker);
+
+				// 화면 중앙과의 거리 계산 (0.0 = 중앙, 1.0 = 가장자리)
+				float DistanceFromCenter = CalculateSeekerDistanceFromScreenCenter(Seeker);
+
+				// 서버에 거리 정보 전송
+				Server_UpdateSeekerProximity(Seeker, DistanceFromCenter);
+			}
+		}
+	}
+
+	// 새로 감지된 시커들 처리
+	for (AGS_Seeker* Seeker : CurrentVisibleSeekers)
+	{
+		if (!DetectedSeekers.Contains(Seeker))
+		{
+			DetectedSeekers.Add(Seeker);
+			NotifySeekerDetection(Seeker, true);
+		}
+	}
+
+	// 더 이상 감지되지 않는 시커들 처리
+	TArray<AGS_Seeker*> SeekersToRemove;
+	for (AGS_Seeker* Seeker : DetectedSeekers)
+	{
+		if (!CurrentVisibleSeekers.Contains(Seeker))
+		{
+			SeekersToRemove.Add(Seeker);
+		}
+	}
+
+	for (AGS_Seeker* Seeker : SeekersToRemove)
+	{
+		DetectedSeekers.Remove(Seeker);
+		NotifySeekerDetection(Seeker, false);
+
+		// 감지 해제 시 거리 1.0 (최대값)으로 설정
+		Server_UpdateSeekerProximity(Seeker, 1.0f);
+
+		LastSeekerNotifyTimes.Remove(Seeker);
+	}
+}
+
+bool AGS_RTSController::IsSeekerInCameraView(AGS_Seeker* Seeker)
+{
+	if (!CameraActor || !Seeker)
+	{
+		return false;
+	}
+
+	// 카메라 시야 경계 계산
+	FBox2D ViewBounds = CameraActor->GetSimpleViewBounds();
+
+	// 시커의 위치를 2D로 변환
+	FVector SeekerLocation = Seeker->GetActorLocation();
+	FVector2D Seeker2DLocation(SeekerLocation.X, SeekerLocation.Y);
+
+	// 시커가 카메라 시야 안에 있는지 확인
+	return ViewBounds.IsInside(Seeker2DLocation);
+}
+
+void AGS_RTSController::NotifySeekerDetection(AGS_Seeker* Seeker, bool bIsDetected)
+{
+	if (!Seeker)
+	{
+		return;
+	}
+
+	// RPC 쿨다운 체크: 동일한 시커에 대해 너무 자주 호출되는 것을 방지
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	float* LastNotifyTime = LastSeekerNotifyTimes.Find(Seeker);
+
+	if (LastNotifyTime && (CurrentTime - *LastNotifyTime) < DetectionRPCCooldown)
+	{
+		return;
+	}
+
+	// 마지막 호출 시간 갱신
+	LastSeekerNotifyTimes.Add(Seeker, CurrentTime);
+
+	// 서버 RPC 호출
+	Server_NotifySeekerDetection(Seeker, bIsDetected);
+}
+
+void AGS_RTSController::Server_NotifySeekerDetection_Implementation(AGS_Seeker* Seeker, bool bIsDetected)
+{
+    if (!Seeker)
+    {
+        return;
+    }
+
+    // 서버 검증: 기본적인 거리 기반 검증
+    // 서버는 카메라 정보가 없으므로 세밀한 시야각 검증 불가. 대신 최대 거리 내에 있는지만 확인
+    if (CameraActor)
+    {
+        const float MaxDetectionDistance = 5000.0f; // 최대 감지 거리
+        float DistanceToSeeker = FVector::Dist(CameraActor->GetActorLocation(), Seeker->GetActorLocation());
+
+        if (bIsDetected && DistanceToSeeker > MaxDetectionDistance)
+        {
+            return; // 너무 먼 거리의 감지 요청은 무시
+        }
+    }
+
+    // 클라이언트의 판단을 신뢰하여 상태 변경
+    Seeker->OnDetectedByGuardian(bIsDetected);
+}
+
+float AGS_RTSController::CalculateSeekerDistanceFromScreenCenter(AGS_Seeker* Seeker)
+{
+	if (!CameraActor || !Seeker)
+	{
+		return 1.0f; // 최대 거리 반환
+	}
+
+	// 화면 경계 가져오기
+	FBox2D ViewBounds = CameraActor->GetSimpleViewBounds();
+	FVector2D Center = ViewBounds.GetCenter();
+
+	// 시커의 2D 위치
+	FVector SeekerLocation = Seeker->GetActorLocation();
+	FVector2D Seeker2D(SeekerLocation.X, SeekerLocation.Y);
+
+	// 화면 크기 계산
+	FVector2D ViewSize = ViewBounds.GetSize();
+	float MaxDistance = ViewSize.Size() * 0.5f; // 대각선 거리의 절반
+
+	// 중앙으로부터의 거리 계산
+	float Distance = FVector2D::Distance(Center, Seeker2D);
+
+	// 0.0 (중앙) ~ 1.0 (가장자리)로 정규화
+	float NormalizedDistance = FMath::Clamp(Distance / MaxDistance, 0.0f, 1.0f);
+
+	return NormalizedDistance;
+}
+
+void AGS_RTSController::Server_UpdateSeekerProximity_Implementation(AGS_Seeker* Seeker, float DistanceFromCenter)
+{
+	if (!Seeker)
+	{
+		return;
+	}
+
+	// 거리 값을 강도로 변환 (0.0 = 중앙 = 최대 강도, 1.0 = 가장자리 = 최소 강도)
+	float Intensity = 1.0f - DistanceFromCenter;
+
+	// 시커에 강도 설정
+	Seeker->SetDetectionIntensity(Intensity);
 }

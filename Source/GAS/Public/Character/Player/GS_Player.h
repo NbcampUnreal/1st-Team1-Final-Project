@@ -9,24 +9,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UGS_SteamNameWidgetComp;
-
-/*USTRUCT(BlueprintType)
-struct FCharacterWantsToMove
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
-	bool WantsToSprint = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
-	bool WantsToWalk = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
-	bool WantsToAim = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Move")
-	bool WantsToStrafe = false;
-};*/
+class FAkAudioDevice;
 
 USTRUCT(BlueprintType)
 struct FSkillInputControl
@@ -43,18 +26,6 @@ struct FSkillInputControl
 	bool CanInputCtrl = true; // Ctrl
 };
 
-/*UENUM(BlueprintType)
-enum class EInputFlag : uint8
-{
-	None = 0,
-	CanInputLC = (1 << 0),
-	CanInputRC = (1 << 1),
-	CanInputRoll = (1 << 2),
-	CanInputLeftClick = (1 << 3)
-};
-
-ENUM_CLASS_FLAGS(EInputFlag)*/
-
 UCLASS()
 class GAS_API AGS_Player : public AGS_Character
 {
@@ -70,8 +41,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character|Components")
 	TObjectPtr<UCameraComponent> CameraComp;
 
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	//TObjectPtr<UGS_SteamNameWidgetComp> SteamNameWidgetComp;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TObjectPtr<UGS_SteamNameWidgetComp> SteamNameWidgetComp;
 	
 	// 시야방해
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character|Components", meta = (AllowPrivateAccess = "true"))
@@ -93,13 +64,21 @@ public:
 	UPROPERTY()
 	float RunSpeed;
 
-	// Wants To Move
-	/*UPROPERTY(BlueprintReadWrite, Category = "Movement")
-	FCharacterWantsToMove WantsToMove;*/
-
 	// 오디오 컴포넌트
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	UAkComponent* AkComponent;
+
+	// 머리 위치 오디오 리스너 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UAkComponent* HeadAudioListenerComponent;
+
+	// 머리 위치로 사용할 소켓/본 후보 목록 (상위에서부터 우선순위)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	TArray<FName> HeadListenerCandidates;
+
+	// 후보를 찾지 못했을 때 적용할 Z 오프셋(머리 높이 추정치)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
+	float HeadListenerZOffset = 180.0f;
 
 	UFUNCTION(Client, Reliable)
 	void Client_StartVisionObscured();
@@ -130,6 +109,9 @@ public:
 	// 오디오 관련 함수들
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	void SetupLocalAudioListener();
+
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void SetupHeadAudioListener();
     
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	bool IsLocalPlayer() const;
@@ -149,7 +131,7 @@ public:
 	FORCEINLINE UGS_SkillComp* GetSkillComp() const { return SkillComp; }
 	virtual void SetCanUseSkill(bool bCanUse) override;
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -170,5 +152,8 @@ private:
 	bool bIsObscuring;
 
 	void UpdateSteamNameWidgetRotation();
+
+	// 오디오 디바이스 캐싱
+	FAkAudioDevice* CachedAudioDevice = nullptr;
 
 };

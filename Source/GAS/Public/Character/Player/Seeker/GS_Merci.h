@@ -35,15 +35,14 @@ public:
 	virtual void LeftClickPressed_Implementation() override;
 	virtual void LeftClickRelease_Implementation() override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 	// 화살 발사 VFX
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayArrowShotVFX(FVector Location, FRotator Rotation, int32 NumArrows);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayArrowShotSound();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayArrowEmptySound();
 
 	// getter
 	UFUNCTION(BlueprintCallable, Category = "Arrow")
@@ -52,6 +51,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Arrow")
 	int32 GetMaxChildArrows();
 
+	// UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> WidgetCrosshairClass;
 
@@ -61,6 +61,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon", meta=(AllowPrivateAccess="true"))
 	USkeletalMeshComponent* Quiver;
 
+	// Attack
 	UFUNCTION(BlueprintCallable)
 	void DrawBow(UAnimMontage* DrawMontage);
 
@@ -75,13 +76,15 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_FireArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg = 0.0f, int32 NumArrows = 1);
-
+	
+	// Arrow
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AGS_SeekerMerciArrow> NormalArrowClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AGS_SeekerMerciArrow> SmokeArrowClass;
 
+	// Animation
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	UAnimMontage* ComboSkillDrawMontage;
 
@@ -91,6 +94,7 @@ public:
 	void OnDrawMontageEnded();
 	
 	bool GetIsFullyDrawn() { return bIsFullyDrawn; }
+	
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_DrawDebugLine(FVector Start, FVector End, FColor Color = FColor::Green);
 
@@ -107,17 +111,23 @@ public:
 	void Client_StartZoom();
 
 	UFUNCTION(Client, Reliable)
-	void Client_StopZoom();
+	void Client_StopZoom(float Duration);
 
 	//Crosshair
 	UFUNCTION(BlueprintCallable, Category = "Crosshair")
 	void SetCrosshairWidget(UGS_CrossHairImage* InCrosshairWidget);
 
 	UFUNCTION(Client, Reliable)
+	void Client_UpdateCrosshairAim(bool bAiming);
+
+	UFUNCTION(Client, Reliable)
 	void Client_ShowCrosshairHitFeedback();
 
 	UFUNCTION(Client, Reliable)
 	void Client_PlayHitFeedbackSound();
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlayArrowEmptySound();
 
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateTargetUI(AActor* NewTarget, AActor* OldTarget);
@@ -139,10 +149,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack", meta = (AllowPrivateAccess = "true"))
 	FVector MultiShotVFXOffset = FVector::ZeroVector;
-
-
+	
 	// 타임라인 관련
 	FTimeline ZoomTimeline;
+
+	void ZoomTimelineReverse();
 
 	UPROPERTY(EditAnywhere)
 	UCurveFloat* ZoomCurve;
@@ -150,40 +161,11 @@ protected:
 	UFUNCTION()
 	void UpdateZoom(float Alpha);
 
-	// 활 관련 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
-	UAkAudioEvent* BowPullSound; // 활 당길 때(클릭)
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
-	UAkAudioEvent* BowReleaseSound; // 활 놓을 때(릴리즈)
-
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Bow")
-	UAkAudioEvent* ArrowShotSound; // 활 놓을 때(릴리즈)
-
-	// 화살 타입 변경 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Arrow")
-	UAkAudioEvent* ArrowTypeChangeSound; // 화살 타입 변경할 때
-
-	// 화살 부족 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Arrow")
-	UAkAudioEvent* ArrowEmptySound; // 화살이 없을 때
-
-	// 타격 피드백 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound|Feedback")
-	UAkAudioEvent* HitFeedbackSound; // 화살이 적을 맞췄을 때의 UI 피드백 사운드
-
-	// 멀티캐스트 사운드 함수들
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayBowPullSound();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayBowReleaseSound();
-
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
-
-	// [화살 관리]
 	
 private:
+	FTimerHandle ReverseTimerHandle;
+	
 	UGS_ArrowTypeWidget* ArrowTypeWidget;
 
 	bool bWidgetVisibility = false;

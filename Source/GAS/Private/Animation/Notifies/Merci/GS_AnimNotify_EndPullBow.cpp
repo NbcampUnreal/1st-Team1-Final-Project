@@ -11,6 +11,9 @@ void UGS_AnimNotify_EndPullBow::Notify(USkeletalMeshComponent* MeshComp, UAnimSe
 	AActor* Owner = MeshComp->GetOwner();
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(Owner))
 	{
-		MerciCharacter->OnDrawMontageEnded();
+		if (MerciCharacter->HasAuthority())
+		{
+			MerciCharacter->OnDrawMontageEnded();
+		}
 	}
 }

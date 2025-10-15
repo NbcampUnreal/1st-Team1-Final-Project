@@ -3,17 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/GS_BasePlayerController.h"
 #include "RTSCommand.h"
 #include "AkGameplayStatics.h"
+#include "ResourceSystem/Aether/GS_AetherComp.h"
 #include "GS_RTSController.generated.h"
 
 struct FInputActionInstance;
 struct FInputActionValue;
 class AGS_Monster;
 class AGS_Character;
+class AGS_Seeker;
 class UInputMappingContext;
 class UInputAction;
+class UGS_AetherComp;
 
 // 지정된 부대 
 USTRUCT(BlueprintType)
@@ -27,11 +30,14 @@ struct FUnitGroup
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionChanged, const TArray<AGS_Monster*>&, NewSelection);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSeekerSelectionChanged, AGS_Seeker*, NewSeeker);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRTSCommandChanged, ERTSCommand, NewCommand);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectedUnitsSkillChanged, bool, bAnyUnitHasSkill);
+//[Aether]
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAetherCompReady, UGS_AetherComp*, AetherComp);
 
 UCLASS()
-class GAS_API AGS_RTSController : public APlayerController
+class GAS_API AGS_RTSController : public AGS_BasePlayerController
 {
 	GENERATED_BODY()
 
@@ -90,13 +96,18 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Selection")
 	FOnSelectedUnitsSkillChanged OnSelectedUnitsSkillChanged;
 
-	// UI 반응 사운드
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandButtonSound; 
+	UPROPERTY(BlueprintAssignable)
+	FOnSeekerSelectionChanged OnSeekerSelectionChanged;
+	
+	//[Aether]AetherComp + 생성 완료 알리는 델리게이트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Resource")
+	TObjectPtr<UGS_AetherComp> AetherComp;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Sound")
-	UAkAudioEvent* CommandCancelSound;
+	UPROPERTY(BlueprintAssignable, Category="Resource")
+	FOnAetherCompReady OnAetherCompReady;
 
+	virtual AActor* GetViewTarget() const override;
+	
 	// 현재 선택된 유닛들
 	UFUNCTION(BlueprintCallable)
 	const TArray<AGS_Monster*>& GetUnitSelection() const { return UnitSelection; }
@@ -201,6 +212,11 @@ public:
 	// Client
 	UFUNCTION(Client, Reliable)
 	void Client_StartGame();
+	// UFUNCTION(Client, Reliable)
+	// void Client_HideDungeonElements();
+
+	UFUNCTION()
+	void HideDungeonElements();
 	
 	// UI 버튼 클릭 함수
 	UFUNCTION(BlueprintCallable, Category="RTS")
@@ -213,6 +229,9 @@ public:
 
 	UFUNCTION()
 	void HandleSeekerHover(bool bIsHover);
+
+	//[Aether]AetherComp 추가 
+	UGS_AetherComp* GetAetherComp() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -238,6 +257,9 @@ private:
 
 	UPROPERTY()
 	TArray<AGS_Monster*> UnitSelection; // 현재 선택된 유닛
+
+	UPROPERTY()
+	AGS_Seeker* SelectedSeeker; 
 
 	UPROPERTY()
 	TArray<FUnitGroup> UnitGroups; // 지정된 부대
@@ -266,6 +288,22 @@ private:
 	UPROPERTY()
 	FTimerHandle AttackCursorTimerHandle;
 
+	// 시커 감지 시스템
+	UPROPERTY()
+	TArray<AGS_Seeker*> DetectedSeekers;
+
+	UPROPERTY(EditAnywhere, Category = "Detection")
+	float DetectionUpdateInterval = 0.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Detection", meta = (ClampMin = "0.1", ClampMax = "1.0"))
+	float DetectionRPCCooldown = 0.2f; // RPC 최소 간격 (초)
+
+	FTimerHandle DetectionTimerHandle;
+
+	// RPC 쿨다운 추적용 맵
+	UPROPERTY()
+	TMap<AGS_Seeker*, float> LastSeekerNotifyTimes;
+
 	FVector2D GetKeyboardDirection() const;
 	FVector2D GetMouseEdgeDirection() const;
 	FVector2D GetFinalDirection() const;
@@ -285,4 +323,20 @@ private:
 	void UpdateCursorForCommand();
 	void UpdateCursorForEdgeScroll();
 	void ShowAttackCursor();
+	
+	// 시커 감지 시스템
+	void UpdateSeekerDetection();
+	bool IsSeekerInCameraView(AGS_Seeker* Seeker);
+	void NotifySeekerDetection(AGS_Seeker* Seeker, bool bIsDetected);
+
+	// 서버로 감지 상태를 알리는 RPC
+	UFUNCTION(Server, Reliable)
+	void Server_NotifySeekerDetection(AGS_Seeker* Seeker, bool bIsDetected);
+
+	// 화면 중앙과의 거리 계산 (0.0 = 중앙, 1.0 = 가장자리)
+	float CalculateSeekerDistanceFromScreenCenter(AGS_Seeker* Seeker);
+
+	// 시커 근접도 업데이트 (서버 RPC)
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdateSeekerProximity(AGS_Seeker* Seeker, float DistanceFromCenter);
 };

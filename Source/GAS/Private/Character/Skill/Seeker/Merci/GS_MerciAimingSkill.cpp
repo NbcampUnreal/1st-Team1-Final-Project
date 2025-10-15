@@ -4,6 +4,7 @@
 #include "Character/Skill/Seeker/Merci/GS_MerciAimingSkill.h"
 #include "Character/Player/Seeker/GS_Merci.h"
 #include "Weapon/Projectile/Seeker/GS_SeekerMerciArrow.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UGS_MerciAimingSkill::UGS_MerciAimingSkill()
 {
@@ -12,36 +13,31 @@ UGS_MerciAimingSkill::UGS_MerciAimingSkill()
 
 void UGS_MerciAimingSkill::ActiveSkill()
 {
-	if (!CanActiveInternally())
-	{
-		bPressedDuringCooldown = true;
-		return;
-	}
+	Super::ActiveSkill();
 	
-	// 유효 입력이므로 무효 입력 플래그 해제
-	bPressedDuringCooldown = false;
-	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-	if (MerciCharacter)
+	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
 		// 스킬 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
+		if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
 		{
-			MerciCharacter->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
 		}
 
 		MerciCharacter->SetDrawState(false);
+
+		// 활 당기기
 		MerciCharacter->DrawBow(SkillAnimMontages[0]);
 	}
 }
 
 void UGS_MerciAimingSkill::OnSkillCommand()
 {
-	if (!CanActiveInternally() || bPressedDuringCooldown)
+	if (!CanActive() || !GetIsActive())
 	{
 		return;
 	}
 
+	// 활 놓기
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	bool IsFullyDrawn = MerciCharacter->GetIsFullyDrawn();
 	if(MerciCharacter->NormalArrowClass)
@@ -50,8 +46,16 @@ void UGS_MerciAimingSkill::OnSkillCommand()
 	}
 	if(IsFullyDrawn)
 	{
+		// 쿨타임 측정 시작
 		StartCoolDown();
 	}
+
+	// 스킬 종료
+	DeactiveSkill();
+}
+
+void UGS_MerciAimingSkill::OnSkillAnimationEnd()
+{
 }
 
 void UGS_MerciAimingSkill::InterruptSkill()
@@ -59,18 +63,19 @@ void UGS_MerciAimingSkill::InterruptSkill()
 	Super::InterruptSkill();
 
 	AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter);
-	if (MerciCharacter->GetSkillComp())
+	SetIsActive(false);
+}
+
+void UGS_MerciAimingSkill::DeactiveSkill()
+{
+	// SeekerAudioComponent를 통한 스킬 종료 사운드
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
-		MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Aiming, false);
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
 	}
-}
 
-bool UGS_MerciAimingSkill::CanActive() const
-{
-	return true;
-}
-
-bool UGS_MerciAimingSkill::CanActiveInternally() const
-{
-	return OwnerCharacter && !bIsCoolingDown;
+	Super::DeactiveSkill();
 }

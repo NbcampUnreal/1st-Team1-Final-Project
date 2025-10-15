@@ -26,3 +26,10 @@ Saved/
 # Cursor
 .cursor/rules/.mdc
 .cursor/
+
+# Claude
+.claude/
+*.md
+
+
+Plugins/GameLiftPlugin/

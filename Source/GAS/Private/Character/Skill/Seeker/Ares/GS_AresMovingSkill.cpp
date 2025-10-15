@@ -12,6 +12,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/Player/Seeker/GS_Ares.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/GS_TpsController.h"
 
 
@@ -22,45 +24,48 @@ UGS_AresMovingSkill::UGS_AresMovingSkill()
 
 void UGS_AresMovingSkill::ActiveSkill()
 {
-	if (!CanActiveInternally())
-	{
-		bPressedDuringCooldown = true;
-		return;
-	}
+	Super::ActiveSkill();
+
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
+		// 스킬 애니메이션 재생
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 
-		// 스킬 시작 사운드 재생
-		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
-		if (SkillInfo && SkillInfo->SkillStartSound)
+		// SeekerAudioComponent를 통한 스킬 시작 사운드
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			OwnerPlayer->Multicast_PlaySkillSound(SkillInfo->SkillStartSound);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			}
 		}
-	}
 
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->SetMoveControlValue(false, false);
-	bPressedDuringCooldown = false;
+		// 차징 루프 사운드는 SeekerAudioComponent를 통해 처리됨
+
+		OwnerPlayer->SetMoveControlValue(false, false);
+	}
 
 	// 차징 시작
 	ChargingStartTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
 	ChargingTime = 0.0f;
-	bIsCharging = true;
 
 	// 일정 주기로 방향과 차징 시간 갱신
 	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(ChargingTimerHandle, this, &UGS_AresMovingSkill::UpdateCharging, 0.05f, true);
 
-	OwnerCharacter->SetSkillInputControl(false, false, false);
 }
 
-void UGS_AresMovingSkill::DeactiveSkill()
+void UGS_AresMovingSkill::OnSkillCanceledByDebuff()
 {
+}
+
+void UGS_AresMovingSkill::OnSkillAnimationEnd()
+{
+	Super::OnSkillAnimationEnd();
 }
 
 void UGS_AresMovingSkill::OnSkillCommand()
 {
-	if (!CanActiveInternally() || bPressedDuringCooldown)
+	if (!CanActive() || !GetIsActive())
 	{
 		return;
 	}
@@ -72,20 +77,33 @@ void UGS_AresMovingSkill::OnSkillCommand()
 
 	Super::OnSkillCommand();
 
+	// SeekerAudioComponent를 통한 사운드 처리
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			// 차징 루프 사운드 정지
+			AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
+			
+			// 돌진 시작 사운드 재생
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
+	}
+
 	// 차징 종료
-	bIsCharging = false;
 	OwnerCharacter->GetWorld()->GetTimerManager().ClearTimer(ChargingTimerHandle);
 
 	// 돌진 거리 계산
 	float Ratio = ChargingTime / MaxChargingTime;
 	float DashDistance = FMath::Lerp(MinDashDistance, MaxDashDistance, Ratio);
 
-	UE_LOG(LogTemp, Log, TEXT("[AresDash] ChargingTime: %.2f / %.2f (%.0f%%), DashDistance: %.0f units"),
-		ChargingTime,
-		MaxChargingTime,
-		Ratio * 100.f,
-		DashDistance);
+	//UE_LOG(LogTemp, Log, TEXT("[AresDash] ChargingTime: %.2f / %.2f (%.0f%%), DashDistance: %.0f units"),
+	//	ChargingTime,
+	//	MaxChargingTime,
+	//	Ratio * 100.f,
+	//	DashDistance);
 
+	// 대시 시작
 	if (IsValid(OwnerCharacter))
 	{
 		DashDirection = OwnerCharacter->GetActorForwardVector().GetSafeNormal();
@@ -95,56 +113,48 @@ void UGS_AresMovingSkill::OnSkillCommand()
 		StartDash();
 	}
 
+	// 쿨다운 시작
 	StartCoolDown();
-}
-
-void UGS_AresMovingSkill::ExecuteSkillEffect()
-{
-
-}
-
-bool UGS_AresMovingSkill::IsActive() const
-{
-	return bIsCharging;
-}
-
-bool UGS_AresMovingSkill::CanActiveInternally() const
-{
-	return OwnerCharacter && !bIsCoolingDown;
 }
 
 void UGS_AresMovingSkill::InterruptSkill()
 {
 	Super::InterruptSkill();
-	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
-	if (AresCharacter->GetSkillComp())
-	{
-		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Moving, false);
-	}
+	//AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	SetIsActive(false);
 }
 
 void UGS_AresMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
 	// 데미지
 	UGameplayStatics::ApplyDamage(Target, 50.0f, OwnerCharacter->GetController(), OwnerCharacter, nullptr);
+	
+	// 몬스터 충돌 사운드는 SeekerAudioComponent를 통해 처리됨
 }
 
 void UGS_AresMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
 	// 데미지
 	UGameplayStatics::ApplyDamage(Target, 50.0f, OwnerCharacter->GetController(), OwnerCharacter, nullptr);
+	
+	// 가디언 충돌 사운드는 SeekerAudioComponent를 통해 처리됨
 }
 
 void UGS_AresMovingSkill::UpdateCharging()
 {
-	if (!IsValid(OwnerCharacter)) return;
+	if (!IsValid(OwnerCharacter))
+	{
+		return;
+	}
 
+	// 차징 시간 계산
 	float CurrentTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
 	ChargingTime = FMath::Min(CurrentTime - ChargingStartTime, MaxChargingTime);
 }
 
 void UGS_AresMovingSkill::StartDash()
 {
+	// 충돌 몬스터 초기화
 	DamagedActors.Empty();
 
 	// 몬스터는 충돌 막지 않도록 설정
@@ -158,7 +168,6 @@ void UGS_AresMovingSkill::StartDash()
 	if (OwningComp)
 	{
 		FVector SkillLocation = OwnerCharacter->GetActorLocation();
-		//FRotator SkillRotation = OwnerCharacter->GetActorRotation();
 		FRotator SkillRotation = FRotator(0.f, 0.f, 0.f);
 
 
@@ -212,21 +221,38 @@ void UGS_AresMovingSkill::UpdateDash()
 	OwnerCharacter->SetActorLocation(NewLocation, true); // Sweep = true로 충돌 적용
 	DashStartLocation = NewLocation;
 
+	// 대시 거리만큼 이동 하면
 	if (DashInterpAlpha >= 1.f)
 	{
-		StopDash();
+		// 스킬 종료
+		DeactiveSkill();
 	}
 }
 
-void UGS_AresMovingSkill::StopDash()
+void UGS_AresMovingSkill::DeactiveSkill()
 {
+	// 타이머 초기화
 	GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
 
-	AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
-	Controller->SetMoveControlValue(true, true);
-	OwnerCharacter->SetSkillInputControl(true, true, true);
+	// 입력 제한 설정
+	/*AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
+	Controller->SetMoveControlValue(true, true);*/
+	AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+	AresCharacter->SetMoveControlValue(true, true);
+	//OwnerCharacter->SetSkillInputControl(true, true, true);
 
 	// 원래대로 Block으로 되돌리기
 	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+
+	// SeekerAudioComponent를 통한 스킬 종료 사운드
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
+	}
+
+	Super::DeactiveSkill();
 }

@@ -75,7 +75,12 @@ void UGS_SeekerAnimInstance::UpdateEssentialValue_Implementation()
 }
 
 void UGS_SeekerAnimInstance::UpdateState_Implementation()
-{	
+{
+	if (!ChooserInputObj)
+	{
+		return;
+	}
+	
 	// Set Rotation Mode
 	LastRotationMode = ChooserInputObj->RotationMode;
 	if (OwnerCharacterMovement->bOrientRotationToMovement)
@@ -89,25 +94,24 @@ void UGS_SeekerAnimInstance::UpdateState_Implementation()
 
 	// Set Movement State
 	ChooserInputObj->LastMovementState = ChooserInputObj->MovementState;
-	if (ChooserInputObj->IsMoving())
+	if (ChooserInputObj->IsMoving() )
 	{
 		OwnerCharacter->bUseControllerRotationYaw = true;
 		ChooserInputObj->MovementState = EMovementState::Moving;
-		if (ChooserInputObj)
-		{
-			ChooserInputObj->MovementState = EMovementState::Moving;
-		}
 	}
 	else
 	{
-		OwnerCharacter->bUseControllerRotationYaw = false;
-		ChooserInputObj->MovementState = EMovementState::Idle;
-		if (ChooserInputObj)
+		if (OwnerCharacter->GetIsLockedRotationToController())
 		{
-			ChooserInputObj->MovementState = EMovementState::Idle;
+			OwnerCharacter->bUseControllerRotationYaw = true;
 		}
+		else
+		{
+			OwnerCharacter->bUseControllerRotationYaw = false;
+		}
+		ChooserInputObj->MovementState = EMovementState::Idle;
 	}
-
+	
 	// Set Gait State
 	LastGait = ChooserInputObj->Gait;
 }
@@ -202,9 +206,26 @@ bool UGS_SeekerAnimInstance::Enable_AO()
 	return FMath::Abs(Get_AOValue().X) < 90.0f && ChooserInputObj->RotationMode == ERotationMode::Strafe;
 }
 
+void UGS_SeekerAnimInstance::SetCurMontageSlot(ESeekerMontageSlot InputMontageSlot)
+{
+	uint8 BitFlag = 0;
+	BitFlag |= (1 << static_cast<int32>(InputMontageSlot));
+	CurMontageSlot = BitFlag;
+}
+
+bool UGS_SeekerAnimInstance::IsMontageSlotActive(ESeekerMontageSlot InputMontageSlot)
+{
+	uint8 BitFlag = 0;
+	BitFlag |= (1 << static_cast<int32>(InputMontageSlot));
+	return CurMontageSlot & BitFlag;
+}
+
+
 void UGS_SeekerAnimInstance::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UGS_SeekerAnimInstance, IsPlayingUpperBodyMontage);
-	DOREPLIFETIME(UGS_SeekerAnimInstance, IsPlayingFullBodyMontage);
+	DOREPLIFETIME(UGS_SeekerAnimInstance, CurMontageSlot);
+	/*DOREPLIFETIME(UGS_SeekerAnimInstance, IsPlayingUpperBodyMontage);
+	DOREPLIFETIME(UGS_SeekerAnimInstance, IsPlayingFullBodyMontage);*/
 }
+

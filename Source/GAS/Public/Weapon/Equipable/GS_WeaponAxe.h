@@ -68,12 +68,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
 	UNiagaraSystem* HitStructureVFX;
 
-	UPROPERTY()
-	class AGS_Character* OwnerChar;
-
-	UPROPERTY()
-	TSet<AActor*> HitActors;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -85,6 +79,15 @@ protected:
 	virtual EAxeHitTargetType DetermineTargetType(AActor* OtherActor) const;
 	virtual void PlayHitSound(EAxeHitTargetType TargetType, const FHitResult& SweepResult);
 	virtual void PlayHitVFX(EAxeHitTargetType TargetType, const FHitResult& SweepResult);
+
+	// RTS 모드 지원을 위한 리스너 위치 가져오기
+	bool GetListenerLocation(FVector& OutLocation) const;
+	
+	// RTS 모드 감지
+	bool IsRTSMode() const;
+
+	// 특화 헬퍼 함수 (타이머 관련)
+	virtual void ClearSafetyTimer() override;
 
 	// 멀티캐스트 함수들
 	UFUNCTION(NetMulticast, Reliable)

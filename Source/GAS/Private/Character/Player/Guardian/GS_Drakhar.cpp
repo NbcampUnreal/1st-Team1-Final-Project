@@ -8,6 +8,7 @@
 #include "Weapon/Projectile/Guardian/GS_DrakharProjectile.h"
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
+#include "AkGameplayStatics.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -19,15 +20,25 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_DrakharFeverGauge.h"
 #include "Character/Component/GS_DrakharVFXComponent.h"
-#include "Character/Component/GS_DrakharSFXComponent.h"
+#include "Character/Component/GS_DrakharAudioComponent.h"
 #include "Character/F_GS_DamageEvent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+#include "VFX/GS_VFX_FunctionLibrary.h"
 
 AGS_Drakhar::AGS_Drakhar()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
-	VFXComponent = CreateDefaultSubobject<UGS_DrakharVFXComponent>(TEXT("VFXComponent"));
-	SFXComponent = CreateDefaultSubobject<UGS_DrakharSFXComponent>(TEXT("SFXComponent"));
+	// Guardian의 VFXComponent를 제거하고 Drakhar 전용 컴포넌트로 교체
+	if (VFXComponent)
+	{
+		VFXComponent->DestroyComponent();
+		VFXComponent = nullptr;
+	}
+	
+	DrakharVFXComponent = CreateDefaultSubobject<UGS_DrakharVFXComponent>(TEXT("DrakharVFXComponent"));
+	AudioComponent = CreateDefaultSubobject<UGS_DrakharAudioComponent>(TEXT("AudioComponent"));
 	FootManagerComponent = CreateDefaultSubobject<UGS_FootManagerComponent>(TEXT("FootManagerComponent"));
 	
 	// === 어스퀘이크 카메라 쉐이크 기본값 설정 ===
@@ -41,7 +52,6 @@ AGS_Drakhar::AGS_Drakhar()
 	DefaultComboAttackSectionName = FName("Combo1");
 	ComboAttackSectionName = DefaultComboAttackSectionName;
 	bCanCombo = true;
-	bClientCanCombo = true;
 
 	//dash skill variables
 	DashPower = 1500.f;
@@ -56,9 +66,9 @@ AGS_Drakhar::AGS_Drakhar()
 	DraconicAttackPersistenceTime = 5.f;
 
 	//Guardian State Setting
-	ClientGuardianState = EGuardianState::CtrlEnd;
-	ClientGuardianDoSkillState = EGuardianDoSkill::None;
-
+	GuardianState = EGuardianCtrlState::CtrlEnd;
+	GuardianDoSkillState = EGuardianDoSkill::None;
+	
 	//fever mode
 	MaxFeverGauge = 100.f;
 	CurrentFeverGauge = 0.f;
@@ -79,7 +89,9 @@ AGS_Drakhar::AGS_Drakhar()
 	DraconicProjectileImpactSoundEvent = nullptr;
 	DraconicProjectileExplosionSoundEvent = nullptr;
 	AttackHitSoundEvent = nullptr;
+	ComboFinisherSoundEvent = nullptr;
 	FeverModeStartSoundEvent = nullptr;
+	HurtSoundEvent = nullptr;
 
 	// AkComponent 추가
 	if (!FindComponentByClass<UAkComponent>())
@@ -127,9 +139,7 @@ AGS_Drakhar::AGS_Drakhar()
 void AGS_Drakhar::BeginPlay()
 {
 	Super::BeginPlay();
-
-	GuardianState = EGuardianState::CtrlEnd;
-
+	
 	UGS_DrakharAnimInstance* Anim = Cast<UGS_DrakharAnimInstance>(GetMesh()->GetAnimInstance());
 	if (IsValid(Anim))
 	{
@@ -141,7 +151,6 @@ void AGS_Drakhar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("@@@@@@@@@@@@@@@@@@@@@@@@@@@ %d | %d"),ClientGuardianDoSkillState, GuardianDoSkillState));
 	if (SpringArmComp && bIsFlying)
 	{
 		if (FMath::IsNearlyEqual(SpringArmComp->TargetArmLength, TargetSpringArmLength, 1.0f))
@@ -183,39 +192,45 @@ void AGS_Drakhar::OnDamageStart()
 	
 	//timer start
 	GetWorld()->GetTimerManager().SetTimer(HealthDelayTimer,this,&AGS_Drakhar::BeginHealRegeneration,5.f,false);
+	
+	// 피격 사운드 재생
+	if (HasAuthority())
+	{
+		MulticastPlayHurtSound();
+	}
 }
 
 void AGS_Drakhar::Ctrl()
 {
+	Super::Ctrl();
+	
 	if (!HasAuthority() && IsLocallyControlled())
 	{
 		//not flying
-		if (ClientGuardianState == EGuardianState::CtrlEnd)
+		if (GuardianState == EGuardianCtrlState::CtrlEnd)
 		{
 			//if execute flying skill, prevent change state
-			if (ClientGuardianDoSkillState != EGuardianDoSkill::None)
+			if (GuardianDoSkillState != EGuardianDoSkill::None)
 			{
 				return;
 			}
-			
-			ClientGuardianState = EGuardianState::CtrlUp;
-			TargetSpringArmLength = 800.f;
-			bIsFlying = true;
-			
-			//server logic
-			GetSkillComp()->TryActivateSkill(ESkillSlot::Ready);
-			ServerRPCStartCtrl();
+
+			GuardianState = EGuardianCtrlState::CtrlUp;
+			StartCtrl();
 		}
 	}
 }
 
 void AGS_Drakhar::CtrlStop()
 {
+	Super::CtrlStop();
+	
 	if (!HasAuthority() && IsLocallyControlled())
 	{
 		//stop flying
-		if (ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		if (GuardianDoSkillState == EGuardianDoSkill::None)
 		{
+			GuardianState = EGuardianCtrlState::CtrlEnd;
 			StopCtrl();
 		}
 	}
@@ -228,20 +243,20 @@ void AGS_Drakhar::LeftMouse()
 	if (!HasAuthority() && IsLocallyControlled())
 	{
 		//flying & not using flying skill
-		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready) && ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		if (GuardianState == EGuardianCtrlState::CtrlUp && GuardianDoSkillState == EGuardianDoSkill::None)
 		{
 			//check earthquake skill
-			GetSkillComp()->TryActivateSkill(ESkillSlot::Aiming);
+			GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Aiming);
 		}
 		
 		//not flying & not using skills
-		else if (ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		else if (GuardianDoSkillState == EGuardianDoSkill::None)
 		{
-			if (bClientCanCombo)
+			if (bCanCombo)
 			{
+				bCanCombo = false;
 				PlayComboAttackMontage();
 				ServerRPCNewComboAttack();
-				bClientCanCombo = false;
 			}
 		}
 	}
@@ -252,16 +267,16 @@ void AGS_Drakhar::RightMouse()
 	if (!HasAuthority() && IsLocallyControlled())
 	{
 		//flying & not using flying skill
-		if (GetSkillComp()->IsSkillActive(ESkillSlot::Ready) && ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		if (GuardianState == EGuardianCtrlState::CtrlUp && GuardianDoSkillState == EGuardianDoSkill::None)
 		{
 			//ultimate skill check
-			ServerRPC_BeginDraconicFury();
+			GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 		}
 		//not flying & not using flying skills
-		else if (ClientGuardianState == EGuardianState::CtrlEnd && ClientGuardianDoSkillState == EGuardianDoSkill::None)
+		else if (GuardianState == EGuardianCtrlState::CtrlEnd && GuardianDoSkillState == EGuardianDoSkill::None)
 		{
 			//dash skill check
-			GetSkillComp()->TryActivateSkill(ESkillSlot::Moving);
+			GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Moving);
 		}
 	}
 }
@@ -285,14 +300,71 @@ void AGS_Drakhar::OnMontageNotifyBegin(FName NotifyName, const FBranchingPointNo
 {
 	if (NotifyName == "None")
 	{
-		bClientCanCombo = true;
+		bCanCombo = true;
 		ServerRPCResetValue();
 	}
 }
 
-void AGS_Drakhar::OnRep_CanCombo()
+void AGS_Drakhar::MeleeAttackCheck()
 {
-	bClientCanCombo = bCanCombo;
+	if (HasAuthority())
+	{
+		GuardianState = EGuardianCtrlState::CtrlEnd;
+
+		const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+		const float MeleeAttackRange = 200.f;
+		const float MeleeAttackRadius = 200.f;
+		
+		TSet<AGS_Character*> DamagedCharacters = DetectPlayerInRange(Start, MeleeAttackRange, MeleeAttackRadius);
+		
+		// 각 플레이어에게 개별적으로 데미지 적용 및 혈흔 이펙트 처리
+		for (AGS_Character* DamagedCharacter : DamagedCharacters)
+		{
+			if (IsValid(DamagedCharacter))
+			{
+				UGS_StatComp* DamagedCharacterStat = DamagedCharacter->GetStatComp();
+				if (IsValid(DamagedCharacterStat))
+				{
+					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
+					FGS_DamageEvent DamageEvent;
+					DamageEvent.HitReactType = EHitReactType::DamageOnly;
+					
+					float ActualDamage = DamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
+					
+					// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생 (기본 콤보는 1.0 스케일)
+					if (ActualDamage > 0.0f)
+					{
+						FVector HitLocation = DamagedCharacter->GetActorLocation();
+						FVector HitNormal = (HitLocation - GetActorLocation()).GetSafeNormal();
+						Multicast_PlayBloodEffect(HitLocation, HitNormal, 1.0f);
+					}
+					
+					// 히트 스톱 효과
+					MulticastRPCApplyHitStop(DamagedCharacter);
+					
+					// 공격 성공 시 공격자에게 카메라 쉐이크 적용
+					if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+					{
+						Client_PlayAttackSuccessShake(AttackerPC);
+					}
+					
+					// 서버에서 피버 게이지 증가
+					if (!GetIsFeverMode())
+					{
+						SetFeverGauge(10.f);
+					}
+					else if (GetIsFeverMode())
+					{
+						bIsAttckingDuringFever = true;
+						ResetIsAttackingDuringFeverMode();
+					}
+					
+					// 히트 사운드 재생
+					MulticastPlayAttackHitSound();
+				}
+			}
+		}
+	}
 }
 
 void AGS_Drakhar::ComboLastAttack()
@@ -304,16 +376,43 @@ void AGS_Drakhar::ComboLastAttack()
 		const float PlusDamage = 20.f;
 
 		TSet<AGS_Character*> DamagedPlayers = DetectPlayerInRange(Start, 200.f, Radius);
-		ApplyDamageToDetectedPlayer(DamagedPlayers, PlusDamage);
-
-		for(AGS_Character* DamagedPlayer : DamagedPlayers)
+		
+		// 각 플레이어에게 개별적으로 데미지 적용 및 혈흔 이펙트 처리
+		for (AGS_Character* DamagedPlayer : DamagedPlayers)
 		{
-			if(IsValid(DamagedPlayer))
+			if (IsValid(DamagedPlayer))
 			{
-				MulticastRPC_PlayAttackHitVFX(DamagedPlayer->GetActorLocation());
+				UGS_StatComp* DamagedCharacterStat = DamagedPlayer->GetStatComp();
+				if (IsValid(DamagedCharacterStat))
+				{
+					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedPlayer);
+					FGS_DamageEvent DamageEvent;
+					DamageEvent.HitReactType = EHitReactType::DamageOnly;
+					
+					float ActualDamage = DamagedPlayer->TakeDamage(Damage + PlusDamage, DamageEvent, GetController(), this);
+					
+					// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생 (마지막 공격은 더 큰 스케일)
+					if (ActualDamage > 0.0f)
+					{
+						FVector HitLocation = DamagedPlayer->GetActorLocation();
+						FVector HitNormal = (HitLocation - GetActorLocation()).GetSafeNormal();
+						Multicast_PlayBloodEffect(HitLocation, HitNormal, 1.5f); // 마지막 공격은 1.5배 스케일
+					}
+					
+					MulticastRPC_PlayAttackHitVFX(DamagedPlayer->GetActorLocation());
+					MulticastPlayAttackHitSound();
+					
+					// 공격 성공 시 공격자에게 강한 카메라 쉐이크 적용
+					if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+					{
+						FGS_CameraShakeInfo StrongAttackShake = AttackSuccessShake;
+						StrongAttackShake.Intensity *= 1.8f; // 마지막 콤보는 더 강한 쉐이크
+						Client_PlayAttackSuccessShakeWithInfo(AttackerPC, StrongAttackShake);
+					}
+				}
 			}
 		}
-
+		
 		if (IsFeverMode)
 		{
 			FeverComoLastAttack();
@@ -324,15 +423,12 @@ void AGS_Drakhar::ComboLastAttack()
 void AGS_Drakhar::ServerRPCResetValue_Implementation()
 {
 	bCanCombo = true;
-	//GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 }
 
 void AGS_Drakhar::ServerRPCNewComboAttack_Implementation()
 {
-	MulticastRPCComboAttack();
-	//GetCharacterMovement()->SetMovementMode(MOVE_None);
 	bCanCombo = false;
-
+	MulticastRPCComboAttack();
 	MulticastPlayComboAttackSound();
 }
 
@@ -372,6 +468,9 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	//skill state reset
 	GuardianDoSkillState = EGuardianDoSkill::None;
+
+	// Skill Input Reset
+	GetSkillComp()->ResetAllowedSkillsMask(); // SJE
 	
 	if (DamagedCharactersFromDash.IsEmpty())
 	{
@@ -384,8 +483,17 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		float RealDamage = DamagedCharacter->GetStatComp()->CalculateDamage(this, DamagedCharacter, SkillCoefficient);
 
 		FGS_DamageEvent DamageEvent;
-		DamageEvent.HitReactType = EHitReactType::Interrupt;
-		DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+		DamageEvent.HitReactType = EHitReactType::DamageOnly; // 가드 풀리지 않도록 변경
+		
+		float ActualDamage = DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+
+		// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생
+		if (ActualDamage > 0.0f)
+		{
+			FVector HitLocation = DamagedCharacter->GetActorLocation();
+			FVector HitNormal = (HitLocation - GetActorLocation()).GetSafeNormal();
+			Multicast_PlayBloodEffect(HitLocation, HitNormal, 1.2f); // 대시 공격
+		}
 
 		if (IsFeverMode)
 		{
@@ -394,6 +502,14 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 
 		MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
 		MulticastPlayAttackHitSound();
+		
+		// 공격 성공 시 공격자에게 카메라 쉐이크 적용
+		if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+		{
+			FGS_CameraShakeInfo DashAttackShake = AttackSuccessShake;
+			DashAttackShake.Intensity *= 1.2f; // 대시 공격은 약간 강한 쉐이크
+			Client_PlayAttackSuccessShakeWithInfo(AttackerPC, DashAttackShake);
+		}
 
 		FVector DrakharPos = GetActorLocation();
 		FVector DamagedPos = DamagedCharacter->GetActorLocation();
@@ -454,6 +570,19 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 		FGS_DamageEvent DamageEvent;
 		if (IsValid(DamagedCharacter))
 		{
+			DamageEvent.HitReactType = EHitReactType::DamageOnly; // 가드 풀리지 않도록 변경
+			
+			// 실제 데미지 적용
+			float ActualDamage = DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+			
+			// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생
+			if (ActualDamage > 0.0f)
+			{
+				FVector HitLocation = DamagedCharacter->GetActorLocation();
+				FVector HitNormal = FVector::UpVector; // 어스퀘이크는 위쪽에서 아래로
+				Multicast_PlayBloodEffect(HitLocation, HitNormal, 1.3f);
+			}
+			
 			if (IsFeverMode)
 			{
 				DamagedCharacter->GetDebuffComp()->ApplyDebuff(EDebuffType::Bleed, this);
@@ -463,8 +592,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			{
 				MulticastPlayEarthquakeImpactVFX(DamagedCharacter->GetActorLocation());
 			}
-			DamageEvent.HitReactType = EHitReactType::Interrupt;
-			DamagedCharacter->TakeDamage(RealDamage, DamageEvent, GetController(), this);
+			
 			// === 어스퀘이크 스킬 히트 사운드 재생 ===
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
 			MulticastPlayAttackHitSound();
@@ -480,10 +608,32 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 
 void AGS_Drakhar::ServerRPCStartCtrl_Implementation()
 {
-	GuardianState = EGuardianState::CtrlUp;
-
+	GuardianState = EGuardianCtrlState::CtrlUp;
 	MoveSpeed = SpeedUpMoveSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+}
+
+void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
+{
+	GuardianState = EGuardianCtrlState::CtrlEnd;
+	GuardianDoSkillState = EGuardianDoSkill::None;
+	
+	MoveSpeed = NormalMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+
+	GetSkillComp()->ResetAllowedSkillsMask();
+}
+
+void AGS_Drakhar::StartCtrl()
+{
+	if (!HasAuthority())
+	{
+		ServerRPCStartCtrl();
+		GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ready);
+		
+		TargetSpringArmLength = 800.f;
+		bIsFlying = true;
+	}
 }
 
 void AGS_Drakhar::StopCtrl()
@@ -492,20 +642,12 @@ void AGS_Drakhar::StopCtrl()
 	if (!HasAuthority())
 	{
 		ServerRPCStopCtrl();
-		GetSkillComp()->TryDeactiveSkill(ESkillSlot::Ready);
+		GetSkillComp()->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
 		
-		ClientGuardianState = EGuardianState::CtrlEnd;
-		ClientGuardianDoSkillState = EGuardianDoSkill::None;
 		TargetSpringArmLength = 500.f;
 		bIsFlying = true;
+		bCanCombo = true;
 	}
-}
- 
-void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
-{
-	GuardianState = EGuardianState::CtrlEnd;
-	MoveSpeed = NormalMoveSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
@@ -537,6 +679,37 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 			MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
 		}
 	}
+}
+
+void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
+{
+	if (GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
+	{
+		return;
+	}
+
+	GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
+	MulticastRPC_OnUltimateStart();
+
+	FTimerHandle DraconicFuryEndTimer;
+	GetWorld()->GetTimerManager().SetTimer(
+		DraconicFuryEndTimer,
+		this,
+		&AGS_Drakhar::EndDraconicFury,
+		DraconicAttackPersistenceTime,
+		false);
+}
+
+void AGS_Drakhar::EndDraconicFury()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Draconic Fury Skill End"));
+	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT] Draconic Fury Skill End")));
+	
+	GetSkillComp()->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
+	GuardianState = EGuardianCtrlState::CtrlEnd;
+
+	MoveSpeed = NormalMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
 void AGS_Drakhar::SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGaugeWidget)
@@ -634,12 +807,38 @@ void AGS_Drakhar::FeverComoLastAttack()
 		{
 			DamagedSeekers.Append(DetectPlayerInRange(PillarLocation, 0.f, PillarRadius));
 		}
-		ApplyDamageToDetectedPlayer(DamagedSeekers, 20.f);
+		
+		// 각 플레이어에게 개별적으로 데미지 적용 및 혈흔 이펙트 처리
 		for (const auto& DamagedSeeker : DamagedSeekers)
 		{
-			MulticastRPC_PlayAttackHitVFX(DamagedSeeker->GetActorLocation());
-			DamagedSeeker->LaunchCharacter(FVector(0.f, 0.f, 500.f), true, true);
+			if (IsValid(DamagedSeeker))
+			{
+				// 데미지 계산 및 적용
+				UGS_StatComp* DamagedCharacterStat = DamagedSeeker->GetStatComp();
+				if (IsValid(DamagedCharacterStat))
+				{
+					float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedSeeker);
+					FGS_DamageEvent DamageEvent;
+					DamageEvent.HitReactType = EHitReactType::DamageOnly;
+					
+					float ActualDamage = DamagedSeeker->TakeDamage(Damage + 20.f, DamageEvent, GetController(), this);
+					
+					// 실제로 데미지가 적용된 경우에만 혈흔 이펙트 재생
+					if (ActualDamage > 0.0f)
+					{
+						FVector HitLocation = DamagedSeeker->GetActorLocation();
+						FVector HitNormal = FVector::UpVector; // 피버 콤보는 위에서 아래로
+						Multicast_PlayBloodEffect(HitLocation, HitNormal, 1.4f);
+					}
+					
+					MulticastRPC_PlayAttackHitVFX(DamagedSeeker->GetActorLocation());
+					DamagedSeeker->LaunchCharacter(FVector(0.f, 0.f, 500.f), true, true);
+				}
+			}
 		}
+		
+		// 피버모드 콤보 막타에서만 추가 레이어링 사운드 재생
+		MulticastPlayComboFinisherSound();
 	}
 }
 
@@ -724,27 +923,27 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 
 void AGS_Drakhar::MulticastPlayComboAttackSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayComboAttackSound();
+	if (AudioComponent) AudioComponent->PlayComboAttackSound();
 }
 
 void AGS_Drakhar::MulticastPlayDashSkillSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayDashSkillSound();
+	if (AudioComponent) AudioComponent->PlayDashSkillSound();
 }
 
 void AGS_Drakhar::MulticastPlayEarthquakeSkillSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayEarthquakeSkillSound();
+	if (AudioComponent) AudioComponent->PlayEarthquakeSkillSound();
 }
 
 void AGS_Drakhar::MulticastPlayDraconicFurySkillSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayDraconicFurySkillSound();
+	if (AudioComponent) AudioComponent->PlayDraconicFurySkillSound();
 }
 
 void AGS_Drakhar::MulticastPlayDraconicProjectileSound_Implementation(const FVector& Location)
 {
-	if (SFXComponent) SFXComponent->PlayDraconicProjectileSound(Location);
+	if (AudioComponent) AudioComponent->PlayDraconicProjectileSound(Location);
 }
 
 void AGS_Drakhar::OnRep_FeverGauge()
@@ -754,18 +953,61 @@ void AGS_Drakhar::OnRep_FeverGauge()
 
 void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
 {
-	if (!SFXComponent)
+	if (!AudioComponent)
 	{
-		UE_LOG(LogTemp, Error, TEXT("MulticastPlayAttackHitSound: SFXComponent is null"));
 		return;
 	}
 	
-	SFXComponent->PlayAttackHitSound();
+	AudioComponent->PlayAttackHitSound();
+}
+
+void AGS_Drakhar::MulticastPlayComboFinisherSound_Implementation()
+{
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	{
+		return;
+	}
+
+	// 사운드 이벤트 유효성 검사
+	if (!ComboFinisherSoundEvent)
+	{
+		return;
+	}
+
+	// 멀티플레이어 환경에서 Wwise 시스템 안전성 체크
+	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+	if (!AudioDevice)
+	{
+		return;
+	}
+
+	if (!AudioDevice->IsInitialized())
+	{
+		return;
+	}
+
+	// Actor 유효성 검사
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	UAkGameplayStatics::PostEvent(
+		ComboFinisherSoundEvent, 
+		this,
+		0,
+		FOnAkPostEventCallback()
+	);
 }
 
 void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
 {
-	if (SFXComponent) SFXComponent->PlayFeverModeStartSound();
+	if (AudioComponent) AudioComponent->PlayFeverModeStartSound();
+}
+
+void AGS_Drakhar::MulticastPlayHurtSound_Implementation()
+{
+	if (AudioComponent) AudioComponent->PlayHurtSound();
 }
 
 void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
@@ -776,70 +1018,39 @@ void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
 // === 나이아가라 VFX 함수 구현 ===
 void AGS_Drakhar::MulticastStartWingRushVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StartWingRushVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StartWingRushVFX();
 }
 
 void AGS_Drakhar::MulticastStopWingRushVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StopWingRushVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StopWingRushVFX();
 }
 
 void AGS_Drakhar::MulticastStartDustVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StartDustVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StartDustVFX();
 }
 
 void AGS_Drakhar::MulticastStopDustVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StopDustVFX();
-}
-
-void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
-{
-	if (GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
-	{
-		return;
-	}
-
-	GetSkillComp()->TryActivateSkill(ESkillSlot::Ultimate);
-	MulticastRPC_OnUltimateStart();
-
-	FTimerHandle DraconicFuryEndTimer;
-	GetWorld()->GetTimerManager().SetTimer(
-		DraconicFuryEndTimer,
-		this,
-		&AGS_Drakhar::EndDraconicFury,
-		DraconicAttackPersistenceTime,
-		false);
-}
-
-void AGS_Drakhar::EndDraconicFury()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Draconic Fury Skill End"));
-	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT] Draconic Fury Skill End")));
-	
-	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
-	GuardianState = EGuardianState::CtrlEnd;
-
-	MoveSpeed = NormalMoveSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+	if (DrakharVFXComponent) DrakharVFXComponent->StopDustVFX();
 }
 
 // === 어스퀘이크 지면 균열 VFX 제어 함수 ===
 void AGS_Drakhar::MulticastStartGroundCrackVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StartGroundCrackVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StartGroundCrackVFX();
 }
 
 void AGS_Drakhar::MulticastStopGroundCrackVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StopGroundCrackVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StopGroundCrackVFX();
 }
 
 // === 어스퀘이크 먼지 구름 VFX 제어 함수 ===
 void AGS_Drakhar::MulticastStartDustCloudVFX_Implementation()
 {
-	if (VFXComponent) VFXComponent->StartDustCloudVFX();
+	if (DrakharVFXComponent) DrakharVFXComponent->StartDustCloudVFX();
 }
 
 // === DraconicFury 투사체 충돌 처리 함수 구현 ===
@@ -855,51 +1066,51 @@ void AGS_Drakhar::HandleDraconicProjectileImpact(const FVector& ImpactLocation, 
 void AGS_Drakhar::MulticastPlayDraconicProjectileImpactEffects_Implementation(
 	const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
 {
-	if (VFXComponent) VFXComponent->HandleDraconicProjectileImpact(ImpactLocation, ImpactNormal, bHitCharacter);
-	if (SFXComponent) SFXComponent->HandleDraconicProjectileImpact(ImpactLocation, bHitCharacter);
+	if (DrakharVFXComponent) DrakharVFXComponent->HandleDraconicProjectileImpact(ImpactLocation, ImpactNormal, bHitCharacter);
+	if (AudioComponent) AudioComponent->HandleDraconicProjectileImpact(ImpactLocation, bHitCharacter);
 }
 
 void AGS_Drakhar::MulticastPlayFeverEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
 {
-	if (VFXComponent) VFXComponent->PlayFeverEarthquakeImpactVFX(ImpactLocation);
+	if (DrakharVFXComponent) DrakharVFXComponent->PlayFeverEarthquakeImpactVFX(ImpactLocation);
 }
 
 void AGS_Drakhar::MulticastRPC_OnFlyStart_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnFlyStart();
+	if (DrakharVFXComponent) DrakharVFXComponent->OnFlyStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnFlyEnd_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnFlyEnd();
+	if (DrakharVFXComponent) DrakharVFXComponent->OnFlyEnd();
 }
 
 void AGS_Drakhar::MulticastRPC_OnUltimateStart_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnUltimateStart();
+	if (DrakharVFXComponent) DrakharVFXComponent->OnUltimateStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnEarthquakeStart_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnEarthquakeStart();
+	if (DrakharVFXComponent) DrakharVFXComponent->OnEarthquakeStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnFeverModeStart_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnFeverModeChanged(true);
+	if (DrakharVFXComponent) DrakharVFXComponent->OnFeverModeChanged(true);
 	BP_OnFeverModeStart();
 }
 
 void AGS_Drakhar::MulticastRPC_OnFeverModeEnd_Implementation()
 {
-	if (VFXComponent) VFXComponent->OnFeverModeChanged(false);
+	if (DrakharVFXComponent) DrakharVFXComponent->OnFeverModeChanged(false);
 	BP_OnFeverModeEnd();
 }
 
 void AGS_Drakhar::OnRep_IsFeverMode()
 {
-	if (VFXComponent) VFXComponent->OnFeverModeChanged(IsFeverMode);
-	
+	if (DrakharVFXComponent) DrakharVFXComponent->OnFeverModeChanged(IsFeverMode);
+
 	// 클라이언트에서도 블루프린트 이벤트 호출
 	if (IsFeverMode)
 	{
@@ -913,15 +1124,20 @@ void AGS_Drakhar::OnRep_IsFeverMode()
 
 void AGS_Drakhar::MulticastRPC_PlayAttackHitVFX_Implementation(FVector ImpactPoint)
 {
-	if (VFXComponent) VFXComponent->PlayAttackHitVFX(ImpactPoint);
+	if (DrakharVFXComponent) DrakharVFXComponent->PlayAttackHitVFX(ImpactPoint);
 }
 
 void AGS_Drakhar::MulticastPlayEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
 {
-	if (VFXComponent) VFXComponent->PlayEarthquakeImpactVFX(ImpactLocation);
+	if (DrakharVFXComponent) DrakharVFXComponent->PlayEarthquakeImpactVFX(ImpactLocation);
 }
 
 void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
 {
-	if(VFXComponent) VFXComponent->StopDustCloudVFX();
+	if(DrakharVFXComponent) DrakharVFXComponent->StopDustCloudVFX();
+}
+
+void AGS_Drakhar::Multicast_PlayBloodEffect_Implementation(FVector HitLocation, FVector HitNormal, float Scale)
+{
+	UGS_VFX_FunctionLibrary::PlayBloodEffect(this, BloodEffectSystem, HitLocation, FRotationMatrix::MakeFromZ(HitNormal).Rotator(), Scale);
 }

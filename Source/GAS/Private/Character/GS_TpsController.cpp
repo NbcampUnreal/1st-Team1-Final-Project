@@ -103,7 +103,7 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 				NewPitch = FMath::ClampAngle(NewPitch, PitchMin, PitchMax);
 
 				CurrentRot.Pitch = NewPitch;
-				SetControlRotation(CurrentRot);
+				SetControlRotation(CurrentRot); // SJE
 				
 				//ControlledPawn->AddControllerPitchInput(InputAxisVector.Y * SensitivityMultiplier);
 			}
@@ -186,8 +186,20 @@ void AGS_TpsController::InitControllerPerWorld()
 	{
 		check(InputMappingContext);
 
+		// 가디언 테스트용 코드
+		//if (!InputMappingContext)
+		//{
+		//	UE_LOG(LogTemp, Error, TEXT("InputMappingContext is null! Please set it in Blueprint."));
+		//	return;
+		//}
+
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 		check(Subsystem);
+		//if (!Subsystem)
+		//{
+		//	UE_LOG(LogTemp, Error, TEXT("Failed to get EnhancedInputLocalPlayerSubsystem"));
+		//	return;
+		//}
 		Subsystem->AddMappingContext(InputMappingContext, 0);
 
 		// 오디오 리스너 설정 (약간의 지연을 두고 실행)
@@ -470,11 +482,27 @@ void AGS_TpsController::ApplyChargeCameraSettings(bool bCharging)
 	SetLookControlValue(false, false);
 }
 
+void AGS_TpsController::Client_DrawAimAssistDebug_Implementation(const FVector& Start, const FVector& End,
+	const FVector& TargetLocation, float Duration)
+{
+	if (UWorld* World = GetWorld())
+	{
+		DrawDebugLine(World, Start, End, FColor::Yellow, false, Duration, 0, 1.5f);
+		DrawDebugSphere(World, TargetLocation, 24.f, 12, FColor::Red, false, Duration);
+	}
+}
+
 void AGS_TpsController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	GameInstance = Cast<UGS_GameInstance>(GetGameInstance());
+
+	// Input 설정 유효성 검사 : 가디언 테스트용 코드
+	// if (!InputMappingContext)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s): InputMappingContext is not set! Please configure it in Blueprint."), *GetNameSafe(this));
+	//}
 	
 	InitControllerPerWorld();
 }

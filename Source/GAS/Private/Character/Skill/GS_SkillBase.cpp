@@ -5,6 +5,7 @@
 #include "NiagaraComponent.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "Sound/GS_SeekerAudioComponent.h"
 
 UTexture2D* UGS_SkillBase::GetSkillImage()
 {
@@ -29,17 +30,37 @@ void UGS_SkillBase::InitSkill(AGS_Player* InOwner, UGS_SkillComp* InOwningComp, 
 
 void UGS_SkillBase::ActiveSkill()
 {
-	if (!CanActive()) return;
-
-	StartCoolDown();
+	if (!CanActive())
+	{
+		return;
+	}
+	
+	SetIsActive(true);
+	
+	return;
 }
 
-void UGS_SkillBase::DeactiveSkill()
+void UGS_SkillBase::OnSkillCanceledByDebuff()
 {
+}
+
+void UGS_SkillBase::OnSkillAnimationEnd()
+{
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	if(OwnerPlayer)
+	{
+		OwnerPlayer->GetSkillComp()->ResetAllowedSkillsMask();
+	}
 }
 
 void UGS_SkillBase::ExecuteSkillEffect()
 {
+}
+
+void UGS_SkillBase::DeactiveSkill()
+{
+	UE_LOG(LogTemp, Warning, TEXT("DeactiveSkill!!!!!!!!!!!!!!"));
+	SetIsActive(false);
 }
 
 void UGS_SkillBase::OnSkillCommand()
@@ -51,7 +72,7 @@ bool UGS_SkillBase::CanActive() const
 	return OwnerCharacter && !bIsCoolingDown;
 }
 
-bool UGS_SkillBase::IsActive() const
+bool UGS_SkillBase::GetIsActive() const
 {
 	return bIsActive;
 }
@@ -62,9 +83,22 @@ void UGS_SkillBase::InterruptSkill()
 	
 	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerCharacter->GetMesh()->GetAnimInstance()))
 	{
-		Seeker->SetSkillInputControl(true, true, true);
+		//Seeker->SetSkillInputControl(true, true, true);
 		Seeker->SetSeekerGait(EGait::Run);
 		Seeker->CanChangeSeekerGait = true;
+	}
+}
+
+void UGS_SkillBase::SetIsActive(bool bInIsActive)
+{
+	// 스킬 내 bIsActive 업데이트
+	bIsActive = bInIsActive;
+
+	// SkillComp 내 스킬 상태 업데이트
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	if(OwnerPlayer)
+	{
+		OwnerPlayer->GetSkillComp()->SetSkillActiveState(CurrentSkillType, bInIsActive);
 	}
 }
 
@@ -215,7 +249,48 @@ const FSkillInfo* UGS_SkillBase::GetCurrentSkillInfo() const
 		return &SkillSet->UltimateSkill;
 	case ESkillSlot::Rolling:
 		return &SkillSet->RollingSkill;
+	case ESkillSlot::HealPotion:
+		return &SkillSet->HealPotionSkill;
 	default:
 		return nullptr;
 	}
+}
+
+void UGS_SkillBase::PlaySkillStartSound() const
+{
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	// 시커인 경우 SeekerAudioComponent 사용
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No SeekerAudioComponent found for character: %s"), *OwnerCharacter->GetName());
+	}
+}
+
+void UGS_SkillBase::PlaySkillEndSound() const
+{
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	// 시커인 경우 SeekerAudioComponent 사용
+	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		{
+			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+		}
+	}
+	// 다른 캐릭터 타입은 각자의 오디오 컴포넌트 사용
 }

@@ -9,7 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Character/Component/GS_CameraShakeComponent.h"
-#include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Character/Component/GS_VFXComponent.h"
 #include "Props/Interactables/GS_BridgePiece.h"
 #include "Components/WidgetComponent.h"
 
@@ -24,9 +24,9 @@ AGS_Guardian::AGS_Guardian()
 
 	//boss monster tag for user widget
 	Tags.Add("Guardian");
-	
-	//디버프 VFX 컴포넌트 생성
-	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
+
+	// VFX 컴포넌트 생성 (디버프 등 모든 VFX) - Drakhar는 생성자에서 이를 제거하고 자체 컴포넌트 사용
+	VFXComponent = CreateDefaultSubobject<UGS_VFXComponent>("VFXComponent");
 
 	// 컴포넌트 생성 및 초기화
 	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));
@@ -73,9 +73,12 @@ void AGS_Guardian::RightMouse()
 {
 }
 
+void AGS_Guardian::StartCtrl()
+{
+}
+
 void AGS_Guardian::StopCtrl()
 {
-	
 }
 
 void AGS_Guardian::OnRep_MoveSpeed()
@@ -87,7 +90,7 @@ void AGS_Guardian::MeleeAttackCheck()
 {
 	if (HasAuthority())
 	{
-		GuardianState = EGuardianState::CtrlEnd;
+		GuardianState = EGuardianCtrlState::CtrlEnd;
 
 		const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
 		const float MeleeAttackRange = 200.f;
@@ -180,20 +183,20 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 }
 
 
-void AGS_Guardian::OnRep_GuardianState()
-{
-	ClientGuardianState = GuardianState;
-}
+// void AGS_Guardian::OnRep_GuardianState()
+// {
+// 	ClientGuardianState = GuardianState;
+// }
 
-void AGS_Guardian::OnRep_GuardianDoSkillState()
-{
-	ClientGuardianDoSkillState = GuardianDoSkillState;
-}
+// void AGS_Guardian::OnRep_GuardianDoSkillState()
+// {
+// 	ClientGuardianDoSkillState = GuardianDoSkillState;
+// }
 
 void AGS_Guardian::QuitGuardianSkill()
 {
 	//reset skill state
-	GuardianState = EGuardianState::CtrlEnd;
+	GuardianState = EGuardianCtrlState::CtrlEnd;
 	GuardianDoSkillState = EGuardianDoSkill::None;
 	
 	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
@@ -202,7 +205,7 @@ void AGS_Guardian::QuitGuardianSkill()
 		Drakhar->ServerRPCResetValue();
 	}
 	//fly end
-	GetSkillComp()->Server_TryDeactiveSkill(ESkillSlot::Ready);
+	GetSkillComp()->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
 }
 
 void AGS_Guardian::FinishCtrlSkill()
@@ -216,6 +219,11 @@ void AGS_Guardian::ShowTargetUI(bool bIsActive)
 	{
 		TargetedUIComponent->SetVisibility(bIsActive);
 	}
+}
+
+float AGS_Guardian::GetFlySpeed()
+{
+	return SpeedUpMoveSpeed;
 }
 
 void AGS_Guardian::MulticastRPCApplyHitStop_Implementation(AGS_Character* InDamagedCharacter)

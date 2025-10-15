@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/GS_BasePlayerController.h"
 #include "Character/GS_Character.h"
 #include "UI/Character/GS_CrossHairImage.h"
+#include "Character/Skill/ESkill.h"
 #include "GS_TpsController.generated.h"
 
 class UGS_GameInstance;
@@ -13,7 +14,7 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
-USTRUCT(BlueprintType)
+/*USTRUCT(BlueprintType)
 struct FControlValue
 {
 	GENERATED_BODY()
@@ -40,10 +41,10 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool bCanMoveRight;
-};
+};*/
 
 UCLASS()
-class GAS_API AGS_TpsController : public APlayerController
+class GAS_API AGS_TpsController : public AGS_BasePlayerController
 {
 	GENERATED_BODY()
 
@@ -139,8 +140,15 @@ public:
 	// Auto Moving (KCY)
 	void StartAutoMoveForward();
 	void StopAutoMoveForward();
-	
 
+	// Pawn 유효성 검사를 위한 타이머 및 함수 추가
+	void TryCreatingPlayerWidget();
+	FTimerHandle WaitForPawnTimerHandle;
+
+	// Debug
+	UFUNCTION(Client, Unreliable)
+	void Client_DrawAimAssistDebug(const FVector& Start, const FVector& End, const FVector& TargetLocation, float Duration); // SJE
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

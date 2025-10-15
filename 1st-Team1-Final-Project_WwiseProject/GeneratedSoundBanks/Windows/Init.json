@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{9EB7A761-36A0-76FF-D5ED-9E37424D289F}",
+    "Hash": "{2A8A52E8-7D0A-51E8-C9D6-987424484BE5}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -58,6 +58,12 @@
       "Name": "Master Audio Bus",
       "ObjectPath": "\\Master-Mixer Hierarchy\\Default Work Unit\\Master Audio Bus",
       "GUID": "{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}"
+     },
+     {
+      "Id": "3991942870",
+      "Name": "Music",
+      "ObjectPath": "\\Master-Mixer Hierarchy\\Default Work Unit\\Master Audio Bus\\Music",
+      "GUID": "{9367FD4B-9CA5-4723-B0A7-DB75934DCD2F}"
      }
     ],
     "AuxBusses": [
@@ -96,10 +102,28 @@
       "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
      },
      {
+      "Id": "1111830101",
+      "Name": "Distance_Volume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\Distance_Volume",
+      "GUID": "{CE0DA21D-B039-4D70-A62B-0321CD32566D}"
+     },
+     {
+      "Id": "3474855001",
+      "Name": "Occlusion_Disable",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\Occlusion_Disable",
+      "GUID": "{E652B0AB-C01E-4AD5-BCCF-46F25A638601}"
+     },
+     {
       "Id": "3561306875",
       "Name": "MapBGMVolume",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\MapBGMVolume",
       "GUID": "{2F3E4FB8-0714-4169-BAB2-33AE6207B7C7}"
+     },
+     {
+      "Id": "3868840468",
+      "Name": "RTS_Base_20m",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\RTS_Base_20m",
+      "GUID": "{0D40C47D-E51C-450D-8A24-0C6878B9E10F}"
      }
     ],
     "StateGroups": [
@@ -248,6 +272,6 @@
     ]
    }
   ],
-  "FileHash": "{B83A468E-E6EF-55A9-11E3-221A1EE834E0}"
+  "FileHash": "{F6558DEF-173C-7292-53CE-E2E600EF8080}"
  }
 }

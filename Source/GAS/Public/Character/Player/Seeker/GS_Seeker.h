@@ -14,8 +14,10 @@ class UPostProcessComponent;
 class UMaterialInterface;
 class UGS_StatComp;
 class AGS_PlayerState;
-class UGS_DebuffVFXComponent;
+class UGS_VFXComponent;
 class AGS_Monster;
+class UGS_SeekerAudioComponent;
+class UUserWidget;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -39,6 +41,15 @@ struct FSeekerState
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSeekerHover, bool, bIsHover);
 
+// 충돌 사운드 타입 열거형
+UENUM(BlueprintType)
+enum class ECollisionSoundType : uint8
+{
+	Wall,
+	Monster, 
+	Guardian
+};
+
 UCLASS()
 class GAS_API AGS_Seeker : public AGS_Player
 {
@@ -46,9 +57,7 @@ class GAS_API AGS_Seeker : public AGS_Player
 
 public:
 	AGS_Seeker();
-
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// Death
@@ -80,14 +89,13 @@ public:
 	EGait GetLastSeekerGait();
 
 	UFUNCTION()
+	void StateReset();
+
+	UFUNCTION()
 	void OnRep_SeekerGait();
 
-	// AnimInstnace Slot State Value 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsUpperBodySlot(bool bUpperBodySlot);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetIsFullBodySlot(bool bFullBodySlot);
+	void Multicast_SetMontageSlot(ESeekerMontageSlot InputMontageSlot);
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetMustTurnInPlace(bool MustTurn);
@@ -111,8 +119,8 @@ public:
 	UFUNCTION()
 	void ComboInputClose();
 
-	UFUNCTION()
-	virtual void OnComboAttack();
+	UFUNCTION(Server, Reliable)
+	virtual void Server_OnComboAttack();
 
 	// Control
 	UFUNCTION()
@@ -123,13 +131,10 @@ public:
 	// Replication Set
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	// Notify
-	void CallDeactiveSkill(ESkillSlot Slot);
-
-	// 스킬 사운드 재생 (모든 시커 캐릭터에서 사용)
+	// === Audio Functions ===
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlaySkillSound(class UAkAudioEvent* SoundToPlay);
-
+	void Multicast_PlaySound(class UAkAudioEvent* SoundToPlay);
+	
 	// ===============
 	// 공격 사운드 리셋 관련
 	// ===============
@@ -179,15 +184,30 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	UMaterialInterface* LowHealthEffectMaterial;
+
+	// ================
+	// 가디언 감지 스크린 효과
+	// ================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Detection|Effects")
+	UPostProcessComponent* DetectionPostProcessComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Detection|Effects")
+	UMaterialInterface* DetectionEffectMaterial; // MPP_Detect
 	
 	UFUNCTION()
 	void HandleLowHealthEffect(UGS_StatComp* InStatComp);
 
 	// =======================
-	// 디버프 VFX 컴포넌트
+	// VFX 컴포넌트 (디버프, 힐링 등 모든 VFX)
 	// =======================
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX")
-	UGS_DebuffVFXComponent* DebuffVFXComponent;
+	UGS_VFXComponent* VFXComponent;
+
+	// =======================
+	// 시커 오디오 컴포넌트 (RTS/TPS 지원)
+	// =======================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
+	UGS_SeekerAudioComponent* SeekerAudioComponent;
 
 	// ================
 	// 함정 VFX 컴포넌트
@@ -234,15 +254,17 @@ protected:
 	void InitializeCameraManager();
 	void UpdatePostProcessEffect(float EffectStrength);
 
-	// 사운드 관련 헬퍼 함수
-	class UAkComponent* GetOrCreateAkComponent();
-
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
 
 	// 동적 머티리얼 파라미터 사용
 	UPROPERTY()
 	UMaterialInstanceDynamic* LowHealthDynamicMaterial;
+
+	// 감지 효과용 동적 머티리얼
+	UPROPERTY()
+	UMaterialInstanceDynamic* DetectionDynamicMaterial;
 
 	// 카메라 매니저 참조 추가
 	UPROPERTY()
@@ -285,7 +307,7 @@ protected:
 	virtual void OnHoverEnd() override;
 	virtual FLinearColor GetCurrentDecalColor() override;
 	virtual bool ShowDecal() override;
-
+	
 private:
 	UPROPERTY(VisibleAnywhere, Category="State", Replicated)
 	FSeekerState SeekerState;
@@ -295,6 +317,36 @@ private:
 
 	UPROPERTY()
 	FTimerHandle LowHealthEffectTimer;
+
+	// 가디언 감지 상태
+	UPROPERTY(ReplicatedUsing = OnRep_IsDetectedByGuardian)
+	bool bIsDetectedByGuardian = false;
+
+	UFUNCTION()
+	void OnRep_IsDetectedByGuardian();
+
+	// 감지 사운드 쿨다운 (마지막 재생 시간 추적)
+	UPROPERTY()
+	float LastDetectionSoundTime = 0.0f;
+
+	// 감지 사운드 최소 간격 (초)
+	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "0.5", ClampMax = "5.0"))
+	float DetectionSoundCooldown = 5.0f;
+
+	// 화면 중앙 근접도 (0.0 = 가장자리, 1.0 = 중앙)
+	UPROPERTY(ReplicatedUsing = OnRep_DetectionIntensity)
+	float DetectionIntensity = 0.0f;
+
+	UFUNCTION()
+	void OnRep_DetectionIntensity();
+
+	// ==========================================
+	// 가디언 감지 HUD 시스템
+	// ==========================================
+
+	/** 감지 HUD 위젯 클래스 */
+	UPROPERTY(EditDefaultsOnly, Category = "UI|Detection")
+	TSubclassOf<class UUserWidget> DetectionHUDWidgetClass;
 
 	void StartCombatMusic();
 	void StopCombatMusic();
@@ -311,4 +363,61 @@ private:
 public:
 	UFUNCTION(Server, Reliable)
 	void Server_RestKey();
+
+	// State
+	UPROPERTY(Replicated)
+	bool bIsAiming = false;
+
+	// ===============
+	// 시커 타입 체크 함수들 (GS_Character의 ECharacterType 사용)
+	// ===============
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsChan() const { return GetCharacterType() == ECharacterType::Chan; }
+	
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsAres() const { return GetCharacterType() == ECharacterType::Ares; }
+	
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsMerci() const { return GetCharacterType() == ECharacterType::Merci; }
+
+	// 근접/원거리 체크 (하위 호환성)
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsMeleeSeeker() const { return IsChan() || IsAres(); }
+
+	UFUNCTION(BlueprintPure, Category = "Seeker Type")
+	bool IsRangedSeeker() const { return IsMerci(); }
+
+	// ==========================================
+	// 가디언 감지 HUD 시스템
+	// ==========================================
+
+	/** 가디언이 시커를 감지했을 때 호출 (public 인터페이스) */
+	UFUNCTION(BlueprintCallable, Category = "Detection")
+	void OnDetectedByGuardian(bool bIsDetected);
+
+	/** 현재 가디언에게 감지되었는지 확인 */
+	UFUNCTION(BlueprintPure, Category = "Detection")
+	bool IsDetectedByGuardian() const { return bIsDetectedByGuardian; }
+
+	/** 화면 중앙 근접도 설정 (서버에서 호출) */
+	UFUNCTION(BlueprintCallable, Category = "Detection")
+	void SetDetectionIntensity(float Intensity);
+
+	/** 현재 감지 강도 확인 */
+	UFUNCTION(BlueprintPure, Category = "Detection")
+	float GetDetectionIntensity() const { return DetectionIntensity; }
+
+	/** 감지 HUD 위젯 인스턴스 (블루프린트 접근용) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI|Detection")
+	class UUserWidget* DetectionHUDWidget;
+
+	/** 감지 상태 변경 시 HUD 업데이트 */
+	void UpdateDetectionHUD();
+
+private:
+	/** 감지 상태 변경 시 시각적/청각적 효과 업데이트 */
+	void UpdateDetectionEffects();
+
+	/** 화면 중앙 근접도 기반 포스트 프로세스 효과 업데이트 */
+	void UpdateDetectionPostProcessEffect(float Intensity);
 };

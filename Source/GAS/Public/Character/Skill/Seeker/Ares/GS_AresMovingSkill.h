@@ -18,11 +18,9 @@ public:
 	UGS_AresMovingSkill();
 
 	virtual void ActiveSkill() override;
-	virtual void DeactiveSkill() override;
+	virtual void OnSkillCanceledByDebuff() override;
+	virtual void OnSkillAnimationEnd() override;
 	virtual void OnSkillCommand() override;
-	virtual void ExecuteSkillEffect() override;
-	virtual bool IsActive() const override;
-	virtual bool CanActiveInternally() const;
 	virtual void InterruptSkill() override;
 
 protected:
@@ -34,7 +32,7 @@ private:
 	void UpdateCharging();
 	void StartDash();
 	void UpdateDash();
-	void StopDash();
+	virtual void DeactiveSkill() override;
 
 	FTimerHandle ChargingTimerHandle;
 	FTimerHandle DashTimerHandle;
@@ -48,13 +46,9 @@ private:
 	float DashDuration = 0.3f;
 	float DashInterpAlpha = 0.0f;
 
-	bool bIsCharging = false;
-
 	FVector DashDirection; // 돌진 방향
 	FVector DashStartLocation;
 	FVector DashEndLocation;
 
 	TSet<AActor*> DamagedActors;
-
-	bool bPressedDuringCooldown = false;
 };

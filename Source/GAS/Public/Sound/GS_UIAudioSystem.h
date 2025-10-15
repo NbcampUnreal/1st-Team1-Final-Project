@@ -15,7 +15,6 @@ class GAS_API UGS_UIAudioSystem : public UObject
 	GENERATED_BODY()
 	
 public:
-	// UI 사운드 재생
 	UFUNCTION(BlueprintCallable, Category = "Audio|UI")
 	void PlayButtonClick(APlayerController* Controller);
 

@@ -23,11 +23,11 @@ enum class EGridCellState : uint8
 };
 
 UENUM(BlueprintType)
-enum class EPreviewState : uint8
+enum class EPlacementResult : uint8
 {
-	None		UMETA(DisplayName = "None"),
-	Valid		UMETA(DisplayName = "Valid"),
-	Invalid		UMETA(DisplayName = "Invalid")
+	Valid           UMETA(DisplayName = "Valid"),
+	ReplaceExisting UMETA(DisplayName = "ReplaceExisting"),
+	OutOfBounds     UMETA(DisplayName = "OutOfBounds")
 };
 
 USTRUCT(Atomic, BlueprintType)
@@ -146,12 +146,24 @@ struct FGridCellData
 };
 
 USTRUCT(Atomic, BlueprintType)
-struct FRunePlacementData
+struct FArcaneBoardPresets
 {
 	GENERATED_BODY()
 
 	UPROPERTY()
-	TArray<FPlacedRuneInfo> PlacedRunes;
+	TArray<FPlacedRuneInfo> Preset1;
 
-	FRunePlacementData() {}
+	UPROPERTY()
+	TArray<FPlacedRuneInfo> Preset2;
+
+	UPROPERTY()
+	TArray<FPlacedRuneInfo> Preset3;
+
+	UPROPERTY()
+	int32 LastUsedPresetIndex;
+
+	FArcaneBoardPresets()
+	{
+		LastUsedPresetIndex = 1; // 기본값 설정
+	}
 };

@@ -2,7 +2,11 @@
 
 
 #include "Character/Skill/Seeker/Merci/GS_MerciRollingSkill.h"
+
+#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/Player/Seeker/GS_Merci.h"
+#include "Sound/GS_SeekerAudioComponent.h"
+#include "Components/CapsuleComponent.h"
 
 UGS_MerciRollingSkill::UGS_MerciRollingSkill()
 {
@@ -12,21 +16,21 @@ UGS_MerciRollingSkill::UGS_MerciRollingSkill()
 void UGS_MerciRollingSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
+	
+	StartCoolDown();
+
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
-		if (MerciCharacter->HasAuthority())
-		{
+			// 스킬 시작 사운드 재생
+			if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
+			{
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			}
+
 			MerciCharacter->SetDrawState(false);
 			MerciCharacter->SetAimState(false);
-			MerciCharacter->Multicast_SetIsFullBodySlot(true);
-			MerciCharacter->SetSkillInputControl(false, false, false);
-			MerciCharacter->SetMoveControlValue(false, false);
+			MerciCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 			MerciCharacter->CanChangeSeekerGait = false;
-
-			if (MerciCharacter->GetSkillComp())
-			{
-				MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, true);
-			}
 
 			FName RollDirection = CalRollDirection();
 			if (RollDirection == FName("00"))
@@ -37,27 +41,32 @@ void UGS_MerciRollingSkill::ActiveSkill()
 			{
 				MerciCharacter->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
 			}
-		}
+
+			MerciCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	}
 }
 
-void UGS_MerciRollingSkill::DeactiveSkill()
+void UGS_MerciRollingSkill::OnSkillAnimationEnd()
 {
-	Super::DeactiveSkill();
+	Super::OnSkillAnimationEnd();
 
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
 		if (MerciCharacter->HasAuthority())
 		{
-			MerciCharacter->Multicast_SetIsFullBodySlot(false);
-			MerciCharacter->SetSkillInputControl(true, true, true);
-			MerciCharacter->SetMoveControlValue(true, true);
+			MerciCharacter->Multicast_StopSkillMontage(SkillAnimMontages[0]);
+			MerciCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 			MerciCharacter->CanChangeSeekerGait = true;
 
-			if (MerciCharacter->GetSkillComp())
+			// SeekerAudioComponent를 통한 스킬 종료 사운드
+			if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
 			{
-				MerciCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
+				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
 			}
+
+			SetIsActive(false);
+
+			MerciCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 		}
 	}
 }
@@ -68,14 +77,8 @@ void UGS_MerciRollingSkill::InterruptSkill()
 	AGS_Merci* AresCharacter = Cast<AGS_Merci>(OwnerCharacter);
 	if (AresCharacter->GetSkillComp())
 	{
-		AresCharacter->Multicast_SetIsFullBodySlot(false);
+		AresCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 		AresCharacter->SetMoveControlValue(true, true);
-		AresCharacter->GetSkillComp()->SetSkillActiveState(ESkillSlot::Rolling, false);
+		SetIsActive(false);
 	}
-}
-
-
-bool UGS_MerciRollingSkill::CanActive() const
-{
-	return Super::CanActive();
 }

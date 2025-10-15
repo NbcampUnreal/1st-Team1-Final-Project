@@ -11,11 +11,13 @@
 #include "AkGameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/Component/GS_HitReactComp.h"
+#include "Character/Component/GS_CameraShakeComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "AI/RTS/GS_RTSController.h"
 #include "Character/Player/GS_Player.h"
 #include "Components/DecalComponent.h"
+// #include "Components/CapsuleComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
 #include "Character/F_GS_DamageEvent.h"
 
@@ -26,6 +28,7 @@ AGS_Character::AGS_Character()
 	StatComp = CreateDefaultSubobject<UGS_StatComp>(TEXT("StatComp"));
 	DebuffComp = CreateDefaultSubobject<UGS_DebuffComp>(TEXT("DebuffComp"));
 	HitReactComp = CreateDefaultSubobject<UGS_HitReactComp>(TEXT("HitReactComp"));
+	CameraShakeComp = CreateDefaultSubobject<UGS_CameraShakeComponent>(TEXT("CameraShakeComp"));
 	
 	HPTextWidgetComp = CreateDefaultSubobject<UGS_HPTextWidgetComp>(TEXT("TextWidgetComp"));
 	HPTextWidgetComp->SetupAttachment(RootComponent);
@@ -95,7 +98,6 @@ void AGS_Character::BeginPlay()
 void AGS_Character::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -105,7 +107,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
-	DOREPLIFETIME(AGS_Character, CanHitReact);
+	DOREPLIFETIME(AGS_Character, bLockRotationToController);
 }
 
 
@@ -159,14 +161,25 @@ void AGS_Character::BeginDestroy()
 
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	// 이미 죽은 캐릭터는 추가 데미지를 받지 않음
+	if (IsDead())
+	{
+		return 0.0f;
+	}
+
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	float CurrentHealth = StatComp->GetCurrentHealth();
 
 	//when damage input start -> for drakhar 6/24
 	OnDamageStart();
 
-	// SJE
-	UE_LOG(LogTemp, Warning, TEXT("CanHitReact : %s"), CanHitReact ? TEXT("true") : TEXT("false"));
+	if (HasAuthority())
+	{
+		if (APlayerController* PC = Cast<APlayerController>(GetController()))
+		{
+			Client_PlayTakeDamageShake(PC);
+		}
+	}
 
 	if (CanHitReact)
 	{
@@ -196,22 +209,33 @@ void AGS_Character::OnDamageStart()
 	//
 }
 
-void AGS_Character::Multicast_SetCanHitReact_Implementation(bool CanReact)
+void AGS_Character::DisableHitReact(float CooldownTime)
 {
-	CanHitReact = CanReact;
-}
-
-void AGS_Character::AllowHitReact()
-{
+	SetCanHitReact(false);
 	GetWorld()->GetTimerManager().SetTimer(HitReactTimerHandle, [this]()
 	{
 		CanHitReact = true;
-	}, 3.0f, false);
+	}, CooldownTime, false);
+}
+
+void AGS_Character::DisableHitReact(bool bAllowHitReact)
+{
+	CanHitReact = bAllowHitReact;
 }
 
 void AGS_Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+}
+
+bool AGS_Character::GetIsLockedRotationToController()
+{
+	return bLockRotationToController;
+}
+
+void AGS_Character::SetIsLockedRotationToController(bool InputIsRotationRoController)
+{
+	bLockRotationToController = InputIsRotationRoController;
 }
 
 void AGS_Character::OnDeath()
@@ -220,11 +244,8 @@ void AGS_Character::OnDeath()
 
 	OnDeathDelegate.Broadcast();
 
-	// 죽음 사운드 재생
-	if (DeathSoundEvent)
-	{
-		UAkGameplayStatics::PostEvent(DeathSoundEvent, this, 0, FOnAkPostEventCallback());
-	}
+	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
+	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
 
 	DestroyAllWeapons();
 	MulticastRPCCharacterDeath();
@@ -272,7 +293,37 @@ void AGS_Character::ServerRPCMeleeAttack_Implementation(AGS_Character* InDamaged
 			float Damage = DamagedCharacterStat->CalculateDamage(this, InDamagedCharacter);
 			FDamageEvent DamageEvent;
 			InDamagedCharacter->TakeDamage(Damage, DamageEvent, GetController(), this);
+			
+			// 공격이 성공했을 때 공격자에게 카메라 쉐이크 적용
+			if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
+			{
+				Client_PlayAttackSuccessShake(AttackerPC);
+			}
 		}
+	}
+}
+
+void AGS_Character::Client_PlayTakeDamageShake_Implementation(APlayerController* TargetPC)
+{
+	if (TargetPC && TargetPC->IsLocalController() && TakeDamageShake.ShakeClass)
+	{
+		TargetPC->ClientStartCameraShake(TakeDamageShake.ShakeClass, TakeDamageShake.Intensity);
+	}
+}
+
+void AGS_Character::Client_PlayAttackSuccessShake_Implementation(APlayerController* TargetPC)
+{
+	if (TargetPC && TargetPC->IsLocalController() && AttackSuccessShake.ShakeClass)
+	{
+		TargetPC->ClientStartCameraShake(AttackSuccessShake.ShakeClass, AttackSuccessShake.Intensity);
+	}
+}
+
+void AGS_Character::Client_PlayAttackSuccessShakeWithInfo_Implementation(APlayerController* TargetPC, const FGS_CameraShakeInfo& CustomShakeInfo)
+{
+	if (TargetPC && TargetPC->IsLocalController() && CustomShakeInfo.ShakeClass)
+	{
+		TargetPC->ClientStartCameraShake(CustomShakeInfo.ShakeClass, CustomShakeInfo.Intensity);
 	}
 }
 
@@ -319,22 +370,19 @@ void AGS_Character::MulticastRPCCharacterDeath_Implementation()
 {
 	 GetMesh()->SetSimulatePhysics(true);
 	 GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+
+	 // 콜리전 비활성화하여 몬스터가 더 이상 죽은 캐릭터를 타겟으로 하지 않도록 함
+	 // GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AGS_Character::MulticastRPCPlaySkillMontage_Implementation(UAnimMontage* SkillMontage)
 {
-	if (!HasAuthority())
-	{
-		PlayAnimMontage(SkillMontage);
-	}
+	PlayAnimMontage(SkillMontage);
 }
 
 void AGS_Character::MulicastRPCStopCurrentSkillMontage_Implementation(UAnimMontage* CurrentSkillMontage)
 {
-	if (!HasAuthority())
-	{
-		StopAnimMontage(CurrentSkillMontage);
-	}
+	StopAnimMontage(CurrentSkillMontage);
 }
 
 void AGS_Character::Multicast_PlayImpactVFX_Implementation(UNiagaraSystem* VFXAsset, FVector Scale)
@@ -413,6 +461,11 @@ void AGS_Character::OnRep_CharacterSpeed()
 
 
 void AGS_Character::Server_SetCanHitReact_Implementation(bool bCanReact)
+{
+	CanHitReact = bCanReact;
+}
+
+void AGS_Character::SetCanHitReact(bool bCanReact)
 {
 	CanHitReact = bCanReact;
 }

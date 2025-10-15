@@ -14,6 +14,8 @@ class GAS_API UGS_SteamNameWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UGS_SteamNameWidget(const FObjectInitializer& ObjectInitializer);
+	
 	virtual void NativeConstruct() override;
 
 	void InitializeSteamNameWidget();

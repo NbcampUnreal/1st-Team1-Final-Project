@@ -9,17 +9,18 @@
 #include "Animation/Character/GS_MonsterAnimInstance.h"
 #include "Net/UnrealNetwork.h"
 #include "Sound/GS_AudioManager.h"
-#include "Sound/GS_CharacterAudioSystem.h"
 #include "EngineUtils.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+// #include "Character/GS_Character.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "DrawDebugHelpers.h"
 #include "Character/Skill/Monster/GS_MonsterSkillComp.h"
 #include "Sound/GS_MonsterAudioComponent.h"
-#include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Character/Component/GS_VFXComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/WidgetComponent.h"
+// #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -43,9 +44,9 @@ AGS_Monster::AGS_Monster()
 	
 	// 몬스터 오디오 컴포넌트 생성
 	MonsterAudioComponent = CreateDefaultSubobject<UGS_MonsterAudioComponent>("MonsterAudioComponent");
-	
-	// 디버프 VFX 컴포넌트 생성
-	DebuffVFXComponent = CreateDefaultSubobject<UGS_DebuffVFXComponent>("DebuffVFXComponent");
+
+	// VFX 컴포넌트 생성 (디버프 등 모든 VFX)
+	VFXComponent = CreateDefaultSubobject<UGS_VFXComponent>("VFXComponent");
 
 	// UI 컴포넌트 생성 및 초기화
 	TargetedUIComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("TargetedUI"));
@@ -83,7 +84,6 @@ void AGS_Monster::BeginPlay()
 	if (AkComponent)
 	{
 		AkComponent->OcclusionRefreshInterval = 0.0f;
-		UE_LOG(LogTemp, Warning, TEXT("AGS_Monster: AkComponent occlusion DISABLED."));
 	}
 }
 
@@ -114,6 +114,17 @@ void AGS_Monster::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (IsValid(MonsterAudioComponent))
+	{
+		MonsterAudioComponent->SetComponentTickEnabled(false);
+	}
+
+	if (IsValid(AkComponent))
+	{
+		AkComponent->SetComponentTickEnabled(false);
+		AkComponent->Stop();
+	}
+
 	// if (SkillCooldownWidgetComp && SkillCooldownWidgetComp->GetBodySetup())
 	// {
 	// 	SkillCooldownWidgetComp->DestroyPhysicsState();
@@ -140,15 +151,22 @@ void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AGS_Monster::OnDeath()
 {
 	Super::OnDeath();
-	
+
 	if (MonsterAudioComponent)
 	{
 		MonsterAudioComponent->PlayDeathSound();
 	}
-	
+
 	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
 	{
 		MoveComp->DisableMovement();
+	}
+
+	// 즉시 콜리전 비활성화하여 공격이 더 이상 들어오지 않도록 처리
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
 	}
 	
 	// 주변의 모든 Seeker에게 이 몬스터 제거 알림
@@ -179,6 +197,7 @@ void AGS_Monster::OnDeath()
 		false
 	);
 }
+ 
 
 void AGS_Monster::HandleDelayedDestroy()
 {
@@ -230,6 +249,33 @@ void AGS_Monster::Attack()
 {
 	if (HasAuthority())
 	{
+		// 타겟이 죽었는지 확인
+		/*if (AGS_AIController* AIController = Cast<AGS_AIController>(GetController()))
+		{
+			UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
+			if (Blackboard)
+			{
+				AActor* TargetActor = Cast<AActor>(Blackboard->GetValueAsObject(AGS_AIController::TargetActorKey));
+				if (TargetActor)
+				{
+					if (AGS_Character* TargetChar = Cast<AGS_Character>(TargetActor))
+					{
+						if (TargetChar->IsDead())
+						{
+							// 타겟이 죽었으면 공격 취소
+							return;
+						}
+					}
+				}
+			}
+		}*/
+
+		// 공격 모션 시작 시 전투/스윙 사운드 트리거 (서버)
+		if (MonsterAudioComponent)
+		{
+			MonsterAudioComponent->PlaySound(EMonsterAudioState::Combat, /*bForcePlay=*/false);
+			MonsterAudioComponent->PlaySwingSound();
+		}
 		Multicast_PlayAttackMontage();
 	}
 }
@@ -245,11 +291,10 @@ void AGS_Monster::SetSelected(bool bSelected, bool bPlaySound)
 	bIsSelected = bSelected;
 	UpdateDecal();
 
-	// 선택되었고, 소리 재생이 허용된 경우에만 소리 재생
-	if (bSelected && bPlaySound && ClickSoundEvent)
-	{
-		UAkGameplayStatics::PostEvent(ClickSoundEvent, this, 0, FOnAkPostEventCallback());
-	}
+    if (bSelected && bPlaySound && MonsterAudioComponent)
+    {
+        MonsterAudioComponent->PlayRTSCommandSound(ERTSCommandSoundType::Selection);
+    }
 }
 
 FLinearColor AGS_Monster::GetCurrentDecalColor()

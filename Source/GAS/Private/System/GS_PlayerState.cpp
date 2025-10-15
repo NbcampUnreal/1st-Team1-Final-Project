@@ -44,7 +44,7 @@ void AGS_PlayerState::BeginPlay()
     if (PC && PC->IsLocalController())
     {
         FetchMySteamAvatar();
-    }
+    }    
 }
 
 void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)

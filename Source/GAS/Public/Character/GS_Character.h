@@ -5,19 +5,21 @@
 #include "GameFramework/Character.h"
 #include "Character/E_Character.h"
 #include "Component/GS_HitReactComp.h"
+#include "CharacterDataAsset.h"
+#include "Character/Component/GS_CameraShakeTypes.h"
 #include "GS_Character.generated.h"
 
 class UGS_StatComp;
 class UGS_SkillComp;
 class UGS_DebuffComp;
 class UGS_HitReactComp;
+class UGS_CameraShakeComponent;
 class UGS_HPTextWidgetComp;
 class UGS_PlayerInfoWidget;
 class UGS_HPText;
 class UGS_HPWidget;
 class AGS_Weapon;
 class UDecalComponent;
-class UAkAudioEvent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterDeath);
 
@@ -52,15 +54,12 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void OnDamageStart();
 	
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetCanHitReact(bool CanReact);
-	
-	UPROPERTY(Replicated)
+	// HitReact
 	bool CanHitReact = true;
-
 	FTimerHandle HitReactTimerHandle;
-
-	void AllowHitReact();
+	
+	void DisableHitReact(float CooldownTime);
+	void DisableHitReact(bool bAllowHitReact);
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -68,9 +67,8 @@ public:
 	UPROPERTY(EditAnywhere, Category="Team")
 	FGenericTeamId TeamId;
 
-	// 죽음 사운드
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound")
-	UAkAudioEvent* DeathSoundEvent;
+	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
+	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
 
 	//variable
 	float MaxSpeed;
@@ -78,8 +76,45 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	ECharacterType CharacterType;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_HitReactComp> HitReactComp;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UGS_CameraShakeComponent> CameraShakeComp;
+
+	// EditAnywhere, BlueprintReadOnly, Category = "Effects|CameraShake"
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects|CameraShake")
+	FGS_CameraShakeInfo TakeDamageShake;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects|CameraShake")
+	FGS_CameraShakeInfo AttackSuccessShake;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess))
 	TObjectPtr<UGS_HPTextWidgetComp> HPTextWidgetComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Data")
+	UCharacterDataAsset* CharacterData;
+
+	UFUNCTION(BlueprintCallable, Category="Data")
+	UTexture2D* GetPortrait() const { return CharacterData ? CharacterData->Portrait : nullptr; }
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "State", meta = (AllowPrivateAccess), Replicated)
+	bool bLockRotationToController = false; // Idle 상태에도 bUseControllerRotationYaw 를 true 로 두기 위한 flag.
+
+	UFUNCTION(BlueprintCallable, Category = "State")
+	bool GetIsLockedRotationToController();
+
+	UFUNCTION(BlueprintCallable, Category = "State")
+	void SetIsLockedRotationToController(bool InputIsRotationRoController);
+	
+	UFUNCTION(BlueprintCallable, Category="Data")
+	FText GetMonsterName() const { return CharacterData ? CharacterData->CharacterName : FText::GetEmpty(); }
+
+	UFUNCTION(BlueprintCallable, Category="Data")
+	FText GetDescription() const { return CharacterData ? CharacterData->Description : FText::GetEmpty(); }
+
+	UFUNCTION(BlueprintCallable, Category="Data")
+	FText GetTypeName() const { return CharacterData ? CharacterData->TypeName : FText::GetEmpty(); }
 	
 	//getter
 	FORCEINLINE UGS_StatComp* GetStatComp() const { return StatComp; }
@@ -89,6 +124,16 @@ public:
 	//serverRPC
 	UFUNCTION(Server, Reliable)
 	void ServerRPCMeleeAttack(AGS_Character* InDamagedCharacter);
+
+	//clientRPC for camera shake
+	UFUNCTION(Client, Reliable)
+	void Client_PlayTakeDamageShake(APlayerController* TargetPC);
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlayAttackSuccessShake(APlayerController* TargetPC);
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlayAttackSuccessShakeWithInfo(APlayerController* TargetPC, const FGS_CameraShakeInfo& CustomShakeInfo);
 
 	//character death play ragdoll
 	UFUNCTION(NetMulticast, Reliable)
@@ -138,9 +183,13 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnCharacterDeath OnDeathDelegate;
-	
+
+	// HitReact
 	UFUNCTION(Server, Reliable)
 	void Server_SetCanHitReact(bool bCanReact);
+
+	UFUNCTION()
+	void SetCanHitReact(bool bCanReact);
 protected:
 	virtual void NotifyActorBeginCursorOver() override;
 	virtual void NotifyActorEndCursorOver() override;
@@ -152,9 +201,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UGS_StatComp> StatComp;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UGS_HitReactComp> HitReactComp;
 	
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TArray<FWeaponSlot> WeaponSlots;

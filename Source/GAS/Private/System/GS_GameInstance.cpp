@@ -13,6 +13,7 @@
 #include "System/PlayerController/GS_MainMenuPC.h"
 #include "Async/Async.h"
 #include "Json.h"
+#include "Sound/GS_AudioManager.h"
 
 DEFINE_LOG_CATEGORY(GameServerLog);
 
@@ -27,6 +28,7 @@ UGS_GameInstance::UGS_GameInstance()
     MouseSensitivity = 1.0f;
     MinSensitivity = 0.1f;
     MaxSensitivity = 10.0f;
+    BGMVolume = 1.0f;
 }
 
 void UGS_GameInstance::Init()
@@ -84,6 +86,16 @@ void UGS_GameInstance::Init()
     }
 
     LoadSettings();
+    
+    // BGM 볼륨 적용은 약간의 지연 후에 수행 (AudioManager 초기화 보장)
+    FTimerHandle VolumeInitHandle;
+    GetWorld()->GetTimerManager().SetTimer(VolumeInitHandle, [this]()
+    {
+        if (UGS_AudioManager* AudioManager = GetSubsystem<UGS_AudioManager>())
+        {
+            AudioManager->SetBGMVolume(BGMVolume);
+        }
+    }, 0.1f, false);
 }
 
 FString UGS_GameInstance::GetAndClearPendingConnectString()
@@ -855,6 +867,8 @@ void UGS_GameInstance::SaveSettings()
     if (UGS_OptionSettinsSaveGame* SaveGameInstance = Cast<UGS_OptionSettinsSaveGame>(UGameplayStatics::CreateSaveGameObject(UGS_OptionSettinsSaveGame::StaticClass())))
     {
         SaveGameInstance->MouseSensitivity = MouseSensitivity;
+        SaveGameInstance->BGMVolume = BGMVolume;
+
         UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("SettingsSlot"), 0);
     }
 }
@@ -866,8 +880,41 @@ void UGS_GameInstance::LoadSettings()
         if (UGS_OptionSettinsSaveGame* LoadGameInstance = Cast<UGS_OptionSettinsSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("SettingsSlot"), 0)))
         {
             MouseSensitivity = LoadGameInstance->MouseSensitivity;
+            BGMVolume = LoadGameInstance->BGMVolume;
         }
     }
+    else
+    {
+        // 저장 파일이 없는 경우 기본값 설정
+        MouseSensitivity = 1.0f;
+        BGMVolume = 1.0f;
+    }
+}
+
+float UGS_GameInstance::GetBGMVolume() const
+{
+    return BGMVolume;
+}
+
+void UGS_GameInstance::SetBGMVolume(float NewVolume)
+{
+    const float ClampedVolume = FMath::Clamp(NewVolume, 0.0f, 1.0f);
+
+    // 값이 변경되지 않았으면 저장하지 않음 (성능 최적화)
+    if (FMath::IsNearlyEqual(BGMVolume, ClampedVolume, 0.001f))
+    {
+        return;
+    }
+
+    BGMVolume = ClampedVolume;
+
+    // AudioManager를 통해 실제 볼륨 적용
+    if (UGS_AudioManager* AudioManager = GetSubsystem<UGS_AudioManager>())
+    {
+        AudioManager->SetBGMVolume(BGMVolume);
+    }
+
+    SaveSettings();
 }
 
 void UGS_GameInstance::InitGameLift()

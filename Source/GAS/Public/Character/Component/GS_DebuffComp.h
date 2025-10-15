@@ -71,6 +71,7 @@ protected:
 	// ===============================
 	void TriggerDebuffVFX(EDebuffType Type);
 	void TriggerDebuffExpireVFX(EDebuffType Type);
+	void RemoveDebuffVFX(EDebuffType Type);
 
 	UFUNCTION(Server, Reliable)
 	void Server_ApplyDebuff(EDebuffType Type, AActor* Attacker);

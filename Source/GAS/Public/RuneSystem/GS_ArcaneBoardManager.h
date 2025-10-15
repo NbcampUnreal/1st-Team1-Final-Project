@@ -55,11 +55,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ECharacterClass GetCurrClass();
 
-	UFUNCTION(BlueprintCallable)
-	bool CanPlaceRuneAt(uint8 RuneID, const FIntPoint& Pos);
+	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
+	EPlacementResult CheckRunePlacement(uint8 RuneID, const FIntPoint& Pos, TArray<uint8>& OutAffectedRuneIDs);
 
 	UFUNCTION(BlueprintCallable)
-	bool PlaceRune(uint8 RuneID, const FIntPoint& Pos);
+	bool PlaceRune(uint8 RuneID, const FIntPoint& Pos, TArray<uint8>& OutRemovedRunes);
 
 	UFUNCTION(BlueprintCallable)
 	bool RemoveRune(uint8 RuneID);
@@ -91,9 +91,6 @@ public:
 	//UI 관련 함수
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	void InitGridState();
-
-	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
-	bool PreviewRunePlacement(uint8 RuneID, const FIntPoint& Pos, TArray<FIntPoint>& OutAffectedCells);
 
 	UFUNCTION(BlueprintCallable, Category = "ArcaneBoard")
 	bool GetCellData(const FIntPoint& Pos, FGridCellData& OutCellData);

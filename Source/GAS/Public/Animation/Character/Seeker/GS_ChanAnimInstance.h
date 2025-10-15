@@ -16,8 +16,4 @@ class GAS_API UGS_ChanAnimInstance : public UGS_SeekerAnimInstance
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-
-	/*// Combo Attack
-	UFUNCTION()
-	void AnimNotify_ComboInput();*/
 };

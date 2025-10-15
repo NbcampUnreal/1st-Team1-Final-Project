@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "NiagaraSystem.h"
 #include "GS_SmallClaw.generated.h"
 
 /**
@@ -20,6 +21,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Attack")
 	class UBoxComponent* BiteCollision;
 
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	UNiagaraSystem* BloodEffectSystem;
+
 	UFUNCTION()
 	void SetBiteCollision(bool bEnable);
 
@@ -33,12 +37,10 @@ public:
 		const FHitResult& SweepResult
 	);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
-	UAkAudioEvent* SmallClawClickSound;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
-	UAkAudioEvent* SmallClawMoveSound;
-
+private:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayBloodEffect(FVector HitLocation, FVector HitNormal);
+	
 protected:
 	virtual void BeginPlay() override;
 }; 

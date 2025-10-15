@@ -3,7 +3,11 @@
 #include "Character/Player/GS_Player.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/PlayerState.h"
-#include "Kismet/KismetSystemLibrary.h"
+
+UGS_SteamNameWidget::UGS_SteamNameWidget(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
+{
+}
 
 void UGS_SteamNameWidget::NativeConstruct()
 {

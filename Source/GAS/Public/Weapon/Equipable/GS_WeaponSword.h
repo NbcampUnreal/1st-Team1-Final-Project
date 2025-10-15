@@ -58,6 +58,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
 	UAkAudioEvent* HitStructureSoundEvent;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	UAkAudioEvent* HitSeekerSoundEvent;
+
 	// 히트 VFX 에셋들
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
 	UNiagaraSystem* HitPawnVFX;
@@ -65,11 +68,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
 	UNiagaraSystem* HitStructureVFX;
 
-	UPROPERTY()
-	class AGS_Character* OwnerChar;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX")
+	UNiagaraSystem* HitSeekerVFX;
 
-	UPROPERTY()
-	TSet<AActor*> HitActors;
+
 	
 protected:
 	virtual void BeginPlay() override;
@@ -85,6 +87,18 @@ private:
 	virtual ESwordHitTargetType DetermineTargetType(AActor* OtherActor) const;
 	virtual void PlayHitSound(ESwordHitTargetType TargetType, const FHitResult& SweepResult);
 	virtual void PlayHitVFX(ESwordHitTargetType TargetType, const FHitResult& SweepResult);
+
+	// 히트 포인트 계산
+	FHitResult CalculateMoreAccurateHitPoint(AActor* OtherActor) const;
+
+	// RTS 모드 지원을 위한 리스너 위치 가져오기
+	bool GetListenerLocation(FVector& OutLocation) const;
+	
+	// RTS 모드 감지
+	bool IsRTSMode() const;
+
+	// 특화 헬퍼 함수
+	FHitResult CreateCorrectHitResult(const FHitResult& OriginalResult, bool bFromSweep) const override;
 
 	// 멀티캐스트 함수들
 	UFUNCTION(NetMulticast, Reliable)

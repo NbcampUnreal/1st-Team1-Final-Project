@@ -8,7 +8,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Character/Player/Monster/GS_Monster.h"
 #include "Character/Player/Guardian/GS_Guardian.h"
-#include "Character/Component/GS_DebuffVFXComponent.h"
+#include "Character/Component/GS_VFXComponent.h"
+#include "Character/Component/GS_DrakharVFXComponent.h"
 
 
 UGS_DebuffComp::UGS_DebuffComp()
@@ -94,6 +95,9 @@ void UGS_DebuffComp::RemoveDebuff(EDebuffType Type)
 		DebuffTimers.Remove(Debuff);
 	}
 
+	// 디버프 제거 전 만료 VFX 재생
+	TriggerDebuffExpireVFX(Type);
+
 	if (ConcurrentDebuffs.Contains(Debuff))
 	{
 		Debuff->OnExpire();
@@ -110,6 +114,9 @@ void UGS_DebuffComp::RemoveDebuff(EDebuffType Type)
 		CurrentDebuff = nullptr;
 		ApplyNextDebuff();
 	}
+
+	// 디버프 VFX 제거
+	RemoveDebuffVFX(Type);
 
 	UpdateReplicatedDebuffList();
 }
@@ -171,7 +178,6 @@ const FDebuffData* UGS_DebuffComp::GetDebuffData(EDebuffType Type) const
 
 	// 디버프 데이터 Row 반환
 	FName RowName = *UEnum::GetValueAsString(Type).RightChop(13);
-	/*UE_LOG(LogTemp, Warning, TEXT("Get Debuff Data"));*/
 	return DebuffDataTable->FindRow<FDebuffData>(RowName, TEXT(""));
 }
 
@@ -212,10 +218,11 @@ void UGS_DebuffComp::RefreshDebuffTimer(UGS_DebuffBase* Debuff, float Duration)
 				if (!IsValid(WeakDebuff.Get())) return;
 				UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
 				
-				// ===============================
 				// 디버프 만료 VFX 재생
-				// ===============================
 				TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+
+				// 디버프 VFX 제거
+				RemoveDebuffVFX(ValidDebuff->GetDebuffType());
 				
 				ValidDebuff->OnExpire();
 				DebuffTimers.Remove(ValidDebuff);
@@ -247,13 +254,17 @@ void UGS_DebuffComp::CreateAndApplyConcurrentDebuff(UGS_DebuffBase* Debuff)
 
 	GetWorld()->GetTimerManager().SetTimer(Handle, [this, WeakDebuff]()
 		{
-			if (!IsValid(WeakDebuff.Get())) return;
+			if (!IsValid(WeakDebuff.Get()))
+			{
+				return;
+			}
 			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
 			
-			// ===============================
 			// 디버프 만료 VFX 재생 (Concurrent 디버프용)
-			// ===============================
 			TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+
+			// 디버프 VFX 제거
+			RemoveDebuffVFX(ValidDebuff->GetDebuffType());
 			
 			ValidDebuff->OnExpire();
 			ConcurrentDebuffs.Remove(ValidDebuff);
@@ -321,10 +332,11 @@ void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
 			if (!IsValid(WeakDebuff.Get())) return;
 			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
 			
-			// ===============================
 			// 디버프 만료 VFX 재생 (Queue 디버프용)
-			// ===============================
 			TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+
+			// 디버프 VFX 제거
+			RemoveDebuffVFX(ValidDebuff->GetDebuffType());
 			
 			DebuffQueue.Remove(ValidDebuff);
 			DebuffTimers.Remove(ValidDebuff);
@@ -342,7 +354,6 @@ void UGS_DebuffComp::AddDebuffToQueue(UGS_DebuffBase* Debuff)
 
 void UGS_DebuffComp::ApplyNextDebuff()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ApplyNextDebuff"));
 	// 디버프 큐에 없으면 리턴
 	if (DebuffQueue.Num() == 0) return;
 
@@ -371,10 +382,11 @@ void UGS_DebuffComp::ApplyNextDebuff()
 			if (!IsValid(WeakDebuff.Get())) return;
 			UGS_DebuffBase* ValidDebuff = WeakDebuff.Get();
 			
-			// ===============================
 			// 디버프 만료 VFX 재생 (Current 디버프용)
-			// ===============================
 			TriggerDebuffExpireVFX(ValidDebuff->GetDebuffType());
+
+			// 디버프 VFX 제거
+			RemoveDebuffVFX(ValidDebuff->GetDebuffType());
 			
 			ValidDebuff->OnExpire();
 			DebuffTimers.Remove(ValidDebuff);
@@ -455,11 +467,33 @@ void UGS_DebuffComp::TriggerDebuffVFX(EDebuffType Type)
 	}
 
 	// =======================
-	// DebuffVFX 컴포넌트
+	// VFX 컴포넌트 (다양한 타입 지원)
 	// =======================
-	if (UGS_DebuffVFXComponent* VFXComponent = GetOwner()->FindComponentByClass<UGS_DebuffVFXComponent>())
+	// Drakhar 전용 VFX 컴포넌트를 먼저 시도 (우선순위)
+	if (UGS_DrakharVFXComponent* DrakharVFXComponent = GetOwner()->FindComponentByClass<UGS_DrakharVFXComponent>())
+	{
+		DrakharVFXComponent->PlayDebuffVFX(Type);
+	}
+	// 표준 VFX 컴포넌트 시도
+	else if (UGS_VFXComponent* VFXComponent = GetOwner()->FindComponentByClass<UGS_VFXComponent>())
 	{
 		VFXComponent->PlayDebuffVFX(Type);
+	}
+}
+
+void UGS_DebuffComp::RemoveDebuffVFX(EDebuffType Type)
+{
+	if (!GetOwner()->HasAuthority()) return;
+
+	// Drakhar 전용 VFX 컴포넌트를 먼저 시도 (우선순위)
+	if (UGS_DrakharVFXComponent* DrakharVFXComponent = GetOwner()->FindComponentByClass<UGS_DrakharVFXComponent>())
+	{
+		DrakharVFXComponent->RemoveDebuffVFX(Type);
+	}
+	// 일반 VFX 컴포넌트 시도
+	else if (UGS_VFXComponent* VFXComponent = GetOwner()->FindComponentByClass<UGS_VFXComponent>())
+	{
+		VFXComponent->RemoveDebuffVFX(Type);
 	}
 }
 
@@ -472,9 +506,15 @@ void UGS_DebuffComp::TriggerDebuffExpireVFX(EDebuffType Type)
 	}
 
 	// =======================
-	// DebuffVFX 컴포넌트 - 만료 VFX
+	// VFX 컴포넌트 - 만료 VFX (다양한 타입 지원)
 	// =======================
-	if (UGS_DebuffVFXComponent* VFXComponent = GetOwner()->FindComponentByClass<UGS_DebuffVFXComponent>())
+	// Drakhar 전용 VFX 컴포넌트를 먼저 시도 (우선순위)
+	if (UGS_DrakharVFXComponent* DrakharVFXComponent = GetOwner()->FindComponentByClass<UGS_DrakharVFXComponent>())
+	{
+		DrakharVFXComponent->PlayDebuffExpireVFX(Type);
+	}
+	// 일반 VFX 컴포넌트 시도
+	else if (UGS_VFXComponent* VFXComponent = GetOwner()->FindComponentByClass<UGS_VFXComponent>())
 	{
 		VFXComponent->PlayDebuffExpireVFX(Type);
 	}
