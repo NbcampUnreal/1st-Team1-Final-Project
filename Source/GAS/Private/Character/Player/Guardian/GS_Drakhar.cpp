@@ -1387,100 +1387,121 @@ void AGS_Drakhar::UpdateCameraEffect()
 		return;
 	}
 
-	// 현재 단계에 따라 처리
+	// 현재 단계에 따라 적절한 업데이트 함수 호출
 	switch (CurrentCameraEffectPhase)
 	{
 	case ECameraEffectPhase::ZoomIn:
-		{
-			// FOV 줌인
-			float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
-			float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, CAMERA_UPDATE_INTERVAL, FeverEndZoomInSpeed);
-			PC->PlayerCameraManager->SetFOV(NewFOV);
-
-			// SpringArm 줌인
-			if (SpringArmComp)
-			{
-				float CurrentArmLength = SpringArmComp->TargetArmLength;
-				float NewArmLength = FMath::FInterpTo(CurrentArmLength, TargetArmLength, CAMERA_UPDATE_INTERVAL, FeverEndZoomInSpeed);
-				SpringArmComp->TargetArmLength = NewArmLength;
-
-				// 둘 다 타겟에 도달하면 다음 단계로
-				if (FMath::IsNearlyEqual(NewFOV, TargetFOV, FOV_TOLERANCE) &&
-					FMath::IsNearlyEqual(NewArmLength, TargetArmLength, ARM_LENGTH_TOLERANCE))
-				{
-					TransitionToNextCameraPhase();
-				}
-			}
-			break;
-		}
+		UpdateCameraZoomIn();
+		break;
 
 	case ECameraEffectPhase::ZoomOut:
-		{
-			// FOV 줌아웃 ("쾅" 효과)
-			float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
-			float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, CAMERA_UPDATE_INTERVAL, FeverEndZoomOutSpeed);
-			PC->PlayerCameraManager->SetFOV(NewFOV);
-
-			// SpringArm 줌아웃
-			if (SpringArmComp)
-			{
-				float CurrentArmLength = SpringArmComp->TargetArmLength;
-				float NewArmLength = FMath::FInterpTo(CurrentArmLength, TargetArmLength, CAMERA_UPDATE_INTERVAL, FeverEndZoomOutSpeed);
-				SpringArmComp->TargetArmLength = NewArmLength;
-
-				// 둘 다 타겟에 도달하면 다음 단계로
-				if (FMath::IsNearlyEqual(NewFOV, TargetFOV, FOV_TOLERANCE) &&
-					FMath::IsNearlyEqual(NewArmLength, TargetArmLength, ARM_LENGTH_TOLERANCE))
-				{
-					TransitionToNextCameraPhase();
-				}
-			}
-			break;
-		}
+		UpdateCameraZoomOut();
+		break;
 
 	case ECameraEffectPhase::Restore:
-		{
-			// FOV 복귀
-			float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
-			float NewFOV = FMath::FInterpTo(CurrentFOV, OriginalFOV, CAMERA_UPDATE_INTERVAL, FeverEndCameraRestoreSpeed);
-			PC->PlayerCameraManager->SetFOV(NewFOV);
-
-			// SpringArm 복귀
-			bool bFOVCompleted = false;
-			bool bArmCompleted = false;
-
-			if (FMath::IsNearlyEqual(NewFOV, OriginalFOV, FINAL_FOV_TOLERANCE))
-			{
-				PC->PlayerCameraManager->SetFOV(OriginalFOV);
-				bFOVCompleted = true;
-			}
-
-			if (SpringArmComp)
-			{
-				float CurrentArmLength = SpringArmComp->TargetArmLength;
-				float NewArmLength = FMath::FInterpTo(CurrentArmLength, OriginalArmLength, CAMERA_UPDATE_INTERVAL, FeverEndCameraRestoreSpeed);
-				SpringArmComp->TargetArmLength = NewArmLength;
-
-				if (FMath::IsNearlyEqual(NewArmLength, OriginalArmLength, FINAL_ARM_LENGTH_TOLERANCE))
-				{
-					SpringArmComp->TargetArmLength = OriginalArmLength;
-					bArmCompleted = true;
-				}
-			}
-
-			// 모두 완료되면 효과 종료
-			if (bFOVCompleted && bArmCompleted)
-			{
-				SafeClearTimer(CameraZoomTimer);
-				CurrentCameraEffectPhase = ECameraEffectPhase::None;
-			}
-			break;
-		}
+		UpdateCameraRestore();
+		break;
 
 	default:
 		SafeClearTimer(CameraZoomTimer);
 		CurrentCameraEffectPhase = ECameraEffectPhase::None;
 		break;
+	}
+}
+
+// 카메라 줌인 단계 업데이트
+void AGS_Drakhar::UpdateCameraZoomIn()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC || !PC->PlayerCameraManager) return;
+
+	// FOV 줌인
+	float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
+	float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, CAMERA_UPDATE_INTERVAL, FeverEndZoomInSpeed);
+	PC->PlayerCameraManager->SetFOV(NewFOV);
+
+	// SpringArm 줌인
+	if (SpringArmComp)
+	{
+		float CurrentArmLength = SpringArmComp->TargetArmLength;
+		float NewArmLength = FMath::FInterpTo(CurrentArmLength, TargetArmLength, CAMERA_UPDATE_INTERVAL, FeverEndZoomInSpeed);
+		SpringArmComp->TargetArmLength = NewArmLength;
+
+		// 둘 다 타겟에 도달하면 다음 단계로
+		if (FMath::IsNearlyEqual(NewFOV, TargetFOV, FOV_TOLERANCE) &&
+			FMath::IsNearlyEqual(NewArmLength, TargetArmLength, ARM_LENGTH_TOLERANCE))
+		{
+			TransitionToNextCameraPhase();
+		}
+	}
+}
+
+// 카메라 줌아웃 단계 업데이트 ("쾅" 효과)
+void AGS_Drakhar::UpdateCameraZoomOut()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC || !PC->PlayerCameraManager) return;
+
+	// FOV 줌아웃
+	float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
+	float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, CAMERA_UPDATE_INTERVAL, FeverEndZoomOutSpeed);
+	PC->PlayerCameraManager->SetFOV(NewFOV);
+
+	// SpringArm 줌아웃
+	if (SpringArmComp)
+	{
+		float CurrentArmLength = SpringArmComp->TargetArmLength;
+		float NewArmLength = FMath::FInterpTo(CurrentArmLength, TargetArmLength, CAMERA_UPDATE_INTERVAL, FeverEndZoomOutSpeed);
+		SpringArmComp->TargetArmLength = NewArmLength;
+
+		// 둘 다 타겟에 도달하면 다음 단계로
+		if (FMath::IsNearlyEqual(NewFOV, TargetFOV, FOV_TOLERANCE) &&
+			FMath::IsNearlyEqual(NewArmLength, TargetArmLength, ARM_LENGTH_TOLERANCE))
+		{
+			TransitionToNextCameraPhase();
+		}
+	}
+}
+
+// 카메라 원래 상태로 복귀
+void AGS_Drakhar::UpdateCameraRestore()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC || !PC->PlayerCameraManager) return;
+
+	// FOV 복귀
+	float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
+	float NewFOV = FMath::FInterpTo(CurrentFOV, OriginalFOV, CAMERA_UPDATE_INTERVAL, FeverEndCameraRestoreSpeed);
+	PC->PlayerCameraManager->SetFOV(NewFOV);
+
+	bool bFOVCompleted = false;
+	bool bArmCompleted = false;
+
+	if (FMath::IsNearlyEqual(NewFOV, OriginalFOV, FINAL_FOV_TOLERANCE))
+	{
+		PC->PlayerCameraManager->SetFOV(OriginalFOV);
+		bFOVCompleted = true;
+	}
+
+	// SpringArm 복귀
+	if (SpringArmComp)
+	{
+		float CurrentArmLength = SpringArmComp->TargetArmLength;
+		float NewArmLength = FMath::FInterpTo(CurrentArmLength, OriginalArmLength, CAMERA_UPDATE_INTERVAL, FeverEndCameraRestoreSpeed);
+		SpringArmComp->TargetArmLength = NewArmLength;
+
+		if (FMath::IsNearlyEqual(NewArmLength, OriginalArmLength, FINAL_ARM_LENGTH_TOLERANCE))
+		{
+			SpringArmComp->TargetArmLength = OriginalArmLength;
+			bArmCompleted = true;
+		}
+	}
+
+	// 모두 완료되면 효과 종료
+	if (bFOVCompleted && bArmCompleted)
+	{
+		SafeClearTimer(CameraZoomTimer);
+		CurrentCameraEffectPhase = ECameraEffectPhase::None;
 	}
 }
 

@@ -456,6 +456,11 @@ private:
 	UFUNCTION()
 	void UpdateCameraEffect();
 
+	// 카메라 효과 단계별 업데이트 함수
+	void UpdateCameraZoomIn();
+	void UpdateCameraZoomOut();
+	void UpdateCameraRestore();
+
 	// 다음 카메라 효과 단계로 전환
 	void TransitionToNextCameraPhase();
 };

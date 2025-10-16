@@ -20,6 +20,32 @@ void UGS_DrakharAudioComponent::BeginPlay()
 	OwnerDrakhar = Cast<AGS_Drakhar>(GetOwner());
 }
 
+void UGS_DrakharAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// 모든 타이머 정리 (레벨 전환 시 크래시 방지)
+	if (UWorld* World = GetWorld())
+	{
+		if (World->IsValidLowLevel() && !World->bIsTearingDown)
+		{
+			FTimerManager& TimerManager = World->GetTimerManager();
+
+			if (DraconicFurySoundCooldownTimer.IsValid())
+			{
+				TimerManager.ClearTimer(DraconicFurySoundCooldownTimer);
+				DraconicFurySoundCooldownTimer.Invalidate();
+			}
+
+			if (HurtSoundCooldownTimer.IsValid())
+			{
+				TimerManager.ClearTimer(HurtSoundCooldownTimer);
+				HurtSoundCooldownTimer.Invalidate();
+			}
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
 // === 사운드 재생 함수 구현 ===
 void UGS_DrakharAudioComponent::PlayComboAttackSound()
 {
@@ -52,11 +78,20 @@ void UGS_DrakharAudioComponent::PlayDraconicFurySkillSound()
 		PlaySoundEvent(OwnerDrakhar->DraconicFurySkillSoundEvent, OwnerDrakhar->GetActorLocation());
 		bDraconicFurySoundPlayed = true;
 
-		FTimerHandle ResetSoundTimer;
-        GetWorld()->GetTimerManager().SetTimer(ResetSoundTimer, [this]()
+		// 타이머 설정
+		if (UWorld* World = GetWorld())
 		{
-			bDraconicFurySoundPlayed = false;
-        }, DraconicFurySoundCooldown, false);
+			if (World->IsValidLowLevel() && !World->bIsTearingDown)
+			{
+				World->GetTimerManager().SetTimer(
+					DraconicFurySoundCooldownTimer,
+					this,
+					&UGS_DrakharAudioComponent::ResetDraconicFurySoundCooldown,
+					DraconicFurySoundCooldown,
+					false
+				);
+			}
+		}
 	}
 }
 
@@ -103,15 +138,8 @@ void UGS_DrakharAudioComponent::PlayFeverModeStateSound()
 		return;
 	}
 
-	// 데디케이티드 서버에서는 오디오 처리 불필요
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	// Wwise 오디오 디바이스 초기화 상태 확인
-	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-	if (!AudioDevice || !AudioDevice->IsInitialized())
+	// 오디오 시스템 검증
+	if (!IsAudioSystemValid())
 	{
 		return;
 	}
@@ -132,15 +160,8 @@ void UGS_DrakharAudioComponent::StopFeverModeStateSound()
 		return;
 	}
 
-	// 데디케이티드 서버에서는 오디오 처리 불필요
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	// Wwise 오디오 디바이스 초기화 상태 확인
-	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-	if (!AudioDevice || !AudioDevice->IsInitialized())
+	// 오디오 시스템 검증
+	if (!IsAudioSystemValid())
 	{
 		return;
 	}
@@ -148,8 +169,9 @@ void UGS_DrakharAudioComponent::StopFeverModeStateSound()
 	// Playing ID가 유효하면 FAkAudioDevice를 통해 중지
 	if (FeverModeStateSoundPlayingID != AK_INVALID_PLAYING_ID)
 	{
-		// FAkAudioDevice를 통해 StopPlayingID 호출 - 500ms 페이드아웃
-		AudioDevice->StopPlayingID(FeverModeStateSoundPlayingID, 500);
+		// FAkAudioDevice를 통해 StopPlayingID 호출
+		FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+		AudioDevice->StopPlayingID(FeverModeStateSoundPlayingID, FeverModeStateFadeOutDuration);
 		FeverModeStateSoundPlayingID = AK_INVALID_PLAYING_ID;
 	}
 }
@@ -161,12 +183,20 @@ void UGS_DrakharAudioComponent::PlayHurtSound()
 		PlaySoundEvent(OwnerDrakhar->HurtSoundEvent, OwnerDrakhar->GetActorLocation());
 		bHurtSoundPlayed = true;
 
-		// N초 후에 다시 재생 가능하도록 설정
-		FTimerHandle ResetHurtSoundTimer;
-        GetWorld()->GetTimerManager().SetTimer(ResetHurtSoundTimer, [this]()
+		// 타이머 설정
+		if (UWorld* World = GetWorld())
 		{
-			bHurtSoundPlayed = false;
-        }, HurtSoundCooldown, false);
+			if (World->IsValidLowLevel() && !World->bIsTearingDown)
+			{
+				World->GetTimerManager().SetTimer(
+					HurtSoundCooldownTimer,
+					this,
+					&UGS_DrakharAudioComponent::ResetHurtSoundCooldown,
+					HurtSoundCooldown,
+					false
+				);
+			}
+		}
 	}
 }
 
@@ -183,31 +213,40 @@ void UGS_DrakharAudioComponent::HandleDraconicProjectileImpact(const FVector& Im
 
 void UGS_DrakharAudioComponent::PlayComboFinisherSound()
 {
-    if (!OwnerDrakhar)
-    {
-        return;
-    }
-    if (!OwnerDrakhar->ComboFinisherSoundEvent)
-    {
-        return;
-    }
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
-    {
-        return;
-    }
+	if (!OwnerDrakhar || !OwnerDrakhar->ComboFinisherSoundEvent)
+	{
+		return;
+	}
 
-    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-    if (!AudioDevice || !AudioDevice->IsInitialized())
-    {
-        return;
-    }
+	// 오디오 시스템 검증
+	if (!IsAudioSystemValid())
+	{
+		return;
+	}
 
-    UAkGameplayStatics::PostEvent(
-        OwnerDrakhar->ComboFinisherSoundEvent,
-        OwnerDrakhar,
-        0,
-        FOnAkPostEventCallback()
-    );
+	UAkGameplayStatics::PostEvent(
+		OwnerDrakhar->ComboFinisherSoundEvent,
+		OwnerDrakhar,
+		0,
+		FOnAkPostEventCallback()
+	);
+}
+
+// === 타이머 콜백 함수 구현 ===
+void UGS_DrakharAudioComponent::ResetDraconicFurySoundCooldown()
+{
+	// 언리얼이 자동으로 생명주기 관리
+	if (!IsValid(this)) return;
+
+	bDraconicFurySoundPlayed = false;
+}
+
+void UGS_DrakharAudioComponent::ResetHurtSoundCooldown()
+{
+	// 언리얼이 자동으로 생명주기 관리
+	if (!IsValid(this)) return;
+
+	bHurtSoundPlayed = false;
 }
 
 // === Wwise 헬퍼 함수 구현 ===
@@ -218,16 +257,9 @@ void UGS_DrakharAudioComponent::PlaySoundEvent(UAkAudioEvent* SoundEvent, const 
 	{
 		return;
 	}
-    
-	// 데디케이티드 서버에서는 오디오 처리 불필요
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
-	{
-		return;
-	}
 
-	// Wwise 오디오 디바이스 초기화 상태 확인
-	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-	if (!AudioDevice || !AudioDevice->IsInitialized())
+	// 오디오 시스템 검증
+	if (!IsAudioSystemValid())
 	{
 		return;
 	}
