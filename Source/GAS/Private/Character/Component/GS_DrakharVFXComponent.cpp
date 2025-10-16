@@ -21,6 +21,15 @@ UGS_DrakharVFXComponent::UGS_DrakharVFXComponent()
 	ActiveDustCloudVFXComponent = nullptr;
 	ActiveFlyingDustVFXComponent = nullptr;
 }
+// 파라미터명 정의
+const FName UGS_DrakharVFXComponent::Param_DashDirection = FName("DashDirection");
+const FName UGS_DrakharVFXComponent::Param_DashSpeed = FName("DashSpeed");
+const FName UGS_DrakharVFXComponent::Param_Scale = FName("Scale");
+const FName UGS_DrakharVFXComponent::Param_CrackIntensity = FName("CrackIntensity");
+const FName UGS_DrakharVFXComponent::Param_CrackRadius = FName("CrackRadius");
+const FName UGS_DrakharVFXComponent::Param_DustIntensity = FName("DustIntensity");
+const FName UGS_DrakharVFXComponent::Param_DustRadius = FName("DustRadius");
+const FName UGS_DrakharVFXComponent::Param_WindStrength = FName("WindStrength");
 
 void UGS_DrakharVFXComponent::BeginPlay()
 {
@@ -101,12 +110,12 @@ void UGS_DrakharVFXComponent::OnFlyStart()
 			ActiveFlyingDustVFXComponent->SetAutoDestroy(false);
 			ActiveFlyingDustVFXComponent->Deactivate();
 
-			// Timer 시작 (0.1초마다 위치 업데이트)
+            // Timer 시작 (설정 간격마다 위치 업데이트)
 			GetWorld()->GetTimerManager().SetTimer(
 				FlyingDustUpdateTimerHandle,
 				this,
 				&UGS_DrakharVFXComponent::UpdateFlyingDustVFXLocation,
-				0.1f,
+                FlyingDustUpdateInterval,
 				true  // Loop
 			);
 		}
@@ -188,12 +197,12 @@ void UGS_DrakharVFXComponent::StartWingRushVFX()
 		FVector CurrentDashDirection = (OwnerDrakhar->DashEndLocation - OwnerDrakhar->DashStartLocation).GetSafeNormal();
 		if (!CurrentDashDirection.IsZero())
 		{
-			ActiveWingRushVFXComponent->SetVectorParameter(FName("DashDirection"), CurrentDashDirection);
+            ActiveWingRushVFXComponent->SetVectorParameter(Param_DashDirection, CurrentDashDirection);
 		}
 
 		float DashSpeed = OwnerDrakhar->DashPower / OwnerDrakhar->DashDuration;
-		ActiveWingRushVFXComponent->SetFloatParameter(FName("DashSpeed"), DashSpeed);
-		ActiveWingRushVFXComponent->SetFloatParameter(FName("Scale"), 2.0f);
+        ActiveWingRushVFXComponent->SetFloatParameter(Param_DashSpeed, DashSpeed);
+        ActiveWingRushVFXComponent->SetFloatParameter(Param_Scale, 2.0f);
 		ActiveWingRushVFXComponent->SetWorldScale3D(FVector(3.0f, 3.0f, 3.0f));
 	}
 }
@@ -207,7 +216,7 @@ void UGS_DrakharVFXComponent::StopWingRushVFX()
 		ActiveWingRushVFXComponent->Deactivate();
 		FTimerHandle VFXCleanupTimer;
 		TWeakObjectPtr<UGS_DrakharVFXComponent> WeakThis = this;
-		GetWorld()->GetTimerManager().SetTimer(VFXCleanupTimer, [WeakThis]() {
+        GetWorld()->GetTimerManager().SetTimer(VFXCleanupTimer, [WeakThis]() {
 			if (!WeakThis.IsValid()) return;
 
 			if (WeakThis->ActiveWingRushVFXComponent && IsValid(WeakThis->ActiveWingRushVFXComponent))
@@ -215,7 +224,7 @@ void UGS_DrakharVFXComponent::StopWingRushVFX()
 				WeakThis->ActiveWingRushVFXComponent->DestroyComponent();
 			}
 			WeakThis->ActiveWingRushVFXComponent = nullptr;
-		}, 2.0f, false);
+        }, WingRushCleanupDelay, false);
 	}
 }
 
@@ -247,12 +256,12 @@ void UGS_DrakharVFXComponent::StartDustVFX()
 		FVector CurrentDashDirection = (OwnerDrakhar->DashEndLocation - OwnerDrakhar->DashStartLocation).GetSafeNormal();
 		if (!CurrentDashDirection.IsZero())
 		{
-			ActiveDustVFXComponent->SetVectorParameter(FName("DashDirection"), CurrentDashDirection);
+            ActiveDustVFXComponent->SetVectorParameter(Param_DashDirection, CurrentDashDirection);
 		}
 
 		float DashSpeed = OwnerDrakhar->DashPower / OwnerDrakhar->DashDuration;
-		ActiveDustVFXComponent->SetFloatParameter(FName("DashSpeed"), DashSpeed);
-		ActiveDustVFXComponent->SetFloatParameter(FName("Intensity"), 3.0f);
+        ActiveDustVFXComponent->SetFloatParameter(Param_DashSpeed, DashSpeed);
+        ActiveDustVFXComponent->SetFloatParameter(Param_DustIntensity, 3.0f);
 		ActiveDustVFXComponent->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
 	}
 }
@@ -266,7 +275,7 @@ void UGS_DrakharVFXComponent::StopDustVFX()
 		ActiveDustVFXComponent->Deactivate();
 		FTimerHandle DustVFXCleanupTimer;
 		TWeakObjectPtr<UGS_DrakharVFXComponent> WeakThis = this;
-		GetWorld()->GetTimerManager().SetTimer(DustVFXCleanupTimer, [WeakThis]() {
+        GetWorld()->GetTimerManager().SetTimer(DustVFXCleanupTimer, [WeakThis]() {
 			if (!WeakThis.IsValid()) return;
 
 			if (WeakThis->ActiveDustVFXComponent && IsValid(WeakThis->ActiveDustVFXComponent))
@@ -274,7 +283,7 @@ void UGS_DrakharVFXComponent::StopDustVFX()
 				WeakThis->ActiveDustVFXComponent->DestroyComponent();
 			}
 			WeakThis->ActiveDustVFXComponent = nullptr;
-		}, 1.5f, false);
+        }, DustCleanupDelay, false);
 	}
 }
 
@@ -303,8 +312,8 @@ void UGS_DrakharVFXComponent::StartGroundCrackVFX()
 
 	if (ActiveGroundCrackVFXComponent)
 	{
-		ActiveGroundCrackVFXComponent->SetFloatParameter(FName("CrackIntensity"), OwnerDrakhar->EarthquakeShakeInfo.Intensity);
-		ActiveGroundCrackVFXComponent->SetFloatParameter(FName("CrackRadius"), OwnerDrakhar->EarthquakeShakeInfo.MaxDistance * 0.5f);
+        ActiveGroundCrackVFXComponent->SetFloatParameter(Param_CrackIntensity, OwnerDrakhar->EarthquakeShakeInfo.Intensity);
+        ActiveGroundCrackVFXComponent->SetFloatParameter(Param_CrackRadius, OwnerDrakhar->EarthquakeShakeInfo.MaxDistance * 0.5f);
 		ActiveGroundCrackVFXComponent->SetWorldScale3D(FVector(2.0f, 2.0f, 1.0f));
 	}
 }
@@ -326,7 +335,7 @@ void UGS_DrakharVFXComponent::StopGroundCrackVFX()
                 WeakThis->ActiveGroundCrackVFXComponent->DestroyComponent();
             }
             WeakThis->ActiveGroundCrackVFXComponent = nullptr;
-        }, 3.0f, false);
+        }, GroundCrackCleanupDelay, false);
 	}
 }
 
@@ -355,9 +364,9 @@ void UGS_DrakharVFXComponent::StartDustCloudVFX()
 
 	if (ActiveDustCloudVFXComponent)
 	{
-		ActiveDustCloudVFXComponent->SetFloatParameter(FName("DustIntensity"), OwnerDrakhar->EarthquakeShakeInfo.Intensity * 1.5f);
-		ActiveDustCloudVFXComponent->SetFloatParameter(FName("DustRadius"), OwnerDrakhar->EarthquakeShakeInfo.MaxDistance * 0.3f);
-		ActiveDustCloudVFXComponent->SetFloatParameter(FName("WindStrength"), 5.0f);
+        ActiveDustCloudVFXComponent->SetFloatParameter(Param_DustIntensity, OwnerDrakhar->EarthquakeShakeInfo.Intensity * 1.5f);
+        ActiveDustCloudVFXComponent->SetFloatParameter(Param_DustRadius, OwnerDrakhar->EarthquakeShakeInfo.MaxDistance * 0.3f);
+        ActiveDustCloudVFXComponent->SetFloatParameter(Param_WindStrength, 5.0f);
 		ActiveDustCloudVFXComponent->SetWorldScale3D(FVector(3.0f, 3.0f, 2.0f));
 
 		FTimerHandle DustCloudAutoStopTimer;

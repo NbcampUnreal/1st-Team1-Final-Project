@@ -176,6 +176,17 @@ public:
 	/** 두 방이 연결되어 있는지 확인 */
 	bool AreRoomsConnected(AGS_RoomBase* Room1, AGS_RoomBase* Room2) const;
 
+	/**
+	 * 오디오 시스템 검증 (로컬 사운드 재생용)
+	 *
+	 * 데디케이티드 서버 및 Wwise 초기화 상태를 체크합니다.
+	 * 로컬 사운드 재생 전에 호출하여 재생 가능 여부를 판단합니다.
+	 *
+	 * @return 오디오를 재생해야 하면 true, 그렇지 않으면 false
+	 */
+	UFUNCTION(BlueprintPure, Category = "Audio")
+	bool IsAudioSystemValid() const;
+
 
 protected:
 	/** 특정 위치에 있는 Room을 찾는 함수 */
