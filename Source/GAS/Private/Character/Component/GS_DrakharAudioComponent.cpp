@@ -4,12 +4,14 @@
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "AkAudioDevice.h"
 
 UGS_DrakharAudioComponent::UGS_DrakharAudioComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	bDraconicFurySoundPlayed = false;
 	bHurtSoundPlayed = false;
+	FeverModeStateSoundPlayingID = AK_INVALID_PLAYING_ID;
 }
 
 void UGS_DrakharAudioComponent::BeginPlay()
@@ -80,9 +82,75 @@ void UGS_DrakharAudioComponent::PlayAttackHitSound()
 
 void UGS_DrakharAudioComponent::PlayFeverModeStartSound()
 {
-	if(OwnerDrakhar) 
+	if(OwnerDrakhar)
 	{
 		PlaySoundEvent(OwnerDrakhar->FeverModeStartSoundEvent, OwnerDrakhar->GetActorLocation());
+	}
+}
+
+void UGS_DrakharAudioComponent::PlayFeverModeEndSound()
+{
+	if(OwnerDrakhar)
+	{
+		PlaySoundEvent(OwnerDrakhar->FeverModeEndSoundEvent, OwnerDrakhar->GetActorLocation());
+	}
+}
+
+void UGS_DrakharAudioComponent::PlayFeverModeStateSound()
+{
+	if (!OwnerDrakhar || !OwnerDrakhar->FeverModeStateSoundEvent)
+	{
+		return;
+	}
+
+	// 데디케이티드 서버에서는 오디오 처리 불필요
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	// Wwise 오디오 디바이스 초기화 상태 확인
+	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+	if (!AudioDevice || !AudioDevice->IsInitialized())
+	{
+		return;
+	}
+
+	// 피버모드 스테이트 사운드 재생 및 Playing ID 저장
+	FeverModeStateSoundPlayingID = UAkGameplayStatics::PostEvent(
+		OwnerDrakhar->FeverModeStateSoundEvent,
+		OwnerDrakhar,
+		0,
+		FOnAkPostEventCallback()
+	);
+}
+
+void UGS_DrakharAudioComponent::StopFeverModeStateSound()
+{
+	if (!OwnerDrakhar)
+	{
+		return;
+	}
+
+	// 데디케이티드 서버에서는 오디오 처리 불필요
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	// Wwise 오디오 디바이스 초기화 상태 확인
+	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+	if (!AudioDevice || !AudioDevice->IsInitialized())
+	{
+		return;
+	}
+
+	// Playing ID가 유효하면 FAkAudioDevice를 통해 중지
+	if (FeverModeStateSoundPlayingID != AK_INVALID_PLAYING_ID)
+	{
+		// FAkAudioDevice를 통해 StopPlayingID 호출 - 500ms 페이드아웃
+		AudioDevice->StopPlayingID(FeverModeStateSoundPlayingID, 500);
+		FeverModeStateSoundPlayingID = AK_INVALID_PLAYING_ID;
 	}
 }
 

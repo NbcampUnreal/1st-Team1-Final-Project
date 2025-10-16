@@ -17,6 +17,7 @@
 #include "Character/Component/GS_FootManagerComponent.h"
 #include "Character/Skill/Guardian/Drakhar/GS_EarthquakeEffect.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_DrakharFeverGauge.h"
 #include "Character/Component/GS_DrakharVFXComponent.h"
@@ -91,6 +92,7 @@ AGS_Drakhar::AGS_Drakhar()
 	AttackHitSoundEvent = nullptr;
 	ComboFinisherSoundEvent = nullptr;
 	FeverModeStartSoundEvent = nullptr;
+	FeverModeEndSoundEvent = nullptr;
 	HurtSoundEvent = nullptr;
 
 	// AkComponent 추가
@@ -183,7 +185,8 @@ void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	SafeClearTimer(ResetAttackTimer);
 	SafeClearTimer(HealthRegenTimer);
 	SafeClearTimer(HealthDelayTimer);
-	SafeClearTimer(DraconicAttackTimer);  // 궁극기 타이머 추가
+	SafeClearTimer(DraconicAttackTimer);  // 궁극기 타이머
+	SafeClearTimer(CameraZoomTimer);      // 카메라 효과 타이머 (통합됨)
 }
 
 void AGS_Drakhar::OnDamageStart()
@@ -814,6 +817,8 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 			SafeClearTimer(FeverTimer);
 			if (IsFeverMode)
 			{
+				MulticastPlayFeverModeEndEffects();
+
 				FGS_StatRow Stat;
 				Stat.ATK = 50.f;
 				GetStatComp()->ResetStat(Stat);
@@ -917,7 +922,6 @@ void AGS_Drakhar::FeverComoLastAttack()
 			}
 		}
 		
-		// 피버모드 콤보 막타에서만 추가 레이어링 사운드 재생
 		MulticastPlayComboFinisherSound();
 	}
 }
@@ -927,10 +931,11 @@ void AGS_Drakhar::StartFeverMode()
 	//server
 	FGS_StatRow Stat;
 	Stat.ATK = 50.f;
-		
+
 	GetStatComp()->ChangeStat(Stat);
 	MulticastRPCFeverMontagePlay();
 	MulticastPlayFeverModeStartSound();
+	MulticastPlayFeverModeStateSound();
 	MulticastRPC_OnFeverModeStart();
 }
 
@@ -1076,9 +1081,84 @@ void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
 	if (AudioComponent) AudioComponent->PlayFeverModeStartSound();
 }
 
+void AGS_Drakhar::MulticastPlayFeverModeStateSound_Implementation()
+{
+	if (AudioComponent) AudioComponent->PlayFeverModeStateSound();
+}
+
+void AGS_Drakhar::MulticastStopFeverModeStateSound_Implementation()
+{
+	if (AudioComponent) AudioComponent->StopFeverModeStateSound();
+}
+
+void AGS_Drakhar::MulticastPlayFeverModeEndEffects_Implementation()
+{
+	// 피버 모드 스테이트 사운드 중지
+	if (AudioComponent) AudioComponent->StopFeverModeStateSound();
+
+	// 피버 모드 종료 사운드 재생
+	if (AudioComponent) AudioComponent->PlayFeverModeEndSound();
+
+	// 피버 모드 종료 VFX 재생
+	MulticastPlayFeverModeEndVFX();
+
+	// 카메라 쉐이크 효과 (피버 모드 종료시 쉐이크)
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		FGS_CameraShakeInfo EndFeverShake = AttackSuccessShake;
+		EndFeverShake.Intensity *= 0.5f;
+		Client_PlayAttackSuccessShakeWithInfo(PC, EndFeverShake);
+	}
+}
+
 void AGS_Drakhar::MulticastPlayHurtSound_Implementation()
 {
 	if (AudioComponent) AudioComponent->PlayHurtSound();
+}
+
+void AGS_Drakhar::MulticastPlayFeverModeEndVFX_Implementation()
+{
+	// 피버 모드 종료 VFX 재생
+	if (FeverModeEndVFX && GetWorld())
+	{
+		// 캐릭터 위치에 VFX 스폰
+		FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, 100.f);
+
+		// 나이아가라 시스템 스폰
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			FeverModeEndVFX,
+			SpawnLocation,
+			GetActorRotation(),
+			FVector(1.0f, 1.0f, 1.0f), // 기본 스케일
+			true, // 절대 스케일 사용
+			true, // 절대 회전 사용
+			ENCPoolMethod::None, // 풀링 사용 안함
+			true  // 월드 공간에서 자동 파괴
+		);
+
+		// 여러 위치에 스폰하여 화려한 효과 연출
+		for (int32 i = 0; i < 8; ++i)
+		{
+			float Angle = (i / 8.0f) * 2.0f * PI;
+			FVector Offset = FVector(FMath::Cos(Angle) * 150.f, FMath::Sin(Angle) * 150.f, 50.f);
+			FVector ParticleLocation = GetActorLocation() + Offset;
+
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				FeverModeEndVFX,
+				ParticleLocation,
+				FRotator::ZeroRotator,
+				FVector(0.3f, 0.3f, 0.3f),
+				true,
+				true,
+				ENCPoolMethod::None,
+				true
+			);
+		}
+	}
+
+	ApplyFeverModeEndCameraEffect();
 }
 
 void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
@@ -1235,5 +1315,196 @@ void AGS_Drakhar::SafeClearTimer(FTimerHandle& TimerHandle)
 			World->GetTimerManager().ClearTimer(TimerHandle);
 		}
 		TimerHandle.Invalidate();
+	}
+}
+
+// === 피버 모드 종료 카메라 효과 함수 ===
+
+// 카메라 검증 유틸리티 함수
+bool AGS_Drakhar::ValidateCameraEffect(APlayerController*& OutPC) const
+{
+	if (!IsLocallyControlled())
+	{
+		return false;
+	}
+
+	OutPC = Cast<APlayerController>(GetController());
+	if (!OutPC || !OutPC->PlayerCameraManager)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void AGS_Drakhar::ApplyFeverModeEndCameraEffect()
+{
+	APlayerController* PC = nullptr;
+	if (!ValidateCameraEffect(PC))
+	{
+		return;
+	}
+
+	// 현재 카메라 상태 저장
+	OriginalFOV = PC->PlayerCameraManager->GetFOVAngle();
+	if (SpringArmComp)
+	{
+		OriginalArmLength = SpringArmComp->TargetArmLength;
+	}
+
+	// 줌인 단계 타겟 값 설정
+	TargetFOV = OriginalFOV * FeverEndZoomInFOVMultiplier;
+	TargetArmLength = OriginalArmLength * FeverEndZoomInArmMultiplier;
+
+	// 카메라 효과 시작 - 줌인 단계
+	CurrentCameraEffectPhase = ECameraEffectPhase::ZoomIn;
+
+	// 기존 타이머 정리
+	SafeClearTimer(CameraZoomTimer);
+
+	// 통합 카메라 업데이트 타이머 시작
+	UWorld* World = GetWorld();
+	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+	{
+		World->GetTimerManager().SetTimer(
+			CameraZoomTimer,
+			this,
+			&AGS_Drakhar::UpdateCameraEffect,
+			CAMERA_UPDATE_INTERVAL,
+			true
+		);
+	}
+}
+
+// 통합 카메라 업데이트 함수
+void AGS_Drakhar::UpdateCameraEffect()
+{
+	APlayerController* PC = nullptr;
+	if (!ValidateCameraEffect(PC))
+	{
+		SafeClearTimer(CameraZoomTimer);
+		CurrentCameraEffectPhase = ECameraEffectPhase::None;
+		return;
+	}
+
+	// 현재 단계에 따라 처리
+	switch (CurrentCameraEffectPhase)
+	{
+	case ECameraEffectPhase::ZoomIn:
+		{
+			// FOV 줌인
+			float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
+			float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, CAMERA_UPDATE_INTERVAL, FeverEndZoomInSpeed);
+			PC->PlayerCameraManager->SetFOV(NewFOV);
+
+			// SpringArm 줌인
+			if (SpringArmComp)
+			{
+				float CurrentArmLength = SpringArmComp->TargetArmLength;
+				float NewArmLength = FMath::FInterpTo(CurrentArmLength, TargetArmLength, CAMERA_UPDATE_INTERVAL, FeverEndZoomInSpeed);
+				SpringArmComp->TargetArmLength = NewArmLength;
+
+				// 둘 다 타겟에 도달하면 다음 단계로
+				if (FMath::IsNearlyEqual(NewFOV, TargetFOV, FOV_TOLERANCE) &&
+					FMath::IsNearlyEqual(NewArmLength, TargetArmLength, ARM_LENGTH_TOLERANCE))
+				{
+					TransitionToNextCameraPhase();
+				}
+			}
+			break;
+		}
+
+	case ECameraEffectPhase::ZoomOut:
+		{
+			// FOV 줌아웃 ("쾅" 효과)
+			float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
+			float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, CAMERA_UPDATE_INTERVAL, FeverEndZoomOutSpeed);
+			PC->PlayerCameraManager->SetFOV(NewFOV);
+
+			// SpringArm 줌아웃
+			if (SpringArmComp)
+			{
+				float CurrentArmLength = SpringArmComp->TargetArmLength;
+				float NewArmLength = FMath::FInterpTo(CurrentArmLength, TargetArmLength, CAMERA_UPDATE_INTERVAL, FeverEndZoomOutSpeed);
+				SpringArmComp->TargetArmLength = NewArmLength;
+
+				// 둘 다 타겟에 도달하면 다음 단계로
+				if (FMath::IsNearlyEqual(NewFOV, TargetFOV, FOV_TOLERANCE) &&
+					FMath::IsNearlyEqual(NewArmLength, TargetArmLength, ARM_LENGTH_TOLERANCE))
+				{
+					TransitionToNextCameraPhase();
+				}
+			}
+			break;
+		}
+
+	case ECameraEffectPhase::Restore:
+		{
+			// FOV 복귀
+			float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
+			float NewFOV = FMath::FInterpTo(CurrentFOV, OriginalFOV, CAMERA_UPDATE_INTERVAL, FeverEndCameraRestoreSpeed);
+			PC->PlayerCameraManager->SetFOV(NewFOV);
+
+			// SpringArm 복귀
+			bool bFOVCompleted = false;
+			bool bArmCompleted = false;
+
+			if (FMath::IsNearlyEqual(NewFOV, OriginalFOV, FINAL_FOV_TOLERANCE))
+			{
+				PC->PlayerCameraManager->SetFOV(OriginalFOV);
+				bFOVCompleted = true;
+			}
+
+			if (SpringArmComp)
+			{
+				float CurrentArmLength = SpringArmComp->TargetArmLength;
+				float NewArmLength = FMath::FInterpTo(CurrentArmLength, OriginalArmLength, CAMERA_UPDATE_INTERVAL, FeverEndCameraRestoreSpeed);
+				SpringArmComp->TargetArmLength = NewArmLength;
+
+				if (FMath::IsNearlyEqual(NewArmLength, OriginalArmLength, FINAL_ARM_LENGTH_TOLERANCE))
+				{
+					SpringArmComp->TargetArmLength = OriginalArmLength;
+					bArmCompleted = true;
+				}
+			}
+
+			// 모두 완료되면 효과 종료
+			if (bFOVCompleted && bArmCompleted)
+			{
+				SafeClearTimer(CameraZoomTimer);
+				CurrentCameraEffectPhase = ECameraEffectPhase::None;
+			}
+			break;
+		}
+
+	default:
+		SafeClearTimer(CameraZoomTimer);
+		CurrentCameraEffectPhase = ECameraEffectPhase::None;
+		break;
+	}
+}
+
+// 다음 카메라 효과 단계로 전환
+void AGS_Drakhar::TransitionToNextCameraPhase()
+{
+	switch (CurrentCameraEffectPhase)
+	{
+	case ECameraEffectPhase::ZoomIn:
+		// 줌인 완료 -> 줌아웃 단계로
+		CurrentCameraEffectPhase = ECameraEffectPhase::ZoomOut;
+		TargetFOV = OriginalFOV * FeverEndZoomOutFOVMultiplier;
+		TargetArmLength = OriginalArmLength * FeverEndZoomOutArmMultiplier;
+		break;
+
+	case ECameraEffectPhase::ZoomOut:
+		// 줌아웃 완료 -> 복귀 단계로
+		CurrentCameraEffectPhase = ECameraEffectPhase::Restore;
+		TargetFOV = OriginalFOV;
+		TargetArmLength = OriginalArmLength;
+		break;
+
+	default:
+		CurrentCameraEffectPhase = ECameraEffectPhase::None;
+		break;
 	}
 }

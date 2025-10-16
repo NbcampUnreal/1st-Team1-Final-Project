@@ -31,6 +31,9 @@ public:
 	void PlayDraconicProjectileSound(const FVector& Location);
 	void PlayAttackHitSound();
 	void PlayFeverModeStartSound();
+	void PlayFeverModeEndSound();
+	void PlayFeverModeStateSound();
+	void StopFeverModeStateSound();
 	void PlayHurtSound();
 	void PlayComboFinisherSound();
 	void HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter);
@@ -42,6 +45,9 @@ private:
 	// 사운드 중복 재생 방지
 	bool bDraconicFurySoundPlayed;
 	bool bHurtSoundPlayed;
+
+	// 피버모드 스테이트 사운드 Playing ID 저장
+	int32 FeverModeStateSoundPlayingID;
 
 	// 쿨다운 값
 	UPROPERTY(EditDefaultsOnly, Category = "Audio|Cooldown", meta=(ClampMin="0.1"))
