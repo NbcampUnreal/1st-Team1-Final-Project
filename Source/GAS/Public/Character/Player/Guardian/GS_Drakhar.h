@@ -175,7 +175,7 @@ public:
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStateSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStopFeverModeStateSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeEndEffects();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeEndVFX();
+	//UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeEndVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayHurtSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartWingRushVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStopWingRushVFX();

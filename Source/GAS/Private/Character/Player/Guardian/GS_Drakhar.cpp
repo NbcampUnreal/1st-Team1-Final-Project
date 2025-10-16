@@ -1099,8 +1099,8 @@ void AGS_Drakhar::MulticastPlayFeverModeEndEffects_Implementation()
 	// 피버 모드 종료 사운드 재생
 	if (AudioComponent) AudioComponent->PlayFeverModeEndSound();
 
-	// 피버 모드 종료 VFX 재생
-	MulticastPlayFeverModeEndVFX();
+	// 피버 모드 종료 VFX 비활성화
+	// MulticastPlayFeverModeEndVFX();
 
 	// 카메라 쉐이크 효과 (피버 모드 종료시 쉐이크)
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -1116,6 +1116,7 @@ void AGS_Drakhar::MulticastPlayHurtSound_Implementation()
 	if (AudioComponent) AudioComponent->PlayHurtSound();
 }
 
+/*
 void AGS_Drakhar::MulticastPlayFeverModeEndVFX_Implementation()
 {
 	// 피버 모드 종료 VFX 재생
@@ -1160,6 +1161,7 @@ void AGS_Drakhar::MulticastPlayFeverModeEndVFX_Implementation()
 
 	ApplyFeverModeEndCameraEffect();
 }
+*/
 
 void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
 {
