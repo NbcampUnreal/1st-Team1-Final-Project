@@ -219,13 +219,22 @@ protected:
 
 	/**
 	 * 모드별 사운드 이벤트 선택 (TPS/RTS 자동 폴백)
-	 * 
+	 *
 	 * @param TPSSound TPS 모드 사운드
 	 * @param RTSSound RTS 모드 사운드
 	 * @param bUseRTSMode 강제로 RTS 모드 사용 (기본값은 자동 감지)
 	 * @return 선택된 사운드 이벤트 (RTS가 없으면 TPS로 폴백)
 	 */
 	UAkAudioEvent* SelectSoundEventByMode(UAkAudioEvent* TPSSound, UAkAudioEvent* RTSSound, bool bUseRTSMode = false) const;
+
+	/**
+	 * 리슨 서버 RPC 중복 실행 방지 체크
+	 * Multicast RPC Implementation에서 호출하여 리슨 서버의 중복 재생을 방지
+	 *
+	 * @return 리슨 서버에서 RPC를 스킵해야 하면 true
+	 */
+	UFUNCTION(BlueprintPure, Category = "Audio|Network")
+	bool ShouldSkipListenServerRPC() const;
 
 	// ===============
 	// 메모리 관리 헬퍼

@@ -53,12 +53,12 @@ void UGS_ChanMovingSkill::ActiveSkill()
 			OwningComp->Multicast_PlayRangeVFX(CurrentSkillType, SkillLocation, 800.0f);
 		}
 			
-		// 스킬 시작 사운드 재생
-		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+		// 스킬 시작 사운드 재생 (멀티캐스트)
+		if (OwnerCharacter->HasAuthority())
 		{
-			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
 			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
 			}
 		}
 
@@ -136,12 +136,15 @@ void UGS_ChanMovingSkill::DeactiveSkill()
 	// 방어력 증가 디버프 해제
 	DeactiveDEFBuff();
 
-	// SeekerAudioComponent를 통한 스킬 종료 사운드
-	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	// 스킬 종료 사운드 재생 (멀티캐스트)
+	if (OwnerCharacter->HasAuthority())
 	{
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 1);
+			}
 		}
 	}
 

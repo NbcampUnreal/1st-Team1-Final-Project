@@ -678,14 +678,36 @@ bool UGS_AudioComponentBase::PrepareMulticastSound(AActor* SourceActor, bool bSk
 UAkAudioEvent* UGS_AudioComponentBase::SelectSoundEventByMode(UAkAudioEvent* TPSSound, UAkAudioEvent* RTSSound, bool bUseRTSMode) const
 {
     const bool bRTS = bUseRTSMode || IsRTSMode();
-    
+
     if (bRTS)
     {
         // RTS 사운드가 있으면 사용, 없으면 TPS 사운드로 폴백
         return RTSSound ? RTSSound : TPSSound;
     }
-    
+
     return TPSSound;
+}
+
+bool UGS_AudioComponentBase::ShouldSkipListenServerRPC() const
+{
+    // 리슨 서버 중복 재생 방지: 서버에서 이미 로컬 실행했으므로 RPC 수신 시 스킵
+    AActor* Owner = GetOwner();
+    if (!Owner)
+    {
+        return false;
+    }
+
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return false;
+    }
+
+    // 리슨 서버에서 Authority를 가진 액터의 경우 RPC 스킵
+    bool bIsAuthority = Owner->GetLocalRole() == ROLE_Authority;
+    bool bIsListenServer = World->GetNetMode() == NM_ListenServer;
+    
+    return bIsAuthority && bIsListenServer;
 }
 
 // ==========================
