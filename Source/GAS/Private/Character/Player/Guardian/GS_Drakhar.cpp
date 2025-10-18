@@ -17,6 +17,7 @@
 #include "Character/Component/GS_FootManagerComponent.h"
 #include "Character/Skill/Guardian/Drakhar/GS_EarthquakeEffect.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/Character/GS_DrakharFeverGauge.h"
 #include "Character/Component/GS_DrakharVFXComponent.h"
@@ -91,6 +92,7 @@ AGS_Drakhar::AGS_Drakhar()
 	AttackHitSoundEvent = nullptr;
 	ComboFinisherSoundEvent = nullptr;
 	FeverModeStartSoundEvent = nullptr;
+	FeverModeEndSoundEvent = nullptr;
 	HurtSoundEvent = nullptr;
 
 	// AkComponent 추가
@@ -178,10 +180,13 @@ void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	GetWorldTimerManager().ClearTimer(FeverTimer);
-	GetWorldTimerManager().ClearTimer(ResetAttackTimer);
-	GetWorldTimerManager().ClearTimer(HealthRegenTimer);
-	GetWorldTimerManager().ClearTimer(HealthDelayTimer);
+	// 타이머 정리 (레벨 전환 시 크래시 방지)
+	SafeClearTimer(FeverTimer);
+	SafeClearTimer(ResetAttackTimer);
+	SafeClearTimer(HealthRegenTimer);
+	SafeClearTimer(HealthDelayTimer);
+	SafeClearTimer(DraconicAttackTimer);  // 궁극기 타이머
+	SafeClearTimer(CameraZoomTimer);      // 카메라 효과 타이머 (통합됨)
 }
 
 void AGS_Drakhar::OnDamageStart()
@@ -190,8 +195,12 @@ void AGS_Drakhar::OnDamageStart()
 
 	StopHealRegeneration();
 	
-	//timer start
-	GetWorld()->GetTimerManager().SetTimer(HealthDelayTimer,this,&AGS_Drakhar::BeginHealRegeneration,5.f,false);
+	//timer start (타이머 설정)
+	UWorld* World = GetWorld();
+	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+	{
+		World->GetTimerManager().SetTimer(HealthDelayTimer, this, &AGS_Drakhar::BeginHealRegeneration, 5.f, false);
+	}
 	
 	// 피격 사운드 재생
 	if (HasAuthority())
@@ -652,30 +661,73 @@ void AGS_Drakhar::StopCtrl()
 
 void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 {
+	// 월드 검증 및 생명주기 체크
+	if (!IsWorldContextValid() || !IsValid(this))
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	// 사운드 재생 (월드 검증 후)
 	MulticastPlayDraconicFurySkillSound();
-	
+
 	FActorSpawnParameters Params;
 	Params.Instigator = this;
 	Params.Owner = this;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	
+
 	if (IsFeverMode)
 	{
-		FeverModeDraconicFurySpawnLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f,0.f, 600.f);
+		// 피버 모드: 드라카의 현재 위치 기준으로 앞쪽에 투사체 소환
+		FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 600.f);
 		FRotator SpawnRotation = GetActorRotation();
 		float RandomPitch = FMath::FRandRange(-35.f, -30.f);
 		SpawnRotation.Pitch += RandomPitch;
-		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(FeverDraconicProjectile, FeverModeDraconicFurySpawnLocation, SpawnRotation, Params);
+
+		AGS_DrakharProjectile* DrakharProjectile = World->SpawnActor<AGS_DrakharProjectile>(FeverDraconicProjectile, SpawnLocation, SpawnRotation, Params);
+
+		if (DrakharProjectile && FeverDraconicFuryIndicatorVFX)
+		{
+			// 피버 모드 인디케이터 VFX 설정 (더 큰 반경)
+			float FeverIndicatorRadius = 250.0f * 1.5f; // 피버 모드는 1.5배 반경
+			DrakharProjectile->SetIndicatorVFX(FeverDraconicFuryIndicatorVFX, FeverIndicatorRadius);
+		}
 	}
 	else
 	{
-		GetRandomDraconicFuryTarget();
+		// 일반 모드: 드라카의 현재 위치 기준으로 랜덤 위치에 투사체 소환
+		FVector BaseLocation = GetActorLocation();
+		FVector RandomOffset = GetActorForwardVector() * 200.f + FVector(
+			FMath::FRandRange(-300.f, 300.f),
+			FMath::FRandRange(-300.f, 300.f),
+			FMath::FRandRange(500.f, 600.f)
+		);
 
-		int32 Index = FMath::RandRange(0, DraconicFuryTargetArray.Num() - 1);
-		AGS_DrakharProjectile* DrakharProjectile = GetWorld()->SpawnActor<AGS_DrakharProjectile>(DraconicProjectile, DraconicFuryTargetArray[Index].GetLocation(), DraconicFuryTargetArray[Index].Rotator(), Params);
-		
+		FVector SpawnLocation = BaseLocation + RandomOffset;
+		FRotator SpawnRotation = GetActorRotation();
+		float RandomPitch = FMath::FRandRange(-35.f, -30.f);
+		SpawnRotation.Pitch += RandomPitch;
+
+		AGS_DrakharProjectile* DrakharProjectile = World->SpawnActor<AGS_DrakharProjectile>(
+			DraconicProjectile,
+			SpawnLocation,
+			SpawnRotation,
+			Params
+		);
+
 		if (DrakharProjectile)
 		{
+			if (DraconicFuryIndicatorVFX)
+			{
+				float NormalIndicatorRadius = 250.0f; // 일반 모드 반경
+				DrakharProjectile->SetIndicatorVFX(DraconicFuryIndicatorVFX, NormalIndicatorRadius);
+			}
+
 			MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
 		}
 	}
@@ -683,6 +735,12 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 
 void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
 {
+	// 월드 검증 및 생명주기 체크
+	if (!IsWorldContextValid() || !IsValid(this))
+	{
+		return;
+	}
+
 	if (GetSkillComp()->IsSkillActive(ESkillSlot::Ultimate))
 	{
 		return;
@@ -691,25 +749,46 @@ void AGS_Drakhar::ServerRPC_BeginDraconicFury_Implementation()
 	GetSkillComp()->Server_TryActivateSkill(ESkillSlot::Ultimate);
 	MulticastRPC_OnUltimateStart();
 
-	FTimerHandle DraconicFuryEndTimer;
-	GetWorld()->GetTimerManager().SetTimer(
-		DraconicFuryEndTimer,
-		this,
-		&AGS_Drakhar::EndDraconicFury,
-		DraconicAttackPersistenceTime,
-		false);
+	// 타이머 설정 (레벨 전환 시 크래시 방지) - 멤버 변수 사용
+	UWorld* World = GetWorld();
+	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+	{
+		// 기존 타이머가 있다면 먼저 정리
+		SafeClearTimer(DraconicAttackTimer);
+
+		World->GetTimerManager().SetTimer(
+			DraconicAttackTimer,  // 멤버 변수 사용!
+			this,
+			&AGS_Drakhar::EndDraconicFury,
+			DraconicAttackPersistenceTime,
+			false);
+	}
 }
 
 void AGS_Drakhar::EndDraconicFury()
 {
+	// 월드 검증 및 생명주기 체크
+	if (!IsWorldContextValid() || !IsValid(this))
+	{
+		return;
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("Draconic Fury Skill End"));
 	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[CLIENT] Draconic Fury Skill End")));
-	
-	GetSkillComp()->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
+
+	// 컴포넌트 안전성 체크
+	if (UGS_SkillComp* Skill = GetSkillComp())
+	{
+		Skill->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
+	}
+
 	GuardianState = EGuardianCtrlState::CtrlEnd;
 
 	MoveSpeed = NormalMoveSpeed;
-	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+	{
+		Movement->MaxWalkSpeed = MoveSpeed;
+	}
 }
 
 void AGS_Drakhar::SetFeverGaugeWidget(UGS_DrakharFeverGauge* InDrakharFeverGaugeWidget)
@@ -735,9 +814,11 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 		{
 			CurrentFeverGauge = 0.f;
 
-			GetWorldTimerManager().ClearTimer(FeverTimer);
+			SafeClearTimer(FeverTimer);
 			if (IsFeverMode)
 			{
+				MulticastPlayFeverModeEndEffects();
+
 				FGS_StatRow Stat;
 				Stat.ATK = 50.f;
 				GetStatComp()->ResetStat(Stat);
@@ -766,8 +847,12 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 
 void AGS_Drakhar::ResetIsAttackingDuringFeverMode()
 {
-	GetWorldTimerManager().ClearTimer(ResetAttackTimer);
-	GetWorldTimerManager().SetTimer(ResetAttackTimer, this, &AGS_Drakhar::StartIsAttackingTimer, 3.f, false);
+	SafeClearTimer(ResetAttackTimer);
+	UWorld* TimerWorld = GetWorld();
+	if (TimerWorld && TimerWorld->IsValidLowLevel() && !TimerWorld->bIsTearingDown)
+	{
+		TimerWorld->GetTimerManager().SetTimer(ResetAttackTimer, this, &AGS_Drakhar::StartIsAttackingTimer, 3.f, false);
+	}
 }
 
 void AGS_Drakhar::StartIsAttackingTimer()
@@ -837,7 +922,6 @@ void AGS_Drakhar::FeverComoLastAttack()
 			}
 		}
 		
-		// 피버모드 콤보 막타에서만 추가 레이어링 사운드 재생
 		MulticastPlayComboFinisherSound();
 	}
 }
@@ -847,16 +931,21 @@ void AGS_Drakhar::StartFeverMode()
 	//server
 	FGS_StatRow Stat;
 	Stat.ATK = 50.f;
-		
+
 	GetStatComp()->ChangeStat(Stat);
 	MulticastRPCFeverMontagePlay();
 	MulticastPlayFeverModeStartSound();
+	MulticastPlayFeverModeStateSound();
 	MulticastRPC_OnFeverModeStart();
 }
 
 void AGS_Drakhar::DecreaseFeverGauge()
 {
-	GetWorldTimerManager().SetTimer(FeverTimer, this, &AGS_Drakhar::MinusFeverGaugeValue, 1.f, true);
+	UWorld* FeverWorld = GetWorld();
+	if (FeverWorld && FeverWorld->IsValidLowLevel() && !FeverWorld->bIsTearingDown)
+	{
+		FeverWorld->GetTimerManager().SetTimer(FeverTimer, this, &AGS_Drakhar::MinusFeverGaugeValue, 1.f, true);
+	}
 }
 
 void AGS_Drakhar::MinusFeverGaugeValue()
@@ -880,7 +969,11 @@ void AGS_Drakhar::BeginHealRegeneration()
 	bIsDamaged = false;
 	
 	//health regeneration start
-	GetWorld()->GetTimerManager().SetTimer(HealthRegenTimer, this, &AGS_Drakhar::HealRegeneration,1.f,true);
+	UWorld* RegenWorld = GetWorld();
+	if (RegenWorld && RegenWorld->IsValidLowLevel() && !RegenWorld->bIsTearingDown)
+	{
+		RegenWorld->GetTimerManager().SetTimer(HealthRegenTimer, this, &AGS_Drakhar::HealRegeneration, 1.f, true);
+	}
 }
 
 void AGS_Drakhar::HealRegeneration()
@@ -894,7 +987,21 @@ void AGS_Drakhar::HealRegeneration()
 
 void AGS_Drakhar::StopHealRegeneration()
 {
-	GetWorld()->GetTimerManager().ClearTimer(HealthRegenTimer);
+	SafeClearTimer(HealthRegenTimer);
+}
+
+void AGS_Drakhar::GenerateDraconicFuryTargets()
+{
+	// 피버 모드일 경우 피버 모드 위치 생성
+	if (IsFeverMode)
+	{
+		FeverModeDraconicFurySpawnLocation = GetActorLocation() + GetActorForwardVector() * 200.f + FVector(0.f, 0.f, 600.f);
+	}
+	// 일반 모드일 경우 5개의 랜덤 위치 생성
+	else
+	{
+		GetRandomDraconicFuryTarget();
+	}
 }
 
 void AGS_Drakhar::GetRandomDraconicFuryTarget()
@@ -963,41 +1070,10 @@ void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
 
 void AGS_Drakhar::MulticastPlayComboFinisherSound_Implementation()
 {
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
-	{
-		return;
-	}
-
-	// 사운드 이벤트 유효성 검사
-	if (!ComboFinisherSoundEvent)
-	{
-		return;
-	}
-
-	// 멀티플레이어 환경에서 Wwise 시스템 안전성 체크
-	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-	if (!AudioDevice)
-	{
-		return;
-	}
-
-	if (!AudioDevice->IsInitialized())
-	{
-		return;
-	}
-
-	// Actor 유효성 검사
-	if (!IsValid(this))
-	{
-		return;
-	}
-
-	UAkGameplayStatics::PostEvent(
-		ComboFinisherSoundEvent, 
-		this,
-		0,
-		FOnAkPostEventCallback()
-	);
+    if (AudioComponent)
+    {
+        AudioComponent->PlayComboFinisherSound();
+    }
 }
 
 void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
@@ -1005,10 +1081,87 @@ void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
 	if (AudioComponent) AudioComponent->PlayFeverModeStartSound();
 }
 
+void AGS_Drakhar::MulticastPlayFeverModeStateSound_Implementation()
+{
+	if (AudioComponent) AudioComponent->PlayFeverModeStateSound();
+}
+
+void AGS_Drakhar::MulticastStopFeverModeStateSound_Implementation()
+{
+	if (AudioComponent) AudioComponent->StopFeverModeStateSound();
+}
+
+void AGS_Drakhar::MulticastPlayFeverModeEndEffects_Implementation()
+{
+	// 피버 모드 스테이트 사운드 중지
+	if (AudioComponent) AudioComponent->StopFeverModeStateSound();
+
+	// 피버 모드 종료 사운드 재생
+	if (AudioComponent) AudioComponent->PlayFeverModeEndSound();
+
+	// 피버 모드 종료 VFX 비활성화
+	// MulticastPlayFeverModeEndVFX();
+
+	// 카메라 쉐이크 효과 (피버 모드 종료시 쉐이크)
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		FGS_CameraShakeInfo EndFeverShake = AttackSuccessShake;
+		EndFeverShake.Intensity *= 0.5f;
+		Client_PlayAttackSuccessShakeWithInfo(PC, EndFeverShake);
+	}
+}
+
 void AGS_Drakhar::MulticastPlayHurtSound_Implementation()
 {
 	if (AudioComponent) AudioComponent->PlayHurtSound();
 }
+
+/*
+void AGS_Drakhar::MulticastPlayFeverModeEndVFX_Implementation()
+{
+	// 피버 모드 종료 VFX 재생
+	if (FeverModeEndVFX && GetWorld())
+	{
+		// 캐릭터 위치에 VFX 스폰
+		FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, 100.f);
+
+		// 나이아가라 시스템 스폰
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			FeverModeEndVFX,
+			SpawnLocation,
+			GetActorRotation(),
+			FVector(1.0f, 1.0f, 1.0f), // 기본 스케일
+			true, // 절대 스케일 사용
+			true, // 절대 회전 사용
+			ENCPoolMethod::None, // 풀링 사용 안함
+			true  // 월드 공간에서 자동 파괴
+		);
+
+		// 여러 위치에 스폰하여 화려한 효과 연출
+		for (int32 i = 0; i < 8; ++i)
+		{
+			float Angle = (i / 8.0f) * 2.0f * PI;
+			FVector Offset = FVector(FMath::Cos(Angle) * 150.f, FMath::Sin(Angle) * 150.f, 50.f);
+			FVector ParticleLocation = GetActorLocation() + Offset;
+
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+				GetWorld(),
+				FeverModeEndVFX,
+				ParticleLocation,
+				FRotator::ZeroRotator,
+				FVector(0.3f, 0.3f, 0.3f),
+				true,
+				true,
+				ENCPoolMethod::None,
+				true
+			);
+		}
+	}
+
+	ApplyFeverModeEndCameraEffect();
+}
+*/
 
 void AGS_Drakhar::ServerRPCShootEnergy_Implementation()
 {
@@ -1140,4 +1293,241 @@ void AGS_Drakhar::MulticastStopDustCloudVFX_Implementation()
 void AGS_Drakhar::Multicast_PlayBloodEffect_Implementation(FVector HitLocation, FVector HitNormal, float Scale)
 {
 	UGS_VFX_FunctionLibrary::PlayBloodEffect(this, BloodEffectSystem, HitLocation, FRotationMatrix::MakeFromZ(HitNormal).Rotator(), Scale);
+}
+
+// === 월드 컨텍스트 검증 함수 ===
+bool AGS_Drakhar::IsWorldContextValid() const
+{
+	UWorld* World = GetWorld();
+	return World &&
+		   World->IsValidLowLevel() &&
+		   !World->bIsTearingDown &&
+		   IsValid(World) &&
+		   IsValid(this);
+}
+
+// === 타이머 정리 함수 ===
+void AGS_Drakhar::SafeClearTimer(FTimerHandle& TimerHandle)
+{
+	if (TimerHandle.IsValid())
+	{
+		UWorld* World = GetWorld();
+		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+		{
+			World->GetTimerManager().ClearTimer(TimerHandle);
+		}
+		TimerHandle.Invalidate();
+	}
+}
+
+// === 피버 모드 종료 카메라 효과 함수 ===
+
+// 카메라 검증 유틸리티 함수
+bool AGS_Drakhar::ValidateCameraEffect(APlayerController*& OutPC) const
+{
+	if (!IsLocallyControlled())
+	{
+		return false;
+	}
+
+	OutPC = Cast<APlayerController>(GetController());
+	if (!OutPC || !OutPC->PlayerCameraManager)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void AGS_Drakhar::ApplyFeverModeEndCameraEffect()
+{
+	APlayerController* PC = nullptr;
+	if (!ValidateCameraEffect(PC))
+	{
+		return;
+	}
+
+	// 현재 카메라 상태 저장
+	OriginalFOV = PC->PlayerCameraManager->GetFOVAngle();
+	if (SpringArmComp)
+	{
+		OriginalArmLength = SpringArmComp->TargetArmLength;
+	}
+
+	// 줌인 단계 타겟 값 설정
+	TargetFOV = OriginalFOV * FeverEndZoomInFOVMultiplier;
+	TargetArmLength = OriginalArmLength * FeverEndZoomInArmMultiplier;
+
+	// 카메라 효과 시작 - 줌인 단계
+	CurrentCameraEffectPhase = ECameraEffectPhase::ZoomIn;
+
+	// 기존 타이머 정리
+	SafeClearTimer(CameraZoomTimer);
+
+	// 통합 카메라 업데이트 타이머 시작
+	UWorld* World = GetWorld();
+	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+	{
+		World->GetTimerManager().SetTimer(
+			CameraZoomTimer,
+			this,
+			&AGS_Drakhar::UpdateCameraEffect,
+			CAMERA_UPDATE_INTERVAL,
+			true
+		);
+	}
+}
+
+// 통합 카메라 업데이트 함수
+void AGS_Drakhar::UpdateCameraEffect()
+{
+	APlayerController* PC = nullptr;
+	if (!ValidateCameraEffect(PC))
+	{
+		SafeClearTimer(CameraZoomTimer);
+		CurrentCameraEffectPhase = ECameraEffectPhase::None;
+		return;
+	}
+
+	// 현재 단계에 따라 적절한 업데이트 함수 호출
+	switch (CurrentCameraEffectPhase)
+	{
+	case ECameraEffectPhase::ZoomIn:
+		UpdateCameraZoomIn();
+		break;
+
+	case ECameraEffectPhase::ZoomOut:
+		UpdateCameraZoomOut();
+		break;
+
+	case ECameraEffectPhase::Restore:
+		UpdateCameraRestore();
+		break;
+
+	default:
+		SafeClearTimer(CameraZoomTimer);
+		CurrentCameraEffectPhase = ECameraEffectPhase::None;
+		break;
+	}
+}
+
+// 카메라 줌인 단계 업데이트
+void AGS_Drakhar::UpdateCameraZoomIn()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC || !PC->PlayerCameraManager) return;
+
+	// FOV 줌인
+	float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
+	float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, CAMERA_UPDATE_INTERVAL, FeverEndZoomInSpeed);
+	PC->PlayerCameraManager->SetFOV(NewFOV);
+
+	// SpringArm 줌인
+	if (SpringArmComp)
+	{
+		float CurrentArmLength = SpringArmComp->TargetArmLength;
+		float NewArmLength = FMath::FInterpTo(CurrentArmLength, TargetArmLength, CAMERA_UPDATE_INTERVAL, FeverEndZoomInSpeed);
+		SpringArmComp->TargetArmLength = NewArmLength;
+
+		// 둘 다 타겟에 도달하면 다음 단계로
+		if (FMath::IsNearlyEqual(NewFOV, TargetFOV, FOV_TOLERANCE) &&
+			FMath::IsNearlyEqual(NewArmLength, TargetArmLength, ARM_LENGTH_TOLERANCE))
+		{
+			TransitionToNextCameraPhase();
+		}
+	}
+}
+
+// 카메라 줌아웃 단계 업데이트 ("쾅" 효과)
+void AGS_Drakhar::UpdateCameraZoomOut()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC || !PC->PlayerCameraManager) return;
+
+	// FOV 줌아웃
+	float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
+	float NewFOV = FMath::FInterpTo(CurrentFOV, TargetFOV, CAMERA_UPDATE_INTERVAL, FeverEndZoomOutSpeed);
+	PC->PlayerCameraManager->SetFOV(NewFOV);
+
+	// SpringArm 줌아웃
+	if (SpringArmComp)
+	{
+		float CurrentArmLength = SpringArmComp->TargetArmLength;
+		float NewArmLength = FMath::FInterpTo(CurrentArmLength, TargetArmLength, CAMERA_UPDATE_INTERVAL, FeverEndZoomOutSpeed);
+		SpringArmComp->TargetArmLength = NewArmLength;
+
+		// 둘 다 타겟에 도달하면 다음 단계로
+		if (FMath::IsNearlyEqual(NewFOV, TargetFOV, FOV_TOLERANCE) &&
+			FMath::IsNearlyEqual(NewArmLength, TargetArmLength, ARM_LENGTH_TOLERANCE))
+		{
+			TransitionToNextCameraPhase();
+		}
+	}
+}
+
+// 카메라 원래 상태로 복귀
+void AGS_Drakhar::UpdateCameraRestore()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC || !PC->PlayerCameraManager) return;
+
+	// FOV 복귀
+	float CurrentFOV = PC->PlayerCameraManager->GetFOVAngle();
+	float NewFOV = FMath::FInterpTo(CurrentFOV, OriginalFOV, CAMERA_UPDATE_INTERVAL, FeverEndCameraRestoreSpeed);
+	PC->PlayerCameraManager->SetFOV(NewFOV);
+
+	bool bFOVCompleted = false;
+	bool bArmCompleted = false;
+
+	if (FMath::IsNearlyEqual(NewFOV, OriginalFOV, FINAL_FOV_TOLERANCE))
+	{
+		PC->PlayerCameraManager->SetFOV(OriginalFOV);
+		bFOVCompleted = true;
+	}
+
+	// SpringArm 복귀
+	if (SpringArmComp)
+	{
+		float CurrentArmLength = SpringArmComp->TargetArmLength;
+		float NewArmLength = FMath::FInterpTo(CurrentArmLength, OriginalArmLength, CAMERA_UPDATE_INTERVAL, FeverEndCameraRestoreSpeed);
+		SpringArmComp->TargetArmLength = NewArmLength;
+
+		if (FMath::IsNearlyEqual(NewArmLength, OriginalArmLength, FINAL_ARM_LENGTH_TOLERANCE))
+		{
+			SpringArmComp->TargetArmLength = OriginalArmLength;
+			bArmCompleted = true;
+		}
+	}
+
+	// 모두 완료되면 효과 종료
+	if (bFOVCompleted && bArmCompleted)
+	{
+		SafeClearTimer(CameraZoomTimer);
+		CurrentCameraEffectPhase = ECameraEffectPhase::None;
+	}
+}
+
+// 다음 카메라 효과 단계로 전환
+void AGS_Drakhar::TransitionToNextCameraPhase()
+{
+	switch (CurrentCameraEffectPhase)
+	{
+	case ECameraEffectPhase::ZoomIn:
+		// 줌인 완료 -> 줌아웃 단계로
+		CurrentCameraEffectPhase = ECameraEffectPhase::ZoomOut;
+		TargetFOV = OriginalFOV * FeverEndZoomOutFOVMultiplier;
+		TargetArmLength = OriginalArmLength * FeverEndZoomOutArmMultiplier;
+		break;
+
+	case ECameraEffectPhase::ZoomOut:
+		// 줌아웃 완료 -> 복귀 단계로
+		CurrentCameraEffectPhase = ECameraEffectPhase::Restore;
+		TargetFOV = OriginalFOV;
+		TargetArmLength = OriginalArmLength;
+		break;
+
+	default:
+		CurrentCameraEffectPhase = ECameraEffectPhase::None;
+		break;
+	}
 }

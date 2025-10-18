@@ -2261,12 +2261,34 @@
 										</Action>
 									</ChildrenList>
 								</Event>
-								<Event Name="EV_Drakhar_FeverMode" ID="{C93E5944-6465-4E0C-842D-D15DBFAF2833}">
+								<Event Name="EV_Drakhar_FeverMode_Start" ID="{C93E5944-6465-4E0C-842D-D15DBFAF2833}">
 									<ChildrenList>
 										<Action Name="" ID="{D061CCDD-22FE-4CFD-ADB3-6AD2A7D206E0}" ShortID="398538405">
 											<ReferenceList>
 												<Reference Name="Target">
-													<ObjectRef Name="EV_Drakhar_FeverMode" ID="{E1093C78-6DF9-4901-8F15-D3B98BFC6EE5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+													<ObjectRef Name="EV_Drakhar_FeverMode_Start" ID="{E1093C78-6DF9-4901-8F15-D3B98BFC6EE5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Drakhar_FeverMode_ING_Play" ID="{1C74E099-85D8-4312-8B92-E8A863BB1347}">
+									<ChildrenList>
+										<Action Name="" ID="{309E03CA-ACD5-4663-838F-50F5FDCF3076}" ShortID="170241168">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_Drakhar_FeverMode_Ing" ID="{846EAB19-8D07-47E3-958A-A30802DE3B2C}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_Drakhar_FeverMode_End" ID="{46A6AF47-5D83-48AA-A94B-F4EBFDC4CE9D}">
+									<ChildrenList>
+										<Action Name="" ID="{6DA48D25-FF8F-4E20-82E2-998E7438ECF9}" ShortID="1017045596">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="EV_Drakhar_FeverMode_End" ID="{D6A65C06-2526-4EFB-8ADA-18A3ED032A45}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 												</Reference>
 											</ReferenceList>
 										</Action>

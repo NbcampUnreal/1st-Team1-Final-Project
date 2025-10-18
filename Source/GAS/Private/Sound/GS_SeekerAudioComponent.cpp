@@ -130,9 +130,12 @@ void UGS_SeekerAudioComponent::PlaySound(ESeekerAudioState SoundType, bool bForc
 
 void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudioState SoundTypeToTrigger, bool bIsImmediate)
 {
-    // 데디케이티드 서버에서는 오디오 처리 불필요
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
-    
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
+    {
+        return;
+    }
+
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -186,19 +189,8 @@ void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudi
         }
         LocalLastSoundPlayTimes.Emplace(SoundTypeToTrigger, CurrentTime);
     }
-    
-    // 멀티플레이어 환경에서 안전성 체크 강화
-    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-    if (!AudioDevice)
-    {
-        return;
-    }
 
-    if (!AudioDevice->IsInitialized())
-    {
-        return;
-    }
-
+    // 유효성 체크 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
     if (!IsValid(SoundEvent) || !IsValid(OwnerSeeker))
     {
         return;
@@ -268,18 +260,14 @@ void UGS_SeekerAudioComponent::Multicast_PlayBowDrawSound_Implementation()
     // 모드별 사운드 선택
     const bool bRTS = IsRTSMode();
     UAkAudioEvent* SoundToPlay = SelectSoundEventByMode(BowDrawSound, RTSMerciBowDrawSound, bRTS);
-    if (!SoundToPlay)
+    if (!SoundToPlay || !IsValid(OwnerSeeker))
     {
         return;
     }
 
-    // 사운드 재생 (안전성 체크 포함)
-    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-    if (AudioDevice && AudioDevice->IsInitialized() && IsValid(SoundToPlay) && IsValid(OwnerSeeker))
-    {
-        AkPlayingID BowPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
-        RegisterPlayingID(BowPlayingID);
-    }
+    // 사운드 재생 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
+    AkPlayingID BowPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(BowPlayingID);
 }
 
 void UGS_SeekerAudioComponent::PlayBowReleaseSound()
@@ -319,18 +307,14 @@ void UGS_SeekerAudioComponent::Multicast_PlayBowReleaseSound_Implementation()
     // 모드별 사운드 선택
     const bool bRTS = IsRTSMode();
     UAkAudioEvent* SoundToPlay = SelectSoundEventByMode(BowReleaseSound, RTSMerciBowReleaseSound, bRTS);
-    if (!SoundToPlay)
+    if (!SoundToPlay || !IsValid(OwnerSeeker))
     {
         return;
     }
 
-    // 사운드 재생 (안전성 체크 포함)
-    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-    if (AudioDevice && AudioDevice->IsInitialized() && IsValid(SoundToPlay) && IsValid(OwnerSeeker))
-    {
-        AkPlayingID ReleasePlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
-        RegisterPlayingID(ReleasePlayingID);
-    }
+    // 사운드 재생 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
+    AkPlayingID ReleasePlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(ReleasePlayingID);
 }
 
 void UGS_SeekerAudioComponent::StartSoundTimer()
@@ -473,25 +457,13 @@ void UGS_SeekerAudioComponent::StopSkill()
 
 void UGS_SeekerAudioComponent::PlaySoundAtLocation(UAkAudioEvent* SoundEvent, const FVector& Location)
 {
-    // 데디케이티드 서버에서는 사운드 재생하지 않음
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
     {
         return;
     }
 
     if (!SoundEvent)
-    {
-        return;
-    }
-
-    // 멀티플레이어 환경에서 Wwise 오디오 시스템 안전성 체크
-    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-    if (!AudioDevice)
-    {
-        return;
-    }
-
-    if (!AudioDevice->IsInitialized())
     {
         return;
     }
@@ -773,8 +745,8 @@ void UGS_SeekerAudioComponent::PlayFinalAttackSound(UAkAudioEvent* ExtraSound)
 
 void UGS_SeekerAudioComponent::PlayGenericSound(UAkAudioEvent* SoundToPlay, bool bPlayOnLocalOnly)
 {
-	// 데디케이티드 서버에서는 오디오 처리 불필요
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	// 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+	if (!IsAudioSystemValid())
 	{
 		return;
 	}
@@ -784,13 +756,6 @@ void UGS_SeekerAudioComponent::PlayGenericSound(UAkAudioEvent* SoundToPlay, bool
 		return;
 	}
 
-	// Wwise 시스템 안전성 체크
-	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-	if (!AudioDevice || !AudioDevice->IsInitialized())
-	{
-		return;
-	}
-	
 	AkPlayingID GenericPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, GetOwner(), 0, FOnAkPostEventCallback());
 	RegisterPlayingID(GenericPlayingID);
 }
@@ -1471,9 +1436,12 @@ void UGS_SeekerAudioComponent::PlayRTSAresComboAttackSound(int32 ComboIndex)
         return;
     }
 
-    // 데디케이티드 서버에서는 오디오 처리 불필요
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
-    
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
+    {
+        return;
+    }
+
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -1666,12 +1634,12 @@ void UGS_SeekerAudioComponent::PlayRTSMerciArrowShotSound()
 
 bool UGS_SeekerAudioComponent::ShouldPlaySoundAtLocation(const FVector& SourceLocation, bool bSkipViewFrustumCheck) const
 {
-    // 데디케이티드 서버에서는 오디오 처리 불필요
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
     {
         return false;
     }
-    
+
     if (!OwnerSeeker || !GetWorld())
     {
         return false;

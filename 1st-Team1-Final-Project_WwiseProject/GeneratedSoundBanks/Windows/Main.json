@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{0C3651D4-8D58-248A-1E94-5D94BA11AD76}",
+    "Hash": "{9F1C5CBB-D4CF-D583-AC05-56101FC49AAD}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -46,6 +46,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_Crying_2_Female_Adult_Mature_DJ_Woman.wav",
       "CachePath": "0C/{0C1250DD-CCFA-3768-4AAB-FD507977397B}.wem"
+     },
+     {
+      "Id": "8624536",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_MU_FX_fire_whoosh_scorch_smoulder_crackle_simple_04.wav",
+      "CachePath": "67/{67EF237A-C1D8-52F8-1EA6-B3DC061BDD90}.wem"
      },
      {
       "Id": "14755472",
@@ -1816,6 +1824,14 @@
       "CachePath": "BA/{BA48F7C2-D46B-FF4C-E6A0-C9E691A87A03}.wem"
      },
      {
+      "Id": "831514700",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FireFlamesHeavy_SFXB.630.wav",
+      "CachePath": "C5/{C569AAFD-6976-4B22-AE55-11E33ECD0CCD}.wem"
+     },
+     {
       "Id": "833357717",
       "Language": "SFX",
       "Streaming": "false",
@@ -2096,6 +2112,14 @@
       "CachePath": "6F/{6F59C5A8-D7F3-608C-5288-32ED5C69510D}.wem"
      },
      {
+      "Id": "950054670",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Dragon_Vocal_Dialogue_Burn_Burn_Burn_Monster_Creature_Voice.wav",
+      "CachePath": "4E/{4E7AA34C-13E9-5E80-49C8-BE333FF6E1CD}.wem"
+     },
+     {
       "Id": "951256613",
       "Language": "SFX",
       "Streaming": "false",
@@ -2366,6 +2390,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Growl_Attack_Dry.wav",
       "CachePath": "4B/{4B954174-5002-A301-D166-6C4FEBCF59B4}.wem"
+     },
+     {
+      "Id": "1072576034",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FF_HFFX_foley_footstep_creature_loss.wav",
+      "CachePath": "14/{14FE61AD-1BEB-B36B-04D2-D646320ABAAF}.wem"
      },
      {
       "Id": "1073517265",
@@ -4581,9 +4613,61 @@
       ]
      },
      {
-      "Id": "603832892",
-      "Name": "EV_Drakhar_FeverMode",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_FeverMode",
+      "Id": "1367632114",
+      "Name": "EV_Drakhar_FeverMode_End",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_FeverMode_End",
+      "GUID": "{46A6AF47-5D83-48AA-A94B-F4EBFDC4CE9D}",
+      "MaxAttenuation": "1500",
+      "DurationType": "OneShot",
+      "DurationMin": "2.4119892",
+      "DurationMax": "2.4119892",
+      "MediaRefs": [
+       {
+        "Id": "8624536"
+       },
+       {
+        "Id": "64058932"
+       },
+       {
+        "Id": "176067616"
+       },
+       {
+        "Id": "950054670"
+       }
+      ],
+      "PluginRefs": {
+       "ShareSets": [
+        {
+         "Id": "1990128658"
+        }
+       ]
+      }
+     },
+     {
+      "Id": "3809794982",
+      "Name": "EV_Drakhar_FeverMode_ING_Play",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_FeverMode_ING_Play",
+      "GUID": "{1C74E099-85D8-4312-8B92-E8A863BB1347}",
+      "MaxAttenuation": "1500",
+      "DurationType": "OneShot",
+      "DurationMin": "38.98454",
+      "DurationMax": "38.98454",
+      "MediaRefs": [
+       {
+        "Id": "176067616"
+       },
+       {
+        "Id": "831514700"
+       },
+       {
+        "Id": "1072576034"
+       }
+      ]
+     },
+     {
+      "Id": "2808308689",
+      "Name": "EV_Drakhar_FeverMode_Start",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Guardian\\EV_Drakhar_FeverMode_Start",
       "GUID": "{C93E5944-6465-4E0C-842D-D15DBFAF2833}",
       "MaxAttenuation": "2700",
       "DurationType": "OneShot",
@@ -8029,6 +8113,6 @@
     ]
    }
   ],
-  "FileHash": "{0FFFF7B5-4719-B77C-E4C0-711E843B3A95}"
+  "FileHash": "{219E6AD8-A1DF-D061-601A-161CD3157711}"
  }
 }

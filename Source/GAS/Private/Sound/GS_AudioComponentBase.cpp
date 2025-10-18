@@ -688,6 +688,27 @@ UAkAudioEvent* UGS_AudioComponentBase::SelectSoundEventByMode(UAkAudioEvent* TPS
     return TPSSound;
 }
 
+// ==========================
+// 오디오 시스템 검증 (통합)
+// ==========================
+bool UGS_AudioComponentBase::IsAudioSystemValid() const
+{
+	// 데디케이티드 서버에서는 오디오 처리 불필요
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return false;
+	}
+
+	// Wwise 오디오 디바이스 초기화 상태 확인
+	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+	if (!AudioDevice || !AudioDevice->IsInitialized())
+	{
+		return false;
+	}
+
+	return true;
+}
+
 // ===========
 // 방 관련 함수
 // ===========

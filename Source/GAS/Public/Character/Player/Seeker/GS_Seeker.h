@@ -18,6 +18,8 @@ class UGS_VFXComponent;
 class AGS_Monster;
 class UGS_SeekerAudioComponent;
 class UUserWidget;
+class UGS_LowHealthEffectComponent;
+class UGS_DetectionEffectComponent;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -185,6 +187,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	UMaterialInterface* LowHealthEffectMaterial;
 
+	// LowHealth 전용 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Effects")
+	UGS_LowHealthEffectComponent* LowHealthEffectComp;
+
 	// ================
 	// 가디언 감지 스크린 효과
 	// ================
@@ -193,6 +199,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Detection|Effects")
 	UMaterialInterface* DetectionEffectMaterial; // MPP_Detect
+
+	// Detection 전용 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Detection|Effects")
+	UGS_DetectionEffectComponent* DetectionEffectComp;
 	
 	UFUNCTION()
 	void HandleLowHealthEffect(UGS_StatComp* InStatComp);
@@ -227,6 +237,10 @@ public:
 	// 몬스터 감지용 컴포넌트 추가
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	class USphereComponent* CombatTrigger;
+
+	// 전투 탐지 반경
+	UPROPERTY(EditDefaultsOnly, Category = "Combat", meta=(ClampMin="0"))
+	float CombatTriggerRadius = 800.0f;
 	
 	// 몬스터가 전투 음악 시작/중지를 요청할 때 호출
 	UFUNCTION(BlueprintCallable)
