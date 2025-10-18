@@ -69,7 +69,7 @@ void AGS_CustomLobbyGM::BeginPlay()
 void AGS_CustomLobbyGM::PostLogin(APlayerController* NewPlayer)
 {
     Super::PostLogin(NewPlayer);
-
+/*
     if (!NewPlayer)
     {
         UE_LOG(LogTemp, Error, TEXT("PostLogin: NewPlayer is null"));
@@ -199,7 +199,7 @@ void AGS_CustomLobbyGM::PostLogin(APlayerController* NewPlayer)
 #else
     UE_LOG(LogTemp, Warning, TEXT("PostLogin: WITH_GAMELIFT not defined. Skipping GameLift validation."));
 #endif
-
+*/
     // GameLift 검증 성공 또는 GameLift 미사용 환경에서 실행되는 기존 로직
     AGS_PlayerState* PS = NewPlayer->GetPlayerState<AGS_PlayerState>();
     if (PS)

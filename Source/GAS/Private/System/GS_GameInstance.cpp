@@ -176,25 +176,17 @@ void UGS_GameInstance::OnSessionUserInviteAccepted_Impl(const bool bWasSuccessfu
 
     if (bWasSuccessful && InviteResult.IsValid())
     {
-        // 1. InviteResult에서 GameLift 세션 ID를 추출합니다.
-        //    이것은 초대자가 초대장에 세션 ID를 어떻게 심었는지에 따라 달라집니다.
-        //    일반적으로 ConnectString에 저장됩니다.
-        FString ConnectString;
-        if (SessionInterface->GetResolvedConnectString(InviteResult, NAME_Default, ConnectString))
+        FString GameLiftSessionId;
+
+        // 초대장의 세션 설정에서 직접 GameLiftSessionId를 읽어옵니다.
+        if (InviteResult.Session.SessionSettings.Get(FName(TEXT("GameLiftSessionId")), GameLiftSessionId) && !GameLiftSessionId.IsEmpty())
         {
-            FString GameLiftSessionId = UGameplayStatics::ParseOption(ConnectString, TEXT("GameLiftSessionId"));
-
-            if (!GameLiftSessionId.IsEmpty())
-            {
-                UE_LOG(LogTemp, Log, TEXT("Extracted GameLift Session ID from invite: %s"), *GameLiftSessionId);
-
-                // 2. 추출한 ID로 GameLift 세션에 참여하는 새로운 함수 호출
-                JoinGameLiftSessionByID(GameLiftSessionId);
-            }
-            else
-            {
-                UE_LOG(LogTemp, Warning, TEXT("Could not find GameLiftSessionId in invite connect string."));
-            }
+            UE_LOG(LogTemp, Log, TEXT("Extracted GameLift Session ID from invite session settings: %s"), *GameLiftSessionId);
+            JoinGameLiftSessionByID(GameLiftSessionId);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Could not find GameLiftSessionId in invite session settings."));
         }
     }
 }
@@ -208,23 +200,27 @@ void UGS_GameInstance::JoinGameLiftSessionByID(const FString& GameLiftSessionId)
     }
 
     // --- 백엔드 서비스와 통신하는 부분 ---
-    // 1. 플레이어의 Steam 인증 티켓을 가져옵니다.
-    FString SteamAuthTicket;
-    IOnlineIdentityPtr Identity = IOnlineSubsystem::Get()->GetIdentityInterface();
-    if (Identity.IsValid())
+    // 1. 플레이어의 고유 ID를 가져옵니다. (Steam 티켓 대신 사용)
+    IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+    if (!Subsystem)
     {
-        SteamAuthTicket = Identity->GetAuthToken(0);
+        UE_LOG(LogTemp, Error, TEXT("Failed to get Online Subsystem. Cannot join session."));
+        return;
     }
 
-    if (SteamAuthTicket.IsEmpty())
+    IOnlineIdentityPtr Identity = Subsystem->GetIdentityInterface();
+    if (!Identity.IsValid() || !Identity->GetUniquePlayerId(0).IsValid())
     {
-        UE_LOG(LogTemp, Error, TEXT("Failed to get Steam Auth Ticket. Cannot join session."));
+        UE_LOG(LogTemp, Error, TEXT("Failed to get a valid Player ID. Cannot join session."));
         if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController()))
         {
             MPC->HideLoadingScreen();
         }
         return;
     }
+    
+    // 플레이어의 고유 ID를 문자열로 저장합니다.
+    FString PlayerId = Identity->GetUniquePlayerId(0)->ToString();
 
     // 2. 백엔드 서비스의 URL을 설정합니다.
     FString BackendUrl = TEXT("https://635oo4mx8l.execute-api.ap-northeast-2.amazonaws.com/stage_1/create-player-session");
@@ -235,8 +231,8 @@ void UGS_GameInstance::JoinGameLiftSessionByID(const FString& GameLiftSessionId)
     Request->SetVerb("POST");
     Request->SetHeader("Content-Type", "application/json");
 
-    // Body에 GameLiftSessionId와 플레이어의 Steam 인증 티켓을 담습니다.
-    FString RequestBody = FString::Printf(TEXT("{\"SessionId\": \"%s\", \"SteamTicket\": \"%s\"}"), *GameLiftSessionId, *SteamAuthTicket);
+    // Body에 SessionId와 플레이어의 PlayerId를 담습니다. (SteamTicket 제거)
+    FString RequestBody = FString::Printf(TEXT("{\"SessionId\": \"%s\", \"PlayerId\": \"%s\"}"), *GameLiftSessionId, *PlayerId);
     Request->SetContentAsString(RequestBody);
 
     // 4. 요청 완료 콜백을 바인딩합니다.
@@ -349,63 +345,20 @@ void UGS_GameInstance::Shutdown()
 
 void UGS_GameInstance::StartGameSessionPlacement()
 {
-    IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-    if (Subsystem && Subsystem->GetSubsystemName() == STEAM_SUBSYSTEM)
-    {
-        // 1. 이전에 사용한 티켓이 있다면 명시적으로 취소하고 파기합니다.
-        if (LastAuthTicketHandle != k_HAuthTicketInvalid)
-        {
-            SteamUser()->CancelAuthTicket(LastAuthTicketHandle);
-            LastAuthTicketHandle = k_HAuthTicketInvalid;
-            UE_LOG(LogTemp, Log, TEXT("Cancelled previous Steam auth ticket."));
+    UE_LOG(LogTemp, Log, TEXT("Requesting game session placement without a Steam ticket..."));
 
-            FPlatformProcess::Sleep(0.5f);
-        }
+    // Lambda에 빈 요청을 보내 즉시 매칭을 시작합니다.
+    FString BackendUrl = TEXT("https://635oo4mx8l.execute-api.ap-northeast-2.amazonaws.com/stage_1/start-game-session-placement");
+    TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+    Request->SetURL(BackendUrl);
+    Request->SetVerb("POST");
+    Request->SetHeader("Content-Type", "application/json");
 
-        // 2. Steamworks API v157에 맞는 GetAuthSessionTicket 함수를 호출합니다.
-        uint32 TicketSize;
-        TArray<uint8> AuthTicket;
-        AuthTicket.SetNum(1024); // 티켓 최대 크기
-        
-        // 네 번째 파라미터로 nullptr을 전달하여 로컬 유저의 티켓을 발급받습니다.
-        LastAuthTicketHandle = SteamUser()->GetAuthSessionTicket(AuthTicket.GetData(), AuthTicket.Num(), &TicketSize, nullptr);
+    FString RequestBody = TEXT("{}"); 
+    Request->SetContentAsString(RequestBody);
 
-        if (LastAuthTicketHandle != k_HAuthTicketInvalid)
-        {
-            // 실제 티켓 크기에 맞게 배열을 조절합니다.
-            AuthTicket.SetNum(TicketSize);
-
-            // 16진수 문자열(Hex String)로 변환합니다.
-            FString HexTicket;
-            for (uint8 Byte : AuthTicket)
-            {
-                HexTicket += FString::Printf(TEXT("%02X"), Byte);
-            }
-
-            UE_LOG(LogTemp, Log, TEXT("Successfully got a new Steam ticket. Proceeding to call Lambda."));
-            
-            // 3. 새로 발급받은 티켓으로 람다를 호출합니다.
-            FString BackendUrl = TEXT("https://635oo4mx8l.execute-api.ap-northeast-2.amazonaws.com/stage_1/start-game-session-placement");
-            TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-            Request->SetURL(BackendUrl);
-            Request->SetVerb("POST");
-            Request->SetHeader("Content-Type", "application/json");
-
-            FString RequestBody = FString::Printf(TEXT("{\"SteamTicket\": \"%s\"}"), *HexTicket);
-            Request->SetContentAsString(RequestBody);
-
-            Request->OnProcessRequestComplete().BindUObject(this, &UGS_GameInstance::OnStartPlacementResponse);
-            Request->ProcessRequest();
-        }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("Failed to get a new Steam auth ticket handle."));
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("Steam Subsystem not found."));
-    }
+    Request->OnProcessRequestComplete().BindUObject(this, &UGS_GameInstance::OnStartPlacementResponse);
+    Request->ProcessRequest();
 }
 
 void UGS_GameInstance::OnStartPlacementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)

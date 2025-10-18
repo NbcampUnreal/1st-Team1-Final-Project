@@ -55,7 +55,6 @@ protected:
     // ================================커스텀 게임을 위한 세션 자동 생성================================
 public:
     void StartGameSessionPlacement(); // "커스텀 게임" 버튼이 호출할 함수
-    void OnSteamAuthTicketReady(const FString& HexTicket);
 
 private:
     void OnStartPlacementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
@@ -119,8 +118,6 @@ private:
 
     // ================================Steam Ticket================================
 private:
-    // 이전에 사용했던 티켓의 핸들을 저장할 변수
-    HAuthTicket LastAuthTicketHandle;
 
     // ================================플레이어 정보 저장================================
 public:
