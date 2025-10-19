@@ -152,7 +152,8 @@ public:
 	
 	//new skill
 	void FeverComoLastAttack();
-	
+	void PlayDelayedComboFinisherSounds();
+
 	//max fever gauge
 	void StartFeverMode();
 	//when fever gauge > 0

@@ -921,8 +921,26 @@ void AGS_Drakhar::FeverComoLastAttack()
 				}
 			}
 		}
-		
-		if (AudioComponent) AudioComponent->PlayComboFinisherSound();
+
+		// 피버 모드 콤보 피니셔 사운드 재생 (타격 소리와 함께)
+		// RPC 호출 제한을 피하기 위해 약간 지연 후 사운드 재생
+		FTimerHandle ComboFinisherSoundTimer;
+		GetWorld()->GetTimerManager().SetTimer(
+			ComboFinisherSoundTimer,
+			this,
+			&AGS_Drakhar::PlayDelayedComboFinisherSounds,
+			0.125f, // 0.15초 지연 (RPC 제한 0.1초보다 길게)
+			false
+		);
+	}
+}
+
+void AGS_Drakhar::PlayDelayedComboFinisherSounds()
+{
+	if (AudioComponent)
+	{
+		AudioComponent->PlayComboFinisherSound();
+		AudioComponent->PlayAttackHitSound();
 	}
 }
 
@@ -1302,7 +1320,6 @@ void AGS_Drakhar::SafeClearTimer(FTimerHandle& TimerHandle)
 // === FeverModeStateSound 딜레이 재생 콜백 ===
 void AGS_Drakhar::PlayFeverModeStateSoundDelayed()
 {
-	// 언리얼이 자동으로 생명주기 관리
 	if (!IsValid(this)) return;
 
 	if (AudioComponent && IsFeverMode)
