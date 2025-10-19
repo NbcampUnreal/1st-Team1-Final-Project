@@ -130,6 +130,12 @@ void UGS_SeekerAudioComponent::PlaySound(ESeekerAudioState SoundType, bool bForc
 
 void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudioState SoundTypeToTrigger, bool bIsImmediate)
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
     if (!IsAudioSystemValid())
     {
@@ -251,6 +257,12 @@ void UGS_SeekerAudioComponent::PlayBowDrawSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayBowDrawSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 및 Distance Scaling 설정
     if (!PrepareMulticastSound(OwnerSeeker, false))
     {
@@ -298,6 +310,12 @@ void UGS_SeekerAudioComponent::PlayBowReleaseSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayBowReleaseSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 및 Distance Scaling 설정
     if (!PrepareMulticastSound(OwnerSeeker, false))
     {
@@ -645,6 +663,18 @@ void UGS_SeekerAudioComponent::RequestSkillAudio(ESkillSlot SkillSlot, int32 Aud
 
 void UGS_SeekerAudioComponent::Multicast_RequestSkillAudio_Implementation(ESkillSlot SkillSlot, int32 AudioEventType, FVector Location)
 {
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
+    {
+        return;
+    }
+
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // Event-Driven 방식으로 적절한 함수 호출 (RTS/TPS 모드 내장 분기 포함)
     switch (AudioEventType)
     {
@@ -971,6 +1001,12 @@ void UGS_SeekerAudioComponent::PlayAresComboAttackSoundWithExtra(int32 ComboInde
 
 void UGS_SeekerAudioComponent::Multicast_PlayChanComboAttackSound_Implementation(int32 ComboIndex)
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 공통 체크 로직 사용
     if (!ShouldPlaySoundAtLocation(OwnerSeeker->GetActorLocation()))
     {
@@ -1011,6 +1047,12 @@ void UGS_SeekerAudioComponent::Multicast_PlayChanComboAttackSound_Implementation
 
 void UGS_SeekerAudioComponent::Multicast_PlayAresComboAttackSound_Implementation(int32 ComboIndex)
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 공통 체크 로직 사용
     if (!ShouldPlaySoundAtLocation(OwnerSeeker->GetActorLocation()))
     {
@@ -1076,6 +1118,12 @@ void UGS_SeekerAudioComponent::Multicast_PlayAresComboAttackSound_Implementation
 
 void UGS_SeekerAudioComponent::Multicast_PlayAresComboAttackSoundWithExtra_Implementation(int32 ComboIndex)
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 공통 체크 로직 사용
     if (!ShouldPlaySoundAtLocation(OwnerSeeker->GetActorLocation()))
     {
@@ -1168,6 +1216,12 @@ void UGS_SeekerAudioComponent::PlayHitFeedbackSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayArrowShotSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 및 Distance Scaling 설정
     if (!PrepareMulticastSound(OwnerSeeker, false))
     {
@@ -1189,6 +1243,12 @@ void UGS_SeekerAudioComponent::Multicast_PlayArrowShotSound_Implementation()
 
 void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamStartSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 및 Distance Scaling 설정
     if (!PrepareMulticastSound(OwnerSeeker, false))
     {
@@ -1206,6 +1266,12 @@ void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamStartSound_Implementation
 
 void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamImpactSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 및 Distance Scaling 설정
     if (!PrepareMulticastSound(OwnerSeeker, false))
     {
@@ -1223,10 +1289,16 @@ void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamImpactSound_Implementatio
 
 void UGS_SeekerAudioComponent::Multicast_PlayHurtSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 (ViewFrustum 체크 제외 - 피격 사운드는 화면 밖에서도 들려야 함)
     bool bIsRTSMode = false;
     FVector ListenerLocation;
-    
+
     if (!ShouldPlayMulticastSound(OwnerSeeker, bIsRTSMode, ListenerLocation, true))
     {
         return;
@@ -1260,10 +1332,16 @@ void UGS_SeekerAudioComponent::Multicast_PlayHurtSound_Implementation()
 
 void UGS_SeekerAudioComponent::Multicast_PlayDeathSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 (ViewFrustum 체크 제외 - 죽음 사운드는 화면 밖에서도 들려야 함)
     bool bIsRTSMode = false;
     FVector ListenerLocation;
-    
+
     if (!ShouldPlayMulticastSound(OwnerSeeker, bIsRTSMode, ListenerLocation, true))
     {
         return;
@@ -1700,7 +1778,6 @@ void UGS_SeekerAudioComponent::PlayDetectionWarningSound()
 {
     if (!DetectionWarningSound)
     {
-        UE_LOG(LogTemp, Warning, TEXT("DetectionWarningSound is not set!"));
         return;
     }
     

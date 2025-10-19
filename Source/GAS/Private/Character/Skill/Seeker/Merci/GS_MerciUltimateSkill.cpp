@@ -25,14 +25,16 @@ void UGS_MerciUltimateSkill::ActiveSkill()
 	if(OwnerCharacter)
 	{
 		//OwnerCharacter->Server_SetCanHitReact(false); // 서버에 전달
-		// 스킬 시작 사운드 재생
 		const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 		if (AGS_Merci* OwnerPlayer = Cast<AGS_Merci>(OwnerCharacter))
 		{
-			// 스킬 시작 사운드 재생
-			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+			// 스킬 시작 사운드 재생 (멀티캐스트)
+			if (OwnerPlayer->HasAuthority())
 			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+				if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+				{
+					AudioComp->RequestSkillAudio(CurrentSkillType, 0);
+				}
 			}
 
 			OwnerPlayer->SetAutoAimTarget(nullptr);
@@ -241,12 +243,15 @@ void UGS_MerciUltimateSkill::DeactiveSkill()
 		OwnerCharacter->SetSkillInputControl(true, true, true);
 		//OwnerCharacter->Server_SetCanHitReact(true); // 서버에 전달
 
-		// SeekerAudioComponent를 통한 스킬 종료 사운드
-		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+		// 스킬 종료 사운드 재생 (멀티캐스트)
+		if (OwnerCharacter->HasAuthority())
 		{
-			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+				if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+				{
+					AudioComp->RequestSkillAudio(CurrentSkillType, 1);
+				}
 			}
 		}
 	}

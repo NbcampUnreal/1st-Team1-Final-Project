@@ -26,10 +26,13 @@ void UGS_AresUltimateSkill::ActiveSkill()
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		// 스킬 시작 사운드 재생
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		// 스킬 시작 사운드 재생 (멀티캐스트)
+		if (OwnerPlayer->HasAuthority())
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
+			}
 		}
 		
 		// 궁극기 루프 사운드 재생 (SeekerAudioComponent만 지원)
@@ -120,13 +123,16 @@ void UGS_AresUltimateSkill::BecomeBerserker()
 
 void UGS_AresUltimateSkill::DeactiveSkill()
 {
-	// 궁극기 루프 사운드 정지
-	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	// 궁극기 루프 사운드 정지 및 종료 사운드 재생 (멀티캐스트)
+	if (OwnerCharacter->HasAuthority())
 	{
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 3); // 3 = 루프 정지
+				AudioComp->RequestSkillAudio(CurrentSkillType, 1); // 1 = 스킬 종료
+			}
 		}
 	}
 

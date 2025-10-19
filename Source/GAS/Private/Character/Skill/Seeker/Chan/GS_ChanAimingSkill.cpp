@@ -42,10 +42,13 @@ void UGS_ChanAimingSkill::ActiveSkill()
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 		OwnerPlayer->CanChangeSeekerGait = false;
 
-		// 스킬 시작 사운드 재생
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		// 스킬 시작 사운드 재생 (멀티캐스트)
+		if (OwnerPlayer->HasAuthority())
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
+			}
 		}
 
 		// =======================

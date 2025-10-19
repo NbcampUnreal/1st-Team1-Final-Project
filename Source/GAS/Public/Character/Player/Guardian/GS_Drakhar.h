@@ -67,6 +67,10 @@ public:
 	virtual void LeftMouse() override;
 	virtual void RightMouse() override;
 	
+	virtual void OnAttackHit(AGS_Character* HitCharacter) override;
+	virtual void OnFeverGaugeUpdate(float DeltaGauge) override;
+	virtual void OnQuitSkill() override;
+	
 	//[Attack Functions]
 	virtual void MeleeAttackCheck() override;
 	
@@ -148,7 +152,8 @@ public:
 	
 	//new skill
 	void FeverComoLastAttack();
-	
+	void PlayDelayedComboFinisherSounds();
+
 	//max fever gauge
 	void StartFeverMode();
 	//when fever gauge > 0
@@ -163,20 +168,8 @@ public:
 	void HealRegeneration();
 	void StopHealRegeneration();
 
-	// === Multicast RPCs delegated to components ===
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboAttackSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDashSkillSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayEarthquakeSkillSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicFurySkillSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicProjectileSound(const FVector& Location);
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayAttackHitSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboFinisherSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStartSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStateSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastStopFeverModeStateSound();
+	// === Multicast RPCs for VFX only ===
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeEndEffects();
-	//UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeEndVFX();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayHurtSound();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartWingRushVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStopWingRushVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartDustVFX();
@@ -188,6 +181,7 @@ public:
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayEarthquakeImpactVFX(const FVector& ImpactLocation);
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverEarthquakeImpactVFX(const FVector& ImpactLocation);
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_PlayAttackHitVFX(FVector ImpactPoint);
+	//UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeEndVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFlyStart();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFlyEnd();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnUltimateStart();
@@ -382,8 +376,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsFeverMode)
 	bool IsFeverMode;
-	
+
 	FTimerHandle FeverTimer;
+	FTimerHandle FeverStateSoundDelayTimer;
 
 	// === 카메라 줌 효과 설정 ===
 
@@ -443,6 +438,10 @@ private:
 
 	// 타이머 정리 함수 (레벨 전환 시 크래시 방지)
 	void SafeClearTimer(FTimerHandle& TimerHandle);
+
+	// FeverModeStateSound 딜레이 재생 콜백
+	UFUNCTION()
+	void PlayFeverModeStateSoundDelayed();
 
 	// === 카메라 효과 함수 ===
 

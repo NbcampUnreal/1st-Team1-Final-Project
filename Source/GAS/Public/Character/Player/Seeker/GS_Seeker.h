@@ -344,8 +344,16 @@ private:
 	float LastDetectionSoundTime = 0.0f;
 
 	// 감지 사운드 최소 간격 (초)
-	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "0.5", ClampMax = "5.0"))
-	float DetectionSoundCooldown = 5.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "1.0", ClampMax = "10.0"))
+	float DetectionSoundCooldown = 7.0f;
+
+	// 퇴장 감지 사운드 쿨다운 (마지막 재생 시간 추적)
+	UPROPERTY()
+	float LastExitDetectionSoundTime = 0.0f;
+
+	// 퇴장 감지 사운드 최소 간격 (초)
+	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "1.0", ClampMax = "10.0"))
+	float ExitDetectionSoundCooldown = 7.0f;
 
 	// 화면 중앙 근접도 (0.0 = 가장자리, 1.0 = 중앙)
 	UPROPERTY(ReplicatedUsing = OnRep_DetectionIntensity)

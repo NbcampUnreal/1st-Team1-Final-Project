@@ -814,11 +814,18 @@ void AGS_Seeker::OnRep_IsDetectedByGuardian()
 		return;
 	}
 
-	float CurrentTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
-	float TimeSinceLastSound = CurrentTime - LastDetectionSoundTime;
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	float CurrentTime = World->GetTimeSeconds();
 
     if (bIsDetectedByGuardian)
 	{
+		// 입장 감지 사운드 제한 적용
+		float TimeSinceLastSound = CurrentTime - LastDetectionSoundTime;
 		if (TimeSinceLastSound >= DetectionSoundCooldown)
 		{
 			SeekerAudioComponent->PlayDetectionWarningSound();
@@ -827,8 +834,13 @@ void AGS_Seeker::OnRep_IsDetectedByGuardian()
 	}
 	else
 	{
-		SeekerAudioComponent->PlayDetectionClearedSound();
-		LastDetectionSoundTime = CurrentTime;
+		// 퇴장 감지 사운드 제한 적용
+		float TimeSinceLastExitSound = CurrentTime - LastExitDetectionSoundTime;
+		if (TimeSinceLastExitSound >= ExitDetectionSoundCooldown)
+		{
+			SeekerAudioComponent->PlayDetectionClearedSound();
+			LastExitDetectionSoundTime = CurrentTime;
+		}
 	}
 }
 
