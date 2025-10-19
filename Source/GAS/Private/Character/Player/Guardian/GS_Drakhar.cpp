@@ -182,6 +182,7 @@ void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	// 타이머 정리 (레벨 전환 시 크래시 방지)
 	SafeClearTimer(FeverTimer);
+	SafeClearTimer(FeverStateSoundDelayTimer);
 	SafeClearTimer(ResetAttackTimer);
 	SafeClearTimer(HealthRegenTimer);
 	SafeClearTimer(HealthDelayTimer);
@@ -203,9 +204,9 @@ void AGS_Drakhar::OnDamageStart()
 	}
 	
 	// 피격 사운드 재생
-	if (HasAuthority())
+	if (HasAuthority() && AudioComponent)
 	{
-		MulticastPlayHurtSound();
+		AudioComponent->PlayHurtSound();
 	}
 }
 
@@ -369,7 +370,7 @@ void AGS_Drakhar::MeleeAttackCheck()
 					}
 					
 					// 히트 사운드 재생
-					MulticastPlayAttackHitSound();
+					if (AudioComponent) AudioComponent->PlayAttackHitSound();
 				}
 			}
 		}
@@ -409,7 +410,7 @@ void AGS_Drakhar::ComboLastAttack()
 					}
 					
 					MulticastRPC_PlayAttackHitVFX(DamagedPlayer->GetActorLocation());
-					MulticastPlayAttackHitSound();
+					if (AudioComponent) AudioComponent->PlayAttackHitSound();
 					
 					// 공격 성공 시 공격자에게 강한 카메라 쉐이크 적용
 					if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
@@ -438,7 +439,7 @@ void AGS_Drakhar::ServerRPCNewComboAttack_Implementation()
 {
 	bCanCombo = false;
 	MulticastRPCComboAttack();
-	MulticastPlayComboAttackSound();
+	if (AudioComponent) AudioComponent->PlayComboAttackSound();
 }
 
 void AGS_Drakhar::MulticastRPCComboAttack_Implementation()
@@ -510,7 +511,7 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		}
 
 		MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
-		MulticastPlayAttackHitSound();
+		if (AudioComponent) AudioComponent->PlayAttackHitSound();
 		
 		// 공격 성공 시 공격자에게 카메라 쉐이크 적용
 		if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
@@ -542,7 +543,7 @@ void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
 	DashStartLocation = GetActorLocation();
 	DashEndLocation = DashStartLocation + GetActorForwardVector() * DashPower;
 
-	MulticastPlayDashSkillSound();
+	if (AudioComponent) AudioComponent->PlayDashSkillSound();
 	MulticastStartWingRushVFX();
 	MulticastStartDustVFX();
 }
@@ -560,7 +561,7 @@ void AGS_Drakhar::DashAttackCheck()
 void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 {
 	MulticastRPC_OnEarthquakeStart();
-	MulticastPlayEarthquakeSkillSound();
+	if (AudioComponent) AudioComponent->PlayEarthquakeSkillSound();
 
 	const FVector Start = GetActorLocation() + 100.f;
 	TSet<AGS_Character*> EarthquakeDamagedCharacters = DetectPlayerInRange(Start, 200.f, EarthquakeRadius);
@@ -604,7 +605,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			
 			// === 어스퀘이크 스킬 히트 사운드 재생 ===
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
-			MulticastPlayAttackHitSound();
+			if (AudioComponent) AudioComponent->PlayAttackHitSound();
 
 			FVector DrakharLocation = GetActorLocation();
 			FVector DamagedLocation = DamagedCharacter->GetActorLocation();
@@ -674,7 +675,7 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 	}
 
 	// 사운드 재생 (월드 검증 후)
-	MulticastPlayDraconicFurySkillSound();
+	if (AudioComponent) AudioComponent->PlayDraconicFurySkillSound();
 
 	FActorSpawnParameters Params;
 	Params.Instigator = this;
@@ -728,7 +729,7 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 				DrakharProjectile->SetIndicatorVFX(DraconicFuryIndicatorVFX, NormalIndicatorRadius);
 			}
 
-			MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
+			if (AudioComponent) AudioComponent->PlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
 		}
 	}
 }
@@ -817,12 +818,11 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 			SafeClearTimer(FeverTimer);
 			if (IsFeverMode)
 			{
-				MulticastPlayFeverModeEndEffects();
-
 				FGS_StatRow Stat;
 				Stat.ATK = 50.f;
 				GetStatComp()->ResetStat(Stat);
 				MulticastRPC_OnFeverModeEnd();
+				MulticastPlayFeverModeEndEffects();  // 피버 모드 종료 사운드 & 카메라 효과
 			}
 
 			IsFeverMode = false;
@@ -922,7 +922,7 @@ void AGS_Drakhar::FeverComoLastAttack()
 			}
 		}
 		
-		MulticastPlayComboFinisherSound();
+		if (AudioComponent) AudioComponent->PlayComboFinisherSound();
 	}
 }
 
@@ -934,8 +934,24 @@ void AGS_Drakhar::StartFeverMode()
 
 	GetStatComp()->ChangeStat(Stat);
 	MulticastRPCFeverMontagePlay();
-	MulticastPlayFeverModeStartSound();
-	MulticastPlayFeverModeStateSound();
+	if (AudioComponent)
+	{
+		AudioComponent->PlayFeverModeStartSound();
+
+		// FeverModeStateSound는 0.15초 후에 재생 (RPC 간격 제한 회피)
+		UWorld* World = GetWorld();
+		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+		{
+			SafeClearTimer(FeverStateSoundDelayTimer);
+			World->GetTimerManager().SetTimer(
+				FeverStateSoundDelayTimer,
+				this,
+				&AGS_Drakhar::PlayFeverModeStateSoundDelayed,
+				0.15f,
+				false
+			);
+		}
+	}
 	MulticastRPC_OnFeverModeStart();
 }
 
@@ -1026,81 +1042,49 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 	}
 }
 
-// === Multicast 사운드 RPC 함수들 구현 ===
-
-void AGS_Drakhar::MulticastPlayComboAttackSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayComboAttackSound();
-}
-
-void AGS_Drakhar::MulticastPlayDashSkillSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayDashSkillSound();
-}
-
-void AGS_Drakhar::MulticastPlayEarthquakeSkillSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayEarthquakeSkillSound();
-}
-
-void AGS_Drakhar::MulticastPlayDraconicFurySkillSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayDraconicFurySkillSound();
-}
-
-void AGS_Drakhar::MulticastPlayDraconicProjectileSound_Implementation(const FVector& Location)
-{
-	if (AudioComponent) AudioComponent->PlayDraconicProjectileSound(Location);
-}
-
 void AGS_Drakhar::OnRep_FeverGauge()
 {
 	OnCurrentFeverGaugeChanged.Broadcast(CurrentFeverGauge);
 }
 
-void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
+void AGS_Drakhar::OnAttackHit(AGS_Character* HitCharacter)
 {
-	if (!AudioComponent)
+	// 공격 히트 사운드 재생
+	if (AudioComponent)
 	{
-		return;
+		AudioComponent->PlayAttackHitSound();
 	}
-	
-	AudioComponent->PlayAttackHitSound();
 }
 
-void AGS_Drakhar::MulticastPlayComboFinisherSound_Implementation()
+void AGS_Drakhar::OnFeverGaugeUpdate(float DeltaGauge)
 {
-    if (AudioComponent)
-    {
-        AudioComponent->PlayComboFinisherSound();
-    }
+	// 피버 게이지 업데이트 로직
+	if (!GetIsFeverMode())
+	{
+		SetFeverGauge(DeltaGauge);
+	}
+	else if (GetIsFeverMode())
+	{
+		bIsAttckingDuringFever = true;
+		ResetIsAttackingDuringFeverMode();
+	}
 }
 
-void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
+void AGS_Drakhar::OnQuitSkill()
 {
-	if (AudioComponent) AudioComponent->PlayFeverModeStartSound();
-}
-
-void AGS_Drakhar::MulticastPlayFeverModeStateSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayFeverModeStateSound();
-}
-
-void AGS_Drakhar::MulticastStopFeverModeStateSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->StopFeverModeStateSound();
+	// 스킬 종료 시 값 리셋
+	ServerRPCResetValue();
 }
 
 void AGS_Drakhar::MulticastPlayFeverModeEndEffects_Implementation()
 {
-	// 피버 모드 스테이트 사운드 중지
-	if (AudioComponent) AudioComponent->StopFeverModeStateSound();
-
-	// 피버 모드 종료 사운드 재생
-	if (AudioComponent) AudioComponent->PlayFeverModeEndSound();
-
-	// 피버 모드 종료 VFX 비활성화
-	// MulticastPlayFeverModeEndVFX();
+	// 피버 모드 스테이트 사운드 중지 및 종료 사운드 재생
+	if (AudioComponent)
+	{
+		// Multicast RPC 내부에서 호출되므로 _Implementation을 직접 호출
+		AudioComponent->Multicast_StopFeverModeStateSound_Implementation();
+		AudioComponent->Multicast_PlayFeverModeEndSound_Implementation();
+	}
 
 	// 카메라 쉐이크 효과 (피버 모드 종료시 쉐이크)
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -1109,11 +1093,6 @@ void AGS_Drakhar::MulticastPlayFeverModeEndEffects_Implementation()
 		EndFeverShake.Intensity *= 0.5f;
 		Client_PlayAttackSuccessShakeWithInfo(PC, EndFeverShake);
 	}
-}
-
-void AGS_Drakhar::MulticastPlayHurtSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayHurtSound();
 }
 
 /*
@@ -1317,6 +1296,18 @@ void AGS_Drakhar::SafeClearTimer(FTimerHandle& TimerHandle)
 			World->GetTimerManager().ClearTimer(TimerHandle);
 		}
 		TimerHandle.Invalidate();
+	}
+}
+
+// === FeverModeStateSound 딜레이 재생 콜백 ===
+void AGS_Drakhar::PlayFeverModeStateSoundDelayed()
+{
+	// 언리얼이 자동으로 생명주기 관리
+	if (!IsValid(this)) return;
+
+	if (AudioComponent && IsFeverMode)
+	{
+		AudioComponent->PlayFeverModeStateSound();
 	}
 }
 

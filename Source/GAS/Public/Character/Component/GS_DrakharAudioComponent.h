@@ -40,6 +40,46 @@ public:
 	void HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter);
 
 private:
+	// === 멀티캐스트 RPC 함수 ===
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayComboAttackSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDashSkillSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayEarthquakeSkillSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDraconicFurySkillSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDraconicProjectileSound(const FVector& Location);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayAttackHitSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayFeverModeStartSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayFeverModeEndSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayFeverModeStateSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StopFeverModeStateSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayHurtSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayComboFinisherSound();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter);
+
 	UPROPERTY()
 	TObjectPtr<AGS_Drakhar> OwnerDrakhar;
 
