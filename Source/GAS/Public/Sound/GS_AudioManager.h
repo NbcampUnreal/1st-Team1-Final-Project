@@ -102,6 +102,9 @@ private:
 	// 맵 BGM 상태 관리
 	bool bIsMapBGMPlaying;
 
+	// 전투 BGM 상태 관리
+	bool bIsCombatMusicPlaying;
+
 	// 전투 BGM 관리
 	UPROPERTY()
 	UAkAudioEvent* CurrentCombatMusicStartEvent;

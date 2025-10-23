@@ -15,6 +15,9 @@ UGS_AudioManager::UGS_AudioManager()
 	// 맵 BGM 상태 초기화
 	bIsMapBGMPlaying = false;
 
+	// 전투 BGM 상태 초기화
+	bIsCombatMusicPlaying = false;
+
 	// BGM 볼륨 초기화
 	CurrentBGMVolume = 1.0f;
 
@@ -93,7 +96,10 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	// 맵 BGM 상태 초기화
 	bIsMapBGMPlaying = false;
-	
+
+	// 전투 BGM 상태 초기화
+	bIsCombatMusicPlaying = false;
+
 	// 오디오 에셋 유효성 검사
 	if (!ValidateAudioAssets())
 	{
@@ -211,6 +217,7 @@ void UGS_AudioManager::OnPreLoadMap(const FString& MapName)
 		// 상태 초기화
 		CurrentCombatMusicStartEvent = nullptr;
 		CurrentCombatMusicStopEvent = nullptr;
+		bIsCombatMusicPlaying = false;  // 전투 BGM 플래그 리셋
 	}
 	
 	// 3. RTPC를 기본값(100)으로 리셋 (다음 맵에서 맵 BGM이 정상 재생되도록)
@@ -413,7 +420,25 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 		// 서버에서는 전투 음악 상태만 저장
 		CurrentCombatMusicStartEvent = CombatMusicStartEvent;
 		CurrentCombatMusicStopEvent = CombatMusicStopEvent;
+		bIsCombatMusicPlaying = true;
 		return;
+	}
+
+	// 중복 재생 방지: 이미 같은 전투 BGM이 재생 중이면 중단
+	if (bIsCombatMusicPlaying && CurrentCombatMusicStartEvent == CombatMusicStartEvent)
+	{
+		UE_LOG(LogTemp, Log, TEXT("[AudioManager] 전투 BGM이 이미 재생 중입니다. 중복 재생을 방지합니다. (Event: %s)"),
+			*CombatMusicStartEvent->GetName());
+		return;
+	}
+
+	// 다른 전투 BGM이 재생 중이면 교체 허용 (다른 몬스터 종류)
+	if (bIsCombatMusicPlaying && CurrentCombatMusicStartEvent != CombatMusicStartEvent)
+	{
+		UE_LOG(LogTemp, Log, TEXT("[AudioManager] 전투 BGM 교체: %s → %s"),
+			CurrentCombatMusicStartEvent ? *CurrentCombatMusicStartEvent->GetName() : TEXT("None"),
+			*CombatMusicStartEvent->GetName());
+		// 기존 BGM 정지 후 새 BGM 재생 (아래 로직 계속 진행)
 	}
 
 	// 1. 기존 전투 음악 정지
@@ -434,6 +459,7 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 	if (Context && CombatMusicStartEvent)
 	{
 		UAkGameplayStatics::PostEvent(CombatMusicStartEvent, Context, 0, FOnAkPostEventCallback());
+		bIsCombatMusicPlaying = true;  // 전투 BGM 재생 상태로 설정
 	}
 
 	// 5. 전투 BGM에 현재 볼륨 적용 (Wwise에서 Music Bus에 RTPC가 연결되어 있어야 함)
@@ -477,6 +503,7 @@ void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatM
 	// 2. 전투 음악 상태 초기화
 	CurrentCombatMusicStartEvent = nullptr;
 	CurrentCombatMusicStopEvent = nullptr;
+	bIsCombatMusicPlaying = false;  // 전투 BGM 정지 상태로 설정
 
 	// 3. MapBGMVolume RTPC를 현재 볼륨으로 설정 (맵 BGM이 들리도록)
 	if (MapBGMVolumeRTPC)

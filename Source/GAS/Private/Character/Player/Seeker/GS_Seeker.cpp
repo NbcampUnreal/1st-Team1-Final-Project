@@ -568,15 +568,18 @@ void AGS_Seeker::OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedCompon
 
 void AGS_Seeker::AddCombatMonster(AGS_Monster* Monster)
 {
-	if (!Monster)
+	if (!IsValid(Monster))
 	{
 		return;
 	}
-	
+
+	// 무효한 몬스터 제거
+	NearbyMonsters.RemoveAll([](AGS_Monster* M) { return !IsValid(M); });
+
 	if (!NearbyMonsters.Contains(Monster))
 	{
 		NearbyMonsters.Add(Monster);
-		
+
 		// 첫 번째 몬스터가 추가되면 음악 시작
 		if (NearbyMonsters.Num() == 1)
 		{
@@ -587,13 +590,14 @@ void AGS_Seeker::AddCombatMonster(AGS_Monster* Monster)
 
 void AGS_Seeker::RemoveCombatMonster(AGS_Monster* Monster)
 {
-	if (!Monster)
+	if (Monster)
 	{
-		return;
+		NearbyMonsters.Remove(Monster);
 	}
-	
-	NearbyMonsters.Remove(Monster);
-	
+
+	// 무효한 몬스터 제거
+	NearbyMonsters.RemoveAll([](AGS_Monster* M) { return !IsValid(M); });
+
 	// 모든 몬스터가 제거되면 음악 중지
 	if (NearbyMonsters.Num() == 0)
 	{
@@ -603,7 +607,16 @@ void AGS_Seeker::RemoveCombatMonster(AGS_Monster* Monster)
 
 void AGS_Seeker::StartCombatMusic()
 {
-	if (!IsLocallyControlled() || NearbyMonsters.Num() == 0 || !NearbyMonsters[0])
+	// 로컬 제어 확인
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	// 무효한 몬스터 제거 후 배열 체크
+	NearbyMonsters.RemoveAll([](AGS_Monster* M) { return !IsValid(M); });
+
+	if (NearbyMonsters.Num() == 0)
 	{
 		return;
 	}
@@ -616,7 +629,7 @@ void AGS_Seeker::StartCombatMusic()
             UAkAudioEvent* CombatStartEvent = nullptr;
             UAkAudioEvent* CombatStopEvent = nullptr;
 
-            // 유효 이벤트를 가진 몬스터를 우선 탐색
+            // 유효한 이벤트를 가진 몬스터를 우선 탐색
             for (AGS_Monster* Monster : NearbyMonsters)
             {
                 if (!IsValid(Monster))
@@ -637,9 +650,17 @@ void AGS_Seeker::StartCombatMusic()
             }
             else
             {
-                UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StartCombatMusic - No valid CombatMusicEvent in NearbyMonsters."));
+                UE_LOG(LogTemp, Warning, TEXT("[Seeker] StartCombatMusic - 유효한 CombatMusicEvent가 없습니다. (NearbyMonsters: %d)"), NearbyMonsters.Num());
             }
 		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("[Seeker] StartCombatMusic - AudioManager를 찾을 수 없습니다!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Seeker] StartCombatMusic - GameInstance를 찾을 수 없습니다!"));
 	}
 }
 
