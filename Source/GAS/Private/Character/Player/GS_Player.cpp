@@ -16,6 +16,7 @@
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_SteamNameWidgetComp.h"
 #include "AkAudioDevice.h"
+#include "Sound/GS_AudioComponentBase.h"
 
 AGS_Player::AGS_Player()
 {
@@ -108,10 +109,16 @@ void AGS_Player::BeginPlay()
 	if (IsLocalPlayer())
 	{
 		// 자체 AkComponent의 Occlusion도 비활성화
-		if (AkComponent)
+		if (IsValid(AkComponent))
 		{
-			AkComponent->OcclusionRefreshInterval = 0.0f;
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Player AkComponent occlusion DISABLED."));
+			// Transform 검증
+			const FVector Location = GetActorLocation();
+			const FRotator Rotation = GetActorRotation();
+
+			if (UGS_AudioComponentBase::IsTransformValid(Location, Rotation))
+			{
+				AkComponent->OcclusionRefreshInterval = 0.0f;
+			}
 		}
 	}
 }
@@ -383,26 +390,32 @@ void AGS_Player::SetupLocalAudioListener()
 			}
 
 			// 만약 카메라 매니저에 리스너가 없다면 새로 생성하여 추가합니다.
-			if (!ListenerComponent)
+			if (!ListenerComponent && CameraManager->GetRootComponent())
 			{
-				ListenerComponent = NewObject<UAkComponent>(CameraManager);
-				if (ListenerComponent)
+				// Transform 검증
+				const FVector CameraLocation = CameraManager->GetCameraLocation();
+				const FRotator CameraRotation = CameraManager->GetCameraRotation();
+
+				if (UGS_AudioComponentBase::IsTransformValid(CameraLocation, CameraRotation))
 				{
-					ListenerComponent->AttachToComponent(CameraManager->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-					ListenerComponent->RegisterComponent();
-					FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-					if(AudioDevice)
+					ListenerComponent = NewObject<UAkComponent>(CameraManager);
+					if (IsValid(ListenerComponent))
 					{
-						AudioDevice->AddDefaultListener(ListenerComponent);
+						ListenerComponent->AttachToComponent(CameraManager->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+						ListenerComponent->RegisterComponent();
+						FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+						if (AudioDevice)
+						{
+							AudioDevice->AddDefaultListener(ListenerComponent);
+						}
 					}
 				}
 			}
 
-			if (ListenerComponent)
+			if (IsValid(ListenerComponent))
 			{
 				// 가장 중요한 부분: 카메라 리스너의 Occlusion을 비활성화합니다.
 				ListenerComponent->OcclusionRefreshInterval = 0.0f;
-				UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Camera audio listener occlusion DISABLED for local player."));
 			}
 		}
 	}
@@ -410,9 +423,19 @@ void AGS_Player::SetupLocalAudioListener()
 
 void AGS_Player::SetupHeadAudioListener()
 {
-	if (!HeadAudioListenerComponent)
+	if (!IsValid(HeadAudioListenerComponent))
 	{
 		UE_LOG(LogTemp, Error, TEXT("AGS_Player::SetupHeadAudioListener: HeadAudioListenerComponent is null!"));
+		return;
+	}
+
+	// Transform 검증
+	const FVector Location = GetActorLocation();
+	const FRotator Rotation = GetActorRotation();
+
+	if (!UGS_AudioComponentBase::IsTransformValid(Location, Rotation))
+	{
+		UE_LOG(LogTemp, Error, TEXT("[AGS_Player] SetupHeadAudioListener: Invalid Transform - %s"), *GetName());
 		return;
 	}
 
@@ -514,9 +537,19 @@ void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage
 
 void AGS_Player::PlaySound(UAkAudioEvent* SoundEvent)
 {
-	if (!AkComponent || !SoundEvent)
+	if (!IsValid(AkComponent) || !SoundEvent)
 	{
 		UE_LOG(LogAudio, Warning, TEXT("AkComponent or SoundEvent is null in PlaySound"));
+		return;
+	}
+
+	// Transform 검증
+	const FVector Location = GetActorLocation();
+	const FRotator Rotation = GetActorRotation();
+
+	if (!UGS_AudioComponentBase::IsTransformValid(Location, Rotation))
+	{
+		UE_LOG(LogAudio, Error, TEXT("[AGS_Player] PlaySound: Invalid Transform - %s"), *GetName());
 		return;
 	}
 
@@ -525,9 +558,19 @@ void AGS_Player::PlaySound(UAkAudioEvent* SoundEvent)
 
 void AGS_Player::PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPostEventCallback& Callback)
 {
-	if (!AkComponent || !SoundEvent)
+	if (!IsValid(AkComponent) || !SoundEvent)
 	{
 		UE_LOG(LogAudio, Warning, TEXT("AkComponent or SoundEvent is null in PlaySoundWithCallback"));
+		return;
+	}
+
+	// Transform 검증
+	const FVector Location = GetActorLocation();
+	const FRotator Rotation = GetActorRotation();
+
+	if (!UGS_AudioComponentBase::IsTransformValid(Location, Rotation))
+	{
+		UE_LOG(LogAudio, Error, TEXT("[AGS_Player] PlaySoundWithCallback: Invalid Transform - %s"), *GetName());
 		return;
 	}
 
