@@ -247,6 +247,12 @@ void AGS_Character::OnDeath()
 	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
 	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
 
+	// 모든 디버프 제거 (VFX 포함)
+	if (DebuffComp)
+	{
+		DebuffComp->ClearAllDebuffs();
+	}
+
 	DestroyAllWeapons();
 	MulticastRPCCharacterDeath();
 }
