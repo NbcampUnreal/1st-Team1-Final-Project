@@ -147,11 +147,14 @@ void UGS_DebuffComp::ClearAllDebuffs()
 		GetWorld()->GetTimerManager().ClearTimer(Elem.Value);
 	}
 
-	// 이후 안전하게 OnExpire 호출
+	// 이후 안전하게 OnExpire 호출 및 VFX 제거
 	for (auto& Elem : DebuffTimers)
 	{
 		if (Elem.Key && IsValid(Elem.Key))
 		{
+			// 디버프 VFX 제거 (만료 VFX는 재생하지 않음 - 사망 시)
+			RemoveDebuffVFX(Elem.Key->GetDebuffType());
+
 			Elem.Key->OnExpire();
 		}
 	}

@@ -112,7 +112,7 @@ protected:
 
 	/** 오디오 컴포넌트 초기화 여부 플래그 */
 	bool bIsAudioComponentInitialized;
-	
+
 	// ===================
 	// 카메라 위치 캐싱
 	// ===================
@@ -137,9 +137,29 @@ protected:
 
 public:
 	// ===================
+	// Transform 검증 (Static)
+	// ===================
+
+	/** Transform이 유효한지 검증 (NaN 체크) */
+	UFUNCTION(BlueprintPure, Category = "Audio|Validation")
+	static bool IsTransformValid(const FVector& Location, const FRotator& Rotation);
+
+	/** Transform이 유효한지 검증 (위치만) */
+	UFUNCTION(BlueprintPure, Category = "Audio|Validation")
+	static bool IsLocationValid(const FVector& Location);
+
+	/** World 컨텍스트가 유효한지 검증 */
+	UFUNCTION(BlueprintPure, Category = "Audio|Validation")
+	bool IsWorldContextValid() const;
+
+	/** AkComponent의 Transform을 안전하게 업데이트 */
+	UFUNCTION(BlueprintCallable, Category = "Audio|Validation")
+	bool SafeUpdateAkComponentTransform(UAkComponent* AkComp, const FVector& NewLocation, const FRotator& NewRotation);
+
+	// ===================
 	// 공통 인터페이스
 	// ===================
-	
+
 	/** 현재 RTS 모드인지 확인 */
 	UFUNCTION(BlueprintPure, Category = "Audio")
 	bool IsRTSMode() const;
