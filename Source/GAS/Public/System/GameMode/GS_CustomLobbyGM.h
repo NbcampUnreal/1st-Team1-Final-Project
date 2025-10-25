@@ -43,6 +43,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Game Settings")
 	int32 MinPlayersToStart = 1;
 
+	// 첫 플레이어 접속 대기 타이머
+	FTimerHandle StartupTimerHandle;
+	bool bHasFirstPlayerAttemptedLogin = false;
+	// 타이머가 만료되면 호출될 함수
+	void HandleStartupTimeout();
+	// 타이머 시간 (예: 120초 = 2분)
+	UPROPERTY(EditDefaultsOnly, Category = "GameLift")
+	float FirstPlayerTimeoutSeconds = 10.0f;
+
 private:
 	UPROPERTY()
 	TMap<FString, FString> PendingPlayerSessions;

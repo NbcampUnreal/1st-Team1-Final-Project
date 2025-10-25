@@ -6,6 +6,7 @@
 #include "Interfaces/OnlineFriendsInterface.h"
 #include "Interfaces/OnlineExternalUIInterface.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/LocalPlayer.h"
 #include "System/Save/GS_OptionSettinsSaveGame.h"
@@ -725,25 +726,35 @@ void UGS_GameInstance::CheckIfLastPlayerAndTerminate()
     {
         AGameStateBase* GS = World->GetGameState();
         
-        // Logout 함수는 플레이어 컨트롤러가 GameState의 PlayerArray에서 실제로 제거되기 전에 호출
-        // 플레이어 수가 1명이라면, 마지막 플레이어가 로그아웃하는 과정임을 의미
-        if (GS && GS->PlayerArray.Num() == 1)
+        if (GS && GS->PlayerArray.Num() == 1) // 마지막 플레이어가 로그아웃 중
         {
-            UE_LOG(LogTemp, Log, TEXT("Last player has left the game session. Calling ProcessEnding()."));
-            
-#if WITH_GAMELIFT_AUTOMATION
-            FGameLiftServerSDKModule* GameLiftSdkModule = &FModuleManager::LoadModuleChecked<FGameLiftServerSDKModule>(FName("GameLiftServerSDK"));
-            if (GameLiftSdkModule)
-            {
-                GameLiftSdkModule->ProcessEnding();
-            }
-#endif
+            UE_LOG(LogTemp, Log, TEXT("마지막 플레이어가 나갔습니다. TerminateServerProcess 호출."));
+            TerminateServerProcess();
         }
         else if (GS)
         {
-            UE_LOG(LogTemp, Log, TEXT("A player has left. Players remaining: %d"), GS->PlayerArray.Num() - 1);
+            UE_LOG(LogTemp, Log, TEXT("플레이어가 나갔습니다. 남은 인원: %d"), GS->PlayerArray.Num() - 1);
         }
     }
+}
+
+void UGS_GameInstance::TerminateServerProcess()
+{
+#if WITH_GAMELIFT
+    FGameLiftServerSDKModule* GameLiftSdkModule = FModuleManager::GetModulePtr<FGameLiftServerSDKModule>(TEXT("GameLiftServerSDK"));
+    if (GameLiftSdkModule)
+    {
+        GameLiftSdkModule->ProcessEnding();
+
+        //2초 후 강제 종료 실행
+        FTimerHandle ShutdownTimer;
+        GetWorld()->GetTimerManager().SetTimer(ShutdownTimer, [this]()
+        {
+            UE_LOG(LogTemp, Log, TEXT("서버 프로세스 종료를 시작합니다 (0명 로그아웃 또는 시작 타임아웃)."));
+            FGenericPlatformMisc::RequestExit(true);
+        }, 2.0f, false);
+    }
+#endif
 }
 
 void UGS_GameInstance::StorePlayerSession(const FUniqueNetIdRepl& PlayerId, const FString& PlayerSessionId)
@@ -911,6 +922,7 @@ void UGS_GameInstance::InitGameLift()
     {
         UE_LOG(GameServerLog, Log, TEXT("Game Server Process is terminating"));
         GameLiftSdkModule->ProcessEnding();
+        FGenericPlatformMisc::RequestExit(true);
     });
 
     // OnHealthCheck 콜백 설정
@@ -920,18 +932,14 @@ void UGS_GameInstance::InitGameLift()
         return true;
     });
 
-    // 로그 파일 경로 지정 (두 버전 모두에 적용)
+    // 로그 파일 경로 지정
     TArray<FString> Logfiles;
-#if WITH_GAMELIFT_AUTOMATION
     Logfiles.Add(TEXT("C:/game/logs/server.log")); // EC2 인스턴스 내의 경로
-#else
-    Logfiles.Add(TEXT("1st-Team1-Final-Project/Saved/Logs/server.log")); // Anywhere (로컬) 경로
-#endif
     ProcessParameters->logParameters = Logfiles;
 
     ProcessParameters->port = FURL::UrlConfig.DefaultPort;
 
-#if WITH_GAMELIFT_AUTOMATION
+#if WITH_GAMELIFT
     // --- EC2 버전일 경우 ---
     UE_LOG(GameServerLog, Log, TEXT("EC2 mode enabled. Initializing SDK for EC2 Fleet."));
     GameLiftSdkModule->InitSDK();

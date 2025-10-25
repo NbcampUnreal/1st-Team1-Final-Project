@@ -71,6 +71,7 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Network|Session")
     void CheckIfLastPlayerAndTerminate();
+    void TerminateServerProcess();
 
 protected:
     FOnDestroySessionCompleteDelegate LeaveSessionCompleteDelegate;
