@@ -190,6 +190,9 @@ public:
 
 	UFUNCTION()
 	void SetCanHitReact(bool bCanReact);
+
+	void SetInvincible(bool bEnable);
+
 protected:
 	virtual void NotifyActorBeginCursorOver() override;
 	virtual void NotifyActorEndCursorOver() override;
@@ -234,5 +237,9 @@ private:
 	void SpawnAndAttachWeapons();
 	
 	void SetHovered(bool bHovered);
+
+	// 무적 상태
+	UPROPERTY(Replicated)
+	bool bIsInvincible = false;
 };
 

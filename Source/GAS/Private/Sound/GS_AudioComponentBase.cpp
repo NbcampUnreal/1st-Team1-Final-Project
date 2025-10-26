@@ -54,11 +54,104 @@ void UGS_AudioComponentBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
     {
         GetWorld()->GetTimerManager().ClearTimer(DistanceCheckTimerHandle);
     }
-    
+
     // 모든 활성 사운드 중지
     StopAllActiveSounds();
-    
+
+    // AkComponent 정리
+    if (CachedAkComponent && IsValid(CachedAkComponent))
+    {
+        CachedAkComponent->Stop();
+        CachedAkComponent = nullptr;
+    }
+
     Super::EndPlay(EndPlayReason);
+}
+
+// ==========================
+// Transform 검증 함수들
+// ==========================
+
+bool UGS_AudioComponentBase::IsTransformValid(const FVector& Location, const FRotator& Rotation)
+{
+    // NaN 체크
+    if (Location.ContainsNaN())
+    {
+        return false;
+    }
+
+    if (Rotation.ContainsNaN())
+    {
+        return false;
+    }
+
+    // 개별 컴포넌트 Infinity 체크
+    if (!FMath::IsFinite(Location.X) || !FMath::IsFinite(Location.Y) || !FMath::IsFinite(Location.Z))
+    {
+        return false;
+    }
+
+    if (!FMath::IsFinite(Rotation.Pitch) || !FMath::IsFinite(Rotation.Yaw) || !FMath::IsFinite(Rotation.Roll))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool UGS_AudioComponentBase::IsLocationValid(const FVector& Location)
+{
+    // NaN 체크
+    if (Location.ContainsNaN())
+    {
+        return false;
+    }
+
+    // 개별 컴포넌트 Infinity 체크
+    if (!FMath::IsFinite(Location.X) || !FMath::IsFinite(Location.Y) || !FMath::IsFinite(Location.Z))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool UGS_AudioComponentBase::IsWorldContextValid() const
+{
+    UWorld* World = GetWorld();
+    return World &&
+           World->IsValidLowLevel() &&
+           !World->bIsTearingDown &&
+           IsValid(World) &&
+           IsValid(this);
+}
+
+bool UGS_AudioComponentBase::SafeUpdateAkComponentTransform(UAkComponent* AkComp, const FVector& NewLocation, const FRotator& NewRotation)
+{
+    // 컴포넌트 유효성 체크
+    if (!IsValid(AkComp))
+    {
+        return false;
+    }
+
+    // World 컨텍스트 체크
+    if (!IsWorldContextValid())
+    {
+        return false;
+    }
+
+    // Transform 유효성 체크
+    if (!IsTransformValid(NewLocation, NewRotation))
+    {
+        UE_LOG(LogTemp, Error, TEXT("[GS_AudioComponentBase] Invalid Transform detected - Location: %s, Rotation: %s (Owner: %s)"),
+               *NewLocation.ToString(), *NewRotation.ToString(),
+               GetOwner() ? *GetOwner()->GetName() : TEXT("None"));
+        return false;
+    }
+
+    // 안전하게 Transform 업데이트
+    AkComp->SetWorldLocationAndRotation(NewLocation, NewRotation);
+    return true;
 }
 
 bool UGS_AudioComponentBase::IsRTSMode() const
@@ -513,34 +606,63 @@ bool UGS_AudioComponentBase::ShouldUpdateRTPC(float NewDistance, float CurrentTi
 
 void UGS_AudioComponentBase::SetDistanceScaling(bool bIsRTS)
 {
+    // World 컨텍스트 검증
+    if (!IsWorldContextValid())
+    {
+        return;
+    }
+
     // 통일된 RTPC 시스템 사용
     const float ScalingValue = GetDistanceScalingForMode(bIsRTS);
     SetUnifiedRTPCValue(AttenuationModeRTPC, ScalingValue / 100.0f); // 0-100 → 0-1 정규화
-    
+
     // RTS 모드에서는 오클루전/오브스트럭션 비활성화
     const float OcclusionValue = bIsRTS ? 1.0f : 0.0f; // 1.0f = 비활성화, 0.0f = 활성화
     SetUnifiedRTPCValue(OcclusionDisableRTPC, OcclusionValue); // 이미 0-1 범위
 
     // RTS 모드에서는 AkComponent의 내장 오클루전 기능을 직접 비활성화!
     UAkComponent* AkComp = GetOrCreateAkComponent();
-    if (AkComp)
+    if (IsValid(AkComp))
     {
-        // OcclusionRefreshInterval을 0으로 설정하면 오클루전 계산이 비활성화!
-        // TPS 모드에서는 0.2초마다 계산하도록 재활성화!
-        AkComp->OcclusionRefreshInterval = bIsRTS ? 0.0f : 0.2f;
+        // Transform 검증
+        const FVector Location = GetOwner() ? GetOwner()->GetActorLocation() : FVector::ZeroVector;
+        const FRotator Rotation = GetOwner() ? GetOwner()->GetActorRotation() : FRotator::ZeroRotator;
+
+        if (IsTransformValid(Location, Rotation))
+        {
+            // OcclusionRefreshInterval을 0으로 설정하면 오클루전 계산이 비활성화!
+            // TPS 모드에서는 0.2초마다 계산하도록 재활성화!
+            AkComp->OcclusionRefreshInterval = bIsRTS ? 0.0f : 0.2f;
+        }
     }
 }
 
 UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
 {
+    // World 컨텍스트 검증
+    if (!IsWorldContextValid())
+    {
+        return nullptr;
+    }
+
     if (CachedAkComponent && IsValid(CachedAkComponent))
     {
         return CachedAkComponent;
     }
 
     AActor* Owner = GetOwner();
-    if (!Owner)
+    if (!IsValid(Owner))
     {
+        return nullptr;
+    }
+
+    // Transform 검증
+    const FVector Location = Owner->GetActorLocation();
+    const FRotator Rotation = Owner->GetActorRotation();
+
+    if (!IsTransformValid(Location, Rotation))
+    {
+        UE_LOG(LogTemp, Error, TEXT("[GS_AudioComponentBase] Invalid Transform at component creation - Owner: %s"), *Owner->GetName());
         return nullptr;
     }
 
@@ -548,13 +670,27 @@ UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
     if (!CachedAkComponent)
     {
         CachedAkComponent = NewObject<UAkComponent>(Owner);
-        if(CachedAkComponent)
+        if (IsValid(CachedAkComponent))
         {
             if (USceneComponent* RootC = Owner->GetRootComponent())
             {
                 CachedAkComponent->AttachToComponent(RootC, FAttachmentTransformRules::KeepRelativeTransform);
             }
-            CachedAkComponent->RegisterComponent();
+
+            // Transform 재검증 후 등록
+            const FVector NewLocation = Owner->GetActorLocation();
+            const FRotator NewRotation = Owner->GetActorRotation();
+
+            if (IsTransformValid(NewLocation, NewRotation))
+            {
+                CachedAkComponent->RegisterComponent();
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("[GS_AudioComponentBase] Invalid Transform during component registration - Owner: %s"), *Owner->GetName());
+                CachedAkComponent = nullptr;
+                return nullptr;
+            }
         }
     }
     return CachedAkComponent;
@@ -678,14 +814,57 @@ bool UGS_AudioComponentBase::PrepareMulticastSound(AActor* SourceActor, bool bSk
 UAkAudioEvent* UGS_AudioComponentBase::SelectSoundEventByMode(UAkAudioEvent* TPSSound, UAkAudioEvent* RTSSound, bool bUseRTSMode) const
 {
     const bool bRTS = bUseRTSMode || IsRTSMode();
-    
+
     if (bRTS)
     {
         // RTS 사운드가 있으면 사용, 없으면 TPS 사운드로 폴백
         return RTSSound ? RTSSound : TPSSound;
     }
-    
+
     return TPSSound;
+}
+
+bool UGS_AudioComponentBase::ShouldSkipListenServerRPC() const
+{
+    // 리슨 서버 중복 재생 방지: 서버에서 이미 로컬 실행했으므로 RPC 수신 시 스킵
+    AActor* Owner = GetOwner();
+    if (!Owner)
+    {
+        return false;
+    }
+
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return false;
+    }
+
+    // 리슨 서버에서 Authority를 가진 액터의 경우 RPC 스킵
+    bool bIsAuthority = Owner->GetLocalRole() == ROLE_Authority;
+    bool bIsListenServer = World->GetNetMode() == NM_ListenServer;
+    
+    return bIsAuthority && bIsListenServer;
+}
+
+// ==========================
+// 오디오 시스템 검증 (통합)
+// ==========================
+bool UGS_AudioComponentBase::IsAudioSystemValid() const
+{
+	// 데디케이티드 서버에서는 오디오 처리 불필요
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return false;
+	}
+
+	// Wwise 오디오 디바이스 초기화 상태 확인
+	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+	if (!AudioDevice || !AudioDevice->IsInitialized())
+	{
+		return false;
+	}
+
+	return true;
 }
 
 // ===========

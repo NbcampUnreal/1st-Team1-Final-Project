@@ -107,6 +107,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
+	DOREPLIFETIME(AGS_Character, bIsInvincible);
 	DOREPLIFETIME(AGS_Character, bLockRotationToController);
 }
 
@@ -161,6 +162,10 @@ void AGS_Character::BeginDestroy()
 
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (bIsInvincible)
+	{
+		return 0.0f;
+	}
 	// 이미 죽은 캐릭터는 추가 데미지를 받지 않음
 	if (IsDead())
 	{
@@ -246,6 +251,12 @@ void AGS_Character::OnDeath()
 
 	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
 	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
+
+	// 모든 디버프 제거 (VFX 포함)
+	if (DebuffComp)
+	{
+		DebuffComp->ClearAllDebuffs();
+	}
 
 	DestroyAllWeapons();
 	MulticastRPCCharacterDeath();
@@ -468,6 +479,11 @@ void AGS_Character::Server_SetCanHitReact_Implementation(bool bCanReact)
 void AGS_Character::SetCanHitReact(bool bCanReact)
 {
 	CanHitReact = bCanReact;
+}
+
+void AGS_Character::SetInvincible(bool bEnable)
+{
+	bIsInvincible = bEnable;
 }
 
 void AGS_Character::NotifyActorBeginCursorOver()

@@ -41,6 +41,7 @@
 						<ObjectRef Name="EV_PotionSippin" ID="{0960A90B-D49D-42D6-BE63-0838B5CE21D1}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresDashSkill_Hit_RTS" ID="{F2FE15FB-F0D3-4303-9E69-57DE5E51BFF5}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_UI_Mon_IronFang_Attack" ID="{05C664A9-8858-4308-9826-1B444CCD290E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Drakhar_FeverMode_ING_Play" ID="{1C74E099-85D8-4312-8B92-E8A863BB1347}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Merci_Hit_RTS" ID="{2C9F47AB-5F15-432C-A354-4D6D8A7DEDB1}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Voice_Ares_Attack_Final" ID="{F9E4E007-BB21-433B-B984-9BD2A6D80544}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Mon_SmallClaw_Attack_Swing" ID="{9773521B-3E47-434B-A618-825EECCA9E38}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -116,6 +117,7 @@
 						<ObjectRef Name="Props_StoneDooor_Close" ID="{CAF2368B-2B31-4894-B890-6034FC2E534C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_MeleeAttack_RTS" ID="{4F1663D5-6BFF-4898-B54C-9E58EA29967C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Fire_Extinguish" ID="{1261AE45-6B7B-489A-93E1-50AC8218A43C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Drakhar_FeverMode_End" ID="{46A6AF47-5D83-48AA-A94B-F4EBFDC4CE9D}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_UI_Mon_ShadowFang_Attack" ID="{BC1F0ACF-8BBE-48AB-9D16-6F6030777A27}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Chan_FinalAttack" ID="{FE229EF2-B036-48BD-BFB8-FD28A465AC48}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="SFX_ArrowImpact_Stone" ID="{5B4DA841-68C7-48EF-90AB-20E344778912}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
@@ -193,7 +195,7 @@
 						<ObjectRef Name="EV_Fire_Extinguish_RTS" ID="{31398026-F90C-4DEE-BD28-B1D52D9E0C65}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresSlashSkill" ID="{AE1FDE02-250E-4DFA-8402-681C1B1B8785}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_CrystalWallTrap_RTS" ID="{1462F21D-FA91-4E0A-A39F-7D1971122EFA}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
-						<ObjectRef Name="EV_Drakhar_FeverMode" ID="{C93E5944-6465-4E0C-842D-D15DBFAF2833}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_Drakhar_FeverMode_Start" ID="{C93E5944-6465-4E0C-842D-D15DBFAF2833}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_StoneTrap_Hit" ID="{624349E1-2251-4E0E-8E91-39536798294E}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_CombatPlay" ID="{ABB542E2-AD40-4E0E-BAC0-407ACAEE0A96}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_WingRush" ID="{148D1E7F-E352-4E1C-A1EB-4F703B63F0EE}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>

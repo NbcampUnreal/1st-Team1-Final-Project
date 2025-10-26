@@ -18,6 +18,7 @@
  */
 
 class UGS_UIAudioSystem;
+class UAkComponent;
 
 UCLASS()
 class GAS_API UGS_AudioManager : public UGameInstanceSubsystem
@@ -99,8 +100,15 @@ private:
 	UPROPERTY()
 	UGS_UIAudioSystem* UIAudio;
 
+	// BGM 전용 AkComponent (오클루전 비활성화)
+	UPROPERTY()
+	UAkComponent* BGMAkComponent;
+
 	// 맵 BGM 상태 관리
 	bool bIsMapBGMPlaying;
+
+	// 전투 BGM 상태 관리
+	bool bIsCombatMusicPlaying;
 
 	// 전투 BGM 관리
 	UPROPERTY()
@@ -154,4 +162,10 @@ private:
 	 * @brief 현재 재생 중인 전투 음악을 정지합니다.
 	 */
 	void StopCurrentCombatMusic(AActor* Context);
+
+	/**
+	 * @brief BGM 전용 AkComponent를 가져오거나 생성합니다.
+	 * @return BGM 재생용 AkComponent (오클루전 비활성화됨)
+	 */
+	UAkComponent* GetOrCreateBGMAkComponent();
 };

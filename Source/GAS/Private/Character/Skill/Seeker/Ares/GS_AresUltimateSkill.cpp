@@ -26,10 +26,13 @@ void UGS_AresUltimateSkill::ActiveSkill()
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		// 스킬 시작 사운드 재생
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		// 스킬 시작 사운드 재생 (멀티캐스트)
+		if (OwnerPlayer->HasAuthority())
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
+			}
 		}
 		
 		// 궁극기 루프 사운드 재생 (SeekerAudioComponent만 지원)
@@ -92,10 +95,7 @@ void UGS_AresUltimateSkill::BecomeBerserker()
 	}
 
 	// 1. 데미지 무효화
-	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
-	{
-		StatComp->SetInvincible(true);
-	}
+	OwnerCharacter->SetInvincible(true);
 
 	// 2~3. 스탯 변경
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
@@ -120,30 +120,31 @@ void UGS_AresUltimateSkill::BecomeBerserker()
 
 void UGS_AresUltimateSkill::DeactiveSkill()
 {
-	// 궁극기 루프 사운드 정지
-	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	// 궁극기 루프 사운드 정지 및 종료 사운드 재생 (멀티캐스트)
+	if (OwnerCharacter->HasAuthority())
 	{
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 3); // 3 = 루프 정지
+				AudioComp->RequestSkillAudio(CurrentSkillType, 1); // 1 = 스킬 종료
+			}
 		}
 	}
+
+	// 무적 상태 해제
+	OwnerCharacter->SetInvincible(false);
 
 	// 스탯 복원
 	if (UGS_StatComp* StatComp = OwnerCharacter->GetStatComp())
 	{
-		StatComp->SetInvincible(false);
 		StatComp->ResetStat(BuffAmount);
 	}
 
 	// 쿨타임 복원
 	if (UGS_SkillComp* SkillComp = OwnerCharacter->GetSkillComp())
 	{
-		/*if (UGS_SkillBase* MovingSkill = SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving))
-		{
-			SkillComp->ResetCooldownModifier(ESkillSlot::Moving);
-		}*/
 		SkillComp->ResetCooldownModifier(ESkillSlot::Moving);
 		OriginalMovingSkillCooltime = -1.f; // 초기화
 	}

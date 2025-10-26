@@ -149,6 +149,8 @@ public:
 	UFUNCTION(Client, Unreliable)
 	void Client_DrawAimAssistDebug(const FVector& Start, const FVector& End, const FVector& TargetLocation, float Duration); // SJE
 	
+	void SetIsAutoMoving(bool InIsAutoMoving);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

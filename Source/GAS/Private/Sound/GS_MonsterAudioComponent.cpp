@@ -125,8 +125,11 @@ void UGS_MonsterAudioComponent::PlaySound(EMonsterAudioState SoundType, bool bFo
 
 void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAudioState SoundTypeToTrigger, bool bIsImmediate)
 {
-    // 데디케이티드 서버에서는 오디오 처리 불필요
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
+    {
+        return;
+    }
 
     if (!OwnerMonster || !GetWorld())
     {

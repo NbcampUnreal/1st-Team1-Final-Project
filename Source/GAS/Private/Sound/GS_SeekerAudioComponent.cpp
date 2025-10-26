@@ -130,9 +130,18 @@ void UGS_SeekerAudioComponent::PlaySound(ESeekerAudioState SoundType, bool bForc
 
 void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudioState SoundTypeToTrigger, bool bIsImmediate)
 {
-    // 데디케이티드 서버에서는 오디오 처리 불필요
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
-    
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
+    {
+        return;
+    }
+
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -186,19 +195,8 @@ void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudi
         }
         LocalLastSoundPlayTimes.Emplace(SoundTypeToTrigger, CurrentTime);
     }
-    
-    // 멀티플레이어 환경에서 안전성 체크 강화
-    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-    if (!AudioDevice)
-    {
-        return;
-    }
 
-    if (!AudioDevice->IsInitialized())
-    {
-        return;
-    }
-
+    // 유효성 체크 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
     if (!IsValid(SoundEvent) || !IsValid(OwnerSeeker))
     {
         return;
@@ -259,6 +257,12 @@ void UGS_SeekerAudioComponent::PlayBowDrawSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayBowDrawSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 및 Distance Scaling 설정
     if (!PrepareMulticastSound(OwnerSeeker, false))
     {
@@ -268,18 +272,14 @@ void UGS_SeekerAudioComponent::Multicast_PlayBowDrawSound_Implementation()
     // 모드별 사운드 선택
     const bool bRTS = IsRTSMode();
     UAkAudioEvent* SoundToPlay = SelectSoundEventByMode(BowDrawSound, RTSMerciBowDrawSound, bRTS);
-    if (!SoundToPlay)
+    if (!SoundToPlay || !IsValid(OwnerSeeker))
     {
         return;
     }
 
-    // 사운드 재생 (안전성 체크 포함)
-    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-    if (AudioDevice && AudioDevice->IsInitialized() && IsValid(SoundToPlay) && IsValid(OwnerSeeker))
-    {
-        AkPlayingID BowPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
-        RegisterPlayingID(BowPlayingID);
-    }
+    // 사운드 재생 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
+    AkPlayingID BowPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(BowPlayingID);
 }
 
 void UGS_SeekerAudioComponent::PlayBowReleaseSound()
@@ -310,6 +310,12 @@ void UGS_SeekerAudioComponent::PlayBowReleaseSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayBowReleaseSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 및 Distance Scaling 설정
     if (!PrepareMulticastSound(OwnerSeeker, false))
     {
@@ -319,18 +325,14 @@ void UGS_SeekerAudioComponent::Multicast_PlayBowReleaseSound_Implementation()
     // 모드별 사운드 선택
     const bool bRTS = IsRTSMode();
     UAkAudioEvent* SoundToPlay = SelectSoundEventByMode(BowReleaseSound, RTSMerciBowReleaseSound, bRTS);
-    if (!SoundToPlay)
+    if (!SoundToPlay || !IsValid(OwnerSeeker))
     {
         return;
     }
 
-    // 사운드 재생 (안전성 체크 포함)
-    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-    if (AudioDevice && AudioDevice->IsInitialized() && IsValid(SoundToPlay) && IsValid(OwnerSeeker))
-    {
-        AkPlayingID ReleasePlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
-        RegisterPlayingID(ReleasePlayingID);
-    }
+    // 사운드 재생 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
+    AkPlayingID ReleasePlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(ReleasePlayingID);
 }
 
 void UGS_SeekerAudioComponent::StartSoundTimer()
@@ -473,25 +475,13 @@ void UGS_SeekerAudioComponent::StopSkill()
 
 void UGS_SeekerAudioComponent::PlaySoundAtLocation(UAkAudioEvent* SoundEvent, const FVector& Location)
 {
-    // 데디케이티드 서버에서는 사운드 재생하지 않음
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
     {
         return;
     }
 
     if (!SoundEvent)
-    {
-        return;
-    }
-
-    // 멀티플레이어 환경에서 Wwise 오디오 시스템 안전성 체크
-    FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-    if (!AudioDevice)
-    {
-        return;
-    }
-
-    if (!AudioDevice->IsInitialized())
     {
         return;
     }
@@ -673,6 +663,18 @@ void UGS_SeekerAudioComponent::RequestSkillAudio(ESkillSlot SkillSlot, int32 Aud
 
 void UGS_SeekerAudioComponent::Multicast_RequestSkillAudio_Implementation(ESkillSlot SkillSlot, int32 AudioEventType, FVector Location)
 {
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
+    {
+        return;
+    }
+
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // Event-Driven 방식으로 적절한 함수 호출 (RTS/TPS 모드 내장 분기 포함)
     switch (AudioEventType)
     {
@@ -773,8 +775,8 @@ void UGS_SeekerAudioComponent::PlayFinalAttackSound(UAkAudioEvent* ExtraSound)
 
 void UGS_SeekerAudioComponent::PlayGenericSound(UAkAudioEvent* SoundToPlay, bool bPlayOnLocalOnly)
 {
-	// 데디케이티드 서버에서는 오디오 처리 불필요
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) 
+	// 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+	if (!IsAudioSystemValid())
 	{
 		return;
 	}
@@ -784,13 +786,6 @@ void UGS_SeekerAudioComponent::PlayGenericSound(UAkAudioEvent* SoundToPlay, bool
 		return;
 	}
 
-	// Wwise 시스템 안전성 체크
-	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-	if (!AudioDevice || !AudioDevice->IsInitialized())
-	{
-		return;
-	}
-	
 	AkPlayingID GenericPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, GetOwner(), 0, FOnAkPostEventCallback());
 	RegisterPlayingID(GenericPlayingID);
 }
@@ -1006,6 +1001,12 @@ void UGS_SeekerAudioComponent::PlayAresComboAttackSoundWithExtra(int32 ComboInde
 
 void UGS_SeekerAudioComponent::Multicast_PlayChanComboAttackSound_Implementation(int32 ComboIndex)
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 공통 체크 로직 사용
     if (!ShouldPlaySoundAtLocation(OwnerSeeker->GetActorLocation()))
     {
@@ -1046,6 +1047,12 @@ void UGS_SeekerAudioComponent::Multicast_PlayChanComboAttackSound_Implementation
 
 void UGS_SeekerAudioComponent::Multicast_PlayAresComboAttackSound_Implementation(int32 ComboIndex)
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 공통 체크 로직 사용
     if (!ShouldPlaySoundAtLocation(OwnerSeeker->GetActorLocation()))
     {
@@ -1111,6 +1118,12 @@ void UGS_SeekerAudioComponent::Multicast_PlayAresComboAttackSound_Implementation
 
 void UGS_SeekerAudioComponent::Multicast_PlayAresComboAttackSoundWithExtra_Implementation(int32 ComboIndex)
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 공통 체크 로직 사용
     if (!ShouldPlaySoundAtLocation(OwnerSeeker->GetActorLocation()))
     {
@@ -1203,6 +1216,12 @@ void UGS_SeekerAudioComponent::PlayHitFeedbackSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayArrowShotSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 및 Distance Scaling 설정
     if (!PrepareMulticastSound(OwnerSeeker, false))
     {
@@ -1224,6 +1243,12 @@ void UGS_SeekerAudioComponent::Multicast_PlayArrowShotSound_Implementation()
 
 void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamStartSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 및 Distance Scaling 설정
     if (!PrepareMulticastSound(OwnerSeeker, false))
     {
@@ -1241,6 +1266,12 @@ void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamStartSound_Implementation
 
 void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamImpactSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 및 Distance Scaling 설정
     if (!PrepareMulticastSound(OwnerSeeker, false))
     {
@@ -1258,10 +1289,16 @@ void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamImpactSound_Implementatio
 
 void UGS_SeekerAudioComponent::Multicast_PlayHurtSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 (ViewFrustum 체크 제외 - 피격 사운드는 화면 밖에서도 들려야 함)
     bool bIsRTSMode = false;
     FVector ListenerLocation;
-    
+
     if (!ShouldPlayMulticastSound(OwnerSeeker, bIsRTSMode, ListenerLocation, true))
     {
         return;
@@ -1295,10 +1332,16 @@ void UGS_SeekerAudioComponent::Multicast_PlayHurtSound_Implementation()
 
 void UGS_SeekerAudioComponent::Multicast_PlayDeathSound_Implementation()
 {
+    // 리슨 서버 중복 재생 방지
+    if (ShouldSkipListenServerRPC())
+    {
+        return;
+    }
+
     // 통합 체크 (ViewFrustum 체크 제외 - 죽음 사운드는 화면 밖에서도 들려야 함)
     bool bIsRTSMode = false;
     FVector ListenerLocation;
-    
+
     if (!ShouldPlayMulticastSound(OwnerSeeker, bIsRTSMode, ListenerLocation, true))
     {
         return;
@@ -1471,9 +1514,12 @@ void UGS_SeekerAudioComponent::PlayRTSAresComboAttackSound(int32 ComboIndex)
         return;
     }
 
-    // 데디케이티드 서버에서는 오디오 처리 불필요
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer) { return; }
-    
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
+    {
+        return;
+    }
+
     if (!OwnerSeeker || !GetWorld())
     {
         return;
@@ -1666,12 +1712,12 @@ void UGS_SeekerAudioComponent::PlayRTSMerciArrowShotSound()
 
 bool UGS_SeekerAudioComponent::ShouldPlaySoundAtLocation(const FVector& SourceLocation, bool bSkipViewFrustumCheck) const
 {
-    // 데디케이티드 서버에서는 오디오 처리 불필요
-    if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
+    if (!IsAudioSystemValid())
     {
         return false;
     }
-    
+
     if (!OwnerSeeker || !GetWorld())
     {
         return false;
@@ -1732,7 +1778,6 @@ void UGS_SeekerAudioComponent::PlayDetectionWarningSound()
 {
     if (!DetectionWarningSound)
     {
-        UE_LOG(LogTemp, Warning, TEXT("DetectionWarningSound is not set!"));
         return;
     }
     

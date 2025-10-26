@@ -10,6 +10,7 @@ class UGS_DrakharAnimInstance;
 class UGS_VFXComponent;
 class UGS_CameraShakeComponent;
 class UWidgetComponent;
+class AGS_Character;
 
 //check ctrl input
 UENUM(BlueprintType)
@@ -84,6 +85,10 @@ public:
 	
 	//damage player in TSet
 	void ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& DamagedCharacters, float PlusDamge);
+
+	virtual void OnAttackHit(AGS_Character* HitCharacter);
+	virtual void OnFeverGaugeUpdate(float DeltaGauge);
+	virtual void OnQuitSkill();
 
 	//[quit skill - server logic]
 	UFUNCTION(BlueprintCallable)

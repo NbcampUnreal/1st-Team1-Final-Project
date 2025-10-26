@@ -43,6 +43,8 @@ AGS_Chan::AGS_Chan()
 void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_Chan, bIsDefending);
 }
 
 void AGS_Chan::ResetCurrentStamina()
@@ -50,24 +52,33 @@ void AGS_Chan::ResetCurrentStamina()
 	CurrentStamina = MaxStamina;
 }
 
-void AGS_Chan::SetCurrentStamina(float NewValue, bool SetbyDamage)
+void AGS_Chan::SetCurrentStamina(float NewValue, bool bByDamage)
 {
 	CurrentStamina = FMath::Clamp(NewValue, 0.f, MaxStamina);
 	Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
-	// UI 반영
-	/*if (SetbyDamage)
-	{
-		Client_UpdateChanAimingSkillBarDealy(CurrentStamina / MaxStamina);
-	}
-	else
-	{
-		Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
-	}*/
 
-	// 스테미나가 다 떨어지면 스킬
-	if (CurrentStamina <= 0.f && SkillComp && CurrentStamina > 0.f) // 직전 값 기준 체크
+	// 스테미나가 다 떨어지면 애니메이션 설정 후 Deactive
+	if (HasAuthority())
 	{
-		SkillComp->Server_TryDeactiveSkill(ESkillSlot::Aiming);
+		if (CurrentStamina <= 0.f && SkillComp) // 직전 값 기준 체크
+		{
+			OnStaminaDepleted.Broadcast(bByDamage);
+			SkillComp->Server_TryDeactiveSkill(ESkillSlot::Ready);
+		}
+	}
+}
+
+void AGS_Chan::DrainStaminaTick()
+{
+	SetCurrentStamina(CurrentStamina - StaminaDrainRate * 0.1f, false);
+}
+
+void AGS_Chan::RegenStaminaTick()
+{
+	SetCurrentStamina(CurrentStamina + StaminaRegenRate * 0.1f, false);
+	if (CurrentStamina >= MaxStamina)
+	{
+		GetWorldTimerManager().ClearTimer(StaminaHandle);
 	}
 }
 
@@ -83,6 +94,11 @@ void AGS_Chan::BeginPlay()
 
 	CurrentStamina = MaxStamina;
 	MaxHealth = GetStatComp()->GetMaxHealth();
+}
+
+void AGS_Chan::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
 }
 
 void AGS_Chan::OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -116,41 +132,11 @@ void AGS_Chan::MulticastPlayComboSection()
 {
 	Super::MulticastPlayComboSection();
 
-	// 3번째 공격(Attack3)에서만 방패 콜리전 활성화
-	if (HasAuthority() && CurrentComboIndex == 3)
-	{
-		// 방패 찾기 및 활성화
-		bool bShieldFound = false;
-		for (int32 i = 0; i < 5; ++i)
-		{
-			if (AGS_WeaponShield* Shield = Cast<AGS_WeaponShield>(GetWeaponByIndex(i)))
-			{
-				Shield->ServerEnableHit();
-				bShieldFound = true;
-				
-				// 0.8초 후 비활성화 (방패 공격 지속 시간을 좀 더 길게)
-				GetWorldTimerManager().ClearTimer(ShieldDisableTimer);
-				GetWorldTimerManager().SetTimer(ShieldDisableTimer, [Shield]()
-				{
-					if (Shield && IsValid(Shield))
-					{
-						Shield->ServerDisableHit();
-					}
-				}, 0.8f, false);
-				break;
-			}
-		}
-		
-		if (!bShieldFound)
-		{
-			UE_LOG(LogTemp, Error, TEXT("[Chan] Shield not found in any weapon slot!"));
-		}
-	}
+	// 방패 콜리전은 GS_AN_ShieldAttack AnimNotify에서 처리
 
 	// 오디오 컴포넌트를 통해 찬 전용 콤보 공격 사운드 재생
 	if (SeekerAudioComponent)
 	{
-		// 현재 콤보 인덱스를 가져와서 적절한 사운드 재생
 		SeekerAudioComponent->PlayChanComboAttackSound(CurrentComboIndex);
 	}
 }
@@ -300,7 +286,11 @@ void AGS_Chan::SetDefending(bool bDefending)
 {
 	if (HasAuthority())
 	{
+		if (bIsDefending == bDefending) return;
+
 		bIsDefending = bDefending;
+
+		GetWorldTimerManager().ClearTimer(StaminaHandle);
 		
 		// 방패의 방어용 콜리전 제어
 		for (int32 i = 0; i < 5; ++i)
@@ -311,11 +301,16 @@ void AGS_Chan::SetDefending(bool bDefending)
 				{
 					// 방어 시작 - 방어용 콜리전 활성화
 					Shield->ServerEnableDefenseHit();
+
+					// 스테미나 감소
+					GetWorldTimerManager().SetTimer(StaminaHandle, this, &AGS_Chan::DrainStaminaTick, 0.05f, true);
 				}
 				else
 				{
 					// 방어 해제 - 방어용 콜리전 비활성화
 					Shield->ServerDisableDefenseHit();
+
+					GetWorldTimerManager().SetTimer(StaminaHandle, this, &AGS_Chan::RegenStaminaTick, 0.05f, true);
 				}
 				break;
 			}

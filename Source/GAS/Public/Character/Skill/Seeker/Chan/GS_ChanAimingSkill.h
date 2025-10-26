@@ -23,11 +23,7 @@ public:
 	virtual void ActiveSkill() override;
 	virtual void OnSkillCanceledByDebuff() override;
 	virtual void OnSkillAnimationEnd() override;
-	virtual void OnSkillCommand() override;
 	virtual void InterruptSkill() override;
-
-	// 스테미나 관리
-	void TickDrainStamina();
 
 protected:
 	// 스탠스 관리
@@ -42,9 +38,6 @@ private:
 
 	// 공격
 	void OnShieldSlam();
-
-	// 스테미나 관리
-	FTimerHandle StaminaDrainHandle;
 
 	FTimerHandle KnockbackHandle;
 
