@@ -127,9 +127,6 @@ public:
 	void DrainStaminaTick();
 	void RegenStaminaTick();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animation")
-	UAnimMontage* TakeDownShieldMontage;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
