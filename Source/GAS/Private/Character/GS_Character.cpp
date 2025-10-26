@@ -107,6 +107,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
+	DOREPLIFETIME(AGS_Character, bIsInvincible);
 	DOREPLIFETIME(AGS_Character, bLockRotationToController);
 }
 
@@ -161,6 +162,10 @@ void AGS_Character::BeginDestroy()
 
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (bIsInvincible)
+	{
+		return 0.0f;
+	}
 	// 이미 죽은 캐릭터는 추가 데미지를 받지 않음
 	if (IsDead())
 	{
@@ -474,6 +479,11 @@ void AGS_Character::Server_SetCanHitReact_Implementation(bool bCanReact)
 void AGS_Character::SetCanHitReact(bool bCanReact)
 {
 	CanHitReact = bCanReact;
+}
+
+void AGS_Character::SetInvincible(bool bEnable)
+{
+	bIsInvincible = bEnable;
 }
 
 void AGS_Character::NotifyActorBeginCursorOver()
