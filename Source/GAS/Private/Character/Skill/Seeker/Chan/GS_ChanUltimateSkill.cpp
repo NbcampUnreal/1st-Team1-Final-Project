@@ -35,6 +35,13 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
+		if (UAnimInstance* AnimInstance = OwnerPlayer->GetMesh()->GetAnimInstance())
+		{
+			// 중복 등록 방지
+			//AnimInstance->OnMontageEnded.RemoveDynamic(this, &UGS_ChanUltimateSkill::OnMontageEnded);
+			//AnimInstance->OnMontageEnded.AddDynamic(this, &UGS_ChanUltimateSkill::OnMontageEnded);
+		}
+
 		// 궁극기 사운드 재생
 		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
 		{
@@ -296,4 +303,24 @@ void UGS_ChanUltimateSkill::EndCharge()
 	}
 
 	DeactiveSkill();
+}
+
+void UGS_ChanUltimateSkill::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (!OwnerCharacter) return;
+
+	if (SkillAnimMontages.Contains(Montage))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Montage Ended: %s (Interrupted: %s)"),
+			*Montage->GetName(),
+			bInterrupted ? TEXT("True") : TEXT("False"));
+
+		// 애니메이션 종료 처리 (Notify가 빠졌을 경우에도 안전하게)
+		OnSkillAnimationEnd();
+
+		if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
+		{
+			AnimInstance->OnMontageEnded.RemoveDynamic(this, &UGS_ChanUltimateSkill::OnMontageEnded);
+		}
+	}
 }

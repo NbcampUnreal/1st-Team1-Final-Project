@@ -47,9 +47,8 @@ void UGS_ChanReadySkill::ActiveSkill()
 
 		if (UAnimInstance* AnimInstance = OwnerPlayer->GetMesh()->GetAnimInstance())
 		{
-			// 중복 등록 방지
-			AnimInstance->OnMontageEnded.RemoveDynamic(this, &UGS_ChanReadySkill::OnMontageEnded);
-			AnimInstance->OnMontageEnded.AddDynamic(this, &UGS_ChanReadySkill::OnMontageEnded);
+			AnimInstance->OnMontageEnded.AddUniqueDynamic(this, &UGS_ChanReadySkill::OnMontageEnded);
+			ActiveMontage = TargetMontage; // 추적용 변수
 		}
 
 		// 스테미나 이벤트 구독
@@ -143,13 +142,38 @@ void UGS_ChanReadySkill::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted
 			*Montage->GetName(),
 			bInterrupted ? TEXT("True") : TEXT("False"));
 
-		// 애니메이션 종료 처리 (Notify가 빠졌을 경우에도 안전하게)
-		OnSkillAnimationEnd();
+		UE_LOG(LogTemp, Warning, TEXT("Ended Montage Name: %s | Path: %s | Addr: %p"),
+			*Montage->GetName(),
+			*Montage->GetPathName(),
+			Montage);
 
-		if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
+		if (SkillAnimMontages.IsValidIndex(1))
 		{
-			AnimInstance->OnMontageEnded.RemoveDynamic(this, &UGS_ChanReadySkill::OnMontageEnded);
+			UE_LOG(LogTemp, Warning, TEXT("SkillAnimMontages[1] Name: %s | Path: %s | Addr: %p"),
+				*SkillAnimMontages[1]->GetName(),
+				*SkillAnimMontages[1]->GetPathName(),
+				SkillAnimMontages[1]);
 		}
+
+		FName CurrentMontageName = NAME_None;
+		if (UAnimMontage* CurrentMontage = OwnerCharacter->GetMesh()->GetAnimInstance()->GetCurrentActiveMontage())
+		{
+			CurrentMontageName = CurrentMontage->GetFName();
+		}
+		UE_LOG(LogTemp, Warning, TEXT("AnimationEnded 현재 애니메이션 몽타주: %s"), *CurrentMontageName.ToString());
+
+		
+		// 애니메이션 종료 처리 (Notify가 빠졌을 경우에도 안전하게)
+		if (Montage == SkillAnimMontages[1])
+		{
+			OnSkillAnimationEnd();
+			if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
+			{
+				AnimInstance->OnMontageEnded.RemoveDynamic(this, &UGS_ChanReadySkill::OnMontageEnded);
+			}
+		}
+
+		
 	}
 }
 
@@ -172,7 +196,17 @@ void UGS_ChanReadySkill::DeactiveSkill()
 		{
 			OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 		}
+
+		
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[DeactiveMontageIndex], SectionName);
+
+		// 현재 재생 중인 몽타주가 있으면
+		FName CurrentMontageName = NAME_None;
+		if (UAnimMontage* CurrentMontage = OwnerCharacter->GetMesh()->GetAnimInstance()->GetCurrentActiveMontage())
+		{
+			CurrentMontageName = CurrentMontage->GetFName();
+		}
+		UE_LOG(LogTemp, Warning, TEXT("현재 애니메이션 몽타주: %s"), *CurrentMontageName.ToString());
 
 		// 방어 상태 비활성화 (스킬 완전 종료 시)
 		OwnerPlayer->SetDefending(false);

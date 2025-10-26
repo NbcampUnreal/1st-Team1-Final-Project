@@ -80,6 +80,12 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 
 void AGS_TpsController::Look(const FInputActionValue& InputValue)
 {
+	if (bIsAutoMoving)
+	{
+		// 자동 이동 중에는 마우스 회전 무시
+		return;
+	}
+
 	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
 	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
 	{
@@ -382,7 +388,10 @@ void AGS_TpsController::SnapCameraToCharacterYaw()
 
 void AGS_TpsController::SetIsAutoMoving(bool InIsAutoMoving)
 {
-	bIsAutoMoving = InIsAutoMoving;
+	if(HasAuthority())
+	{
+		bIsAutoMoving = InIsAutoMoving;
+	}
 }
 
 void AGS_TpsController::AutoMoveTick()

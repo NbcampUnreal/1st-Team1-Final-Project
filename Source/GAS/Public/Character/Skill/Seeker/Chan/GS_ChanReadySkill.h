@@ -25,6 +25,8 @@ public:
 protected:
 
 private:
+	UAnimMontage* ActiveMontage;
+	UAnimMontage* TargetMontage;
 	virtual void DeactiveSkill() override;
 
 	UFUNCTION()
