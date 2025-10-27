@@ -851,19 +851,36 @@ bool UGS_AudioComponentBase::ShouldSkipListenServerRPC() const
 // ==========================
 bool UGS_AudioComponentBase::IsAudioSystemValid() const
 {
+	UWorld* World = GetWorld();
+
 	// 데디케이티드 서버에서는 오디오 처리 불필요
-	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	// 단, Listen Server는 로컬 플레이어가 있으므로 오디오 필요
+	if (World && World->GetNetMode() == NM_DedicatedServer)
 	{
+		// Dedicated Server인 경우에만 차단
+		// (Listen Server는 NM_ListenServer(2)이므로 통과)
+		UE_LOG(LogTemp, Log, TEXT("[AudioSystem DEBUG] Dedicated Server - Audio disabled"));
 		return false;
 	}
 
 	// Wwise 오디오 디바이스 초기화 상태 확인
 	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-	if (!AudioDevice || !AudioDevice->IsInitialized())
+	if (!AudioDevice)
 	{
+		UE_LOG(LogTemp, Error, TEXT("[AudioSystem DEBUG] ❌ FAkAudioDevice::Get() returned NULL! NetMode: %d"),
+			World ? World->GetNetMode() : -1);
 		return false;
 	}
 
+	if (!AudioDevice->IsInitialized())
+	{
+		UE_LOG(LogTemp, Error, TEXT("[AudioSystem DEBUG] ❌ Wwise AudioDevice NOT initialized! NetMode: %d"),
+			World ? World->GetNetMode() : -1);
+		return false;
+	}
+
+	UE_LOG(LogTemp, Verbose, TEXT("[AudioSystem DEBUG] ✅ Audio system valid - NetMode: %d"),
+		World ? World->GetNetMode() : -1);
 	return true;
 }
 

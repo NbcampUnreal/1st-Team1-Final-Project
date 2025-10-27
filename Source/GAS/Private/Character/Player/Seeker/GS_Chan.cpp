@@ -135,9 +135,17 @@ void AGS_Chan::MulticastPlayComboSection()
 	// 방패 콜리전은 GS_AN_ShieldAttack AnimNotify에서 처리
 
 	// 오디오 컴포넌트를 통해 찬 전용 콤보 공격 사운드 재생
+	UE_LOG(LogTemp, Warning, TEXT("[CHAN DEBUG] MulticastPlayComboSection called - SeekerAudioComponent: %s, ComboIndex: %d"),
+		SeekerAudioComponent ? TEXT("Valid") : TEXT("NULL"), CurrentComboIndex);
+
 	if (SeekerAudioComponent)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[CHAN DEBUG] Calling PlayChanComboAttackSound(%d)"), CurrentComboIndex);
 		SeekerAudioComponent->PlayChanComboAttackSound(CurrentComboIndex);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[CHAN DEBUG] SeekerAudioComponent is NULL!"));
 	}
 }
 
