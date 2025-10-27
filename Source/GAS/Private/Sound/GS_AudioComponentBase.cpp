@@ -36,10 +36,24 @@ void UGS_AudioComponentBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 void UGS_AudioComponentBase::BeginPlay()
 {
     Super::BeginPlay();
-    
+
+    // 레벨 전환 후 AkComponent 재초기화 (중요!)
+    // EndPlay에서 nullptr로 설정된 AkComponent를 다시 생성
+    UAkComponent* AkComp = GetOrCreateAkComponent();
+    if (AkComp)
+    {
+        UE_LOG(LogTemp, Log, TEXT("[Audio Base] AkComponent initialized for %s"),
+            GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Audio Base] Failed to initialize AkComponent for %s"),
+            GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+    }
+
     // 모든 오디오 RTPC 초기화
     InitializeAudioRTPCs();
-    
+
     // 거리 체크 타이머 시작 - 성능 최적화된 주기
     if (GetWorld())
     {
