@@ -102,10 +102,10 @@ void UGS_AN_RotateControllerYaw::Notify(USkeletalMeshComponent* MeshComp, UAnimS
 
                 const FRotator DesiredYawOnly(0.f, (To - From).Rotation().Yaw, 0.f);
                 Seeker->SetActorRotation(DesiredYawOnly);
-                TpsController->SetControlRotation(DesiredYawOnly);
+                //TpsController->SetControlRotation(DesiredYawOnly);
 
                 // Debugging
-                if (Seeker->HasAuthority())
+                /*if (Seeker->HasAuthority())
                 {
                     TpsController->Client_DrawAimAssistDebug(Start, End, TargetActor->GetActorLocation(), 1.0f);
                     if (UCapsuleComponent* Capsule = TargetActor->FindComponentByClass<UCapsuleComponent>())
@@ -124,7 +124,7 @@ void UGS_AN_RotateControllerYaw::Notify(USkeletalMeshComponent* MeshComp, UAnimS
                     {
                         UE_LOG(LogTemp, Warning, TEXT("No Capsule")); // SJE
                     }
-                }
+                }*/
             }
             else
             {
