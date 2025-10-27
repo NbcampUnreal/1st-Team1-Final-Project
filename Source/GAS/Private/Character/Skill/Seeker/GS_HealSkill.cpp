@@ -47,6 +47,9 @@ void UGS_HealSkill::ActiveSkill()
 
 	if (OwnerCharacter)
 	{
+		// 여기가 아니라 직접 입에 갖다 대는 애니메이션이 시작되면 그때 AnimNotify 로 호출. -> 여기에서는 AnimMontage 를 호출.
+		OwnerCharacter->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+		
 		// 체력 회복 (서버 권한)
 		UGS_StatComp* StatComp = OwnerCharacter->GetStatComp();
 		if (StatComp)
@@ -90,6 +93,7 @@ void UGS_HealSkill::ActiveSkill()
 	}
 	
 	// 스킬 사용 후 비활성화
+	// -> 이걸 drinkpotion animation 끝났을 때 실행.
 	DeactiveSkill();
 }
 
