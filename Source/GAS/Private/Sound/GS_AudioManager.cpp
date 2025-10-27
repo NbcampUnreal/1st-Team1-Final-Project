@@ -278,10 +278,18 @@ void UGS_AudioManager::OnPreLoadMap(const FString& MapName)
 		bIsCombatMusicPlaying = false;  // 전투 BGM 플래그 리셋
 	}
 	
-	// 3. RTPC를 기본값(100)으로 리셋 (다음 맵에서 맵 BGM이 정상 재생되도록)
+	// 3. RTPC를 현재 사용자 설정 볼륨으로 유지 (다음 맵에서도 동일한 볼륨 유지)
 	if (MapBGMVolumeRTPC)
 	{
-		SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, 0.0f);
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, 0.0f);
+	}
+
+	// 4. BGMAkComponent 정리
+	if (BGMAkComponent && BGMAkComponent->IsValidLowLevel())
+	{
+		BGMAkComponent->Stop();
+		BGMAkComponent->DestroyComponent();
+		BGMAkComponent = nullptr;
 	}
 }
 
