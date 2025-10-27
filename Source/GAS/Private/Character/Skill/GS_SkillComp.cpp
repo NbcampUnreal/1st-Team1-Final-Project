@@ -126,7 +126,7 @@ bool UGS_SkillComp::IsSkillAllowed(ESkillSlot CompareSkillType)
 
 void UGS_SkillComp::SetCurAllowedSkillsMask(int8 BitMask)
 {
-	CurAllowedSkillsMask = BitMask;	
+	CurAllowedSkillsMask = BitMask;
 }
 
 void UGS_SkillComp::InitSkills()
@@ -239,6 +239,9 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 	Skill->EndVFXOffset = Info.EndVFXOffset;
 	
 	SkillMap.Add(Slot, Skill);
+
+	// Init Delegate
+	Skill->InitializeDelegate();
 }
 
 void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)

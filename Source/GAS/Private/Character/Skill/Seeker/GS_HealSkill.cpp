@@ -14,6 +14,7 @@ UGS_HealSkill::UGS_HealSkill()
 	bIsPotionDepletedOrHealthFull = false; 
 }
 
+/*
 void UGS_HealSkill::InitializeDamageBinding()
 {
 	// 한 번만 바인딩하도록 체크
@@ -25,13 +26,14 @@ void UGS_HealSkill::InitializeDamageBinding()
 		bIsAlreadyBound = true;
 	}
 }
+*/
 
 void UGS_HealSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
 
-	// 피해 감지 바인딩 초기화 (한 번만 실행됨)
-	InitializeDamageBinding();
+	/*// 피해 감지 바인딩 초기화 (한 번만 실행됨)
+	InitializeDamageBinding();*/
 
 	// 서버 권한 확인
 	if (!OwnerCharacter || !OwnerCharacter->HasAuthority())
@@ -219,6 +221,13 @@ void UGS_HealSkill::ShowPotionDepletedEffect()
 	}
 }
 
+void UGS_HealSkill::InitializeDelegate()
+{
+	Super::InitializeDelegate();
+
+	OwnerCharacter->OnTakeAnyDamage.AddDynamic(this, &UGS_HealSkill::OnOwnerDamaged);
+}
+
 void UGS_HealSkill::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -245,11 +254,8 @@ void UGS_HealSkill::OnOwnerDamaged(AActor* DamagedActor, float DamageAmount, con
 {
 	// 체력이 가득 찬 상태에서 피해를 입었을 때만 제한 해제
 	if (bIsPotionDepletedOrHealthFull)
-	{
-		// 현재 체력 상태를 다시 확인
-		bool bIsStillHealthFull = IsHealthFull();
-		
-		if (!bIsStillHealthFull)
+	{		
+		if (!IsHealthFull())
 		{
 			bIsPotionDepletedOrHealthFull = false;
 			SetCoolingDown(false);
