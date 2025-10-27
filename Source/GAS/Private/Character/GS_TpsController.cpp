@@ -396,8 +396,20 @@ void AGS_TpsController::SetIsAutoMoving(bool InIsAutoMoving)
 
 void AGS_TpsController::AutoMoveTick()
 {
+	if (!IsValid(this) || !IsLocalController())
+	{
+		return;
+	}
+	
 	if (!bIsAutoMoving)
 	{
+		return;
+	}
+
+	ACharacter* ControlledCharacter = Cast<ACharacter>(GetPawn());
+	if (!IsValid(ControlledCharacter) || !ControlledCharacter->GetCharacterMovement())
+	{
+		StopAutoMoveForward(); // 안전하게 정지
 		return;
 	}
 
@@ -586,5 +598,15 @@ void AGS_TpsController::BeginPlayingState()
 	{
 		Server_NotifyPlayerIsReady();
 		TestFunction();
+	}
+}
+
+void AGS_TpsController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AutoMoveTickHandle);
 	}
 }

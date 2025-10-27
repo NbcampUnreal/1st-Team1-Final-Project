@@ -156,6 +156,7 @@ protected:
 	virtual void SetupInputComponent() override;
 	virtual void PostSeamlessTravel() override;
 	virtual void BeginPlayingState() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	//게임 인스턴스 참조
 	UPROPERTY(BlueprintReadOnly, Category = "Settings")

@@ -616,6 +616,7 @@ float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 		// 활 쏘기 조준 상태 해제
 		SetDrawState(false);
 		SetAimState(false);
+		bIsFullyDrawn = false;
 
 		// 키 제한
 		GetSkillComp()->SetCurAllowedSkillsMask(0);

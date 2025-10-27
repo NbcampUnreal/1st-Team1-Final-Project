@@ -45,6 +45,10 @@ void UGS_AresMovingSkill::ActiveSkill()
 		OwnerPlayer->SetMoveControlValue(false, false);
 	}
 
+	// 기본 충돌 설정 저장
+	OriginalCapsuleResponseToPawn = OwnerCharacter->GetCapsuleComponent()->GetCollisionResponseToChannel(ECC_Pawn);
+	OriginalMeshResponseToPawn = OwnerCharacter->GetMesh()->GetCollisionResponseToChannel(ECC_Pawn);
+
 	// 차징 시작
 	ChargingStartTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
 	ChargingTime = 0.0f;
@@ -245,8 +249,8 @@ void UGS_AresMovingSkill::DeactiveSkill()
 	//OwnerCharacter->SetSkillInputControl(true, true, true);
 
 	// 원래대로 Block으로 되돌리기
-	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, OriginalCapsuleResponseToPawn);
+	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, OriginalMeshResponseToPawn);
 
 	// 스킬 종료 사운드 재생 (멀티캐스트)
 	if (OwnerCharacter->HasAuthority())
