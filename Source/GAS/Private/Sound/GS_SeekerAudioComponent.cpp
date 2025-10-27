@@ -133,38 +133,45 @@ void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudi
     // 리슨 서버 중복 재생 방지
     if (ShouldSkipListenServerRPC())
     {
+        UE_LOG(LogTemp, Warning, TEXT("[Seeker Audio DEBUG] ShouldSkipListenServerRPC returned true - Owner: %s"), OwnerSeeker ? *OwnerSeeker->GetName() : TEXT("None"));
         return;
     }
 
     // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
     if (!IsAudioSystemValid())
     {
+        UE_LOG(LogTemp, Warning, TEXT("[Seeker Audio DEBUG] IsAudioSystemValid failed - NetMode: %d, Wwise Initialized: %d"),
+            GetWorld() ? GetWorld()->GetNetMode() : -1,
+            FAkAudioDevice::Get() ? FAkAudioDevice::Get()->IsInitialized() : false);
         return;
     }
 
     if (!OwnerSeeker || !GetWorld())
     {
+        UE_LOG(LogTemp, Warning, TEXT("[Seeker Audio DEBUG] OwnerSeeker or World is null"));
         return;
     }
 
     FVector ListenerLocation;
     if (!GetListenerLocation(ListenerLocation))
     {
+        UE_LOG(LogTemp, Warning, TEXT("[Seeker Audio DEBUG] GetListenerLocation failed - Owner: %s"), *OwnerSeeker->GetName());
         return;
     }
 
     // RTS 모드와 TPS 모드에 따른 거리 체크
     const bool bRTS = IsRTSMode();
     const float MaxDistance = GetMaxDistanceForMode(bRTS);
-    
+
     float DistanceToListener = FVector::Dist(OwnerSeeker->GetActorLocation(), ListenerLocation);
-        
+
     // RTS 모드에서는 화면 시야각 기반 체크, TPS 모드에서는 거리 기반 체크
     if (bRTS)
     {
         // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
         if (!IsInViewFrustum(OwnerSeeker->GetActorLocation()))
         {
+            UE_LOG(LogTemp, Log, TEXT("[Seeker Audio DEBUG] RTS mode: Not in view frustum - Owner: %s"), *OwnerSeeker->GetName());
             return;
         }
     }
@@ -173,13 +180,17 @@ void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudi
         // TPS 모드: 기존 거리 기반 체크
         if (DistanceToListener > MaxDistance)
         {
+            UE_LOG(LogTemp, Log, TEXT("[Seeker Audio DEBUG] TPS mode: Distance too far (%.2f > %.2f) - Owner: %s"),
+                DistanceToListener, MaxDistance, *OwnerSeeker->GetName());
             return;
         }
     }
-    
+
     UAkAudioEvent* SoundEvent = GetSoundEvent(SoundTypeToTrigger);
     if (!SoundEvent)
     {
+        UE_LOG(LogTemp, Error, TEXT("[Seeker Audio DEBUG] SoundEvent is NULL for state %d - Owner: %s, CharacterType: %d"),
+            (int32)SoundTypeToTrigger, *OwnerSeeker->GetName(), (int32)CharacterType);
         return;
     }
 
@@ -189,9 +200,10 @@ void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudi
     if (!bIsImmediate)
     {
         float CurrentTime = GetWorld()->GetTimeSeconds();
-        if ((CurrentTime - LocalLastSoundPlayTimes.FindOrAdd(SoundTypeToTrigger, 0.0f)) < (1.0f * LocalSoundCooldownMultiplier)) 
+        if ((CurrentTime - LocalLastSoundPlayTimes.FindOrAdd(SoundTypeToTrigger, 0.0f)) < (1.0f * LocalSoundCooldownMultiplier))
         {
-            return; 
+            UE_LOG(LogTemp, Log, TEXT("[Seeker Audio DEBUG] Cooldown active - Owner: %s"), *OwnerSeeker->GetName());
+            return;
         }
         LocalLastSoundPlayTimes.Emplace(SoundTypeToTrigger, CurrentTime);
     }
@@ -199,11 +211,18 @@ void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudi
     // 유효성 체크 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
     if (!IsValid(SoundEvent) || !IsValid(OwnerSeeker))
     {
+        UE_LOG(LogTemp, Warning, TEXT("[Seeker Audio DEBUG] Final validation failed - SoundEvent valid: %d, OwnerSeeker valid: %d"),
+            IsValid(SoundEvent), IsValid(OwnerSeeker));
         return;
     }
 
+    UE_LOG(LogTemp, Log, TEXT("[Seeker Audio DEBUG] Posting sound event: %s for owner: %s (State: %d, CharType: %d)"),
+        *SoundEvent->GetName(), *OwnerSeeker->GetName(), (int32)SoundTypeToTrigger, (int32)CharacterType);
+
     AkPlayingID NewPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerSeeker, 0, FOnAkPostEventCallback());
     RegisterPlayingID(NewPlayingID);
+
+    UE_LOG(LogTemp, Log, TEXT("[Seeker Audio DEBUG] Sound posted with PlayingID: %d"), NewPlayingID);
 }
 
 void UGS_SeekerAudioComponent::PlayHurtSound()
@@ -874,25 +893,36 @@ void UGS_SeekerAudioComponent::PlayShieldSlamImpactSound()
 
 void UGS_SeekerAudioComponent::PlayChanComboAttackSound(int32 ComboIndex)
 {
+    UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] PlayChanComboAttackSound called - ComboIndex: %d, CharacterType: %d, HasAuthority: %d"),
+        ComboIndex, (int32)CharacterType, GetOwner() ? GetOwner()->HasAuthority() : false);
+
     // 찬만 찬 콤보 공격 사운드 재생 가능
     if (CharacterType != ECharacterType::Chan)
     {
+        UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] CharacterType is not Chan! Type: %d"), (int32)CharacterType);
         return;
     }
-    
+
     if (!OwnerSeeker || !OwnerSeeker->IsChan())
     {
+        UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] OwnerSeeker invalid or not Chan! OwnerSeeker: %s"),
+            OwnerSeeker ? *OwnerSeeker->GetName() : TEXT("NULL"));
         return;
     }
 
     if (!GetOwner() || !GetOwner()->HasAuthority())
     {
+        UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] No authority - Owner: %s, HasAuthority: %d"),
+            GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"), GetOwner() ? GetOwner()->HasAuthority() : false);
         return;
     }
 
     // RPC 호출 빈도 체크
     if (!CanSendRPC())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] CanSendRPC failed - RPC throttled"));
         return;
+    }
 
     LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
     Multicast_PlayChanComboAttackSound(ComboIndex);
@@ -1001,30 +1031,45 @@ void UGS_SeekerAudioComponent::PlayAresComboAttackSoundWithExtra(int32 ComboInde
 
 void UGS_SeekerAudioComponent::Multicast_PlayChanComboAttackSound_Implementation(int32 ComboIndex)
 {
+    UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] Multicast_PlayChanComboAttackSound_Implementation called - ComboIndex: %d"), ComboIndex);
+
     // 리슨 서버 중복 재생 방지
     if (ShouldSkipListenServerRPC())
     {
+        UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] Multicast skipped - Listen server"));
         return;
     }
 
     // 공통 체크 로직 사용
     if (!ShouldPlaySoundAtLocation(OwnerSeeker->GetActorLocation()))
     {
+        UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] ShouldPlaySoundAtLocation returned false"));
         return;
     }
 
     // RTS 모드 여부 확인
     const bool bRTS = IsRTSMode();
-    
+    UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] RTS Mode: %d"), bRTS);
+
     // RTS 모드에 따른 Distance Scaling 설정
     SetDistanceScaling(bRTS);
 
     // 찬 전용 콤보 공격 사운드 재생 (모드별 사운드 선택)
     UAkAudioEvent* SwingSoundToPlay = SelectSoundEventByMode(ChanAxeSwingSound, RTSChanAxeSwingSound, bRTS);
+    UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] SwingSound selected: %s (TPS: %s, RTS: %s)"),
+        SwingSoundToPlay ? *SwingSoundToPlay->GetName() : TEXT("NULL"),
+        ChanAxeSwingSound ? *ChanAxeSwingSound->GetName() : TEXT("NULL"),
+        RTSChanAxeSwingSound ? *RTSChanAxeSwingSound->GetName() : TEXT("NULL"));
+
     if (SwingSoundToPlay)
     {
         AkPlayingID SwingPlayingID = UAkGameplayStatics::PostEvent(SwingSoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
         RegisterPlayingID(SwingPlayingID);
+        UE_LOG(LogTemp, Warning, TEXT("[CHAN AUDIO DEBUG] ✅ SwingSound posted with PlayingID: %d"), SwingPlayingID);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("[CHAN AUDIO DEBUG] ❌ SwingSoundToPlay is NULL!"));
     }
 
     UAkAudioEvent* VoiceSoundToPlay = SelectSoundEventByMode(ChanAttackVoiceSound, RTSChanAttackVoiceSound, bRTS);
@@ -1715,32 +1760,49 @@ bool UGS_SeekerAudioComponent::ShouldPlaySoundAtLocation(const FVector& SourceLo
     // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
     if (!IsAudioSystemValid())
     {
+        UE_LOG(LogTemp, Error, TEXT("[ShouldPlaySound DEBUG] IsAudioSystemValid FAILED - NetMode: %d, Wwise: %d"),
+            GetWorld() ? GetWorld()->GetNetMode() : -1,
+            FAkAudioDevice::Get() ? FAkAudioDevice::Get()->IsInitialized() : false);
         return false;
     }
 
     if (!OwnerSeeker || !GetWorld())
     {
+        UE_LOG(LogTemp, Error, TEXT("[ShouldPlaySound DEBUG] OwnerSeeker or World NULL - Owner: %d, World: %d"),
+            OwnerSeeker != nullptr, GetWorld() != nullptr);
         return false;
     }
 
     FVector ListenerLocation;
     if (!GetListenerLocation(ListenerLocation))
     {
+        // GetListenerLocation 실패 시 (서버에서 로컬 플레이어가 없을 수 있음)
+        // Multicast RPC는 클라이언트에서도 실행되므로 서버에서는 스킵해도 됨
+        UE_LOG(LogTemp, Log, TEXT("[ShouldPlaySound DEBUG] GetListenerLocation FAILED (Server) - Owner: %s"),
+            OwnerSeeker ? *OwnerSeeker->GetName() : TEXT("NULL"));
+
+        // 서버에서는 스킵, 클라이언트에서 재생될 것
+        // 단, Standalone이나 실제 로컬 플레이어가 있는 경우만 경고
+        if (GetWorld() && GetWorld()->GetNetMode() == NM_Standalone)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("[ShouldPlaySound DEBUG] WARNING: Standalone mode but no listener!"));
+        }
         return false;
     }
 
     // RTS 모드와 TPS 모드에 따른 거리 체크
     const bool bRTS = IsRTSMode();
     const float MaxDistance = GetMaxDistanceForMode(bRTS);
-    
+
     const float DistanceToListener = FVector::Dist(SourceLocation, ListenerLocation);
-    
+
     // 모드별 체크 로직
     if (bRTS)
     {
         // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
         if (!bSkipViewFrustumCheck && !IsInViewFrustum(SourceLocation))
         {
+            UE_LOG(LogTemp, Log, TEXT("[ShouldPlaySound DEBUG] RTS mode - Not in view frustum"));
             return false;
         }
     }
@@ -1749,10 +1811,14 @@ bool UGS_SeekerAudioComponent::ShouldPlaySoundAtLocation(const FVector& SourceLo
         // TPS 모드: 기존 거리 기반 체크
         if (DistanceToListener > MaxDistance)
         {
+            UE_LOG(LogTemp, Warning, TEXT("[ShouldPlaySound DEBUG] TPS mode - Distance too far: %.2f > %.2f"),
+                DistanceToListener, MaxDistance);
             return false;
         }
     }
-    
+
+    UE_LOG(LogTemp, Log, TEXT("[ShouldPlaySound DEBUG] ✅ PASSED all checks - RTS: %d, Distance: %.2f/%.2f"),
+        bRTS, DistanceToListener, MaxDistance);
     return true;
 }
 
