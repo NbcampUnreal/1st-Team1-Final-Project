@@ -51,4 +51,7 @@ private:
 	FVector DashEndLocation;
 
 	TSet<AActor*> DamagedActors;
+
+	ECollisionResponse OriginalCapsuleResponseToPawn;
+	ECollisionResponse OriginalMeshResponseToPawn;
 };
