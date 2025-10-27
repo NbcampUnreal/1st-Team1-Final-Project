@@ -36,10 +36,24 @@ void UGS_AudioComponentBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty
 void UGS_AudioComponentBase::BeginPlay()
 {
     Super::BeginPlay();
-    
+
+    // 레벨 전환 후 AkComponent 재초기화 (중요!)
+    // EndPlay에서 nullptr로 설정된 AkComponent를 다시 생성
+    UAkComponent* AkComp = GetOrCreateAkComponent();
+    if (AkComp)
+    {
+        UE_LOG(LogTemp, Log, TEXT("[Audio Base] AkComponent initialized for %s"),
+            GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Audio Base] Failed to initialize AkComponent for %s"),
+            GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+    }
+
     // 모든 오디오 RTPC 초기화
     InitializeAudioRTPCs();
-    
+
     // 거리 체크 타이머 시작 - 성능 최적화된 주기
     if (GetWorld())
     {
@@ -859,7 +873,6 @@ bool UGS_AudioComponentBase::IsAudioSystemValid() const
 	{
 		// Dedicated Server인 경우에만 차단
 		// (Listen Server는 NM_ListenServer(2)이므로 통과)
-		UE_LOG(LogTemp, Log, TEXT("[AudioSystem DEBUG] Dedicated Server - Audio disabled"));
 		return false;
 	}
 
@@ -867,19 +880,19 @@ bool UGS_AudioComponentBase::IsAudioSystemValid() const
 	FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
 	if (!AudioDevice)
 	{
-		UE_LOG(LogTemp, Error, TEXT("[AudioSystem DEBUG] ❌ FAkAudioDevice::Get() returned NULL! NetMode: %d"),
+		UE_LOG(LogTemp, Error, TEXT("[AudioSystem DEBUG] FAkAudioDevice::Get() returned NULL! NetMode: %d"),
 			World ? World->GetNetMode() : -1);
 		return false;
 	}
 
 	if (!AudioDevice->IsInitialized())
 	{
-		UE_LOG(LogTemp, Error, TEXT("[AudioSystem DEBUG] ❌ Wwise AudioDevice NOT initialized! NetMode: %d"),
+		UE_LOG(LogTemp, Error, TEXT("[AudioSystem DEBUG] Wwise AudioDevice NOT initialized! NetMode: %d"),
 			World ? World->GetNetMode() : -1);
 		return false;
 	}
 
-	UE_LOG(LogTemp, Verbose, TEXT("[AudioSystem DEBUG] ✅ Audio system valid - NetMode: %d"),
+	UE_LOG(LogTemp, Verbose, TEXT("[AudioSystem DEBUG] Audio system valid - NetMode: %d"),
 		World ? World->GetNetMode() : -1);
 	return true;
 }
