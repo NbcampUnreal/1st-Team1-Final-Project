@@ -37,6 +37,9 @@ void UGS_AudioComponentBase::BeginPlay()
 {
     Super::BeginPlay();
 
+    // 재시도 카운터 초기화
+    AudioInitRetryCount = 0;
+
     // Seamless Travel 대응: World가 완전히 준비될 때까지 대기 후 초기화
     // 즉시 초기화 시도
     if (!InitializeAudioSystem())
@@ -47,9 +50,9 @@ void UGS_AudioComponentBase::BeginPlay()
 
         if (UWorld* World = GetWorld())
         {
-            FTimerHandle RetryTimerHandle;
+            // 멤버 변수 사용 (지역 변수 금지!)
             World->GetTimerManager().SetTimer(
-                RetryTimerHandle,
+                RetryInitTimerHandle,
                 this,
                 &UGS_AudioComponentBase::RetryAudioInitialization,
                 0.1f,  // 100ms 후 재시도
@@ -61,11 +64,12 @@ void UGS_AudioComponentBase::BeginPlay()
 
 void UGS_AudioComponentBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    // 타이머 중지
-    if (GetWorld())
-    {
-        GetWorld()->GetTimerManager().ClearTimer(DistanceCheckTimerHandle);
-    }
+    // 모든 타이머 안전하게 정리 (레벨 전환 대응)
+    SafeClearTimer(DistanceCheckTimerHandle);
+    SafeClearTimer(RetryInitTimerHandle);
+
+    // 재시도 카운터 리셋
+    AudioInitRetryCount = 0;
 
     // 모든 활성 사운드 중지
     StopAllActiveSounds();
@@ -708,7 +712,10 @@ UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
                 }
                 else
                 {
-                    UE_LOG(LogTemp, Warning, TEXT("[GS_AudioComponentBase] World tearing down, deferred registration for %s"), *Owner->GetName());
+                    // World가 정리 중이면 등록할 수 없으므로 생성 포기하고 재시도에 맡김
+                    UE_LOG(LogTemp, Warning, TEXT("[GS_AudioComponentBase] World tearing down, aborting component creation. Will retry for %s"), *Owner->GetName());
+                    CachedAkComponent = nullptr;
+                    return nullptr;
                 }
             }
             else
@@ -819,37 +826,35 @@ bool UGS_AudioComponentBase::InitializeAudioSystem()
 void UGS_AudioComponentBase::RetryAudioInitialization()
 {
     static const int32 MaxRetries = 5;
-    static TMap<UGS_AudioComponentBase*, int32> RetryCountMap;
 
-    int32& RetryCount = RetryCountMap.FindOrAdd(this, 0);
-    RetryCount++;
+    // 멤버 변수 사용 (static TMap 제거!)
+    AudioInitRetryCount++;
 
     UE_LOG(LogTemp, Log, TEXT("[Audio Base] Retry attempt %d/%d for %s"),
-        RetryCount, MaxRetries, GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+        AudioInitRetryCount, MaxRetries, GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
 
     if (InitializeAudioSystem())
     {
         UE_LOG(LogTemp, Log, TEXT("[Audio Base] ✅ Audio initialization succeeded on retry %d for %s"),
-            RetryCount, GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
-        RetryCountMap.Remove(this);
+            AudioInitRetryCount, GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+        AudioInitRetryCount = 0;  // 성공 시 리셋
         return;
     }
 
     // 최대 재시도 횟수 도달
-    if (RetryCount >= MaxRetries)
+    if (AudioInitRetryCount >= MaxRetries)
     {
         UE_LOG(LogTemp, Error, TEXT("[Audio Base] ❌ Audio initialization failed after %d retries for %s"),
             MaxRetries, GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
-        RetryCountMap.Remove(this);
+        AudioInitRetryCount = 0;  // 실패 시 리셋
         return;
     }
 
-    // 재시도
+    // 재시도 - 멤버 변수 사용 (지역 변수 금지!)
     if (UWorld* World = GetWorld())
     {
-        FTimerHandle RetryTimerHandle;
         World->GetTimerManager().SetTimer(
-            RetryTimerHandle,
+            RetryInitTimerHandle,
             this,
             &UGS_AudioComponentBase::RetryAudioInitialization,
             0.2f,  // 200ms 후 재시도
@@ -870,6 +875,19 @@ void UGS_AudioComponentBase::InitializeAudioRTPCs()
 
     // 오클루전 기본값 설정 (TPS 모드에서는 활성화: 0.0f)
     SetUnifiedRTPCValue(OcclusionDisableRTPC, 0.0f);
+}
+
+void UGS_AudioComponentBase::SafeClearTimer(FTimerHandle& TimerHandle)
+{
+    if (TimerHandle.IsValid())
+    {
+        UWorld* World = GetWorld();
+        if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+        {
+            World->GetTimerManager().ClearTimer(TimerHandle);
+        }
+        TimerHandle.Invalidate();
+    }
 }
 
 // ==========================
