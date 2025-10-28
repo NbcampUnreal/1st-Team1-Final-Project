@@ -79,6 +79,12 @@ public:
 	// Delegate
 	virtual void InitializeDelegate() override;
 
+	// Get
+	float GetHealAmount();
+	int32 GetCurrentHealCount();
+	void DecreaseCurrentHealCount();
+	int32 GetMaxHealCount();
+
 	// ===================
 	// VFX/SFX 참고
 	// ===================
