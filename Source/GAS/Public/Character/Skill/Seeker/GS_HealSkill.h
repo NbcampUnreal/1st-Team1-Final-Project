@@ -36,9 +36,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Heal")
 	bool bIsPotionDepletedOrHealthFull;
 
-protected:
+/*protected:
 	// 초기화 함수
-	void InitializeDamageBinding();
+	void InitializeDamageBinding();*/ // SJE
 
 public:
 	// 리플리케이션 함수
@@ -75,6 +75,9 @@ public:
 
 	// 포션 부족 시 쿨다운 효과 표시
 	void ShowPotionDepletedEffect();
+
+	// Delegate
+	virtual void InitializeDelegate() override;
 
 	// ===================
 	// VFX/SFX 참고

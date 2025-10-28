@@ -229,7 +229,5 @@ void UGS_ArrowFXComponent::Multicast_PlayHitSound_Implementation(ETargetType Tar
 			FRotator::ZeroRotator,
 			OwnerActor->GetWorld()
 		);
-		
-		UE_LOG(LogTemp, Log, TEXT("Arrow Hit Sound Played"));
 	}
 } 

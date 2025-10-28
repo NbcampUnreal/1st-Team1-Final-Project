@@ -294,3 +294,8 @@ void UGS_SkillBase::PlaySkillEndSound() const
 	}
 	// 다른 캐릭터 타입은 각자의 오디오 컴포넌트 사용
 }
+
+void UGS_SkillBase::InitializeDelegate()
+{
+	return;
+}

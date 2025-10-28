@@ -94,6 +94,9 @@ public:
 	// 쿨타임 
 	void SetCoolingDown(bool bInCoolingDown) { bIsCoolingDown = bInCoolingDown; }
 	
+	// Delegate Binding 함수
+	virtual void InitializeDelegate(); 
+	
 protected:
 	bool bIsActive = false;
 	bool bIsCoolingDown;
