@@ -37,27 +37,25 @@ void UGS_AudioComponentBase::BeginPlay()
 {
     Super::BeginPlay();
 
-    // 레벨 전환 후 AkComponent 재초기화 (중요!)
-    // EndPlay에서 nullptr로 설정된 AkComponent를 다시 생성
-    UAkComponent* AkComp = GetOrCreateAkComponent();
-    if (AkComp)
+    // Seamless Travel 대응: World가 완전히 준비될 때까지 대기 후 초기화
+    // 즉시 초기화 시도
+    if (!InitializeAudioSystem())
     {
-        UE_LOG(LogTemp, Log, TEXT("[Audio Base] AkComponent initialized for %s"),
+        // 실패 시 다음 프레임에 재시도 (Seamless Travel 중일 가능성)
+        UE_LOG(LogTemp, Warning, TEXT("[Audio Base] Audio initialization failed at BeginPlay. Retrying on next tick for %s"),
             GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("[Audio Base] Failed to initialize AkComponent for %s"),
-            GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
-    }
 
-    // 모든 오디오 RTPC 초기화
-    InitializeAudioRTPCs();
-
-    // 거리 체크 타이머 시작 - 성능 최적화된 주기
-    if (GetWorld())
-    {
-        GetWorld()->GetTimerManager().SetTimer(DistanceCheckTimerHandle, this, &UGS_AudioComponentBase::UpdateDistanceRTPC, DistanceCheckInterval, true);
+        if (UWorld* World = GetWorld())
+        {
+            FTimerHandle RetryTimerHandle;
+            World->GetTimerManager().SetTimer(
+                RetryTimerHandle,
+                this,
+                &UGS_AudioComponentBase::RetryAudioInitialization,
+                0.1f,  // 100ms 후 재시도
+                false
+            );
+        }
     }
 }
 
@@ -653,12 +651,7 @@ void UGS_AudioComponentBase::SetDistanceScaling(bool bIsRTS)
 
 UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
 {
-    // World 컨텍스트 검증
-    if (!IsWorldContextValid())
-    {
-        return nullptr;
-    }
-
+    // 캐시된 컴포넌트가 유효하면 바로 반환
     if (CachedAkComponent && IsValid(CachedAkComponent))
     {
         return CachedAkComponent;
@@ -666,6 +659,13 @@ UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
 
     AActor* Owner = GetOwner();
     if (!IsValid(Owner))
+    {
+        return nullptr;
+    }
+
+    // World 검증 (Seamless Travel 대응: bIsTearingDown 체크 제거)
+    UWorld* World = GetWorld();
+    if (!World || !World->IsValidLowLevel())
     {
         return nullptr;
     }
@@ -680,12 +680,15 @@ UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
         return nullptr;
     }
 
+    // 먼저 기존 AkComponent 찾기
     CachedAkComponent = Owner->FindComponentByClass<UAkComponent>();
     if (!CachedAkComponent)
     {
-        CachedAkComponent = NewObject<UAkComponent>(Owner);
+        // 없으면 새로 생성
+        CachedAkComponent = NewObject<UAkComponent>(Owner, NAME_None, RF_Transient);
         if (IsValid(CachedAkComponent))
         {
+            // Root Component에 Attach
             if (USceneComponent* RootC = Owner->GetRootComponent())
             {
                 CachedAkComponent->AttachToComponent(RootC, FAttachmentTransformRules::KeepRelativeTransform);
@@ -697,7 +700,16 @@ UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
 
             if (IsTransformValid(NewLocation, NewRotation))
             {
-                CachedAkComponent->RegisterComponent();
+                // RegisterComponent()는 World가 완전히 준비된 후에만 호출
+                if (!World->bIsTearingDown)
+                {
+                    CachedAkComponent->RegisterComponent();
+                    UE_LOG(LogTemp, Log, TEXT("[GS_AudioComponentBase] ✅ AkComponent created and registered for %s"), *Owner->GetName());
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("[GS_AudioComponentBase] World tearing down, deferred registration for %s"), *Owner->GetName());
+                }
             }
             else
             {
@@ -707,6 +719,11 @@ UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
             }
         }
     }
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("[GS_AudioComponentBase] Found existing AkComponent for %s"), *Owner->GetName());
+    }
+
     return CachedAkComponent;
 }
 
@@ -739,8 +756,108 @@ void UGS_AudioComponentBase::SetUnifiedRTPCValue(UAkRtpc* RTPC, float Normalized
 }
 
 // ==========
-// 초기화 함수  
+// 초기화 함수
 // ==========
+
+bool UGS_AudioComponentBase::InitializeAudioSystem()
+{
+    // World 유효성 체크 (Seamless Travel 대응)
+    UWorld* World = GetWorld();
+    if (!World || !World->IsValidLowLevel())
+    {
+        return false;
+    }
+
+    // Seamless Travel 중인지 확인
+    if (World->bIsTearingDown)
+    {
+        UE_LOG(LogTemp, Log, TEXT("[Audio Base] World is tearing down, deferring initialization for %s"),
+            GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+        return false;
+    }
+
+    // Wwise 오디오 디바이스 확인
+    FAkAudioDevice* AkDevice = FAkAudioDevice::Get();
+    if (!AkDevice || !AkDevice->IsInitialized())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Audio Base] Wwise not initialized yet, deferring for %s"),
+            GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+        return false;
+    }
+
+    // 레벨 전환 후 AkComponent 재초기화 (중요!)
+    // EndPlay에서 nullptr로 설정된 AkComponent를 다시 생성
+    UAkComponent* AkComp = GetOrCreateAkComponent();
+    if (!AkComp)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Audio Base] Failed to create AkComponent for %s"),
+            GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+        return false;
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("[Audio Base] ✅ AkComponent successfully initialized for %s"),
+        GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+
+    // 모든 오디오 RTPC 초기화
+    InitializeAudioRTPCs();
+
+    // 거리 체크 타이머 시작 - 성능 최적화된 주기
+    if (!DistanceCheckTimerHandle.IsValid())
+    {
+        World->GetTimerManager().SetTimer(
+            DistanceCheckTimerHandle,
+            this,
+            &UGS_AudioComponentBase::UpdateDistanceRTPC,
+            DistanceCheckInterval,
+            true
+        );
+    }
+
+    return true;
+}
+
+void UGS_AudioComponentBase::RetryAudioInitialization()
+{
+    static const int32 MaxRetries = 5;
+    static TMap<UGS_AudioComponentBase*, int32> RetryCountMap;
+
+    int32& RetryCount = RetryCountMap.FindOrAdd(this, 0);
+    RetryCount++;
+
+    UE_LOG(LogTemp, Log, TEXT("[Audio Base] Retry attempt %d/%d for %s"),
+        RetryCount, MaxRetries, GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+
+    if (InitializeAudioSystem())
+    {
+        UE_LOG(LogTemp, Log, TEXT("[Audio Base] ✅ Audio initialization succeeded on retry %d for %s"),
+            RetryCount, GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+        RetryCountMap.Remove(this);
+        return;
+    }
+
+    // 최대 재시도 횟수 도달
+    if (RetryCount >= MaxRetries)
+    {
+        UE_LOG(LogTemp, Error, TEXT("[Audio Base] ❌ Audio initialization failed after %d retries for %s"),
+            MaxRetries, GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
+        RetryCountMap.Remove(this);
+        return;
+    }
+
+    // 재시도
+    if (UWorld* World = GetWorld())
+    {
+        FTimerHandle RetryTimerHandle;
+        World->GetTimerManager().SetTimer(
+            RetryTimerHandle,
+            this,
+            &UGS_AudioComponentBase::RetryAudioInitialization,
+            0.2f,  // 200ms 후 재시도
+            false
+        );
+    }
+}
+
 void UGS_AudioComponentBase::InitializeAudioRTPCs()
 {
     if (!GetOwner())
