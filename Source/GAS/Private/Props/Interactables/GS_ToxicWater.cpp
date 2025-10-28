@@ -40,7 +40,7 @@ void AGS_ToxicWater::OnTWaterBeginOverlap(UPrimitiveComponent* OverlappedComp, A
 		if (UGS_DebuffComp* DebuffComp = Seeker->FindComponentByClass<UGS_DebuffComp>())
 		{
 			DebuffComp->ApplyDebuff(EDebuffType::Slow, nullptr);
-			DebuffComp->ApplyDebuff(EDebuffType::Lava, nullptr);
+			//DebuffComp->ApplyDebuff(EDebuffType::Lava, nullptr);
 		}
 	}
 }
@@ -57,7 +57,7 @@ void AGS_ToxicWater::OnTWaterEndOverlap(UPrimitiveComponent* OverlappedComp,
 		{
 			DebuffComp->RemoveDebuff(EDebuffType::Slow);
 			//임시
-			DebuffComp->RemoveDebuff(EDebuffType::Lava);
+			//DebuffComp->RemoveDebuff(EDebuffType::Lava);
 		}
 	}
 	
