@@ -287,7 +287,14 @@ protected:
 	
 	/** Distance Scaling 설정 (통일된 방식) */
 	void SetDistanceScaling(bool bIsRTS);
-	
+
+	/** 오디오 시스템 초기화 (Seamless Travel 대응) */
+	bool InitializeAudioSystem();
+
+	/** 오디오 초기화 재시도 (Seamless Travel 중 실패 시) */
+	UFUNCTION()
+	void RetryAudioInitialization();
+
 	/** 모든 오디오 RTPC 초기화 */
 	virtual void InitializeAudioRTPCs();
 
