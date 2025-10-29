@@ -20,6 +20,9 @@ AGS_Ares::AGS_Ares()
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_AresSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 
 	// 사운드 배열들은 GS_SeekerAudioComponent에서 관리됨
+
+	// KeyManual에서 쓰일 캐릭터 타입 저장
+	ManualRowName = FName("Ares");
 }
 
 // Called when the game starts or when spawned

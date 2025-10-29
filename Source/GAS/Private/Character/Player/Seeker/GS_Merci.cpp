@@ -43,6 +43,9 @@ AGS_Merci::AGS_Merci()
 	
 	CharacterType = ECharacterType::Merci;
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_MerciSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
+
+	// KeyManual에서 쓰일 캐릭터 타입 저장
+	ManualRowName = FName("Merci");
 }
 
 void AGS_Merci::Client_UpdateTargetUI_Implementation(AActor* NewTarget, AActor* OldTarget)

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Interface/GS_ManualDataInterface.h"
 #include "NiagaraComponent.h"
 #include "Animation/Character/E_SeekerAnim.h"
 #include "Character/Skill/GS_SkillComp.h"
@@ -53,7 +54,7 @@ enum class ECollisionSoundType : uint8
 };
 
 UCLASS()
-class GAS_API AGS_Seeker : public AGS_Player
+class GAS_API AGS_Seeker : public AGS_Player, public IGS_ManualDataInterface
 {
 	GENERATED_BODY()
 
@@ -268,6 +269,9 @@ protected:
 	void InitializeCameraManager();
 	void UpdatePostProcessEffect(float EffectStrength);
 
+	// KeyManual을 위한 인터페이스 함수
+	virtual FName GetManualRowName_Implementation() const override;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
@@ -283,6 +287,10 @@ protected:
 	// 카메라 매니저 참조 추가
 	UPROPERTY()
 	APlayerCameraManager* LocalCameraManager;
+
+	// KeyManual을 위한 캐릭터 타입 저장
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Manual")
+	FName ManualRowName;
 
 	// ===================================
 	// LowHP 스크린 효과 (효과 보간 관련 변수)

@@ -221,6 +221,11 @@ void AGS_Guardian::ShowTargetUI(bool bIsActive)
 	}
 }
 
+FName AGS_Guardian::GetManualRowName_Implementation() const
+{
+	return ManualRowName;
+}
+
 float AGS_Guardian::GetFlySpeed()
 {
 	return SpeedUpMoveSpeed;

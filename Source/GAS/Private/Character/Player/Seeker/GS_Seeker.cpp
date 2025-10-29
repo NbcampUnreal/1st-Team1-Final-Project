@@ -418,6 +418,11 @@ void AGS_Seeker::SetLookControlValue(bool bLookUp, bool bLookRight)
 	}
 }
 
+FName AGS_Seeker::GetManualRowName_Implementation() const
+{
+	return ManualRowName;
+}
+
 void AGS_Seeker::UpdatePostProcessEffect(float EffectStrength)
 {
     if (LowHealthEffectComp)
