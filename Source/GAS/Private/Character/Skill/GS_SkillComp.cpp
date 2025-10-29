@@ -376,6 +376,22 @@ bool UGS_SkillComp::IsSkillActive(ESkillSlot Slot) const
 	return false;
 }
 
+UGS_SkillBase* UGS_SkillComp::GetActiveSkill() const
+{
+	for (const auto& Pair : SkillStates)
+	{
+		if (Pair.Value.bIsActive)
+		{
+			if (UGS_SkillBase* const* SkillPtr = SkillMap.Find(Pair.Key))
+			{
+				return *SkillPtr;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
 void UGS_SkillComp::StartCooldownForSkill(ESkillSlot Slot)
 {
 	if (!GetOwner()->HasAuthority())
