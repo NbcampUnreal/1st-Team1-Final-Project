@@ -104,6 +104,7 @@ public:
 
 	void SetSkillActiveState(ESkillSlot Slot, bool InIsActive);
 	bool IsSkillActive(ESkillSlot Slot) const;
+	UGS_SkillBase* GetActiveSkill() const;
 	
 	void StartCooldownForSkill(ESkillSlot Slot);
 

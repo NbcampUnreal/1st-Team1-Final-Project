@@ -6,6 +6,7 @@
 #include "Components/PostProcessComponent.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Character/Skill/GS_SkillBase.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/Controller.h"
 #include "System/GS_PlayerState.h"
@@ -315,6 +316,17 @@ void AGS_Player::OnDeath()
 
 	// 추가적인 플레이어 죽음 처리 로직을 여기에 구현할 수 있다
 	// 예: 카메라 연출, UI 변경, 리스폰 타이머 등
+
+	// TODO: 추후 빈사 상태 등 복잡한 사망 처리가 필요할 시, 이 로직은 해당 상태 전환 함수로 이동해야 함.
+	
+	// 현재 사용 중인 스킬 강제 중단 및 VFX 정리
+	if (SkillComp)
+	{
+		if(UGS_SkillBase* CurrentSkill = SkillComp->GetActiveSkill())
+		{
+			CurrentSkill->InterruptSkill();
+		}
+	}
 	
 	GetCharacterMovement()->DisableMovement();
 

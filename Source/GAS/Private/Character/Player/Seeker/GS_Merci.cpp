@@ -463,7 +463,7 @@ void AGS_Merci::UpdateZoom(float Alpha)
 		return;
 	}
 
-	float TargetArmLength = FMath::Lerp(400.0f, 180.0f, Alpha);
+	float TargetArmLength = FMath::Lerp(320.0f, 180.0f, Alpha);
 	float SocketOffsetY = FMath::Lerp(67.f, 87.f, Alpha);
 	float SocketOffsetZ = FMath::Lerp(174.f, 134.f, Alpha);
 
