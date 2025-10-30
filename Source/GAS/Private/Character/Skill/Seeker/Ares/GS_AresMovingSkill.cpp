@@ -15,6 +15,8 @@
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/GS_TpsController.h"
+#include "Character/Player/GS_Player.h"
+#include "GameFramework/SpringArmComponent.h"
 
 
 UGS_AresMovingSkill::UGS_AresMovingSkill()
@@ -55,7 +57,29 @@ void UGS_AresMovingSkill::ActiveSkill()
 
 	// 일정 주기로 방향과 차징 시간 갱신
 	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(ChargingTimerHandle, this, &UGS_AresMovingSkill::UpdateCharging, 0.05f, true);
+}
 
+void UGS_AresMovingSkill::InitializeDelegate()
+{
+	Super::InitializeDelegate();
+
+	if (OwningComp)
+	{
+		OwningComp->OnSkillActivated.AddDynamic(this, &UGS_AresMovingSkill::HandleSkillActivated);
+	}
+}
+
+void UGS_AresMovingSkill::HandleSkillActivated(ESkillSlot ActivatedSkillSlot)
+{
+	// 이 스킬이 맞는지, 카메라가 Idle 상태인지 확인
+	if (ActivatedSkillSlot == CurrentSkillType && CurrentZoomState == EZoomState::Idle)
+	{
+		// 카메라 줌아웃 시작 (클라이언트에서만)
+		if (OwnerCharacter && OwnerCharacter->IsLocallyControlled())
+		{
+			StartCameraZoomOut();
+		}
+	}
 }
 
 void UGS_AresMovingSkill::OnSkillCanceledByDebuff()
@@ -74,12 +98,20 @@ void UGS_AresMovingSkill::OnSkillCommand()
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] OnSkillCommand CALLED (Server)"));
+
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
 	}
 
 	Super::OnSkillCommand();
+
+	// Actor의 Multicast RPC를 통해 카메라 원복 (모든 클라이언트에게 전달됨)
+	if (AGS_Ares* AresOwner = Cast<AGS_Ares>(OwnerCharacter))
+	{
+		AresOwner->Multicast_RestoreDashCameraZoom();
+	}
 
 	// 사운드 처리 (멀티캐스트)
 	if (OwnerCharacter->HasAuthority())
@@ -104,12 +136,6 @@ void UGS_AresMovingSkill::OnSkillCommand()
 	float Ratio = ChargingTime / MaxChargingTime;
 	float DashDistance = FMath::Lerp(MinDashDistance, MaxDashDistance, Ratio);
 
-	//UE_LOG(LogTemp, Log, TEXT("[AresDash] ChargingTime: %.2f / %.2f (%.0f%%), DashDistance: %.0f units"),
-	//	ChargingTime,
-	//	MaxChargingTime,
-	//	Ratio * 100.f,
-	//	DashDistance);
-
 	// 대시 시작
 	if (IsValid(OwnerCharacter))
 	{
@@ -127,7 +153,16 @@ void UGS_AresMovingSkill::OnSkillCommand()
 void UGS_AresMovingSkill::InterruptSkill()
 {
 	Super::InterruptSkill();
-	//AGS_Ares* AresCharacter = Cast<AGS_Ares>(OwnerCharacter);
+
+	// 카메라 원복 (Idle 상태가 아닐 때만)
+	if (OwnerCharacter && OwnerCharacter->IsLocallyControlled() && CurrentZoomState != EZoomState::Idle)
+	{
+		RestoreCameraZoom(true); // 강제 복원
+	}
+
+	// 타이머 정리
+	SafeClearTimer(ChargingTimerHandle);
+
 	SetIsActive(false);
 }
 
@@ -238,8 +273,11 @@ void UGS_AresMovingSkill::UpdateDash()
 
 void UGS_AresMovingSkill::DeactiveSkill()
 {
-	// 타이머 초기화
-	GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
+	// 대시 타이머만 정리합니다.
+	if (OwnerCharacter && OwnerCharacter->GetWorld())
+	{
+		OwnerCharacter->GetWorld()->GetTimerManager().ClearTimer(DashTimerHandle);
+	}
 
 	// 입력 제한 설정
 	/*AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController());
@@ -265,4 +303,222 @@ void UGS_AresMovingSkill::DeactiveSkill()
 	}
 
 	Super::DeactiveSkill();
+}
+
+void UGS_AresMovingSkill::StartCameraZoomOut()
+{
+	if (!OwnerCharacter || !OwnerCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	// 이미 줌 진행 중이면 중복 호출 방지
+	if (CurrentZoomState != EZoomState::Idle)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] StartCameraZoomOut IGNORED (Already in progress, State=%d)"), (int32)CurrentZoomState);
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] StartCameraZoomOut CALLED"));
+
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	if (!OwnerPlayer || !OwnerPlayer->SpringArmComp)
+	{
+		return;
+	}
+
+	// 원래 거리 저장
+	OriginalArmLength = OwnerPlayer->SpringArmComp->TargetArmLength;
+
+	// 커브 시간 계산
+	CameraZoomDuration = GetCameraZoomDuration();
+
+	CameraZoomElapsed = 0.0f;
+	CurrentZoomState = EZoomState::ZoomingOut;
+	bPendingZoomIn = false;
+
+	// 기존 타이머 정리 후 새 타이머 시작
+	SafeClearTimer(CameraUpdateTimerHandle);
+	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(
+		CameraUpdateTimerHandle,
+		this,
+		&UGS_AresMovingSkill::UpdateCameraZoom,
+		0.016f, // ~60fps
+		true
+	);
+}
+
+void UGS_AresMovingSkill::RestoreCameraZoom(bool bForceRestore)
+{
+	if (!OwnerCharacter || !OwnerCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	// Idle 상태면 이미 원래 상태이므로 무시
+	if (CurrentZoomState == EZoomState::Idle)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] RestoreCameraZoom IGNORED (Already Idle)"));
+		return;
+	}
+
+	// 강제 복원 모드가 아니고, 줌아웃이 완료되지 않았다면 pending 처리
+	if (!bForceRestore && CurrentZoomState != EZoomState::ZoomedOut)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] RestoreCameraZoom PENDING (State=%d)"), (int32)CurrentZoomState);
+		bPendingZoomIn = true;
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] RestoreCameraZoom START (Force=%s, State=%d)"),
+		bForceRestore ? TEXT("true") : TEXT("false"), (int32)CurrentZoomState);
+
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	if (!OwnerPlayer || !OwnerPlayer->SpringArmComp)
+	{
+		return;
+	}
+
+	// 커브 시간 계산
+	CameraZoomDuration = GetCameraZoomDuration();
+
+	CameraZoomElapsed = 0.0f;
+	CurrentZoomState = EZoomState::ZoomingIn;
+	bPendingZoomIn = false;
+
+	// 기존 타이머 정리 후 줌인 타이머 시작
+	SafeClearTimer(CameraUpdateTimerHandle);
+	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(
+		CameraUpdateTimerHandle,
+		this,
+		&UGS_AresMovingSkill::UpdateCameraZoom,
+		0.016f, // ~60fps
+		true
+	);
+}
+
+void UGS_AresMovingSkill::SetCameraSettings(float InZoomOutDistance, UCurveFloat* InCameraZoomCurve)
+{
+	ZoomOutDistance = InZoomOutDistance;
+	CameraZoomCurve = InCameraZoomCurve;
+}
+
+void UGS_AresMovingSkill::UpdateCameraZoom()
+{
+	if (!OwnerCharacter || !OwnerCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	if (!OwnerPlayer || !OwnerPlayer->SpringArmComp)
+	{
+		return;
+	}
+
+	// 시간 경과 (타이머 간격 0.016초 사용)
+	float DeltaTime = 0.016f;
+	CameraZoomElapsed += DeltaTime;
+
+	float Alpha = FMath::Clamp(CameraZoomElapsed / CameraZoomDuration, 0.0f, 1.0f);
+
+	// 커브가 있으면 커브 값 사용, 없으면 선형 보간
+	if (CameraZoomCurve)
+	{
+		Alpha = CameraZoomCurve->GetFloatValue(CameraZoomElapsed);
+	}
+
+	float TargetArmLength = OriginalArmLength;
+	if (CurrentZoomState == EZoomState::ZoomingOut)
+	{
+		TargetArmLength = FMath::Lerp(OriginalArmLength, OriginalArmLength + ZoomOutDistance, Alpha);
+	}
+	else if (CurrentZoomState == EZoomState::ZoomingIn)
+	{
+		TargetArmLength = FMath::Lerp(OriginalArmLength + ZoomOutDistance, OriginalArmLength, Alpha);
+	}
+
+	OwnerPlayer->SpringArmComp->TargetArmLength = TargetArmLength;
+
+	// 애니메이션 완료 체크
+	if (CameraZoomElapsed >= CameraZoomDuration)
+	{
+		if (CurrentZoomState == EZoomState::ZoomingOut)
+		{
+			CurrentZoomState = EZoomState::ZoomedOut;
+			SafeClearTimer(CameraUpdateTimerHandle);
+			UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] Zoom-Out FINISHED. State -> ZoomedOut."));
+
+			if (bPendingZoomIn)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] Pending Zoom-In detected. Starting zoom-in."));
+				bPendingZoomIn = false;
+				RestoreCameraZoom();
+			}
+		}
+		else if (CurrentZoomState == EZoomState::ZoomingIn)
+		{
+			CurrentZoomState = EZoomState::Idle;
+			SafeClearTimer(CameraUpdateTimerHandle);
+			UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] Zoom-In FINISHED. State -> Idle. Clearing Timer."));
+		}
+	}
+}
+
+void UGS_AresMovingSkill::SafeClearTimer(FTimerHandle& TimerHandle)
+{
+	if (!TimerHandle.IsValid())
+	{
+		return;
+	}
+
+	if (!IsWorldContextValid())
+	{
+		TimerHandle.Invalidate();
+		return;
+	}
+
+	UWorld* World = OwnerCharacter ? OwnerCharacter->GetWorld() : nullptr;
+	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+	{
+		World->GetTimerManager().ClearTimer(TimerHandle);
+	}
+	TimerHandle.Invalidate();
+}
+
+bool UGS_AresMovingSkill::IsWorldContextValid() const
+{
+	if (!OwnerCharacter)
+	{
+		return false;
+	}
+
+	UWorld* World = OwnerCharacter->GetWorld();
+	return World &&
+	       World->IsValidLowLevel() &&
+	       !World->bIsTearingDown &&
+	       IsValid(World);
+}
+
+void UGS_AresMovingSkill::BeginDestroy()
+{
+	// 모든 타이머 정리
+	SafeClearTimer(ChargingTimerHandle);
+	SafeClearTimer(DashTimerHandle);
+	SafeClearTimer(CameraUpdateTimerHandle);
+
+	Super::BeginDestroy();
+}
+
+float UGS_AresMovingSkill::GetCameraZoomDuration() const
+{
+	if (CameraZoomCurve)
+	{
+		float MinTime = 0.f;
+		float MaxTime = 0.f;
+		CameraZoomCurve->GetTimeRange(MinTime, MaxTime);
+		float Duration = MaxTime - MinTime;
+		return (Duration > 0.0f) ? Duration : 0.3f;
+	}
+	return 0.3f;
 }

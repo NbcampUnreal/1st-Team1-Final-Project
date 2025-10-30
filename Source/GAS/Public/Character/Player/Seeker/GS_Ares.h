@@ -58,6 +58,18 @@ public:
 	// Damage handling with audio feedback
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	// 아레스 대시 스킬 카메라 복원
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_RestoreDashCameraZoom();
+
+public:
+	// 아레스 대시 스킬 카메라 설정
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving")
+	float MovingSkill_ZoomOutDistance = 300.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving")
+	UCurveFloat* MovingSkill_CameraZoomCurve;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
