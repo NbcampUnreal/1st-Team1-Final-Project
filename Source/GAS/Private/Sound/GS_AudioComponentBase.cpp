@@ -708,7 +708,7 @@ UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
                 if (!World->bIsTearingDown)
                 {
                     CachedAkComponent->RegisterComponent();
-                    UE_LOG(LogTemp, Log, TEXT("[GS_AudioComponentBase] ✅ AkComponent created and registered for %s"), *Owner->GetName());
+                    UE_LOG(LogTemp, Verbose, TEXT("[GS_AudioComponentBase] AkComponent created and registered for %s"), *Owner->GetName());
                 }
                 else
                 {
@@ -728,7 +728,7 @@ UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
     }
     else
     {
-        UE_LOG(LogTemp, Log, TEXT("[GS_AudioComponentBase] Found existing AkComponent for %s"), *Owner->GetName());
+        UE_LOG(LogTemp, Verbose, TEXT("[GS_AudioComponentBase] Found existing AkComponent for %s"), *Owner->GetName());
     }
 
     return CachedAkComponent;
@@ -802,7 +802,7 @@ bool UGS_AudioComponentBase::InitializeAudioSystem()
         return false;
     }
 
-    UE_LOG(LogTemp, Log, TEXT("[Audio Base] ✅ AkComponent successfully initialized for %s"),
+    UE_LOG(LogTemp, Verbose, TEXT("[Audio Base] AkComponent successfully initialized for %s"),
         GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
 
     // 모든 오디오 RTPC 초기화
