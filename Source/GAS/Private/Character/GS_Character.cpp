@@ -43,11 +43,14 @@ AGS_Character::AGS_Character()
 
 	bIsDead = false;
 	bIsHovered = false;
+	bIsInvincible = false;
 }
 
 void AGS_Character::BeginPlay()
 {
 	Super::BeginPlay();
+
+	bIsInvincible = false;
 
 	//Set Default Stats to Character
 	const UEnum* CharacterEnum = FindObject<UEnum>(ANY_PACKAGE, TEXT("ECharacterType"), true);
