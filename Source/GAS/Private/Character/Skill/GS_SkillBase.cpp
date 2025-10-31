@@ -321,7 +321,11 @@ void UGS_SkillBase::PlaySkillEndSound() const
 
 void UGS_SkillBase::BeginDestroy()
 {
-	DeactiveSkill();
+	Super::BeginDestroy();
+	if(bIsActive)
+	{
+		DeactiveSkill();
+	}
 }
 
 void UGS_SkillBase::InitializeDelegate()
