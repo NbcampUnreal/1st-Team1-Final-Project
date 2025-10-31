@@ -366,7 +366,7 @@ void AGS_TpsController::Client_StopAutoMoveForward_Implementation()
 		return;
 	}
 
-	bIsAutoMoving = false;
+	//bIsAutoMoving = false;
 	GetWorld()->GetTimerManager().ClearTimer(AutoMoveTickHandle);
 	RestoreOriginalCameraSettings();
 }
