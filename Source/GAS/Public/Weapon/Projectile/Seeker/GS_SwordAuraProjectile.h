@@ -9,6 +9,7 @@
 class UBoxComponent;
 class USphereComponent;
 class UNiagaraSystem;
+class UNiagaraComponent;
 
 UENUM(BlueprintType)
 enum class ESwordAuraEffectType : uint8
@@ -34,6 +35,10 @@ public:
 	void Multicast_StartSwordSlashVFX();
 	void Multicast_StartSwordSlashVFX_Implementation();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayHitVFX(const FVector& HitLocation);
+	void Multicast_PlayHitVFX_Implementation(const FVector& HitLocation);
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -53,7 +58,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
 	UNiagaraSystem* RightBuffSlashVFX;
 
+	// 타격 시 VFX
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Hit")
+	UNiagaraSystem* NormalHitVFX;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Hit")
+	UNiagaraSystem* BuffHitVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Hit")
+	UNiagaraSystem* NormalBloodSplatterVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Hit")
+	UNiagaraSystem* BuffBloodSplatterVFX;
+
+	// VFX 컴포넌트 관리
+	UPROPERTY()
+	UNiagaraComponent* SlashVFXComponent;
 
 	UPROPERTY()
 	TSet<AActor*> HitActors;

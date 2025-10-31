@@ -135,6 +135,7 @@ void UGS_AresAimingSkill::SpawnFirstProjectile()
 		ProjectileA->EffectType = bIsBerserker
 			? ESwordAuraEffectType::LeftBuff
 			: ESwordAuraEffectType::LeftNormal;
+		UGameplayStatics::FinishSpawningActor(ProjectileA, SpawnTransform);
 		ProjectileA->Multicast_StartSwordSlashVFX();
 	}
 

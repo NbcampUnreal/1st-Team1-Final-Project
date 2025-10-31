@@ -136,6 +136,9 @@ AGS_Drakhar::AGS_Drakhar()
 	}
 
 	FlyingDustTraceDistance = 2000.f;
+
+	// KeyManual에서 쓰일 캐릭터 타입 저장
+	ManualRowName = FName("Drakhar");
 }
 
 void AGS_Drakhar::BeginPlay()

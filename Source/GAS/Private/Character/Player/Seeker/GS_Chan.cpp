@@ -38,6 +38,9 @@ AGS_Chan::AGS_Chan()
 	UltimateCollision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
 	UltimateCollision->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	UltimateCollision->SetGenerateOverlapEvents(true);
+
+	// KeyManual에서 쓰일 캐릭터 타입 저장
+	ManualRowName = FName("Chan");
 }
 
 void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

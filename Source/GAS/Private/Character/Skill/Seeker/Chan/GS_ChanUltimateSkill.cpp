@@ -78,6 +78,18 @@ void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 		Controller->SetLookControlValue(true, true);
 	}
 
+	// =======================
+	// VFX 정리 및 종료 VFX 재생
+	// =======================
+	if (OwningComp)
+	{
+		FVector SkillLocation = OwnerCharacter->GetActorLocation();
+		FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+
+		// 스킬 종료 VFX 재생 (PlayEndVFX 내부에서 Cast VFX도 정리됨)
+		OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
+	}
+
 	// 스킬 상태 업데이트
 	SetIsActive(false);
 }

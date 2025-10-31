@@ -135,6 +135,12 @@ protected:
 	
 	FTimerHandle DistanceCheckTimerHandle;
 
+	/** 오디오 초기화 재시도 타이머 핸들 (레벨 전환 안전성) */
+	FTimerHandle RetryInitTimerHandle;
+
+	/** 오디오 초기화 재시도 횟수 추적 */
+	int32 AudioInitRetryCount = 0;
+
 public:
 	// ===================
 	// Transform 검증 (Static)
@@ -287,7 +293,17 @@ protected:
 	
 	/** Distance Scaling 설정 (통일된 방식) */
 	void SetDistanceScaling(bool bIsRTS);
-	
+
+	/** 오디오 시스템 초기화 (Seamless Travel 대응) */
+	bool InitializeAudioSystem();
+
+	/** 오디오 초기화 재시도 (Seamless Travel 중 실패 시) */
+	UFUNCTION()
+	void RetryAudioInitialization();
+
+	/** 타이머를 안전하게 정리하는 헬퍼 함수 (레벨 전환 안전성) */
+	void SafeClearTimer(FTimerHandle& TimerHandle);
+
 	/** 모든 오디오 RTPC 초기화 */
 	virtual void InitializeAudioRTPCs();
 
