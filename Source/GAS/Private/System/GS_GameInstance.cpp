@@ -344,41 +344,36 @@ void UGS_GameInstance::Shutdown()
     Super::Shutdown();
 }
 
-void UGS_GameInstance::StartGameSessionPlacement()
+void UGS_GameInstance::StartGameSession()
 {
-    UE_LOG(LogTemp, Log, TEXT("Requesting game session placement without a Steam ticket..."));
-
-    // Lambda에 빈 요청을 보내 즉시 매칭을 시작합니다.
-    FString BackendUrl = TEXT("https://635oo4mx8l.execute-api.ap-northeast-2.amazonaws.com/stage_1/start-game-session-placement");
+    UE_LOG(LogTemp, Log, TEXT("Requesting new game session..."));
+    FString BackendUrl = TEXT("https://635oo4mx8l.execute-api.ap-northeast-2.amazonaws.com/stage_1/create-game-session");
+    
     TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
     Request->SetURL(BackendUrl);
     Request->SetVerb("POST");
     Request->SetHeader("Content-Type", "application/json");
 
-    FString RequestBody = TEXT("{}"); 
+    FString RequestBody = FString::Printf(TEXT("{\"AliasId\": \"%s\"}"), *TargetAliasId); //fleet id를 가리키는 별칭
     Request->SetContentAsString(RequestBody);
-
-    Request->OnProcessRequestComplete().BindUObject(this, &UGS_GameInstance::OnStartPlacementResponse);
+    Request->OnProcessRequestComplete().BindUObject(this, &UGS_GameInstance::OnCreateSessionResponse);
     Request->ProcessRequest();
 }
 
-void UGS_GameInstance::OnStartPlacementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+void UGS_GameInstance::OnCreateSessionResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-    UE_LOG(LogTemp, Log, TEXT("=== OnStartPlacementResponse Called ==="));
+    UE_LOG(LogTemp, Log, TEXT("=== OnCreateSessionResponse Called ==="));
     UE_LOG(LogTemp, Log, TEXT("bWasSuccessful: %s"), bWasSuccessful ? TEXT("TRUE") : TEXT("FALSE"));
     
-    // ⭐ Request 유효성 검사
+    // Request 유효성 검사
     if (!Request.IsValid())
     {
         UE_LOG(LogTemp, Error, TEXT("❌ Request is INVALID (null pointer)"));
-        UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
+        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
         return;
     }
-    UE_LOG(LogTemp, Log, TEXT("✅ Request is valid"));
-    UE_LOG(LogTemp, Log, TEXT("Request URL: %s"), *Request->GetURL());
-    UE_LOG(LogTemp, Log, TEXT("Request Verb: %s"), *Request->GetVerb());
-    
-    // ⭐ Response 유효성 검사
+
+    // Response 유효성 검사
     if (!Response.IsValid())
     {
         UE_LOG(LogTemp, Error, TEXT("❌ Response is INVALID (null pointer)"));
@@ -424,12 +419,11 @@ void UGS_GameInstance::OnStartPlacementResponse(FHttpRequestPtr Request, FHttpRe
             break;
         }
         
-        UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
+        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
         return;
     }
-    UE_LOG(LogTemp, Log, TEXT("✅ Response is valid"));
 
-    // ⭐ bWasSuccessful이 false인 경우 상세 분석
+    // bWasSuccessful이 false인 경우 상세 분석
     if (!bWasSuccessful)
     {
         UE_LOG(LogTemp, Error, TEXT("❌ bWasSuccessful is FALSE"));
@@ -438,7 +432,7 @@ void UGS_GameInstance::OnStartPlacementResponse(FHttpRequestPtr Request, FHttpRe
         FString ResponseBody = Response->GetContentAsString();
         
         UE_LOG(LogTemp, Error, TEXT("Response Code: %d"), ResponseCode);
-        UE_LOG(LogTemp, Error, TEXT("Response Content Length: %d bytes"), ResponseBody.Len());
+        UE_LOG(LogTemp, Error, TEXT("  → Response Body: %s"), *ResponseBody);
         
         if (ResponseCode == 0)
         {
@@ -447,20 +441,18 @@ void UGS_GameInstance::OnStartPlacementResponse(FHttpRequestPtr Request, FHttpRe
         else if (ResponseCode >= 400 && ResponseCode < 500)
         {
             UE_LOG(LogTemp, Error, TEXT("  → Client Error (%d)"), ResponseCode);
-            UE_LOG(LogTemp, Error, TEXT("  → Response Body: %s"), *ResponseBody);
         }
         else if (ResponseCode >= 500)
         {
             UE_LOG(LogTemp, Error, TEXT("  → Server Error (%d)"), ResponseCode);
-            UE_LOG(LogTemp, Error, TEXT("  → Response Body: %s"), *ResponseBody);
         }
         
-        UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
+        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
         return;
     }
 
-    // ⭐ 여기부터는 bWasSuccessful == true
-    UE_LOG(LogTemp, Log, TEXT("✅ bWasSuccessful is TRUE"));
+    // [로직 시작]
+    // 여기까지 왔다면 bWasSuccessful == true 이고, Request/Response가 유효함.
     
     int32 ResponseCode = Response->GetResponseCode();
     FString ResponseBody = Response->GetContentAsString();
@@ -468,214 +460,117 @@ void UGS_GameInstance::OnStartPlacementResponse(FHttpRequestPtr Request, FHttpRe
     UE_LOG(LogTemp, Log, TEXT("=== Response Details ==="));
     UE_LOG(LogTemp, Log, TEXT("Response Code: %d"), ResponseCode);
     UE_LOG(LogTemp, Log, TEXT("Content Type: %s"), *Response->GetContentType());
-    UE_LOG(LogTemp, Log, TEXT("Content Length: %llu bytes"), Response->GetContentLength());
-    UE_LOG(LogTemp, Log, TEXT("Response Body:"));
-    UE_LOG(LogTemp, Log, TEXT("%s"), *ResponseBody);
+    UE_LOG(LogTemp, Log, TEXT("Response Body: %s"), *ResponseBody);
     UE_LOG(LogTemp, Log, TEXT("========================"));
     
+    // ResponseCode == 200 인지 확인하고, 파싱하여 작업 수행
     if (ResponseCode == 200)
     {
         TSharedPtr<FJsonObject> JsonObject;
         TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(ResponseBody);
         
-        if (!FJsonSerializer::Deserialize(Reader, JsonObject) || !JsonObject.IsValid())
+        if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
         {
-            UE_LOG(LogTemp, Error, TEXT("❌ Failed to parse JSON response."));
-            UE_LOG(LogTemp, Error, TEXT("Response was: %s"), *ResponseBody);
-            UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
-            return;
-        }
-        UE_LOG(LogTemp, Log, TEXT("✅ JSON parsed successfully"));
-
-        // JSON 구조 로깅
-        UE_LOG(LogTemp, Log, TEXT("JSON Fields:"));
-        for (const auto& Field : JsonObject->Values)
-        {
-            UE_LOG(LogTemp, Log, TEXT("  - %s: %s"), *Field.Key, *Field.Value->AsString());
-        }
-
-        FString PlacementId;
-        
-        // ⭐ 시나리오 1: API Gateway가 래핑하지 않은 경우 (람다 직접 응답)
-        if (JsonObject->HasField(TEXT("body")))
-        {
-            UE_LOG(LogTemp, Log, TEXT("✅ Detected Lambda proxy response format (has 'body' field)."));
+            UE_LOG(LogTemp, Log, TEXT("✅ Main JSON parsed successfully"));
             
             FString BodyString;
-            if (JsonObject->TryGetStringField(TEXT("body"), BodyString))
+            TSharedPtr<FJsonObject> BodyObject; // 최종 데이터가 담길 JSON 객체
+
+            if (JsonObject->HasField(TEXT("body")))
             {
-                UE_LOG(LogTemp, Log, TEXT("Body string: %s"), *BodyString);
-                
-                TSharedPtr<FJsonObject> BodyObject;
+                // API Gateway 프록시 응답: "body" 필드 안의 문자열을 다시 파싱
+                UE_LOG(LogTemp, Log, TEXT("Detected Lambda proxy response (has 'body' field)."));
+                BodyString = JsonObject->GetStringField(TEXT("body"));
                 TSharedRef<TJsonReader<>> BodyReader = TJsonReaderFactory<>::Create(BodyString);
-                if (FJsonSerializer::Deserialize(BodyReader, BodyObject) && BodyObject->HasField(TEXT("PlacementId")))
+                
+                if (!FJsonSerializer::Deserialize(BodyReader, BodyObject) || !BodyObject.IsValid())
                 {
-                    PlacementId = BodyObject->GetStringField(TEXT("PlacementId"));
-                    UE_LOG(LogTemp, Log, TEXT("✅ Extracted PlacementId from body: %s"), *PlacementId);
-                }
-                else
-                {
-                    UE_LOG(LogTemp, Error, TEXT("❌ Failed to parse body string or no PlacementId field"));
+                    UE_LOG(LogTemp, Error, TEXT("❌ Failed to parse inner 'body' JSON string."));
+                    // (실패 처리 - 로딩 화면 숨기기 등)
                 }
             }
             else
             {
-                UE_LOG(LogTemp, Error, TEXT("❌ Failed to get 'body' field as string"));
+                // API Gateway가 래핑하지 않은 응답
+                UE_LOG(LogTemp, Log, TEXT("Detected unwrapped response."));
+                BodyObject = JsonObject; // 루트 객체가 이미 최종 데이터임
+            }
+
+            // BodyObject가 유효한지 확인 (람다가 에러를 반환했을 수 있으므로)
+            if (BodyObject.IsValid() && BodyObject->HasField(TEXT("Status")))
+            {
+                FString Status = BodyObject->GetStringField(TEXT("Status"));
+                UE_LOG(LogTemp, Log, TEXT("GameSession status is: %s"), *Status);
+
+                if (Status == TEXT("FULFILLED"))
+                {
+                    FString IpAddress, Port, PlayerSessionId;
+
+                    if (BodyObject->TryGetStringField(TEXT("IpAddress"), IpAddress) &&
+                        BodyObject->TryGetStringField(TEXT("Port"), Port) &&
+                        BodyObject->TryGetStringField(TEXT("PlayerSessionId"), PlayerSessionId)) 
+                    {
+                        if (PlayerSessionId.IsEmpty())
+                        {
+                            UE_LOG(LogTemp, Error, TEXT("PlayerSessionId parsing succeeded, but the string is EMPTY! Lambda might have sent null."));
+                            if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
+                            return; // 함수 종료
+                        }
+
+                        FString ConnectString = FString::Printf(TEXT("%s:%s?PlayerSessionId=%s"), *IpAddress, *Port, *PlayerSessionId);
+                        UE_LOG(LogTemp, Log, TEXT("Attempting ClientTravel with ConnectString: %s"), *ConnectString);
+        
+                        APlayerController* PC = GetFirstLocalPlayerController();
+                        if (PC)
+                        {
+                            PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
+                        }
+                    }
+                    else
+                    {
+                        UE_LOG(LogTemp, Error, TEXT("Session creation FULFILLED, but connection info is invalid or missing."));
+                        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
+                    }
+                }
+                else // Status == "FAILED" 등
+                {
+                    UE_LOG(LogTemp, Error, TEXT("Session creation failed with status: %s"), *Status);
+                    if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
+                }
+                
+                return; // 성공/실패 처리 완료 후 함수 종료
+            }
+            else
+            {
+                 // 'Status' 필드가 없는 경우 (람다가 에러를 반환한 경우)
+                 UE_LOG(LogTemp, Error, TEXT("❌ Parsed 'body' object, but 'Status' field is missing. Lambda returned error."));
+                 if (BodyObject.IsValid())
+                 {
+                    FString ErrorMsg;
+                    if(BodyObject->TryGetStringField(TEXT("error"), ErrorMsg))
+                    {
+                        UE_LOG(LogTemp, Error, TEXT("Lambda Error: %s"), *ErrorMsg);
+                    }
+                 }
             }
         }
-        // ⭐ 시나리오 2: API Gateway가 언래핑한 경우 (바로 PlacementId)
-        else if (JsonObject->HasField(TEXT("PlacementId")))
-        {
-            UE_LOG(LogTemp, Log, TEXT("✅ Detected unwrapped response format (direct PlacementId)."));
-            PlacementId = JsonObject->GetStringField(TEXT("PlacementId"));
-            UE_LOG(LogTemp, Log, TEXT("✅ Extracted PlacementId: %s"), *PlacementId);
-        }
-        // ⭐ 시나리오 3: 에러 응답
-        else if (JsonObject->HasField(TEXT("error")))
-        {
-            FString ErrorMsg = JsonObject->GetStringField(TEXT("error"));
-            UE_LOG(LogTemp, Error, TEXT("❌ Lambda returned error: %s"), *ErrorMsg);
-            UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
-            return;
-        }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("❌ Unknown response format. No 'body', 'PlacementId', or 'error' field found."));
-            UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
-            return;
+            UE_LOG(LogTemp, Error, TEXT("❌ Failed to parse main JSON response. Body: %s"), *ResponseBody);
         }
-
-        if (!PlacementId.IsEmpty())
-        {
-            CurrentPlacementId = PlacementId;
-            UE_LOG(LogTemp, Log, TEXT("✅✅✅ SUCCESS! Got PlacementId: %s. Starting to poll..."), *CurrentPlacementId);
-
-            // 다음 단계: 3초마다 상태 확인 타이머 시작
-            GetWorld()->GetTimerManager().SetTimer(PollPlacementTimerHandle, this, &UGS_GameInstance::PollPlacementStatus, 3.0f, true);
-            return;
-        }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("❌ PlacementId is empty after parsing."));
-            UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
-        }
-    }
-    else if (ResponseCode == 401)
-    {
-        UE_LOG(LogTemp, Error, TEXT("❌ Steam authentication failed (401 Unauthorized)."));
-        UE_LOG(LogTemp, Error, TEXT("Response Body: %s"), *ResponseBody);
-        UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
-    }
-    else if (ResponseCode >= 400 && ResponseCode < 500)
-    {
-        UE_LOG(LogTemp, Error, TEXT("❌ Client error: %d"), ResponseCode);
-        UE_LOG(LogTemp, Error, TEXT("Response Body: %s"), *ResponseBody);
-        UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
-    }
-    else if (ResponseCode >= 500)
-    {
-        UE_LOG(LogTemp, Error, TEXT("❌ Server error: %d"), ResponseCode);
-        UE_LOG(LogTemp, Error, TEXT("Response Body: %s"), *ResponseBody);
-        UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("❌ Unexpected response code: %d"), ResponseCode);
-        UE_LOG(LogTemp, Error, TEXT("Response Body: %s"), *ResponseBody);
-        UE_LOG(LogTemp, Error, TEXT("Failed to start game session placement."));
-    }
-}
-
-void UGS_GameInstance::PollPlacementStatus()
-{
-    FString BackendUrl = TEXT("https://635oo4mx8l.execute-api.ap-northeast-2.amazonaws.com/stage_1/start-game-session-placement");
-
-    TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
-    Request->SetURL(BackendUrl);
-    Request->SetVerb("POST");
-    Request->SetHeader("Content-Type", "application/json");
-
-    FString RequestBody = FString::Printf(TEXT("{\"PlacementId\": \"%s\"}"), *CurrentPlacementId);
-    Request->SetContentAsString(RequestBody);
-
-    Request->OnProcessRequestComplete().BindUObject(this, &UGS_GameInstance::OnPollPlacementResponse);
-    Request->ProcessRequest();
-}
-
-void UGS_GameInstance::OnPollPlacementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-    if (bWasSuccessful && Response.IsValid() && Response->GetResponseCode() == 200)
-    {
-        // 1. 람다의 전체 응답을 파싱합니다.
-        TSharedPtr<FJsonObject> JsonObject;
-        TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
-        if (FJsonSerializer::Deserialize(Reader, JsonObject))
-        {
-            // 2. "body" 필드를 문자열로 가져옵니다.
-            FString BodyString;
-            if (JsonObject->TryGetStringField(TEXT("body"), BodyString))
-            {
-                // 3. 그 "body" 문자열을 다시 파싱하여 상태 정보를 얻습니다.
-                TSharedPtr<FJsonObject> BodyObject;
-                TSharedRef<TJsonReader<>> BodyReader = TJsonReaderFactory<>::Create(BodyString);
-                if (FJsonSerializer::Deserialize(BodyReader, BodyObject) && BodyObject->HasField(TEXT("Status")))
-                {
-                    FString Status = BodyObject->GetStringField(TEXT("Status"));
-                    UE_LOG(LogTemp, Log, TEXT("Polling... GameSession status is: %s"), *Status);
-
-                    if (Status == TEXT("FULFILLED"))
-                    {
-                        // 최종 목표 달성! 타이머를 중지합니다.
-                        GetWorld()->GetTimerManager().ClearTimer(PollPlacementTimerHandle);
-
-                        FString IpAddress, Port, PlayerSessionId;
-
-                        // TryGetStringField를 사용하여 모든 필드가 유효한 문자열인지 안전하게 확인합니다.
-                        if (BodyObject->TryGetStringField(TEXT("IpAddress"), IpAddress) &&
-                            BodyObject->TryGetStringField(TEXT("Port"), Port) &&
-                            BodyObject->TryGetStringField(TEXT("PlayerSessionId"), PlayerSessionId) &&
-                            !IpAddress.IsEmpty() && !Port.IsEmpty() && !PlayerSessionId.IsEmpty())
-                        {
-                            // 모든 정보가 유효할 때만 접속을 시도합니다.
-                            FString ConnectString = FString::Printf(TEXT("%s:%s?PlayerSessionId=%s"), *IpAddress, *Port, *PlayerSessionId);
-
-                            UE_LOG(LogTemp, Log, TEXT("Placement FULFILLED! Traveling to: %s"), *ConnectString);
-                            
-                            APlayerController* PC = GetFirstLocalPlayerController();
-                            if (PC)
-                            {
-                                PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
-                            }
-                        }
-                        else
-                        {
-                            // FULFILLED 상태이지만, 필수 정보 중 하나가 누락/null인 경우
-                            UE_LOG(LogTemp, Error, TEXT("Placement FULFILLED, but connection info is invalid or missing."));
-                            if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController()))
-                            {
-                                MPC->HideLoadingScreen();
-                            }
-                        }
-                    }
-                    else if (Status == TEXT("TIMED_OUT") || Status == TEXT("FAILED") || Status == TEXT("CANCELLED"))
-                    {
-                        // 실패 상태 처리
-                        GetWorld()->GetTimerManager().ClearTimer(PollPlacementTimerHandle);
-                        UE_LOG(LogTemp, Error, TEXT("Placement failed with status: %s"), *Status);
-                        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController()))
-                        {
-                            MPC->HideLoadingScreen();
-                        }
-                    }
-                    // "PENDING" 상태일 경우, 아무것도 하지 않고 타이머가 다음 주기에 다시 호출하기를 기다립니다.
-                    return; // 성공적으로 상태를 확인했으므로 함수 종료
-                }
-            }
-        }
+        // bWasSuccessful=true 였는데도 200이 아닌 경우 (이론상 2xx, 3xx 등)
+        UE_LOG(LogTemp, Error, TEXT("❌ HTTP Request was successful but ResponseCode is not 200 (%d). Body: %s"), ResponseCode, *ResponseBody);
     }
     
-    // HTTP 요청 자체가 실패했거나, JSON 파싱에 실패한 경우
-    UE_LOG(LogTemp, Warning, TEXT("Failed to poll game session status. Retrying in 3 seconds..."));
+    // 여기까지 왔다면 HTTP 에러거나 JSON 파싱 에러임
+    UE_LOG(LogTemp, Error, TEXT("Failed to create game session (HTTP Error or Parse Error)."));
+    if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController()))
+    {
+        MPC->HideLoadingScreen();
+    }
 }
 
 void UGS_GameInstance::GSLeaveSession(APlayerController* RequestingPlayer) //NetDriver 상관 없이 필요함

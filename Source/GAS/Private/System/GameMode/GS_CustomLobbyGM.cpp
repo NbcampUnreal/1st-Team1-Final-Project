@@ -32,32 +32,6 @@ AGS_CustomLobbyGM::AGS_CustomLobbyGM()
 
 void AGS_CustomLobbyGM::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
-    UE_LOG(LogTemp, Log, TEXT("PreLogin called - Options: %s, Address: %s"), *Options, *Address);
-    
-    // URL 옵션에서 PlayerSessionId 파싱
-    const FString PlayerSessionId = UGameplayStatics::ParseOption(Options, TEXT("PlayerSessionId"));
-
-    if (PlayerSessionId.IsEmpty())
-    {
-        // PlayerSessionId가 없으면 접속 거부
-        ErrorMessage = TEXT("No PlayerSessionId provided.");
-        UE_LOG(LogTemp, Warning, TEXT("PreLogin Failed: %s"), *ErrorMessage);
-        return;
-    }
-
-    // UniqueId를 키로 PlayerSessionId 저장 (PostLogin에서 사용)
-    if (UniqueId.IsValid())
-    {
-        FString UniqueIdStr = UniqueId.ToString();
-        PendingPlayerSessions.Add(UniqueIdStr, PlayerSessionId);
-        UE_LOG(LogTemp, Log, TEXT("PreLogin: Stored PlayerSessionId %s for UniqueId %s"), *PlayerSessionId, *UniqueIdStr);
-    }
-
-    // PlayerSessionId가 있다면 PreLogin 통과
-    // Super::PreLogin을 호출하지 않음으로써 UniqueNetId 검증 우회
-    UE_LOG(LogTemp, Log, TEXT("PreLogin Passed - PlayerSessionId: %s"), *PlayerSessionId);
-    ErrorMessage.Empty();
-
 #if WITH_GAMELIFT
     // 접속 거부로 인해 생길 수 있는 좀비 세션 파괴를 위한 타이머 시작
     if (!bHasFirstPlayerAttemptedLogin)
@@ -75,6 +49,60 @@ void AGS_CustomLobbyGM::PreLogin(const FString& Options, const FString& Address,
         );
     }
 #endif
+    
+    UE_LOG(LogTemp, Log, TEXT("PreLogin called - Options: %s, Address: %s"), *Options, *Address);
+    
+    // URL 옵션에서 PlayerSessionId 파싱
+    const FString PlayerSessionId = UGameplayStatics::ParseOption(Options, TEXT("PlayerSessionId"));
+
+    if (PlayerSessionId.IsEmpty())
+    {
+        ErrorMessage = TEXT("No PlayerSessionId provided.");
+        UE_LOG(LogTemp, Warning, TEXT("PreLogin Failed: %s"), *ErrorMessage);
+        return;
+    }
+    UE_LOG(LogTemp, Log, TEXT("PreLogin Passed - PlayerSessionId: %s"), *PlayerSessionId);
+    ErrorMessage.Empty();
+
+#if WITH_GAMELIFT
+    UE_LOG(LogTemp, Log, TEXT("PreLogin: Validating PlayerSessionId: %s"), *PlayerSessionId);
+    
+    FGameLiftServerSDKModule* GameLiftSdkModule = FModuleManager::GetModulePtr<FGameLiftServerSDKModule>(TEXT("GameLiftServerSDK"));
+    
+    if (!GameLiftSdkModule)
+    {
+        ErrorMessage = TEXT("Server configuration error (GameLift SDK module not loaded).");
+        UE_LOG(LogTemp, Error, TEXT("PreLogin Failed: %s"), *ErrorMessage);
+        return;
+    }
+
+    // AcceptPlayerSession 호출 (동기 방식)
+    FGameLiftGenericOutcome Result = GameLiftSdkModule->AcceptPlayerSession(PlayerSessionId);
+
+    if (Result.IsSuccess())
+    {
+        // 성공
+        UE_LOG(LogTemp, Log, TEXT("PreLogin Success: AcceptPlayerSession Success for PlayerSessionId: %s"), *PlayerSessionId);
+    }
+    else
+    {
+        // 실패 - 접속 거부
+        FGameLiftError Error = Result.GetError();
+        ErrorMessage = FString::Printf(TEXT("GameLift rejected connection: ErrorType: %d, ErrorName: %s"), 
+            static_cast<int32>(Error.m_errorType), 
+            *Error.m_errorName);
+        
+        UE_LOG(LogTemp, Warning, TEXT("PreLogin Failed for PlayerSessionId: %s. Error: %s"), 
+            *PlayerSessionId, *ErrorMessage);
+        
+        return;
+    }
+#else
+    UE_LOG(LogTemp, Warning, TEXT("PreLogin: WITH_GAMELIFT not defined. Skipping GameLift validation."));
+#endif
+    
+    UE_LOG(LogTemp, Log, TEXT("PreLogin Passed - PlayerSessionId: %s"), *PlayerSessionId);
+    ErrorMessage.Empty();
 }
 
 void AGS_CustomLobbyGM::BeginPlay()
@@ -87,137 +115,15 @@ void AGS_CustomLobbyGM::BeginPlay()
 void AGS_CustomLobbyGM::PostLogin(APlayerController* NewPlayer)
 {
     Super::PostLogin(NewPlayer);
-/*
+
     if (!NewPlayer)
     {
         UE_LOG(LogTemp, Error, TEXT("PostLogin: NewPlayer is null"));
         return;
     }
 
-    // PreLogin에서 저장한 PlayerSessionId 가져오기
-    FString PlayerSessionId;
-    
-    if (NewPlayer->PlayerState && NewPlayer->PlayerState->GetUniqueId().IsValid())
-    {
-        FString UniqueIdStr = NewPlayer->PlayerState->GetUniqueId().ToString();
-        UE_LOG(LogTemp, Log, TEXT("PostLogin: Looking for PlayerSessionId with UniqueId: %s"), *UniqueIdStr);
-        
-        // 먼저 전체 형식으로 찾기 (예: "STEAM:76561198148599903")
-        if (FString* StoredSessionId = PendingPlayerSessions.Find(UniqueIdStr))
-        {
-            PlayerSessionId = *StoredSessionId;
-            PendingPlayerSessions.Remove(UniqueIdStr);
-            UE_LOG(LogTemp, Log, TEXT("PostLogin: Retrieved PlayerSessionId %s for UniqueId %s"), *PlayerSessionId, *UniqueIdStr);
-        }
-        // 못 찾았다면 숫자 부분만 추출해서 다시 시도
-        else
-        {
-            // "STEAM:76561198148599903"에서 "76561198148599903" 추출
-            FString NumericId;
-            int32 ColonIndex;
-            if (UniqueIdStr.FindChar(':', ColonIndex))
-            {
-                NumericId = UniqueIdStr.RightChop(ColonIndex + 1);
-                UE_LOG(LogTemp, Log, TEXT("PostLogin: Trying with numeric ID only: %s"), *NumericId);
-                
-                if (FString* StoredSessionIdforPostLogin = PendingPlayerSessions.Find(NumericId))
-                {
-                    PlayerSessionId = *StoredSessionIdforPostLogin;
-                    PendingPlayerSessions.Remove(NumericId);
-                    UE_LOG(LogTemp, Log, TEXT("PostLogin: Retrieved PlayerSessionId %s for numeric ID %s"), *PlayerSessionId, *NumericId);
-                }
-            }
-            
-            // 여전히 못 찾았다면 전체 맵 내용 로깅
-            if (PlayerSessionId.IsEmpty())
-            {
-                UE_LOG(LogTemp, Warning, TEXT("PostLogin: Could not find PlayerSessionId for UniqueId: %s"), *UniqueIdStr);
-                UE_LOG(LogTemp, Warning, TEXT("PostLogin: Current PendingPlayerSessions map contents:"));
-                for (const auto& Pair : PendingPlayerSessions)
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("  - Key: '%s', Value: '%s'"), *Pair.Key, *Pair.Value);
-                }
-            }
-        }
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("PostLogin: PlayerState or UniqueId is invalid"));
-    }
+    UE_LOG(LogTemp, Log, TEXT("PostLogin: Player %s successfully validated and logged in."), *NewPlayer->GetName());
 
-    if (PlayerSessionId.IsEmpty())
-    {
-        UE_LOG(LogTemp, Warning, TEXT("PostLogin: No PlayerSessionId found. Kicking player."));
-        FText KickReason = FText::FromString(TEXT("Invalid connection - No PlayerSessionId."));
-        
-        if (NewPlayer)
-        {
-            NewPlayer->ClientReturnToMainMenuWithTextReason(KickReason);
-            NewPlayer->Destroy();
-        }
-        return;
-    }
-
-    UE_LOG(LogTemp, Log, TEXT("PostLogin: Validating PlayerSessionId: %s"), *PlayerSessionId);
-
-#if WITH_GAMELIFT
-    // GameLift SDK 모듈 가져오기
-    FGameLiftServerSDKModule* GameLiftSdkModule = FModuleManager::GetModulePtr<FGameLiftServerSDKModule>(TEXT("GameLiftServerSDK"));
-    
-    if (!GameLiftSdkModule)
-    {
-        UE_LOG(LogTemp, Error, TEXT("PostLogin: GameLiftServerSDK module not loaded. Kicking player."));
-        FText KickReason = FText::FromString(TEXT("Server configuration error."));
-        
-        if (NewPlayer)
-        {
-            NewPlayer->ClientReturnToMainMenuWithTextReason(KickReason);
-            NewPlayer->Destroy();
-        }
-        return;
-    }
-
-    // PlayerController를 약한 포인터로 캡처 (안전성)
-    TWeakObjectPtr<APlayerController> WeakPlayerController = NewPlayer;
-
-    // AcceptPlayerSession 호출 (동기 방식)
-    FGameLiftGenericOutcome Result = GameLiftSdkModule->AcceptPlayerSession(PlayerSessionId);
-
-    if (Result.IsSuccess())
-    {
-        UE_LOG(LogTemp, Log, TEXT("AcceptPlayerSession Success for PlayerSessionId: %s"), *PlayerSessionId);
-        
-        UGS_GameInstance* GI = GetGameInstance<UGS_GameInstance>();
-        if (GI && NewPlayer->PlayerState)
-        {
-            GI->StorePlayerSession(NewPlayer->PlayerState->GetUniqueId(), PlayerSessionId);
-        }
-    }
-    else
-    {
-        // 실패 - 플레이어 강퇴
-        FGameLiftError Error = Result.GetError();
-        FString ErrorMessage = FString::Printf(TEXT("ErrorType: %d, ErrorName: %s"), 
-            static_cast<int32>(Error.m_errorType), 
-            *Error.m_errorName);
-        
-        UE_LOG(LogTemp, Warning, TEXT("AcceptPlayerSession Failed for PlayerSessionId: %s, Error: %s"), 
-            *PlayerSessionId, *ErrorMessage);
-        
-        FText KickReason = FText::FromString(FString::Printf(TEXT("GameLift rejected connection: %s"), *ErrorMessage));
-        
-        if (WeakPlayerController.IsValid())
-        {
-            APlayerController* PlayerController = WeakPlayerController.Get();
-            PlayerController->ClientReturnToMainMenuWithTextReason(KickReason);
-            PlayerController->Destroy();
-        }
-        return; // 실패 시 여기서 종료
-    }
-#else
-    UE_LOG(LogTemp, Warning, TEXT("PostLogin: WITH_GAMELIFT not defined. Skipping GameLift validation."));
-#endif
-*/
     // GameLift 검증 성공 또는 GameLift 미사용 환경에서 실행되는 기존 로직
     if (StartupTimerHandle.IsValid())
     {

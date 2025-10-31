@@ -19,7 +19,7 @@ void AGS_MainMenuPC::HandleCustomGameRequest()
 	{
 		ShowLoadingScreen();
 	}
-	GI->StartGameSessionPlacement();
+	GI->StartGameSession();
 }
 
 void AGS_MainMenuPC::BeginPlay()

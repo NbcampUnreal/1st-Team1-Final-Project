@@ -54,15 +54,11 @@ protected:
 
     // ================================커스텀 게임을 위한 세션 자동 생성================================
 public:
-    void StartGameSessionPlacement(); // "커스텀 게임" 버튼이 호출할 함수
+    void StartGameSession(); // "커스텀 게임" 버튼이 호출할 함수
+    void OnCreateSessionResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
-private:
-    void OnStartPlacementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-    void PollPlacementStatus();
-    void OnPollPlacementResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-
-    FTimerHandle PollPlacementTimerHandle;
-    FString CurrentPlacementId;
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "GameLift")
+    FString TargetAliasId = "alias-3baf7f4d-89f9-4b8c-afc0-b3be91335dd9";
     
     // ================================세션 나가기================================
 public:
