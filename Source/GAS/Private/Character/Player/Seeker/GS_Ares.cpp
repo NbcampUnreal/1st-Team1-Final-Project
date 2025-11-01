@@ -41,7 +41,13 @@ void AGS_Ares::BeginPlay()
 		UGS_AresMovingSkill* MovingSkill = Cast<UGS_AresMovingSkill>(SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving));
 		if (MovingSkill)
 		{
-			MovingSkill->SetCameraSettings(MovingSkill_ZoomOutDistance, MovingSkill_CameraZoomCurve);
+			MovingSkill->SetCameraSettings(
+				MovingSkill_ZoomOutDistance,
+				MovingSkill_CameraZoomCurve,
+				MovingSkill_EnableMotionBlur,
+				MovingSkill_MotionBlurPeakAmount,
+				MovingSkill_MotionBlurCurve,
+				MovingSkill_MotionBlurExponent);
 		}
 	}
 }

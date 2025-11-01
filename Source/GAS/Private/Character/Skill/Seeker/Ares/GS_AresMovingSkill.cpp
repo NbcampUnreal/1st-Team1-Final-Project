@@ -17,6 +17,7 @@
 #include "Character/GS_TpsController.h"
 #include "Character/Player/GS_Player.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 
 UGS_AresMovingSkill::UGS_AresMovingSkill()
@@ -327,6 +328,9 @@ void UGS_AresMovingSkill::StartCameraZoomOut()
 		return;
 	}
 
+	CacheCameraMotionBlurDefaults(OwnerPlayer);
+	ResetCameraMotionBlur();
+
 	// 원래 거리 저장
 	OriginalArmLength = OwnerPlayer->SpringArmComp->TargetArmLength;
 
@@ -336,6 +340,7 @@ void UGS_AresMovingSkill::StartCameraZoomOut()
 	CameraZoomElapsed = 0.0f;
 	CurrentZoomState = EZoomState::ZoomingOut;
 	bPendingZoomIn = false;
+	bMotionBlurActive = false;
 
 	// 기존 타이머 정리 후 새 타이머 시작
 	SafeClearTimer(CameraUpdateTimerHandle);
@@ -379,12 +384,24 @@ void UGS_AresMovingSkill::RestoreCameraZoom(bool bForceRestore)
 		return;
 	}
 
+	CacheCameraMotionBlurDefaults(OwnerPlayer);
+
 	// 커브 시간 계산
 	CameraZoomDuration = GetCameraZoomDuration();
 
 	CameraZoomElapsed = 0.0f;
 	CurrentZoomState = EZoomState::ZoomingIn;
 	bPendingZoomIn = false;
+	bMotionBlurActive = bEnableMotionBlur && (MotionBlurPeakAmount > KINDA_SMALL_NUMBER);
+
+	if (bMotionBlurActive)
+	{
+		UpdateCameraMotionBlur(0.0f, 0.0f);
+	}
+	else
+	{
+		ResetCameraMotionBlur();
+	}
 
 	// 기존 타이머 정리 후 줌인 타이머 시작
 	SafeClearTimer(CameraUpdateTimerHandle);
@@ -397,10 +414,18 @@ void UGS_AresMovingSkill::RestoreCameraZoom(bool bForceRestore)
 	);
 }
 
-void UGS_AresMovingSkill::SetCameraSettings(float InZoomOutDistance, UCurveFloat* InCameraZoomCurve)
+void UGS_AresMovingSkill::SetCameraSettings(float InZoomOutDistance, UCurveFloat* InCameraZoomCurve,
+	bool bInEnableMotionBlur,
+	float InMotionBlurPeakAmount,
+	UCurveFloat* InMotionBlurCurve,
+	float InMotionBlurExponent)
 {
 	ZoomOutDistance = InZoomOutDistance;
 	CameraZoomCurve = InCameraZoomCurve;
+	bEnableMotionBlur = bInEnableMotionBlur;
+	MotionBlurPeakAmount = FMath::Clamp(InMotionBlurPeakAmount, 0.0f, 1.0f);
+	MotionBlurCurve = InMotionBlurCurve;
+	MotionBlurExponent = FMath::Max(0.01f, InMotionBlurExponent);
 }
 
 void UGS_AresMovingSkill::UpdateCameraZoom()
@@ -436,6 +461,7 @@ void UGS_AresMovingSkill::UpdateCameraZoom()
 	else if (CurrentZoomState == EZoomState::ZoomingIn)
 	{
 		TargetArmLength = FMath::Lerp(OriginalArmLength + ZoomOutDistance, OriginalArmLength, Alpha);
+		UpdateCameraMotionBlur(Alpha, CameraZoomElapsed);
 	}
 
 	OwnerPlayer->SpringArmComp->TargetArmLength = TargetArmLength;
@@ -460,6 +486,7 @@ void UGS_AresMovingSkill::UpdateCameraZoom()
 		{
 			CurrentZoomState = EZoomState::Idle;
 			SafeClearTimer(CameraUpdateTimerHandle);
+			ResetCameraMotionBlur();
 			UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] Zoom-In FINISHED. State -> Idle. Clearing Timer."));
 		}
 	}
@@ -502,12 +529,79 @@ bool UGS_AresMovingSkill::IsWorldContextValid() const
 
 void UGS_AresMovingSkill::BeginDestroy()
 {
+	ResetCameraMotionBlur();
+
 	// 모든 타이머 정리
 	SafeClearTimer(ChargingTimerHandle);
 	SafeClearTimer(DashTimerHandle);
 	SafeClearTimer(CameraUpdateTimerHandle);
 
 	Super::BeginDestroy();
+}
+
+void UGS_AresMovingSkill::ResetCameraMotionBlur()
+{
+	if (!bMotionBlurDefaultsCached)
+	{
+		return;
+	}
+
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	if (!OwnerPlayer || !OwnerPlayer->CameraComp)
+	{
+		return;
+	}
+
+	OwnerPlayer->CameraComp->PostProcessSettings.MotionBlurAmount = OriginalMotionBlurAmount;
+	OwnerPlayer->CameraComp->PostProcessSettings.bOverride_MotionBlurAmount = bOriginalOverrideMotionBlurAmount;
+	bMotionBlurActive = false;
+}
+
+void UGS_AresMovingSkill::CacheCameraMotionBlurDefaults(AGS_Player* Player)
+{
+	if (bMotionBlurDefaultsCached || !Player || !Player->CameraComp)
+	{
+		return;
+	}
+
+	OriginalMotionBlurAmount = Player->CameraComp->PostProcessSettings.MotionBlurAmount;
+	bOriginalOverrideMotionBlurAmount = Player->CameraComp->PostProcessSettings.bOverride_MotionBlurAmount;
+	bMotionBlurDefaultsCached = true;
+}
+
+void UGS_AresMovingSkill::UpdateCameraMotionBlur(float NormalizedAlpha, float ElapsedTime)
+{
+	if (!bMotionBlurActive || !bEnableMotionBlur)
+	{
+		return;
+	}
+
+	AGS_Player* OwnerPlayer = Cast<AGS_Player>(OwnerCharacter);
+	if (!OwnerPlayer || !OwnerPlayer->CameraComp)
+	{
+		return;
+	}
+
+	float Weight = 1.0f - NormalizedAlpha;
+
+	if (MotionBlurCurve)
+	{
+		Weight = MotionBlurCurve->GetFloatValue(ElapsedTime);
+	}
+	else
+	{
+		Weight = FMath::Pow(FMath::Clamp(Weight, 0.0f, 1.0f), MotionBlurExponent);
+	}
+
+	float BlurAmount = MotionBlurPeakAmount * FMath::Clamp(Weight, 0.0f, 1.0f);
+
+	OwnerPlayer->CameraComp->PostProcessSettings.bOverride_MotionBlurAmount = true;
+	OwnerPlayer->CameraComp->PostProcessSettings.MotionBlurAmount = BlurAmount;
+
+	if (BlurAmount <= KINDA_SMALL_NUMBER && CurrentZoomState != EZoomState::ZoomingIn)
+	{
+		ResetCameraMotionBlur();
+	}
 }
 
 float UGS_AresMovingSkill::GetCameraZoomDuration() const

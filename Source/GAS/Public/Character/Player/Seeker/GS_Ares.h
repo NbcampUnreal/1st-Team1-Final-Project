@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GS_Seeker.h"
+#include "Curves/CurveFloat.h"
 #include "GS_Ares.generated.h"
 
 class AGS_SwordAuraProjectile;
@@ -69,6 +70,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving")
 	UCurveFloat* MovingSkill_CameraZoomCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera")
+	bool MovingSkill_EnableMotionBlur = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float MovingSkill_MotionBlurPeakAmount = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera")
+	UCurveFloat* MovingSkill_MotionBlurCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera", meta = (ClampMin = "0.1", ClampMax = "5.0"))
+	float MovingSkill_MotionBlurExponent = 1.0f;
 
 protected:
 	// Called when the game starts or when spawned

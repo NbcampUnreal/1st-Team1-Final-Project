@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Character/Skill/Seeker/GS_SeekerSkillBase.h"
+
+class AGS_Player;
+
 #include "GS_AresMovingSkill.generated.h"
 
 /**
@@ -18,7 +21,11 @@ public:
 	UGS_AresMovingSkill();
 
 	// BP_Ares에서 설정된 값을 받기 위한 함수
-	void SetCameraSettings(float InZoomOutDistance, UCurveFloat* InCameraZoomCurve);
+	void SetCameraSettings(float InZoomOutDistance, UCurveFloat* InCameraZoomCurve,
+		bool bInEnableMotionBlur = false,
+		float InMotionBlurPeakAmount = 0.0f,
+		UCurveFloat* InMotionBlurCurve = nullptr,
+		float InMotionBlurExponent = 1.0f);
 
 	virtual void BeginDestroy() override;
 
@@ -58,6 +65,11 @@ private:
 	// 카메라 줌 헬퍼 함수
 	float GetCameraZoomDuration() const;
 
+	// 모션 블러 관련
+	void CacheCameraMotionBlurDefaults(class AGS_Player* Player);
+	void UpdateCameraMotionBlur(float NormalizedAlpha, float ElapsedTime);
+	void ResetCameraMotionBlur();
+
 	// 카메라 애니메이션 상태
 	enum class EZoomState : uint8
 	{
@@ -76,12 +88,29 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 	float ZoomOutDistance = 300.0f;
 
+	// 모션 블러 설정
+	UPROPERTY(VisibleAnywhere, Category = "Camera|MotionBlur")
+	bool bEnableMotionBlur = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Camera|MotionBlur")
+	float MotionBlurPeakAmount = 0.5f;
+
+	UPROPERTY(VisibleAnywhere, Category = "Camera|MotionBlur")
+	UCurveFloat* MotionBlurCurve = nullptr;
+
+	UPROPERTY(VisibleAnywhere, Category = "Camera|MotionBlur")
+	float MotionBlurExponent = 1.0f;
+
 	// 카메라 줌 애니메이션 관련
 	float OriginalArmLength = 0.0f;
 	float CameraZoomElapsed = 0.0f;
 	float CameraZoomDuration = 0.3f;
 
 	bool bPendingZoomIn = false;
+	bool bMotionBlurActive = false;
+	bool bMotionBlurDefaultsCached = false;
+	bool bOriginalOverrideMotionBlurAmount = false;
+	float OriginalMotionBlurAmount = 0.0f;
 
 	FTimerHandle ChargingTimerHandle;
 	FTimerHandle DashTimerHandle;
