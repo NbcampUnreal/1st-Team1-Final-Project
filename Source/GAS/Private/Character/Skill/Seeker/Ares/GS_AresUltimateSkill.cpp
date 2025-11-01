@@ -151,5 +151,3 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 	
 	Super::DeactiveSkill();
 }
-
-

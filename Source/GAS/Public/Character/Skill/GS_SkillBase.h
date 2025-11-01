@@ -120,4 +120,5 @@ protected:
 	// 스킬 오디오 재생 헬퍼 함수들
 	void PlaySkillStartSound() const;
 	void PlaySkillEndSound() const;
+	virtual void BeginDestroy() override;
 };
