@@ -9,6 +9,11 @@
 #include "NiagaraComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "AkGameplayStatics.h"
+#include "Character/GS_Character.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/Player/Guardian/GS_Guardian.h"
+#include "ResourceSystem/Aether/GS_AetherExtractor.h"
 
 AGS_SwordAuraProjectile::AGS_SwordAuraProjectile()
 {
@@ -47,22 +52,49 @@ void AGS_SwordAuraProjectile::BeginPlay()
 
 void AGS_SwordAuraProjectile::OnSlashBoxOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor && OtherActor != this && !HitActors.Contains(OtherActor))
+	// 서버에서만 실행
+	if (!HasAuthority())
 	{
-		HitActors.Add(OtherActor);
-		
-		// 데미지 적용
-		UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * 2.0f, GetInstigatorController(), this, nullptr);
-		
-		// 타격 위치 계산 (히트된 액터의 중심 위치 사용)
-		FVector HitLocation = OtherActor->GetActorLocation();
-		
-		// 타격 VFX 재생 (멀티캐스트)
-		if (HasAuthority())
-		{
-			Multicast_PlayHitVFX(HitLocation);
-		}
+		return;
 	}
+
+	// 유효성 및 중복 체크
+	if (!OtherActor || OtherActor == this || HitActors.Contains(OtherActor))
+	{
+		return;
+	}
+
+	HitActors.Add(OtherActor);
+	
+	// 데미지 적용
+	UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * 2.0f, GetInstigatorController(), this, nullptr);
+	
+	// 타격 위치 계산 (히트된 액터의 중심 위치 사용)
+	FVector HitLocation = OtherActor->GetActorLocation();
+	
+	// 타격 대상 타입 판별 (최적화: 한 번만 Cast, 상속 계층 고려)
+	ESwordAuraHitTargetType TargetType = ESwordAuraHitTargetType::Other;
+	
+	// 상속 관계 고려: 구체적인 타입부터 체크 (Guardian, Seeker는 Character를 상속)
+	if (AGS_Guardian* Guardian = Cast<AGS_Guardian>(OtherActor))
+	{
+		TargetType = ESwordAuraHitTargetType::Guardian;
+	}
+	else if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor))
+	{
+		TargetType = ESwordAuraHitTargetType::Seeker;
+	}
+	else if (AGS_Character* Character = Cast<AGS_Character>(OtherActor))
+	{
+		TargetType = ESwordAuraHitTargetType::Character;
+	}
+	else if (AGS_AetherExtractor* Extractor = Cast<AGS_AetherExtractor>(OtherActor))
+	{
+		TargetType = ESwordAuraHitTargetType::Structure;
+	}
+	
+	// 타격 VFX 및 사운드 재생 (멀티캐스트)
+	Multicast_PlayHitEffects(TargetType, HitLocation);
 }
 
 void AGS_SwordAuraProjectile::DestroySwordAura()
@@ -132,20 +164,25 @@ void AGS_SwordAuraProjectile::Multicast_StartSwordSlashVFX_Implementation()
 	}
 }
 
-void AGS_SwordAuraProjectile::Multicast_PlayHitVFX_Implementation(const FVector& HitLocation)
+void AGS_SwordAuraProjectile::Multicast_PlayHitEffects_Implementation(ESwordAuraHitTargetType TargetType, const FVector& HitLocation)
 {
-	// 궁극기 활성화 상태에 따라 Hit VFX 선택
-	bool bIsBuffed = (EffectType == ESwordAuraEffectType::LeftBuff || EffectType == ESwordAuraEffectType::RightBuff);
-	UNiagaraSystem* SelectedHitVFX = bIsBuffed ? BuffHitVFX : NormalHitVFX;
-
-	if (!SelectedHitVFX)
+	if (!GetWorld())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("SwordAuraProjectile: Hit VFX is null"));
+		return;
 	}
-	else
+
+	// 궁극기 활성화 상태 확인
+	bool bIsBuffed = (EffectType == ESwordAuraEffectType::LeftBuff || EffectType == ESwordAuraEffectType::RightBuff);
+
+	// =============================
+	// VFX 재생
+	// =============================
+	
+	// 타격 이펙트
+	UNiagaraSystem* SelectedHitVFX = bIsBuffed ? BuffHitVFX : NormalHitVFX;
+	if (SelectedHitVFX)
 	{
-		// 타격 이펙트 스폰 (월드 스페이스)
-		UNiagaraComponent* HitVFXComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 			GetWorld(),
 			SelectedHitVFX,
 			HitLocation,
@@ -155,19 +192,13 @@ void AGS_SwordAuraProjectile::Multicast_PlayHitVFX_Implementation(const FVector&
 			true,
 			ENCPoolMethod::AutoRelease
 		);
-
-		if (HitVFXComp)
-		{
-			UE_LOG(LogTemp, Log, TEXT("SwordAuraProjectile: Hit VFX spawned at location: %s"), *HitLocation.ToString());
-		}
 	}
 
-	// 혈흔 이펙트 스폰 (버프 상태에 따라 다른 혈흔 선택)
+	// 혈흔 이펙트
 	UNiagaraSystem* SelectedBloodVFX = bIsBuffed ? BuffBloodSplatterVFX : NormalBloodSplatterVFX;
-	
 	if (SelectedBloodVFX)
 	{
-		UNiagaraComponent* BloodVFXComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 			GetWorld(),
 			SelectedBloodVFX,
 			HitLocation,
@@ -177,17 +208,40 @@ void AGS_SwordAuraProjectile::Multicast_PlayHitVFX_Implementation(const FVector&
 			true,
 			ENCPoolMethod::AutoRelease
 		);
-
-		if (BloodVFXComp)
-		{
-			FString BloodType = bIsBuffed ? TEXT("Buff") : TEXT("Normal");
-			UE_LOG(LogTemp, Log, TEXT("SwordAuraProjectile: %s Blood Splatter VFX spawned at location: %s"), 
-				*BloodType, *HitLocation.ToString());
-		}
 	}
-	else
+
+	// =============================
+	// 사운드 재생
+	// =============================
+	
+	UAkAudioEvent* SoundEventToPlay = nullptr;
+
+	// 타격 대상 타입에 따라 사운드 선택
+	switch (TargetType)
 	{
-		FString BloodType = bIsBuffed ? TEXT("Buff") : TEXT("Normal");
-		UE_LOG(LogTemp, Warning, TEXT("SwordAuraProjectile: %s Blood Splatter VFX is null"), *BloodType);
+	case ESwordAuraHitTargetType::Guardian:
+	case ESwordAuraHitTargetType::Character:
+		SoundEventToPlay = HitPawnSoundEvent;
+		break;
+	case ESwordAuraHitTargetType::Seeker:
+		SoundEventToPlay = HitSeekerSoundEvent;
+		break;
+	case ESwordAuraHitTargetType::Structure:
+	case ESwordAuraHitTargetType::Other:
+		SoundEventToPlay = HitStructureSoundEvent;
+		break;
+	default:
+		break;
+	}
+
+	// Wwise 사운드 이벤트 재생
+	if (SoundEventToPlay)
+	{
+		UAkGameplayStatics::PostEventAtLocation(
+			SoundEventToPlay,
+			HitLocation,
+			FRotator::ZeroRotator,
+			GetWorld()
+		);
 	}
 }

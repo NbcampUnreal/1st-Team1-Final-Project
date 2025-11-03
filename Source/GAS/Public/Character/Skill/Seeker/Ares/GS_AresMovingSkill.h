@@ -9,6 +9,14 @@ class AGS_Player;
 
 #include "GS_AresMovingSkill.generated.h"
 
+UENUM(BlueprintType)
+enum class EAresDashHitTargetType : uint8
+{
+	Guardian,
+	Monster,
+	Other
+};
+
 /**
  * 
  */
@@ -43,6 +51,11 @@ protected:
 	// 공격
 	virtual void ApplyEffectToDungeonMonster(AGS_Monster* Target) override;
 	virtual void ApplyEffectToGuardian(AGS_Guardian* Target) override;
+
+	// 타격 사운드 재생 (멀티캐스트)
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDashHitSound(EAresDashHitTargetType TargetType, const FVector& HitLocation);
+	void Multicast_PlayDashHitSound_Implementation(EAresDashHitTargetType TargetType, const FVector& HitLocation);
 
 private:
 	void UpdateCharging();

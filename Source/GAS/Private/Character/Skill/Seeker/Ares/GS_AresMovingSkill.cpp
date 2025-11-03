@@ -18,6 +18,8 @@
 #include "Character/Player/GS_Player.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "AkGameplayStatics.h"
+#include "Character/Skill/GS_SkillSet.h"
 
 
 UGS_AresMovingSkill::UGS_AresMovingSkill()
@@ -169,18 +171,34 @@ void UGS_AresMovingSkill::InterruptSkill()
 
 void UGS_AresMovingSkill::ApplyEffectToDungeonMonster(AGS_Monster* Target)
 {
-	// 데미지
+	// 유효성 체크
+	if (!Target || !OwnerCharacter)
+	{
+		return;
+	}
+
+	// 데미지 적용
 	UGameplayStatics::ApplyDamage(Target, 50.0f, OwnerCharacter->GetController(), OwnerCharacter, nullptr);
 	
-	// 몬스터 충돌 사운드는 SeekerAudioComponent를 통해 처리됨
+	// 타격 사운드 재생 (멀티캐스트) - HasAuthority 체크 불필요 (UpdateDash가 서버에서만 호출됨)
+	FVector HitLocation = Target->GetActorLocation();
+	Multicast_PlayDashHitSound(EAresDashHitTargetType::Monster, HitLocation);
 }
 
 void UGS_AresMovingSkill::ApplyEffectToGuardian(AGS_Guardian* Target)
 {
-	// 데미지
+	// 유효성 체크
+	if (!Target || !OwnerCharacter)
+	{
+		return;
+	}
+
+	// 데미지 적용
 	UGameplayStatics::ApplyDamage(Target, 50.0f, OwnerCharacter->GetController(), OwnerCharacter, nullptr);
 	
-	// 가디언 충돌 사운드는 SeekerAudioComponent를 통해 처리됨
+	// 타격 사운드 재생 (멀티캐스트) - HasAuthority 체크 불필요 (UpdateDash가 서버에서만 호출됨)
+	FVector HitLocation = Target->GetActorLocation();
+	Multicast_PlayDashHitSound(EAresDashHitTargetType::Guardian, HitLocation);
 }
 
 void UGS_AresMovingSkill::UpdateCharging()
@@ -221,7 +239,14 @@ void UGS_AresMovingSkill::StartDash()
 
 void UGS_AresMovingSkill::UpdateDash()
 {
-	if (!IsValid(OwnerCharacter))
+	// 유효성 체크
+	if (!IsValid(OwnerCharacter) || !OwnerCharacter->GetWorld())
+	{
+		return;
+	}
+
+	// 서버에서만 실행 (위치 이동, 데미지, 충돌 판정)
+	if (!OwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -229,17 +254,30 @@ void UGS_AresMovingSkill::UpdateDash()
 	float Step = 0.01f / DashDuration;
 	DashInterpAlpha += Step;
 
+	// 위치 보간 이동 (서버에서 실행, 자동 복제)
+	FVector NewLocation = FMath::Lerp(DashStartLocation, DashEndLocation, DashInterpAlpha);
+	OwnerCharacter->SetActorLocation(NewLocation, true); // Sweep = true로 충돌 적용
+	DashStartLocation = NewLocation;
+
 	// 공격 판정
 	TArray<FHitResult> HitResults;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerCharacter);
-	GetWorld()->SweepMultiByChannel(HitResults, DashStartLocation, DashEndLocation,
-		FQuat::Identity, ECC_Pawn, FCollisionShape::MakeCapsule(100.0f, 100.0f), Params);
-
-	for (const FHitResult& Hit : HitResults)
+	
+	if (OwnerCharacter->GetWorld()->SweepMultiByChannel(
+		HitResults, 
+		DashStartLocation, 
+		DashEndLocation,
+		FQuat::Identity, 
+		ECC_Pawn, 
+		FCollisionShape::MakeCapsule(100.0f, 100.0f), 
+		Params))
 	{
-		if (AActor* HitActor = Hit.GetActor())
+		for (const FHitResult& Hit : HitResults)
 		{
+			AActor* HitActor = Hit.GetActor();
+			
+			// 중복 체크 (GetActor()는 이미 유효성 보장)
 			if (!HitActor || DamagedActors.Contains(HitActor))
 			{
 				continue;
@@ -247,6 +285,7 @@ void UGS_AresMovingSkill::UpdateDash()
 
 			DamagedActors.Add(HitActor);
 
+			// 타입별 처리 (최적화: 한 번만 Cast)
 			if (AGS_Monster* TargetMonster = Cast<AGS_Monster>(HitActor))
 			{
 				ApplyEffectToDungeonMonster(TargetMonster);
@@ -254,17 +293,11 @@ void UGS_AresMovingSkill::UpdateDash()
 			else if (AGS_Guardian* TargetGuardian = Cast<AGS_Guardian>(HitActor))
 			{
 				ApplyEffectToGuardian(TargetGuardian);
-
 			}
 		}
 	}
 
-	// 위치 보간 이동
-	FVector NewLocation = FMath::Lerp(DashStartLocation, DashEndLocation, DashInterpAlpha);
-	OwnerCharacter->SetActorLocation(NewLocation, true); // Sweep = true로 충돌 적용
-	DashStartLocation = NewLocation;
-
-	// 대시 거리만큼 이동 하면
+	// 대시 거리만큼 이동 완료
 	if (DashInterpAlpha >= 1.f)
 	{
 		// 스킬 종료
@@ -615,4 +648,48 @@ float UGS_AresMovingSkill::GetCameraZoomDuration() const
 		return (Duration > 0.0f) ? Duration : 0.3f;
 	}
 	return 0.3f;
+}
+
+void UGS_AresMovingSkill::Multicast_PlayDashHitSound_Implementation(EAresDashHitTargetType TargetType, const FVector& HitLocation)
+{
+	// 유효성 체크
+	if (!OwnerCharacter || !OwnerCharacter->GetWorld())
+	{
+		return;
+	}
+
+	// 데이터 테이블에서 스킬 정보 가져오기
+	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
+	if (!SkillInfo)
+	{
+		return;
+	}
+
+	UAkAudioEvent* SoundEventToPlay = nullptr;
+
+	// 타격 대상 타입에 따라 데이터 테이블의 사운드 선택
+	switch (TargetType)
+	{
+	case EAresDashHitTargetType::Guardian:
+		SoundEventToPlay = SkillInfo->GuardianCollisionSound;
+		break;
+	case EAresDashHitTargetType::Monster:
+		SoundEventToPlay = SkillInfo->MonsterCollisionSound;
+		break;
+	case EAresDashHitTargetType::Other:
+	default:
+		// 기타 오브젝트는 사운드 없음
+		break;
+	}
+
+	// Wwise 사운드 이벤트 재생
+	if (SoundEventToPlay)
+	{
+		UAkGameplayStatics::PostEventAtLocation(
+			SoundEventToPlay,
+			HitLocation,
+			FRotator::ZeroRotator,
+			OwnerCharacter->GetWorld()
+		);
+	}
 }
