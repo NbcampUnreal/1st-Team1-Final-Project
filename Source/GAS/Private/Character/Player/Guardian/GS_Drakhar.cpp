@@ -1333,10 +1333,14 @@ void AGS_Drakhar::OnRep_IsFeverMode()
 
 void AGS_Drakhar::OnRep_FlyingStaminaCoolTime()
 {
-	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("!!!!!!!!!!!!!%f"),FlyingStaminaCoolTime));
 	if (FMath::IsNearlyZero(FlyingStaminaCoolTime))
 	{
 		StopCtrl();
+	}
+	if (FlyingStaminaCoolTime == MaxFlyingStaminaCoolTime)
+	{
+		SafeClearTimer(FlyingStartStaminaCoolTimeHandler);
+		SafeClearTimer(FlyingEndStaminaCoolTimeHandler);
 	}
 }
 

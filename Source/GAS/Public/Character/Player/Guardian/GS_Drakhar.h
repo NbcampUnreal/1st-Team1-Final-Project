@@ -173,16 +173,16 @@ public:
 	void EndFlyingStaminaTimer();
 		
 	// === Multicast RPCs delegated to components ===
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboAttackSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDashSkillSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayEarthquakeSkillSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicFurySkillSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicProjectileSound(const FVector& Location);
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayAttackHitSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboFinisherSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStartSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStateSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastStopFeverModeStateSound();
+	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboAttackSound();
+	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDashSkillSound();
+	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayEarthquakeSkillSound();
+	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicFurySkillSound();
+	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicProjectileSound(const FVector& Location);
+	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayAttackHitSound();
+	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboFinisherSound();
+	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStartSound();
+	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStateSound();
+	// UFUNCTION(NetMulticast, Unreliable) void MulticastStopFeverModeStateSound();
 	// === Multicast RPCs for VFX only ===
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeEndEffects();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartWingRushVFX();
@@ -398,8 +398,8 @@ private:
 	//[Flying CoolTime]
 	UPROPERTY(ReplicatedUsing=OnRep_FlyingStaminaCoolTime)
 	float FlyingStaminaCoolTime;
-	const float MaxFlyingStaminaCoolTime = 5.f; // 최대 스테미나
-	const float ValidFlyingStaminaCoolTime = 2.f; // 날기 시작 가능한 정도
+	const float MaxFlyingStaminaCoolTime = 20.f; // 최대 스테미나
+	const float ValidFlyingStaminaCoolTime = 5.f; // 날기 시작 가능한 정도
 	bool isStartCoolTime = true;
 	
 	FTimerHandle FlyingStartStaminaCoolTimeHandler;
