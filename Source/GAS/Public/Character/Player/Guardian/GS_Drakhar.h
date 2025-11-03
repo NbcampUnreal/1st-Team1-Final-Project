@@ -168,6 +168,21 @@ public:
 	void HealRegeneration();
 	void StopHealRegeneration();
 
+	//[flying timer]
+	void StartFlyingStaminaTimer();
+	void EndFlyingStaminaTimer();
+		
+	// === Multicast RPCs delegated to components ===
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboAttackSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDashSkillSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayEarthquakeSkillSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicFurySkillSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicProjectileSound(const FVector& Location);
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayAttackHitSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboFinisherSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStartSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStateSound();
+	UFUNCTION(NetMulticast, Unreliable) void MulticastStopFeverModeStateSound();
 	// === Multicast RPCs for VFX only ===
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeEndEffects();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartWingRushVFX();
@@ -380,6 +395,16 @@ private:
 	FTimerHandle FeverTimer;
 	FTimerHandle FeverStateSoundDelayTimer;
 
+	//[Flying CoolTime]
+	UPROPERTY(ReplicatedUsing=OnRep_FlyingStaminaCoolTime)
+	float FlyingStaminaCoolTime;
+	const float MaxFlyingStaminaCoolTime = 5.f; // 최대 스테미나
+	const float ValidFlyingStaminaCoolTime = 2.f; // 날기 시작 가능한 정도
+	bool isStartCoolTime = true;
+	
+	FTimerHandle FlyingStartStaminaCoolTimeHandler;
+	FTimerHandle FlyingEndStaminaCoolTimeHandler;
+	
 	// === 카메라 줌 효과 설정 ===
 
 	// 카메라 줌인 효과 설정
@@ -433,6 +458,9 @@ private:
 	UFUNCTION()
 	void OnRep_IsFeverMode();
 
+	UFUNCTION()
+	void OnRep_FlyingStaminaCoolTime();
+	
 	// 월드 컨텍스트 검증 함수 (레벨 전환 시 크래시 방지)
 	bool IsWorldContextValid() const;
 
