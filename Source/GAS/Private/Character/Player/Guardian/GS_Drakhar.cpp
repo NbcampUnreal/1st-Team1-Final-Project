@@ -136,6 +136,7 @@ AGS_Drakhar::AGS_Drakhar()
 	}
 
 	FlyingDustTraceDistance = 2000.f;
+	FlyingStaminaCoolTime = MaxFlyingStaminaCoolTime;
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -152,7 +153,7 @@ void AGS_Drakhar::BeginPlay()
 void AGS_Drakhar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	if (SpringArmComp && bIsFlying)
 	{
 		if (FMath::IsNearlyEqual(SpringArmComp->TargetArmLength, TargetSpringArmLength, 1.0f))
@@ -174,6 +175,7 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	DOREPLIFETIME(ThisClass, bCanCombo);
 	DOREPLIFETIME(ThisClass, CurrentFeverGauge);
 	DOREPLIFETIME(ThisClass, IsFeverMode);
+	DOREPLIFETIME(ThisClass, FlyingStaminaCoolTime);
 }
 
 void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -215,8 +217,14 @@ void AGS_Drakhar::Ctrl()
 	
 	if (!HasAuthority() && IsLocallyControlled())
 	{
+		if (FMath::IsNearlyZero(FlyingStaminaCoolTime))
+		{
+			//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("!!!!!!!STOP!!!!!!!!!!")));
+			return;
+		}
+
 		//not flying
-		if (GuardianState == EGuardianCtrlState::CtrlEnd)
+		if (GuardianState == EGuardianCtrlState::CtrlEnd && FlyingStaminaCoolTime >= ValidFlyingStaminaCoolTime)
 		{
 			//if execute flying skill, prevent change state
 			if (GuardianDoSkillState != EGuardianDoSkill::None)
@@ -619,6 +627,18 @@ void AGS_Drakhar::ServerRPCStartCtrl_Implementation()
 {
 	GuardianState = EGuardianCtrlState::CtrlUp;
 	MoveSpeed = SpeedUpMoveSpeed;
+
+	if (isStartCoolTime)
+	{
+		SafeClearTimer(FlyingEndStaminaCoolTimeHandler);
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->GetTimerManager().SetTimer(FlyingStartStaminaCoolTimeHandler, this, &AGS_Drakhar::StartFlyingStaminaTimer, 1.f, true);
+		}
+		isStartCoolTime = false;
+	}
+	
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
@@ -628,6 +648,16 @@ void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
 	GuardianDoSkillState = EGuardianDoSkill::None;
 	
 	MoveSpeed = NormalMoveSpeed;
+
+	isStartCoolTime = true;
+	SafeClearTimer(FlyingStartStaminaCoolTimeHandler);
+	
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->GetTimerManager().SetTimer(FlyingEndStaminaCoolTimeHandler, this, &AGS_Drakhar::EndFlyingStaminaTimer, 1.f, true);
+	}
+	
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 
 	GetSkillComp()->ResetAllowedSkillsMask();
@@ -990,6 +1020,32 @@ void AGS_Drakhar::StopHealRegeneration()
 	SafeClearTimer(HealthRegenTimer);
 }
 
+void AGS_Drakhar::StartFlyingStaminaTimer()
+{
+	SafeClearTimer(FlyingEndStaminaCoolTimeHandler);
+	
+	FlyingStaminaCoolTime -= 1.f;
+	
+	if (FlyingStaminaCoolTime <= 0.f)
+	{
+		FlyingStaminaCoolTime = 0.f;
+	}
+	UE_LOG(LogTemp, Error, TEXT("start flying stamina %f"), FlyingStaminaCoolTime);
+}
+
+void AGS_Drakhar::EndFlyingStaminaTimer()
+{
+	SafeClearTimer(FlyingStartStaminaCoolTimeHandler);
+	
+	FlyingStaminaCoolTime += 1.f;
+
+	if (FlyingStaminaCoolTime >= MaxFlyingStaminaCoolTime)
+	{
+		FlyingStaminaCoolTime = MaxFlyingStaminaCoolTime;
+	}
+	UE_LOG(LogTemp, Error, TEXT("end flying stamina %f"), FlyingStaminaCoolTime);
+}
+
 void AGS_Drakhar::GenerateDraconicFuryTargets()
 {
 	// 피버 모드일 경우 피버 모드 위치 생성
@@ -1272,6 +1328,15 @@ void AGS_Drakhar::OnRep_IsFeverMode()
 	else
 	{
 		BP_OnFeverModeEnd();
+	}
+}
+
+void AGS_Drakhar::OnRep_FlyingStaminaCoolTime()
+{
+	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("!!!!!!!!!!!!!%f"),FlyingStaminaCoolTime));
+	if (FMath::IsNearlyZero(FlyingStaminaCoolTime))
+	{
+		StopCtrl();
 	}
 }
 
