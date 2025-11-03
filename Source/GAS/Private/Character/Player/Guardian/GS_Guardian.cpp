@@ -2,7 +2,6 @@
 #include "Character/Player/Guardian/GS_DrakharAnimInstance.h"
 #include "Animation/AnimInstance.h"
 #include "Character/Component/GS_StatComp.h"
-#include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
@@ -155,31 +154,34 @@ void AGS_Guardian::ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& Damag
 		{
 			float Damage = DamagedCharacterStat->CalculateDamage(this, DamagedCharacter);
 			FDamageEvent DamageEvent;
-			DamagedCharacter->TakeDamage(Damage + PlusDamge, DamageEvent, GetController(),this);
+			DamagedCharacter->TakeDamage(Damage + PlusDamge, DamageEvent, GetController(), this);
 
 			//hit stop
 			MulticastRPCApplyHitStop(DamagedCharacter);
 			
-			//server
-			AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
+			// 피버 게이지 업데이트 (각 가디언이 자신의 방식으로 처리)
+			OnFeverGaugeUpdate(10.f);
 			
-			if (!Drakhar->GetIsFeverMode())
-			{
-				Drakhar->SetFeverGauge(10.f);
-			}
-			else if (Drakhar->GetIsFeverMode())
-			{
-				Drakhar->bIsAttckingDuringFever = true;
-				Drakhar->ResetIsAttackingDuringFeverMode();
-			}
-			
-			// === 히트 사운드 재생 (Drakhar인 경우) ===
-			if (Drakhar)
-			{
-				Drakhar->MulticastPlayAttackHitSound();
-			}
+			// 공격 히트 처리 (각 가디언이 자신의 방식으로 처리)
+			OnAttackHit(DamagedCharacter);
 		}
 	}
+}
+
+// === 가상 함수 기본 구현 (비어있음, 파생 클래스에서 필요시 오버라이드) ===
+void AGS_Guardian::OnAttackHit(AGS_Character* HitCharacter)
+{
+	// 기본 구현은 비어있음 - 각 가디언이 필요시 오버라이드
+}
+
+void AGS_Guardian::OnFeverGaugeUpdate(float DeltaGauge)
+{
+	// 기본 구현은 비어있음 - 각 가디언이 필요시 오버라이드
+}
+
+void AGS_Guardian::OnQuitSkill()
+{
+	// 기본 구현은 비어있음 - 각 가디언이 필요시 오버라이드
 }
 
 
@@ -199,11 +201,9 @@ void AGS_Guardian::QuitGuardianSkill()
 	GuardianState = EGuardianCtrlState::CtrlEnd;
 	GuardianDoSkillState = EGuardianDoSkill::None;
 	
-	AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this);
-	if (Drakhar)
-	{
-		Drakhar->ServerRPCResetValue();
-	}
+	// 각 가디언의 스킬 종료 처리
+	OnQuitSkill();
+	
 	//fly end
 	GetSkillComp()->Server_TrySkillCanceledByDebuff(ESkillSlot::Ready);
 }
@@ -219,6 +219,11 @@ void AGS_Guardian::ShowTargetUI(bool bIsActive)
 	{
 		TargetedUIComponent->SetVisibility(bIsActive);
 	}
+}
+
+FName AGS_Guardian::GetManualRowName_Implementation() const
+{
+	return ManualRowName;
 }
 
 float AGS_Guardian::GetFlySpeed()

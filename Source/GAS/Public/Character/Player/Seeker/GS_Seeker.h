@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Interface/GS_ManualDataInterface.h"
 #include "NiagaraComponent.h"
 #include "Animation/Character/E_SeekerAnim.h"
 #include "Character/Skill/GS_SkillComp.h"
@@ -18,6 +19,8 @@ class UGS_VFXComponent;
 class AGS_Monster;
 class UGS_SeekerAudioComponent;
 class UUserWidget;
+class UGS_LowHealthEffectComponent;
+class UGS_DetectionEffectComponent;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -51,7 +54,7 @@ enum class ECollisionSoundType : uint8
 };
 
 UCLASS()
-class GAS_API AGS_Seeker : public AGS_Player
+class GAS_API AGS_Seeker : public AGS_Player, public IGS_ManualDataInterface
 {
 	GENERATED_BODY()
 
@@ -185,6 +188,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
 	UMaterialInterface* LowHealthEffectMaterial;
 
+	// LowHealth 전용 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Effects")
+	UGS_LowHealthEffectComponent* LowHealthEffectComp;
+
 	// ================
 	// 가디언 감지 스크린 효과
 	// ================
@@ -193,6 +200,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Detection|Effects")
 	UMaterialInterface* DetectionEffectMaterial; // MPP_Detect
+
+	// Detection 전용 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Detection|Effects")
+	UGS_DetectionEffectComponent* DetectionEffectComp;
 	
 	UFUNCTION()
 	void HandleLowHealthEffect(UGS_StatComp* InStatComp);
@@ -227,6 +238,10 @@ public:
 	// 몬스터 감지용 컴포넌트 추가
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	class USphereComponent* CombatTrigger;
+
+	// 전투 탐지 반경
+	UPROPERTY(EditDefaultsOnly, Category = "Combat", meta=(ClampMin="0"))
+	float CombatTriggerRadius = 800.0f;
 	
 	// 몬스터가 전투 음악 시작/중지를 요청할 때 호출
 	UFUNCTION(BlueprintCallable)
@@ -254,6 +269,9 @@ protected:
 	void InitializeCameraManager();
 	void UpdatePostProcessEffect(float EffectStrength);
 
+	// KeyManual을 위한 인터페이스 함수
+	virtual FName GetManualRowName_Implementation() const override;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
@@ -269,6 +287,10 @@ protected:
 	// 카메라 매니저 참조 추가
 	UPROPERTY()
 	APlayerCameraManager* LocalCameraManager;
+
+	// KeyManual을 위한 캐릭터 타입 저장
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Manual")
+	FName ManualRowName;
 
 	// ===================================
 	// LowHP 스크린 효과 (효과 보간 관련 변수)
@@ -330,8 +352,16 @@ private:
 	float LastDetectionSoundTime = 0.0f;
 
 	// 감지 사운드 최소 간격 (초)
-	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "0.5", ClampMax = "5.0"))
-	float DetectionSoundCooldown = 5.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "1.0", ClampMax = "10.0"))
+	float DetectionSoundCooldown = 7.0f;
+
+	// 퇴장 감지 사운드 쿨다운 (마지막 재생 시간 추적)
+	UPROPERTY()
+	float LastExitDetectionSoundTime = 0.0f;
+
+	// 퇴장 감지 사운드 최소 간격 (초)
+	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "1.0", ClampMax = "10.0"))
+	float ExitDetectionSoundCooldown = 7.0f;
 
 	// 화면 중앙 근접도 (0.0 = 가장자리, 1.0 = 중앙)
 	UPROPERTY(ReplicatedUsing = OnRep_DetectionIntensity)

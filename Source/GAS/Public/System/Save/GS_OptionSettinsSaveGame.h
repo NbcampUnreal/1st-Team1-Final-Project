@@ -17,4 +17,7 @@ class GAS_API UGS_OptionSettinsSaveGame : public USaveGame
 public:
 	UPROPERTY(VisibleAnywhere, Category = "Settings")
 	float MouseSensitivity;
+
+	UPROPERTY(VisibleAnywhere, Category = "Settings")
+	float BGMVolume;
 };

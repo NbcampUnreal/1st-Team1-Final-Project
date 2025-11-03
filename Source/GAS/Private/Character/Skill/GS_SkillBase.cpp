@@ -42,6 +42,7 @@ void UGS_SkillBase::ActiveSkill()
 
 void UGS_SkillBase::OnSkillCanceledByDebuff()
 {
+	StopCastVFX();
 }
 
 void UGS_SkillBase::OnSkillAnimationEnd()
@@ -60,6 +61,7 @@ void UGS_SkillBase::ExecuteSkillEffect()
 void UGS_SkillBase::DeactiveSkill()
 {
 	UE_LOG(LogTemp, Warning, TEXT("DeactiveSkill!!!!!!!!!!!!!!"));
+	StopCastVFX();
 	SetIsActive(false);
 }
 
@@ -79,6 +81,8 @@ bool UGS_SkillBase::GetIsActive() const
 
 void UGS_SkillBase::InterruptSkill()
 {
+	StopCastVFX();
+	
 	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter);
 	
 	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerCharacter->GetMesh()->GetAnimInstance()))
@@ -115,6 +119,9 @@ void UGS_SkillBase::PlayCastVFX(FVector Location, FRotator Rotation)
 {
 	if (SkillCastVFX && OwnerCharacter)
 	{
+		// 기존 Cast VFX가 있으면 먼저 정리
+		StopCastVFX();
+		
 		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
 			SkillCastVFX,
 			OwnerCharacter->GetRootComponent(),
@@ -127,6 +134,9 @@ void UGS_SkillBase::PlayCastVFX(FVector Location, FRotator Rotation)
 
 		if (NiagaraComp)
 		{
+			// Cast VFX 컴포넌트 추적 저장
+			ActiveCastVFXComponent = NiagaraComp;
+			
 			FVector Forward = OwnerCharacter->GetActorForwardVector();
 			NiagaraComp->SetVectorParameter(FName("User.ForwardVector"), Forward);
 
@@ -209,6 +219,20 @@ void UGS_SkillBase::PlayEndVFX(FVector Location, FRotator Rotation)
 			EAttachLocation::KeepRelativeOffset,
 			true
 		);
+	}
+	
+	// End VFX 재생 시 Cast VFX 정리
+	StopCastVFX();
+}
+
+void UGS_SkillBase::StopCastVFX()
+{
+	if (ActiveCastVFXComponent && IsValid(ActiveCastVFXComponent))
+	{
+		// VFX 비활성화 및 제거
+		ActiveCastVFXComponent->Deactivate();
+		ActiveCastVFXComponent->DestroyComponent();
+		ActiveCastVFXComponent = nullptr;
 	}
 }
 
@@ -293,4 +317,18 @@ void UGS_SkillBase::PlaySkillEndSound() const
 		}
 	}
 	// 다른 캐릭터 타입은 각자의 오디오 컴포넌트 사용
+}
+
+void UGS_SkillBase::BeginDestroy()
+{
+	Super::BeginDestroy();
+	if(bIsActive)
+	{
+		DeactiveSkill();
+	}
+}
+
+void UGS_SkillBase::InitializeDelegate()
+{
+	return;
 }

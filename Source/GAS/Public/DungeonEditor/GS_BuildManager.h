@@ -23,11 +23,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
 	TObjectPtr<USceneComponent> DefaultSceneRoot;
 	
-#if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
-	TObjectPtr<UBillboardComponent> BillboardCompo;
-#endif
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
 	TObjectPtr<UStaticMeshComponent> StaticMeshCompo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")

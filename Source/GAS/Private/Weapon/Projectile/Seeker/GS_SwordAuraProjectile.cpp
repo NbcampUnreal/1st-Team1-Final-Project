@@ -38,7 +38,7 @@ void AGS_SwordAuraProjectile::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 void AGS_SwordAuraProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	Multicast_StartSwordSlashVFX();
+	
 	// 오버랩 이벤트 바인딩
 	SlashBox->OnComponentBeginOverlap.AddDynamic(this, &AGS_SwordAuraProjectile::OnSlashBoxOverlap);	
 
@@ -50,7 +50,18 @@ void AGS_SwordAuraProjectile::OnSlashBoxOverlap(UPrimitiveComponent* OverlappedC
 	if (OtherActor && OtherActor != this && !HitActors.Contains(OtherActor))
 	{
 		HitActors.Add(OtherActor);
+		
+		// 데미지 적용
 		UGameplayStatics::ApplyDamage(OtherActor, BaseDamage * 2.0f, GetInstigatorController(), this, nullptr);
+		
+		// 타격 위치 계산 (히트된 액터의 중심 위치 사용)
+		FVector HitLocation = OtherActor->GetActorLocation();
+		
+		// 타격 VFX 재생 (멀티캐스트)
+		if (HasAuthority())
+		{
+			Multicast_PlayHitVFX(HitLocation);
+		}
 	}
 }
 
@@ -77,6 +88,7 @@ void AGS_SwordAuraProjectile::Multicast_StartSwordSlashVFX_Implementation()
 		return;
 	}
 
+	// VFX 타입 선택
 	UNiagaraSystem* SelectedVFX = nullptr;
 	switch (EffectType)
 	{
@@ -93,29 +105,89 @@ void AGS_SwordAuraProjectile::Multicast_StartSwordSlashVFX_Implementation()
 		SelectedVFX = RightBuffSlashVFX;
 		break;
 	}
-		
-		
-		
 	
 	if (!SelectedVFX)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("SwordAuraProjectile: SelectedVFX is null"));
 		return;
 	}
-	FString VFXName;
-	SelectedVFX->GetFName().ToString(VFXName);
 
-	UE_LOG(LogTemp, Warning, TEXT("SelectedVFX : %s"), *VFXName);
+	// VFX 컴포넌트 생성 및 부착
+	FVector LocalPos = FVector::ZeroVector;
+	FRotator LocalRot = FRotator::ZeroRotator;
 
-	FVector LocalPos = FVector::ZeroVector; // 부모 위치 기준 (붙는 지점 기준)
-	FRotator LocalRot = FRotator::ZeroRotator; // 붙는 지점 기준 회전
-
-	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+	SlashVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
 		SelectedVFX,
 		SlashBox,
 		NAME_None,
 		LocalPos,
-		LocalRot, //Projectile 회전값 
-		EAttachLocation::KeepRelativeOffset,//월드 기준
+		LocalRot,
+		EAttachLocation::KeepRelativeOffset,
 		true
 	);
+
+	if (SlashVFXComponent)
+	{
+		UE_LOG(LogTemp, Log, TEXT("SwordAuraProjectile: Slash VFX Component created successfully"));
+	}
+}
+
+void AGS_SwordAuraProjectile::Multicast_PlayHitVFX_Implementation(const FVector& HitLocation)
+{
+	// 궁극기 활성화 상태에 따라 Hit VFX 선택
+	bool bIsBuffed = (EffectType == ESwordAuraEffectType::LeftBuff || EffectType == ESwordAuraEffectType::RightBuff);
+	UNiagaraSystem* SelectedHitVFX = bIsBuffed ? BuffHitVFX : NormalHitVFX;
+
+	if (!SelectedHitVFX)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("SwordAuraProjectile: Hit VFX is null"));
+	}
+	else
+	{
+		// 타격 이펙트 스폰 (월드 스페이스)
+		UNiagaraComponent* HitVFXComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			SelectedHitVFX,
+			HitLocation,
+			FRotator::ZeroRotator,
+			FVector(1.0f),
+			true,
+			true,
+			ENCPoolMethod::AutoRelease
+		);
+
+		if (HitVFXComp)
+		{
+			UE_LOG(LogTemp, Log, TEXT("SwordAuraProjectile: Hit VFX spawned at location: %s"), *HitLocation.ToString());
+		}
+	}
+
+	// 혈흔 이펙트 스폰 (버프 상태에 따라 다른 혈흔 선택)
+	UNiagaraSystem* SelectedBloodVFX = bIsBuffed ? BuffBloodSplatterVFX : NormalBloodSplatterVFX;
+	
+	if (SelectedBloodVFX)
+	{
+		UNiagaraComponent* BloodVFXComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			SelectedBloodVFX,
+			HitLocation,
+			FRotator::ZeroRotator,
+			FVector(1.0f),
+			true,
+			true,
+			ENCPoolMethod::AutoRelease
+		);
+
+		if (BloodVFXComp)
+		{
+			FString BloodType = bIsBuffed ? TEXT("Buff") : TEXT("Normal");
+			UE_LOG(LogTemp, Log, TEXT("SwordAuraProjectile: %s Blood Splatter VFX spawned at location: %s"), 
+				*BloodType, *HitLocation.ToString());
+		}
+	}
+	else
+	{
+		FString BloodType = bIsBuffed ? TEXT("Buff") : TEXT("Normal");
+		UE_LOG(LogTemp, Warning, TEXT("SwordAuraProjectile: %s Blood Splatter VFX is null"), *BloodType);
+	}
 }

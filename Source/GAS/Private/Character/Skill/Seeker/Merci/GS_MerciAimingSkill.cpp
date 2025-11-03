@@ -17,10 +17,13 @@ void UGS_MerciAimingSkill::ActiveSkill()
 	
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
-		// 스킬 시작 사운드 재생
-		if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
+		// 스킬 시작 사운드 재생 (멀티캐스트)
+		if (MerciCharacter->HasAuthority())
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
+			}
 		}
 
 		MerciCharacter->SetDrawState(false);
@@ -68,12 +71,15 @@ void UGS_MerciAimingSkill::InterruptSkill()
 
 void UGS_MerciAimingSkill::DeactiveSkill()
 {
-	// SeekerAudioComponent를 통한 스킬 종료 사운드
-	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	// 스킬 종료 사운드 재생 (멀티캐스트)
+	if (OwnerCharacter->HasAuthority())
 	{
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 1);
+			}
 		}
 	}
 

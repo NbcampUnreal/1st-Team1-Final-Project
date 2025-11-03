@@ -67,6 +67,10 @@ public:
 	virtual void LeftMouse() override;
 	virtual void RightMouse() override;
 	
+	virtual void OnAttackHit(AGS_Character* HitCharacter) override;
+	virtual void OnFeverGaugeUpdate(float DeltaGauge) override;
+	virtual void OnQuitSkill() override;
+	
 	//[Attack Functions]
 	virtual void MeleeAttackCheck() override;
 	
@@ -148,7 +152,8 @@ public:
 	
 	//new skill
 	void FeverComoLastAttack();
-	
+	void PlayDelayedComboFinisherSounds();
+
 	//max fever gauge
 	void StartFeverMode();
 	//when fever gauge > 0
@@ -163,16 +168,8 @@ public:
 	void HealRegeneration();
 	void StopHealRegeneration();
 
-	// === Multicast RPCs delegated to components ===
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboAttackSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDashSkillSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayEarthquakeSkillSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicFurySkillSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDraconicProjectileSound(const FVector& Location);
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayAttackHitSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboFinisherSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeStartSound();
-	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayHurtSound();
+	// === Multicast RPCs for VFX only ===
+	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeEndEffects();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartWingRushVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStopWingRushVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastStartDustVFX();
@@ -184,6 +181,7 @@ public:
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayEarthquakeImpactVFX(const FVector& ImpactLocation);
 	UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverEarthquakeImpactVFX(const FVector& ImpactLocation);
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_PlayAttackHitVFX(FVector ImpactPoint);
+	//UFUNCTION(NetMulticast, Unreliable) void MulticastPlayFeverModeEndVFX();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFlyStart();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnFlyEnd();
 	UFUNCTION(NetMulticast, Unreliable) void MulticastRPC_OnUltimateStart();
@@ -257,6 +255,10 @@ public:
 	UNiagaraSystem* FeverDraconicProjectileImpactVFX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Fever Projectile Explosion VFX"))
 	UNiagaraSystem* FeverDraconicProjectileExplosionVFX;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Normal Mode Indicator VFX"))
+	UNiagaraSystem* DraconicFuryIndicatorVFX;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|DraconicFury", meta = (DisplayName = "Fever Mode Indicator VFX"))
+	UNiagaraSystem* FeverDraconicFuryIndicatorVFX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Fever Footstep VFX"))
 	UNiagaraSystem* FeverFootstepVFX;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|Drakhar", meta = (DisplayName = "Flying Dust VFX"))
@@ -273,6 +275,8 @@ public:
 	float FeverOverlayIntensity = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|FeverMode")
 	FLinearColor FeverOverlayColor = FLinearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX|FeverMode", meta = (DisplayName = "Fever Mode End VFX"))
+	UNiagaraSystem* FeverModeEndVFX;
 
 	// === Wwise Sound Events ===
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Combo")
@@ -295,13 +299,44 @@ public:
 	UAkAudioEvent* ComboFinisherSoundEvent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Fever")
 	UAkAudioEvent* FeverModeStartSoundEvent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Fever")
+	UAkAudioEvent* FeverModeEndSoundEvent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Fever")
+	UAkAudioEvent* FeverModeStateSoundEvent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Impact")
 	UAkAudioEvent* HurtSoundEvent;
 	
 	FORCEINLINE UGS_DrakharVFXComponent* GetDrakharVFXComponent() const { return DrakharVFXComponent; }
 	FORCEINLINE UGS_DrakharAudioComponent* GetAudioComponent() const { return AudioComponent; }
 
+	// 궁극기 타겟 배열 접근자 (인디케이터용)
+	FORCEINLINE const TArray<FTransform>& GetDraconicFuryTargetArray() const { return DraconicFuryTargetArray; }
+	FORCEINLINE const FVector& GetFeverModeDraconicFurySpawnLocation() const { return FeverModeDraconicFurySpawnLocation; }
+
+	// 궁극기 타겟 생성 함수
+	void GenerateDraconicFuryTargets();
+
 private:
+	// === 카메라 효과 상태 관리 ===
+
+	// 카메라 효과 단계
+	enum class ECameraEffectPhase : uint8
+	{
+		None,      // 효과 없음
+		ZoomIn,    // 줌인 단계
+		ZoomOut,   // 줌아웃 단계 ("쾅" 효과)
+		Restore    // 원래 상태로 복귀
+	};
+
+	ECameraEffectPhase CurrentCameraEffectPhase = ECameraEffectPhase::None;
+
+	// 카메라 효과 상수
+	static constexpr float CAMERA_UPDATE_INTERVAL = 0.01f;      // 타이머 간격 (10ms)
+	static constexpr float FOV_TOLERANCE = 0.5f;                 // FOV 도달 판정 허용 오차
+	static constexpr float ARM_LENGTH_TOLERANCE = 5.0f;          // Arm Length 도달 판정 허용 오차
+	static constexpr float FINAL_FOV_TOLERANCE = 0.1f;           // 최종 FOV 복귀 판정 허용 오차
+	static constexpr float FINAL_ARM_LENGTH_TOLERANCE = 1.0f;    // 최종 Arm Length 복귀 판정 허용 오차
+
 	//move spring arm for flying
 	float DefaultSpringArmLength;
 	float TargetSpringArmLength;
@@ -341,8 +376,42 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsFeverMode)
 	bool IsFeverMode;
-	
+
 	FTimerHandle FeverTimer;
+	FTimerHandle FeverStateSoundDelayTimer;
+
+	// === 카메라 줌 효과 설정 ===
+
+	// 카메라 줌인 효과 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|FeverModeEnd", meta = (AllowPrivateAccess = "true", ClampMin = "0.1", ClampMax = "1.0", UIMin = "0.1", UIMax = "1.0"))
+	float FeverEndZoomInFOVMultiplier = 0.7f;  // FOV 줌인 비율 (기본 30% 줌인)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|FeverModeEnd", meta = (AllowPrivateAccess = "true", ClampMin = "0.1", ClampMax = "1.0", UIMin = "0.1", UIMax = "1.0"))
+	float FeverEndZoomInArmMultiplier = 0.6f;  // 카메라 암 줌인 비율 (기본 40% 가까이)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|FeverModeEnd", meta = (AllowPrivateAccess = "true", ClampMin = "10.0", ClampMax = "100.0", UIMin = "10.0", UIMax = "100.0"))
+	float FeverEndZoomInSpeed = 30.0f;  // 줌인 속도
+
+	// 카메라 줌아웃 효과 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|FeverModeEnd", meta = (AllowPrivateAccess = "true", ClampMin = "1.0", ClampMax = "1.5", UIMin = "1.0", UIMax = "1.5"))
+	float FeverEndZoomOutFOVMultiplier = 1.05f;  // FOV 줌아웃 비율 (기본 5% 더 나감)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|FeverModeEnd", meta = (AllowPrivateAccess = "true", ClampMin = "1.0", ClampMax = "1.5", UIMin = "1.0", UIMax = "1.5"))
+	float FeverEndZoomOutArmMultiplier = 1.1f;  // 카메라 암 줌아웃 비율 (기본 10% 더 멀리)
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|FeverModeEnd", meta = (AllowPrivateAccess = "true", ClampMin = "10.0", ClampMax = "100.0", UIMin = "10.0", UIMax = "100.0"))
+	float FeverEndZoomOutSpeed = 40.0f;  // 줌아웃 속도 (빠른 "쾅" 효과)
+
+	// 카메라 복귀 설정
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|FeverModeEnd", meta = (AllowPrivateAccess = "true", ClampMin = "1.0", ClampMax = "20.0", UIMin = "1.0", UIMax = "20.0"))
+	float FeverEndCameraRestoreSpeed = 8.0f;  // 복귀 속도
+
+	// 카메라 효과용 런타임 변수들
+	float OriginalFOV = 90.0f;
+	float TargetFOV = 90.0f;
+	float OriginalArmLength = 500.0f;
+	float TargetArmLength = 500.0f;
+	FTimerHandle CameraZoomTimer;
 
 	float PillarForwardOffset = 300.f;
 	float PillarSideSpacing = 400.f;
@@ -363,4 +432,34 @@ private:
 	
 	UFUNCTION()
 	void OnRep_IsFeverMode();
+
+	// 월드 컨텍스트 검증 함수 (레벨 전환 시 크래시 방지)
+	bool IsWorldContextValid() const;
+
+	// 타이머 정리 함수 (레벨 전환 시 크래시 방지)
+	void SafeClearTimer(FTimerHandle& TimerHandle);
+
+	// FeverModeStateSound 딜레이 재생 콜백
+	UFUNCTION()
+	void PlayFeverModeStateSoundDelayed();
+
+	// === 카메라 효과 함수 ===
+
+	// 카메라 줌인아웃 효과 시작
+	void ApplyFeverModeEndCameraEffect();
+
+	// 카메라 검증 유틸리티
+	bool ValidateCameraEffect(APlayerController*& OutPC) const;
+
+	// 통합 카메라 업데이트 함수
+	UFUNCTION()
+	void UpdateCameraEffect();
+
+	// 카메라 효과 단계별 업데이트 함수
+	void UpdateCameraZoomIn();
+	void UpdateCameraZoomOut();
+	void UpdateCameraRestore();
+
+	// 다음 카메라 효과 단계로 전환
+	void TransitionToNextCameraPhase();
 };

@@ -15,7 +15,7 @@ void UGS_ChanAimingSkillBar::NativeConstruct()
 	{
 		ChanCharacter->SetChanAimingSkillBarWidget(this);
 	}
-	ShowSkillBar(false);
+	ShowSkillBar(true);
 
 	// 초기화
 	if (AimingProgressBar)

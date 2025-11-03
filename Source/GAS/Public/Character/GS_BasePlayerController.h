@@ -9,6 +9,7 @@
 class UInputAction;
 struct FInputActionValue;
 class UGS_InGameMenuUI;
+class UGS_QuickManualUI;
 
 /**
  * 
@@ -26,11 +27,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* MenuAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* KeyManualAction;
+
 	void OpenMenuUI(const FInputActionValue& InputValue);
+	void OpenKeyManual(const FInputActionValue& InputValue);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UGS_InGameMenuUI> InGameMenuUIClass;
 
 	UPROPERTY()
 	UGS_InGameMenuUI* InGameMenuUI;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UGS_QuickManualUI> QuickManualUIClass;
+
+	UPROPERTY()
+	UGS_QuickManualUI* QuickManualUI;
 };

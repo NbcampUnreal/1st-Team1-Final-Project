@@ -17,6 +17,7 @@
 #include "GameFramework/Pawn.h"
 #include "DrawDebugHelpers.h"
 #include "HAL/IConsoleManager.h"
+#include "Sound/GS_AudioComponentBase.h"
 
 #if WITH_EDITOR
 // Console variable for debug visualization
@@ -462,8 +463,16 @@ void UGS_FootManagerComponent::PlayFootstepSound(EPhysicalSurface Surface, const
 	);
 
 	UAkComponent* AkComp = GetOwner()->FindComponentByClass<UAkComponent>();
-	if (!AkComp)
+	if (!IsValid(AkComp))
 	{
+		return;
+	}
+
+	// Transform 검증
+	if (!UGS_AudioComponentBase::IsLocationValid(Location))
+	{
+		UE_LOG(LogTemp, Error, TEXT("[GS_FootManagerComponent] Invalid footstep location - %s"),
+		       GetOwner() ? *GetOwner()->GetName() : TEXT("None"));
 		return;
 	}
 

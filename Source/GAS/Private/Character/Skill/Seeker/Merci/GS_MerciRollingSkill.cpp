@@ -16,15 +16,17 @@ UGS_MerciRollingSkill::UGS_MerciRollingSkill()
 void UGS_MerciRollingSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
-	
+
 	StartCoolDown();
 
 	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
 	{
-			// 스킬 시작 사운드 재생
+		if (MerciCharacter->HasAuthority())
+		{
+			// 스킬 시작 사운드 재생 (멀티캐스트)
 			if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
 			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
 			}
 
 			MerciCharacter->SetDrawState(false);
@@ -43,6 +45,7 @@ void UGS_MerciRollingSkill::ActiveSkill()
 			}
 
 			MerciCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		}
 	}
 }
 
@@ -58,10 +61,10 @@ void UGS_MerciRollingSkill::OnSkillAnimationEnd()
 			MerciCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
 			MerciCharacter->CanChangeSeekerGait = true;
 
-			// SeekerAudioComponent를 통한 스킬 종료 사운드
+			// 스킬 종료 사운드 재생 (멀티캐스트)
 			if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
 			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+				AudioComp->RequestSkillAudio(CurrentSkillType, 1);
 			}
 
 			SetIsActive(false);

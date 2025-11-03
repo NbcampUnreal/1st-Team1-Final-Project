@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Interface/GS_ManualDataInterface.h"
 #include "CollisionShape.h"
 #include "Character/Component/GS_CameraShakeTypes.h"
 #include "GS_Guardian.generated.h"
@@ -10,6 +11,7 @@ class UGS_DrakharAnimInstance;
 class UGS_VFXComponent;
 class UGS_CameraShakeComponent;
 class UWidgetComponent;
+class AGS_Character;
 
 //check ctrl input
 UENUM(BlueprintType)
@@ -31,7 +33,7 @@ enum class EGuardianDoSkill : uint8
 };
 
 UCLASS()
-class GAS_API AGS_Guardian : public AGS_Player
+class GAS_API AGS_Guardian : public AGS_Player, public IGS_ManualDataInterface
 {
 	GENERATED_BODY()
 	
@@ -85,6 +87,10 @@ public:
 	//damage player in TSet
 	void ApplyDamageToDetectedPlayer(const TSet<AGS_Character*>& DamagedCharacters, float PlusDamge);
 
+	virtual void OnAttackHit(AGS_Character* HitCharacter);
+	virtual void OnFeverGaugeUpdate(float DeltaGauge);
+	virtual void OnQuitSkill();
+
 	//[quit skill - server logic]
 	UFUNCTION(BlueprintCallable)
 	void QuitGuardianSkill();
@@ -100,6 +106,9 @@ public:
 	// 몬스터 조준 3D UI 관리
 	void ShowTargetUI(bool bIsActive);
 
+	// KeyManual을 위한 인터페이스 함수
+	virtual FName GetManualRowName_Implementation() const override;
+
 	FORCEINLINE UGS_CameraShakeComponent* GetCameraShakeComponent() const { return CameraShakeComponent; }
 
 	float GetFlySpeed();
@@ -111,6 +120,10 @@ protected:
 	// 몬스터 조준 3D UI
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	UWidgetComponent* TargetedUIComponent;
+
+	// KeyManual을 위한 캐릭터 타입 저장
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Manual")
+	FName ManualRowName;
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPCApplyHitStop(AGS_Character* InDamagedCharacter);

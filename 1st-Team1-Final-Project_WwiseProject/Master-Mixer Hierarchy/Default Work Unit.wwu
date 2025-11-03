@@ -77,6 +77,47 @@
 								</ObjectList>
 							</ObjectLists>
 						</AuxBus>
+						<Bus Name="Music" ID="{9367FD4B-9CA5-4723-B0A7-DB75934DCD2F}">
+							<ObjectLists>
+								<ObjectList Name="RTPC">
+									<Reference>
+										<Local>
+											<RTPC Name="" ID="{3C33DB81-F538-46D2-BE74-CCC7EF3B9169}" ShortID="1069289876">
+												<PropertyList>
+													<Property Name="PropertyName" Type="string" Value="MakeUpGain"/>
+												</PropertyList>
+												<ReferenceList>
+													<Reference Name="ControlInput">
+														<ObjectRef Name="MapBGMVolume" ID="{2F3E4FB8-0714-4169-BAB2-33AE6207B7C7}" WorkUnitID="{FDFB093B-59E2-4879-BF96-CF460645B40F}"/>
+													</Reference>
+													<Reference Name="Curve">
+														<Custom>
+															<Curve Name="" ID="{A4A0A108-DA3F-498B-B767-7A2C24DB48A1}">
+																<PropertyList>
+																	<Property Name="Flags" Type="int32" Value="3"/>
+																</PropertyList>
+																<PointList>
+																	<Point>
+																		<XPos>0</XPos>
+																		<YPos>-200</YPos>
+																		<Flags>5</Flags>
+																	</Point>
+																	<Point>
+																		<XPos>100</XPos>
+																		<YPos>0</YPos>
+																		<Flags>37</Flags>
+																	</Point>
+																</PointList>
+															</Curve>
+														</Custom>
+													</Reference>
+												</ReferenceList>
+											</RTPC>
+										</Local>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</Bus>
 					</ChildrenList>
 					<ObjectLists>
 						<ObjectList Name="RTPC">

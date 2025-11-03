@@ -18,6 +18,7 @@
  */
 
 class UGS_UIAudioSystem;
+class UAkComponent;
 
 UCLASS()
 class GAS_API UGS_AudioManager : public UGameInstanceSubsystem
@@ -54,6 +55,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "맵 BGM 페이드인 후 재생"))
 	void FadeInAndStartMapBGM(AActor* Context, float FadeTime = 2.0f);
 
+	// === BGM 볼륨 설정 ===
+	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "BGM 볼륨 설정"))
+	void SetBGMVolume(float Volume);
+
+	// 현재 BGM 볼륨 가져오기
+	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "현재 BGM 볼륨 가져오기"))
+	float GetCurrentBGMVolume() const { return CurrentBGMVolume; }
+
 	// === 통합 전투 시퀀스 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio|Combat", meta = (DisplayName = "전투 시퀀스 시작", ToolTip = "맵 BGM을 페이드아웃/정지하고 전투 BGM을 시작합니다."))
 	void StartCombatSequence(AActor* Context, UAkAudioEvent* CombatMusicStartEvent, UAkAudioEvent* CombatMusicStopEvent, float FadeTime = 2.0f);
@@ -79,13 +88,27 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Audio|Map BGM", meta = (DisplayName = "맵 BGM 볼륨 RTPC"))
 	UAkRtpc* MapBGMVolumeRTPC;
 
+	// === 네이티브 오디오 시스템 지원 ===
+	UPROPERTY(EditDefaultsOnly, Category = "Audio|Map BGM", meta = (DisplayName = "BGM 사운드 클래스"))
+	USoundClass* BGMSoundClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio|Map BGM", meta = (DisplayName = "BGM 사운드 믹스"))
+	USoundMix* BGMSoundMix;
+
 private:
 	// 생성된·파괴 주기는 GameInstance와 동기화
 	UPROPERTY()
 	UGS_UIAudioSystem* UIAudio;
 
+	// BGM 전용 AkComponent (오클루전 비활성화)
+	UPROPERTY()
+	UAkComponent* BGMAkComponent;
+
 	// 맵 BGM 상태 관리
 	bool bIsMapBGMPlaying;
+
+	// 전투 BGM 상태 관리
+	bool bIsCombatMusicPlaying;
 
 	// 전투 BGM 관리
 	UPROPERTY()
@@ -102,8 +125,14 @@ private:
 	FTimerHandle MapBGMFadeInTimerHandle;
 	FTimerHandle MapBGMFadeOutTimerHandle;
 
+	// 현재 BGM 볼륨 (0.0 ~ 1.0)
+	float CurrentBGMVolume;
+
 	// RTPC 헬퍼 함수
 	void SetRTPCValue(UAkRtpc* RTPC, float Value, AActor* Context, float InterpolationTime = 0.0f);
+
+	// 네이티브 사운드 클래스 볼륨 조절 헬퍼 함수
+	void SetNativeSoundClassVolume(float Volume);
 
 	/**
 	* @brief 오디오 에셋의 유효성을 검사합니다.
@@ -133,4 +162,10 @@ private:
 	 * @brief 현재 재생 중인 전투 음악을 정지합니다.
 	 */
 	void StopCurrentCombatMusic(AActor* Context);
+
+	/**
+	 * @brief BGM 전용 AkComponent를 가져오거나 생성합니다.
+	 * @return BGM 재생용 AkComponent (오클루전 비활성화됨)
+	 */
+	UAkComponent* GetOrCreateBGMAkComponent();
 };

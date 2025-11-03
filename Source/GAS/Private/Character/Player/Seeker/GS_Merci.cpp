@@ -43,6 +43,9 @@ AGS_Merci::AGS_Merci()
 	
 	CharacterType = ECharacterType::Merci;
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_MerciSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
+
+	// KeyManual에서 쓰일 캐릭터 타입 저장
+	ManualRowName = FName("Merci");
 }
 
 void AGS_Merci::Client_UpdateTargetUI_Implementation(AActor* NewTarget, AActor* OldTarget)
@@ -460,7 +463,7 @@ void AGS_Merci::UpdateZoom(float Alpha)
 		return;
 	}
 
-	float TargetArmLength = FMath::Lerp(400.0f, 180.0f, Alpha);
+	float TargetArmLength = FMath::Lerp(320.0f, 180.0f, Alpha);
 	float SocketOffsetY = FMath::Lerp(67.f, 87.f, Alpha);
 	float SocketOffsetZ = FMath::Lerp(174.f, 134.f, Alpha);
 
@@ -616,6 +619,7 @@ float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 		// 활 쏘기 조준 상태 해제
 		SetDrawState(false);
 		SetAimState(false);
+		bIsFullyDrawn = false;
 
 		// 키 제한
 		GetSkillComp()->SetCurAllowedSkillsMask(0);

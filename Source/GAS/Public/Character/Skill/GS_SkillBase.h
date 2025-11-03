@@ -78,6 +78,9 @@ public:
 	void PlayImpactVFX(FVector Location); // 월드 위치에 생성
 	void PlayImpactVFXOnTarget(AActor* Target); // 타겟에 부착
 	void PlayEndVFX(FVector Location, FRotator Rotation);
+	
+	// Cast VFX 정리 함수
+	void StopCastVFX();
 
 	// 스킬 작동
 	virtual void ActiveSkill(); // 스킬 시작(서버 권한에서만 호출)
@@ -94,6 +97,9 @@ public:
 	// 쿨타임 
 	void SetCoolingDown(bool bInCoolingDown) { bIsCoolingDown = bInCoolingDown; }
 	
+	// Delegate Binding 함수
+	virtual void InitializeDelegate(); 
+	
 protected:
 	bool bIsActive = false;
 	bool bIsCoolingDown;
@@ -101,6 +107,10 @@ protected:
 	// 스킬 소유자
 	AGS_Player* OwnerCharacter;
 	UGS_SkillComp* OwningComp;
+	
+	// Cast VFX 컴포넌트 추적 (스킬 종료 시 정리를 위해)
+	UPROPERTY()
+	TObjectPtr<UNiagaraComponent> ActiveCastVFXComponent;
 	
 	void StartCoolDown();
 	
@@ -110,4 +120,5 @@ protected:
 	// 스킬 오디오 재생 헬퍼 함수들
 	void PlaySkillStartSound() const;
 	void PlaySkillEndSound() const;
+	virtual void BeginDestroy() override;
 };

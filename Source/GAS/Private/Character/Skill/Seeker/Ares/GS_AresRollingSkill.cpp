@@ -19,15 +19,15 @@ void UGS_AresRollingSkill::ActiveSkill()
 	StartCoolDown();
 
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
-	{		
+	{
 		if (OwnerPlayer->HasAuthority())
 		{
-			// 스킬 시작 사운드 재생
+			// 스킬 시작 사운드 재생 (멀티캐스트)
 			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
 			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
 			}
-			
+
 			OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
 			OwnerPlayer->SetMoveControlValue(false, false);
 			OwnerPlayer->CanChangeSeekerGait = false;
@@ -55,17 +55,20 @@ void UGS_AresRollingSkill::OnSkillAnimationEnd()
 
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
-		OwnerPlayer->SetMoveControlValue(true, true);
-		OwnerPlayer->CanChangeSeekerGait = true;
-
-		// SeekerAudioComponent를 통한 스킬 종료 사운드
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		if (OwnerPlayer->HasAuthority())
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
-		}
+			OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+			OwnerPlayer->SetMoveControlValue(true, true);
+			OwnerPlayer->CanChangeSeekerGait = true;
 
-		SetIsActive(false);
+			// 스킬 종료 사운드 재생 (멀티캐스트)
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 1);
+			}
+
+			SetIsActive(false);
+		}
 	}
 }
 

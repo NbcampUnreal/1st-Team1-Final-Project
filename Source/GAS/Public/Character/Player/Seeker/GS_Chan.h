@@ -12,6 +12,8 @@ class AGS_WeaponAxe;
 class UGS_ChanAimingSkillBar;
 class UAkAudioEvent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaminaDepleted, bool, bByDamage);
+
 UCLASS()
 class GAS_API AGS_Chan : public AGS_Seeker
 {
@@ -61,9 +63,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Chan|UltimateSkill", meta = (DisplayName = "궁극기 충돌 컴포넌트"))
 	UCapsuleComponent* UltimateCollision;
 
-	// 방패 비활성화 타이머
-	FTimerHandle ShieldDisableTimer;
-
 	// 찬 전용 궁극기 오버랩 처리 Knockback Collision (KCY)
 	UFUNCTION()
 	void OnUltimateOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -103,7 +102,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Chan|Defense")
 	void SetDefending(bool bDefending);
 
+	// =============
 	// 스테미나 관리
+	// =============
+	UPROPERTY(BlueprintAssignable, Category = "Stamina")
+	FOnStaminaDepleted OnStaminaDepleted;
+
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
 	float MaxStamina = 100.f;
 
@@ -111,16 +115,24 @@ public:
 	float CurrentStamina = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
-	float StaminaDrainRate = 0.1f;
+	float StaminaDrainRate = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
+	float StaminaRegenRate = 1.0f;
 
 	float GetCurrentStamina() const { return CurrentStamina; }
 	void ResetCurrentStamina();
 	void SetCurrentStamina(float NewValue, bool SetbyDamage = false);
 	bool HasEnoughStamina(float Cost) const { return CurrentStamina >= Cost; }
+	void DrainStaminaTick();
+	void RegenStaminaTick();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	// Called when actor is being removed from level
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	// 방어 상태 변경 시 호출되는 함수
 	UFUNCTION()
@@ -133,7 +145,7 @@ private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;
 
 	// 스테미나 관리
-	FTimerHandle StaminaDrainHandle;
+	FTimerHandle StaminaHandle;
 
 	// 체력 관리
 	float MaxHealth;

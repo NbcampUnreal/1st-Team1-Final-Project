@@ -31,12 +31,12 @@ void UGS_AresMovingSkill::ActiveSkill()
 		// 스킬 애니메이션 재생
 		OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
 
-		// SeekerAudioComponent를 통한 스킬 시작 사운드
-		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+		// 스킬 시작 사운드 재생 (멀티캐스트)
+		if (OwnerPlayer->HasAuthority())
 		{
-			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
 			{
-				AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
 			}
 		}
 
@@ -44,6 +44,10 @@ void UGS_AresMovingSkill::ActiveSkill()
 
 		OwnerPlayer->SetMoveControlValue(false, false);
 	}
+
+	// 기본 충돌 설정 저장
+	OriginalCapsuleResponseToPawn = OwnerCharacter->GetCapsuleComponent()->GetCollisionResponseToChannel(ECC_Pawn);
+	OriginalMeshResponseToPawn = OwnerCharacter->GetMesh()->GetCollisionResponseToChannel(ECC_Pawn);
 
 	// 차징 시작
 	ChargingStartTime = OwnerCharacter->GetWorld()->GetTimeSeconds();
@@ -77,16 +81,19 @@ void UGS_AresMovingSkill::OnSkillCommand()
 
 	Super::OnSkillCommand();
 
-	// SeekerAudioComponent를 통한 사운드 처리
-	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	// 사운드 처리 (멀티캐스트)
+	if (OwnerCharacter->HasAuthority())
 	{
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			// 차징 루프 사운드 정지
-			AudioComp->StopSkillLoopSoundFromDataTable(CurrentSkillType);
-			
-			// 돌진 시작 사운드 재생
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				// 차징 루프 사운드 정지
+				AudioComp->RequestSkillAudio(CurrentSkillType, 3); // 3 = 루프 정지
+
+				// 돌진 시작 사운드 재생
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0); // 0 = 스킬 시작
+			}
 		}
 	}
 
@@ -242,15 +249,18 @@ void UGS_AresMovingSkill::DeactiveSkill()
 	//OwnerCharacter->SetSkillInputControl(true, true, true);
 
 	// 원래대로 Block으로 되돌리기
-	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	OwnerCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, OriginalCapsuleResponseToPawn);
+	OwnerCharacter->GetMesh()->SetCollisionResponseToChannel(ECC_Pawn, OriginalMeshResponseToPawn);
 
-	// SeekerAudioComponent를 통한 스킬 종료 사운드
-	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	// 스킬 종료 사운드 재생 (멀티캐스트)
+	if (OwnerCharacter->HasAuthority())
 	{
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 1);
+			}
 		}
 	}
 

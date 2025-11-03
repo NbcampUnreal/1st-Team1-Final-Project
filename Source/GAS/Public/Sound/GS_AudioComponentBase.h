@@ -112,7 +112,7 @@ protected:
 
 	/** 오디오 컴포넌트 초기화 여부 플래그 */
 	bool bIsAudioComponentInitialized;
-	
+
 	// ===================
 	// 카메라 위치 캐싱
 	// ===================
@@ -135,11 +135,37 @@ protected:
 	
 	FTimerHandle DistanceCheckTimerHandle;
 
+	/** 오디오 초기화 재시도 타이머 핸들 (레벨 전환 안전성) */
+	FTimerHandle RetryInitTimerHandle;
+
+	/** 오디오 초기화 재시도 횟수 추적 */
+	int32 AudioInitRetryCount = 0;
+
 public:
+	// ===================
+	// Transform 검증 (Static)
+	// ===================
+
+	/** Transform이 유효한지 검증 (NaN 체크) */
+	UFUNCTION(BlueprintPure, Category = "Audio|Validation")
+	static bool IsTransformValid(const FVector& Location, const FRotator& Rotation);
+
+	/** Transform이 유효한지 검증 (위치만) */
+	UFUNCTION(BlueprintPure, Category = "Audio|Validation")
+	static bool IsLocationValid(const FVector& Location);
+
+	/** World 컨텍스트가 유효한지 검증 */
+	UFUNCTION(BlueprintPure, Category = "Audio|Validation")
+	bool IsWorldContextValid() const;
+
+	/** AkComponent의 Transform을 안전하게 업데이트 */
+	UFUNCTION(BlueprintCallable, Category = "Audio|Validation")
+	bool SafeUpdateAkComponentTransform(UAkComponent* AkComp, const FVector& NewLocation, const FRotator& NewRotation);
+
 	// ===================
 	// 공통 인터페이스
 	// ===================
-	
+
 	/** 현재 RTS 모드인지 확인 */
 	UFUNCTION(BlueprintPure, Category = "Audio")
 	bool IsRTSMode() const;
@@ -176,6 +202,17 @@ public:
 	/** 두 방이 연결되어 있는지 확인 */
 	bool AreRoomsConnected(AGS_RoomBase* Room1, AGS_RoomBase* Room2) const;
 
+	/**
+	 * 오디오 시스템 검증 (로컬 사운드 재생용)
+	 *
+	 * 데디케이티드 서버 및 Wwise 초기화 상태를 체크합니다.
+	 * 로컬 사운드 재생 전에 호출하여 재생 가능 여부를 판단합니다.
+	 *
+	 * @return 오디오를 재생해야 하면 true, 그렇지 않으면 false
+	 */
+	UFUNCTION(BlueprintPure, Category = "Audio")
+	bool IsAudioSystemValid() const;
+
 
 protected:
 	/** 특정 위치에 있는 Room을 찾는 함수 */
@@ -208,13 +245,22 @@ protected:
 
 	/**
 	 * 모드별 사운드 이벤트 선택 (TPS/RTS 자동 폴백)
-	 * 
+	 *
 	 * @param TPSSound TPS 모드 사운드
 	 * @param RTSSound RTS 모드 사운드
 	 * @param bUseRTSMode 강제로 RTS 모드 사용 (기본값은 자동 감지)
 	 * @return 선택된 사운드 이벤트 (RTS가 없으면 TPS로 폴백)
 	 */
 	UAkAudioEvent* SelectSoundEventByMode(UAkAudioEvent* TPSSound, UAkAudioEvent* RTSSound, bool bUseRTSMode = false) const;
+
+	/**
+	 * 리슨 서버 RPC 중복 실행 방지 체크
+	 * Multicast RPC Implementation에서 호출하여 리슨 서버의 중복 재생을 방지
+	 *
+	 * @return 리슨 서버에서 RPC를 스킵해야 하면 true
+	 */
+	UFUNCTION(BlueprintPure, Category = "Audio|Network")
+	bool ShouldSkipListenServerRPC() const;
 
 	// ===============
 	// 메모리 관리 헬퍼
@@ -247,7 +293,17 @@ protected:
 	
 	/** Distance Scaling 설정 (통일된 방식) */
 	void SetDistanceScaling(bool bIsRTS);
-	
+
+	/** 오디오 시스템 초기화 (Seamless Travel 대응) */
+	bool InitializeAudioSystem();
+
+	/** 오디오 초기화 재시도 (Seamless Travel 중 실패 시) */
+	UFUNCTION()
+	void RetryAudioInitialization();
+
+	/** 타이머를 안전하게 정리하는 헬퍼 함수 (레벨 전환 안전성) */
+	void SafeClearTimer(FTimerHandle& TimerHandle);
+
 	/** 모든 오디오 RTPC 초기화 */
 	virtual void InitializeAudioRTPCs();
 
