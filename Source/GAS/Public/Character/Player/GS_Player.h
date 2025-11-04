@@ -117,7 +117,7 @@ public:
 	bool IsLocalPlayer() const;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlaySkillMontage(UAnimMontage* Montage, FName Section = NAME_None);
+	void Multicast_PlaySkillMontage(UAnimMontage* Montage, FName Section = NAME_None, int32 PlayRate = 1.0f);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_StopSkillMontage(UAnimMontage* Montage);

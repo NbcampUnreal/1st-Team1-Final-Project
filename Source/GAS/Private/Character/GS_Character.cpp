@@ -109,6 +109,7 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, bIsDead);
 	DOREPLIFETIME(AGS_Character, bIsInvincible);
 	DOREPLIFETIME(AGS_Character, bLockRotationToController);
+	DOREPLIFETIME(AGS_Character, WeaponHandlingState);
 }
 
 
@@ -353,6 +354,19 @@ AGS_Weapon* AGS_Character::GetWeaponByIndex(int32 Index) const
 	return WeaponSlots.IsValidIndex(Index) ? WeaponSlots[Index].WeaponInstance : nullptr;
 }
 
+AGS_Weapon* AGS_Character::GetWeaponBySocketName(FName SocketName)
+{
+	for (FWeaponSlot WeaponSlot : WeaponSlots)
+	{
+		if (WeaponSlot.SocketName == SocketName)
+		{
+			return WeaponSlot.WeaponInstance;
+		}
+	}
+	
+	return nullptr;
+}
+
 void AGS_Character::SetCharacterSpeed(float InRatio)
 {
 	if (InRatio >= 0 && InRatio <= 1)
@@ -562,4 +576,14 @@ void AGS_Character::OnHoverBegin()
 
 void AGS_Character::OnHoverEnd()
 {
+}
+
+EWeaponHandlingState AGS_Character::GetWeaponHandlingState()
+{
+	return WeaponHandlingState;
+}
+
+void AGS_Character::SetWeaponHandlingState(EWeaponHandlingState InputWeaponHandlingState)
+{
+	WeaponHandlingState = InputWeaponHandlingState;
 }

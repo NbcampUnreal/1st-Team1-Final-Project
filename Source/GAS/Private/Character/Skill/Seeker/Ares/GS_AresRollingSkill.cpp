@@ -15,33 +15,6 @@ UGS_AresRollingSkill::UGS_AresRollingSkill()
 void UGS_AresRollingSkill::ActiveSkill()
 {	
 	Super::ActiveSkill();
-
-	StartCoolDown();
-
-	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
-	{
-		if (OwnerPlayer->HasAuthority())
-		{
-			// 스킬 시작 사운드 재생 (멀티캐스트)
-			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
-			{
-				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
-			}
-
-			OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
-			OwnerPlayer->SetMoveControlValue(false, false);
-			OwnerPlayer->CanChangeSeekerGait = false;
-			FName RollDirection = CalRollDirection();
-			if (RollDirection == FName("00"))
-			{
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
-			}
-			else
-			{
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
-			}
-		}
-	}
 }
 
 void UGS_AresRollingSkill::OnSkillCanceledByDebuff()

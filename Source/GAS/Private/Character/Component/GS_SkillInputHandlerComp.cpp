@@ -192,13 +192,7 @@ void UGS_SkillInputHandlerComp::OnHealSkill(const FInputActionInstance& Instance
     if (!HealSkill) return;
 
     // 클라이언트에서 먼저 스킬 사용 가능 여부 검사
-    if (HealSkill->CanActivateHealSkill())
-    {
-        SkillComp->Server_TryActivateSkill(ESkillSlot::HealPotion);
-    }
-    else
-    {
-        HealSkill->ShowPotionDepletedEffect();
-    }
+	SkillComp->Server_TryActivateSkill(ESkillSlot::HealPotion);
+
 }
 

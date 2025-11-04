@@ -28,12 +28,14 @@
 #include "Character/GS_TpsController.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "AkAudioEvent.h"
-#include "AkComponent.h"
-#include "AkAudioDevice.h"
+/*#include "AkComponent.h"
+#include "AkAudioDevice.h"*/
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/Component/GS_LowHealthEffectComponent.h"
 #include "Character/Component/GS_DetectionEffectComponent.h"
+#include "Props/Item/SeekerItem/GS_HP_Potion.h"
+#include "Props/Item/GS_ItemData.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -104,6 +106,20 @@ AGS_Seeker::AGS_Seeker()
 	SeekerGait = EGait::Run;
 	LastSeekerGait = SeekerGait;
 	CanChangeSeekerGait = true;
+
+	// Item (hard coding) -> 나중에 SkillSet DataTable 과 같이 ItemSet DataTable 를 가지고 초기화 할 수 있도록 한다. // SJE
+	UGS_ItemData* ItemData = CreateDefaultSubobject<UGS_ItemData>(TEXT("HP_Potion_Data"));
+	ItemData->ItemName = TEXT("HP_Potion");
+	ItemData->ItemType = EItemType::HP_Potion;
+	ItemData->MaxCount = 5;
+	ItemData->CurCount = 5;
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> FullPotionMesh(TEXT("/Game/Props/Item/Stuff/Mesh/HP_Potion_Full.HP_Potion_Full"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> EmptyPotionMesh(TEXT("/Game/Props/Item/Stuff/Mesh/HP_Potion_Empty.HP_Potion_Empty"));
+	
+	ItemData->ItemMeshs.Add(FName(TEXT("HP_Potion_Full")), FullPotionMesh.Object);
+	ItemData->ItemMeshs.Add(FName(TEXT("HP_Potion_Empty")), EmptyPotionMesh.Object);
+
+	ItemDatas.Add(EItemType::HP_Potion, ItemData);
 }
 
 void AGS_Seeker::BeginPlay()
@@ -148,7 +164,6 @@ void AGS_Seeker::BeginPlay()
 void AGS_Seeker::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
 }
 
 // Called to bind functionality to input
@@ -177,6 +192,16 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, SeekerState);
 	DOREPLIFETIME(AGS_Seeker, bIsDetectedByGuardian);
 	DOREPLIFETIME(AGS_Seeker, DetectionIntensity);
+}
+
+AGS_Item* AGS_Seeker::GetItem(EItemType ItemType)
+{
+	return Items[ItemType];
+}
+
+UGS_ItemData* AGS_Seeker::GetItemData(EItemType ItemType)
+{
+	return ItemDatas[ItemType];
 }
 
 void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -743,6 +768,17 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 	{
 		ClientRPCStopCombatMusic();
 		NearbyMonsters.Empty();
+	}
+}
+
+void AGS_Seeker::TransWeaponHandingState(EWeaponHandlingState RequiredCurState, EWeaponHandlingState NextState,
+	UAnimMontage* TargetAM, ESeekerMontageSlot TargetMontageSlot)
+{
+	if (WeaponHandlingState == RequiredCurState)
+	{
+		Multicast_SetMontageSlot(TargetMontageSlot);
+		Multicast_PlaySkillMontage(TargetAM);
+		SetWeaponHandlingState(NextState);
 	}
 }
 

@@ -10,16 +10,16 @@
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_ChanAimingSkillBar.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
-#include "Character/GS_TpsController.h"
+/*#include "Character/GS_TpsController.h"
 #include "AkComponent.h"
 #include "AkAudioEvent.h"
 #include "AkGameplayStatics.h"
-#include "AkAudioDevice.h"
+#include "AkAudioDevice.h"*/
 #include "Animation/Character/Seeker/GS_ChooserInputObj.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
-#include "Engine/DamageEvents.h"
+/*#include "Engine/DamageEvents.h"*/
 
 
 // Sets default values

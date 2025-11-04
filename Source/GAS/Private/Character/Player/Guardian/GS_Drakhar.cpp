@@ -480,7 +480,7 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	GuardianDoSkillState = EGuardianDoSkill::None;
 
 	// Skill Input Reset
-	GetSkillComp()->ResetAllowedSkillsMask(); // SJE
+	GetSkillComp()->ResetAllowedSkillsMask();
 	
 	if (DamagedCharactersFromDash.IsEmpty())
 	{

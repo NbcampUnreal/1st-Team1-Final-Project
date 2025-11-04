@@ -170,6 +170,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AGS_Weapon* GetWeaponByIndex(int32 Index) const;
 
+	UFUNCTION(BlueprintCallable)
+	AGS_Weapon* GetWeaponBySocketName(FName SocketName);
+
 	UFUNCTION(Server, Reliable)
 	void Server_SetCharacterSpeed(float InRatio);
 
@@ -208,6 +211,9 @@ protected:
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TArray<FWeaponSlot> WeaponSlots;
 
+	UPROPERTY(Replicated)
+	EWeaponHandlingState WeaponHandlingState = EWeaponHandlingState::Wielding;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="RTS")
 	TObjectPtr<UDecalComponent> SelectionDecal;
 
@@ -219,6 +225,12 @@ protected:
 	void ShowDecalWithColor(const FLinearColor& Color);
 	virtual void OnHoverBegin();
 	virtual void OnHoverEnd();
+
+public:
+	UFUNCTION()
+	EWeaponHandlingState GetWeaponHandlingState();
+	UFUNCTION()
+	void SetWeaponHandlingState(EWeaponHandlingState InputWeaponHandlingState);
 	
 private:
 	UPROPERTY(ReplicatedUsing = OnRep_CharacterSpeed)

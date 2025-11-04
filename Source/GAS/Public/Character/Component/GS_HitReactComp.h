@@ -28,6 +28,14 @@ public:
 	UFUNCTION()
 	FName CalculateHitDirection(FVector HitDirection);
 
+	/*UFUNCTION()
+	void CheckAxeState(UAnimMontage* Montage, bool bInterrupted);*/ // SJE
+
+	FOnMontageEnded HitReactEndDelegate;
+
+	UFUNCTION()
+	void OnEndDelegate(UAnimMontage* Montage, bool bInterrupted);
+
 protected:
 	virtual void BeginPlay() override;
 };

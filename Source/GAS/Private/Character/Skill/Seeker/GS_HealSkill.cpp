@@ -5,13 +5,17 @@
 #include "Character/Component/GS_StatComp.h"
 #include "Sound/GS_SeekerAudioComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Animation/Character/GS_SeekerAnimInstance.h"
+#include "Props/Item/SeekerItem/GS_HP_Potion.h"
+#include "Weapon/GS_Weapon.h"
 
 UGS_HealSkill::UGS_HealSkill()
 {
 	HealAmount = 200.0f; // 기본 치유량 설정
 	MaxHealCount = 5; // 기본 포션 개수
 	CurrentHealCount = MaxHealCount; // 시작 시 최대 개수로 설정
-	bIsPotionDepletedOrHealthFull = false; 
+	bIsPotionDepletedOrHealthFull = false;
 }
 
 /*
@@ -32,9 +36,6 @@ void UGS_HealSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
 
-	/*// 피해 감지 바인딩 초기화 (한 번만 실행됨)
-	InitializeDamageBinding();*/
-
 	// 서버 권한 확인
 	if (!OwnerCharacter || !OwnerCharacter->HasAuthority())
 	{
@@ -46,63 +47,30 @@ void UGS_HealSkill::ActiveSkill()
 		ShowPotionDepletedEffect();
 		return;
 	}
-
-	if (OwnerCharacter)
-	{
-		// 체력 회복 (서버 권한)
-		UGS_StatComp* StatComp = OwnerCharacter->GetStatComp();
-		if (StatComp)
-		{
-			StatComp->ServerRPCHeal(HealAmount);
-		}
-
-		// VFX 재생 (모든 클라이언트에 동기화)
-		if (OwningComp)
-		{
-			// Cast VFX: 스킬 시전 시 플레이어 위치에 표시
-			if (SkillCastVFX)
-			{
-				OwningComp->Multicast_PlayCastVFX(CurrentSkillType, OwnerCharacter->GetActorLocation(), OwnerCharacter->GetActorRotation());
-			}
-
-			// Impact VFX: 힐링 효과를 플레이어에게 표시
-			if (SkillImpactVFX)
-			{
-				OwningComp->Multicast_PlayImpactVFX(CurrentSkillType, OwnerCharacter->GetActorLocation());
-			}
-		}
-
-		// SFX 재생 (모든 클라이언트에 동기화)
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>())
-		{
-			// Multicast RPC 직접 호출 (CanSendRPC 체크 우회)
-			// AudioEventType 0 = 스킬 시작 사운드
-			AudioComp->Multicast_RequestSkillAudio(CurrentSkillType, 0, OwnerCharacter->GetActorLocation());
-		}
-	}
-
-	// 포션 개수 감소
-	int32 OldPotionCount = CurrentHealCount;
-	CurrentHealCount = FMath::Max(0, CurrentHealCount - 1);
 	
-	// UI 업데이트를 위해 즉시 클라이언트에 알림 (서버에서만 실행)
-	if (OwningComp && OwnerCharacter->HasAuthority())
-	{
-		OwningComp->Client_BroadcastHealCountChanged(CurrentSkillType, CurrentHealCount, MaxHealCount);
-	} // SJE 해당 로직은 GS_ANS_SeekerHealPotion::NotifyBegin() 으로 이전되었음.
+	OwnerCharacter->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+	bIsCoolingDown = true;
 
-	// OwnerCharacter->Multicast_PlaySkillMontage(SkillAnimMontages[0]);
+	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter);
+
+	if (!Seeker)
+	{
+		return;
+	}
+	
+	Seeker->Multicast_SetMontageSlot(ESeekerMontageSlot::UpperBody);
+	Seeker->Server_SetSeekerGait(EGait::Walk);
 	
 	// 스킬 사용 후 비활성화
 	// -> 이걸 drinkpotion animation 끝났을 때 실행.
-	DeactiveSkill();
+	/*DeactiveSkill();*/
 }
 
 void UGS_HealSkill::DeactiveSkill()
 {
 	// 부모 클래스의 DeactiveSkill 호출
 	Super::DeactiveSkill();
-
+	bIsCoolingDown = false;
 	// 서버 권한에서만 종료 사운드 재생 (Multicast로 모든 클라이언트에 동기화)
 	if (OwnerCharacter && OwnerCharacter->HasAuthority())
 	{
@@ -111,6 +79,38 @@ void UGS_HealSkill::DeactiveSkill()
 			// Multicast RPC 직접 호출 (CanSendRPC 체크 우회)
 			// AudioEventType 1 = 스킬 종료 사운드
 			AudioComp->Multicast_RequestSkillAudio(CurrentSkillType, 1, OwnerCharacter->GetActorLocation());
+		}
+	}
+}
+
+void UGS_HealSkill::InterruptSkill()
+{
+	Super::InterruptSkill();
+
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (Seeker->GetSkillComp())
+		{
+			Seeker->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+			Seeker->SetMoveControlValue(true, true);
+			
+			// Potion 떨구기
+			SetIsActive(false);
+			bIsCoolingDown = false; // hard coding // SJE
+
+			AGS_HP_Potion* Potion = Cast<AGS_HP_Potion>(Seeker->GetItem(EItemType::HP_Potion));
+			if (Potion)
+			{
+				Potion->DropFromSocket();
+                	
+				UStaticMeshComponent* Mesh = Potion->GetMeshComp();
+				if (Mesh)
+				{
+					Mesh->SetSimulatePhysics(true);
+					Mesh->SetEnableGravity(true);
+					Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				}
+			}
 		}
 	}
 }
@@ -203,21 +203,21 @@ bool UGS_HealSkill::CanActivateHealSkill() const
 void UGS_HealSkill::ShowPotionDepletedEffect()
 {
 	bIsPotionDepletedOrHealthFull = true;
-	SetCoolingDown(true);
+	//SetCoolingDown(true); 어차피 true 인데 왜 SEt 하는 거야? // SJE
 
 	if (OwningComp)
 	{
 		OwningComp->Client_BroadcastSkillCooldownBlocked_Implementation(CurrentSkillType);
 	}
 
-	if (OwnerCharacter && OwnerCharacter->GetWorld())
+	/*if (OwnerCharacter && OwnerCharacter->GetWorld())
 	{
 		FTimerHandle TimerHandle;
 		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 		{
 			SetCoolingDown(false);
 		}, 2.0f, false);
-	}
+	}*/
 }
 
 void UGS_HealSkill::InitializeDelegate()
@@ -250,6 +250,22 @@ int32 UGS_HealSkill::GetMaxHealCount()
 	return MaxHealCount;
 }
 
+/*void UGS_HealSkill::CheckWeaponStateAndPlayWielding()
+{
+	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter);
+	if (!Seeker)
+	{
+		return;
+	}
+
+	if (Seeker->GetWeaponHandlingState() == EWeaponHandlingState::Sheathing)
+	{
+		Seeker->Multicast_SetMontageSlot(ESeekerMontageSlot::UpperBody);
+		Seeker->Multicast_PlaySkillMontage(SkillAnimMontages[2]); // // Hard coding // SJE
+		Seeker->SetWeaponHandlingState(EWeaponHandlingState::Wielding);
+	}
+}*/
+
 void UGS_HealSkill::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -260,16 +276,18 @@ void UGS_HealSkill::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 void UGS_HealSkill::OnRep_CurrentHealCount()
 {
 	// 포션이 0에서 증가하면 제한 상태 및 쿨다운 해제
-	if (CurrentHealCount > 0)
+	/*if (CurrentHealCount > 0)
 	{
 		bIsPotionDepletedOrHealthFull = false;
 		SetCoolingDown(false);
 	}
 
-	if (OwningComp)
+	UE_LOG(LogTemp, Error, TEXT("OnRep_CurrentHealCount")); // SJE*/
+
+	/*if (OwningComp)
 	{
 		OwningComp->Client_BroadcastHealCountChanged(CurrentSkillType, CurrentHealCount, MaxHealCount);
-	}
+	}*/ // SJE
 }
 
 void UGS_HealSkill::OnOwnerDamaged(AActor* DamagedActor, float DamageAmount, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)

@@ -117,16 +117,21 @@ void UGS_SkillComp::BeginPlay()
 
 bool UGS_SkillComp::IsSkillAllowed(ESkillSlot CompareSkillType)
 {
-	uint8 BitFlag = 0;
+	uint16 BitFlag = 0;
 	BitFlag |= (1 << static_cast<int32>(CompareSkillType));
 	UE_LOG(LogTemp, Warning, TEXT("UGS_SkillComp::IsSkillAllowed BitFlag :%d"), BitFlag);
 	UE_LOG(LogTemp, Warning, TEXT("UGS_SkillComp::IsSkillAllowed CurAllowedSkillsMask :%d"), CurAllowedSkillsMask);
 	return CurAllowedSkillsMask & BitFlag;
 }
 
-void UGS_SkillComp::SetCurAllowedSkillsMask(int8 BitMask)
+void UGS_SkillComp::SetCurAllowedSkillsMask(int16 BitMask)
 {
 	CurAllowedSkillsMask = BitMask;
+}
+
+int16 UGS_SkillComp::GetCurAllowedSkillsMask()
+{
+	return CurAllowedSkillsMask;
 }
 
 void UGS_SkillComp::InitSkills()
@@ -265,7 +270,10 @@ void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
 					
 					SkillsInterrupt();
 					SkillMap[Slot]->ActiveSkill();
+					UE_LOG(LogTemp, Warning, TEXT("AllowSkillMask : %d"), SkillMap[Slot]->AllowSkillsMask);
+					ResetAllowedSkillsMask();
 					SetCurAllowedSkillsMask(SkillMap[Slot]->AllowSkillsMask);
+					UE_LOG(LogTemp, Warning, TEXT("CurAllowedSkillsMask : %d"),GetCurAllowedSkillsMask());
 
 					// 스킬 활성화 알림
 					if (GetOwner()->GetLocalRole() == ROLE_Authority)
@@ -448,20 +456,13 @@ void UGS_SkillComp::SkillsInterrupt()
 	
 	for (TPair<ESkillSlot, UGS_SkillBase*> slot : SkillMap)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *slot.Value->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *slot.Value->GetName());
 
 		if (Seeker->GetSkillComp()->IsSkillActive(slot.Key))
 		{
-			slot.Value->InterruptSkill(); // 모든 스킬 interruptSkill()
-			/*if (Seeker->GetCharacterType() != ECharacterType::Merci)
-			{
-				//Seeker->SetSkillInputControl(false, false, false);
-				
-			}*/
+			slot.Value->InterruptSkill();
 		}
 	}
-
-	//Seeker->GetSkillComp()->ResetAllowedSkillsMask(); // 모든 입력 가능 상태.
 }
 
 void UGS_SkillComp::HandleCooldownComplete(ESkillSlot Slot)
