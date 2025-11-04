@@ -87,7 +87,6 @@ void UGS_SkillBase::InterruptSkill()
 	
 	if (UGS_SeekerAnimInstance* SeekerAnim = Cast<UGS_SeekerAnimInstance>(OwnerCharacter->GetMesh()->GetAnimInstance()))
 	{
-		//Seeker->SetSkillInputControl(true, true, true);
 		Seeker->SetSeekerGait(EGait::Run);
 		Seeker->CanChangeSeekerGait = true;
 	}

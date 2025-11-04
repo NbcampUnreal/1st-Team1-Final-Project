@@ -7,6 +7,9 @@
 #include "Character/Player/GS_Player.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/Skill/GS_SkillBase.h"
+#include "Weapon/Equipable/GS_WeaponAxe.h"
+#include "Character/Player/Seeker/GS_Chan.h"
+#include "Character/Skill/Seeker/GS_HealSkill.h"
 
 
 // Sets default values for this component's properties
@@ -25,20 +28,29 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 	if (OwnerCharacter)
 	{
 		if (ReactType == EHitReactType::Interrupt)
-		{
+		{			
 			if (OwnerSeeker)
 			{
 				OwnerSeeker->GetSkillComp()->SkillsInterrupt();
 
-				OwnerSeeker->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+				UGS_SeekerAnimInstance* SeekerAnimInstance = Cast<UGS_SeekerAnimInstance>(OwnerSeeker->GetMesh()->GetAnimInstance());
 
-				OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReacts[static_cast<int>(ReactType)], Section);
+				OwnerSeeker->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
+				
+				UAnimMontage* AM_HitReact = AM_HitReacts[static_cast<int>(ReactType)];
+				if (AM_HitReact)
+				{
+					OwnerCharacter->Multicast_PlaySkillMontage(AM_HitReact, Section);
+					HitReactEndDelegate.BindUObject(this, &UGS_HitReactComp::OnEndDelegate);
+					SeekerAnimInstance->Montage_SetEndDelegate(HitReactEndDelegate, AM_HitReact);
+				}
 			}
+			
 			OwnerCharacter->DisableHitReact(4.0f);
 		}
 		else if (ReactType == EHitReactType::Additive)
 		{
-			if (OwnerSeeker)
+			if (OwnerSeeker) // 추후 수정. // SJE
 			{
 				OwnerSeeker->StateReset();
 			}
@@ -100,6 +112,27 @@ FName UGS_HitReactComp::CalculateHitDirection(FVector HitDirection)
 	}
 	
 	return Section;
+}
+
+void UGS_HitReactComp::OnEndDelegate(UAnimMontage* Montage, bool bInterrupted)
+{	
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(GetOwner()))
+	{
+		UGS_HealSkill* HealSkill = Cast<UGS_HealSkill>(Seeker->GetSkillComp()->GetSkillFromSkillMap(ESkillSlot::HealPotion));
+		if (HealSkill)
+		{
+			UAnimMontage* AM_Wielding = HealSkill->SkillAnimMontages[2];
+
+			if (AM_Wielding)
+			{
+				Seeker->TransWeaponHandingState(
+				EWeaponHandlingState::Sheathing,
+				EWeaponHandlingState::Wielding,
+				AM_Wielding,
+				ESeekerMontageSlot::UpperBody);
+			}
+		}
+	}
 }
 
 // Called when the game starts

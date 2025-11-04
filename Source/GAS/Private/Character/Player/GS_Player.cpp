@@ -428,14 +428,14 @@ bool AGS_Player::IsLocalPlayer() const
 	return false;
 }
 
-void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage, FName Section)
+void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage, FName Section, int32 PlayRate)
 {
 	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance && Montage)
 	{
 		if (Section == NAME_None)
 		{
-			AnimInstance->Montage_Play(Montage);
+			AnimInstance->Montage_Play(Montage, PlayRate);
 		}
 		else
 		{
