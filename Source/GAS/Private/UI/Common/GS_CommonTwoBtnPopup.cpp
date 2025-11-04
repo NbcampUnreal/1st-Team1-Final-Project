@@ -23,6 +23,16 @@ void UGS_CommonTwoBtnPopup::NativeConstruct()
 	}
 }
 
+void UGS_CommonTwoBtnPopup::SynchronizeProperties()
+{
+	Super::SynchronizeProperties();
+
+	if (DescriptionText)
+	{
+		DescriptionText->SetText(DescriptionMessage);
+	}
+}
+
 void UGS_CommonTwoBtnPopup::SetDescription(const FText& Description)
 {
 	if (DescriptionText)
