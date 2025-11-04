@@ -5,12 +5,12 @@
 			<ChildrenList>
 				<Attenuation Name="BaseAttenuation" ID="{B72E6503-4AD5-4DB3-8853-15727BF9AC4E}" ShortID="683696575">
 					<PropertyList>
-						<Property Name="ConeUse" Type="bool">
+						<Property Name="HeightSpreadEnable" Type="bool">
 							<ValueList>
-								<Value>True</Value>
+								<Value>False</Value>
 							</ValueList>
 						</Property>
-						<Property Name="RadiusMax" Type="Real64" Value="1500"/>
+						<Property Name="RadiusMax" Type="Real64" Value="1700"/>
 					</PropertyList>
 					<ObjectLists>
 						<ObjectList Name="RTPC">
@@ -66,18 +66,18 @@
 											<SegmentShape>Exp3</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>767.19553</XPos>
-											<YPos>-0.851</YPos>
+											<XPos>1375.72982</XPos>
+											<YPos>-0.86896</YPos>
 											<Flags>0</Flags>
 										</Point>
 										<Point>
-											<XPos>1088.4162</XPos>
-											<YPos>-2.01891</YPos>
+											<XPos>1595.93591</XPos>
+											<YPos>-1.79606</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>1500</XPos>
+											<XPos>1700</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>
@@ -160,8 +160,8 @@
 											<SegmentShape>Exp3</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>765.06537</XPos>
-											<YPos>-1.0998</YPos>
+											<XPos>834.92565</XPos>
+											<YPos>-1.30529</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
@@ -232,12 +232,7 @@
 				</Attenuation>
 				<Attenuation Name="RTS_Attenuation" ID="{BA588512-4963-42D7-AD9C-A02AD9F2F4F8}" ShortID="845504517">
 					<PropertyList>
-						<Property Name="ConeUse" Type="bool">
-							<ValueList>
-								<Value>True</Value>
-							</ValueList>
-						</Property>
-						<Property Name="RadiusMax" Type="Real64" Value="3500"/>
+						<Property Name="RadiusMax" Type="Real64" Value="3600"/>
 					</PropertyList>
 					<ObjectLists>
 						<ObjectList Name="RTPC">
@@ -293,13 +288,13 @@
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>2171.10935125</XPos>
-											<YPos>-1.14158</YPos>
+											<XPos>2807.99135</XPos>
+											<YPos>-1.2161</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>3500</XPos>
+											<XPos>3600</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>
@@ -326,7 +321,7 @@
 											<Flags>5</Flags>
 										</Point>
 										<Point>
-											<XPos>3500</XPos>
+											<XPos>3600</XPos>
 											<YPos>100</YPos>
 											<Flags>37</Flags>
 										</Point>
