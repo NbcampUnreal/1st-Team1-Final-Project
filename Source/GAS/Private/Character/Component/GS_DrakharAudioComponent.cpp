@@ -415,7 +415,7 @@ void UGS_DrakharAudioComponent::Multicast_StopFeverModeStateSound_Implementation
 
 		// FAkAudioDevice를 통해 StopPlayingID 호출
 		FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-		if (AudioDevice)
+		if (AudioDevice != nullptr)
 		{
 			AudioDevice->StopPlayingID(FeverModeStateSoundPlayingID, FeverModeStateFadeOutDuration);
 			FeverModeStateSoundPlayingID = AK_INVALID_PLAYING_ID;
@@ -587,7 +587,7 @@ void UGS_DrakharAudioComponent::PlaySoundEvent(UAkAudioEvent* SoundEvent, const 
 	else
 	{
 		UAkComponent* AkComp = GetOrCreateAkComponent();
-		if (AkComp)
+		if (IsValid(AkComp))
 		{
 			AkComp->PostAkEvent(SoundEvent);
 		}

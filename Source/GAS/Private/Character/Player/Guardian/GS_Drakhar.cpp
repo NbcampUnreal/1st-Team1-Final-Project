@@ -99,7 +99,7 @@ AGS_Drakhar::AGS_Drakhar()
 	if (!FindComponentByClass<UAkComponent>())
 	{
 		UAkComponent* AkComp = CreateDefaultSubobject<UAkComponent>(TEXT("AkAudioComponent"));
-		if (AkComp)
+		if (IsValid(AkComp))
 		{
 			AkComp->SetupAttachment(RootComponent);
 		}

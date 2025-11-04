@@ -81,7 +81,7 @@ void AGS_Monster::BeginPlay()
 	}
 	
 	// AkComponent Occlusion 비활성화
-	if (AkComponent)
+	if (IsValid(AkComponent))
 	{
 		AkComponent->OcclusionRefreshInterval = 0.0f;
 	}

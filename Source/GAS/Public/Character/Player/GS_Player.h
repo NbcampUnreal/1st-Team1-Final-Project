@@ -68,17 +68,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	UAkComponent* AkComponent;
 
-	// 머리 위치 오디오 리스너 컴포넌트
+	// 카메라 위치 오디오 리스너 컴포넌트 (TPS 표준)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
-	UAkComponent* HeadAudioListenerComponent;
-
-	// 머리 위치로 사용할 소켓/본 후보 목록 (상위에서부터 우선순위)
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
-	TArray<FName> HeadListenerCandidates;
-
-	// 후보를 찾지 못했을 때 적용할 Z 오프셋(머리 높이 추정치)
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Audio")
-	float HeadListenerZOffset = 180.0f;
+	UAkComponent* CameraAudioListenerComponent;
 
 	UFUNCTION(Client, Reliable)
 	void Client_StartVisionObscured();
@@ -111,7 +103,7 @@ public:
 	void SetupLocalAudioListener();
 
 	UFUNCTION(BlueprintCallable, Category = "Audio")
-	void SetupHeadAudioListener();
+	void SetupCameraAudioListener();
     
 	UFUNCTION(BlueprintCallable, Category = "Audio")
 	bool IsLocalPlayer() const;
