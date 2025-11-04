@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GS_Seeker.h"
+#include "Curves/CurveFloat.h"
 #include "GS_Ares.generated.h"
 
 class AGS_SwordAuraProjectile;
@@ -57,6 +58,30 @@ public:
 
 	// Damage handling with audio feedback
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	// 아레스 대시 스킬 카메라 복원
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_RestoreDashCameraZoom();
+
+public:
+	// 아레스 대시 스킬 카메라 설정
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving")
+	float MovingSkill_ZoomOutDistance = 300.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving")
+	UCurveFloat* MovingSkill_CameraZoomCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera")
+	bool MovingSkill_EnableMotionBlur = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float MovingSkill_MotionBlurPeakAmount = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera")
+	UCurveFloat* MovingSkill_MotionBlurCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera", meta = (ClampMin = "0.1", ClampMax = "5.0"))
+	float MovingSkill_MotionBlurExponent = 1.0f;
 
 protected:
 	// Called when the game starts or when spawned

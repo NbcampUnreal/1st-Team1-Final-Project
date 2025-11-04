@@ -3,9 +3,12 @@
 #include "CoreMinimal.h"
 #include "Props/Trap/GS_TrapBase.h"
 #include "Components/BoxComponent.h"
+#include "AkGameplayTypes.h"
 #include "GS_TrigTrapBase.generated.h"
 
 class UBoxComponent;
+class UAkComponent;
+class UAkRtpc;
 UCLASS()
 class GAS_API AGS_TrigTrapBase : public AGS_TrapBase
 {
@@ -84,4 +87,12 @@ protected:
 	UFUNCTION(BlueprintNativeEvent)
 	void EndTrapEffect(AActor* TargetActor);
 	void EndTrapEffect_Implementation(AActor* TargetActor);
+
+	// === Overrides ===
+	void ActivateTrap_Implementation(AActor* TargetActor);
+	void DeActivateTrap_Implementation();
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+private:
+	UAkComponent* GetOrCreateTrapAkComponent();
 };

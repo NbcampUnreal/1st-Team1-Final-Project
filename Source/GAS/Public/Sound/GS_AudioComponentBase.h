@@ -120,6 +120,10 @@ protected:
 	/** 캐싱된 카메라 위치 */
 	UPROPERTY(Transient)
 	mutable FVector CachedCameraLocation = FVector::ZeroVector;
+
+	/** 캐싱된 카메라 회전 */
+	UPROPERTY(Transient)
+	mutable FRotator CachedCameraRotation = FRotator::ZeroRotator;
 	
 	/** 마지막 카메라 위치 업데이트 시간 */
 	UPROPERTY(Transient)
@@ -173,6 +177,9 @@ public:
 	/** 리스너 위치 가져오기 (RTS/TPS) */
 	UFUNCTION(BlueprintPure, Category = "Audio")
 	bool GetListenerLocation(FVector& OutLocation) const;
+
+	/** 리스너 위치와 회전(Transform) 가져오기 */
+	bool GetListenerTransform(FVector& OutLocation, FRotator& OutRotation) const;
 	
 	/** 모드별 최대 거리 가져오기 */
 	UFUNCTION(BlueprintPure, Category = "Audio")
@@ -188,6 +195,9 @@ public:
 	/** 실제 카메라 위치 가져오기 (캐싱 포함) */
 	UFUNCTION(BlueprintPure, Category = "Audio")
 	bool GetActualCameraLocation(FVector& OutLocation) const;
+
+	/** 실제 카메라 위치 및 회전 가져오기 (캐싱 포함) */
+	bool GetActualCameraTransform(FVector& OutLocation, FRotator& OutRotation) const;
 	
 	/** 소스가 뷰 프러스텀 내에 있는지 확인 */
 	UFUNCTION(BlueprintPure, Category = "Audio")
