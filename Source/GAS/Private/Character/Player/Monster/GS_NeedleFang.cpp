@@ -63,8 +63,8 @@ void AGS_NeedleFang::Server_SpawnProjectile_Implementation()
 	{
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = this; 
-		SpawnParams.Instigator = GetInstigator(); 
-
+		SpawnParams.Instigator = GetInstigator();
+		
 		AGS_NeedleFangProjectile* SpawnedProjectile = GetWorld()->SpawnActor<AGS_NeedleFangProjectile>(
 		   ProjectileClass,
 		   SpawnLocation,
