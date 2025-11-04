@@ -135,7 +135,6 @@ void UGS_CustomLobbyUI::OnBackButtonClicked()
 		}
 	}
 	CommonPopUpUI->SetVisibility(ESlateVisibility::Visible);
-	CommonPopUpUI->SetDescription(FText::FromString(TEXT("세션을 나가시겠습니까?")));
 	CommonPopUpUI->OnYesClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupYesButtonClicked);
 	CommonPopUpUI->OnNoClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupNoButtonClicked);
 }

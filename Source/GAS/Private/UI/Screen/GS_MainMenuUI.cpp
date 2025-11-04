@@ -130,7 +130,6 @@ void UGS_MainMenuUI::OnExitButtonClicked()
 {
 	if (ExitPopUp)
 	{
-		ExitPopUp->SetDescription(FText::FromString(TEXT("게임을 종료하시겠습니까?")));
 		ExitPopUp->OnYesClicked.BindUObject(this, &UGS_MainMenuUI::OnExitPopupYesButtonClicked);
 		ExitPopUp->OnNoClicked.BindUObject(this, &UGS_MainMenuUI::OnExitPopupNoButtonClicked);
 		ExitPopUp->SetVisibility(ESlateVisibility::Visible);
