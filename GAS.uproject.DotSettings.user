@@ -24,4 +24,5 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=AEC96199_002D061B_002D0DC7_002D2B55_002D13CC8994725E_002Fd_003APublic_002Fd_003ADelegates_002Ff_003ADelegateInstancesImpl_002Eh/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=AEC96199_002D061B_002D0DC7_002D2B55_002D13CC8994725E_002Fd_003APublic_002Fd_003AMath_002Ff_003AVector_002Eh/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=AEC96199_002D061B_002D0DC7_002D2B55_002D13CC8994725E_002Fd_003APublic_002Fd_003AUObject_002Ff_003ANameTypes_002Eh/@EntryIndexedValue">ForceIncluded</s:String>
-	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=C611AB4F_002DD418_002DDCC5_002D85DD_002D8064F3597C85_002Fd_003APrivate_002Ff_003ACascadePreviewViewportClient_002Eh/@EntryIndexedValue">ForceIncluded</s:String></wpf:ResourceDictionary>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=C611AB4F_002DD418_002DDCC5_002D85DD_002D8064F3597C85_002Fd_003APrivate_002Ff_003ACascadePreviewViewportClient_002Eh/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/CodeInspection/PencilsConfiguration/ActualSeverity/@EntryValue">WARNING</s:String></wpf:ResourceDictionary>

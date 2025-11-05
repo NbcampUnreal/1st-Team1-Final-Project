@@ -65,6 +65,25 @@ void AGS_CustomLobbyGM::PreLogin(const FString& Options, const FString& Address,
     {
         // 성공
         UE_LOG(LogTemp, Log, TEXT("PreLogin Success: AcceptPlayerSession Success for PlayerSessionId: %s"), *PlayerSessionId);
+        if (UniqueId.IsValid())
+        {
+            if (UWorld* World = GetWorld())
+            {
+                if (UGS_GameInstance* GI = Cast<UGS_GameInstance>(World->GetGameInstance()))
+                {
+                    GI->StorePlayerSession(UniqueId, PlayerSessionId);
+                    UE_LOG(LogTemp, Log, TEXT("PreLogin: Stored PlayerSessionId for UniqueId=%s"), *UniqueId.ToString());
+                }
+                else
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("PreLogin: GameInstance cast failed. Could not store PlayerSessionId."));
+                }
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("PreLogin: UniqueId is invalid. Could not store PlayerSessionId."));
+        }
     }
     else
     {
