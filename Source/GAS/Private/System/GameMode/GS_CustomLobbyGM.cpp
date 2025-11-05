@@ -32,24 +32,6 @@ AGS_CustomLobbyGM::AGS_CustomLobbyGM()
 
 void AGS_CustomLobbyGM::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
-#if WITH_GAMELIFT
-    // 접속 거부로 인해 생길 수 있는 좀비 세션 파괴를 위한 타이머 시작
-    if (!bHasFirstPlayerAttemptedLogin)
-    {
-        bHasFirstPlayerAttemptedLogin = true;
-        
-        UE_LOG(LogTemp, Log, TEXT("LobbyGM: 첫 번째 플레이어 접속 시도 감지. %f초 타임아웃 타이머를 시작합니다."), FirstPlayerTimeoutSeconds);
-        
-        GetWorldTimerManager().SetTimer(
-            StartupTimerHandle, 
-            this, 
-            &AGS_CustomLobbyGM::HandleStartupTimeout, 
-            FirstPlayerTimeoutSeconds, 
-            false
-        );
-    }
-#endif
-    
     UE_LOG(LogTemp, Log, TEXT("PreLogin called - Options: %s, Address: %s"), *Options, *Address);
     
     // URL 옵션에서 PlayerSessionId 파싱
@@ -123,14 +105,6 @@ void AGS_CustomLobbyGM::PostLogin(APlayerController* NewPlayer)
     }
 
     UE_LOG(LogTemp, Log, TEXT("PostLogin: Player %s successfully validated and logged in."), *NewPlayer->GetName());
-
-    // GameLift 검증 성공 또는 GameLift 미사용 환경에서 실행되는 기존 로직
-    if (StartupTimerHandle.IsValid())
-    {
-        UE_LOG(LogTemp, Log, TEXT("LobbyGM: 첫 번째 플레이어 (%s) 접속 성공. 대기 타이머를 중지합니다."), *NewPlayer->GetName());
-        GetWorldTimerManager().ClearTimer(StartupTimerHandle);
-        StartupTimerHandle.Invalidate();
-    }
     
     AGS_PlayerState* PS = NewPlayer->GetPlayerState<AGS_PlayerState>();
     if (PS)
@@ -365,24 +339,6 @@ void AGS_CustomLobbyGM::DoServerTravel()
     {
         bUseSeamlessTravel = true;
         World->ServerTravel(NextLevelName.ToString() + "?listen", true);
-    }
-}
-
-void AGS_CustomLobbyGM::HandleStartupTimeout()
-{
-    if (GameState && GameState->PlayerArray.Num() == 0)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("LobbyGM: 첫 번째 플레이어 접속 시간 초과. 아무도 접속하지 않았습니다. 서버를 종료합니다."));
-
-        if (UGS_GameInstance* GI = GetGameInstance<UGS_GameInstance>())
-        {
-            GI->TerminateServerProcess();
-        }
-    }
-    else
-    {
-        // 타이머가 돌았는데 플레이어가 0명이 아닌 경우 (PostLogin에서 타이머가 안 꺼지는 버그가 있거나, 다른 엣지 케이스)
-        UE_LOG(LogTemp, Error, TEXT("LobbyGM: HandleStartupTimeout이 호출되었으나 플레이어가 0명이 아닙니다. 종료 로직을 건너뜁니다."));
     }
 }
 
