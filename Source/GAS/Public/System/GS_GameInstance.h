@@ -113,8 +113,21 @@ private:
 
     TSharedPtr<FProcessParameters> ProcessParameters;
 
-    // ================================Steam Ticket================================
+    // ================================세션 생명 주기================================
+#if WITH_GAMELIFT
+    bool bGameSessionActive = false;
+#endif
+    
 private:
+#if WITH_GAMELIFT
+    FTimerHandle HealthIdleTimer;
+    double LastNonZeroPlayerTimeSec = 0.0; // 현재 시각 담을 변수
+    float HealthTickSeconds = 20.f; // <-초 마다 플레이어 체크
+    float IdleShutdownGraceSeconds = 60.f; // <-초 만큼 비어있으면 종료
+
+    void StartHealthAndIdleMonitor();
+    void TickHealthAndIdle();
+#endif
 
     // ================================플레이어 정보 저장================================
 public:

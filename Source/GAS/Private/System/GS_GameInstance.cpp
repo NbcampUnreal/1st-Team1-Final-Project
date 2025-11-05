@@ -14,6 +14,7 @@
 #include "System/PlayerController/GS_MainMenuPC.h"
 #include "Async/Async.h"
 #include "Json.h"
+#include "GameFramework/PlayerState.h"
 #include "Sound/GS_AudioManager.h"
 
 DEFINE_LOG_CATEGORY(GameServerLog);
@@ -201,86 +202,117 @@ void UGS_GameInstance::JoinGameLiftSessionByID(const FString& GameLiftSessionId)
     }
 
     // --- 백엔드 서비스와 통신하는 부분 ---
-    // 1. 플레이어의 고유 ID를 가져옵니다. (Steam 티켓 대신 사용)
-    IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-    if (!Subsystem)
+    APlayerController* PC = GetFirstLocalPlayerController();
+    if (!PC)
     {
-        UE_LOG(LogTemp, Error, TEXT("Failed to get Online Subsystem. Cannot join session."));
+        UE_LOG(LogTemp, Error, TEXT("JoinGameLiftSessionByID: Failed to get FirstLocalPlayerController."));
+        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
         return;
     }
 
-    IOnlineIdentityPtr Identity = Subsystem->GetIdentityInterface();
-    if (!Identity.IsValid() || !Identity->GetUniquePlayerId(0).IsValid())
+    APlayerState* PS = PC->PlayerState;
+    if (!PS || !PS->GetUniqueId().IsValid())
     {
-        UE_LOG(LogTemp, Error, TEXT("Failed to get a valid Player ID. Cannot join session."));
-        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController()))
-        {
-            MPC->HideLoadingScreen();
-        }
+        UE_LOG(LogTemp, Error, TEXT("JoinGameLiftSessionByID: Failed to get a valid PlayerState or UniqueId."));
+        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
         return;
     }
-    
-    // 플레이어의 고유 ID를 문자열로 저장합니다.
-    FString PlayerId = Identity->GetUniquePlayerId(0)->ToString();
+    FString PlayerId = PS->GetUniqueId().ToString();
 
-    // 2. 백엔드 서비스의 URL을 설정합니다.
     FString BackendUrl = TEXT("https://635oo4mx8l.execute-api.ap-northeast-2.amazonaws.com/stage_1/create-player-session");
 
-    // 3. HTTP 요청을 생성합니다.
+    // HTTP 요청을 생성
     TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
     Request->SetURL(BackendUrl);
     Request->SetVerb("POST");
     Request->SetHeader("Content-Type", "application/json");
 
-    // Body에 SessionId와 플레이어의 PlayerId를 담습니다. (SteamTicket 제거)
+    // Body 구성
     FString RequestBody = FString::Printf(TEXT("{\"SessionId\": \"%s\", \"PlayerId\": \"%s\"}"), *GameLiftSessionId, *PlayerId);
     Request->SetContentAsString(RequestBody);
 
-    // 4. 요청 완료 콜백을 바인딩합니다.
+    // 요청 완료 콜백 바인딩
     Request->OnProcessRequestComplete().BindLambda([this](FHttpRequestPtr Req, FHttpResponsePtr Response, bool bWasSuccessful)
     {
-        if (bWasSuccessful && Response.IsValid() && Response->GetResponseCode() == 200)
+        if (!(bWasSuccessful && Response.IsValid() && Response->GetResponseCode() == 200))
         {
-            // 5. 백엔드로부터 받은 JSON 응답을 파싱합니다.
-            TSharedPtr<FJsonObject> JsonObject;
-            TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Response->GetContentAsString());
-            if (FJsonSerializer::Deserialize(Reader, JsonObject))
-            {
-                FString BodyString;
-                if (JsonObject->TryGetStringField(TEXT("body"), BodyString))
-                {
-                    TSharedPtr<FJsonObject> BodyObject;
-                    TSharedRef<TJsonReader<>> BodyReader = TJsonReaderFactory<>::Create(BodyString);
-                    if (FJsonSerializer::Deserialize(BodyReader, BodyObject))
-                    {
-                        FString IpAddress = BodyObject->GetStringField(TEXT("IpAddress"));
-                        FString Port = BodyObject->GetStringField(TEXT("Port"));
-                        FString PlayerSessionId = BodyObject->GetStringField(TEXT("PlayerSessionId"));
+            UE_LOG(LogTemp, Error, TEXT("JoinGL: HTTP fail. ok=%d code=%d"), bWasSuccessful?1:0, Response.IsValid()?Response->GetResponseCode():-1);
+            if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
+            return;
+        }
 
-                        // 6. 최종 접속 문자열을 만들어 서버로 이동합니다.
-                        FString ConnectString = FString::Printf(TEXT("%s:%s?PlayerSessionId=%s"), *IpAddress, *Port, *PlayerSessionId);
-                        UE_LOG(LogTemp, Log, TEXT("Successfully got connection info. Traveling to: %s"), *ConnectString);
-                        
-                        APlayerController* PC = GetFirstLocalPlayerController();
-                        if (PC)
-                        {
-                             PC->ClientTravel(ConnectString, ETravelType::TRAVEL_Absolute);
-                        }
-                        return;
-                    }
-                }
+        const FString Raw = Response->GetContentAsString();
+
+        // 1) 1차 역직렬화
+        TSharedPtr<FJsonObject> Root;
+        {
+            TSharedRef<TJsonReader<>> R = TJsonReaderFactory<>::Create(Raw);
+            if (!FJsonSerializer::Deserialize(R, Root) || !Root.IsValid())
+            {
+                UE_LOG(LogTemp, Error, TEXT("JoinGL: JSON root parse failed. raw='%s'"), *Raw);
+                if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
+                return;
             }
         }
 
-        // 실패한 경우
-        UE_LOG(LogTemp, Error, TEXT("Failed to parse connection info from backend response."));
-        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController()))
+        // 2) 래핑/언래핑 모두 처리
+        TSharedPtr<FJsonObject> Body = Root;
+        FString BodyStr;
+        if (Root->TryGetStringField(TEXT("body"), BodyStr))
         {
-            MPC->HideLoadingScreen();
+            UE_LOG(LogTemp, Log, TEXT("JoinGL: Detected Lambda proxy response (has 'body')."));
+            TSharedRef<TJsonReader<>> BR = TJsonReaderFactory<>::Create(BodyStr);
+            if (!FJsonSerializer::Deserialize(BR, Body) || !Body.IsValid())
+            {
+                UE_LOG(LogTemp, Error, TEXT("JoinGL: inner 'body' JSON parse failed. body='%s'"), *BodyStr);
+                if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
+                return;
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Log, TEXT("JoinGL: Detected unwrapped response."));
+        }
+
+        // 3) 키 대소문자/타입(문자/숫자) 호환 도우미
+        auto ReadStr = [](const TSharedPtr<FJsonObject>& Obj, const TCHAR* Upper, const TCHAR* Lower, FString& Out)->bool
+        {
+            return Obj->TryGetStringField(Upper, Out) || Obj->TryGetStringField(Lower, Out);
+        };
+        auto ReadStrOrNum = [](const TSharedPtr<FJsonObject>& Obj, const TCHAR* Upper, const TCHAR* Lower, FString& Out)->bool
+        {
+            if (Obj->TryGetStringField(Upper, Out) || Obj->TryGetStringField(Lower, Out)) return !Out.IsEmpty();
+            double Num = 0.0;
+            if (Obj->TryGetNumberField(Upper, Num) || Obj->TryGetNumberField(Lower, Num)) { Out = FString::Printf(TEXT("%.0f"), Num); return true; }
+            return false;
+        };
+
+        // 4) 실제 필드 읽기 (대소문자 혼용 허용)
+        FString IpAddress, Port, PlayerSessionId;
+        const bool OkIp   = ReadStr(Body, TEXT("IpAddress"),      TEXT("ipAddress"),      IpAddress) || ReadStr(Body, TEXT("Ip"), TEXT("ip"), IpAddress);
+        const bool OkPort = ReadStrOrNum(Body, TEXT("Port"),      TEXT("port"),           Port);
+        const bool OkPs   = ReadStr(Body, TEXT("PlayerSessionId"),TEXT("playerSessionId"),PlayerSessionId) ||
+                            ReadStr(Body, TEXT("PlayerSessionID"),TEXT("playerSessionID"),PlayerSessionId);
+
+        if (!OkIp || !OkPort || !OkPs || PlayerSessionId.IsEmpty())
+        {
+            UE_LOG(LogTemp, Error, TEXT("JoinGL: missing fields. Ip[%d]=%s Port[%d]=%s PlayerSessionId[%d]=%s"),
+                OkIp?1:0, *IpAddress, OkPort?1:0, *Port, OkPs?1:0, *PlayerSessionId);
+            UE_LOG(LogTemp, Error, TEXT("JoinGL: raw='%s'"), *Raw);
+            if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
+            return;
+        }
+
+        // 5) 접속
+        const FString Connect = FString::Printf(TEXT("%s:%s?PlayerSessionId=%s"), *IpAddress, *Port, *PlayerSessionId);
+        UE_LOG(LogTemp, Log, TEXT("JoinGL: Traveling to %s"), *Connect);
+
+        if (APlayerController* PC = GetFirstLocalPlayerController())
+        {
+            PC->ClientTravel(Connect, ETravelType::TRAVEL_Absolute);
         }
     });
 
-    // 7. HTTP 요청을 보냅니다.
     Request->ProcessRequest();
 }
 
@@ -347,6 +379,28 @@ void UGS_GameInstance::Shutdown()
 void UGS_GameInstance::StartGameSession()
 {
     UE_LOG(LogTemp, Log, TEXT("Requesting new game session..."));
+
+    APlayerController* PC = GetFirstLocalPlayerController();
+    if (!PC)
+    {
+        UE_LOG(LogTemp, Error, TEXT("StartGameSession: Failed to get FirstLocalPlayerController."));
+        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
+        return;
+    }
+
+    APlayerState* PS = PC->PlayerState;
+    if (!PS || !PS->GetUniqueId().IsValid())
+    {
+        UE_LOG(LogTemp, Error, TEXT("StartGameSession: Failed to get a valid PlayerState or UniqueId."));
+        if (AGS_MainMenuPC* MPC = Cast<AGS_MainMenuPC>(GetFirstLocalPlayerController())) { MPC->HideLoadingScreen(); }
+        return;
+    }
+
+    FString HostPlayerId = PS->GetUniqueId().ToString(); // 지금은 이거 aws 람다로 굳이 넘길 필요 없는데 나중에 스팀 쪽에서도 검증 강화해야 할 것 같음 그때 필요함
+    
+    UE_LOG(LogTemp, Log, TEXT("StartGameSession: Host PlayerId is: %s"), *HostPlayerId);
+
+    
     FString BackendUrl = TEXT("https://635oo4mx8l.execute-api.ap-northeast-2.amazonaws.com/stage_1/create-game-session");
     
     TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
@@ -354,7 +408,7 @@ void UGS_GameInstance::StartGameSession()
     Request->SetVerb("POST");
     Request->SetHeader("Content-Type", "application/json");
 
-    FString RequestBody = FString::Printf(TEXT("{\"AliasId\": \"%s\"}"), *TargetAliasId); //fleet id를 가리키는 별칭
+    FString RequestBody = FString::Printf(TEXT("{\"AliasId\": \"%s\", \"PlayerId\": \"%s\"}"), *TargetAliasId, *HostPlayerId);
     Request->SetContentAsString(RequestBody);
     Request->OnProcessRequestComplete().BindUObject(this, &UGS_GameInstance::OnCreateSessionResponse);
     Request->ProcessRequest();
@@ -710,6 +764,56 @@ void UGS_GameInstance::OnLeaveSessionComplete(FName SessionName, bool bWasSucces
     }
 }
 
+#if WITH_GAMELIFT
+void UGS_GameInstance::StartHealthAndIdleMonitor()
+{
+    if (!bGameSessionActive) return;
+    if (UWorld* World = GetWorld())
+    {
+        if (!World->GetTimerManager().IsTimerActive(HealthIdleTimer))
+        {
+            World->GetTimerManager().SetTimer(
+                HealthIdleTimer,
+                this, &UGS_GameInstance::TickHealthAndIdle,
+                HealthTickSeconds,
+                true,
+                HealthTickSeconds
+            );
+            UE_LOG(GameServerLog, Log, TEXT("Health/Idle monitor started: tick=%.1fs, idleGrace=%.1fs"),
+                   HealthTickSeconds, IdleShutdownGraceSeconds);
+        }
+    }
+}
+
+void UGS_GameInstance::TickHealthAndIdle()
+{
+    if (!bGameSessionActive) return;
+
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    const double Now = World->GetRealTimeSeconds();
+
+    // 현재 GameMode가 무엇이든, GameState의 PlayerArray로 현재 접속 인원 파악
+    AGameStateBase* GS = World->GetGameState();
+    const int32 CurrentPlayers = (GS ? GS->PlayerArray.Num() : 0);
+
+    if (CurrentPlayers > 0)
+    {
+        LastNonZeroPlayerTimeSec = Now;
+        return; // 사람이 있으면 OK
+    }
+
+    // 무인 상태가 grace 이상 지속되면 종료
+    if (IdleShutdownGraceSeconds > 0.f && (Now - LastNonZeroPlayerTimeSec) >= IdleShutdownGraceSeconds)
+    {
+        UE_LOG(GameServerLog, Warning, TEXT("Zero-player idle for %.1fs (>= %.1fs). Shutting down."),
+               Now - LastNonZeroPlayerTimeSec, IdleShutdownGraceSeconds);
+        TerminateServerProcess();
+    }
+}
+#endif
+
 float UGS_GameInstance::GetMouseSensitivity() const
 {
     return MouseSensitivity;
@@ -792,23 +896,32 @@ void UGS_GameInstance::InitGameLift()
     {
         FString GameSessionId = FString(InGameSession.GetGameSessionId());
         UE_LOG(GameServerLog, Log, TEXT("GameSession Initializing: %s"), *GameSessionId);
-        
-        GameLiftSdkModule->ActivateGameSession();
 
         int32 AssignedPort = InGameSession.GetPort();
         UE_LOG(GameServerLog, Log, TEXT("GameSession assigned to port: %d"), AssignedPort);
 
         AsyncTask(ENamedThreads::GameThread, [=, this]()
         {
-            UWorld* World = GetWorld();
-            if (World)
-            {
-                FString MapLoadOptions = FString::Printf(TEXT("?listen?Port=%d"), AssignedPort);
-            FString MapToLoad = FString(*DefaultLobbyMapName) + MapLoadOptions;
+            UE_LOG(GameServerLog, Log, TEXT("GameThread: Activating GameSession: %s"), *GameSessionId);
             
-            UGameplayStatics::OpenLevel(World, FName(*MapToLoad), true);
-            UE_LOG(GameServerLog, Log, TEXT("Server traveling to map: %s"), *MapToLoad);
+            FGameLiftGenericOutcome ActivateOutcome = GameLiftSdkModule->ActivateGameSession();
+            if (!ActivateOutcome.IsSuccess())
+            {
+                UE_LOG(GameServerLog, Fatal, TEXT("Failed to Activate GameSession: %s"),
+                       *ActivateOutcome.GetError().m_errorMessage);
+                GameLiftSdkModule->ProcessEnding();
+                FGenericPlatformMisc::RequestExit(true);
+                return;
             }
+
+            UE_LOG(GameServerLog, Log, TEXT("GameThread: GameSession Activated successfully."));
+            bGameSessionActive = true;
+
+            if (UWorld* World = GetWorld())
+            {
+                LastNonZeroPlayerTimeSec = World->GetRealTimeSeconds();
+            }
+            StartHealthAndIdleMonitor();
         });
     });
 
