@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{B9AEF953-7885-6A1F-F54B-20DB18E7F065}",
+    "Hash": "{C1EFF7E8-5D22-8EA0-E9C4-667107527AFF}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -685,7 +685,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_GB_fx_foley_one_shot_firebrst_inflammation_light_02_burn_fire_flame.wav",
-      "CachePath": "E5/{E56B4A16-B8EB-0509-809C-ED4DA5C20709}.wem"
+      "CachePath": "2F/{2F125835-1030-34FF-FAD9-AD9B96460D8C}.wem"
      },
      {
       "Id": "290212776",
@@ -8121,6 +8121,6 @@
     ]
    }
   ],
-  "FileHash": "{92C28DB5-5BA4-3EAC-A43D-DEC3081EC9F0}"
+  "FileHash": "{B9103705-245B-5916-E740-07F3F10D579F}"
  }
 }

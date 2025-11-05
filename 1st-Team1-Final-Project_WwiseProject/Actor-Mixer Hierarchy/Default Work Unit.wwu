@@ -34042,16 +34042,19 @@
 										<Property Name="3DSpatialization" Type="int16" Value="2"/>
 										<Property Name="Highpass" Type="int16">
 											<ValueList>
-												<Value>15</Value>
+												<Value>18</Value>
 											</ValueList>
 										</Property>
 										<Property Name="HoldEmitterPositionOrientation" Type="bool" Value="True"/>
 										<Property Name="Lowpass" Type="int16">
 											<ValueList>
-												<Value>15</Value>
+												<Value>16</Value>
 											</ValueList>
 										</Property>
 										<Property Name="MakeUpGain" Type="Real64">
+											<ValueList>
+												<Value>-2</Value>
+											</ValueList>
 											<ModifierList>
 												<ModifierInfo>
 													<Modifier Name="" ID="{B4AE3563-D85B-4AAE-8496-164E2004AC0B}">
@@ -36928,13 +36931,13 @@
 										<Property Name="3DSpatialization" Type="int16" Value="2"/>
 										<Property Name="Highpass" Type="int16">
 											<ValueList>
-												<Value>8</Value>
+												<Value>12</Value>
 											</ValueList>
 										</Property>
 										<Property Name="HoldEmitterPositionOrientation" Type="bool" Value="True"/>
 										<Property Name="Lowpass" Type="int16">
 											<ValueList>
-												<Value>8</Value>
+												<Value>12</Value>
 											</ValueList>
 										</Property>
 										<Property Name="MakeUpGain" Type="Real64">
@@ -36966,7 +36969,7 @@
 										</Property>
 										<Property Name="Volume" Type="Real64">
 											<ValueList>
-												<Value>-3</Value>
+												<Value>-1</Value>
 											</ValueList>
 											<ModifierList>
 												<ModifierInfo>

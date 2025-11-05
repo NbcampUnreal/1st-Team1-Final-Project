@@ -75,13 +75,13 @@ public:
 	bool MovingSkill_EnableMotionBlur = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float MovingSkill_MotionBlurPeakAmount = 0.5f;
+	float MovingSkill_MotionBlurPeakAmount = 1.0f; // 기본값을 1.0으로 설정하여 더 강한 효과
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera")
 	UCurveFloat* MovingSkill_MotionBlurCurve;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Moving|Camera", meta = (ClampMin = "0.1", ClampMax = "5.0"))
-	float MovingSkill_MotionBlurExponent = 1.0f;
+	float MovingSkill_MotionBlurExponent = 2.0f;
 
 protected:
 	// Called when the game starts or when spawned

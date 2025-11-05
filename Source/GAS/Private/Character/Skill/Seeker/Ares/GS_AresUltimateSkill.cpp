@@ -26,21 +26,13 @@ void UGS_AresUltimateSkill::ActiveSkill()
 	const FSkillInfo* SkillInfo = GetCurrentSkillInfo();
 	if (AGS_Ares* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		// 스킬 시작 사운드 재생 (멀티캐스트)
+		// 스킬 시작 사운드 및 루프 사운드 재생 (멀티캐스트)
 		if (OwnerPlayer->HasAuthority())
 		{
 			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
 			{
-				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
-			}
-		}
-		
-		// 궁극기 루프 사운드 재생 (SeekerAudioComponent만 지원)
-		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
-		{
-			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
-			{
-				AudioComp->PlaySkillLoopSoundFromDataTable(CurrentSkillType);
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0); // 0 = 스킬 시작
+				AudioComp->RequestSkillAudio(CurrentSkillType, 2); // 2 = 루프 시작
 			}
 		}
 
