@@ -157,11 +157,6 @@ void AGS_SwordAuraProjectile::Multicast_StartSwordSlashVFX_Implementation()
 		EAttachLocation::KeepRelativeOffset,
 		true
 	);
-
-	if (SlashVFXComponent)
-	{
-		UE_LOG(LogTemp, Log, TEXT("SwordAuraProjectile: Slash VFX Component created successfully"));
-	}
 }
 
 void AGS_SwordAuraProjectile::Multicast_PlayHitEffects_Implementation(ESwordAuraHitTargetType TargetType, const FVector& HitLocation)

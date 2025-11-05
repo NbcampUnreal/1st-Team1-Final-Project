@@ -138,9 +138,6 @@ float AGS_Ares::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 
 void AGS_Ares::Multicast_RestoreDashCameraZoom_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[AresDashCamera] Multicast_RestoreDashCameraZoom CALLED (Local=%s)"),
-		IsLocallyControlled() ? TEXT("true") : TEXT("false"));
-
 	// 로컬 클라이언트에서만 카메라 복원 실행
 	if (!IsLocallyControlled())
 	{

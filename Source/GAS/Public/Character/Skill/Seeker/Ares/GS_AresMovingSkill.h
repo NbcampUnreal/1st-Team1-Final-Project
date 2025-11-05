@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/Skill/Seeker/GS_SeekerSkillBase.h"
+#include "Curves/CurveFloat.h"
 
 class AGS_Player;
 
@@ -33,7 +34,7 @@ public:
 		bool bInEnableMotionBlur = false,
 		float InMotionBlurPeakAmount = 0.0f,
 		UCurveFloat* InMotionBlurCurve = nullptr,
-		float InMotionBlurExponent = 1.0f);
+		float InMotionBlurExponent = 2.0f);
 
 	virtual void BeginDestroy() override;
 
@@ -56,6 +57,11 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayDashHitSound(EAresDashHitTargetType TargetType, const FVector& HitLocation);
 	void Multicast_PlayDashHitSound_Implementation(EAresDashHitTargetType TargetType, const FVector& HitLocation);
+
+	// 대시 종료 시 FireSlash 이펙트 재생 (멀티캐스트)
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDashEndVFX(const FVector& Location, const FRotator& Rotation);
+	void Multicast_PlayDashEndVFX_Implementation(const FVector& Location, const FRotator& Rotation);
 
 private:
 	void UpdateCharging();
@@ -82,6 +88,9 @@ private:
 	void CacheCameraMotionBlurDefaults(class AGS_Player* Player);
 	void UpdateCameraMotionBlur(float NormalizedAlpha, float ElapsedTime);
 	void ResetCameraMotionBlur();
+	
+	// 대시 중 모션블러 업데이트 (클라이언트용)
+	void UpdateDashMotionBlur();
 
 	// 카메라 애니메이션 상태
 	enum class EZoomState : uint8
@@ -105,14 +114,14 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Camera|MotionBlur")
 	bool bEnableMotionBlur = false;
 
-	UPROPERTY(VisibleAnywhere, Category = "Camera|MotionBlur")
-	float MotionBlurPeakAmount = 0.5f;
+	UPROPERTY(VisibleAnywhere, Category = "Camera|MotionBlur", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float MotionBlurPeakAmount = 1.0f; // 기본값을 1.0으로 설정하여 더 강한 효과
 
 	UPROPERTY(VisibleAnywhere, Category = "Camera|MotionBlur")
 	UCurveFloat* MotionBlurCurve = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "Camera|MotionBlur")
-	float MotionBlurExponent = 1.0f;
+	float MotionBlurExponent = 2.0f;
 
 	// 카메라 줌 애니메이션 관련
 	float OriginalArmLength = 0.0f;
@@ -128,6 +137,11 @@ private:
 	FTimerHandle ChargingTimerHandle;
 	FTimerHandle DashTimerHandle;
 	FTimerHandle CameraUpdateTimerHandle;
+	FTimerHandle DashMotionBlurTimerHandle; // 대시 중 모션블러 업데이트용 타이머
+	
+	// 대시 모션블러 추적용 변수
+	float DashMotionBlurStartTime = 0.0f;
+	bool bDashMotionBlurActive = false;
 
 	float ChargingTime = 0.0f;
 	float ChargingStartTime = 0.0f;
