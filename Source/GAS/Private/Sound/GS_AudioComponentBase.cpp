@@ -189,15 +189,23 @@ bool UGS_AudioComponentBase::IsRTSMode() const
 
 bool UGS_AudioComponentBase::GetListenerLocation(FVector& OutLocation) const
 {
+    FRotator DummyRotation;
+    return GetListenerTransform(OutLocation, DummyRotation);
+}
+
+bool UGS_AudioComponentBase::GetListenerTransform(FVector& OutLocation, FRotator& OutRotation) const
+{
+    OutLocation = FVector::ZeroVector;
+    OutRotation = FRotator::ZeroRotator;
+
     if (!GetWorld())
     {
         return false;
     }
-    
-    // First try to find a local player controller (for client-side audio)
+
     APlayerController* LocalPC = nullptr;
     UWorld* World = GetWorld();
-    
+
     for (auto It = World->GetPlayerControllerIterator(); It; ++It)
     {
         APlayerController* PC = It->Get();
@@ -207,42 +215,55 @@ bool UGS_AudioComponentBase::GetListenerLocation(FVector& OutLocation) const
             break;
         }
     }
-    
-    // Fallback to PlayerController index 0 if no local controller found
+
     if (!LocalPC)
     {
         LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     }
-    
+
     if (!LocalPC)
     {
         return false;
     }
-    
+
     if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(LocalPC))
     {
-        AActor* ViewTarget = RTSController->GetViewTarget();
-        if (ViewTarget && IsValid(ViewTarget))
+        FVector CameraLocation;
+        FRotator CameraRotation;
+        if (GetActualCameraTransform(CameraLocation, CameraRotation))
         {
-            // RTS 모드에서는 실제 카메라 위치를 리스너 위치로 사용
-            FVector ActualCameraLocation;
-            if (GetActualCameraLocation(ActualCameraLocation))
-            {
-                OutLocation = ActualCameraLocation;
-                return true;
-            }
-            
-            // 폴백: ViewTarget 위치
+            OutLocation = CameraLocation;
+            OutRotation = CameraRotation;
+            return true;
+        }
+
+        if (AActor* ViewTarget = RTSController->GetViewTarget())
+        {
             OutLocation = ViewTarget->GetActorLocation();
+            OutRotation = ViewTarget->GetActorRotation();
+            return true;
+        }
+
+        if (LocalPC->PlayerCameraManager)
+        {
+            OutLocation = LocalPC->PlayerCameraManager->GetCameraLocation();
+            OutRotation = LocalPC->PlayerCameraManager->GetCameraRotation();
             return true;
         }
     }
-    else 
+    else
     {
-        APawn* PlayerPawn = LocalPC->GetPawn();
-        if (PlayerPawn && IsValid(PlayerPawn))
+        if (LocalPC->PlayerCameraManager)
+        {
+            OutLocation = LocalPC->PlayerCameraManager->GetCameraLocation();
+            OutRotation = LocalPC->PlayerCameraManager->GetCameraRotation();
+            return true;
+        }
+
+        if (APawn* PlayerPawn = LocalPC->GetPawn())
         {
             OutLocation = PlayerPawn->GetActorLocation();
+            OutRotation = PlayerPawn->GetActorRotation();
             return true;
         }
     }
@@ -270,7 +291,31 @@ bool UGS_AudioComponentBase::IsInViewFrustum(const FVector& SourceLocation) cons
         return IsSourceVisibleOnScreen(RTSController, SourceLocation);
     }
     
-    // TPS 모드는 항상 true
+    // TPS 모드: 카메라 앞쪽 영역에서만 들리도록 개선
+    FVector CameraLocation;
+    FRotator CameraRotation;
+    if (GetActualCameraTransform(CameraLocation, CameraRotation))
+    {
+        const FVector DirectionToSource = (SourceLocation - CameraLocation).GetSafeNormal();
+        const FVector CameraForwardVector = CameraRotation.Vector();
+        
+        // 1. 카메라 뒤에 있는 경우 필터링 (dot product < 0)
+        const float DotProduct = FVector::DotProduct(DirectionToSource, CameraForwardVector);
+        if (DotProduct < 0.0f)
+        {
+            return false; // 카메라 뒤의 소리는 들리지 않음
+        }
+        
+        // 2. 시야각(FOV) 기반 필터링: 약 90도 이상 옆쪽의 소리는 감쇠
+        // 기본 FOV 약 90도를 기준으로, cos(90도) = 0 인 지점부터 필터링 시작
+        const float FOVThreshold = 0.0f; // cos(90도)
+        if (DotProduct < FOVThreshold)
+        {
+            return false; // 90도 이상 옆쪽은 들리지 않음
+        }
+    }
+    
+    // TPS 모드: 기본 거리 체크만 수행
     return true;
 }
 
@@ -283,11 +328,14 @@ bool UGS_AudioComponentBase::IsSourceVisibleOnScreen(AGS_RTSController* RTSContr
     }
 
     FVector CameraLocation;
-    if (!GetActualCameraLocation(CameraLocation))
+    FRotator CameraRotation;
+    if (!GetActualCameraTransform(CameraLocation, CameraRotation))
     {
-        return true; // 카메라 위치를 얻을 수 없으면, 안전하게 true 반환
+        return true; // 카메라 정보를 얻을 수 없으면, 안전하게 true 반환
     }
 
+    const FVector DirectionToSource = (SourceLocation - CameraLocation).GetSafeNormal();
+    const FVector CameraForwardVector = CameraRotation.Vector();
     const float Distance = FVector::Dist(CameraLocation, SourceLocation);
 
     // 1. 근접 체크: 매우 가까우면 항상 들리도록 처리
@@ -296,7 +344,29 @@ bool UGS_AudioComponentBase::IsSourceVisibleOnScreen(AGS_RTSController* RTSContr
         return true;
     }
 
-    // 2. 화면 내 가시성 체크: 화면에 보이면 소리가 들려야 함
+    // 2. 카메라 뒤에 있는 객체 필터링 (중요: 카메라 앞에 있는지 확인)
+    // dot product > 0 이면 카메라 앞, < 0 이면 카메라 뒤
+    const float DotProduct = FVector::DotProduct(DirectionToSource, CameraForwardVector);
+    
+    if (DotProduct < 0.0f)
+    {
+        // 카메라 뒤에 있는 경우 - 방 체크만 수행
+        AActor* ViewTarget = RTSController->GetViewTarget();
+        if (ViewTarget)
+        {
+            if (IsInSameRoom(ViewTarget->GetActorLocation(), SourceLocation))
+            {
+                // 같은 방 시스템 내에 있다면, 제한된 거리로 허용
+                if (Distance <= 2000.0f) // 카메라 뒤쪽: 20미터
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // 3. 화면 내 가시성 체크: 화면에 보이면 소리가 들려야 함
     FVector2D ScreenPosition;
     // ProjectWorldLocationToScreen은 위치가 카메라 앞에 있고 화면에 투영되면 true를 반환
     if (RTSController->ProjectWorldLocationToScreen(SourceLocation, ScreenPosition, false))
@@ -307,7 +377,8 @@ bool UGS_AudioComponentBase::IsSourceVisibleOnScreen(AGS_RTSController* RTSContr
             GEngine->GameViewport->GetViewportSize(ViewportSize);
 
             // 뷰포트 경계 내에 있는지 확인 (약간의 여유분 포함)
-            const float Margin = 100.0f; // 100픽셀 여유
+            // 화면 가장자리의 소리도 들을 수 있도록 마진 설정
+            const float Margin = 200.0f; // 200픽셀 여유 (화면 밖의 가까운 소리도 포함)
             if (ScreenPosition.X >= -Margin && ScreenPosition.X <= ViewportSize.X + Margin &&
                 ScreenPosition.Y >= -Margin && ScreenPosition.Y <= ViewportSize.Y + Margin)
             {
@@ -322,8 +393,7 @@ bool UGS_AudioComponentBase::IsSourceVisibleOnScreen(AGS_RTSController* RTSContr
         }
     }
 
-    // 3. 방 체크: 화면에 보이지 않는 경우, 리스너와 음원이 같은 방/연결된 방에 있는지 확인
-    // 이 경우 리스너는 카메라 자체가 아닌, 카메라가 따라다니는 대상(ViewTarget)으로 간주
+    // 4. 방 체크: 화면에 보이지 않지만 시야각 내에 있는 경우
     AActor* ViewTarget = RTSController->GetViewTarget();
     if (ViewTarget)
     {
@@ -337,30 +407,39 @@ bool UGS_AudioComponentBase::IsSourceVisibleOnScreen(AGS_RTSController* RTSContr
         }
     }
 
-    // 4. 위의 모든 조건에 해당하지 않으면 소리가 들리지 않음
+    // 5. 위의 모든 조건에 해당하지 않으면 소리가 들리지 않음
     return false;
 }
 
 bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
 {
+    FRotator DummyRotation;
+    return GetActualCameraTransform(OutLocation, DummyRotation);
+}
+
+bool UGS_AudioComponentBase::GetActualCameraTransform(FVector& OutLocation, FRotator& OutRotation) const
+{
+    OutLocation = FVector::ZeroVector;
+    OutRotation = FRotator::ZeroRotator;
+
     if (!GetWorld())
     {
         return false;
     }
-    
+
     const float CurrentTime = GetWorld()->GetTimeSeconds();
-    
-    if (!CachedCameraLocation.IsZero() && 
+
+    if (!CachedCameraLocation.IsZero() &&
         (CurrentTime - LastCameraLocationUpdateTime) < CameraLocationUpdateInterval)
     {
         OutLocation = CachedCameraLocation;
+        OutRotation = CachedCameraRotation;
         return true;
     }
-    
-    // Get local player controller
+
     APlayerController* LocalPC = nullptr;
     UWorld* World = GetWorld();
-    
+
     for (auto It = World->GetPlayerControllerIterator(); It; ++It)
     {
         APlayerController* PC = It->Get();
@@ -370,103 +449,95 @@ bool UGS_AudioComponentBase::GetActualCameraLocation(FVector& OutLocation) const
             break;
         }
     }
-    
+
     if (!LocalPC)
     {
         LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
     }
-    
+
     if (!LocalPC)
     {
         return false;
     }
-    
-    // RTS Controller 처리
+
     if (AGS_RTSController* RTSController = Cast<AGS_RTSController>(LocalPC))
     {
-        // 1-1: 캐싱된 RTSCamera 사용
         AGS_RTSCamera* RTSCameraActor = nullptr;
-        
+
         if (CachedRTSCamera.IsValid())
         {
             RTSCameraActor = CachedRTSCamera.Get();
         }
         else
         {
-            // 월드에서 RTSCamera 찾기 (한 번만 실행)
             for (TActorIterator<AGS_RTSCamera> ActorIterator(GetWorld()); ActorIterator; ++ActorIterator)
             {
                 AGS_RTSCamera* FoundCamera = *ActorIterator;
                 if (FoundCamera && IsValid(FoundCamera))
                 {
+                    CachedRTSCamera = FoundCamera;
                     RTSCameraActor = FoundCamera;
-                    CachedRTSCamera = FoundCamera; // 캐시에 저장
                     break;
                 }
             }
         }
-        
-        if (RTSCameraActor)
+
+        if (RTSCameraActor && IsValid(RTSCameraActor))
         {
-            FVector NewCameraLocation;
-            
-            UCameraComponent* CameraComp = RTSCameraActor->GetCameraComponent();
-            USpringArmComponent* SpringArmComp = RTSCameraActor->GetSpringArmComponent();
-            
-            if (CameraComp)
+            if (IsTransformValid(RTSCameraActor->GetActorLocation(), RTSCameraActor->GetActorRotation()))
             {
-                // 카메라 컴포넌트의 실제 위치 사용
-                NewCameraLocation = CameraComp->GetComponentLocation();
-            }
-            else if (SpringArmComp)
-            {
-                // SpringArm을 통한 카메라 위치 계산
-                NewCameraLocation = SpringArmComp->GetComponentLocation() + SpringArmComp->GetForwardVector() * SpringArmComp->TargetArmLength;
-            }
-            else
-            {
-                // RTS 카메라 액터의 위치
-                NewCameraLocation = RTSCameraActor->GetActorLocation();
-            }
-            
-            if (!NewCameraLocation.IsZero())
-            {
-                // 캐시 업데이트 (mutable 변수들이므로 const 함수에서도 수정 가능)
-                CachedCameraLocation = NewCameraLocation;
+                CachedCameraLocation = RTSCameraActor->GetActorLocation();
+                CachedCameraRotation = RTSCameraActor->GetActorRotation();
                 LastCameraLocationUpdateTime = CurrentTime;
-                
-                OutLocation = NewCameraLocation;
+                OutLocation = CachedCameraLocation;
+                OutRotation = CachedCameraRotation;
                 return true;
             }
         }
-        
-        // 1-2: PlayerCameraManager 백업
-        if (RTSController->PlayerCameraManager)
+
+        if (LocalPC->PlayerCameraManager)
         {
-            FVector CameraManagerLocation = RTSController->PlayerCameraManager->GetCameraLocation();
-            
-            if (!CameraManagerLocation.IsZero())
-            {
-                CachedCameraLocation = CameraManagerLocation;
-                LastCameraLocationUpdateTime = CurrentTime;
-                
-                OutLocation = CameraManagerLocation;
-                return true;
-            }
+            CachedCameraLocation = LocalPC->PlayerCameraManager->GetCameraLocation();
+            CachedCameraRotation = LocalPC->PlayerCameraManager->GetCameraRotation();
+            LastCameraLocationUpdateTime = CurrentTime;
+            OutLocation = CachedCameraLocation;
+            OutRotation = CachedCameraRotation;
+            return true;
         }
-    }
-    
-    // 백업: TPS 모드이거나 다른 경우
-    if (LocalPC->PlayerCameraManager)
-    {
-        FVector CameraManagerLocation = LocalPC->PlayerCameraManager->GetCameraLocation();
-        if (!CameraManagerLocation.IsZero())
+
+        if (AActor* ViewTarget = LocalPC->GetViewTarget())
         {
-            OutLocation = CameraManagerLocation;
+            CachedCameraLocation = ViewTarget->GetActorLocation();
+            CachedCameraRotation = ViewTarget->GetActorRotation();
+            LastCameraLocationUpdateTime = CurrentTime;
+            OutLocation = CachedCameraLocation;
+            OutRotation = CachedCameraRotation;
             return true;
         }
     }
-    
+    else
+    {
+        if (LocalPC->PlayerCameraManager)
+        {
+            CachedCameraLocation = LocalPC->PlayerCameraManager->GetCameraLocation();
+            CachedCameraRotation = LocalPC->PlayerCameraManager->GetCameraRotation();
+            LastCameraLocationUpdateTime = CurrentTime;
+            OutLocation = CachedCameraLocation;
+            OutRotation = CachedCameraRotation;
+            return true;
+        }
+
+        if (APawn* Pawn = LocalPC->GetPawn())
+        {
+            CachedCameraLocation = Pawn->GetActorLocation();
+            CachedCameraRotation = Pawn->GetActorRotation();
+            LastCameraLocationUpdateTime = CurrentTime;
+            OutLocation = CachedCameraLocation;
+            OutRotation = CachedCameraRotation;
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -561,7 +632,17 @@ AkPlayingID UGS_AudioComponentBase::PostEventWithCallback(UAkAudioEvent* AkEvent
 
 void UGS_AudioComponentBase::UpdateDistanceRTPC()
 {
-    if (!GetOwner() || !GetWorld()) return;
+    // World 및 Owner 유효성 체크 (서버 안정성)
+    if (!GetWorld() || !IsWorldContextValid())
+    {
+        return;
+    }
+
+    AActor* Owner = GetOwner();
+    if (!Owner || !IsValid(Owner))
+    {
+        return;
+    }
 
     const float CurrentTime = GetWorld()->GetTimeSeconds();
     const bool bCurrentRTSMode = IsRTSMode();
@@ -577,7 +658,20 @@ void UGS_AudioComponentBase::UpdateDistanceRTPC()
     FVector ListenerLocation;
     if (GetListenerLocation(ListenerLocation))
     {
-        float DistanceToListener = FVector::Dist(GetOwner()->GetActorLocation(), ListenerLocation);
+        // Owner 위치 검증
+        const FVector OwnerLocation = Owner->GetActorLocation();
+        if (!IsLocationValid(OwnerLocation) || !IsLocationValid(ListenerLocation))
+        {
+            return;
+        }
+
+        float DistanceToListener = FVector::Dist(OwnerLocation, ListenerLocation);
+
+        // 거리 값 검증 (NaN/Infinity 체크)
+        if (!FMath::IsFinite(DistanceToListener))
+        {
+            return;
+        }
 
         if (DistanceToListener <= GetMaxAudioDistance())
         {
@@ -596,7 +690,7 @@ void UGS_AudioComponentBase::UpdateDistanceRTPC()
     }
 
     // 서버에서만 상태 변경 체크
-    if (GetOwner() && GetOwner()->HasAuthority())
+    if (Owner->HasAuthority())
     {
         CheckForStateChanges();
     }
@@ -629,8 +723,11 @@ void UGS_AudioComponentBase::SetDistanceScaling(bool bIsRTS)
     }
 
     // 통일된 RTPC 시스템 사용
+    // GetDistanceScalingForMode는 RTSDistanceScaling(2.0f) 또는 TPSDistanceScaling(1.0f) 값을 반환
+    // SetUnifiedRTPCValue는 0-1 범위를 기대하므로, 0-2 범위를 0-1로 정규화
     const float ScalingValue = GetDistanceScalingForMode(bIsRTS);
-    SetUnifiedRTPCValue(AttenuationModeRTPC, ScalingValue / 100.0f); // 0-100 → 0-1 정규화
+    const float NormalizedScaling = ScalingValue / 2.0f; // 0-2 범위를 0-1로 정규화 (1.0f → 0.5f, 2.0f → 1.0f)
+    SetUnifiedRTPCValue(AttenuationModeRTPC, NormalizedScaling);
 
     // RTS 모드에서는 오클루전/오브스트럭션 비활성화
     const float OcclusionValue = bIsRTS ? 1.0f : 0.0f; // 1.0f = 비활성화, 0.0f = 활성화
@@ -640,15 +737,25 @@ void UGS_AudioComponentBase::SetDistanceScaling(bool bIsRTS)
     UAkComponent* AkComp = GetOrCreateAkComponent();
     if (IsValid(AkComp))
     {
-        // Transform 검증
-        const FVector Location = GetOwner() ? GetOwner()->GetActorLocation() : FVector::ZeroVector;
-        const FRotator Rotation = GetOwner() ? GetOwner()->GetActorRotation() : FRotator::ZeroRotator;
+        // Owner 및 Transform 검증
+        AActor* Owner = GetOwner();
+        if (!Owner || !IsValid(Owner))
+        {
+            return;
+        }
+
+        const FVector Location = Owner->GetActorLocation();
+        const FRotator Rotation = Owner->GetActorRotation();
 
         if (IsTransformValid(Location, Rotation))
         {
             // OcclusionRefreshInterval을 0으로 설정하면 오클루전 계산이 비활성화!
             // TPS 모드에서는 0.2초마다 계산하도록 재활성화!
             AkComp->OcclusionRefreshInterval = bIsRTS ? 0.0f : 0.2f;
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("[AudioComponentBase] Invalid Transform in SetDistanceScaling - Owner: %s"), *Owner->GetName());
         }
     }
 }
@@ -708,7 +815,7 @@ UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
                 if (!World->bIsTearingDown)
                 {
                     CachedAkComponent->RegisterComponent();
-                    UE_LOG(LogTemp, Log, TEXT("[GS_AudioComponentBase] ✅ AkComponent created and registered for %s"), *Owner->GetName());
+                    UE_LOG(LogTemp, Verbose, TEXT("[GS_AudioComponentBase] AkComponent created and registered for %s"), *Owner->GetName());
                 }
                 else
                 {
@@ -728,7 +835,7 @@ UAkComponent* UGS_AudioComponentBase::GetOrCreateAkComponent()
     }
     else
     {
-        UE_LOG(LogTemp, Log, TEXT("[GS_AudioComponentBase] Found existing AkComponent for %s"), *Owner->GetName());
+        UE_LOG(LogTemp, Verbose, TEXT("[GS_AudioComponentBase] Found existing AkComponent for %s"), *Owner->GetName());
     }
 
     return CachedAkComponent;
@@ -745,7 +852,12 @@ void UGS_AudioComponentBase::SetUnifiedRTPCValue(UAkRtpc* RTPC, float Normalized
         static TSet<FString> WarnedActors;
         FString ActorName = GetOwner() ? GetOwner()->GetName() : TEXT("Unknown");
         
-        WarnedActors.Add(ActorName);
+        // 이미 경고한 액터면 스킵
+        if (!WarnedActors.Contains(ActorName))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("[AudioComponentBase] RTPC is null for actor: %s"), *ActorName);
+            WarnedActors.Add(ActorName);
+        }
         return;
     }
 
@@ -802,7 +914,7 @@ bool UGS_AudioComponentBase::InitializeAudioSystem()
         return false;
     }
 
-    UE_LOG(LogTemp, Log, TEXT("[Audio Base] ✅ AkComponent successfully initialized for %s"),
+    UE_LOG(LogTemp, Verbose, TEXT("[Audio Base] AkComponent successfully initialized for %s"),
         GetOwner() ? *GetOwner()->GetName() : TEXT("NULL"));
 
     // 모든 오디오 RTPC 초기화
@@ -902,8 +1014,8 @@ bool UGS_AudioComponentBase::ShouldPlayMulticastSound(AActor* SourceActor, bool&
         return false;
     }
 
-    // 2. Owner 및 World 유효성 체크
-    if (!SourceActor || !GetWorld())
+    // 2. Owner 및 World 유효성 체크 (서버 안정성 강화)
+    if (!SourceActor || !IsValid(SourceActor) || !GetWorld() || !IsWorldContextValid())
     {
         return false;
     }
@@ -914,13 +1026,30 @@ bool UGS_AudioComponentBase::ShouldPlayMulticastSound(AActor* SourceActor, bool&
         return false;
     }
 
+    // 리스너 위치 검증
+    if (!IsLocationValid(OutListenerLocation))
+    {
+        return false;
+    }
+
     // 4. RTS 모드 확인
     OutIsRTSMode = IsRTSMode();
     const float MaxDistance = GetMaxDistanceForMode(OutIsRTSMode);
 
-    // 5. 소스 위치 가져오기
+    // 5. 소스 위치 가져오기 및 검증
     const FVector SourceLocation = SourceActor->GetActorLocation();
+    if (!IsLocationValid(SourceLocation))
+    {
+        return false;
+    }
+
     const float DistanceToListener = FVector::Dist(SourceLocation, OutListenerLocation);
+
+    // 거리 값 검증 (NaN/Infinity 체크)
+    if (!FMath::IsFinite(DistanceToListener))
+    {
+        return false;
+    }
 
     // 6. 모드별 거리/시야각 체크
     if (OutIsRTSMode)

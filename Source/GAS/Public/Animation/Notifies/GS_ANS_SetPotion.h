@@ -4,15 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "GS_ANS_ChanHeal.generated.h"
+#include "GS_ANS_SetPotion.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GAS_API UGS_ANS_ChanHeal : public UAnimNotifyState
+class GAS_API UGS_ANS_SetPotion : public UAnimNotifyState
 {
 	GENERATED_BODY()
+public:
 	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) override;
 	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 };

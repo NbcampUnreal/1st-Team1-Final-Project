@@ -26,7 +26,7 @@ public:
 	UTexture2D* SkillImage;
 
 	UPROPERTY(EditDefaultsOnly)
-	int8 AllowSkillsMask;
+	int16 AllowSkillsMask;
 
 	UPROPERTY(EditDefaultsOnly)
 	FControlValue AllowControlValue;

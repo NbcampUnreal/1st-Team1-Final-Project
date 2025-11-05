@@ -12,6 +12,7 @@
 #include "Engine/HitResult.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "Components/SphereComponent.h"
 #include "VFX/GS_VFX_FunctionLibrary.h"
 
 AGS_NeedleFangProjectile::AGS_NeedleFangProjectile()
@@ -22,7 +23,7 @@ AGS_NeedleFangProjectile::AGS_NeedleFangProjectile()
 void AGS_NeedleFangProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	GetWorld()->GetTimerManager().SetTimer(DestroyTimerHandle, this, &AGS_NeedleFangProjectile::HandleProjectileDestroy, ProjectileLifeTime, false);
 }
 

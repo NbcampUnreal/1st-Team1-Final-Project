@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "Components/SceneComponent.h"
 #include "GS_TrapData.h"
 #include "Character/GS_Character.h"
 #include "Character/Component/GS_DebuffComp.h"
@@ -108,6 +109,34 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Trap|Audio")
 	void PlayHitSound();
 
+	/** 시커 외의 환경 오브젝트(바닥, 벽 등)와 충돌했을 때도 히트 사운드를 재생할지 여부 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap|Audio")
+	bool bPlayHitSoundOnEnvironmentImpact = true;
+
+	/** 활성화/경고 사운드는 방향 필터링을 완화할지 여부 (천장 함정 등) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap|Audio")
+	bool bRelaxDirectionFilterForWarning = true;
+
+	/** 활성화/경고 사운드 최대 거리 (기본값: 3000.0f = 30m, 히트 사운드보다 멈) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap|Audio")
+	float ActivationSoundMaxDistance = 3000.0f;
+
+	/** 오디오 위치를 일정 높이에 고정하기 위한 앵커 사용 여부 (움직이는 함정용) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap|Audio")
+	bool bUseAudioAnchor = true;
+
+	/** Trap 오디오 앵커의 상대 위치 (RootSceneComp 기준) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap|Audio")
+	FVector AudioAnchorRelativeLocation = FVector(0.0f, 0.0f, 120.0f);
+
+	/** 오디오 앵커 컴포넌트 (편집용으로 노출) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trap|Audio")
+	TObjectPtr<USceneComponent> AudioAnchorComponent;
+
+	/** AudioAnchor 위치를 함정 배치 타입에 맞게 동적으로 조정 */
+	UFUNCTION(BlueprintCallable, Category = "Trap|Audio")
+	void AdjustAudioAnchorByPlacement();
+
 	/** 서버에서 멀티캐스트로 사운드 재생 */
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayActivationSound();
@@ -194,5 +223,10 @@ protected:
 	//TMap<AActor*, FTimerHandle> ActiveDoTTimers;
 
 	virtual void BeginPlay() override;
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+private:
+	void RefreshTrapAudioSetup(bool bForceFindComponent = false);
+	void AttachTrapAkComponentToAnchor();
 	
 };

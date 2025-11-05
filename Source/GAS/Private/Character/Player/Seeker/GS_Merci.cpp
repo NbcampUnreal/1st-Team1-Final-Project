@@ -197,7 +197,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		bIsFullyDrawn = false;  // 상태 초기화
 	}
 
-	GetSkillComp()->ResetAllowedSkillsMask(); // SJE
+	GetSkillComp()->ResetAllowedSkillsMask();
 	
 	// 달리기 상태 설정
 	SetSeekerGait(EGait::Run);

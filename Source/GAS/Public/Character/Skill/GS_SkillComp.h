@@ -6,19 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "GS_SkillSet.h"
 #include "ESkill.h"
-#include "Character/E_Character.h"
 #include "GS_SkillComp.generated.h"
-
-
-/*UENUM(BlueprintType)
-enum class ESkillSlot : uint8
-{
-	Ready,
-	Moving,
-	Aiming,
-	Ultimate,
-	Rolling
-};*/
 
 USTRUCT()
 struct FSkillCooldownState
@@ -168,10 +156,10 @@ protected:
 	
 	//Skill Flag
 	UPROPERTY() // 오직 서버에서 판단.
-	int8 CurAllowedSkillsMask = 0;
+	int16 CurAllowedSkillsMask = 0;
 
 	UPROPERTY()
-	int8 DefaultAllowedSkillsMask = -1;
+	int16 DefaultAllowedSkillsMask = -1;
 	
 	UFUNCTION()
 	void InitSkills();
@@ -184,7 +172,10 @@ public:
 	bool IsSkillAllowed(ESkillSlot CompareSkillsMask);
 
 	UFUNCTION()
-	void SetCurAllowedSkillsMask(int8 BitMask);
+	void SetCurAllowedSkillsMask(int16 BitMask);
+
+	UFUNCTION()
+	int16 GetCurAllowedSkillsMask();
 	
 private:
 	UFUNCTION()

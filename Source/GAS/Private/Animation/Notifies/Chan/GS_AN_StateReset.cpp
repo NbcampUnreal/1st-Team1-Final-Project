@@ -10,7 +10,7 @@ void UGS_AN_StateReset::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBa
 	Super::Notify(MeshComp, Animation, EventReference);
 
 	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(MeshComp->GetOwner()))
-	{
+	{		
 		if (Seeker->HasAuthority())
 		{
 			Seeker->StateReset();

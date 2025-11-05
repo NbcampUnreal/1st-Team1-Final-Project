@@ -109,7 +109,7 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 				NewPitch = FMath::ClampAngle(NewPitch, PitchMin, PitchMax);
 
 				CurrentRot.Pitch = NewPitch;
-				SetControlRotation(CurrentRot); // SJE
+				SetControlRotation(CurrentRot);
 				
 				//ControlledPawn->AddControllerPitchInput(InputAxisVector.Y * SensitivityMultiplier);
 			}
@@ -159,6 +159,11 @@ void AGS_TpsController::SetMoveControlValue(bool CanMoveRight, bool CanMoveForwa
 {
 	ControlValues.bCanMoveForward = CanMoveForward;
 	ControlValues.bCanMoveRight = CanMoveRight;
+}
+
+FControlValue AGS_TpsController::GetMoveControlValue()
+{
+	return ControlValues;
 }
 
 void AGS_TpsController::SetLookControlValue(bool CanLookRight, bool CanLookUp)
@@ -366,7 +371,7 @@ void AGS_TpsController::Client_StopAutoMoveForward_Implementation()
 		return;
 	}
 
-	bIsAutoMoving = false;
+	//bIsAutoMoving = false;
 	GetWorld()->GetTimerManager().ClearTimer(AutoMoveTickHandle);
 	RestoreOriginalCameraSettings();
 }

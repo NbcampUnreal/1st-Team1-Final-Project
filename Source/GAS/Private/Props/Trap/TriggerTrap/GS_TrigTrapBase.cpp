@@ -3,8 +3,15 @@
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include <Net/UnrealNetwork.h>
 #include "AkGameplayStatics.h"
+#include "AkGameplayTypes.h"
+#include "AkAudioDevice.h"
+#include "AkComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "AI/RTS/GS_RTSController.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
+#include "GameFramework/PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
 AGS_TrigTrapBase::AGS_TrigTrapBase()
 {
 	TriggerBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
@@ -26,6 +33,11 @@ void AGS_TrigTrapBase::BeginPlay()
 	TriggerBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrigTrapBase::OnTriggerBeginOverlap);
 	TriggerBoxComp->OnComponentEndOverlap.AddDynamic(this, &AGS_TrigTrapBase::OnTriggerEndOverlap);
 
+}
+
+void AGS_TrigTrapBase::ActivateTrap_Implementation(AActor* TargetActor)
+{
+	Super::ActivateTrap_Implementation(TargetActor);
 }
 
 void AGS_TrigTrapBase::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -80,29 +92,36 @@ void AGS_TrigTrapBase::Multicast_PlayTrapAlertSound_Implementation(AActor* Targe
 	// 데디케이티드 서버에서는 오디오 처리 불필요
 	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[TrigTrap] Dedicated Server - Audio skipped"));
 		return;
 	}
 
-	// 거리 기반 최적화 체크 (임시로 비활성화)
-	bool bShouldPlay = ShouldPlayTrapSoundAtLocation(GetActorLocation());
-	UE_LOG(LogTemp, Warning, TEXT("[TrigTrap] ShouldPlayTrapSoundAtLocation: %s"), bShouldPlay ? TEXT("TRUE") : TEXT("FALSE"));
-	
-	// 디버깅을 위해 임시로 거리 체크 무시
-	// if (!bShouldPlay)
-	// {
-	//     return;
-	// }
+	// Actor 유효성 체크 (서버 안정성)
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 거리 기반 최적화 체크
+	if (!ShouldPlayTrapSoundAtLocation(GetActorLocation()))
+	{
+		return;
+	}
 
 	UAkAudioEvent* SoundEvent = SelectSoundEventByMode(TrapData.AlertSound_TPS, TrapData.AlertSound_RTS);
-	
 	if (SoundEvent)
 	{
-		// TrapAkComponent가 있으면 해당 컴포넌트를 사용, 없으면 Actor 자체 사용
-		AActor* AudioActor = TrapAkComponent ? TrapAkComponent->GetOwner() : this;
-		UAkGameplayStatics::PostEvent(SoundEvent, AudioActor, 0, FOnAkPostEventCallback());
+		// TrapAkComponent가 있으면 AudioAnchor 위치에서 재생, 없으면 Actor 자체 사용
+		if (IsValid(TrapAkComponent))
+		{
+			TrapAkComponent->PostAkEvent(SoundEvent, 0, FOnAkPostEventCallback());
+		}
+		else
+		{
+			UAkGameplayStatics::PostEvent(SoundEvent, this, 0, FOnAkPostEventCallback());
+		}
 	}
 }
+
 
 void AGS_TrigTrapBase::Server_DelayTrapEffect_Implementation(AActor* TargetActor)
 {
@@ -183,6 +202,64 @@ void AGS_TrigTrapBase::Server_EndTrapEffect_Implementation(AActor* TargetActor)
 void AGS_TrigTrapBase::Multicast_EndTrapEffect_Implementation(AActor* TargetActor)
 {
 	EndTrapEffect(TargetActor);
+}
+
+void AGS_TrigTrapBase::DeActivateTrap_Implementation()
+{
+	Super::DeActivateTrap_Implementation();
+}
+
+void AGS_TrigTrapBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// 타이머 정리 (레벨 전환 안전성)
+	if (UWorld* World = GetWorld())
+	{
+		if (DelayHandle.IsValid())
+		{
+			World->GetTimerManager().ClearTimer(DelayHandle);
+			DelayHandle.Invalidate();
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
+UAkComponent* AGS_TrigTrapBase::GetOrCreateTrapAkComponent()
+{
+	if (IsValid(TrapAkComponent))
+	{
+		TrapAkComponent->OcclusionRefreshInterval = 0.0f;
+		return TrapAkComponent;
+	}
+
+	TrapAkComponent = FindComponentByClass<UAkComponent>();
+	if (IsValid(TrapAkComponent))
+	{
+		TrapAkComponent->OcclusionRefreshInterval = 0.0f;
+		return TrapAkComponent;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World || World->bIsTearingDown)
+	{
+		return nullptr;
+	}
+
+    TrapAkComponent = NewObject<UAkComponent>(this, UAkComponent::StaticClass(), NAME_None, RF_Transient);
+	if (!IsValid(TrapAkComponent))
+	{
+		return nullptr;
+	}
+
+    USceneComponent* AttachTarget = GetRootComponent();
+    TrapAkComponent->AttachToComponent(AttachTarget ? AttachTarget : GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+	TrapAkComponent->RegisterComponent();
+	TrapAkComponent->SetAutoActivate(false);
+	TrapAkComponent->SetStopWhenOwnerDestroyed(true);
+	
+	TrapAkComponent->OcclusionRefreshInterval = 0.0f;
+
+	return TrapAkComponent;
 }
 
 

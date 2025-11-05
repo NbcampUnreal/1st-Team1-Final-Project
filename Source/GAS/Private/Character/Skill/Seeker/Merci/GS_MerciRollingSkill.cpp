@@ -16,37 +16,6 @@ UGS_MerciRollingSkill::UGS_MerciRollingSkill()
 void UGS_MerciRollingSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
-
-	StartCoolDown();
-
-	if (AGS_Merci* MerciCharacter = Cast<AGS_Merci>(OwnerCharacter))
-	{
-		if (MerciCharacter->HasAuthority())
-		{
-			// 스킬 시작 사운드 재생 (멀티캐스트)
-			if (UGS_SeekerAudioComponent* AudioComp = MerciCharacter->SeekerAudioComponent)
-			{
-				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
-			}
-
-			MerciCharacter->SetDrawState(false);
-			MerciCharacter->SetAimState(false);
-			MerciCharacter->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
-			MerciCharacter->CanChangeSeekerGait = false;
-
-			FName RollDirection = CalRollDirection();
-			if (RollDirection == FName("00"))
-			{
-				MerciCharacter->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
-			}
-			else
-			{
-				MerciCharacter->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
-			}
-
-			MerciCharacter->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-		}
-	}
 }
 
 void UGS_MerciRollingSkill::OnSkillAnimationEnd()

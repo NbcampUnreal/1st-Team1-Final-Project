@@ -9,6 +9,8 @@
 #include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/GS_TpsController.h"
 #include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
+#include "Character/Skill/GS_SkillComp.h"
+#include "Character/Skill/Seeker/Ares/GS_AresMovingSkill.h"
 
 
 // Sets default values
@@ -32,6 +34,22 @@ void AGS_Ares::BeginPlay()
 
 	SetReplicateMovement(true);
 	GetMesh()->SetIsReplicated(true);
+	
+	// Moving 스킬 객체를 가져와서 카메라 설정값 전달
+	if (SkillComp)
+	{
+		UGS_AresMovingSkill* MovingSkill = Cast<UGS_AresMovingSkill>(SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving));
+		if (MovingSkill)
+		{
+			MovingSkill->SetCameraSettings(
+				MovingSkill_ZoomOutDistance,
+				MovingSkill_CameraZoomCurve,
+				MovingSkill_EnableMotionBlur,
+				MovingSkill_MotionBlurPeakAmount,
+				MovingSkill_MotionBlurCurve,
+				MovingSkill_MotionBlurExponent);
+		}
+	}
 }
 
 // Called every frame
@@ -116,5 +134,23 @@ float AGS_Ares::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 	}
 
 	return ActualDamage;
+}
+
+void AGS_Ares::Multicast_RestoreDashCameraZoom_Implementation()
+{
+	// 로컬 클라이언트에서만 카메라 복원 실행
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	if (SkillComp)
+	{
+		UGS_AresMovingSkill* MovingSkill = Cast<UGS_AresMovingSkill>(SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving));
+		if (MovingSkill)
+		{
+			MovingSkill->RestoreCameraZoom(true);
+		}
+	}
 }
 
