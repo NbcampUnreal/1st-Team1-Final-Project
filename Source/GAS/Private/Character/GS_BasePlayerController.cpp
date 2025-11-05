@@ -57,6 +57,12 @@ void AGS_BasePlayerController::OpenKeyManual(const FInputActionValue& InputValue
 			QuickManualUI = CreateWidget<UGS_QuickManualUI>(this, QuickManualUIClass);
 			QuickManualUI->InitImage();
 			QuickManualUI->AddToViewport(1);
+			
+			// UI와 게임 입력을 모두 받을 수 있도록 설정
+			FInputModeGameAndUI InputMode;
+			InputMode.SetHideCursorDuringCapture(false);
+			SetInputMode(InputMode);
+			bShowMouseCursor = true;
 		}
 		else
 		{
@@ -65,9 +71,22 @@ void AGS_BasePlayerController::OpenKeyManual(const FInputActionValue& InputValue
 	}
 	else
 	{
-		QuickManualUI->SetVisibility(ESlateVisibility::Visible);
+		// UI가 이미 보이는 상태면 닫기, 안 보이면 열기
+		if (QuickManualUI->IsVisible())
+		{
+			QuickManualUI->SetVisibility(ESlateVisibility::Hidden);
+			SetInputMode(FInputModeGameOnly());
+			bShowMouseCursor = false;
+		}
+		else
+		{
+			QuickManualUI->SetVisibility(ESlateVisibility::Visible);
+			
+			// UI와 게임 입력을 모두 받을 수 있도록 설정
+			FInputModeGameAndUI InputMode;
+			InputMode.SetHideCursorDuringCapture(false);
+			SetInputMode(InputMode);
+			bShowMouseCursor = true;
+		}
 	}
-
-	SetInputMode(FInputModeUIOnly());
-	bShowMouseCursor = true;
 }
