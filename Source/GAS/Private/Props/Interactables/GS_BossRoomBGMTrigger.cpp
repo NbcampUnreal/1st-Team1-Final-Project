@@ -14,11 +14,13 @@ AGS_BossRoomBGMTrigger::AGS_BossRoomBGMTrigger()
 
 	RootSceneComp = CreateDefaultSubobject<USceneComponent>(TEXT("RootScene"));
 	RootComponent = RootSceneComp;
+	RootSceneComp->SetMobility(EComponentMobility::Movable);
 
 	TriggerBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
 	TriggerBoxComp->SetupAttachment(RootComponent);
 	TriggerBoxComp->SetBoxExtent(FVector(100.f, 100.f, 100.f));
 	TriggerBoxComp->SetCollisionProfileName(TEXT("Trigger"));
+	TriggerBoxComp->SetMobility(EComponentMobility::Movable);
 }
 
 void AGS_BossRoomBGMTrigger::BeginPlay()

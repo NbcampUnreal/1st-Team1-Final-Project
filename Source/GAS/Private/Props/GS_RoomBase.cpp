@@ -16,6 +16,7 @@ AGS_RoomBase::AGS_RoomBase()
 
 	BGMTrigger = CreateDefaultSubobject<UChildActorComponent>("BGMTrigger");
 	BGMTrigger->SetupAttachment(Floor);
+	BGMTrigger->SetMobility(EComponentMobility::Movable);
 }
 
 void AGS_RoomBase::BeginPlay()
