@@ -115,6 +115,10 @@ public:
 	void Multicast_StopSkillMontage(UAnimMontage* Montage);
 	
 	virtual void OnDeath() override;
+
+	// Collision Set
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetCollisionResponseToChannel(ECollisionChannel Channel, ECollisionResponse NewResponse);
 	
 	// Skll Input Control
 	void SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick, bool CanCtrlClick = true);

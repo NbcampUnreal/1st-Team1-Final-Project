@@ -18,6 +18,8 @@ void UGS_SeekerRollSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
 
+	UE_LOG(LogTemp, Warning, TEXT("SeekerRollSkill")); // SJE
+	
 	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
 		if (Seeker->HasAuthority())
@@ -46,7 +48,7 @@ void UGS_SeekerRollSkill::ActiveSkill()
 				SeekerAnimInstance->Montage_SetEndDelegate(EndDelegate, AM_Roll);
 			}
 
-			Seeker->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+			Seeker->Multicast_SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 
 			// 스킬 시작 사운드 재생 (멀티캐스트)
 			if (UGS_SeekerAudioComponent* AudioComp = Seeker->SeekerAudioComponent)
@@ -88,5 +90,10 @@ void UGS_SeekerRollSkill::OnRollMontageEnded(UAnimMontage* Montage, bool bInterr
 			AM_Wielding,
 			ESeekerMontageSlot::UpperBody);
 		}
+	}
+
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		Seeker->Multicast_SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	}
 }
