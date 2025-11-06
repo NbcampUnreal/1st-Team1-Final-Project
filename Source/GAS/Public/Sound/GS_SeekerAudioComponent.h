@@ -540,6 +540,15 @@ private:
     
     // DT_SkillSet에서 스킬 정보 조회
     const struct FSkillInfo* GetSkillInfoFromDataTable(ESkillSlot SkillSlot) const;
+    
+    /** Server RPC 호출 전 공통 검증 로직 */
+    bool ValidateServerRPCCall() const;
+    
+    /** 콤보 공격 사운드 재생 공통 로직 */
+    void PlayComboSounds(int32 ArrayIndex, const TArray<UAkAudioEvent*>& SwingSounds, 
+                         const TArray<UAkAudioEvent*>& VoiceSounds, 
+                         const TArray<UAkAudioEvent*>* ExtraSounds = nullptr,
+                         UAkAudioEvent* StopEvent = nullptr, float ResetTime = 0.0f);
 
     // ===================
     // 상수 정의

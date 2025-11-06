@@ -49,7 +49,22 @@ void UGS_DrakharAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason
 // === 사운드 재생 함수 구현 ===
 void UGS_DrakharAudioComponent::PlayComboAttackSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -59,7 +74,7 @@ void UGS_DrakharAudioComponent::PlayComboAttackSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayComboAttackSound();
 }
 
@@ -70,7 +85,8 @@ void UGS_DrakharAudioComponent::Multicast_PlayComboAttackSound_Implementation()
 		return;
 	}
 
-	if (!OwnerDrakhar)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
 		return;
 	}
@@ -80,7 +96,22 @@ void UGS_DrakharAudioComponent::Multicast_PlayComboAttackSound_Implementation()
 
 void UGS_DrakharAudioComponent::PlayDashSkillSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -90,7 +121,7 @@ void UGS_DrakharAudioComponent::PlayDashSkillSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayDashSkillSound();
 }
 
@@ -101,7 +132,8 @@ void UGS_DrakharAudioComponent::Multicast_PlayDashSkillSound_Implementation()
 		return;
 	}
 
-	if (!OwnerDrakhar)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
 		return;
 	}
@@ -111,7 +143,22 @@ void UGS_DrakharAudioComponent::Multicast_PlayDashSkillSound_Implementation()
 
 void UGS_DrakharAudioComponent::PlayEarthquakeSkillSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -121,7 +168,7 @@ void UGS_DrakharAudioComponent::PlayEarthquakeSkillSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayEarthquakeSkillSound();
 }
 
@@ -132,7 +179,8 @@ void UGS_DrakharAudioComponent::Multicast_PlayEarthquakeSkillSound_Implementatio
 		return;
 	}
 
-	if (!OwnerDrakhar)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
 		return;
 	}
@@ -142,7 +190,22 @@ void UGS_DrakharAudioComponent::Multicast_PlayEarthquakeSkillSound_Implementatio
 
 void UGS_DrakharAudioComponent::PlayDraconicFurySkillSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -157,7 +220,7 @@ void UGS_DrakharAudioComponent::PlayDraconicFurySkillSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayDraconicFurySkillSound();
 }
 
@@ -168,7 +231,13 @@ void UGS_DrakharAudioComponent::Multicast_PlayDraconicFurySkillSound_Implementat
 		return;
 	}
 
-	if (!OwnerDrakhar || bDraconicFurySoundPlayed)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
+	{
+		return;
+	}
+
+	if (bDraconicFurySoundPlayed)
 	{
 		return;
 	}
@@ -176,25 +245,35 @@ void UGS_DrakharAudioComponent::Multicast_PlayDraconicFurySkillSound_Implementat
 	PlaySoundEvent(OwnerDrakhar->DraconicFurySkillSoundEvent, OwnerDrakhar->GetActorLocation());
 	bDraconicFurySoundPlayed = true;
 
-	// 타이머 설정
-	if (UWorld* World = GetWorld())
-	{
-		if (World->IsValidLowLevel() && !World->bIsTearingDown)
-		{
-			World->GetTimerManager().SetTimer(
-				DraconicFurySoundCooldownTimer,
-				this,
-				&UGS_DrakharAudioComponent::ResetDraconicFurySoundCooldown,
-				DraconicFurySoundCooldown,
-				false
-			);
-		}
-	}
+	// 타이머 설정 (PrepareMulticastSound가 World 검증을 완료했으므로 안전)
+	UWorld* World = GetWorld();
+	World->GetTimerManager().SetTimer(
+		DraconicFurySoundCooldownTimer,
+		this,
+		&UGS_DrakharAudioComponent::ResetDraconicFurySoundCooldown,
+		DraconicFurySoundCooldown,
+		false
+	);
 }
 
 void UGS_DrakharAudioComponent::PlayDraconicProjectileSound(const FVector& Location)
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -204,7 +283,7 @@ void UGS_DrakharAudioComponent::PlayDraconicProjectileSound(const FVector& Locat
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayDraconicProjectileSound(Location);
 }
 
@@ -215,7 +294,8 @@ void UGS_DrakharAudioComponent::Multicast_PlayDraconicProjectileSound_Implementa
 		return;
 	}
 
-	if (!OwnerDrakhar)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
 		return;
 	}
@@ -225,7 +305,22 @@ void UGS_DrakharAudioComponent::Multicast_PlayDraconicProjectileSound_Implementa
 
 void UGS_DrakharAudioComponent::PlayAttackHitSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -235,7 +330,7 @@ void UGS_DrakharAudioComponent::PlayAttackHitSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayAttackHitSound();
 }
 
@@ -246,7 +341,13 @@ void UGS_DrakharAudioComponent::Multicast_PlayAttackHitSound_Implementation()
 		return;
 	}
 
-	if (!OwnerDrakhar || !OwnerDrakhar->AttackHitSoundEvent)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
+	{
+		return;
+	}
+
+	if (!OwnerDrakhar->AttackHitSoundEvent)
 	{
 		return;
 	}
@@ -256,7 +357,22 @@ void UGS_DrakharAudioComponent::Multicast_PlayAttackHitSound_Implementation()
 
 void UGS_DrakharAudioComponent::PlayFeverModeStartSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -266,7 +382,7 @@ void UGS_DrakharAudioComponent::PlayFeverModeStartSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayFeverModeStartSound();
 }
 
@@ -277,7 +393,8 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeStartSound_Implementation
 		return;
 	}
 
-	if (!OwnerDrakhar)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
 		return;
 	}
@@ -292,7 +409,22 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeStartSound_Implementation
 
 void UGS_DrakharAudioComponent::PlayFeverModeEndSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -302,7 +434,7 @@ void UGS_DrakharAudioComponent::PlayFeverModeEndSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayFeverModeEndSound();
 }
 
@@ -313,7 +445,8 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeEndSound_Implementation()
 		return;
 	}
 
-	if (!OwnerDrakhar)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
 		return;
 	}
@@ -328,7 +461,22 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeEndSound_Implementation()
 
 void UGS_DrakharAudioComponent::PlayFeverModeStateSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -338,7 +486,7 @@ void UGS_DrakharAudioComponent::PlayFeverModeStateSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayFeverModeStateSound();
 }
 
@@ -349,7 +497,8 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeStateSound_Implementation
 		return;
 	}
 
-	if (!OwnerDrakhar)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
 		return;
 	}
@@ -377,7 +526,22 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeStateSound_Implementation
 
 void UGS_DrakharAudioComponent::StopFeverModeStateSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -387,7 +551,7 @@ void UGS_DrakharAudioComponent::StopFeverModeStateSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_StopFeverModeStateSound();
 }
 
@@ -398,13 +562,8 @@ void UGS_DrakharAudioComponent::Multicast_StopFeverModeStateSound_Implementation
 		return;
 	}
 
-	if (!OwnerDrakhar)
-	{
-		return;
-	}
-
-	// 오디오 시스템 검증
-	if (!IsAudioSystemValid())
+	// 통합 체크 및 Distance Scaling 설정 (Stop은 거리 체크 불필요, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
 		return;
 	}
@@ -425,7 +584,22 @@ void UGS_DrakharAudioComponent::Multicast_StopFeverModeStateSound_Implementation
 
 void UGS_DrakharAudioComponent::PlayHurtSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -440,7 +614,7 @@ void UGS_DrakharAudioComponent::PlayHurtSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayHurtSound();
 }
 
@@ -451,7 +625,13 @@ void UGS_DrakharAudioComponent::Multicast_PlayHurtSound_Implementation()
 		return;
 	}
 
-	if (!OwnerDrakhar || bHurtSoundPlayed)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
+	{
+		return;
+	}
+
+	if (bHurtSoundPlayed)
 	{
 		return;
 	}
@@ -459,25 +639,35 @@ void UGS_DrakharAudioComponent::Multicast_PlayHurtSound_Implementation()
 	PlaySoundEvent(OwnerDrakhar->HurtSoundEvent, OwnerDrakhar->GetActorLocation());
 	bHurtSoundPlayed = true;
 
-	// 타이머 설정
-	if (UWorld* World = GetWorld())
-	{
-		if (World->IsValidLowLevel() && !World->bIsTearingDown)
-		{
-			World->GetTimerManager().SetTimer(
-				HurtSoundCooldownTimer,
-				this,
-				&UGS_DrakharAudioComponent::ResetHurtSoundCooldown,
-				HurtSoundCooldown,
-				false
-			);
-		}
-	}
+	// 타이머 설정 (PrepareMulticastSound가 World 검증을 완료했으므로 안전)
+	UWorld* World = GetWorld();
+	World->GetTimerManager().SetTimer(
+		HurtSoundCooldownTimer,
+		this,
+		&UGS_DrakharAudioComponent::ResetHurtSoundCooldown,
+		HurtSoundCooldown,
+		false
+	);
 }
 
 void UGS_DrakharAudioComponent::HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter)
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -487,7 +677,7 @@ void UGS_DrakharAudioComponent::HandleDraconicProjectileImpact(const FVector& Im
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_HandleDraconicProjectileImpact(ImpactLocation, bHitCharacter);
 }
 
@@ -498,7 +688,8 @@ void UGS_DrakharAudioComponent::Multicast_HandleDraconicProjectileImpact_Impleme
 		return;
 	}
 
-	if (!OwnerDrakhar)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
 		return;
 	}
@@ -512,7 +703,22 @@ void UGS_DrakharAudioComponent::Multicast_HandleDraconicProjectileImpact_Impleme
 
 void UGS_DrakharAudioComponent::PlayComboFinisherSound()
 {
-	if (!GetOwner() || !GetOwner()->HasAuthority())
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
 	{
 		return;
 	}
@@ -522,7 +728,7 @@ void UGS_DrakharAudioComponent::PlayComboFinisherSound()
 		return;
 	}
 
-	LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	LastMulticastTime = World->GetTimeSeconds();
 	Multicast_PlayComboFinisherSound();
 }
 
@@ -533,13 +739,13 @@ void UGS_DrakharAudioComponent::Multicast_PlayComboFinisherSound_Implementation(
 		return;
 	}
 
-	if (!OwnerDrakhar || !OwnerDrakhar->ComboFinisherSoundEvent)
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
 		return;
 	}
 
-	// 오디오 시스템 검증
-	if (!IsAudioSystemValid())
+	if (!OwnerDrakhar->ComboFinisherSoundEvent)
 	{
 		return;
 	}

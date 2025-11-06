@@ -139,6 +139,7 @@ Event	ID	Name			Wwise Object Path	Notes
 	2831646858	EV_ChanAggroSkill_RTS			\Default Work Unit\Player\Seeker\Chan\RTS\EV_ChanAggroSkill_RTS	
 	2834051383	Voice_Chan_Die			\Default Work Unit\Player\Seeker\Chan\Voice_Chan_Die	
 	2837114270	Voice_Merci_Ultimate_RTS			\Default Work Unit\Player\Seeker\Merci\RTS\Voice_Merci_Ultimate_RTS	
+	2887227822	EV_BossRoom_Play			\Default Work Unit\StateSound\EV_BossRoom_Play	
 	2897876713	EV_Arrow_Shot			\Default Work Unit\Player\Seeker\Merci\EV_Arrow_Shot	
 	2900096721	EV_MeleeAttack_RTS			\Default Work Unit\Monster\EV_MeleeAttack_RTS	
 	2908138241	EV_MeleeAttack			\Default Work Unit\EV_MeleeAttack	
@@ -192,6 +193,7 @@ Event	ID	Name			Wwise Object Path	Notes
 	3890138214	EV_Mon_NeedleFang_RTS_Death			\Default Work Unit\Monster\NeedleFang\EV_Mon_NeedleFang_RTS_Death	
 	3900904931	EV_ChanAimingSkill_Slam_RTS			\Default Work Unit\Player\Seeker\Chan\RTS\EV_ChanAimingSkill_Slam_RTS	
 	3924070179	Props_CrystalSaw_Hit_RTS			\Default Work Unit\Props\Props_RTS\CrystalSaw\Props_CrystalSaw_Hit_RTS	플레이어가 함정에 닿았을 때
+	3930343568	EV_BossRoom_Stop			\Default Work Unit\StateSound\EV_BossRoom_Stop	
 	3970649718	Props_MineFuse			\Default Work Unit\Props\Props_TPS\Mine\Props_MineFuse	
 	4008089511	EV_MeleeAttack_Shield			\Default Work Unit\EV_MeleeAttack_Shield	
 	4016887257	EV_Chan_Guard_RTS			\Default Work Unit\Player\Seeker\Chan\RTS\EV_Chan_Guard_RTS	
@@ -599,6 +601,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	980125505	StoneImpact0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\79\{794CC665-93DE-15BC-079F-A02180991290}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TPS\CystalWall\SFX_CystalCeilTrap_Warning\StoneImpact0		148796
 	992284103	AttackVoice0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\3E\{3EDE4200-BC9D-C236-1B10-7BD0E0BD4236}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\EV_AresSlashSkill_RTS\AttackVoice0		37520
 	993356452	Hit01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\FD\{FD348C57-0C66-C7B7-5FC5-DDE2903260D8}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_MonsterSound\SFX_MeleeHit_Sword_RTS\SwordHit_01\Hit01		117692
+	993652783	BossRoomMusic	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\3B\{3B226F25-B0F9-7101-6DE3-46094769E4FF}.wem		\Actor-Mixer Hierarchy\Default Work Unit\StateSound\BossRoomMusic		10695240
 	995426383	FootstepsDirt	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\2E\{2E27881F-A54F-C4E0-0AEC-EA8AE04C3AE2}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Dirt\FootstepsDirt		84948
 	995621401	SmallClawDie_01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\C5\{C5596968-8328-1FDC-F370-7A8151C9DCC6}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_MonsterSound\SFX_Mon_SmallClaw_RTS_Death\SmallClawDie_01		173828
 	995721661	PE-Whoosh_BW_01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\07\{07B05EE4-9776-F290-A478-D6A786C83927}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Guardian\EV_Drakhar_Projectile\PE-Whoosh_BW_01		300920

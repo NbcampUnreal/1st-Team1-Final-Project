@@ -2389,6 +2389,37 @@
 								</Action>
 							</ChildrenList>
 						</Event>
+						<Event Name="EV_BossRoom_Play" ID="{8C8E8098-61EA-46E2-BDB1-762C8B1FBE70}">
+							<ChildrenList>
+								<Action Name="" ID="{7A2E41CF-2B52-4E07-9FE2-280A8944AB89}" ShortID="2004535">
+									<PropertyList>
+										<Property Name="FadeInCurve" Type="int16" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="2"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="BossRoomMusic" ID="{00195F3F-304E-4347-9EE2-3C98A256CF22}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="EV_BossRoom_Stop" ID="{9E099A5B-4878-4DEF-B312-E69B2870F4EA}">
+							<ChildrenList>
+								<Action Name="" ID="{1E4D17DB-3F39-4A15-8731-BC3B15EAFB6A}" ShortID="164361665">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeInCurve" Type="int16" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="2"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="BossRoomMusic" ID="{00195F3F-304E-4347-9EE2-3C98A256CF22}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
 					</ChildrenList>
 				</Folder>
 				<Event Name="BossFootSteps" ID="{69071155-5833-435C-A2EE-C31CC2FCA94B}">
