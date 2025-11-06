@@ -40,7 +40,7 @@ void UPlaceInfoComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 void UPlaceInfoComponent::OnRep_UpdateObjectType()
 {
 	Is_ObjectTypeSynchronization = true;
-	UE_LOG(LogTemp, Warning, TEXT("[방 숨김] %s : ObjectType 동기화 완료, Type : %s"), *GetOwner()->GetName(), %UGS_EnumUtils::GetEnumAsString(ObjectType));
+	UE_LOG(LogTemp, Warning, TEXT("[방 숨김] %s : ObjectType 동기화 완료, Type : %s"), *GetOwner()->GetName(), *UGS_EnumUtils::GetEnumAsString<EObjectType>(ObjectType));
 }
 
 void UPlaceInfoComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
