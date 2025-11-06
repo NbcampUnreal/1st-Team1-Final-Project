@@ -18,6 +18,7 @@
 #include "UI/Character/GS_SteamNameWidgetComp.h"
 #include "AkAudioDevice.h"
 #include "Sound/GS_AudioComponentBase.h"
+#include "Components/CapsuleComponent.h"
 
 AGS_Player::AGS_Player()
 {
@@ -332,6 +333,12 @@ void AGS_Player::OnDeath()
 	{
 		GS_PC->ServerRPCSpectatePlayer();
 	}
+}
+
+void AGS_Player::Multicast_SetCollisionResponseToChannel_Implementation(ECollisionChannel Channel,
+	ECollisionResponse NewResponse)
+{
+	GetCapsuleComponent()->SetCollisionResponseToChannel(Channel, NewResponse);
 }
 
 void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick, bool CanCtrlClick)

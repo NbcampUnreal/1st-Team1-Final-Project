@@ -6,11 +6,12 @@
 #include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
 #include "Character/Component/GS_StatComp.h"
 
-#include "Animation/Character/GS_SeekerAnimInstance.h"
+/*#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/GS_TpsController.h"
-#include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
+#include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"*/
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Skill/Seeker/Ares/GS_AresMovingSkill.h"
+#include "Components/CapsuleComponent.h"
 
 
 // Sets default values
