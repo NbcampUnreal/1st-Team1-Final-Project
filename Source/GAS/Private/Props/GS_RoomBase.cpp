@@ -13,6 +13,9 @@ AGS_RoomBase::AGS_RoomBase()
 
 	Ceiling = CreateDefaultSubobject<UStaticMeshComponent>("Ceiling");
 	Ceiling->SetupAttachment(Floor);
+
+	BGMTrigger = CreateDefaultSubobject<UChildActorComponent>("BGMTrigger");
+	BGMTrigger->SetupAttachment(Floor);
 }
 
 void AGS_RoomBase::BeginPlay()
