@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{C1EFF7E8-5D22-8EA0-E9C4-667107527AFF}",
+    "Hash": "{23661D03-5A09-E175-3693-7CB669A055C9}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -2216,6 +2216,14 @@
       "CachePath": "FD/{FD348C57-0C66-C7B7-5FC5-DDE2903260D8}.wem"
      },
      {
+      "Id": "993652783",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "BGM_DragonMosque_BossRoom (-400cents).wav",
+      "CachePath": "3B/{3B226F25-B0F9-7101-6DE3-46094769E4FF}.wem"
+     },
+     {
       "Id": "995426383",
       "Language": "SFX",
       "Streaming": "false",
@@ -3940,6 +3948,28 @@
         "Id": "699157515"
        }
       ]
+     },
+     {
+      "Id": "2887227822",
+      "Name": "EV_BossRoom_Play",
+      "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_BossRoom_Play",
+      "GUID": "{8C8E8098-61EA-46E2-BDB1-762C8B1FBE70}",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "993652783"
+       }
+      ]
+     },
+     {
+      "Id": "3930343568",
+      "Name": "EV_BossRoom_Stop",
+      "ObjectPath": "\\Events\\Default Work Unit\\StateSound\\EV_BossRoom_Stop",
+      "GUID": "{9E099A5B-4878-4DEF-B312-E69B2870F4EA}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "4151829722",
@@ -7207,7 +7237,7 @@
       "Name": "Props_Portal",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_TPS\\Portal\\Props_Portal",
       "GUID": "{9141DA7A-2D2F-449C-88E2-C9754D09EDA8}",
-      "MaxAttenuation": "1700",
+      "MaxAttenuation": "2550",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -8121,6 +8151,6 @@
     ]
    }
   ],
-  "FileHash": "{B9103705-245B-5916-E740-07F3F10D579F}"
+  "FileHash": "{078E76EF-72F1-A584-7773-9DB50C9CEF88}"
  }
 }
