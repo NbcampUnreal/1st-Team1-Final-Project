@@ -17,6 +17,7 @@
 #include "Character/Player/Monster/GS_Monster.h"
 #include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
 #include "Props/GS_RoomBase.h"
+#include "Sound/GS_AudioManager.h"
 
 AGS_InGameGM::AGS_InGameGM()
 {
@@ -443,6 +444,15 @@ void AGS_InGameGM::EndGame(EGameResult Result)
 	}
     else if (Result == EGameResult::GR_InProgress)
     {
+        if (UGameInstance* GameInstance = GetGameInstance())
+        {
+	        if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
+	        {
+		        // 보스룸 BGM 종료
+		        AudioManager->EndBossSequence(nullptr, 0.5f);
+	        }
+        }
+
         UE_LOG(LogTemp, Warning, TEXT("AGS_InGameGM: Not All Seekers dead. Traveling to BossLevel."));
         SetGameResultOnAllPlayers(EGameResult::GR_InProgress);
         NextLevelName = TEXT("testbosslevel");

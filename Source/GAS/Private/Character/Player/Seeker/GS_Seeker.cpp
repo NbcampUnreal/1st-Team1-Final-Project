@@ -164,6 +164,20 @@ void AGS_Seeker::BeginPlay()
 void AGS_Seeker::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	/*const ECollisionResponse CurrentResponse = GetCapsuleComponent()->GetCollisionResponseToChannel(ECC_Pawn);
+
+	FString ResponseString = UEnum::GetValueAsString(TEXT("Engine.ECollisionResponse"), CurrentResponse);
+	
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			3,
+			FColor::Red,
+			FString::Printf(TEXT("Response to ECC_Pawn : %s"), *ResponseString)
+			);
+	}*/ // SJE
 }
 
 // Called to bind functionality to input

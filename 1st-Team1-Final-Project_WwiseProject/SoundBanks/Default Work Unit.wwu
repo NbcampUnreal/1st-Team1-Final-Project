@@ -90,6 +90,7 @@
 						<ObjectRef Name="SFX_Mine_Fuse" ID="{F132EACB-2D2B-46AD-A69A-7A9E5F8BA8C2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_DraconicFuryProjectile_Impact" ID="{6CC63D62-1048-46DC-B03B-560D5B86DEF7}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_CrystalWallTrap_End" ID="{89711335-193C-46E0-A2F3-AF1AC6E56925}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_BossRoom_Play" ID="{8C8E8098-61EA-46E2-BDB1-762C8B1FBE70}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_Lava_RTS" ID="{6144C6B4-4A0D-46E5-AB26-EBD812E4DC21}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_CrystalWallTrap" ID="{9C89005A-CF4E-46F0-9A26-2606EC93E64B}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_SwingBlade_Hit" ID="{E6A16F60-3008-4709-B717-1D97F028AB1C}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
@@ -193,6 +194,7 @@
 						<ObjectRef Name="Voice_Merci_Jump" ID="{888AE5E5-0803-4DD0-A033-9B7BCE1C3B86}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_Hit" ID="{3E24D4DA-C114-4DD0-95F8-709C1A310631}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Fire_Extinguish_RTS" ID="{31398026-F90C-4DEE-BD28-B1D52D9E0C65}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
+						<ObjectRef Name="EV_BossRoom_Stop" ID="{9E099A5B-4878-4DEF-B312-E69B2870F4EA}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_AresSlashSkill" ID="{AE1FDE02-250E-4DFA-8402-681C1B1B8785}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="Props_CrystalWallTrap_RTS" ID="{1462F21D-FA91-4E0A-A39F-7D1971122EFA}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>
 						<ObjectRef Name="EV_Drakhar_FeverMode_Start" ID="{C93E5944-6465-4E0C-842D-D15DBFAF2833}" WorkUnitID="{8F441750-37AA-4CA2-9723-168A80C284C9}" Origin="Manual" Filter="7"/>

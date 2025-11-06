@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Weapon/GS_Weapon.h"
 #include "Weapon/Component/GS_WeaponVFXComponent.h"
+#include "Character/GS_Character.h"
 #include "GS_WeaponEquipable.generated.h"
 
 class AGS_Seeker;
@@ -15,6 +16,8 @@ class GAS_API AGS_WeaponEquipable : public AGS_Weapon
 	GENERATED_BODY()
 public:
 	AGS_WeaponEquipable();
+	
+	AGS_Character* GetOwnerChar() { return OwnerChar; };
 
 protected:
 	virtual void PostInitializeComponents() override;
