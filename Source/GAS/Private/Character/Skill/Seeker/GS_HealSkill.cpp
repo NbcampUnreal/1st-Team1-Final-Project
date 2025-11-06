@@ -18,20 +18,6 @@ UGS_HealSkill::UGS_HealSkill()
 	bIsPotionDepletedOrHealthFull = false;
 }
 
-/*
-void UGS_HealSkill::InitializeDamageBinding()
-{
-	// 한 번만 바인딩하도록 체크
-	static bool bIsAlreadyBound = false;
-	
-	if (!bIsAlreadyBound && OwnerCharacter)
-	{
-		OwnerCharacter->OnTakeAnyDamage.AddDynamic(this, &UGS_HealSkill::OnOwnerDamaged);
-		bIsAlreadyBound = true;
-	}
-}
-*/
-
 void UGS_HealSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
@@ -60,10 +46,6 @@ void UGS_HealSkill::ActiveSkill()
 	
 	Seeker->Multicast_SetMontageSlot(ESeekerMontageSlot::UpperBody);
 	Seeker->Server_SetSeekerGait(EGait::Walk);
-	
-	// 스킬 사용 후 비활성화
-	// -> 이걸 drinkpotion animation 끝났을 때 실행.
-	/*DeactiveSkill();*/
 }
 
 void UGS_HealSkill::DeactiveSkill()
@@ -81,6 +63,11 @@ void UGS_HealSkill::DeactiveSkill()
 			AudioComp->Multicast_RequestSkillAudio(CurrentSkillType, 1, OwnerCharacter->GetActorLocation());
 		}
 	}
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		Seeker->GetSkillComp()->ResetAllowedSkillsMask();
+	}
+	
 }
 
 void UGS_HealSkill::InterruptSkill()
@@ -112,6 +99,7 @@ void UGS_HealSkill::InterruptSkill()
 				}
 			}
 		}
+		Seeker->GetSkillComp()->ResetAllowedSkillsMask();
 	}
 }
 
