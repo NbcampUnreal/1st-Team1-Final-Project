@@ -68,12 +68,12 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	MaxConcurrentWaterEffects = 3;
 
 	// Initialize water VFX systems with default PS_Splash
-	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> DefaultWaterSplash(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
-	if (DefaultWaterSplash.Succeeded())
-	{
-		WaterSplashEffect = DefaultWaterSplash.Object;
-		DeepWaterSplashEffect = DefaultWaterSplash.Object; // Default to same effect
-	}
+	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> DefaultWaterSplash(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
+	//if (DefaultWaterSplash.Succeeded())
+	//{
+	//	WaterSplashEffect = DefaultWaterSplash.Object;
+	//	DeepWaterSplashEffect = DefaultWaterSplash.Object; // Default to same effect
+	//}
 
 	// Initialize additional water VFX (can be set in Blueprint)
 	WaterRippleEffect = nullptr;
@@ -123,11 +123,11 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	}
 
 	// Water splash effect
-	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> WaterEffect(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
+	/*static ConstructorHelpers::FObjectFinder<UNiagaraSystem> WaterEffect(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
 	if (WaterEffect.Succeeded())
 	{
 		FootDustEffects.Add(SurfaceType6, WaterEffect.Object);
-	}
+	}*/
 }
 
 // Called when the game starts

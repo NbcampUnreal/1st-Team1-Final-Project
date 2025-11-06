@@ -130,6 +130,9 @@ void UGS_MainMenuUI::OnExitButtonClicked()
 {
 	if (ExitPopUp)
 	{
+		ExitPopUp->SetDescription(
+			NSLOCTEXT("MainMenu", "ExitGameConfirm", "Do you want to quit\nthe game?")
+		);
 		ExitPopUp->OnYesClicked.BindUObject(this, &UGS_MainMenuUI::OnExitPopupYesButtonClicked);
 		ExitPopUp->OnNoClicked.BindUObject(this, &UGS_MainMenuUI::OnExitPopupNoButtonClicked);
 		ExitPopUp->SetVisibility(ESlateVisibility::Visible);
