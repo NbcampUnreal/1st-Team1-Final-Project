@@ -15,6 +15,7 @@
 #include "GameFramework/HUD.h"
 #include "UI/Character/GS_HPBoardWidget.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "DungeonEditor/Component/PlaceInfoComponent.h"
 #include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
 #include "Props/GS_RoomBase.h"
 
@@ -141,6 +142,10 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
                     if (IsValid(NewActor))
                     {
                         SpawnedDungeonActors.Add(NewActor);
+                        if (UPlaceInfoComponent* NewActorPlaceInfoComp = NewActor->GetComponentByClass<UPlaceInfoComponent>())
+                        {
+                            NewActorPlaceInfoComp->SetCellInfo(ObjectData.ObjectType, ObjectData.TrapPlacement, ObjectData.CellCoord, ObjectData.ConstructionCost);
+                        }
                     }
 
                     // 만약 이번에 스폰한 액터가 방 모듈이면 방 개수 증가.

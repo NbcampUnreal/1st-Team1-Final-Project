@@ -1,9 +1,18 @@
 #include "DungeonEditor/Component/PlaceInfoComponent.h"
 
+#include "DungeonEditor/Data/GS_DungeonEditorTypes.h"
+#include "Net/UnrealNetwork.h"
+#include "Props/Trap/GS_TrapData.h"
+#include "RuneSystem/GS_EnumUtils.h"
+
 UPlaceInfoComponent::UPlaceInfoComponent()
+	: ObjectType(EObjectType::None)
+	, TrapPlacement(ETrapPlacement::Ceiling)
+	, ConstructionCost(0.0f)
+	, Is_ObjectTypeSynchronization(false)
 {
 	PrimaryComponentTick.bCanEverTick = false;
-
+	SetIsReplicatedByDefault(true);
 }
 
 void UPlaceInfoComponent::BeginPlay()
@@ -28,3 +37,18 @@ void UPlaceInfoComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 }
 
+void UPlaceInfoComponent::OnRep_UpdateObjectType()
+{
+	Is_ObjectTypeSynchronization = true;
+	UE_LOG(LogTemp, Warning, TEXT("[방 숨김] %s : ObjectType 동기화 완료, Type : %s"), *GetOwner()->GetName(), %UGS_EnumUtils::GetEnumAsString(ObjectType));
+}
+
+void UPlaceInfoComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(UPlaceInfoComponent, CellCoord);
+	DOREPLIFETIME(UPlaceInfoComponent, ObjectType);
+	DOREPLIFETIME(UPlaceInfoComponent, TrapPlacement);
+	DOREPLIFETIME(UPlaceInfoComponent, ConstructionCost);
+}

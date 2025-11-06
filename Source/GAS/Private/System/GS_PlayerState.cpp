@@ -62,7 +62,8 @@ void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
         NewPS->MySteamAvatar = MySteamAvatar;
-        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>()
+            || GetWorld()->GetAuthGameMode<AGS_InGameGM>())
         {
             NewPS->ObjectData = ObjectData;
         }
@@ -84,7 +85,8 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
         NewPS->bIsAlive = bIsAlive;
         NewPS->BoundStatComp = BoundStatComp;
         NewPS->MySteamAvatar = MySteamAvatar;
-        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>()
+            || GetWorld()->GetAuthGameMode<AGS_InGameGM>())
         {
             NewPS->ObjectData = ObjectData;
         }
