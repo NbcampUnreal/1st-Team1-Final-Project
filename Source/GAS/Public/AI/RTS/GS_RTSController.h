@@ -233,6 +233,9 @@ public:
 	//[Aether]AetherComp 추가 
 	UGS_AetherComp* GetAetherComp() const;
 
+	//마우스 설정 함수
+	void ApplyRTSInputMode();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;

@@ -3,6 +3,7 @@
 
 #include "UI/Screen/Option/GS_InGameMenuUI.h"
 #include "CommonUI/Public/CommonButtonBase.h"
+#include "AI/RTS/GS_RTSController.h"
 #include "UI/Screen/Option/GS_OptionMenuUI.h"
 #include "UI/Screen/Option/GS_InGameManualWidget.h"
 
@@ -45,10 +46,18 @@ void UGS_InGameMenuUI::OnResumeButtonClicked()
 {
 	if (APlayerController* PC = GetOwningPlayer())
 	{
-		PC->SetInputMode(FInputModeGameOnly());
-		PC->bShowMouseCursor = false;
-
 		SetVisibility(ESlateVisibility::Hidden);
+
+		AGS_RTSController* RTSCtrl = Cast<AGS_RTSController>(PC);
+		if (RTSCtrl)
+		{
+			RTSCtrl->ApplyRTSInputMode();
+		}
+		else
+		{
+			PC->SetInputMode(FInputModeGameOnly());
+			PC->bShowMouseCursor = false;
+		}
 	}
 }
 

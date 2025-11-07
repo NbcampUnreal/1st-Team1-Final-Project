@@ -135,6 +135,9 @@ void UGS_CustomLobbyUI::OnBackButtonClicked()
 		}
 	}
 	CommonPopUpUI->SetVisibility(ESlateVisibility::Visible);
+	CommonPopUpUI->SetDescription(
+		NSLOCTEXT("CustomLobby", "LeaveSessionConfirm", "Do you want to leave\nthe session?")
+	);
 	CommonPopUpUI->OnYesClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupYesButtonClicked);
 	CommonPopUpUI->OnNoClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupNoButtonClicked);
 }
@@ -277,7 +280,9 @@ void UGS_CustomLobbyUI::ShowPerkSaveConfirmPopup()
 	if (CommonPopUpUI)
 	{
 		CommonPopUpUI->SetVisibility(ESlateVisibility::Visible);
-		CommonPopUpUI->SetDescription(FText::FromString(TEXT("변경사항을\n저장하시겠습니까?")));
+		CommonPopUpUI->SetDescription(
+			NSLOCTEXT("CustomLobby", "PerkSaveConfirm", "Do you want to save\nthe changes?")
+		);
 
 		AGS_CustomLobbyPC* PC = GetOwningPlayer<AGS_CustomLobbyPC>();
 		if (PC)
