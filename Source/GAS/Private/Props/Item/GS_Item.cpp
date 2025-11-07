@@ -2,8 +2,6 @@
 
 
 #include "Props/Item/GS_Item.h"
-
-#include "ContentBrowserItemData.h"
 #include "Props/Item/GS_ItemData.h"
 
 
