@@ -22,9 +22,15 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_SpawnProjectile();
 
+	virtual void ApplyStiffness() override;
+	virtual void EndStiffness() override;
+
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<AGS_NeedleFangProjectile> ProjectileClass;
+
+private:
+	bool bIsStunned;
 };

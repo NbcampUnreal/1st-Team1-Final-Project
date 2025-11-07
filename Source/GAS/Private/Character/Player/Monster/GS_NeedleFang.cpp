@@ -19,8 +19,27 @@ void AGS_NeedleFang::BeginPlay()
 }
 
 
+void AGS_NeedleFang::ApplyStiffness()
+{
+	Super::ApplyStiffness();
+	
+	bIsStunned = true;
+}
+
+void AGS_NeedleFang::EndStiffness()
+{
+	Super::EndStiffness();
+	
+	bIsStunned = false;
+}
+
 void AGS_NeedleFang::Server_SpawnProjectile_Implementation()
 {
+	if (bIsStunned)
+	{
+		return; 
+	}
+	
 	FVector SpawnLocation;
 	FRotator SpawnRotation;
 	
