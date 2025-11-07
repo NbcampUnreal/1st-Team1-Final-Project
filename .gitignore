@@ -31,6 +31,9 @@ Saved/
 .claude/
 *.md
 
+# Windsurf
+Documentation/windsurf-guide.txt
+Config/WindsurfSettings.ini
 
 Plugins/GameLiftPlugin/
 
