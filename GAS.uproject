@@ -70,13 +70,6 @@
 		{
 			"Name": "StaticMeshEditorModeling",
 			"Enabled": true
-		},
-		{
-			"Name": "TextureGraph",
-			"Enabled": true,
-			"SupportedTargetPlatforms": [
-				"Win64"
-			]
 		}
 	]
 }
