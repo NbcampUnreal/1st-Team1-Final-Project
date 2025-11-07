@@ -860,7 +860,9 @@ void UGS_ArcaneBoardWidget::ShowPresetSaveConfirmPopup(int32 TargetPresetIndex)
 	PresetSaveConfirmPopup = CreateWidget<UGS_CommonTwoBtnPopup>(this, PresetSaveConfirmPopupClass);
 	if (PresetSaveConfirmPopup)
 	{
-		PresetSaveConfirmPopup->SetDescription(FText::FromString(TEXT("변경사항을\n저장하시겠습니까?")));
+		PresetSaveConfirmPopup->SetDescription(
+			NSLOCTEXT("CustomLobby", "PerkSaveConfirm", "Do you want to save\nthe changes?")
+		);
 		PresetSaveConfirmPopup->OnYesClicked.BindUObject(this, &UGS_ArcaneBoardWidget::OnPresetSaveYes);
 		PresetSaveConfirmPopup->OnNoClicked.BindUObject(this, &UGS_ArcaneBoardWidget::OnPresetSaveNo);
 
