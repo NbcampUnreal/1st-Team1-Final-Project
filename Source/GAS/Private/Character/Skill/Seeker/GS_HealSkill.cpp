@@ -74,6 +74,11 @@ void UGS_HealSkill::InterruptSkill()
 {
 	Super::InterruptSkill();
 
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
 	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
 		if (Seeker->GetSkillComp())
@@ -98,8 +103,8 @@ void UGS_HealSkill::InterruptSkill()
 					Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 				}
 			}
+			Seeker->GetSkillComp()->ResetAllowedSkillsMask();
 		}
-		Seeker->GetSkillComp()->ResetAllowedSkillsMask();
 	}
 }
 
