@@ -24,13 +24,15 @@
 UGS_SeekerAudioComponent::UGS_SeekerAudioComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
-    
+
     CurrentAudioState = ESeekerAudioState::Idle;
     PreviousAudioState = ESeekerAudioState::Idle;
-    
+
     AudioConfig.MaxAudioDistance = 2000.0f;
-    
+
     SkillEventID = AK_INVALID_PLAYING_ID;
+
+    bIsComponentShuttingDown = false;
 }
 
 void UGS_SeekerAudioComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -67,6 +69,9 @@ void UGS_SeekerAudioComponent::BeginPlay()
 
 void UGS_SeekerAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    // 가장 먼저 셧다운 플래그 설정 (RPC 크래시 방지)
+    bIsComponentShuttingDown = true;
+
     StopSoundTimer();
 
     if (AttackSoundResetTimerHandle.IsValid())
@@ -659,20 +664,40 @@ void UGS_SeekerAudioComponent::PlaySkillCollisionSoundFromDataTable(ESkillSlot S
 
 void UGS_SeekerAudioComponent::RequestSkillAudio(ESkillSlot SkillSlot, int32 AudioEventType, FVector Location)
 {
-    // 객체 및 월드 유효성 검증 (RPC 호출 전 필수)
+    // 셧다운 중이면 RPC 호출 금지 (레벨 전환/액터 파괴 시 크래시 방지)
+    if (bIsComponentShuttingDown)
+    {
+        return;
+    }
+
+    // 컴포넌트 유효성 검증 (RPC 호출 전 필수)
     if (!IsValid(this))
     {
         return;
     }
 
+    // 월드 컨텍스트 유효성 검증
     UWorld* World = GetWorld();
     if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
     {
         return;
     }
 
+    // 오너 액터 유효성 검증
     AActor* Owner = GetOwner();
     if (!IsValid(Owner))
+    {
+        return;
+    }
+
+    // 액터 파괴 상태 확인 (가비지 컬렉션 대상 객체에서 RPC 호출 방지)
+    if (Owner->IsActorBeingDestroyed())
+    {
+        return;
+    }
+
+    // 네트워크 복제가 비활성화된 경우 RPC 호출 금지
+    if (!Owner->GetIsReplicated())
     {
         return;
     }
@@ -690,6 +715,12 @@ void UGS_SeekerAudioComponent::RequestSkillAudio(ESkillSlot SkillSlot, int32 Aud
 
 void UGS_SeekerAudioComponent::Multicast_RequestSkillAudio_Implementation(ESkillSlot SkillSlot, int32 AudioEventType, FVector Location)
 {
+    // 셧다운 중이면 RPC 처리 거부 (레벨 전환/액터 파괴 시 크래시 방지)
+    if (bIsComponentShuttingDown)
+    {
+        return;
+    }
+
     // 컴포넌트 유효성 검증 (RPC 수신 시 가장 먼저 체크)
     if (!IsValid(this))
     {
@@ -703,9 +734,15 @@ void UGS_SeekerAudioComponent::Multicast_RequestSkillAudio_Implementation(ESkill
         return;
     }
 
-    // 오너 액터 유효성 검증
+    // 오너 액터 유효성 검증 및 파괴 상태 확인
     AActor* Owner = GetOwner();
     if (!IsValid(Owner))
+    {
+        return;
+    }
+
+    // 액터 파괴 중이거나 가비지 컬렉션 대상인 경우 RPC 처리 중단
+    if (Owner->IsActorBeingDestroyed() || Owner->IsUnreachable())
     {
         return;
     }
