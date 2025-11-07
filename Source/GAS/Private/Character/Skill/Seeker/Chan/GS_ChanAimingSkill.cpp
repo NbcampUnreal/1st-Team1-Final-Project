@@ -111,6 +111,9 @@ void UGS_ChanAimingSkill::OnSkillAnimationEnd()
 		OwnerPlayer->SetMoveControlValue(true, true);
 		OwnerPlayer->SetLookControlValue(true, true);
 
+		// 피격 애니메이션 재생 가능 설정
+		//OwnerPlayer->SetCanHitReact(true);
+
 		// SetIsActive(false); // 방어 상태를 유지하기 위해 제거
 
 		// =======================
@@ -231,7 +234,7 @@ void UGS_ChanAimingSkill::OnShieldSlam()
 	}
 
 	// Set HitReact
-	OwnerPlayer->SetCanHitReact(true);
+	//OwnerPlayer->SetCanHitReact(true);
 
 	// 방어 상태 해제 (방패 슬램 실행 시)
 	OwnerPlayer->SetDefending(false);
@@ -293,7 +296,7 @@ void UGS_ChanAimingSkill::DeactiveSkill()
 		// Set HitReact
 		OwnerPlayer->CanChangeSeekerGait = true;
 		OwnerPlayer->SetSeekerGait(EGait::Run);
-		OwnerPlayer->SetCanHitReact(true);
+		//OwnerPlayer->SetCanHitReact(true);
 
 		// 방어 상태 비활성화 (스킬 완전 종료 시)
 		OwnerPlayer->SetDefending(false);

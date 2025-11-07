@@ -5,6 +5,8 @@
 #include "Sound/GS_UIAudioSystem.h"
 #include "AkAudioDevice.h"
 #include "AkComponent.h"
+#include "AkAudioEvent.h"
+#include "AkRtpc.h"
 #include "UObject/UObjectGlobals.h"
 #include "Sound/SoundClass.h"
 #include "Sound/SoundMix.h"
@@ -20,12 +22,17 @@ UGS_AudioManager::UGS_AudioManager()
 	// 전투 BGM 상태 초기화
 	bIsCombatMusicPlaying = false;
 
+	// 보스룸 BGM 상태 초기화
+	bIsBossMusicPlaying = false;
+
 	// BGM 볼륨 초기화
 	CurrentBGMVolume = 1.0f;
 
 	// 포인터 멤버 초기화
 	UIAudio = nullptr;
 	BGMAkComponent = nullptr;
+	CachedTargetActor = nullptr;
+	CachedFadeTime = 0.0f;
 
 	// 맵 BGM 멤버 초기화
 	MapBGMEvent = nullptr;
@@ -35,6 +42,12 @@ UGS_AudioManager::UGS_AudioManager()
 	// 전투 BGM 멤버 초기화
 	CurrentCombatMusicStartEvent = nullptr;
 	CurrentCombatMusicStopEvent = nullptr;
+
+	// 보스룸 BGM 멤버 초기화
+	CurrentBossMusicStartEvent = nullptr;
+	CurrentBossMusicStopEvent = nullptr;
+	DefaultBossMusicStartEvent = nullptr;
+	DefaultBossMusicStopEvent = nullptr;
 
 	// 기본 전투 BGM StopEvent 로드
 	DefaultCombatStopEvent = nullptr;
@@ -57,6 +70,19 @@ UGS_AudioManager::UGS_AudioManager()
 	if (CombatStopEventFinder.Succeeded())
 	{
 		DefaultCombatStopEvent = CombatStopEventFinder.Object;
+	}
+
+	// 기본 보스룸 BGM 이벤트 로드
+	static ConstructorHelpers::FObjectFinder<UAkAudioEvent> BossStartEventFinder(TEXT("/Game/WwiseAudio/Events/Default_Work_Unit/StateSound/EV_Boss_Play.EV_Boss_Play"));
+	if (BossStartEventFinder.Succeeded())
+	{
+		DefaultBossMusicStartEvent = BossStartEventFinder.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UAkAudioEvent> BossStopEventFinder(TEXT("/Game/WwiseAudio/Events/Default_Work_Unit/StateSound/EV_Boss_Stop.EV_Boss_Stop"));
+	if (BossStopEventFinder.Succeeded())
+	{
+		DefaultBossMusicStopEvent = BossStopEventFinder.Object;
 	}
 	
 	static ConstructorHelpers::FObjectFinder<UAkRtpc> MapBGMVolumeRTPCFinder(TEXT("/Game/WwiseAudio/Game_Parameters/Default_Work_Unit/MapBGMVolume.MapBGMVolume"));
@@ -103,6 +129,9 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 	// 전투 BGM 상태 초기화
 	bIsCombatMusicPlaying = false;
 
+	// 보스룸 BGM 상태 초기화
+	bIsBossMusicPlaying = false;
+
 	// 오디오 에셋 유효성 검사
 	if (!ValidateAudioAssets())
 	{
@@ -118,6 +147,11 @@ void UGS_AudioManager::Deinitialize()
 	// 델리게이트 해제
 	FCoreUObjectDelegates::PreLoadMap.RemoveAll(this);
 
+	// 모든 타이머 정리 (레벨 전환 안전성 보장)
+	SafeClearTimer(MapBGMFadeInTimerHandle);
+	SafeClearTimer(MapBGMFadeOutTimerHandle);
+	SafeClearTimer(MapBGMStopDelayTimerHandle);
+
 	// BGM AkComponent 정리
 	if (BGMAkComponent && BGMAkComponent->IsValidLowLevel())
 	{
@@ -128,6 +162,7 @@ void UGS_AudioManager::Deinitialize()
 
 	// 메모리 해제 처리
 	UIAudio = nullptr;
+	CachedTargetActor = nullptr;
 
 	// 맵 BGM 상태 정리
 	bIsMapBGMPlaying = false;
@@ -135,6 +170,10 @@ void UGS_AudioManager::Deinitialize()
 	// 전투 BGM 상태 정리
 	CurrentCombatMusicStartEvent = nullptr;
 	CurrentCombatMusicStopEvent = nullptr;
+
+	// 보스룸 BGM 상태 정리
+	CurrentBossMusicStartEvent = nullptr;
+	CurrentBossMusicStopEvent = nullptr;
 
 	Super::Deinitialize();
 }
@@ -277,6 +316,15 @@ void UGS_AudioManager::OnPreLoadMap(const FString& MapName)
 		CurrentCombatMusicStopEvent = nullptr;
 		bIsCombatMusicPlaying = false;  // 전투 BGM 플래그 리셋
 	}
+
+	// 보스룸 BGM 정지
+	if (CurrentBossMusicStartEvent)
+	{
+		StopCurrentBossMusic(TargetActor);
+		CurrentBossMusicStartEvent = nullptr;
+		CurrentBossMusicStopEvent = nullptr;
+		bIsBossMusicPlaying = false;
+	}
 	
 	// 3. RTPC를 현재 사용자 설정 볼륨으로 유지 (다음 맵에서도 동일한 볼륨 유지)
 	if (MapBGMVolumeRTPC)
@@ -388,15 +436,18 @@ void UGS_AudioManager::StopMapBGM(AActor* Context)
 		{
 			SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, 0.0f);
 		}
-		
-		// 볼륨을 0으로 만든 후 짧은 지연으로 정지
-		FTimerHandle StopHandle;
-		GetWorld()->GetTimerManager().SetTimer(StopHandle, [this]()
+
+		// 볼륨을 0으로 만든 후 짧은 지연으로 정지 (UFUNCTION 멤버 함수 사용)
+		if (IsWorldContextValid())
 		{
-			bIsMapBGMPlaying = false;
-			// TargetActor 기반으로 MapBGM만 정지
-			UE_LOG(LogTemp, Warning, TEXT("MapBGM 강제 정지됨 - StopEvent 없음"));
-		}, 0.1f, false);
+			GetWorld()->GetTimerManager().SetTimer(
+				MapBGMStopDelayTimerHandle,
+				this,
+				&UGS_AudioManager::OnMapBGMStopDelayCallback,
+				0.1f,
+				false
+			);
+		}
 	}
 }
 
@@ -526,6 +577,15 @@ void UGS_AudioManager::StartCombatSequence(AActor* Context, UAkAudioEvent* Comba
 		// 기존 BGM 정지 후 새 BGM 재생 (아래 로직 계속 진행)
 	}
 
+	// 보스룸 BGM이 재생중이면 정지
+	if (bIsBossMusicPlaying)
+	{
+		StopCurrentBossMusic(Context);
+		bIsBossMusicPlaying = false;
+		CurrentBossMusicStartEvent = nullptr;
+		CurrentBossMusicStopEvent = nullptr;
+	}
+
 	// 1. 기존 전투 음악 정지
 	StopCurrentCombatMusic(Context);
 
@@ -617,6 +677,165 @@ void UGS_AudioManager::EndCombatSequence(AActor* Context, UAkAudioEvent* CombatM
 	}
 }
 
+// === 보스룸 시퀀스 ===
+
+void UGS_AudioManager::StopCurrentBossMusic(AActor* Context)
+{
+	// 기존 보스룸 음악이 없으면 조기 종료
+	if (!CurrentBossMusicStartEvent)
+	{
+		return;
+	}
+
+	// BGM 전용 AkComponent 가져오기
+	UAkComponent* BGMComponent = GetOrCreateBGMAkComponent();
+	if (!BGMComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[AudioManager] StopCurrentBossMusic: BGM AkComponent를 찾을 수 없습니다!"));
+		return;
+	}
+
+	// StopEvent가 있으면 사용, 없으면 기본 이벤트 사용
+	UAkAudioEvent* StopEventToUse = CurrentBossMusicStopEvent ? CurrentBossMusicStopEvent : DefaultBossMusicStopEvent;
+	if (StopEventToUse)
+	{
+		BGMComponent->PostAkEvent(StopEventToUse, 0, FOnAkPostEventCallback());
+	}
+	else
+	{
+		// StopEvent가 없으면 BGM Component 전체 정지
+		BGMComponent->Stop();
+	}
+}
+
+void UGS_AudioManager::StartBossSequence(AActor* Context, UAkAudioEvent* InBossMusicStartEvent, UAkAudioEvent* InBossMusicStopEvent)
+{
+	// 서버에서 멀티캐스트로 모든 클라이언트에 전파
+	if (GetWorld() && GetWorld()->GetNetMode() != NM_Standalone)
+	{
+		Multicast_StartBossSequence(Context, InBossMusicStartEvent, InBossMusicStopEvent);
+	}
+	else
+	{
+		// 스탠드얼론이면 직접 실행
+		Multicast_StartBossSequence(Context, InBossMusicStartEvent, InBossMusicStopEvent);
+	}
+}
+
+void UGS_AudioManager::Multicast_StartBossSequence_Implementation(AActor* Context, UAkAudioEvent* InBossMusicStartEvent, UAkAudioEvent* InBossMusicStopEvent)
+{
+	UAkAudioEvent* BossStartEvent = InBossMusicStartEvent ? InBossMusicStartEvent : DefaultBossMusicStartEvent;
+	UAkAudioEvent* BossStopEvent = InBossMusicStopEvent ? InBossMusicStopEvent : DefaultBossMusicStopEvent;
+
+	if (!Context || !BossStartEvent)
+	{
+		return;
+	}
+
+	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
+	if (!IsAudioProcessingAllowed())
+	{
+		// 서버에서는 전투 음악 상태만 저장
+		CurrentBossMusicStartEvent = BossStartEvent;
+		CurrentBossMusicStopEvent = BossStopEvent;
+		bIsBossMusicPlaying = true;
+		return;
+	}
+
+	// 중복 재생 방지: 이미 같은 보스룸 BGM이 재생 중이면 중단
+	if (bIsBossMusicPlaying && CurrentBossMusicStartEvent == BossStartEvent)
+	{
+		return;
+	}
+
+	// 1. 기존 전투/보스룸 음악 정지
+	if (bIsCombatMusicPlaying)
+	{
+		StopCurrentCombatMusic(Context);
+		bIsCombatMusicPlaying = false;
+		CurrentCombatMusicStartEvent = nullptr;
+		CurrentCombatMusicStopEvent = nullptr;
+	}
+	if (bIsBossMusicPlaying)
+	{
+		StopCurrentBossMusic(Context);
+	}
+
+	// 2. 보스룸 음악 상태 저장
+	CurrentBossMusicStartEvent = BossStartEvent;
+	CurrentBossMusicStopEvent = BossStopEvent;
+
+	// 3. 맵 BGM 즉시 정지
+	AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+	if (bIsMapBGMPlaying)
+	{
+		StopMapBGM(TargetActor);
+	}
+
+	// 4. 보스룸 BGM 즉시 시작
+	UAkComponent* BGMComponent = GetOrCreateBGMAkComponent();
+	if (BGMComponent && CurrentBossMusicStartEvent)
+	{
+		int32 PlayingID = BGMComponent->PostAkEvent(CurrentBossMusicStartEvent, 0, FOnAkPostEventCallback());
+		if (PlayingID != AK_INVALID_PLAYING_ID)
+		{
+			bIsBossMusicPlaying = true;
+		}
+	}
+
+	// 5. 전투 BGM에 현재 볼륨 적용
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, 0.0f);
+	}
+}
+
+void UGS_AudioManager::EndBossSequence(AActor* Context, float FadeTime)
+{
+	// 서버에서 멀티캐스트로 모든 클라이언트에 전파
+	if (GetWorld() && GetWorld()->GetNetMode() != NM_Standalone)
+	{
+		Multicast_EndBossSequence(Context, FadeTime);
+	}
+	else
+	{
+		// 스탠드얼론이면 직접 실행
+		Multicast_EndBossSequence(Context, FadeTime);
+	}
+}
+
+void UGS_AudioManager::Multicast_EndBossSequence_Implementation(AActor* Context, float FadeTime)
+{
+	if (!IsAudioProcessingAllowed())
+	{
+		CurrentBossMusicStartEvent = nullptr;
+		CurrentBossMusicStopEvent = nullptr;
+		bIsBossMusicPlaying = false;
+		return;
+	}
+
+	// 1. 보스룸 BGM 정지
+	AActor* TargetActor = GetTargetActorForPlayback(Context);
+	StopCurrentBossMusic(TargetActor);
+	
+	// 2. 보스룸 음악 상태 초기화
+	CurrentBossMusicStartEvent = nullptr;
+	CurrentBossMusicStopEvent = nullptr;
+	bIsBossMusicPlaying = false;
+
+	// 3. MapBGMVolume RTPC를 현재 볼륨으로 설정 (맵 BGM이 들리도록)
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, FadeTime * 1000.0f);
+	}
+
+	// 4. 맵 BGM 복원
+	if (!bIsMapBGMPlaying)
+	{
+		StartMapBGM(TargetActor);
+	}
+}
+
 // === 멀티플레이어 지원 함수들 ===
 
 void UGS_AudioManager::StartMapBGMForAllClients()
@@ -643,19 +862,23 @@ void UGS_AudioManager::FadeOutAndStopMapBGM(AActor* Context, float FadeTime)
 	// 볼륨 페이드 아웃
 	SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, FadeTime * 1000.0f);
 
-	// 기존 타이머 취소
-	if (GetWorld()->GetTimerManager().IsTimerActive(MapBGMFadeOutTimerHandle))
-	{
-		GetWorld()->GetTimerManager().ClearTimer(MapBGMFadeOutTimerHandle);
-	}
+	// 타이머 콜백용 캐시 저장
+	CachedTargetActor = TargetActor;
 
-	// FadeTime 후 정지
-	GetWorld()->GetTimerManager().SetTimer(MapBGMFadeOutTimerHandle,
-		[this, TargetActor]()
-		{
-			StopMapBGM(TargetActor);
-		},
-		FadeTime, false);
+	// 기존 타이머 취소
+	SafeClearTimer(MapBGMFadeOutTimerHandle);
+
+	// FadeTime 후 정지 (UFUNCTION 멤버 함수 사용)
+	if (IsWorldContextValid())
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			MapBGMFadeOutTimerHandle,
+			this,
+			&UGS_AudioManager::OnMapBGMFadeOutCompleteCallback,
+			FadeTime,
+			false
+		);
+	}
 }
 
 void UGS_AudioManager::FadeInAndStartMapBGM(AActor* Context, float FadeTime)
@@ -672,31 +895,33 @@ void UGS_AudioManager::FadeInAndStartMapBGM(AActor* Context, float FadeTime)
 	{
 		StartMapBGM(TargetActor);
 	}
-	
+
 	// 2. 볼륨 페이드인 (RTPC가 있고 BGM이 재생 중이면)
 	if (!bIsMapBGMPlaying || !MapBGMVolumeRTPC)
 	{
 		return;
 	}
 
-	// 기존 타이머 취소
-	if (GetWorld()->GetTimerManager().IsTimerActive(MapBGMFadeInTimerHandle))
-	{
-		GetWorld()->GetTimerManager().ClearTimer(MapBGMFadeInTimerHandle);
-	}
+	// 타이머 콜백용 캐시 저장
+	CachedTargetActor = TargetActor;
+	CachedFadeTime = FadeTime;
 
-	// 볼륨 0으로 설정 후 페이드인
+	// 기존 타이머 취소
+	SafeClearTimer(MapBGMFadeInTimerHandle);
+
+	// 볼륨 0으로 설정 후 페이드인 (UFUNCTION 멤버 함수 사용)
 	SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, 0.0f);
 
-	GetWorld()->GetTimerManager().SetTimer(MapBGMFadeInTimerHandle,
-		[this, TargetActor, FadeTime]()
-		{
-			if (MapBGMVolumeRTPC && bIsMapBGMPlaying)
-			{
-				SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, FadeTime * 1000.0f);
-			}
-		},
-		0.1f, false);
+	if (IsWorldContextValid())
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			MapBGMFadeInTimerHandle,
+			this,
+			&UGS_AudioManager::OnMapBGMFadeInStartCallback,
+			0.1f,
+			false
+		);
+	}
 }
 
 // === 네이티브 사운드 클래스 볼륨 조절 ===
@@ -733,4 +958,72 @@ void UGS_AudioManager::SetNativeSoundClassVolume(float Volume)
 
 	// Sound Mix 활성화
 	UGameplayStatics::PushSoundMixModifier(World, BGMSoundMix);
+}
+
+// === 타이머 관리 헬퍼 함수 ===
+
+void UGS_AudioManager::SafeClearTimer(FTimerHandle& TimerHandle)
+{
+	if (!TimerHandle.IsValid())
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+	{
+		World->GetTimerManager().ClearTimer(TimerHandle);
+	}
+	TimerHandle.Invalidate();
+}
+
+bool UGS_AudioManager::IsWorldContextValid() const
+{
+	UWorld* World = GetWorld();
+	return World &&
+		   World->IsValidLowLevel() &&
+		   !World->bIsTearingDown &&
+		   IsValid(World);
+}
+
+// === 타이머 콜백 함수들 (UFUNCTION) ===
+
+void UGS_AudioManager::OnMapBGMStopDelayCallback()
+{
+	if (!IsWorldContextValid())
+	{
+		return;
+	}
+
+	bIsMapBGMPlaying = false;
+	UE_LOG(LogTemp, Warning, TEXT("MapBGM 강제 정지됨 - StopEvent 없음"));
+}
+
+void UGS_AudioManager::OnMapBGMFadeOutCompleteCallback()
+{
+	if (!IsWorldContextValid())
+	{
+		return;
+	}
+
+	AActor* TargetActor = CachedTargetActor.Get();
+	StopMapBGM(TargetActor);
+	CachedTargetActor = nullptr;
+}
+
+void UGS_AudioManager::OnMapBGMFadeInStartCallback()
+{
+	if (!IsWorldContextValid())
+	{
+		return;
+	}
+
+	if (MapBGMVolumeRTPC && bIsMapBGMPlaying)
+	{
+		AActor* TargetActor = CachedTargetActor.Get();
+		SetRTPCValue(MapBGMVolumeRTPC, 1.0f, TargetActor, CachedFadeTime * 1000.0f);
+	}
+
+	CachedTargetActor = nullptr;
+	CachedFadeTime = 0.0f;
 }

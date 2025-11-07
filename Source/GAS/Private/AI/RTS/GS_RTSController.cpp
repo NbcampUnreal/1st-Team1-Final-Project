@@ -60,16 +60,8 @@ AActor* AGS_RTSController::GetViewTarget() const
 void AGS_RTSController::BeginPlay()
 {
 	Super::BeginPlay();
-	FInputModeGameOnly InputModeData;
-	SetInputMode(InputModeData);
-	if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
-	{
-		ViewportClient->SetMouseCaptureMode(EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown);
-		ViewportClient->SetHideCursorDuringCapture(false);
-		ViewportClient->SetMouseLockMode(EMouseLockMode::LockAlways);
-	}
+	ApplyRTSInputMode();
 	SetRTSCursor(DefaultCursorPath);
-	bEnableMouseOverEvents = true; 
 	
 	if (!HasAuthority() && IsLocalController())
 	{
@@ -1164,6 +1156,21 @@ void AGS_RTSController::OnSelectedUnitDead(AGS_Monster* Monster)
 UGS_AetherComp* AGS_RTSController::GetAetherComp() const
 {
 	return AetherComp;
+}
+
+// RTS 마우스 설정
+void AGS_RTSController::ApplyRTSInputMode()
+{
+	FInputModeGameOnly InputModeData;
+	SetInputMode(InputModeData);
+
+	if (UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport())
+	{
+		ViewportClient->SetMouseCaptureMode(EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown);
+		ViewportClient->SetHideCursorDuringCapture(false);
+		ViewportClient->SetMouseLockMode(EMouseLockMode::LockAlways);
+	}
+	bEnableMouseOverEvents = true;
 }
 
 // ==========================================

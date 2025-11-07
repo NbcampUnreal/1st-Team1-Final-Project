@@ -25,7 +25,21 @@ void AGS_MainMenuPC::HandleCustomGameRequest()
 void AGS_MainMenuPC::BeginPlay()
 {
 	Super::BeginPlay();
-
+	if (IsLocalController())
+	{
+		TArray<AActor*> FoundCameras;
+		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
+		if (FoundCameras.Num() > 0)
+		{
+			// 첫 번째로 찾은 카메라를 뷰 타겟으로 설정합니다.
+			SetViewTargetWithBlend(FoundCameras[0]);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LobbyCamera 태그를 가진 CameraActor를 찾을 수 없습니다."));
+		}
+	}
+		
 	ShowMainMenuUI();
 
 	if (IsLocalController()) // MainLevel 앞에 TitleLevel 추가할 거면 이거도 옮겨야 됨!!!!

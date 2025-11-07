@@ -1074,6 +1074,19 @@ bool UGS_AudioComponentBase::ShouldPlayMulticastSound(AActor* SourceActor, bool&
 
 bool UGS_AudioComponentBase::PrepareMulticastSound(AActor* SourceActor, bool bSkipViewFrustumCheck)
 {
+    // 컴포넌트 유효성 검증 (베이스 클래스에서 공통 체크)
+    if (!IsValid(this))
+    {
+        return false;
+    }
+
+    // 월드 컨텍스트 유효성 검증
+    UWorld* World = GetWorld();
+    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+    {
+        return false;
+    }
+
     bool bIsRTSMode = false;
     FVector ListenerLocation;
 

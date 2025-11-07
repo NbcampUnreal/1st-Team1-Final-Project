@@ -445,7 +445,7 @@ void AGS_CustomLobbyGM::SpawnLobbyActorForPlayer(AGS_PlayerState* PlayerState, A
         FTransform SpawnTransform = SpawnSlot->GetActorTransform();
         if (PlayerState->CurrentPlayerRole == EPlayerRole::PR_Guardian)
         {
-            SpawnTransform.SetScale3D(FVector(3.f));
+            SpawnTransform.SetScale3D(FVector(1.8f));
         }
 
         AGS_LobbyDisplayActor* NewDisplayActor = GetWorld()->SpawnActor<AGS_LobbyDisplayActor>(

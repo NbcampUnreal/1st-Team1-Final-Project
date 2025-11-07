@@ -14,8 +14,8 @@ class GAS_API UGS_CommonTwoBtnPopup : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Popup Content")
-	FText DescriptionMessage;
+	/*UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Popup Content")
+	FText DescriptionMessage;*/
 	
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* DescriptionText;
@@ -31,7 +31,7 @@ public:
 	
 protected:
 	virtual void NativeConstruct() override;
-	virtual void SynchronizeProperties() override;
+	//virtual void SynchronizeProperties() override;
 	
 	UFUNCTION()
 	void OnYesButtonClicked();

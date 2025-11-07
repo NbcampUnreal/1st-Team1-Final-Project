@@ -23,6 +23,9 @@
 #include "Character/Player/GS_PawnMappingDataAsset.h"
 #include <DungeonEditor/Data/GS_DungeonEditorSaveGame.h>
 #include "OnlineSessionSettings.h"
+
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
 #include "Engine/DirectionalLight.h"
 #include "Serialization/BufferArchive.h"
 
@@ -54,22 +57,6 @@ void AGS_CustomLobbyPC::BeginPlay()
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("LobbyCamera 태그를 가진 CameraActor를 찾을 수 없습니다."));
-		}
-
-		TArray<AActor*> FoundDirectionalLights;
-		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("DirectionalLight"), FoundDirectionalLights);
-		if (FoundDirectionalLights.Num() > 0)
-		{
-			if (Cast<ADirectionalLight>(FoundDirectionalLights[0]))
-			{
-				LobbyDirectionalLight = Cast<ADirectionalLight>(FoundDirectionalLights[0]);
-				// 디렉셔널 라이트를 꺼줍니다.
-				LobbyDirectionalLight->SetEnabled(false);
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("DirectionalLight 태그를 가진 Light 찾을 수 없습니다."));
 		}
 	}
 }
@@ -674,40 +661,6 @@ void AGS_CustomLobbyPC::ShowPerkSaveConfirmPopup()
 	}
 }
 
-// void AGS_CustomLobbyPC::EnterEditorMode(AActor* SpawnPoint)
-// {
-// 	Super::EnterEditorMode(SpawnPoint);
-//
-// 	if (CustomLobbyWidgetInstance)
-// 	{
-// 		CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
-// 	}
-// }
-//
-// void AGS_CustomLobbyPC::ExitEditorMode()
-// {
-// 	Super::ExitEditorMode();
-//
-// 	// 2. 로비 카메라를 다시 뷰 타겟으로 설정합니다.
-// 	TArray<AActor*> FoundCameras;
-// 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
-// 	if (FoundCameras.Num() > 0)
-// 	{
-// 		SetViewTargetWithBlend(FoundCameras[0]);
-// 	}
-//
-// 	// 3. 로비 UI를 다시 보여줍니다.
-// 	if (CustomLobbyWidgetInstance)
-// 	{
-// 		CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-// 		// 로비에 맞는 입력 모드로 다시 설정합니다.
-// 		FInputModeUIOnly InputModeData;
-// 		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-// 		SetInputMode(InputModeData);
-// 		SetShowMouseCursor(true);
-// 	}
-// }
-
 void AGS_CustomLobbyPC::Client_OnEnteredEditorMode_Implementation()
 {
 	// 부모의 클라이언트 로직 실행 (입력, 에디터 UI 생성 등)
@@ -718,38 +671,6 @@ void AGS_CustomLobbyPC::Client_OnEnteredEditorMode_Implementation()
 	{
 		CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 	}
-
-	// 라이트 켜주기
-	LobbyDirectionalLight->SetEnabled(true);
-}
-
-void AGS_CustomLobbyPC::Client_OnExitedEditorMode_Implementation()
-{
-	// 부모의 클라이언트 로직 실행 (입력 초기화, 에디터 UI 제거 등)
-	Super::Client_OnExitedEditorMode_Implementation();
-
-	// 로비 카메라로 뷰 타겟 변경
-	TArray<AActor*> FoundCameras;
-	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
-	if (FoundCameras.Num() > 0)
-	{
-		SetViewTargetWithBlend(FoundCameras[0]);
-	}
-
-	// 로비 UI 보이기
-	if (CustomLobbyWidgetInstance)
-	{
-		CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Visible);
-        
-		// 로비에 맞는 입력 모드로 복귀
-		FInputModeUIOnly InputModeData;
-		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		SetInputMode(InputModeData);
-		SetShowMouseCursor(true);
-	}
-
-	// 라이트 꺼주기
-	LobbyDirectionalLight->SetEnabled(false);
 }
 
 void AGS_CustomLobbyPC::RequestDungeonEditorToLobby()
@@ -758,20 +679,37 @@ void AGS_CustomLobbyPC::RequestDungeonEditorToLobby()
 	{
 		ExitEditorMode();
 		
-		TArray<AActor*> FoundCameras;
-		UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
-
-		if (FoundCameras.Num() > 0)
-		{
-			// 첫 번째로 찾은 카메라를 뷰 타겟으로 설정합니다.
-			SetViewTargetWithBlend(FoundCameras[0]);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("LobbyCamera 태그를 가진 CameraActor를 찾을 수 없습니다."));
-		}
+		 TArray<AActor*> FoundCameras;
+		 UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("LobbyCamera"), FoundCameras);
 		
-		ShowCustomLobbyUI();
+		 if (FoundCameras.Num() > 0)
+		 {
+		 	// 첫 번째로 찾은 카메라를 뷰 타겟으로 설정합니다.
+		 	PlayerCameraManager->bDefaultConstrainAspectRatio = false;
+		 	SetViewTargetWithBlend(FoundCameras[0], 0.0f);
+		 	SetControlRotation(FoundCameras[0]->GetActorRotation());
+
+		 	if (ACameraActor* LobbyCamera = Cast<ACameraActor>(FoundCameras[0]))
+		 	{
+		 		if (UCameraComponent* LobbyCameraComponent = LobbyCamera->GetCameraComponent())
+		 		{
+		 			PlayerCameraManager->SetFOV(LobbyCameraComponent->FieldOfView);
+		 			PlayerCameraManager->DefaultAspectRatio = LobbyCameraComponent->AspectRatio;
+		 		}
+		 	}
+		 	
+		 }
+
+		if (CustomLobbyWidgetInstance)
+		{
+			CustomLobbyWidgetInstance->SetVisibility(ESlateVisibility::Visible);
+		      
+			// 로비에 맞는 입력 모드로 복귀
+			FInputModeUIOnly InputModeData;
+			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			SetInputMode(InputModeData);
+			SetShowMouseCursor(true);
+		}
 	}
 }
 

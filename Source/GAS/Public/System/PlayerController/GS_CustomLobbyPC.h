@@ -57,8 +57,8 @@ protected:
 
 	AGS_PlayerState* GetCachedPlayerState();
 
-	UPROPERTY(VisibleAnywhere, Category = "Actors")
-	TObjectPtr<ADirectionalLight> LobbyDirectionalLight;
+	// UPROPERTY(VisibleAnywhere, Category = "Actors")
+	// TObjectPtr<ADirectionalLight> LobbyDirectionalLight;
 
 	FOnCreateSessionCompleteDelegate OnCreatePresenceSessionCompleteDelegate;
 	FDelegateHandle OnCreatePresenceSessionCompleteDelegateHandle;
@@ -141,7 +141,6 @@ protected:
 
 	// 서버가 클라이언트에게 모드 변경이 완료되었음을 알리는 RPC를 오버라이드
 	virtual void Client_OnEnteredEditorMode_Implementation() override;
-	virtual void Client_OnExitedEditorMode_Implementation() override;
 
 	// 던전 정보 넘기기
 public:
