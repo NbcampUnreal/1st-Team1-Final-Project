@@ -33,6 +33,9 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	// 구조물 충돌 확인 변수 초기화
 	bInStructureCrash = false;
 	
+	// 무적 설정
+	OwnerCharacter->SetInvincible(true);
+
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		// 궁극기 사운드 재생 (멀티캐스트)
@@ -65,6 +68,10 @@ void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 	Super::OnSkillAnimationEnd();
 
 	UE_LOG(LogTemp, Error, TEXT("OnSkillAnimationEnd ChanUltimateSkill"));
+	
+	// 무적 해제
+	OwnerCharacter->SetInvincible(false);
+
 	if(AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
