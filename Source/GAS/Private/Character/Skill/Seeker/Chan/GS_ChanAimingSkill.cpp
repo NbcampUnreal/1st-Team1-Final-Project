@@ -128,6 +128,8 @@ void UGS_ChanAimingSkill::OnSkillAnimationEnd()
 			// 스킬 종료 VFX 재생
 			OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
 		}
+
+		OwnerPlayer->SetCanHitReact(true);
 	}
 }
 
