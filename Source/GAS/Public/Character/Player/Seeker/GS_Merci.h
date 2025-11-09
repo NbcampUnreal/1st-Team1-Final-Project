@@ -179,12 +179,6 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayDrawMontage(UAnimMontage* Montage);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayBowDrawSound();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayBowReleaseSound();
-
 	UFUNCTION(Client, Reliable)
 	void Client_SetWidgetVisibility(bool bVisible);	
 

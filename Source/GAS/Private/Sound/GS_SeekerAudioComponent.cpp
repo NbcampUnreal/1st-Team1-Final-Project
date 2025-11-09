@@ -222,27 +222,41 @@ void UGS_SeekerAudioComponent::PlayBowDrawSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayBowDrawSound_Implementation()
 {
-    // 리슨 서버 중복 재생 방지
-    if (ShouldSkipListenServerRPC())
+    // 오디오 시스템 검증 (데디케이티드 서버 체크)
+    if (!IsAudioSystemValid())
     {
         return;
     }
 
-    // 통합 체크 및 Distance Scaling 설정
-    if (!PrepareMulticastSound(OwnerSeeker, false))
+    // 리슨 서버 체크
+    UWorld* World = GetWorld();
+    const bool bIsListenServer = (World && World->GetNetMode() == NM_ListenServer);
+
+    // 리슨 서버가 아닌 경우에만 거리/시야각 체크
+    if (!bIsListenServer)
     {
-        return;
+        // 통합 체크 및 Distance Scaling 설정
+        if (!PrepareMulticastSound(OwnerSeeker, false))
+        {
+            return;
+        }
+    }
+    else
+    {
+        // 리슨 서버는 로컬 플레이어이므로 거리 체크 스킵, Distance Scaling만 설정
+        SetDistanceScaling(IsRTSMode());
     }
 
     // 모드별 사운드 선택
     const bool bRTS = IsRTSMode();
     UAkAudioEvent* SoundToPlay = SelectSoundEventByMode(BowDrawSound, RTSMerciBowDrawSound, bRTS);
+
     if (!SoundToPlay || !IsValid(OwnerSeeker))
     {
         return;
     }
 
-    // 사운드 재생 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
+    // 사운드 재생
     AkPlayingID BowPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
     RegisterPlayingID(BowPlayingID);
 }
@@ -266,27 +280,41 @@ void UGS_SeekerAudioComponent::PlayBowReleaseSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayBowReleaseSound_Implementation()
 {
-    // 리슨 서버 중복 재생 방지
-    if (ShouldSkipListenServerRPC())
+    // 오디오 시스템 검증 (데디케이티드 서버 체크)
+    if (!IsAudioSystemValid())
     {
         return;
     }
 
-    // 통합 체크 및 Distance Scaling 설정
-    if (!PrepareMulticastSound(OwnerSeeker, false))
+    // 리슨 서버 체크
+    UWorld* World = GetWorld();
+    const bool bIsListenServer = (World && World->GetNetMode() == NM_ListenServer);
+
+    // 리슨 서버가 아닌 경우에만 거리/시야각 체크
+    if (!bIsListenServer)
     {
-        return;
+        // 통합 체크 및 Distance Scaling 설정
+        if (!PrepareMulticastSound(OwnerSeeker, false))
+        {
+            return;
+        }
+    }
+    else
+    {
+        // 리슨 서버는 로컬 플레이어이므로 거리 체크 스킵, Distance Scaling만 설정
+        SetDistanceScaling(IsRTSMode());
     }
 
     // 모드별 사운드 선택
     const bool bRTS = IsRTSMode();
     UAkAudioEvent* SoundToPlay = SelectSoundEventByMode(BowReleaseSound, RTSMerciBowReleaseSound, bRTS);
+
     if (!SoundToPlay || !IsValid(OwnerSeeker))
     {
         return;
     }
 
-    // 사운드 재생 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
+    // 사운드 재생
     AkPlayingID ReleasePlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
     RegisterPlayingID(ReleasePlayingID);
 }

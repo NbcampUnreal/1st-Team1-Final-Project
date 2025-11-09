@@ -146,7 +146,10 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		Multicast_SetMustTurnInPlace(true);
 
 		// 활 당기는 사운드 재생
-		Multicast_PlayBowDrawSound();
+		if (SeekerAudioComponent)
+		{
+			SeekerAudioComponent->PlayBowDrawSound();
+		}
 	}
 
 	// 걷기 상태 설정
@@ -183,8 +186,11 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	// 조준 완료 시(활을 끝까지 당겼을 때)
 	if (GetAimState())
 	{
-		// 활 놓는 사운드 재생 (모든 클라이언트)
-		Multicast_PlayBowReleaseSound();
+		// 활 놓는 사운드 재생 (서버에서 직접 오디오 컴포넌트의 RPC 호출)
+		if (SeekerAudioComponent)
+		{
+			SeekerAudioComponent->PlayBowReleaseSound();
+		}
 
 		// 화살 발사
 		Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
@@ -258,22 +264,6 @@ void AGS_Merci::Multicast_StopDrawMontage_Implementation()
 void AGS_Merci::Multicast_PlayDrawMontage_Implementation(UAnimMontage* Montage)
 {
 	PlayDrawMontage(Montage);
-}
-
-void AGS_Merci::Multicast_PlayBowDrawSound_Implementation()
-{
-	if (SeekerAudioComponent && GetWorld() && GetWorld()->GetNetMode() != NM_DedicatedServer)
-	{
-		SeekerAudioComponent->PlayBowDrawSound();
-	}
-}
-
-void AGS_Merci::Multicast_PlayBowReleaseSound_Implementation()
-{
-	if (SeekerAudioComponent && GetWorld() && GetWorld()->GetNetMode() != NM_DedicatedServer)
-	{
-		SeekerAudioComponent->PlayBowReleaseSound();
-	}
 }
 
 void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
