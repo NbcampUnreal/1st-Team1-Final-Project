@@ -836,6 +836,109 @@ void UGS_AudioManager::Multicast_EndBossSequence_Implementation(AActor* Context,
 	}
 }
 
+// === 로컬 전용 보스 시퀀스 (멀티캐스트 없음) ===
+
+void UGS_AudioManager::StartBossSequenceLocal(AActor* Context, UAkAudioEvent* InBossMusicStartEvent, UAkAudioEvent* InBossMusicStopEvent)
+{
+	// 기본 이벤트 사용 (파라미터가 nullptr이면)
+	UAkAudioEvent* BossStartEvent = InBossMusicStartEvent ? InBossMusicStartEvent : DefaultBossMusicStartEvent;
+	UAkAudioEvent* BossStopEvent = InBossMusicStopEvent ? InBossMusicStopEvent : DefaultBossMusicStopEvent;
+
+	if (!Context || !BossStartEvent)
+	{
+		return;
+	}
+
+	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
+	if (!IsAudioProcessingAllowed())
+	{
+		// 서버에서는 전투 음악 상태만 저장
+		CurrentBossMusicStartEvent = BossStartEvent;
+		CurrentBossMusicStopEvent = BossStopEvent;
+		bIsBossMusicPlaying = true;
+		return;
+	}
+
+	// 중복 재생 방지: 이미 같은 보스룸 BGM이 재생 중이면 중단
+	if (bIsBossMusicPlaying && CurrentBossMusicStartEvent == BossStartEvent)
+	{
+		return;
+	}
+
+	// 1. 기존 전투/보스룸 음악 정지
+	if (bIsCombatMusicPlaying)
+	{
+		StopCurrentCombatMusic(Context);
+		bIsCombatMusicPlaying = false;
+		CurrentCombatMusicStartEvent = nullptr;
+		CurrentCombatMusicStopEvent = nullptr;
+	}
+	if (bIsBossMusicPlaying)
+	{
+		StopCurrentBossMusic(Context);
+	}
+
+	// 2. 보스룸 음악 상태 저장
+	CurrentBossMusicStartEvent = BossStartEvent;
+	CurrentBossMusicStopEvent = BossStopEvent;
+
+	// 3. 맵 BGM 즉시 정지
+	AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+	if (bIsMapBGMPlaying)
+	{
+		StopMapBGM(TargetActor);
+	}
+
+	// 4. 보스룸 BGM 즉시 시작
+	UAkComponent* BGMComponent = GetOrCreateBGMAkComponent();
+	if (BGMComponent && CurrentBossMusicStartEvent)
+	{
+		int32 PlayingID = BGMComponent->PostAkEvent(CurrentBossMusicStartEvent, 0, FOnAkPostEventCallback());
+		if (PlayingID != AK_INVALID_PLAYING_ID)
+		{
+			bIsBossMusicPlaying = true;
+		}
+	}
+
+	// 5. 전투 BGM에 현재 볼륨 적용
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, 0.0f);
+	}
+}
+
+void UGS_AudioManager::EndBossSequenceLocal(AActor* Context, float FadeTime)
+{
+	if (!IsAudioProcessingAllowed())
+	{
+		CurrentBossMusicStartEvent = nullptr;
+		CurrentBossMusicStopEvent = nullptr;
+		bIsBossMusicPlaying = false;
+		return;
+	}
+
+	// 1. 보스룸 BGM 정지
+	AActor* TargetActor = GetTargetActorForPlayback(Context);
+	StopCurrentBossMusic(TargetActor);
+
+	// 2. 보스룸 음악 상태 초기화
+	CurrentBossMusicStartEvent = nullptr;
+	CurrentBossMusicStopEvent = nullptr;
+	bIsBossMusicPlaying = false;
+
+	// 3. MapBGMVolume RTPC를 현재 볼륨으로 설정 (맵 BGM이 들리도록)
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, FadeTime * 1000.0f);
+	}
+
+	// 4. 맵 BGM 복원
+	if (!bIsMapBGMPlaying)
+	{
+		StartMapBGM(TargetActor);
+	}
+}
+
 // === 멀티플레이어 지원 함수들 ===
 
 void UGS_AudioManager::StartMapBGMForAllClients()

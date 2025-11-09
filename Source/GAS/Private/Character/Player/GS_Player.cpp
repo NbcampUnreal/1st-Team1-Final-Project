@@ -137,18 +137,14 @@ void AGS_Player::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
-
-	if (PS && StatComp)
+	if (AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>())
 	{
-		StatComp->SetCurrentHealth(PS->CurrentHealth, true);
 		PS->OnPawnStatInitialized();
 		UE_LOG(LogTemp, Warning, TEXT("AGS_Player::PossessedBy: Synced StatComp health from PlayerState. PS Health: %f, StatComp Health set to: %f"), PS->CurrentHealth, StatComp->GetCurrentHealth());
 	}
 	else
 	{
-		if (!PS) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: PlayerState is NULL!"), *GetName());
-		if (!StatComp) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: StatComp is NULL!"), *GetName());
+		UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: PlayerState is NULL!"), *GetName());
 	}
 }
 
@@ -421,8 +417,6 @@ void AGS_Player::SetupCameraAudioListener()
 
 	// 카메라 위치 리스너를 기본 리스너로 설정 (TPS 표준)
 	CachedAudioDevice->AddDefaultListener(CameraAudioListenerComponent);
-
-	UE_LOG(LogTemp, Log, TEXT("[AGS_Player] Camera audio listener set as default listener for local player: %s"), *GetName());
 }
 
 // 로컬 플레이어 확인 함수

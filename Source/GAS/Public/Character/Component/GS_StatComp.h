@@ -67,7 +67,7 @@ public:
 	void MulticastRPCPlayTakeDamageMontage();
 
 	UFUNCTION()
-	void OnRep_CurrentHealth();
+	void OnRep_CurrentHealth(float OldHealth);
 
 	// heal system
 	UFUNCTION(Server, Reliable, BlueprintCallable)
@@ -97,4 +97,7 @@ private:
 	//Enum 통일 전 임시
 	UFUNCTION()
 	ECharacterClass MapCharacterTypeToCharacterClass(ECharacterType CharacterType);
+
+	// Health 변화 처리 헬퍼 함수 (RepNotify + Server 공통)
+	void HandleHealthDamage(float OldHealth, float NewHealth);
 };

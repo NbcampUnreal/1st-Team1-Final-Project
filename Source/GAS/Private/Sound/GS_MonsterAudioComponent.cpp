@@ -269,6 +269,58 @@ void UGS_MonsterAudioComponent::PlayDeathSound()
     PlaySound(EMonsterAudioState::Death, true);
 }
 
+// 로컬 전용 Hurt 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+void UGS_MonsterAudioComponent::PlayHurtSoundLocal()
+{
+    if (!OwnerMonster)
+    {
+        return;
+    }
+
+    // 통합 체크 및 Distance Scaling 설정 (피격 사운드는 ViewFrustum 체크 제외)
+    if (!PrepareMulticastSound(OwnerMonster, true))
+    {
+        return;
+    }
+
+    // Hurt 사운드 가져오기
+    UAkAudioEvent* SoundEvent = GetSoundEvent(EMonsterAudioState::Hurt);
+    if (!SoundEvent)
+    {
+        return;
+    }
+
+    // 사운드 재생
+    AkPlayingID NewPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerMonster, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(NewPlayingID);
+}
+
+// 로컬 전용 Death 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+void UGS_MonsterAudioComponent::PlayDeathSoundLocal()
+{
+    if (!OwnerMonster)
+    {
+        return;
+    }
+
+    // 죽음 사운드는 ViewFrustum 체크 제외
+    if (!PrepareMulticastSound(OwnerMonster, true))
+    {
+        return;
+    }
+
+    // Death 사운드 가져오기
+    UAkAudioEvent* SoundEvent = GetSoundEvent(EMonsterAudioState::Death);
+    if (!SoundEvent)
+    {
+        return;
+    }
+
+    // 사운드 재생
+    AkPlayingID NewPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerMonster, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(NewPlayingID);
+}
+
 void UGS_MonsterAudioComponent::PlaySwingSound()
 {
     // 컴포넌트 유효성 검증

@@ -24,13 +24,15 @@
 UGS_SeekerAudioComponent::UGS_SeekerAudioComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
-    
+
     CurrentAudioState = ESeekerAudioState::Idle;
     PreviousAudioState = ESeekerAudioState::Idle;
-    
+
     AudioConfig.MaxAudioDistance = 2000.0f;
-    
+
     SkillEventID = AK_INVALID_PLAYING_ID;
+
+    bIsComponentShuttingDown = false;
 }
 
 void UGS_SeekerAudioComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -67,6 +69,9 @@ void UGS_SeekerAudioComponent::BeginPlay()
 
 void UGS_SeekerAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    // 가장 먼저 셧다운 플래그 설정 (RPC 크래시 방지)
+    bIsComponentShuttingDown = true;
+
     StopSoundTimer();
 
     if (AttackSoundResetTimerHandle.IsValid())
@@ -198,44 +203,6 @@ void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudi
     RegisterPlayingID(NewPlayingID);
 }
 
-void UGS_SeekerAudioComponent::PlayHurtSound()
-{
-    if (!ValidateServerRPCCall())
-    {
-        return;
-    }
-
-    LastMulticastTime = GetWorld()->GetTimeSeconds();
-    Multicast_PlayHurtSound();
-}
-
-void UGS_SeekerAudioComponent::PlayDeathSound()
-{
-    // 컴포넌트 유효성 검증
-    if (!IsValid(this))
-    {
-        return;
-    }
-
-    // 월드 컨텍스트 유효성 검증
-    UWorld* World = GetWorld();
-    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-    {
-        return;
-    }
-
-    // 오너 유효성 검증
-    AActor* Owner = GetOwner();
-    if (!IsValid(Owner) || !Owner->HasAuthority())
-    {
-        return;
-    }
-
-    // 죽음 소리는 중요하므로 RPC 빈도 체크 우회 (항상 재생)
-    LastMulticastTime = World->GetTimeSeconds();
-    Multicast_PlayDeathSound();
-}
-
 void UGS_SeekerAudioComponent::PlayBowDrawSound()
 {
     // 메르시만 활 사운드 재생 가능
@@ -255,27 +222,41 @@ void UGS_SeekerAudioComponent::PlayBowDrawSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayBowDrawSound_Implementation()
 {
-    // 리슨 서버 중복 재생 방지
-    if (ShouldSkipListenServerRPC())
+    // 오디오 시스템 검증 (데디케이티드 서버 체크)
+    if (!IsAudioSystemValid())
     {
         return;
     }
 
-    // 통합 체크 및 Distance Scaling 설정
-    if (!PrepareMulticastSound(OwnerSeeker, false))
+    // 리슨 서버 체크
+    UWorld* World = GetWorld();
+    const bool bIsListenServer = (World && World->GetNetMode() == NM_ListenServer);
+
+    // 리슨 서버가 아닌 경우에만 거리/시야각 체크
+    if (!bIsListenServer)
     {
-        return;
+        // 통합 체크 및 Distance Scaling 설정
+        if (!PrepareMulticastSound(OwnerSeeker, false))
+        {
+            return;
+        }
+    }
+    else
+    {
+        // 리슨 서버는 로컬 플레이어이므로 거리 체크 스킵, Distance Scaling만 설정
+        SetDistanceScaling(IsRTSMode());
     }
 
     // 모드별 사운드 선택
     const bool bRTS = IsRTSMode();
     UAkAudioEvent* SoundToPlay = SelectSoundEventByMode(BowDrawSound, RTSMerciBowDrawSound, bRTS);
+
     if (!SoundToPlay || !IsValid(OwnerSeeker))
     {
         return;
     }
 
-    // 사운드 재생 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
+    // 사운드 재생
     AkPlayingID BowPlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
     RegisterPlayingID(BowPlayingID);
 }
@@ -299,27 +280,41 @@ void UGS_SeekerAudioComponent::PlayBowReleaseSound()
 
 void UGS_SeekerAudioComponent::Multicast_PlayBowReleaseSound_Implementation()
 {
-    // 리슨 서버 중복 재생 방지
-    if (ShouldSkipListenServerRPC())
+    // 오디오 시스템 검증 (데디케이티드 서버 체크)
+    if (!IsAudioSystemValid())
     {
         return;
     }
 
-    // 통합 체크 및 Distance Scaling 설정
-    if (!PrepareMulticastSound(OwnerSeeker, false))
+    // 리슨 서버 체크
+    UWorld* World = GetWorld();
+    const bool bIsListenServer = (World && World->GetNetMode() == NM_ListenServer);
+
+    // 리슨 서버가 아닌 경우에만 거리/시야각 체크
+    if (!bIsListenServer)
     {
-        return;
+        // 통합 체크 및 Distance Scaling 설정
+        if (!PrepareMulticastSound(OwnerSeeker, false))
+        {
+            return;
+        }
+    }
+    else
+    {
+        // 리슨 서버는 로컬 플레이어이므로 거리 체크 스킵, Distance Scaling만 설정
+        SetDistanceScaling(IsRTSMode());
     }
 
     // 모드별 사운드 선택
     const bool bRTS = IsRTSMode();
     UAkAudioEvent* SoundToPlay = SelectSoundEventByMode(BowReleaseSound, RTSMerciBowReleaseSound, bRTS);
+
     if (!SoundToPlay || !IsValid(OwnerSeeker))
     {
         return;
     }
 
-    // 사운드 재생 (IsAudioSystemValid에서 이미 Wwise 초기화 체크 완료)
+    // 사운드 재생
     AkPlayingID ReleasePlayingID = UAkGameplayStatics::PostEvent(SoundToPlay, OwnerSeeker, 0, FOnAkPostEventCallback());
     RegisterPlayingID(ReleasePlayingID);
 }
@@ -659,20 +654,40 @@ void UGS_SeekerAudioComponent::PlaySkillCollisionSoundFromDataTable(ESkillSlot S
 
 void UGS_SeekerAudioComponent::RequestSkillAudio(ESkillSlot SkillSlot, int32 AudioEventType, FVector Location)
 {
-    // 객체 및 월드 유효성 검증 (RPC 호출 전 필수)
+    // 셧다운 중이면 RPC 호출 금지 (레벨 전환/액터 파괴 시 크래시 방지)
+    if (bIsComponentShuttingDown)
+    {
+        return;
+    }
+
+    // 컴포넌트 유효성 검증 (RPC 호출 전 필수)
     if (!IsValid(this))
     {
         return;
     }
 
+    // 월드 컨텍스트 유효성 검증
     UWorld* World = GetWorld();
     if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
     {
         return;
     }
 
+    // 오너 액터 유효성 검증
     AActor* Owner = GetOwner();
     if (!IsValid(Owner))
+    {
+        return;
+    }
+
+    // 액터 파괴 상태 확인 (가비지 컬렉션 대상 객체에서 RPC 호출 방지)
+    if (Owner->IsActorBeingDestroyed())
+    {
+        return;
+    }
+
+    // 네트워크 복제가 비활성화된 경우 RPC 호출 금지
+    if (!Owner->GetIsReplicated())
     {
         return;
     }
@@ -690,6 +705,12 @@ void UGS_SeekerAudioComponent::RequestSkillAudio(ESkillSlot SkillSlot, int32 Aud
 
 void UGS_SeekerAudioComponent::Multicast_RequestSkillAudio_Implementation(ESkillSlot SkillSlot, int32 AudioEventType, FVector Location)
 {
+    // 셧다운 중이면 RPC 처리 거부 (레벨 전환/액터 파괴 시 크래시 방지)
+    if (bIsComponentShuttingDown)
+    {
+        return;
+    }
+
     // 컴포넌트 유효성 검증 (RPC 수신 시 가장 먼저 체크)
     if (!IsValid(this))
     {
@@ -703,9 +724,15 @@ void UGS_SeekerAudioComponent::Multicast_RequestSkillAudio_Implementation(ESkill
         return;
     }
 
-    // 오너 액터 유효성 검증
+    // 오너 액터 유효성 검증 및 파괴 상태 확인
     AActor* Owner = GetOwner();
     if (!IsValid(Owner))
+    {
+        return;
+    }
+
+    // 액터 파괴 중이거나 가비지 컬렉션 대상인 경우 RPC 처리 중단
+    if (Owner->IsActorBeingDestroyed() || Owner->IsUnreachable())
     {
         return;
     }
@@ -1300,14 +1327,9 @@ void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamImpactSound_Implementatio
     }
 }
 
-void UGS_SeekerAudioComponent::Multicast_PlayHurtSound_Implementation()
+// 로컬 전용 Hurt 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+void UGS_SeekerAudioComponent::PlayHurtSoundLocal()
 {
-    // 리슨 서버 중복 재생 방지
-    if (ShouldSkipListenServerRPC())
-    {
-        return;
-    }
-
     // 통합 체크 및 Distance Scaling 설정 (피격 사운드는 ViewFrustum 체크 제외, bSkipViewFrustumCheck = true)
     if (!PrepareMulticastSound(OwnerSeeker, true))
     {
@@ -1342,14 +1364,9 @@ void UGS_SeekerAudioComponent::Multicast_PlayHurtSound_Implementation()
     }
 }
 
-void UGS_SeekerAudioComponent::Multicast_PlayDeathSound_Implementation()
+// 로컬 전용 Death 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+void UGS_SeekerAudioComponent::PlayDeathSoundLocal()
 {
-    // 리슨 서버 중복 재생 방지
-    if (ShouldSkipListenServerRPC())
-    {
-        return;
-    }
-
     // 통합 체크 및 Distance Scaling 설정 (죽음 사운드는 ViewFrustum 체크 제외, bSkipViewFrustumCheck = true)
     if (!PrepareMulticastSound(OwnerSeeker, true))
     {

@@ -20,6 +20,12 @@
 // #include "Components/CapsuleComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
 #include "Character/F_GS_DamageEvent.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/Player/Monster/GS_Monster.h"
+#include "Sound/GS_SeekerAudioComponent.h"
+#include "Sound/GS_MonsterAudioComponent.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Character/Component/GS_DrakharAudioComponent.h"
 
 AGS_Character::AGS_Character()
 {
@@ -253,8 +259,35 @@ void AGS_Character::OnDeath()
 
 	OnDeathDelegate.Broadcast();
 
-	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
-	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
+	// 서버/리슨 서버에서 로컬 Death 사운드 재생 (RPC 제거)
+	// 클라이언트는 OnRep_IsDead()에서 재생됨
+	if (HasAuthority())
+	{
+		// Seeker Death 사운드 (로컬 재생)
+		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(this))
+		{
+			if (Seeker->SeekerAudioComponent)
+			{
+				Seeker->SeekerAudioComponent->PlayDeathSoundLocal();
+			}
+		}
+		// Monster Death 사운드 (로컬 재생)
+		else if (AGS_Monster* Monster = Cast<AGS_Monster>(this))
+		{
+			if (Monster->MonsterAudioComponent)
+			{
+				Monster->MonsterAudioComponent->PlayDeathSoundLocal();
+			}
+		}
+		// Drakhar Death 사운드 (로컬 재생)
+		else if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this))
+		{
+			if (Drakhar->GetAudioComponent())
+			{
+				Drakhar->GetAudioComponent()->PlayDeathSoundLocal();
+			}
+		}
+	}
 
 	// 모든 디버프 제거 (VFX 포함)
 	if (DebuffComp)
@@ -485,6 +518,40 @@ void AGS_Character::DestroyAllWeapons()
 void AGS_Character::OnRep_CharacterSpeed()
 {
 	GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
+}
+
+void AGS_Character::OnRep_IsDead()
+{
+	// 클라이언트에서 Death 사운드 재생 (RPC 없음!)
+	if (!bIsDead)
+	{
+		return;  // 죽지 않은 상태면 무시
+	}
+
+	// Seeker Death 사운드 (로컬 재생)
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(this))
+	{
+		if (Seeker->SeekerAudioComponent)
+		{
+			Seeker->SeekerAudioComponent->PlayDeathSoundLocal();
+		}
+	}
+	// Monster Death 사운드 (로컬 재생)
+	else if (AGS_Monster* Monster = Cast<AGS_Monster>(this))
+	{
+		if (Monster->MonsterAudioComponent)
+		{
+			Monster->MonsterAudioComponent->PlayDeathSoundLocal();
+		}
+	}
+	// Drakhar Death 사운드 (로컬 재생)
+	else if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this))
+	{
+		if (Drakhar->GetAudioComponent())
+		{
+			Drakhar->GetAudioComponent()->PlayDeathSoundLocal();
+		}
+	}
 }
 
 

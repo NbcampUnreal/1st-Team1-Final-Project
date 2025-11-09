@@ -85,6 +85,13 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_EndBossSequence(AActor* Context, float FadeTime = 3.0f);
 
+	// === 로컬 전용 보스 시퀀스 (멀티캐스트 없음) ===
+	UFUNCTION(BlueprintCallable, Category = "Audio|Boss", meta = (DisplayName = "보스 시퀀스 시작 (로컬)"))
+	void StartBossSequenceLocal(AActor* Context, UAkAudioEvent* InBossMusicStartEvent, UAkAudioEvent* InBossMusicStopEvent);
+
+	UFUNCTION(BlueprintCallable, Category = "Audio|Boss", meta = (DisplayName = "보스 시퀀스 종료 (로컬)"))
+	void EndBossSequenceLocal(AActor* Context, float FadeTime = 3.0f);
+
 	// === 멀티플레이어 지원 함수들 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio|Multiplayer", meta = (DisplayName = "모든 클라이언트 맵 BGM 시작"))
 	void StartMapBGMForAllClients();

@@ -144,8 +144,8 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		SetDrawState(true);
 		SetAimState(false);
 		Multicast_SetMustTurnInPlace(true);
-		
-		// 활 당기는 사운드 재생 (SeekerAudioComponent에서 처리)
+
+		// 활 당기는 사운드 재생
 		if (SeekerAudioComponent)
 		{
 			SeekerAudioComponent->PlayBowDrawSound();
@@ -186,7 +186,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	// 조준 완료 시(활을 끝까지 당겼을 때)
 	if (GetAimState())
 	{
-		// 활 놓는 사운드 재생 (SeekerAudioComponent에서 처리)
+		// 활 놓는 사운드 재생 (서버에서 직접 오디오 컴포넌트의 RPC 호출)
 		if (SeekerAudioComponent)
 		{
 			SeekerAudioComponent->PlayBowReleaseSound();
@@ -635,18 +635,6 @@ float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	{
 		// 죽었는지 확인 (체력이 0 이하인지)
 		float CurrentHealth = GetStatComp() ? GetStatComp()->GetCurrentHealth() : -1.0f;
-		
-		if (GetStatComp() && GetStatComp()->GetCurrentHealth() <= 0.0f)
-		{
-			// Death Sound는 OnDeath()에서 재생되므로 여기서는 재생하지 않음
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Merci::TakeDamage - Character died, Death sound will be played in OnDeath()"));
-		}
-		else
-		{
-			// 살아있으면 Hurt Sound 재생
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Merci::TakeDamage - Character hurt, calling PlayHurtSound()"));
-			SeekerAudioComponent->PlayHurtSound();
-		}
 	}
 	
 	return ActualDamage;

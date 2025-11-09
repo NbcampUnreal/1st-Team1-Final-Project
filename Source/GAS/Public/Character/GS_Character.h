@@ -236,15 +236,18 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_CharacterSpeed)
 	float CharacterSpeed;
 	float DefaultCharacterSpeed;
-	
-	UPROPERTY(Replicated)
+
+	UPROPERTY(ReplicatedUsing = OnRep_IsDead)
 	bool bIsDead;
 
 	UPROPERTY()
 	UMaterialInstanceDynamic* DynamicDecalMaterial;
-	
+
 	UFUNCTION()
 	void OnRep_CharacterSpeed();
+
+	UFUNCTION()
+	void OnRep_IsDead();
 
 	void SpawnAndAttachWeapons();
 	

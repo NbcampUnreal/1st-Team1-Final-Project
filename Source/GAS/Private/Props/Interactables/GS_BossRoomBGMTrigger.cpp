@@ -103,7 +103,8 @@ void AGS_BossRoomBGMTrigger::TriggerBossRoomBGMForLocalPlayer(AActor* TargetActo
 	{
 		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
 		{
-			AudioManager->Multicast_StartBossSequence(TargetActor, StartEvent, StopEvent);
+			// 로컬 전용 함수 사용 (멀티캐스트 불필요)
+			AudioManager->StartBossSequenceLocal(TargetActor, StartEvent, StopEvent);
 		}
 	}
 }
@@ -114,7 +115,8 @@ void AGS_BossRoomBGMTrigger::EndBossRoomBGMForLocalPlayer(AActor* TargetActor)
 	{
 		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
 		{
-			AudioManager->Multicast_EndBossSequence(TargetActor, 2.0f);
+			// 로컬 전용 함수 사용 (멀티캐스트 불필요)
+			AudioManager->EndBossSequenceLocal(TargetActor, 2.0f);
 		}
 	}
 }
