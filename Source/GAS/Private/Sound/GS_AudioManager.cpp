@@ -73,13 +73,13 @@ UGS_AudioManager::UGS_AudioManager()
 	}
 
 	// 기본 보스룸 BGM 이벤트 로드
-	static ConstructorHelpers::FObjectFinder<UAkAudioEvent> BossStartEventFinder(TEXT("/Game/WwiseAudio/Events/Default_Work_Unit/StateSound/EV_Boss_Play.EV_Boss_Play"));
+	static ConstructorHelpers::FObjectFinder<UAkAudioEvent> BossStartEventFinder(TEXT("/Game/WwiseAudio/Events/Default_Work_Unit/StateSound/EV_BossRoom_Play.EV_BossRoom_Play"));
 	if (BossStartEventFinder.Succeeded())
 	{
 		DefaultBossMusicStartEvent = BossStartEventFinder.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UAkAudioEvent> BossStopEventFinder(TEXT("/Game/WwiseAudio/Events/Default_Work_Unit/StateSound/EV_Boss_Stop.EV_Boss_Stop"));
+	static ConstructorHelpers::FObjectFinder<UAkAudioEvent> BossStopEventFinder(TEXT("/Game/WwiseAudio/Events/Default_Work_Unit/StateSound/EV_BossRoom_Stop.EV_BossRoom_Stop"));
 	if (BossStopEventFinder.Succeeded())
 	{
 		DefaultBossMusicStopEvent = BossStopEventFinder.Object;

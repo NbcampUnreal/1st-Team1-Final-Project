@@ -144,12 +144,9 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		SetDrawState(true);
 		SetAimState(false);
 		Multicast_SetMustTurnInPlace(true);
-		
-		// 활 당기는 사운드 재생 (SeekerAudioComponent에서 처리)
-		if (SeekerAudioComponent)
-		{
-			SeekerAudioComponent->PlayBowDrawSound();
-		}
+
+		// 활 당기는 사운드 재생
+		Multicast_PlayBowDrawSound();
 	}
 
 	// 걷기 상태 설정
@@ -186,11 +183,8 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	// 조준 완료 시(활을 끝까지 당겼을 때)
 	if (GetAimState())
 	{
-		// 활 놓는 사운드 재생 (SeekerAudioComponent에서 처리)
-		if (SeekerAudioComponent)
-		{
-			SeekerAudioComponent->PlayBowReleaseSound();
-		}
+		// 활 놓는 사운드 재생 (모든 클라이언트)
+		Multicast_PlayBowReleaseSound();
 
 		// 화살 발사
 		Server_FireArrow(ArrowClass, SpreadAngleDeg, NumArrows);
@@ -264,6 +258,22 @@ void AGS_Merci::Multicast_StopDrawMontage_Implementation()
 void AGS_Merci::Multicast_PlayDrawMontage_Implementation(UAnimMontage* Montage)
 {
 	PlayDrawMontage(Montage);
+}
+
+void AGS_Merci::Multicast_PlayBowDrawSound_Implementation()
+{
+	if (SeekerAudioComponent && GetWorld() && GetWorld()->GetNetMode() != NM_DedicatedServer)
+	{
+		SeekerAudioComponent->PlayBowDrawSound();
+	}
+}
+
+void AGS_Merci::Multicast_PlayBowReleaseSound_Implementation()
+{
+	if (SeekerAudioComponent && GetWorld() && GetWorld()->GetNetMode() != NM_DedicatedServer)
+	{
+		SeekerAudioComponent->PlayBowReleaseSound();
+	}
 }
 
 void AGS_Merci::Server_FireArrow_Implementation(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float SpreadAngleDeg, int32 NumArrows)
@@ -635,18 +645,6 @@ float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	{
 		// 죽었는지 확인 (체력이 0 이하인지)
 		float CurrentHealth = GetStatComp() ? GetStatComp()->GetCurrentHealth() : -1.0f;
-		
-		if (GetStatComp() && GetStatComp()->GetCurrentHealth() <= 0.0f)
-		{
-			// Death Sound는 OnDeath()에서 재생되므로 여기서는 재생하지 않음
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Merci::TakeDamage - Character died, Death sound will be played in OnDeath()"));
-		}
-		else
-		{
-			// 살아있으면 Hurt Sound 재생
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Merci::TakeDamage - Character hurt, calling PlayHurtSound()"));
-			SeekerAudioComponent->PlayHurtSound();
-		}
 	}
 	
 	return ActualDamage;

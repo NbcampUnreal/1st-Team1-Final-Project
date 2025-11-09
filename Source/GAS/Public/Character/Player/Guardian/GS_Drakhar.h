@@ -120,12 +120,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_BeginDraconicFury();
 
-	// === DraconicFury 투사체 충돌 처리 ===
+	// === DraconicFury 투사체 충돌 처리 (로컬 재생 - RPC 제거) ===
 	UFUNCTION(BlueprintCallable, Category = "DraconicFury")
 	void HandleDraconicProjectileImpact(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter);
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void MulticastPlayDraconicProjectileImpactEffects(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter);
 
 	//[Fly Skill]
 	UFUNCTION(Server, Reliable)
@@ -320,7 +317,9 @@ public:
 	UAkAudioEvent* FeverModeStateSoundEvent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Impact")
 	UAkAudioEvent* HurtSoundEvent;
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Impact")
+	UAkAudioEvent* DeathSoundEvent;
+
 	FORCEINLINE UGS_DrakharVFXComponent* GetDrakharVFXComponent() const { return DrakharVFXComponent; }
 	FORCEINLINE UGS_DrakharAudioComponent* GetAudioComponent() const { return AudioComponent; }
 

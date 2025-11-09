@@ -757,14 +757,9 @@ void AGS_Seeker::UpdateCombatMusicState()
 
 void AGS_Seeker::OnDeath()
 {
-	// 시커 죽음 사운드 재생
-	if (SeekerAudioComponent)
-	{
-		SeekerAudioComponent->PlayDeathSound();
-	}
-	
+	// Death 사운드는 부모 클래스(GS_Character::OnDeath)에서 통합 처리됨
 	Super::OnDeath();
-	
+
 	ClientRPCStopCombatMusic();
 	NearbyMonsters.Empty();
 }

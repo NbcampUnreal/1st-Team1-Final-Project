@@ -203,44 +203,6 @@ void UGS_SeekerAudioComponent::Multicast_TriggerSound_Implementation(ESeekerAudi
     RegisterPlayingID(NewPlayingID);
 }
 
-void UGS_SeekerAudioComponent::PlayHurtSound()
-{
-    if (!ValidateServerRPCCall())
-    {
-        return;
-    }
-
-    LastMulticastTime = GetWorld()->GetTimeSeconds();
-    Multicast_PlayHurtSound();
-}
-
-void UGS_SeekerAudioComponent::PlayDeathSound()
-{
-    // 컴포넌트 유효성 검증
-    if (!IsValid(this))
-    {
-        return;
-    }
-
-    // 월드 컨텍스트 유효성 검증
-    UWorld* World = GetWorld();
-    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-    {
-        return;
-    }
-
-    // 오너 유효성 검증
-    AActor* Owner = GetOwner();
-    if (!IsValid(Owner) || !Owner->HasAuthority())
-    {
-        return;
-    }
-
-    // 죽음 소리는 중요하므로 RPC 빈도 체크 우회 (항상 재생)
-    LastMulticastTime = World->GetTimeSeconds();
-    Multicast_PlayDeathSound();
-}
-
 void UGS_SeekerAudioComponent::PlayBowDrawSound()
 {
     // 메르시만 활 사운드 재생 가능
@@ -1337,14 +1299,9 @@ void UGS_SeekerAudioComponent::Multicast_PlayShieldSlamImpactSound_Implementatio
     }
 }
 
-void UGS_SeekerAudioComponent::Multicast_PlayHurtSound_Implementation()
+// 로컬 전용 Hurt 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+void UGS_SeekerAudioComponent::PlayHurtSoundLocal()
 {
-    // 리슨 서버 중복 재생 방지
-    if (ShouldSkipListenServerRPC())
-    {
-        return;
-    }
-
     // 통합 체크 및 Distance Scaling 설정 (피격 사운드는 ViewFrustum 체크 제외, bSkipViewFrustumCheck = true)
     if (!PrepareMulticastSound(OwnerSeeker, true))
     {
@@ -1379,14 +1336,9 @@ void UGS_SeekerAudioComponent::Multicast_PlayHurtSound_Implementation()
     }
 }
 
-void UGS_SeekerAudioComponent::Multicast_PlayDeathSound_Implementation()
+// 로컬 전용 Death 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+void UGS_SeekerAudioComponent::PlayDeathSoundLocal()
 {
-    // 리슨 서버 중복 재생 방지
-    if (ShouldSkipListenServerRPC())
-    {
-        return;
-    }
-
     // 통합 체크 및 Distance Scaling 설정 (죽음 사운드는 ViewFrustum 체크 제외, bSkipViewFrustumCheck = true)
     if (!PrepareMulticastSound(OwnerSeeker, true))
     {
