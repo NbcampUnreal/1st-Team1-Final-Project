@@ -28,6 +28,7 @@ void UGS_DebuffStun::OnApply()
 			MaxSpeed = TargetCharacter->GetCharacterMovement()->MaxWalkSpeed;
 			TargetCharacter->GetCharacterMovement()->MaxWalkSpeed = 0.0f;
 			AGS_Monster* Monster = Cast<AGS_Monster>(TargetCharacter);
+			if (Monster)
 			{
 				Monster->ApplyStiffness();
 			}
@@ -62,6 +63,7 @@ void UGS_DebuffStun::OnExpire()
 		}
 
 		AGS_Monster* Monster = Cast<AGS_Monster>(TargetCharacter);
+		if (Monster)
 		{
 			Monster->EndStiffness();
 		}
