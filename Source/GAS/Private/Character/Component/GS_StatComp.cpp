@@ -134,6 +134,25 @@ void UGS_StatComp::UpdateStat_Implementation(const FGS_StatRow& RuneStats)
 	}
 }
 
+void UGS_StatComp::ApplyHealthFromPlayerState(float InHealth)
+{
+	if (!IsValid(GetOwner()) || !GetOwner()->HasAuthority())
+	{
+		return;
+	}
+
+	// PS에 저장된 값을 신뢰하되, 스탯 범위 안으로만 클램프
+	const float Clamped = FMath::Clamp(InHealth, 0.f, MaxHealth);
+	CurrentHealth = Clamped;
+
+	// UI / PlayerState 쪽과 동기화
+	OnCurrentHPChanged.Broadcast(this);
+
+	UE_LOG(LogTemp, Log,
+		TEXT("UGS_StatComp(%s)::ApplyHealthFromPlayerState - Synced HP to %f"),
+		*GetName(), CurrentHealth);
+}
+
 float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
 {
 	float Damage = 0.f;
