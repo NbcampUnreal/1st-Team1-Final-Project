@@ -720,6 +720,7 @@ void AGS_BuildManager::PressedDel()
 			if (DEPC->GetHitResultUnderCursor(ECC_GameTraceChannel6, bTraceComplex, HitResult))
 			{
 				AActor* DelActorUnderCursor = HitResult.GetActor();
+				UE_LOG(LogTemp, Warning, TEXT("DelActor: %s"), *DelActorUnderCursor->GetName());
 
 				if (UPlaceInfoComponent* PlaceInfoComp = DelActorUnderCursor->GetComponentByClass<UPlaceInfoComponent>())
 				{
