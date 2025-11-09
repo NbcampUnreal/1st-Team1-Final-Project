@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "System/GS_PlayerRole.h"
+#include "Sound/SoundBase.h"
 #include "GS_CustomLobbyUI.generated.h"
 
 class UGS_CommonTwoBtnPopup;
@@ -72,6 +73,39 @@ public:
 	//아케인보드 저장 관련 함수
 	void ShowPerkSaveConfirmPopup();
 	
+	// 캐릭터별 준비 사운드
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Seeker|Ready")
+	TObjectPtr<USoundBase> AresReadySound;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Seeker|Ready")
+	TObjectPtr<USoundBase> ChanReadySound;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Seeker|Ready")
+	TObjectPtr<USoundBase> MerciReadySound;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Seeker|Ready")
+	TObjectPtr<USoundBase> ReinaReadySound;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Guardian|Ready")
+	TObjectPtr<USoundBase> DrakharReadySound;
+	
+	// 캐릭터별 취소 사운드
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Seeker|Cancel")
+	TObjectPtr<USoundBase> AresCancelSound;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Seeker|Cancel")
+	TObjectPtr<USoundBase> ChanCancelSound;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Seeker|Cancel")
+	TObjectPtr<USoundBase> MerciCancelSound;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Seeker|Cancel")
+	TObjectPtr<USoundBase> ReinaCancelSound;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sound|Guardian|Cancel")
+	TObjectPtr<USoundBase> DrakharCancelSound;
+	
 private:
 	void ChangeRoleBtnIcon(EPlayerRole NewRole);
+	void PlayCharacterReadySound();
 };
