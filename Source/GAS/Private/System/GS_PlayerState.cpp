@@ -150,50 +150,22 @@ void AGS_PlayerState::OnPawnStatInitialized()
     APawn* MyPawn = GetPawn();
     if (!MyPawn)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState(%s)::OnPawnStatInitialized - Pawn is NULL"), *GetPlayerName());
+        UE_LOG(LogTemp, Warning, TEXT("OnPawnStatInitialized: No Pawn for PS %s"), *GetPlayerName());
         return;
     }
-    
+
     UGS_StatComp* StatComp = MyPawn->FindComponentByClass<UGS_StatComp>();
     if (!StatComp)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState(%s)::OnPawnStatInitialized - No StatComp on Pawn %s"),
-            *GetPlayerName(), *MyPawn->GetName());
+        UE_LOG(LogTemp, Warning, TEXT("OnPawnStatInitialized: No StatComp found on Pawn %s"), *MyPawn->GetName());
         return;
     }
+
+    StatComp->SetCurrentHealth(CurrentHealth, /*bIsHealing=*/true);
     SetupStatCompBinding(StatComp);
 
-    if (!bHasInitializedStats)
-    {
-        float MaxHealth = StatComp->GetMaxHealth();
-        float CurHealth = StatComp->GetCurrentHealth();
-
-        // 정상적으로 InitStat 된 경우
-        if (MaxHealth > 0.f && CurHealth > 0.f)
-        {
-            CurrentHealth        = CurHealth;
-            bIsAlive             = true;
-            bHasInitializedStats = true;
-            return;
-        }
-
-        // 초기화 이상 케이스
-        constexpr float SafeFallbackHP = 9999.f;
-
-        UE_LOG(LogTemp, Error,
-            TEXT("Invalid HP setup for %s (MaxHealth=%.2f, CurHealth=%.2f). Using SafeFallbackHP=%.2f"),
-            *GetPlayerName(), MaxHealth, CurHealth, SafeFallbackHP);
-
-        CurrentHealth        = SafeFallbackHP;
-        bIsAlive             = true;
-        bHasInitializedStats = true;
-
-        // PlayerState → StatComp로 강제 싱크
-        StatComp->ApplyHealthFromPlayerState(CurrentHealth);
-        return;
-    }
-
-    StatComp->ApplyHealthFromPlayerState(CurrentHealth);
+    UE_LOG(LogTemp, Warning, TEXT("OnPawnStatInitialized: PS(%s) -> StatComp HP Sync Done. HP=%f"),
+        *GetPlayerName(), CurrentHealth);
 }
 
 void AGS_PlayerState::SetupStatCompBinding(UGS_StatComp* InStatComp)
@@ -212,26 +184,35 @@ void AGS_PlayerState::SetupStatCompBinding(UGS_StatComp* InStatComp)
 
 void AGS_PlayerState::HandleCurrentHPChanged(UGS_StatComp* StatComp)
 {
-    if (!StatComp)
+    if (!StatComp || StatComp != BoundStatComp)
         return;
 
-    const float HealthFromStatComp = StatComp->GetCurrentHealth();
-    UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) in HandleCurrentHPChanged: Value from StatComp->GetCurrentHealth() is: %f"),
-            *GetName(), HealthFromStatComp);
-    
-    CurrentHealth = HealthFromStatComp;
-    UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s) HP updated to %f (this is PlayerState.CurrentHealth)"), *GetName(), CurrentHealth);
+    const float MaxHP = StatComp->GetMaxHealth();
+    const float NewHP = StatComp->GetCurrentHealth();
 
-    if (!HasAuthority())
-        return;
-
-    AGameModeBase* GM = GetWorld()->GetAuthGameMode();
-    if (!GM || !GM->HasMatchStarted())
+    // 1) StatComp가 아직 제대로 안 올라온 상태는 무시
+    if (MaxHP <= 0.f)
     {
+        UE_LOG(LogTemp, Warning,
+            TEXT("HandleCurrentHPChanged: Ignoring HP update from uninitialized StatComp (MaxHP=0, HP=%f)"),
+            NewHP);
         return;
     }
 
-    if (CurrentHealth <= 0.f && bIsAlive)
+    // 2) 이미 살아있는 애가 맵 전환 직후 첫 이벤트로 0 찍히면 초기화 버그라고 보고 무시
+    if (bHasInitializedStats && CurrentHealth > 0.f && NewHP <= 0.f)
+    {
+        UE_LOG(LogTemp, Warning,
+            TEXT("HandleCurrentHPChanged: Ignoring suspicious zero HP right after travel."));
+        return;
+    }
+
+    CurrentHealth = FMath::Clamp(NewHP, 0.f, MaxHP);
+
+    const bool bWasAlive = bIsAlive;
+    bIsAlive = (CurrentHealth > 0.f);
+
+    if (bWasAlive && !bIsAlive)
     {
         SetIsAlive(false);
     }
