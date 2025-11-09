@@ -41,6 +41,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void UpdateStat(const FGS_StatRow& RuneStats);
 
+	void ApplyHealthFromPlayerState(float InHealth);
+
 	float CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
 
 	//getter

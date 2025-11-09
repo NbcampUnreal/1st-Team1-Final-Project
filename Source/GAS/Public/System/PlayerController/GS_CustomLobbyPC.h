@@ -45,10 +45,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	//virtual void SetupInputComponent() override; // 키보드 기능. 나중에 esc 넣을때 주석 해제
 	virtual void OnRep_PlayerState() override;
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyPlayerReadyInLobby();
+	UFUNCTION(Server, Reliable)
+	void Server_RequestServerTravel();
 
 	void OnCreatePresenceSessionComplete(FName SessionName, bool bWasSuccessful);
 	

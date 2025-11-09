@@ -34,6 +34,7 @@ public:
     UGS_GameInstance();
     virtual void Init() override;
     virtual void Shutdown() override;
+    virtual void OnStart() override;
     void JoinGameLiftSessionByID(const FString& GameLiftSessionId);
     
 protected:
@@ -162,6 +163,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Settings")
     void SetBGMVolume(float NewVolume);
 
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    FString GetLanguageSet() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    void SetLanguageSet(FString CurrCulture);
+
  private:
      UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
      float MouseSensitivity;
@@ -174,4 +181,7 @@ public:
 
      UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
      float BGMVolume;
+
+     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+     FString LanguageSet;
 };

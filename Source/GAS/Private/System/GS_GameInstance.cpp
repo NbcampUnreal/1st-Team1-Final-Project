@@ -5,6 +5,9 @@
 #include "Online/OnlineSessionNames.h" //SETTING_GAMEMODE 이런 거 쓸라면 필요. 앞으로 까먹지 말기
 #include "Interfaces/OnlineFriendsInterface.h"
 #include "Interfaces/OnlineExternalUIInterface.h"
+#include "Internationalization/Internationalization.h"
+#include "Internationalization/Culture.h"
+#include "Internationalization/TextLocalizationManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "GameFramework/PlayerController.h"
@@ -31,6 +34,7 @@ UGS_GameInstance::UGS_GameInstance()
     MinSensitivity = 0.1f;
     MaxSensitivity = 10.0f;
     BGMVolume = 1.0f;
+    LanguageSet = "ko";
 }
 
 void UGS_GameInstance::Init()
@@ -86,8 +90,10 @@ void UGS_GameInstance::Init()
 
         InitGameLift();
     }
-
-    LoadSettings();
+    else
+    {
+        UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Init() - Not a Dedicated Server Instance."));
+    }
     
     // BGM 볼륨 적용은 약간의 지연 후에 수행 (AudioManager 초기화 보장)
     FTimerHandle VolumeInitHandle;
@@ -374,6 +380,16 @@ void UGS_GameInstance::Shutdown()
         }
     }
     Super::Shutdown();
+}
+
+void UGS_GameInstance::OnStart()
+{
+    Super::OnStart();
+
+    // 저장된 옵션 세팅 로드
+    LoadSettings();
+
+    FTextLocalizationManager::Get().RefreshResources();
 }
 
 void UGS_GameInstance::StartGameSession()
@@ -822,7 +838,6 @@ float UGS_GameInstance::GetMouseSensitivity() const
 void UGS_GameInstance::SetMouseSensitivity(float NewSensitivity)
 {
     MouseSensitivity = NewSensitivity;
-    SaveSettings();
 }
 
 void UGS_GameInstance::SaveSettings()
@@ -831,6 +846,7 @@ void UGS_GameInstance::SaveSettings()
     {
         SaveGameInstance->MouseSensitivity = MouseSensitivity;
         SaveGameInstance->BGMVolume = BGMVolume;
+        SaveGameInstance->LanguageSet = LanguageSet;
 
         UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("SettingsSlot"), 0);
     }
@@ -844,6 +860,7 @@ void UGS_GameInstance::LoadSettings()
         {
             MouseSensitivity = LoadGameInstance->MouseSensitivity;
             BGMVolume = LoadGameInstance->BGMVolume;
+            LanguageSet = LoadGameInstance->LanguageSet;
         }
     }
     else
@@ -851,7 +868,9 @@ void UGS_GameInstance::LoadSettings()
         // 저장 파일이 없는 경우 기본값 설정
         MouseSensitivity = 1.0f;
         BGMVolume = 1.0f;
+        LanguageSet = "ko";
     }
+    FInternationalization::Get().SetCurrentCulture(LanguageSet);
 }
 
 float UGS_GameInstance::GetBGMVolume() const
@@ -879,6 +898,18 @@ void UGS_GameInstance::SetBGMVolume(float NewVolume)
 
     SaveSettings();
 }
+
+FString UGS_GameInstance::GetLanguageSet() const
+{
+    return LanguageSet;
+}
+
+void UGS_GameInstance::SetLanguageSet(FString CurrCulture)
+{
+    LanguageSet = CurrCulture;
+    FInternationalization::Get().SetCurrentCulture(LanguageSet);
+}
+
 
 void UGS_GameInstance::InitGameLift()
 {

@@ -214,6 +214,14 @@ void AGS_Monster::UseSkill()
 {	
 }
 
+void AGS_Monster::ApplyStiffness()
+{
+}
+
+void AGS_Monster::EndStiffness()
+{
+}
+
 void AGS_Monster::ShowTargetUI(bool bIsActive)
 {
 	if (TargetedUIComponent)

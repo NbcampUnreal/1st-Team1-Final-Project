@@ -24,14 +24,14 @@ public:
 	void HandlePlayerReadyInLobby(APlayerController* PlayerController);
 	virtual void Logout(AController* Exiting) override;
 	void UpdatePlayerReadyStatus(APlayerState* Player, bool bIsReady);
+	void DoServerTravel();
+	
 
 	/** 클라이언트의 요청을 받아 GameSessionId를 찾아 보내줍니다. */
 	void RequestGameSessionIdForClient(APlayerController* RequestingController);
 
 protected:
 	void CheckAllPlayersReady();
-
-	void DoServerTravel();
 
 	UPROPERTY()
 	TMap<TObjectPtr<APlayerState>, bool> PlayerReadyStates;

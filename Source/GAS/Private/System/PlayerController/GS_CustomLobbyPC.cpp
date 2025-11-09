@@ -889,6 +889,7 @@ void AGS_CustomLobbyPC::Server_ReceiveDungeonDataChunk_Implementation(const TArr
             {
                 UE_LOG(LogTemp, Error, TEXT("Server: Failed to create a new SaveGameObject for deserialization."));
             }
+        	Server_RequestServerTravel();
         }
         else
         {
@@ -906,6 +907,14 @@ void AGS_CustomLobbyPC::Server_ReceiveDungeonDataChunk_Implementation(const TArr
         // 클라이언트에게 다음 청크를 보낼 준비가 되었다고 알립니다.
         Client_ReadyForNextChunk();
     }
+}
+
+void AGS_CustomLobbyPC::Server_RequestServerTravel_Implementation()
+{
+	if (AGS_CustomLobbyGM* GM = GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
+	{
+		GM->DoServerTravel();
+	}
 }
 
 void AGS_CustomLobbyPC::Client_ReadyForNextChunk_Implementation()

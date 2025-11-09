@@ -46,29 +46,29 @@ void AGS_PlayerState::BeginPlay()
         FetchMySteamAvatar();
     }    
 }
-
-void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
-{
-    Super::CopyProperties(NewPlayerState);
-
-    if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
-    {
-        // 다음 맵으로 넘길 애들 추가 까먹지 말기!!!!!!!!
-        NewPS->CurrentPlayerRole = CurrentPlayerRole;
-        NewPS->CurrentSeekerJob = CurrentSeekerJob;
-        NewPS->CurrentGuardianJob = CurrentGuardianJob;
-        NewPS->CurrentGameResult = CurrentGameResult;
-        NewPS->CurrentHealth = CurrentHealth;
-        NewPS->bIsAlive = bIsAlive;
-        NewPS->BoundStatComp = BoundStatComp;
-        NewPS->MySteamAvatar = MySteamAvatar;
-        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>()
-            || GetWorld()->GetAuthGameMode<AGS_InGameGM>())
-        {
-            NewPS->ObjectData = ObjectData;
-        }
-    }
-}
+//
+// void AGS_PlayerState::CopyProperties(APlayerState* NewPlayerState)
+// {
+//     Super::CopyProperties(NewPlayerState);
+//
+//     if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
+//     {
+//         // 다음 맵으로 넘길 애들 추가 까먹지 말기!!!!!!!!
+//         NewPS->CurrentPlayerRole = CurrentPlayerRole;
+//         NewPS->CurrentSeekerJob = CurrentSeekerJob;
+//         NewPS->CurrentGuardianJob = CurrentGuardianJob;
+//         NewPS->CurrentGameResult = CurrentGameResult;
+//         NewPS->CurrentHealth = CurrentHealth;
+//         NewPS->bIsAlive = bIsAlive;
+//         NewPS->BoundStatComp = BoundStatComp;
+//         NewPS->MySteamAvatar = MySteamAvatar;
+//         if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>()
+//             || GetWorld()->GetAuthGameMode<AGS_InGameGM>())
+//         {
+//             NewPS->ObjectData = ObjectData;
+//         }
+//     }
+// }
 
 void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
 {
@@ -77,18 +77,25 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
     if (AGS_PlayerState* NewPS = Cast<AGS_PlayerState>(NewPlayerState))
     {
         // 다음 맵으로 넘길 애들 추가 까먹지 말기!!!!!!!!
+        NewPS->bHasInitializedStats  = bHasInitializedStats;
         NewPS->CurrentPlayerRole = CurrentPlayerRole;
+        UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 1. %s : NewRole = %d, CurRole = %d"), *GetPlayerName(), NewPS->CurrentPlayerRole, CurrentPlayerRole);
         NewPS->CurrentSeekerJob = CurrentSeekerJob;
+        UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 2. %s : NewSeekerJob = %d, CurSeekerJob = %d"), *GetPlayerName(), NewPS->CurrentSeekerJob, CurrentSeekerJob);
         NewPS->CurrentGuardianJob = CurrentGuardianJob;
+        UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 3. %s : NewGuardianJob = %d, CurGuardianJob = %d"), *GetPlayerName(), NewPS->CurrentGuardianJob, CurrentGuardianJob);
         NewPS->CurrentGameResult = CurrentGameResult;
+        UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 4. %s : NewGameResult = %d, CurGameResult = %d"), *GetPlayerName(), NewPS->CurrentGameResult, CurrentGameResult);
         NewPS->CurrentHealth = CurrentHealth;
+        UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 5. %s : NewCurrentHealth = %f, CurCurrentHealth = %f"), *GetPlayerName(), NewPS->CurrentHealth, CurrentHealth);
         NewPS->bIsAlive = bIsAlive;
-        NewPS->BoundStatComp = BoundStatComp;
+        UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 6. %s : NewIsAlive = %d, CurIsAlive = %d"), *GetPlayerName(), NewPS->bIsAlive, bIsAlive);
         NewPS->MySteamAvatar = MySteamAvatar;
-        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>()
-            || GetWorld()->GetAuthGameMode<AGS_InGameGM>())
+        UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 7. %s : MySteamAvatar복사 완료"), *GetPlayerName());
+        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
         {
             NewPS->ObjectData = ObjectData;
+            UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 8. %s : ObjectData복사 완료"), *GetPlayerName());
         }
     }
 }
@@ -109,6 +116,7 @@ void AGS_PlayerState::InitializeDefaults()
 	CurrentHealth = 99999.f;
     bIsReady = false;
     bIsAlive = true;
+    bHasInitializedStats = false;
 
     if (GetNetMode() != NM_Client)
     {
@@ -134,34 +142,58 @@ void AGS_PlayerState::OnRep_PlayerRole()
 
 void AGS_PlayerState::OnPawnStatInitialized()
 {
+    if (!HasAuthority())
+    {
+        return; // 체력 소스는 서버 기준
+    }
+    
     APawn* MyPawn = GetPawn();
-
-    if (MyPawn)
+    if (!MyPawn)
     {
-        UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): OnPawnStatInitialized - Found Pawn: %s (Class: %s)"),
-            *GetName(), *MyPawn->GetName(), *MyPawn->GetClass()->GetName());
-
-        UGS_StatComp* StatComp = MyPawn->FindComponentByClass<UGS_StatComp>();
-
-        if (StatComp)
-        {
-            UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): OnPawnStatInitialized - Found StatComp: %s on Pawn %s"),
-                *GetName(), *StatComp->GetName(), *MyPawn->GetName());
-
-            StatComp->SetCurrentHealth(this->CurrentHealth, true);
-            SetupStatCompBinding(StatComp);
-            UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s): StatComp binding successful! from OnPawnStatInitialized"), *GetName()); // 성공 로그
-        }
-        else
-        {
-            UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s): OnPawnStatInitialized - StatComp NOT FOUND on Pawn: %s. This should not happen if Character called this."),
-                *GetName(), *MyPawn->GetName());
-        }
+        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState(%s)::OnPawnStatInitialized - Pawn is NULL"), *GetPlayerName());
+        return;
     }
-    else
+    
+    UGS_StatComp* StatComp = MyPawn->FindComponentByClass<UGS_StatComp>();
+    if (!StatComp)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s): OnPawnStatInitialized - MyPawn is NULL. This should not happen."), *GetName());
+        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState(%s)::OnPawnStatInitialized - No StatComp on Pawn %s"),
+            *GetPlayerName(), *MyPawn->GetName());
+        return;
     }
+    SetupStatCompBinding(StatComp);
+
+    if (!bHasInitializedStats)
+    {
+        float MaxHealth = StatComp->GetMaxHealth();
+        float CurHealth = StatComp->GetCurrentHealth();
+
+        // 정상적으로 InitStat 된 경우
+        if (MaxHealth > 0.f && CurHealth > 0.f)
+        {
+            CurrentHealth        = CurHealth;
+            bIsAlive             = true;
+            bHasInitializedStats = true;
+            return;
+        }
+
+        // 초기화 이상 케이스
+        constexpr float SafeFallbackHP = 9999.f;
+
+        UE_LOG(LogTemp, Error,
+            TEXT("Invalid HP setup for %s (MaxHealth=%.2f, CurHealth=%.2f). Using SafeFallbackHP=%.2f"),
+            *GetPlayerName(), MaxHealth, CurHealth, SafeFallbackHP);
+
+        CurrentHealth        = SafeFallbackHP;
+        bIsAlive             = true;
+        bHasInitializedStats = true;
+
+        // PlayerState → StatComp로 강제 싱크
+        StatComp->ApplyHealthFromPlayerState(CurrentHealth);
+        return;
+    }
+
+    StatComp->ApplyHealthFromPlayerState(CurrentHealth);
 }
 
 void AGS_PlayerState::SetupStatCompBinding(UGS_StatComp* InStatComp)
@@ -172,34 +204,36 @@ void AGS_PlayerState::SetupStatCompBinding(UGS_StatComp* InStatComp)
         {
             BoundStatComp->OnCurrentHPChanged.RemoveAll(this);
         }
-        InStatComp->OnCurrentHPChanged.AddUObject(this, &AGS_PlayerState::HandleCurrentHPChanged);
+        
         BoundStatComp = InStatComp;
-
-        HandleCurrentHPChanged(BoundStatComp);
+        BoundStatComp->OnCurrentHPChanged.AddUObject(this, &AGS_PlayerState::HandleCurrentHPChanged);
     }
 }
 
 void AGS_PlayerState::HandleCurrentHPChanged(UGS_StatComp* StatComp)
 {
-    if (StatComp)
-    {
-        float HealthFromStatComp = StatComp->GetCurrentHealth();
-        UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) in HandleCurrentHPChanged: Value from StatComp->GetCurrentHealth() is: %f"),
+    if (!StatComp)
+        return;
+
+    const float HealthFromStatComp = StatComp->GetCurrentHealth();
+    UE_LOG(LogTemp, Warning, TEXT("AGS_PlayerState (%s) in HandleCurrentHPChanged: Value from StatComp->GetCurrentHealth() is: %f"),
             *GetName(), HealthFromStatComp);
+    
+    CurrentHealth = HealthFromStatComp;
+    UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s) HP updated to %f (this is PlayerState.CurrentHealth)"), *GetName(), CurrentHealth);
 
-        CurrentHealth = HealthFromStatComp;
-        UE_LOG(LogTemp, Log, TEXT("AGS_PlayerState (%s) HP updated to %f (this is PlayerState.CurrentHealth)"), *GetName(), CurrentHealth);
+    if (!HasAuthority())
+        return;
 
-        if (HasAuthority())
-        {
-            if (GetWorld()->GetAuthGameMode() && GetWorld()->GetAuthGameMode()->HasMatchStarted())
-            {
-                if (CurrentHealth <= 0.f && bIsAlive)
-                {
-                    SetIsAlive(false);
-                }
-            }
-        }
+    AGameModeBase* GM = GetWorld()->GetAuthGameMode();
+    if (!GM || !GM->HasMatchStarted())
+    {
+        return;
+    }
+
+    if (CurrentHealth <= 0.f && bIsAlive)
+    {
+        SetIsAlive(false);
     }
 }
 
@@ -340,10 +374,4 @@ void AGS_PlayerState::Server_SetReadyStatus_Implementation(bool bNewReadyStatus)
             GM->UpdatePlayerReadyStatus(this, bIsReady);
         }
     }
-}
-
-void AGS_PlayerState::SetPlayerRole(EPlayerRole NewRole)
-{
-// ... existing code ...
-
 }
