@@ -217,14 +217,7 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady()
                 break;
             }
         }
-        
-        UWorld* World = GetWorld();
-        if (World)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("LobbyGM: ServerTravel Start ***"));
-            FTimerHandle TravelDelayHandle;
-            World->GetTimerManager().SetTimer(TravelDelayHandle, this, &AGS_CustomLobbyGM::DoServerTravel, 2.0f, false);
-        }
+        // TODO: 화면 가리개 on
     }
 }
 

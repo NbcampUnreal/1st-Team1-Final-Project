@@ -216,12 +216,12 @@ void AGS_BossLevelGM::EndGame(EGameResult Result)
 
     if (Result == EGameResult::GR_SeekersLost)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Seekers Lost. Traveling to EndingLevel."));
+        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Seekers Lost. Traveling to ResultLevel."));
         SetGameResultOnAllPlayers(EGameResult::GR_SeekersLost);
     }
     else if (Result == EGameResult::GR_SeekersWon)
     {
-        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Not All Seekers dead. Traveling to BossLevel."));
+        UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Not All Seekers dead. Traveling to ResultLevel."));
         SetGameResultOnAllPlayers(EGameResult::GR_SeekersWon);
     }
 
@@ -262,7 +262,6 @@ void AGS_BossLevelGM::CheckAllPlayersDead()
 {
     if (!GameState) return;
 
-    int32 SeekerCount = 0;
     int32 AliveSeekerCount = 0;
     bool bIsGuardianAlive = false;
 
@@ -272,7 +271,6 @@ void AGS_BossLevelGM::CheckAllPlayersDead()
         {
             if (GS_PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
             {
-                SeekerCount++;
                 if (GS_PS->bIsAlive)
                 {
                     AliveSeekerCount++;
@@ -288,7 +286,7 @@ void AGS_BossLevelGM::CheckAllPlayersDead()
         }
     }
 
-    if (SeekerCount > 0 && AliveSeekerCount == 0)
+    if (AliveSeekerCount == 0)
     {
         UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: All Seekers are dead! Guardian wins."));
         EndGame(EGameResult::GR_SeekersLost); // 씨커 패배

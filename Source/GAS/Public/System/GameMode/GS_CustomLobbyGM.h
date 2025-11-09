@@ -24,11 +24,10 @@ public:
 	void HandlePlayerReadyInLobby(APlayerController* PlayerController);
 	virtual void Logout(AController* Exiting) override;
 	void UpdatePlayerReadyStatus(APlayerState* Player, bool bIsReady);
-
+	void DoServerTravel();
+	
 protected:
 	void CheckAllPlayersReady();
-
-	void DoServerTravel();
 
 	UPROPERTY()
 	TMap<TObjectPtr<APlayerState>, bool> PlayerReadyStates;
