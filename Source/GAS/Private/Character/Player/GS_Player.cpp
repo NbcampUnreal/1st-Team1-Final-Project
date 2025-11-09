@@ -421,8 +421,6 @@ void AGS_Player::SetupCameraAudioListener()
 
 	// 카메라 위치 리스너를 기본 리스너로 설정 (TPS 표준)
 	CachedAudioDevice->AddDefaultListener(CameraAudioListenerComponent);
-
-	UE_LOG(LogTemp, Log, TEXT("[AGS_Player] Camera audio listener set as default listener for local player: %s"), *GetName());
 }
 
 // 로컬 플레이어 확인 함수
