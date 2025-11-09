@@ -134,6 +134,14 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Monster Audio")
     void PlayDeathSound();
 
+    /** 피해받을 때 사운드 (로컬 전용 - RPC 없음) */
+    UFUNCTION(BlueprintCallable, Category = "Monster Audio")
+    void PlayHurtSoundLocal();
+
+    /** 죽을 때 사운드 (로컬 전용 - RPC 없음) */
+    UFUNCTION(BlueprintCallable, Category = "Monster Audio")
+    void PlayDeathSoundLocal();
+
     /** 현재 오디오 상태 반환 */
     UFUNCTION(BlueprintPure, Category = "Monster Audio")
     EMonsterAudioState GetCurrentAudioState() const { return CurrentAudioState; }

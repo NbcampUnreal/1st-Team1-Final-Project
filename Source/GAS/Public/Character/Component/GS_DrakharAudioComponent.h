@@ -35,9 +35,12 @@ public:
 	void PlayFeverModeEndSound();
 	void PlayFeverModeStateSound();
 	void StopFeverModeStateSound();
-	void PlayHurtSound();
 	void PlayComboFinisherSound();
-	void HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter);
+
+	// === 로컬 전용 사운드 재생 (RPC 없음 - RepNotify에서 호출) ===
+	void PlayHurtSoundLocal();
+	void PlayDeathSoundLocal();
+	void PlayDraconicProjectileImpactSoundLocal(const FVector& ImpactLocation, bool bHitCharacter);
 
 private:
 	// === 멀티캐스트 RPC 함수 ===
@@ -70,15 +73,9 @@ private:
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_StopFeverModeStateSound();
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayHurtSound();
-	
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayComboFinisherSound();
-	
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter);
 
 	UPROPERTY()
 	TObjectPtr<AGS_Drakhar> OwnerDrakhar;

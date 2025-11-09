@@ -230,13 +230,13 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Seeker Audio")
     void PlaySound(ESeekerAudioState SoundType, bool bForcePlay = false);
 
-    /** 피해받을 때 사운드 */
+    /** 피해받을 때 사운드 (로컬 전용 - RPC 없음) */
     UFUNCTION(BlueprintCallable, Category = "Seeker Audio")
-    void PlayHurtSound();
+    void PlayHurtSoundLocal();
 
-    /** 죽을 때 사운드 */
+    /** 죽을 때 사운드 (로컬 전용 - RPC 없음) */
     UFUNCTION(BlueprintCallable, Category = "Seeker Audio")
-    void PlayDeathSound();
+    void PlayDeathSoundLocal();
 
     /** 현재 오디오 상태 반환 */
     UFUNCTION(BlueprintPure, Category = "Seeker Audio")
@@ -462,6 +462,9 @@ private:
     UPROPERTY()
     FTimerHandle AttackSoundResetTimerHandle;
 
+    // 컴포넌트 셧다운 상태 플래그 (레벨 전환/액터 파괴 시 RPC 크래시 방지)
+    bool bIsComponentShuttingDown;
+
     /** 타이머 관리 */
     void StartSoundTimer();
     void StopSoundTimer();
@@ -507,13 +510,6 @@ private:
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_PlayBowReleaseSound();
-
-    // Hurt/Death 사운드 멀티캐스트 RPC
-    UFUNCTION(NetMulticast, Reliable)
-    void Multicast_PlayHurtSound();
-
-    UFUNCTION(NetMulticast, Reliable)
-    void Multicast_PlayDeathSound();
 
     // 방패 슬램 사운드 멀티캐스트 RPC
     UFUNCTION(NetMulticast, Reliable)

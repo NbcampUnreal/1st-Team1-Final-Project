@@ -200,18 +200,12 @@ void AGS_Drakhar::OnDamageStart()
 	bIsDamaged = true;
 
 	StopHealRegeneration();
-	
+
 	//timer start (타이머 설정)
 	UWorld* World = GetWorld();
 	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
 	{
 		World->GetTimerManager().SetTimer(HealthDelayTimer, this, &AGS_Drakhar::BeginHealRegeneration, 5.f, false);
-	}
-	
-	// 피격 사운드 재생
-	if (HasAuthority() && AudioComponent)
-	{
-		AudioComponent->PlayHurtSound();
 	}
 }
 
@@ -1266,17 +1260,9 @@ void AGS_Drakhar::MulticastStartDustCloudVFX_Implementation()
 
 void AGS_Drakhar::HandleDraconicProjectileImpact(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
 {
-	if (HasAuthority())
-	{
-		MulticastPlayDraconicProjectileImpactEffects(ImpactLocation, ImpactNormal, bHitCharacter);
-	}
-}
-
-void AGS_Drakhar::MulticastPlayDraconicProjectileImpactEffects_Implementation(
-	const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
-{
+	// 로컬 재생 (모든 클라이언트에서 OnHit이 호출되므로 RPC 불필요)
 	if (DrakharVFXComponent) DrakharVFXComponent->HandleDraconicProjectileImpact(ImpactLocation, ImpactNormal, bHitCharacter);
-	if (AudioComponent) AudioComponent->HandleDraconicProjectileImpact(ImpactLocation, bHitCharacter);
+	if (AudioComponent) AudioComponent->PlayDraconicProjectileImpactSoundLocal(ImpactLocation, bHitCharacter);
 }
 
 void AGS_Drakhar::MulticastPlayFeverEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)

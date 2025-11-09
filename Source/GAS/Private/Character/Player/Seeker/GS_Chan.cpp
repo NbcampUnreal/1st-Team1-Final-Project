@@ -246,15 +246,6 @@ float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 	// 방어 상태일 때는 스테미나 감소 (피격 애니메이션 방지)
 	if (bIsDefending)
 	{
-		// 방어 효과음 재생
-		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
-		{
-			SeekerAudio->PlayDefenseSound();
-		}
-		
-		// 방어 VFX 재생 (나중에 구현)
-		// PlayDefenseVFX();
-		
 		// 방어 성공 시 데미지 0으로 설정하여 피격 애니메이션 방지
 		ActualDamage = 0.0f;
 
@@ -271,15 +262,6 @@ float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 		// 방어 상태가 아닐 때만 부모 클래스의 TakeDamage 호출
 		//UE_LOG(LogTemp, Warning, TEXT("Normal Damage In"));
 		ActualDamage = Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
-	}
-
-	// Play hurt sound if we actually took damage and are still alive
-	if (ActualDamage > 0.0f && GetStatComp() && GetStatComp()->GetCurrentHealth() > 0.0f)
-	{
-		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
-		{
-			SeekerAudio->PlayHurtSound();
-		}
 	}
 
 	return ActualDamage;

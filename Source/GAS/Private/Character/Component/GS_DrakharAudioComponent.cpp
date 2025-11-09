@@ -582,49 +582,9 @@ void UGS_DrakharAudioComponent::Multicast_StopFeverModeStateSound_Implementation
 	}
 }
 
-void UGS_DrakharAudioComponent::PlayHurtSound()
+// 로컬 전용 Hurt 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+void UGS_DrakharAudioComponent::PlayHurtSoundLocal()
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
-	{
-		return;
-	}
-
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (bHurtSoundPlayed)
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
-	Multicast_PlayHurtSound();
-}
-
-void UGS_DrakharAudioComponent::Multicast_PlayHurtSound_Implementation()
-{
-	if (ShouldSkipListenServerRPC())
-	{
-		return;
-	}
-
 	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
 	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
@@ -650,7 +610,23 @@ void UGS_DrakharAudioComponent::Multicast_PlayHurtSound_Implementation()
 	);
 }
 
-void UGS_DrakharAudioComponent::HandleDraconicProjectileImpact(const FVector& ImpactLocation, bool bHitCharacter)
+// 로컬 전용 Death 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+void UGS_DrakharAudioComponent::PlayDeathSoundLocal()
+{
+	// 통합 체크 및 Distance Scaling 설정
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
+	{
+		return;
+	}
+
+	// Death Sound 재생
+	if (IsValid(OwnerDrakhar->DeathSoundEvent))
+	{
+		PlaySoundEvent(OwnerDrakhar->DeathSoundEvent, OwnerDrakhar->GetActorLocation());
+	}
+}
+
+void UGS_DrakharAudioComponent::PlayDraconicProjectileImpactSoundLocal(const FVector& ImpactLocation, bool bHitCharacter)
 {
 	// 컴포넌트 유효성 검증
 	if (!IsValid(this))
@@ -661,29 +637,6 @@ void UGS_DrakharAudioComponent::HandleDraconicProjectileImpact(const FVector& Im
 	// 월드 컨텍스트 유효성 검증
 	UWorld* World = GetWorld();
 	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
-	Multicast_HandleDraconicProjectileImpact(ImpactLocation, bHitCharacter);
-}
-
-void UGS_DrakharAudioComponent::Multicast_HandleDraconicProjectileImpact_Implementation(const FVector& ImpactLocation, bool bHitCharacter)
-{
-	if (ShouldSkipListenServerRPC())
 	{
 		return;
 	}

@@ -125,15 +125,6 @@ float AGS_Ares::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 	// Call parent implementation
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	// Play hurt sound if we actually took damage and are still alive
-	if (ActualDamage > 0.0f && GetStatComp() && GetStatComp()->GetCurrentHealth() > 0.0f)
-	{
-		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
-		{
-			SeekerAudio->PlayHurtSound();
-		}
-	}
-
 	return ActualDamage;
 }
 
