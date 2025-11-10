@@ -89,7 +89,16 @@ AActor* AGS_BossLevelGM::ChoosePlayerStart_Implementation(AController* Player)
         {
             if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
             {
-                PlayerStartTagToFind = TEXT("SeekerStart");
+                PlayerStartTagToFind = FString::Printf(TEXT("SeekerStart%d"), CurrentSeekerSpawnIndex);
+                UE_LOG(LogTemp, Warning, TEXT("[보스 레벨_시커 플레이어 스폰 꼬임] 찾을 스폰포인트 태그 : %s"), *PlayerStartTagToFind);
+                if (CurrentSeekerSpawnIndex >= 4)
+                {
+                    CurrentSeekerSpawnIndex = 1;
+                }
+                else
+                {
+                    CurrentSeekerSpawnIndex++;
+                }
             }
             else if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
             {
@@ -102,10 +111,12 @@ AActor* AGS_BossLevelGM::ChoosePlayerStart_Implementation(AController* Player)
 
     if (FoundPlayerStart)
     {
+        UE_LOG(LogTemp, Warning, TEXT("[보스 레벨_시커 플레이어 스폰 꼬임] %s 찾았음..! 스폰 진행할게요."), *PlayerStartTagToFind);
         return FoundPlayerStart;
     }
     else
     {
+        UE_LOG(LogTemp, Warning, TEXT("[보스 레벨_시커 플레이어 스폰 꼬임] %s 스폰 지점 찾기 실패..! 부모 호출"), *PlayerStartTagToFind);
         return Super::ChoosePlayerStart_Implementation(Player);
     }
 }

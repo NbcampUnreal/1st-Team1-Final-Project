@@ -46,4 +46,7 @@ public:
 	UGS_PawnMappingDataAsset* PawnMappingDataAsset;
 	
 	FTimerHandle MatchStartTimerHandle;
+
+	UPROPERTY(visibleAnywhere, BlueprintReadOnly)
+	int32 CurrentSeekerSpawnIndex = 1;
 };
