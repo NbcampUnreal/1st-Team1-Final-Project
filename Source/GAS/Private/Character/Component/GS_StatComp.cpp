@@ -15,6 +15,7 @@
 #include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/Player/Guardian/GS_Drakhar.h"
 #include "Character/Component/GS_DrakharAudioComponent.h"
+#include "System/GS_PlayerState.h"
 
 UGS_StatComp::UGS_StatComp()
 {
@@ -80,7 +81,20 @@ void UGS_StatComp::InitStat(FName RowName)
 		Agility = FoundRow->AGL;
 		AttackSpeed = FoundRow->ATS;
 
-		CurrentHealth = MaxHealth;
+		if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
+		{
+			if (AGS_PlayerState* PS = OwnerPawn->GetPlayerState<AGS_PlayerState>())
+			{
+				CurrentHealth = FMath::Clamp(PS->CurrentHealth, 0.f, MaxHealth);
+				UE_LOG(LogTemp, Warning, TEXT("StatComp InitStat 성공: RowName=%s, HP=%.1f, ATK=%.1f, DEF=%.1f, AGL=%.1f, ATS=%.1f"),
+				*RowName.ToString(), MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
+			}
+		}
+		else
+		{
+			CurrentHealth = MaxHealth;
+		}
+		
 		//UE_LOG(LogTemp, Warning, TEXT("StatComp InitStat 성공: RowName=%s, HP=%.1f, ATK=%.1f, DEF=%.1f, AGL=%.1f, ATS=%.1f"),
 		//	*RowName.ToString(), MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
 	}
@@ -134,25 +148,6 @@ void UGS_StatComp::UpdateStat_Implementation(const FGS_StatRow& RuneStats)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("스탯 컴프 로우 네임 못찾음"));
 	}
-}
-
-void UGS_StatComp::ApplyHealthFromPlayerState(float InHealth)
-{
-	if (!IsValid(GetOwner()) || !GetOwner()->HasAuthority())
-	{
-		return;
-	}
-
-	// PS에 저장된 값을 신뢰하되, 스탯 범위 안으로만 클램프
-	const float Clamped = FMath::Clamp(InHealth, 0.f, MaxHealth);
-	CurrentHealth = Clamped;
-
-	// UI / PlayerState 쪽과 동기화
-	OnCurrentHPChanged.Broadcast(this);
-
-	UE_LOG(LogTemp, Log,
-		TEXT("UGS_StatComp(%s)::ApplyHealthFromPlayerState - Synced HP to %f"),
-		*GetName(), CurrentHealth);
 }
 
 float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
