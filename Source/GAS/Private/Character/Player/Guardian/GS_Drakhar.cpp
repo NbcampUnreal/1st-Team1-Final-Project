@@ -25,6 +25,7 @@
 #include "Character/F_GS_DamageEvent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "UI/Character/GS_DrakharStaminaGauge.h"
 #include "VFX/GS_VFX_FunctionLibrary.h"
 
 AGS_Drakhar::AGS_Drakhar()
@@ -1051,6 +1052,17 @@ void AGS_Drakhar::StopHealRegeneration()
 	SafeClearTimer(HealthRegenTimer);
 }
 
+void AGS_Drakhar::SetStaminaGaugeWidget(UGS_DrakharStaminaGauge* InDrakharStaminaGaugeWidget)
+{
+	UGS_DrakharStaminaGauge* DrakharStaminaGaugeWidget = Cast<UGS_DrakharStaminaGauge>(InDrakharStaminaGaugeWidget);
+	if (IsValid(DrakharStaminaGaugeWidget))
+	{
+		//client
+		DrakharStaminaGaugeWidget->InitializeGauge(GetCurrentStaminaGauge());
+		OnCurrentStaminaGaugeChanged.AddUObject(DrakharStaminaGaugeWidget, &UGS_DrakharStaminaGauge::OnCurrentStaminaGaugeChanged);
+	}
+}
+
 void AGS_Drakhar::StartFlyingStaminaTimer()
 {
 	SafeClearTimer(FlyingEndStaminaCoolTimeHandler);
@@ -1061,7 +1073,8 @@ void AGS_Drakhar::StartFlyingStaminaTimer()
 	{
 		FlyingStaminaCoolTime = 0.f;
 	}
-	UE_LOG(LogTemp, Error, TEXT("start flying stamina %f"), FlyingStaminaCoolTime);
+
+	//UE_LOG(LogTemp, Error, TEXT("start flying stamina %f"), FlyingStaminaCoolTime);
 }
 
 void AGS_Drakhar::EndFlyingStaminaTimer()
@@ -1074,7 +1087,9 @@ void AGS_Drakhar::EndFlyingStaminaTimer()
 	{
 		FlyingStaminaCoolTime = MaxFlyingStaminaCoolTime;
 	}
-	UE_LOG(LogTemp, Error, TEXT("end flying stamina %f"), FlyingStaminaCoolTime);
+	//OnCurrentStaminaGaugeChanged.Broadcast(FlyingStaminaCoolTime);
+
+	//UE_LOG(LogTemp, Error, TEXT("end flying stamina %f"), FlyingStaminaCoolTime);
 }
 
 void AGS_Drakhar::GenerateDraconicFuryTargets()
@@ -1328,6 +1343,8 @@ void AGS_Drakhar::OnRep_FlyingStaminaCoolTime()
 		SafeClearTimer(FlyingStartStaminaCoolTimeHandler);
 		SafeClearTimer(FlyingEndStaminaCoolTimeHandler);
 	}
+	//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%f"),FlyingStaminaCoolTime));
+	OnCurrentStaminaGaugeChanged.Broadcast(FlyingStaminaCoolTime);
 }
 
 void AGS_Drakhar::MulticastRPC_PlayAttackHitVFX_Implementation(FVector ImpactPoint)
