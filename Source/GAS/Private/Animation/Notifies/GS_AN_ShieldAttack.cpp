@@ -39,9 +39,8 @@ void UGS_AN_ShieldAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 	{
 		if (AGS_WeaponShield* Shield = Cast<AGS_WeaponShield>(Chan->GetWeaponByIndex(i)))
 		{
-			// 방패 공격 콜리전 활성화 (타이머는 내부에서 안전하게 관리됨)
-			// ServerEnableAttackHit()가 3초 안전 타이머를 자동으로 설정함
-			Shield->ServerEnableAttackHit();
+			// EnableAttackHit()가 내부적으로 안전 타이머를 관리함
+			Shield->EnableAttackHit();
 			break;
 		}
 	}
