@@ -1165,6 +1165,7 @@
 										<Property Name="DecayTime" Type="Real32" Value="1.9"/>
 										<Property Name="Density" Type="Real32" Value="60"/>
 										<Property Name="Diffusion" Type="Real32" Value="74"/>
+										<Property Name="ERFrontBackDelay" Type="Real32" Value="1"/>
 										<Property Name="ERLevel" Type="Real32" Value="-22"/>
 										<Property Name="ERPattern" Type="int32" Value="19"/>
 										<Property Name="Filter1Freq" Type="Real32" Value="590"/>
@@ -1175,7 +1176,7 @@
 										<Property Name="Quality" Type="int32" Value="10"/>
 										<Property Name="ReverbLevel" Type="Real32" Value="-10"/>
 										<Property Name="RoomShape" Type="Real32" Value="0"/>
-										<Property Name="RoomSize" Type="Real32" Value="30"/>
+										<Property Name="RoomSize" Type="Real32" Value="60"/>
 										<Property Name="StereoWidth" Type="Real32" Value="165"/>
 									</PropertyList>
 								</Effect>
