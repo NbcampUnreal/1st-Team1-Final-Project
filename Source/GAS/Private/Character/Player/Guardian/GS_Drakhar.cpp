@@ -9,6 +9,7 @@
 #include "AkAudioEvent.h"
 #include "AkComponent.h"
 #include "AkGameplayStatics.h"
+#include "AkAudioDevice.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -980,11 +981,14 @@ void AGS_Drakhar::StartFeverMode()
 
 	GetStatComp()->ChangeStat(Stat);
 	MulticastRPCFeverMontagePlay();
+	MulticastRPC_OnFeverModeStart();
+	
 	if (AudioComponent)
 	{
-		AudioComponent->PlayFeverModeStartSound();
+		// 피버모드 시작 사운드 즉시 재생 (bForcePlay = true로 RPC 제한 무시)
+		AudioComponent->PlayFeverModeStartSound(true);
 
-		// FeverModeStateSound는 0.15초 후에 재생 (RPC 간격 제한 회피)
+		// FeverModeStateSound는 0.2초 후에 재생 (RPC 간격 제한 확실히 회피)
 		UWorld* World = GetWorld();
 		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
 		{
@@ -993,12 +997,11 @@ void AGS_Drakhar::StartFeverMode()
 				FeverStateSoundDelayTimer,
 				this,
 				&AGS_Drakhar::PlayFeverModeStateSoundDelayed,
-				0.15f,
+				0.2f,
 				false
 			);
 		}
 	}
-	MulticastRPC_OnFeverModeStart();
 }
 
 void AGS_Drakhar::DecreaseFeverGauge()
@@ -1072,6 +1075,12 @@ void AGS_Drakhar::StartFlyingStaminaTimer()
 	if (FlyingStaminaCoolTime <= 0.f)
 	{
 		FlyingStaminaCoolTime = 0.f;
+		
+		// 스테미나가 0이 되면 떨어지는 소리 재생
+		if (HasAuthority() && AudioComponent)
+		{
+			AudioComponent->PlayLandingSound();
+		}
 	}
 
 	//UE_LOG(LogTemp, Error, TEXT("start flying stamina %f"), FlyingStaminaCoolTime);
@@ -1164,12 +1173,26 @@ void AGS_Drakhar::OnQuitSkill()
 
 void AGS_Drakhar::MulticastPlayFeverModeEndEffects_Implementation()
 {
-	// 피버 모드 스테이트 사운드 중지 및 종료 사운드 재생
-	if (AudioComponent)
+	// 피버 모드 스테이트 사운드 중지
+	if (AudioComponent && AudioComponent->GetOwner())
 	{
-		// Multicast RPC 내부에서 호출되므로 _Implementation을 직접 호출
-		AudioComponent->Multicast_StopFeverModeStateSound_Implementation();
-		AudioComponent->Multicast_PlayFeverModeEndSound_Implementation();
+		// Playing ID가 유효하면 FAkAudioDevice를 통해 중지
+		int32& FeverModeStateSoundPlayingID = AudioComponent->GetFeverModeStateSoundPlayingID();
+		if (FeverModeStateSoundPlayingID != AK_INVALID_PLAYING_ID)
+		{
+			FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
+			if (AudioDevice != nullptr)
+			{
+				AudioDevice->StopPlayingID(FeverModeStateSoundPlayingID, AudioComponent->GetFeverModeStateFadeOutDuration());
+				FeverModeStateSoundPlayingID = AK_INVALID_PLAYING_ID;
+			}
+		}
+		
+		// 피버 모드 종료 사운드 재생
+		if (FeverModeEndSoundEvent)
+		{
+			UAkGameplayStatics::PostEvent(FeverModeEndSoundEvent, this, 0, FOnAkPostEventCallback());
+		}
 	}
 
 	// 카메라 쉐이크 효과 (피버 모드 종료시 쉐이크)
@@ -1399,7 +1422,8 @@ void AGS_Drakhar::PlayFeverModeStateSoundDelayed()
 
 	if (AudioComponent && IsFeverMode)
 	{
-		AudioComponent->PlayFeverModeStateSound();
+		// bForcePlay = true로 RPC 제한 무시하여 확실하게 재생
+		AudioComponent->PlayFeverModeStateSound(true);
 	}
 }
 

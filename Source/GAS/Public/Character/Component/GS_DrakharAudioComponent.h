@@ -31,16 +31,21 @@ public:
 	void PlayDraconicFurySkillSound();
 	void PlayDraconicProjectileSound(const FVector& Location);
 	void PlayAttackHitSound();
-	void PlayFeverModeStartSound();
+	void PlayFeverModeStartSound(bool bForcePlay = true);  // 피버모드는 중요하므로 기본적으로 강제 재생
 	void PlayFeverModeEndSound();
-	void PlayFeverModeStateSound();
+	void PlayFeverModeStateSound(bool bForcePlay = true);  // 피버모드는 중요하므로 기본적으로 강제 재생
 	void StopFeverModeStateSound();
 	void PlayComboFinisherSound();
+	void PlayLandingSound();
 
 	// === 로컬 전용 사운드 재생 (RPC 없음 - RepNotify에서 호출) ===
 	void PlayHurtSoundLocal();
 	void PlayDeathSoundLocal();
 	void PlayDraconicProjectileImpactSoundLocal(const FVector& ImpactLocation, bool bHitCharacter);
+
+	// === Getter 함수 ===
+	FORCEINLINE int32& GetFeverModeStateSoundPlayingID() { return FeverModeStateSoundPlayingID; }
+	FORCEINLINE int32 GetFeverModeStateFadeOutDuration() const { return FeverModeStateFadeOutDuration; }
 
 private:
 	// === 멀티캐스트 RPC 함수 ===
@@ -76,6 +81,9 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayComboFinisherSound();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayLandingSound();
 
 	UPROPERTY()
 	TObjectPtr<AGS_Drakhar> OwnerDrakhar;
