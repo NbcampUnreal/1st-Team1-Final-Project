@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{2B627F62-0F53-9565-7F74-19B248FAA78F}",
+    "Hash": "{9DFFC290-7E3F-9F82-E6C0-7C4574E78BBA}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -86,6 +86,14 @@
       "Location": "Memory",
       "ShortName": "ESM_Character_Sharon_On_It_1_Female_Adult_Mature_DJ_Woman.wav",
       "CachePath": "B3/{B33BE35D-AA10-A137-2609-FC6FB0A435E0}.wem"
+     },
+     {
+      "Id": "26564241",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "FX_Amb_Campfire.wav",
+      "CachePath": "A3/{A3AE5B2F-8759-DA5C-2117-6DFDC085D01F}.wem"
      },
      {
       "Id": "33319739",
@@ -1526,14 +1534,6 @@
       "Location": "Memory",
       "ShortName": "ESM_Horror_Game_Vocal_Creature_Beast_Attack_Dry.wav",
       "CachePath": "BB/{BB69DEC3-7850-9D9E-61A8-2C1A411383AC}.wem"
-     },
-     {
-      "Id": "678238931",
-      "Language": "SFX",
-      "Streaming": "false",
-      "Location": "Memory",
-      "ShortName": "SFX_CampFire.wav",
-      "CachePath": "CC/{CC1ACFFD-2993-61AD-7C6F-05F047CC3034}.wem"
      },
      {
       "Id": "680560106",
@@ -6680,11 +6680,11 @@
       "Name": "Props_CampFire",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_TPS\\Props_CampFire",
       "GUID": "{BCEA7046-966A-4D96-8341-33FB4002A3CD}",
-      "MaxAttenuation": "800",
+      "MaxAttenuation": "2550",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
-        "Id": "678238931"
+        "Id": "26564241"
        }
       ]
      },
@@ -8047,10 +8047,22 @@
       "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
      },
      {
+      "Id": "988953028",
+      "Name": "SFXVolume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\SFXVolume",
+      "GUID": "{AE614B2E-3E2C-4A32-BE85-A2A4A2B87041}"
+     },
+     {
       "Id": "1111830101",
       "Name": "Distance_Volume",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\Distance_Volume",
       "GUID": "{CE0DA21D-B039-4D70-A62B-0321CD32566D}"
+     },
+     {
+      "Id": "3561306875",
+      "Name": "MapBGMVolume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\MapBGMVolume",
+      "GUID": "{2F3E4FB8-0714-4169-BAB2-33AE6207B7C7}"
      },
      {
       "Id": "3868840468",
@@ -8151,6 +8163,6 @@
     ]
    }
   ],
-  "FileHash": "{30275006-2358-AF34-ACBD-9ADAA82FFCD5}"
+  "FileHash": "{34C8E1C4-E0B9-00FD-D9A2-4F2DBF3FAAFB}"
  }
 }

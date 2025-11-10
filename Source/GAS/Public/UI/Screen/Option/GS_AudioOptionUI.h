@@ -33,6 +33,18 @@ public:
 	UPROPERTY()
 	float TempBGMVolume;
 
+	// SFX 볼륨 슬라이더 (커스텀 UI 위젯에서 동적으로 찾음)
+	UPROPERTY()
+	USlider* SFXVolumeSlider;
+
+	// SFX 볼륨 텍스트 (슬라이더 옆에 표시되는 숫자)
+	UPROPERTY()
+	UTextBlock* SFXVolumeText;
+
+	// 임시 SFX 볼륨 값
+	UPROPERTY()
+	float TempSFXVolume;
+
 	// 초기화 중 플래그 (InitializeValues 실행 중 이벤트 무시용)
 	bool bIsInitializing;
 
@@ -60,12 +72,28 @@ public:
 	void OnBGMVolumeChanged(float Value);
 
 	/**
+	 * SFX 볼륨 슬라이더 값이 변경될 때 호출되는 함수
+	 * 즉시 저장 방식으로 GameInstance->SetSFXVolume을 호출하여 저장합니다.
+	 * @param Value 새로운 볼륨 값 (0.0 ~ 100.0, 내부에서 0.0 ~ 1.0으로 변환)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Audio")
+	void OnSFXVolumeChanged(float Value);
+
+	/**
 	 * 블루프린트에서 정적으로 호출 가능한 BGM 볼륨 설정 함수
 	 * @param WorldContextObject 월드 컨텍스트
 	 * @param Volume 새로운 볼륨 값 (0.0 ~ 1.0)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (WorldContext = "WorldContextObject"))
 	static void SetBGMVolumeStatic(UObject* WorldContextObject, float Volume);
+
+	/**
+	 * 블루프린트에서 정적으로 호출 가능한 SFX 볼륨 설정 함수
+	 * @param WorldContextObject 월드 컨텍스트
+	 * @param Volume 새로운 볼륨 값 (0.0 ~ 1.0)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Audio", meta = (WorldContext = "WorldContextObject"))
+	static void SetSFXVolumeStatic(UObject* WorldContextObject, float Volume);
 
 	// IGS_SettingsApplyInterface 구현
 	/**

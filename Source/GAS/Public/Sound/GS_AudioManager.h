@@ -65,6 +65,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Audio|BGM", meta = (DisplayName = "현재 BGM 볼륨 가져오기"))
 	float GetCurrentBGMVolume() const { return CurrentBGMVolume; }
 
+	// === SFX 볼륨 설정 ===
+	UFUNCTION(BlueprintCallable, Category = "Audio|SFX", meta = (DisplayName = "SFX 볼륨 설정"))
+	void SetSFXVolume(float Volume);
+
+	// 현재 SFX 볼륨 가져오기
+	UFUNCTION(BlueprintCallable, Category = "Audio|SFX", meta = (DisplayName = "현재 SFX 볼륨 가져오기"))
+	float GetCurrentSFXVolume() const { return CurrentSFXVolume; }
+
 	// === 통합 전투 시퀀스 ===
 	UFUNCTION(BlueprintCallable, Category = "Audio|Combat", meta = (DisplayName = "전투 시퀀스 시작", ToolTip = "맵 BGM을 페이드아웃/정지하고 전투 BGM을 시작합니다."))
 	void StartCombatSequence(AActor* Context, UAkAudioEvent* CombatMusicStartEvent, UAkAudioEvent* CombatMusicStopEvent, float FadeTime = 2.0f);
@@ -110,12 +118,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Audio|Map BGM", meta = (DisplayName = "맵 BGM 볼륨 RTPC"))
 	UAkRtpc* MapBGMVolumeRTPC;
 
+	// === SFX 볼륨 관련 에셋들 ===
+	UPROPERTY(EditDefaultsOnly, Category = "Audio|SFX", meta = (DisplayName = "SFX 볼륨 RTPC"))
+	UAkRtpc* SFXVolumeRTPC;
+
 	// === 네이티브 오디오 시스템 지원 ===
 	UPROPERTY(EditDefaultsOnly, Category = "Audio|Map BGM", meta = (DisplayName = "BGM 사운드 클래스"))
 	USoundClass* BGMSoundClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Audio|Map BGM", meta = (DisplayName = "BGM 사운드 믹스"))
 	USoundMix* BGMSoundMix;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio|SFX", meta = (DisplayName = "SFX 사운드 클래스"))
+	USoundClass* SFXSoundClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio|SFX", meta = (DisplayName = "SFX 사운드 믹스"))
+	USoundMix* SFXSoundMix;
 
 private:
 	// 생성된·파괴 주기는 GameInstance와 동기화
@@ -167,6 +185,9 @@ private:
 
 	// 현재 BGM 볼륨 (0.0 ~ 1.0)
 	float CurrentBGMVolume;
+
+	// 현재 SFX 볼륨 (0.0 ~ 1.0)
+	float CurrentSFXVolume;
 
 	// 타이머 콜백용 캐시 변수
 	TWeakObjectPtr<AActor> CachedTargetActor;
@@ -223,24 +244,42 @@ private:
 	bool IsAudioProcessingAllowed() const;
 
 	/**
-	* @brief 현재 게임 모드(TPS/RTS)에 따라 BGM을 재생하거나 정지할 대상 액터를 결정합니다.
-	* @param Context 컨텍스트로 제공된 액터 (옵셔널)
-	* @return 결정된 타겟 액터. RTS 모드이거나 적절한 Pawn이 없는 경우 nullptr을 반환할 수 있습니다.
+	* @brief 맵 로딩 시작 시 호출되는 콜백 (BGM 정지용)
 	*/
-	AActor* GetTargetActorForPlayback(AActor* Context = nullptr);
-
-	/**
-	 * @brief 맵 로딩 시작 시 호출되어 BGM을 정지시킵니다.
-	 */
 	void OnPreLoadMap(const FString& MapName);
 
 	/**
-	 * @brief 현재 재생 중인 전투 음악을 정지합니다.
-	 */
+	* @brief 창 포커스 손실 시 호출되는 콜백 (모든 오디오 음소거)
+	*/
+	void OnApplicationDeactivated();
+
+	/**
+	* @brief 창 포커스 복원 시 호출되는 콜백 (오디오 복원)
+	*/
+	void OnApplicationActivated();
+
+	/**
+	* @brief 뷰포트 포커스 변경 시 호출되는 콜백 (에디터 PIE용)
+	* @param bIsActive 활성화 상태
+	*/
+	void OnViewportFocusChanged(bool bIsActive);
+
+	/**
+	* @brief 현재 게임 모드(TPS/RTS)에 따라 BGM을 재생하거나 정지할 대상 액터를 결정합니다.
+	* @param Context 컨텍스트로 제공된 액터 (옵셔널)
+	* @return 결정된 타겟 액터
+	*/
+	AActor* GetTargetActorForPlayback(AActor* Context);
+
+	/**
+	* @brief 현재 재생 중인 전투 음악을 정지합니다.
+	* @param Context 컨텍스트 액터
+	*/
 	void StopCurrentCombatMusic(AActor* Context);
 
 	/**
-	 * @brief 현재 재생 중인 보스 음악을 정지합니다.
+	* @brief 현재 재생 중인 보스 음악을 정지합니다.
+	* @param Context 컨텍스트 액터
 	 */
 	void StopCurrentBossMusic(AActor* Context);
 
