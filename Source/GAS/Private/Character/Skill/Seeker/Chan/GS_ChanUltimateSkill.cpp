@@ -27,6 +27,8 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
 
+	
+
 	// 쿨타임 측정 시작
 	StartCoolDown();
 	
@@ -38,6 +40,11 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
+		if (UAnimInstance* AnimInstance = OwnerPlayer->GetMesh()->GetAnimInstance())
+		{
+			AnimInstance->OnMontageEnded.AddUniqueDynamic(this, &UGS_ChanUltimateSkill::OnMontageEnded);
+		}
+
 		// 궁극기 사운드 재생 (멀티캐스트)
 		if (OwnerPlayer->HasAuthority())
 		{
@@ -329,16 +336,14 @@ void UGS_ChanUltimateSkill::OnMontageEnded(UAnimMontage* Montage, bool bInterrup
 
 	if (SkillAnimMontages.Contains(Montage))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Montage Ended: %s (Interrupted: %s)"),
-			*Montage->GetName(),
-			bInterrupted ? TEXT("True") : TEXT("False"));
-
 		// 애니메이션 종료 처리 (Notify가 빠졌을 경우에도 안전하게)
-		OnSkillAnimationEnd();
-
-		if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
+		if (Montage == SkillAnimMontages[2] || Montage == SkillAnimMontages[1])
 		{
-			AnimInstance->OnMontageEnded.RemoveDynamic(this, &UGS_ChanUltimateSkill::OnMontageEnded);
+			OnSkillAnimationEnd();
+			if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
+			{
+				AnimInstance->OnMontageEnded.RemoveDynamic(this, &UGS_ChanUltimateSkill::OnMontageEnded);
+			}
 		}
 	}
 }
