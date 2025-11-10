@@ -23,6 +23,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "Character/Component/GS_DebuffComp.h"
 #include "System/GameMode/GS_InGameGM.h"
 
 
@@ -35,6 +36,7 @@ AGS_TpsController::AGS_TpsController()
 
 	//KimYJ
 	bReplicates = true;
+	bIsAutoMoving = false;
 	//SetReplicates(true); 신중은
 }
 
@@ -157,6 +159,16 @@ void AGS_TpsController::PageDown(const FInputActionValue& InputValue)
 
 void AGS_TpsController::SetMoveControlValue(bool CanMoveRight, bool CanMoveForward)
 {
+	// 움직임 활성화 시 Stun 디버프 상태인지 확인 (KCY)
+	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
+	{
+		if ((CanMoveRight || CanMoveForward) && ControlledPawn->GetDebuffComp()->IsDebuffActive(EDebuffType::Stun))
+		{
+			// Stun 디버프 상태라면 ControlValues 값 변경하지 않음
+			return;
+		}
+	}
+
 	ControlValues.bCanMoveForward = CanMoveForward;
 	ControlValues.bCanMoveRight = CanMoveRight;
 }

@@ -27,8 +27,6 @@ void UGS_DebuffComp::ApplyDebuff(EDebuffType Type, AActor* Attacker)
 		return;
 	}
 
-
-
 	// 해당 디버프 타입의 데이터 가져오기
 	const FDebuffData* Row = GetDebuffData(Type);
 	if (!Row || !Row->DebuffClass) return;
@@ -81,8 +79,6 @@ void UGS_DebuffComp::RemoveDebuff(EDebuffType Type)
 		return;
 	}
 
-
-
 	UGS_DebuffBase* Debuff = GetActiveDebuff(Type);
 	if (!Debuff)
 	{
@@ -100,21 +96,20 @@ void UGS_DebuffComp::RemoveDebuff(EDebuffType Type)
 
 	if (ConcurrentDebuffs.Contains(Debuff))
 	{
-		Debuff->OnExpire();
 		ConcurrentDebuffs.Remove(Debuff);
+		
 	}
 	else if (DebuffQueue.Contains(Debuff))
 	{
-		Debuff->OnExpire();
 		DebuffQueue.Remove(Debuff);
 	}
 	else if (Debuff == CurrentDebuff)
 	{
-		CurrentDebuff->OnExpire();
 		CurrentDebuff = nullptr;
 		ApplyNextDebuff();
 	}
 
+	Debuff->OnExpire();
 	// 디버프 VFX 제거
 	RemoveDebuffVFX(Type);
 
@@ -138,8 +133,6 @@ void UGS_DebuffComp::ClearAllDebuffs()
 		Server_ClearAllDebuffs();
 		return;
 	}
-
-
 
 	// 타이머 먼저 제거
 	for (auto& Elem : DebuffTimers)
@@ -227,7 +220,7 @@ void UGS_DebuffComp::RefreshDebuffTimer(UGS_DebuffBase* Debuff, float Duration)
 				// 디버프 VFX 제거
 				RemoveDebuffVFX(ValidDebuff->GetDebuffType());
 				
-				ValidDebuff->OnExpire();
+				
 				DebuffTimers.Remove(ValidDebuff);
 				if (ConcurrentDebuffs.Contains(ValidDebuff))
 				{
@@ -243,6 +236,8 @@ void UGS_DebuffComp::RefreshDebuffTimer(UGS_DebuffBase* Debuff, float Duration)
 					ApplyNextDebuff();
 				}
 				UpdateReplicatedDebuffList();
+
+				ValidDebuff->OnExpire();
 			}, Duration, false);
 	}
 }
@@ -269,10 +264,10 @@ void UGS_DebuffComp::CreateAndApplyConcurrentDebuff(UGS_DebuffBase* Debuff)
 			// 디버프 VFX 제거
 			RemoveDebuffVFX(ValidDebuff->GetDebuffType());
 			
-			ValidDebuff->OnExpire();
 			ConcurrentDebuffs.Remove(ValidDebuff);
 			DebuffTimers.Remove(ValidDebuff);
 			UpdateReplicatedDebuffList();
+			ValidDebuff->OnExpire();
 		}, Debuff->GetDuration(), false);
 
 	DebuffTimers.Add(Debuff, Handle);
@@ -391,13 +386,13 @@ void UGS_DebuffComp::ApplyNextDebuff()
 			// 디버프 VFX 제거
 			RemoveDebuffVFX(ValidDebuff->GetDebuffType());
 			
-			ValidDebuff->OnExpire();
 			DebuffTimers.Remove(ValidDebuff);
 			if (CurrentDebuff == ValidDebuff)
 			{
 				CurrentDebuff = nullptr;
 			}
 			UpdateReplicatedDebuffList();
+			ValidDebuff->OnExpire();
 			ApplyNextDebuff();
 		}, Remaining, false);
 
