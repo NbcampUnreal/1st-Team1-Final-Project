@@ -59,7 +59,7 @@ void UGS_HitReactComp::PlayHitReact(EHitReactType ReactType, FVector HitDirectio
 		{
 			if (OwnerSeeker)
 			{
-				OwnerSeeker->StateReset();
+				//OwnerSeeker->StateReset(); // KCY(주석처리함!)
 			}
 		}
 
