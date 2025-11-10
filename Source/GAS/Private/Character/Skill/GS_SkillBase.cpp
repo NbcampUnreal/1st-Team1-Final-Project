@@ -324,6 +324,7 @@ void UGS_SkillBase::BeginDestroy()
 	if(bIsActive)
 	{
 		DeactiveSkill();
+		OnSkillAnimationEnd();
 	}
 }
 
