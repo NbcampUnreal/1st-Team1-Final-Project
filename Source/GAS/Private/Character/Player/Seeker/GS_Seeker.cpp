@@ -210,12 +210,21 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 
 AGS_Item* AGS_Seeker::GetItem(EItemType ItemType)
 {
-	return Items[ItemType];
+	if (AGS_Item* Item = Cast<AGS_Item>(Items.FindRef(ItemType)))
+	{
+		return Item;
+	}
+	
+	return nullptr;
 }
 
 UGS_ItemData* AGS_Seeker::GetItemData(EItemType ItemType)
 {
-	return ItemDatas[ItemType];
+	if (UGS_ItemData* ItemData = Cast<UGS_ItemData>(Items.FindRef(ItemType)))
+	{
+		return ItemData;
+	}
+	return nullptr;
 }
 
 void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
