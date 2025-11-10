@@ -206,6 +206,10 @@ void AGS_BossLevelGM::OnTimerEnd()
 
 void AGS_BossLevelGM::EndGame(EGameResult Result)
 {
+    if (bEndGameCalled)
+        return;
+    bEndGameCalled = true;
+    
     FString NextLevelName = TEXT("ResultLevel");
 
     if (Result == EGameResult::GR_SeekersLost)
@@ -218,15 +222,44 @@ void AGS_BossLevelGM::EndGame(EGameResult Result)
         UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Not All Seekers dead. Traveling to ResultLevel."));
         SetGameResultOnAllPlayers(EGameResult::GR_SeekersWon);
     }
+    
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        UE_LOG(LogTemp, Error, TEXT("BossLevelGM::EndGame - World is null, cannot schedule travel."));
+        return;
+    }
 
     if (!NextLevelName.IsEmpty())
     {
         FTimerHandle TravelDelayHandle;
-        TWeakObjectPtr<AGS_BossLevelGM> WeakThis = this;
+        TWeakObjectPtr<UWorld> WeakWorld = World;
 
-        GetWorldTimerManager().SetTimer(TravelDelayHandle, [WeakThis, NextLevelName]() {
-            WeakThis->GetWorld()->ServerTravel(NextLevelName + "?listen", true);
-        }, 3.f, false);
+        GetWorldTimerManager().SetTimer(TravelDelayHandle,
+            [WeakWorld, NextLevelName]()
+            {
+                UWorld* World = WeakWorld.Get();
+                if (!World)
+                {
+                    UE_LOG(LogTemp, Error, TEXT("BossLevel Travel - World invalid."));
+                    return;
+                }
+                
+                if (World->bIsTearingDown)
+                {
+                    UE_LOG(LogTemp, Log, TEXT("BossLevel Travel - World tearing down, skip extra travel."));
+                    return;
+                }
+
+                if (World->GetNetMode() != NM_Client)
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("BossLevel Travel - ServerTravel to %s"), *NextLevelName);
+                    World->ServerTravel(NextLevelName + TEXT("?listen"), true);
+                }
+            },
+            5.f,
+            false
+        );
     }
 }
 
@@ -245,7 +278,7 @@ void AGS_BossLevelGM::SetGameResultOnAllPlayers(EGameResult Result)
 
 void AGS_BossLevelGM::HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, bool bIsAlive)
 {
-    UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Player %s alive status changed to %s"),
+    UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Player %s alive status : %s"),
         *PlayerState->GetPlayerName(),
         bIsAlive ? TEXT("True") : TEXT("False"));
 
