@@ -119,6 +119,10 @@ void AGS_CustomLobbyPC::TryBindToPlayerStateDelegates()
 		// 델리게이트 바인딩 후 현재 상태로 UI 즉시 업데이트
 		HandleRoleChanged(PS->CurrentPlayerRole);
 		HandleReadyStatusChanged(PS->bIsReady);
+		if (UGS_ArcaneBoardLPS* LPS = GetLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+		{
+			LPS->RefreshBoardForCurrCharacter();
+		}
 	}
 	else
 	{

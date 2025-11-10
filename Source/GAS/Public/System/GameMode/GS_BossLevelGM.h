@@ -34,6 +34,8 @@ public:
 
 	void CheckAllPlayersDead();
 
+	bool bEndGameCalled = false;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Player Controller Classes")
 	TSubclassOf<APlayerController> SeekerControllerClass;
 
