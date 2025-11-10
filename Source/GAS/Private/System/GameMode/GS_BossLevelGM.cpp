@@ -139,17 +139,11 @@ void AGS_BossLevelGM::StartMatchWhenAllReady()
     {
         if (AGS_PlayerState* GPS = Cast<AGS_PlayerState>(PS))
         {
-            if (GPS && GPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+            if (AGS_Character* GSChar = Cast<AGS_Character>(GPS->GetPawn()))
             {
-                if (AGS_Character* GuardianPawn = Cast<AGS_Character>(GPS->GetPawn()))
+                if (UGS_StatComp* StatComp = GSChar->GetStatComp())
                 {
-                    if (UGS_StatComp* StatComp = GuardianPawn->GetStatComp())
-                    {
-                        const float MaxHP = StatComp->GetMaxHealth();
-                        StatComp->SetCurrentHealth(MaxHP, true);
-                        GPS->CurrentHealth = MaxHP;
-                        GPS->SetIsAlive(true);
-                    }
+                    StatComp->ServerRPCHeal(1.f);
                 }
             }
         }

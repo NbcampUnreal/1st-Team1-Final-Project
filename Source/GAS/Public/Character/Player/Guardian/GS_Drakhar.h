@@ -17,8 +17,10 @@ class UMaterialInstanceDynamic;
 class UAkAudioEvent;
 class AGS_EarthquakeEffect;
 struct FGS_CameraShakeInfo;
+class UGS_DrakharStaminaGauge;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentFeverGaugeChangedDelegate, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnCurrentStaminaGaugeChangedDelegate, float);
 
 UCLASS()
 class GAS_API AGS_Drakhar : public AGS_Guardian
@@ -133,7 +135,6 @@ public:
 	void StartCtrl() override;
 	void StopCtrl() override;
 	
-	
 	//[Fever Mode]
 	FORCEINLINE float GetCurrentFeverGauge() const { return CurrentFeverGauge; }
 	FORCEINLINE float GetMaxFeverGauge() const { return MaxFeverGauge; }
@@ -166,9 +167,13 @@ public:
 	void StopHealRegeneration();
 
 	//[flying timer]
+	void SetStaminaGaugeWidget(UGS_DrakharStaminaGauge* InDrakharStaminaGaugeWidget);
 	void StartFlyingStaminaTimer();
+	FORCEINLINE float GetCurrentStaminaGauge() const { return FlyingStaminaCoolTime; }
+	FORCEINLINE float GetMaxStaminaGauge() const {return MaxFlyingStaminaCoolTime; }
 	void EndFlyingStaminaTimer();
-		
+	FOnCurrentStaminaGaugeChangedDelegate OnCurrentStaminaGaugeChanged;
+
 	// === Multicast RPCs delegated to components ===
 	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayComboAttackSound();
 	// UFUNCTION(NetMulticast, Unreliable) void MulticastPlayDashSkillSound();
