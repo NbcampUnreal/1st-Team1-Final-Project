@@ -137,18 +137,14 @@ void AGS_Player::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
-
-	if (PS && StatComp)
+	if (AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>())
 	{
-		StatComp->SetCurrentHealth(PS->CurrentHealth, true);
 		PS->OnPawnStatInitialized();
 		UE_LOG(LogTemp, Warning, TEXT("AGS_Player::PossessedBy: Synced StatComp health from PlayerState. PS Health: %f, StatComp Health set to: %f"), PS->CurrentHealth, StatComp->GetCurrentHealth());
 	}
 	else
 	{
-		if (!PS) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: PlayerState is NULL!"), *GetName());
-		if (!StatComp) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: StatComp is NULL!"), *GetName());
+		UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: PlayerState is NULL!"), *GetName());
 	}
 }
 

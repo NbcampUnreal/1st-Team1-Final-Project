@@ -235,7 +235,9 @@ Switch	ID	Name	Switch Group			Notes
 
 Game Parameter	ID	Name			Wwise Object Path	Notes
 	181543522	LowHPSound			\Default Work Unit\LowHPSound	
+	988953028	SFXVolume			\Default Work Unit\SFXVolume	
 	1111830101	Distance_Volume			\Default Work Unit\Distance_Volume	
+	3561306875	MapBGMVolume			\Default Work Unit\MapBGMVolume	
 	3868840468	RTS_Base_20m			\Default Work Unit\RTS_Base_20m	
 
 Effect plug-ins	ID	Name	Type				Notes
@@ -335,6 +337,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	15081757	SFX_CrystalSpikeTrap0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\69\{69283A98-7A63-273F-A660-E7C5A5D74086}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_RTS\SFX_FloorCrystalSpikeTrap_RTS\SFX_CrystalSpikeTrap0		121180
 	19908764	Vocal_Growl_0	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\94\{94A45104-2880-3322-C06A-B846438CAD20}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\ShadowFang\SFX_Mon_ShadowFang_Attack\Vocal_Growl_0		246968
 	25611372	Merci_SFX2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B3\{B33BE35D-AA10-A137-2609-FC6FB0A435E0}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\Voice_MerciUltimate_RTS\Merci_SFX2		68634
+	26564241	Props_CampFire	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\A3\{A3AE5B2F-8759-DA5C-2117-6DFDC085D01F}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TPS\Props_CampFire		4709820
 	33319739	FootstepsWater	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\24\{24053DC7-9C92-443A-25F1-39E4054A461C}.wem		\Actor-Mixer Hierarchy\Default Work Unit\BossFootSteps\Water\FootstepsWater		97928
 	42963631	Merci_Dont01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\5C\{5C1DC051-87D0-DFC6-B963-0440EE359128}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Merci\Voice_Merci_ArrowZero\Merci_Dont01		65786
 	45190972	SmallClawSound1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\63\{633CEBE1-2B3B-4680-28E5-1CFE99F164DE}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_MonsterSound\SFX_Mon_SmallClaw_RTS\SmallClawSound1		108704
@@ -387,7 +390,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	199617062	Footstep_Grass (1)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\D4\{D4997C74-C868-E958-1836-37F645D77735}.wem		\Actor-Mixer Hierarchy\Default Work Unit\BossFootSteps\Grass\Footstep_Grass (1)		39204
 	199931232	SmallClaw_DeathSound1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\29\{2931EE58-FB38-B778-5E0B-8EC20B169BA9}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\SmallClaw\SFX_Mon_SmallClaw_Death\SmallClaw_DeathSound1		289740
 	209945099	Merci_SFX4	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\B4\{B4A8F437-18BF-3FF0-5F8E-A6CF3CE0F126}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\Voice_MerciUltimate_RTS\Merci_SFX4		96436
-	213946712	SFX_BearTrap_In1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\D5\{D570C748-BD7E-8229-9BEE-F42962377B5B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_RTS\SFX_BearTrap_RTS\SFX_BearTrap_In1		56684
+	213946712	SFX_BearTrap_In	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\D5\{D570C748-BD7E-8229-9BEE-F42962377B5B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_RTS\SFX_BearTrap_RTS\SFX_BearTrap_In		56684
 	222843135	FootSteps_Lava (3)	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\8E\{8EBB5EF5-C1EA-65FF-5278-9FEBECBFC81B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Lava\FootSteps_Lava (3)		129292
 	223150580	SFX_SmallClaw_Idle1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\2A\{2A5119AE-25F2-360D-62BD-BAE2113B4F4F}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_MonsterSound\SFX_Mon_ShadowFang_RTS\SFX_SmallClaw_Idle1		163264
 	223413545	MonsterSnarlGrowl1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\39\{3904409D-71D1-AB20-F48A-8D01663764A7}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\SmallClaw\SFX_Mon_SmallClaw_Idle\MonsterSnarlGrowl1		112988
@@ -398,7 +401,7 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	243265281	Drakhar_Outch3	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\3F\{3FDBDDB0-2787-73B5-7029-D6618B34C33A}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Guardian\Voice_Drakhar_Hit\Drakhar_Outch3		127192
 	245240366	SFX_Lava1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CC\{CCC44E05-8543-52D6-124F-F6CD377C4DA1}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TPS\Lava\SFX_Lava\SFX_Lava1		2037828
 	246210322	FlameMovementHeavy	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\77\{77AF4E19-1068-61F3-43F7-6D636534580F}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TPS\SFX_FlameShot\FlameMovementHeavy		1232128
-	255360718	FootstepsConcrete2	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E4\{E4362B59-0A9A-4535-8495-A5FD31975BB3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Stone\FootstepsConcrete2		64264
+	255360718	FootstepsConcrete4	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\E4\{E4362B59-0A9A-4535-8495-A5FD31975BB3}.wem		\Actor-Mixer Hierarchy\Default Work Unit\FootSteps\Stone\FootstepsConcrete4		64264
 	258681612	Merci_SFX	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\1E\{1EAFA9F9-472E-A6B9-8DF0-765528FE695C}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\Voice_MerciUltimate_RTS\Merci_SFX		99204
 	259888318	AresGrowl	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\8A\{8A474FBA-B766-7FB7-7D59-ED8CF723C908}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Ares\EV_AresUltimateEnd\AresGrowl		108908
 	265430466	GlassBreakWine_SFXB_2343	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\F7\{F73E03C8-228D-708B-253B-9023EFB5A44A}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TPS\FloorCrystalSpike\SFX_FloorSpikeTrap_Warning\GlassBreakWine_SFXB_2343		130192
@@ -515,7 +518,6 @@ In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
 	661276192	Undead_Vocal_Hurt_1	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\73\{73F8BB20-0E7F-3EE9-EBB3-922D9E7C7D90}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\ShadowFang\SFX_Mon_ShadowFang_Hurt\Undead_Vocal_Hurt_1		156480
 	665252404	EarthquakeTremorRocks	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\32\{32796D3A-8F1C-5320-5441-768D926FD74B}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Guardian\EV_DrakharEarthquake\EarthquakeTremorRocks		499520
 	674316476	Beast_Attack_Dry	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\BB\{BB69DEC3-7850-9D9E-61A8-2C1A411383AC}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Monster\RTS_UI_Sound\SFX_UI_Mon_IronFang\Beast_Attack_Dry		80768
-	678238931	Props_CampFire	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CC\{CC1ACFFD-2993-61AD-7C6F-05F047CC3034}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Props\Props_TPS\Props_CampFire		1628452
 	680560106	Combat_axe_impact	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\CB\{CB6C1D75-6E64-631B-1F48-87212F548CD9}.wem		\Actor-Mixer Hierarchy\Default Work Unit\SFX_MeleeHit_Shield\Combat_axe_impact		240376
 	684819280	Combat_axe_impact_01	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\1B\{1B80E696-4AD3-E30F-1CE4-0BC1737BEA4C}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\RTS_SeekerSound\SFX_Shield_Guard_RTS\Combat_axe_impact_01		370960
 	689500474	SFX_ArrowImpact_Body	F:\GItKraken\1st-Team1-Final-Project\1st-Team1-Final-Project_WwiseProject\.cache\2F\{2F48D1A4-DA9C-10C9-EC73-0E5AA1A41B36}.wem		\Actor-Mixer Hierarchy\Default Work Unit\Seeker\Merci\EV_ArrowHit_UI\SFX_ArrowImpact_Body		61392
