@@ -33,6 +33,28 @@ UGS_StatComp::UGS_StatComp()
 void UGS_StatComp::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	APlayerController* PC = Cast<APlayerController>(OwnerCharacter->GetController());
+	if (PC && PC->IsLocalController())
+	{
+		if (UGS_ArcaneBoardLPS* LPS = PC->GetLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+		{
+			if (UGS_ArcaneBoardManager* Manager = LPS->GetOrCreateBoardManager())
+			{
+				FArcaneBoardStats AppliedStats = Manager->AppliedBoardStats;
+				FGS_StatRow RuneStats = AppliedStats.RuneStats+ AppliedStats.BonusStats;
+				UpdateStat(RuneStats);
+
+				UE_LOG(LogTemp, Warning, TEXT("StatComp BeginPlay: 룬 스탯 적용 완료"));
+			}
+		}
+	}
 }
 
 void UGS_StatComp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -59,35 +81,14 @@ void UGS_StatComp::InitStat(FName RowName)
 		Agility = FoundRow->AGL;
 		AttackSpeed = FoundRow->ATS;
 
-		AGS_Character* OwnerChar = Cast<AGS_Character>(GetOwner());
-		APlayerController* PC = Cast<APlayerController>(OwnerChar->GetController());
-		if (PC && PC->IsLocalController())
+		if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
 		{
-			//이전 위치는 UGS_StatComp::BeginPlay()였어서 지금도 웬만하면 작동할텐데 정석적으로는 불안정함.
-			//AGS_Character::BeginPlay()에서 InitStat()을 호출해주고 있어서 그럼.
-			//이게 안 된다면, AGS_Character::PossessedBy override 해서 거기에 InitStat() 넣는 게 안전함.
-		
-			if (UGS_ArcaneBoardLPS* LPS = PC->GetLocalPlayer()->GetSubsystem<UGS_ArcaneBoardLPS>())
+			if (AGS_PlayerState* PS = OwnerPawn->GetPlayerState<AGS_PlayerState>())
 			{
-				if (UGS_ArcaneBoardManager* Manager = LPS->GetOrCreateBoardManager())
-				{
-					FArcaneBoardStats AppliedStats = Manager->AppliedBoardStats;
-					FGS_StatRow RuneStats = AppliedStats.RuneStats+ AppliedStats.BonusStats;
-					UpdateStat(RuneStats);
-
-					UE_LOG(LogTemp, Warning, TEXT("UGS_StatComp::InitStat: 룬 스탯 적용 완료"));
-				}
+				CurrentHealth = FMath::Clamp(PS->CurrentHealth, 0.f, MaxHealth);
+				UE_LOG(LogTemp, Warning, TEXT("StatComp InitStat 성공: RowName=%s, HP=%.1f, ATK=%.1f, DEF=%.1f, AGL=%.1f, ATS=%.1f"),
+				*RowName.ToString(), MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
 			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("UGS_StatComp::InitStat: 룬 스탯 적용 실패"));
-		}
-		if (AGS_PlayerState* PS = OwnerChar->GetPlayerState<AGS_PlayerState>())
-		{
-			CurrentHealth = FMath::Clamp(PS->CurrentHealth, 0.f, MaxHealth);
-			UE_LOG(LogTemp, Warning, TEXT("StatComp InitStat 성공: RowName=%s, HP=%.1f, ATK=%.1f, DEF=%.1f, AGL=%.1f, ATS=%.1f"),
-			*RowName.ToString(), MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
 		}
 		else
 		{
@@ -126,27 +127,27 @@ void UGS_StatComp::ResetStat(const FGS_StatRow& InChangeStat)
 
 void UGS_StatComp::UpdateStat_Implementation(const FGS_StatRow& RuneStats)
 {
-	// //update stats by rune system
-	// AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-	// FString CurrClass = UGS_EnumUtils::GetEnumAsString<ECharacterType>(OwnerCharacter->GetCharacterType());
-	// FName RowName = FName(CurrClass);
-	// const FGS_StatRow* FoundRow = StatDataTable->FindRow<FGS_StatRow>(RowName, TEXT("InitStat"));
+	//update stats by rune system
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	FString CurrClass = UGS_EnumUtils::GetEnumAsString<ECharacterType>(OwnerCharacter->GetCharacterType());
+	FName RowName = FName(CurrClass);
+	const FGS_StatRow* FoundRow = StatDataTable->FindRow<FGS_StatRow>(RowName, TEXT("InitStat"));
 
-	// if (FoundRow)
-	// {
-	MaxHealth += RuneStats.HP;
-	AttackPower += RuneStats.ATK;
-	Defense += RuneStats.DEF;
-	Agility += RuneStats.AGL;
-	AttackSpeed += RuneStats.ATS;
+	if (FoundRow)
+	{
+		MaxHealth = FoundRow->HP + RuneStats.HP;
+		AttackPower = FoundRow->ATK + RuneStats.ATK;
+		Defense = FoundRow->DEF + RuneStats.DEF;
+		Agility = FoundRow->AGL + RuneStats.AGL;
+		AttackSpeed = FoundRow->ATS + RuneStats.ATS;
 
-	UE_LOG(LogTemp, Log, TEXT("캐릭터 스탯 업데이트 - HP: %.1f, ATK: %.1f, DEF: %.1f, AGL: %.1f, ATS: %.1f"),
-		MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
-	// }
-	// else
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("스탯 컴프 로우 네임 못찾음"));
-	// }
+		UE_LOG(LogTemp, Log, TEXT("캐릭터 스탯 업데이트 - HP: %.1f, ATK: %.1f, DEF: %.1f, AGL: %.1f, ATS: %.1f"),
+			MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("스탯 컴프 로우 네임 못찾음"));
+	}
 }
 
 float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
