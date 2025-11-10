@@ -146,6 +146,12 @@ public:
     void SetBGMVolume(float NewVolume);
 
     UFUNCTION(BlueprintCallable, Category = "Settings")
+    float GetSFXVolume() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Settings")
+    void SetSFXVolume(float NewVolume);
+
+    UFUNCTION(BlueprintCallable, Category = "Settings")
     FString GetLanguageSet() const;
 
     UFUNCTION(BlueprintCallable, Category = "Settings")
@@ -163,6 +169,9 @@ public:
 
      UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
      float BGMVolume;
+
+     UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
+     float SFXVolume;
 
      UPROPERTY(BlueprintReadWrite, Category = "Settings", meta = (AllowPrivateAccess = "true"))
      FString LanguageSet;

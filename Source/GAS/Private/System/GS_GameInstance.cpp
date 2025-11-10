@@ -28,6 +28,7 @@ UGS_GameInstance::UGS_GameInstance()
     MinSensitivity = 0.1f;
     MaxSensitivity = 10.0f;
     BGMVolume = 1.0f;
+    SFXVolume = 1.0f;
     LanguageSet = "ko";
 }
 
@@ -111,16 +112,6 @@ void UGS_GameInstance::Init()
     {
         UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance: Init() - Not a Dedicated Server Instance."));
     }
-    
-    // BGM 볼륨 적용은 약간의 지연 후에 수행 (AudioManager 초기화 보장)
-    FTimerHandle VolumeInitHandle;
-    GetWorld()->GetTimerManager().SetTimer(VolumeInitHandle, [this]()
-    {
-        if (UGS_AudioManager* AudioManager = GetSubsystem<UGS_AudioManager>())
-        {
-            AudioManager->SetBGMVolume(BGMVolume);
-        }
-    }, 0.1f, false);
 }
 
 FString UGS_GameInstance::GetAndClearPendingConnectString()
@@ -340,6 +331,18 @@ void UGS_GameInstance::OnStart()
 
     // 저장된 옵션 세팅 로드
     LoadSettings();
+
+    // AudioManager에 로드된 볼륨 값 적용
+    if (UGS_AudioManager* AudioManager = GetSubsystem<UGS_AudioManager>())
+    {
+        AudioManager->SetBGMVolume(BGMVolume);
+        AudioManager->SetSFXVolume(SFXVolume);
+        //UE_LOG(LogTemp, Log, TEXT("UGS_GameInstance::OnStart - Applied saved volumes: BGM=%.2f, SFX=%.2f"), BGMVolume, SFXVolume);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("UGS_GameInstance::OnStart - AudioManager not available yet"));
+    }
 
     FTextLocalizationManager::Get().RefreshResources();
 }
@@ -750,6 +753,7 @@ void UGS_GameInstance::SaveSettings()
     {
         SaveGameInstance->MouseSensitivity = MouseSensitivity;
         SaveGameInstance->BGMVolume = BGMVolume;
+        SaveGameInstance->SFXVolume = SFXVolume;
         SaveGameInstance->LanguageSet = LanguageSet;
 
         UGameplayStatics::SaveGameToSlot(SaveGameInstance, TEXT("SettingsSlot"), 0);
@@ -764,6 +768,7 @@ void UGS_GameInstance::LoadSettings()
         {
             MouseSensitivity = LoadGameInstance->MouseSensitivity;
             BGMVolume = LoadGameInstance->BGMVolume;
+            SFXVolume = LoadGameInstance->SFXVolume;
             LanguageSet = LoadGameInstance->LanguageSet;
         }
     }
@@ -772,6 +777,7 @@ void UGS_GameInstance::LoadSettings()
         // 저장 파일이 없는 경우 기본값 설정
         MouseSensitivity = 1.0f;
         BGMVolume = 1.0f;
+        SFXVolume = 1.0f;
         LanguageSet = "ko";
     }
     FInternationalization::Get().SetCurrentCulture(LanguageSet);
@@ -798,6 +804,32 @@ void UGS_GameInstance::SetBGMVolume(float NewVolume)
     if (UGS_AudioManager* AudioManager = GetSubsystem<UGS_AudioManager>())
     {
         AudioManager->SetBGMVolume(BGMVolume);
+    }
+
+    SaveSettings();
+}
+
+float UGS_GameInstance::GetSFXVolume() const
+{
+    return SFXVolume;
+}
+
+void UGS_GameInstance::SetSFXVolume(float NewVolume)
+{
+    const float ClampedVolume = FMath::Clamp(NewVolume, 0.0f, 1.0f);
+
+    // 값이 변경되지 않았으면 저장하지 않음 (성능 최적화)
+    if (FMath::IsNearlyEqual(SFXVolume, ClampedVolume, 0.001f))
+    {
+        return;
+    }
+
+    SFXVolume = ClampedVolume;
+
+    // AudioManager를 통해 실제 볼륨 적용
+    if (UGS_AudioManager* AudioManager = GetSubsystem<UGS_AudioManager>())
+    {
+        AudioManager->SetSFXVolume(SFXVolume);
     }
 
     SaveSettings();

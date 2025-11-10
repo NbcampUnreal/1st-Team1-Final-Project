@@ -13,6 +13,7 @@
 #include "AudioDevice.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "Framework/Application/SlateApplication.h"
 
 UGS_AudioManager::UGS_AudioManager()
 {
@@ -27,6 +28,9 @@ UGS_AudioManager::UGS_AudioManager()
 
 	// BGM 볼륨 초기화
 	CurrentBGMVolume = 1.0f;
+
+	// SFX 볼륨 초기화
+	CurrentSFXVolume = 1.0f;
 
 	// 포인터 멤버 초기화
 	UIAudio = nullptr;
@@ -91,6 +95,14 @@ UGS_AudioManager::UGS_AudioManager()
 		MapBGMVolumeRTPC = MapBGMVolumeRTPCFinder.Object;
 	}
 
+	// SFX 볼륨 RTPC 로드
+	static ConstructorHelpers::FObjectFinder<UAkRtpc> SFXVolumeRTPCFinder(TEXT("/Game/WwiseAudio/Game_Parameters/Default_Work_Unit/SFXVolume.SFXVolume"));
+	if (SFXVolumeRTPCFinder.Succeeded())
+	{
+		SFXVolumeRTPC = SFXVolumeRTPCFinder.Object;
+	}
+
+
 	// 네이티브 BGM 사운드 클래스 로드
 	static ConstructorHelpers::FObjectFinder<USoundClass> BGMSoundClassFinder(TEXT("/Game/WwiseAudio/SC_BGM.SC_BGM"));
 	if (BGMSoundClassFinder.Succeeded())
@@ -100,7 +112,6 @@ UGS_AudioManager::UGS_AudioManager()
 	else
 	{
 		BGMSoundClass = nullptr;
-		UE_LOG(LogTemp, Warning, TEXT("[AudioManager] SC_BGM을 찾을 수 없습니다. 네이티브 오디오 볼륨 조절이 비활성화됩니다."));
 	}
 
 	// 네이티브 BGM 사운드 믹스 로드
@@ -112,7 +123,28 @@ UGS_AudioManager::UGS_AudioManager()
 	else
 	{
 		BGMSoundMix = nullptr;
-		UE_LOG(LogTemp, Warning, TEXT("[AudioManager] SM_BGM을 찾을 수 없습니다. 네이티브 오디오 볼륨 조절이 비활성화됩니다."));
+	}
+
+	// 네이티브 SFX 사운드 클래스 로드
+	static ConstructorHelpers::FObjectFinder<USoundClass> SFXSoundClassFinder(TEXT("/Game/WwiseAudio/SC_SFX.SC_SFX"));
+	if (SFXSoundClassFinder.Succeeded())
+	{
+		SFXSoundClass = SFXSoundClassFinder.Object;
+	}
+	else
+	{
+		SFXSoundClass = nullptr;
+	}
+
+	// 네이티브 SFX 사운드 믹스 로드
+	static ConstructorHelpers::FObjectFinder<USoundMix> SFXSoundMixFinder(TEXT("/Game/WwiseAudio/SM_SFX.SM_SFX"));
+	if (SFXSoundMixFinder.Succeeded())
+	{
+		SFXSoundMix = SFXSoundMixFinder.Object;
+	}
+	else
+	{
+		SFXSoundMix = nullptr;
 	}
 }
 
@@ -140,12 +172,21 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	// 맵 전환 시 BGM 정지를 위한 델리게이트 바인딩
 	FCoreUObjectDelegates::PreLoadMap.AddUObject(this, &UGS_AudioManager::OnPreLoadMap);
+
+	// 창 포커스 이벤트 바인딩 (패키징된 빌드용)
+	FCoreDelegates::ApplicationWillDeactivateDelegate.AddUObject(this, &UGS_AudioManager::OnApplicationDeactivated);
+	FCoreDelegates::ApplicationHasReactivatedDelegate.AddUObject(this, &UGS_AudioManager::OnApplicationActivated);
+
+	// 에디터 뷰포트 포커스 이벤트 바인딩 (PIE용)
+	FSlateApplication::Get().OnApplicationActivationStateChanged().AddUObject(this, &UGS_AudioManager::OnViewportFocusChanged);
 }
 
 void UGS_AudioManager::Deinitialize()
 {
 	// 델리게이트 해제
 	FCoreUObjectDelegates::PreLoadMap.RemoveAll(this);
+	FCoreDelegates::ApplicationWillDeactivateDelegate.RemoveAll(this);
+	FCoreDelegates::ApplicationHasReactivatedDelegate.RemoveAll(this);
 
 	// 모든 타이머 정리 (레벨 전환 안전성 보장)
 	SafeClearTimer(MapBGMFadeInTimerHandle);
@@ -516,6 +557,45 @@ void UGS_AudioManager::SetBGMVolume(float Volume)
 
 	// === 2. 네이티브 오디오 시스템 BGM 볼륨 조절 ===
 	SetNativeSoundClassVolume(CurrentBGMVolume);
+}
+
+void UGS_AudioManager::SetSFXVolume(float Volume)
+{
+	// 볼륨 값을 0.0~1.0 범위로 클램프하고 저장
+	CurrentSFXVolume = FMath::Clamp(Volume, 0.0f, 1.0f);
+
+	// 멀티플레이어 환경에서 전용 서버는 오디오를 처리하지 않음
+	if (!IsAudioProcessingAllowed())
+	{
+		return;
+	}
+
+	// === 1. Wwise SFX 볼륨 조절 ===
+	if (SFXVolumeRTPC)
+	{
+		// 게임 모드에 따른 조건부 타겟 액터 결정
+		AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+
+		// RTPC 값 설정 (SetRTPCValue가 0~100 범위로 자동 변환함)
+		SetRTPCValue(SFXVolumeRTPC, CurrentSFXVolume, TargetActor, 0.0f);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[AudioManager] SFXVolumeRTPC가 설정되지 않았습니다. Wwise SFX 볼륨 조절 건너뜀."));
+	}
+
+	// === 2. 네이티브 오디오 시스템 SFX 볼륨 조절 ===
+	if (SFXSoundClass && SFXSoundMix)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			if (FAudioDevice* AudioDevice = World->GetAudioDeviceRaw())
+			{
+				AudioDevice->SetSoundMixClassOverride(SFXSoundMix, SFXSoundClass, CurrentSFXVolume, 1.0f, 0.0f, true);
+				AudioDevice->PushSoundMixModifier(SFXSoundMix);
+			}
+		}
+	}
 }
 
 // === 통합 전투 시스템 ===
@@ -1129,4 +1209,100 @@ void UGS_AudioManager::OnMapBGMFadeInStartCallback()
 
 	CachedTargetActor = nullptr;
 	CachedFadeTime = 0.0f;
+}
+
+void UGS_AudioManager::OnApplicationDeactivated()
+{
+	// 창 포커스 손실 시 모든 오디오 음소거
+	if (!IsAudioProcessingAllowed())
+	{
+		return;
+	}
+
+	// Wwise 오디오 음소거 (모든 RTPC를 0으로 설정)
+	AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+	
+	// BGM 볼륨 0으로
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, 0.0f, TargetActor, 0.0f);
+	}
+	
+	// SFX 볼륨 0으로
+	if (SFXVolumeRTPC)
+	{
+		SetRTPCValue(SFXVolumeRTPC, 0.0f, TargetActor, 0.0f);
+	}
+
+	// 네이티브 오디오 음소거
+	UGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance)
+	{
+		UWorld* World = GameInstance->GetWorld();
+		if (World)
+		{
+			if (FAudioDevice* AudioDevice = World->GetAudioDeviceRaw())
+			{
+				AudioDevice->SetTransientPrimaryVolume(0.0f);
+			}
+		}
+	}
+}
+
+void UGS_AudioManager::OnApplicationActivated()
+{
+	// 창 포커스 복원 시 오디오 복원
+	if (!IsAudioProcessingAllowed())
+	{
+		return;
+	}
+
+	// Wwise 오디오 복원 (개별 RTPC를 사용자 설정 값으로 복원)
+	AActor* TargetActor = GetTargetActorForPlayback(nullptr);
+	
+	// BGM 볼륨 복원
+	if (MapBGMVolumeRTPC)
+	{
+		SetRTPCValue(MapBGMVolumeRTPC, CurrentBGMVolume, TargetActor, 0.0f);
+	}
+	
+	// SFX 볼륨 복원
+	if (SFXVolumeRTPC)
+	{
+		SetRTPCValue(SFXVolumeRTPC, CurrentSFXVolume, TargetActor, 0.0f);
+	}
+
+	// 네이티브 오디오 복원
+	UGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance)
+	{
+		UWorld* World = GameInstance->GetWorld();
+		if (World)
+		{
+			if (FAudioDevice* AudioDevice = World->GetAudioDeviceRaw())
+			{
+				AudioDevice->SetTransientPrimaryVolume(1.0f);
+				
+				// 네이티브 SFX 볼륨도 복원
+				if (SFXSoundClass && SFXSoundMix)
+				{
+					AudioDevice->SetSoundMixClassOverride(SFXSoundMix, SFXSoundClass, CurrentSFXVolume, 1.0f, 0.0f, true);
+					AudioDevice->PushSoundMixModifier(SFXSoundMix);
+				}
+			}
+		}
+	}
+}
+
+void UGS_AudioManager::OnViewportFocusChanged(bool bIsActive)
+{
+	// 에디터 PIE에서 뷰포트 포커스 변경 시 호출
+	if (bIsActive)
+	{
+		OnApplicationActivated();
+	}
+	else
+	{
+		OnApplicationDeactivated();
+	}
 }
