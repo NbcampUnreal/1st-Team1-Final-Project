@@ -178,7 +178,11 @@ void UGS_AudioManager::Initialize(FSubsystemCollectionBase& Collection)
 	FCoreDelegates::ApplicationHasReactivatedDelegate.AddUObject(this, &UGS_AudioManager::OnApplicationActivated);
 
 	// 에디터 뷰포트 포커스 이벤트 바인딩 (PIE용)
-	FSlateApplication::Get().OnApplicationActivationStateChanged().AddUObject(this, &UGS_AudioManager::OnViewportFocusChanged);
+	// 서버에서는 Slate가 초기화되지 않으므로 체크 필요
+	if (FSlateApplication::IsInitialized())
+	{
+		FSlateApplication::Get().OnApplicationActivationStateChanged().AddUObject(this, &UGS_AudioManager::OnViewportFocusChanged);
+	}
 }
 
 void UGS_AudioManager::Deinitialize()
@@ -187,6 +191,12 @@ void UGS_AudioManager::Deinitialize()
 	FCoreUObjectDelegates::PreLoadMap.RemoveAll(this);
 	FCoreDelegates::ApplicationWillDeactivateDelegate.RemoveAll(this);
 	FCoreDelegates::ApplicationHasReactivatedDelegate.RemoveAll(this);
+	
+	// Slate 델리게이트 해제 (초기화된 경우에만)
+	if (FSlateApplication::IsInitialized())
+	{
+		FSlateApplication::Get().OnApplicationActivationStateChanged().RemoveAll(this);
+	}
 
 	// 모든 타이머 정리 (레벨 전환 안전성 보장)
 	SafeClearTimer(MapBGMFadeInTimerHandle);
