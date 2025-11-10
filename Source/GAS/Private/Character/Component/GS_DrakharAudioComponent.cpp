@@ -355,7 +355,7 @@ void UGS_DrakharAudioComponent::Multicast_PlayAttackHitSound_Implementation()
 	PlaySoundEvent(OwnerDrakhar->AttackHitSoundEvent, OwnerDrakhar->GetActorLocation());
 }
 
-void UGS_DrakharAudioComponent::PlayFeverModeStartSound()
+void UGS_DrakharAudioComponent::PlayFeverModeStartSound(bool bForcePlay)
 {
 	// 컴포넌트 유효성 검증
 	if (!IsValid(this))
@@ -377,7 +377,8 @@ void UGS_DrakharAudioComponent::PlayFeverModeStartSound()
 		return;
 	}
 
-	if (!CanSendRPC())
+	// 피버모드 사운드는 중요하므로 강제 재생 옵션 제공
+	if (!bForcePlay && !CanSendRPC())
 	{
 		return;
 	}
@@ -393,6 +394,17 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeStartSound_Implementation
 		return;
 	}
 
+	// OwnerDrakhar 초기화 확인 (BeginPlay가 호출되지 않았을 경우 대비)
+	if (!OwnerDrakhar)
+	{
+		OwnerDrakhar = Cast<AGS_Drakhar>(GetOwner());
+		if (!OwnerDrakhar)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("DrakharAudioComponent: OwnerDrakhar is null in Multicast_PlayFeverModeStartSound"));
+			return;
+		}
+	}
+
 	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
 	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
@@ -401,6 +413,7 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeStartSound_Implementation
 
 	if (!OwnerDrakhar->FeverModeStartSoundEvent)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("DrakharAudioComponent: FeverModeStartSoundEvent is null"));
 		return;
 	}
 
@@ -459,7 +472,7 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeEndSound_Implementation()
 	PlaySoundEvent(OwnerDrakhar->FeverModeEndSoundEvent, OwnerDrakhar->GetActorLocation());
 }
 
-void UGS_DrakharAudioComponent::PlayFeverModeStateSound()
+void UGS_DrakharAudioComponent::PlayFeverModeStateSound(bool bForcePlay)
 {
 	// 컴포넌트 유효성 검증
 	if (!IsValid(this))
@@ -481,7 +494,8 @@ void UGS_DrakharAudioComponent::PlayFeverModeStateSound()
 		return;
 	}
 
-	if (!CanSendRPC())
+	// 피버모드 사운드는 중요하므로 강제 재생 옵션 제공
+	if (!bForcePlay && !CanSendRPC())
 	{
 		return;
 	}
@@ -497,6 +511,17 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeStateSound_Implementation
 		return;
 	}
 
+	// OwnerDrakhar 초기화 확인
+	if (!OwnerDrakhar)
+	{
+		OwnerDrakhar = Cast<AGS_Drakhar>(GetOwner());
+		if (!OwnerDrakhar)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("DrakharAudioComponent: OwnerDrakhar is null in Multicast_PlayFeverModeStateSound"));
+			return;
+		}
+	}
+
 	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
 	if (!PrepareMulticastSound(OwnerDrakhar, true))
 	{
@@ -505,6 +530,7 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeStateSound_Implementation
 
 	if (!OwnerDrakhar->FeverModeStateSoundEvent)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("DrakharAudioComponent: FeverModeStateSoundEvent is null"));
 		return;
 	}
 
@@ -724,6 +750,58 @@ void UGS_DrakharAudioComponent::ResetHurtSoundCooldown()
 	if (!IsValid(this)) return;
 
 	bHurtSoundPlayed = false;
+}
+
+void UGS_DrakharAudioComponent::PlayLandingSound()
+{
+	// 컴포넌트 유효성 검증
+	if (!IsValid(this))
+	{
+		return;
+	}
+
+	// 월드 컨텍스트 유효성 검증
+	UWorld* World = GetWorld();
+	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+	{
+		return;
+	}
+
+	// 오너 유효성 검증
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner) || !Owner->HasAuthority())
+	{
+		return;
+	}
+
+	if (!CanSendRPC())
+	{
+		return;
+	}
+
+	LastMulticastTime = World->GetTimeSeconds();
+	Multicast_PlayLandingSound();
+}
+
+void UGS_DrakharAudioComponent::Multicast_PlayLandingSound_Implementation()
+{
+	if (ShouldSkipListenServerRPC())
+	{
+		return;
+	}
+
+	// 통합 체크 및 Distance Scaling 설정 (보스는 항상 재생, bSkipViewFrustumCheck = true)
+	if (!PrepareMulticastSound(OwnerDrakhar, true))
+	{
+		return;
+	}
+
+	if (!OwnerDrakhar->LandingSoundEvent)
+	{
+		return;
+	}
+
+	PlaySoundEvent(OwnerDrakhar->LandingSoundEvent, OwnerDrakhar->GetActorLocation());
 }
 
 // === Wwise 헬퍼 함수 구현 ===
