@@ -31,9 +31,14 @@ void UGS_HPWidget::NativeConstruct()
 		ShakeHelper->Initialize(GetWorld());
 		
 		// 타겟 위젯 설정
-		if (HPBarWidget)
+		// if (HPBarWidget)
+		// {
+		// 	ShakeHelper->SetTargetWidget(HPBarWidget);
+		// }
+		
+		if (IsValid(this))
 		{
-			ShakeHelper->SetTargetWidget(HPBarWidget);
+			ShakeHelper->SetTargetWidget(this);
 		}
 	}
 }

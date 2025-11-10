@@ -38,9 +38,14 @@ void UGS_BossHP::NativeConstruct()
 	}
 	
 	// BossHPBar가 있으면 흔들림 헬퍼에 타겟으로 설정
-	if (ShakeHelper && BossHPBar)
+	// if (ShakeHelper && BossHPBar)
+	// {
+	// 	ShakeHelper->SetTargetWidget(BossHPBar);
+	// }
+
+	if (ShakeHelper && IsValid(this))
 	{
-		ShakeHelper->SetTargetWidget(BossHPBar);
+		ShakeHelper->SetTargetWidget(this);
 	}
 	
 	// 즉시 Guardian 위젯 초기화 시도
