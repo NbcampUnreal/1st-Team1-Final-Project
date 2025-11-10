@@ -138,23 +138,6 @@ void UGS_ChanReadySkill::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted
 
 	if (SkillAnimMontages.Contains(Montage))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Montage Ended: %s (Interrupted: %s)"),
-			*Montage->GetName(),
-			bInterrupted ? TEXT("True") : TEXT("False"));
-
-		UE_LOG(LogTemp, Warning, TEXT("Ended Montage Name: %s | Path: %s | Addr: %p"),
-			*Montage->GetName(),
-			*Montage->GetPathName(),
-			Montage);
-
-		if (SkillAnimMontages.IsValidIndex(1))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("SkillAnimMontages[1] Name: %s | Path: %s | Addr: %p"),
-				*SkillAnimMontages[1]->GetName(),
-				*SkillAnimMontages[1]->GetPathName(),
-				SkillAnimMontages[1]);
-		}
-
 		FName CurrentMontageName = NAME_None;
 		if (UAnimMontage* CurrentMontage = OwnerCharacter->GetMesh()->GetAnimInstance()->GetCurrentActiveMontage())
 		{

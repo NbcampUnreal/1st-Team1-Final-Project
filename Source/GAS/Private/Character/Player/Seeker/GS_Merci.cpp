@@ -181,7 +181,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	}
 	
 	// 몽타주 정지
-	Multicast_StopDrawMontage();
+	// Multicast_StopDrawMontage();
 	
 	// 조준 완료 시(활을 끝까지 당겼을 때)
 	if (GetAimState())

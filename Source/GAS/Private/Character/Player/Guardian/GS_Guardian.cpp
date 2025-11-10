@@ -19,7 +19,7 @@ AGS_Guardian::AGS_Guardian()
 	CameraShakeComponent = CreateDefaultSubobject<UGS_CameraShakeComponent>(TEXT("CameraShakeComponent"));
 
 	NormalMoveSpeed = GetCharacterMovement()->MaxWalkSpeed;
-	SpeedUpMoveSpeed = 1200.f;
+	SpeedUpMoveSpeed = 930.f;
 
 	//boss monster tag for user widget
 	Tags.Add("Guardian");

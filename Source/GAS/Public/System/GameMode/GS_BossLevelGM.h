@@ -34,6 +34,8 @@ public:
 
 	void CheckAllPlayersDead();
 
+	bool bEndGameCalled = false;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Player Controller Classes")
 	TSubclassOf<APlayerController> SeekerControllerClass;
 
@@ -44,4 +46,7 @@ public:
 	UGS_PawnMappingDataAsset* PawnMappingDataAsset;
 	
 	FTimerHandle MatchStartTimerHandle;
+
+	UPROPERTY(visibleAnywhere, BlueprintReadOnly)
+	int32 CurrentSeekerSpawnIndex = 1;
 };

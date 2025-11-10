@@ -89,7 +89,16 @@ AActor* AGS_BossLevelGM::ChoosePlayerStart_Implementation(AController* Player)
         {
             if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
             {
-                PlayerStartTagToFind = TEXT("SeekerStart");
+                PlayerStartTagToFind = FString::Printf(TEXT("SeekerStart%d"), CurrentSeekerSpawnIndex);
+                UE_LOG(LogTemp, Warning, TEXT("[보스 레벨_시커 플레이어 스폰 꼬임] 찾을 스폰포인트 태그 : %s"), *PlayerStartTagToFind);
+                if (CurrentSeekerSpawnIndex >= 4)
+                {
+                    CurrentSeekerSpawnIndex = 1;
+                }
+                else
+                {
+                    CurrentSeekerSpawnIndex++;
+                }
             }
             else if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
             {
@@ -102,10 +111,12 @@ AActor* AGS_BossLevelGM::ChoosePlayerStart_Implementation(AController* Player)
 
     if (FoundPlayerStart)
     {
+        UE_LOG(LogTemp, Warning, TEXT("[보스 레벨_시커 플레이어 스폰 꼬임] %s 찾았음..! 스폰 진행할게요."), *PlayerStartTagToFind);
         return FoundPlayerStart;
     }
     else
     {
+        UE_LOG(LogTemp, Warning, TEXT("[보스 레벨_시커 플레이어 스폰 꼬임] %s 스폰 지점 찾기 실패..! 부모 호출"), *PlayerStartTagToFind);
         return Super::ChoosePlayerStart_Implementation(Player);
     }
 }
@@ -206,6 +217,10 @@ void AGS_BossLevelGM::OnTimerEnd()
 
 void AGS_BossLevelGM::EndGame(EGameResult Result)
 {
+    if (bEndGameCalled)
+        return;
+    bEndGameCalled = true;
+    
     FString NextLevelName = TEXT("ResultLevel");
 
     if (Result == EGameResult::GR_SeekersLost)
@@ -218,15 +233,44 @@ void AGS_BossLevelGM::EndGame(EGameResult Result)
         UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Not All Seekers dead. Traveling to ResultLevel."));
         SetGameResultOnAllPlayers(EGameResult::GR_SeekersWon);
     }
+    
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        UE_LOG(LogTemp, Error, TEXT("BossLevelGM::EndGame - World is null, cannot schedule travel."));
+        return;
+    }
 
     if (!NextLevelName.IsEmpty())
     {
         FTimerHandle TravelDelayHandle;
-        TWeakObjectPtr<AGS_BossLevelGM> WeakThis = this;
+        TWeakObjectPtr<UWorld> WeakWorld = World;
 
-        GetWorldTimerManager().SetTimer(TravelDelayHandle, [WeakThis, NextLevelName]() {
-            WeakThis->GetWorld()->ServerTravel(NextLevelName + "?listen", true);
-        }, 3.f, false);
+        GetWorldTimerManager().SetTimer(TravelDelayHandle,
+            [WeakWorld, NextLevelName]()
+            {
+                UWorld* World = WeakWorld.Get();
+                if (!World)
+                {
+                    UE_LOG(LogTemp, Error, TEXT("BossLevel Travel - World invalid."));
+                    return;
+                }
+                
+                if (World->bIsTearingDown)
+                {
+                    UE_LOG(LogTemp, Log, TEXT("BossLevel Travel - World tearing down, skip extra travel."));
+                    return;
+                }
+
+                if (World->GetNetMode() != NM_Client)
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("BossLevel Travel - ServerTravel to %s"), *NextLevelName);
+                    World->ServerTravel(NextLevelName + TEXT("?listen"), true);
+                }
+            },
+            5.f,
+            false
+        );
     }
 }
 
@@ -245,7 +289,7 @@ void AGS_BossLevelGM::SetGameResultOnAllPlayers(EGameResult Result)
 
 void AGS_BossLevelGM::HandlePlayerAliveStatusChanged(AGS_PlayerState* PlayerState, bool bIsAlive)
 {
-    UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Player %s alive status changed to %s"),
+    UE_LOG(LogTemp, Warning, TEXT("AGS_BossLevelGM: Player %s alive status : %s"),
         *PlayerState->GetPlayerName(),
         bIsAlive ? TEXT("True") : TEXT("False"));
 

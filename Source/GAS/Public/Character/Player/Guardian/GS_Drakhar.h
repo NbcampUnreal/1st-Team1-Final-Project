@@ -324,6 +324,8 @@ public:
 	UAkAudioEvent* HurtSoundEvent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Impact")
 	UAkAudioEvent* DeathSoundEvent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Sound|Impact")
+	UAkAudioEvent* LandingSoundEvent;
 
 	FORCEINLINE UGS_DrakharVFXComponent* GetDrakharVFXComponent() const { return DrakharVFXComponent; }
 	FORCEINLINE UGS_DrakharAudioComponent* GetAudioComponent() const { return AudioComponent; }
@@ -402,8 +404,8 @@ private:
 	//[Flying CoolTime]
 	UPROPERTY(ReplicatedUsing=OnRep_FlyingStaminaCoolTime)
 	float FlyingStaminaCoolTime;
-	const float MaxFlyingStaminaCoolTime = 20.f; // 최대 스테미나
-	const float ValidFlyingStaminaCoolTime = 5.f; // 날기 시작 가능한 정도
+	const float MaxFlyingStaminaCoolTime = 12.f; // 최대 스테미나
+	const float ValidFlyingStaminaCoolTime = 3.f; // 날기 시작 가능한 정도
 	bool isStartCoolTime = true;
 	
 	FTimerHandle FlyingStartStaminaCoolTimeHandler;

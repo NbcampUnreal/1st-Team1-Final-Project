@@ -268,7 +268,15 @@ void AGS_InGameGM::DelayedRestartPlayer()
                 AActor* FoundStart = FindPlayerStart(PC);
                 if (PC)
                 {
-                    RestartPlayer(PC);
+                    if (APawn* Pawn = PC->GetPawn())
+                    {
+                        Pawn->SetActorLocation(FoundStart->GetActorLocation());
+                        Pawn->SetActorRotation(FoundStart->GetActorRotation());
+                    }
+                    else
+                    {
+                        RestartPlayerAtPlayerStart(PC, FoundStart);
+                    }
                 }
             }
             PendingPlayers.Empty();
