@@ -52,7 +52,9 @@ void UGS_HealSkill::DeactiveSkill()
 {
 	// 부모 클래스의 DeactiveSkill 호출
 	Super::DeactiveSkill();
+	
 	bIsCoolingDown = false;
+	
 	// 서버 권한에서만 종료 사운드 재생 (Multicast로 모든 클라이언트에 동기화)
 	if (OwnerCharacter && OwnerCharacter->HasAuthority())
 	{
@@ -62,12 +64,11 @@ void UGS_HealSkill::DeactiveSkill()
 			// AudioEventType 1 = 스킬 종료 사운드
 			AudioComp->Multicast_RequestSkillAudio(CurrentSkillType, 1, OwnerCharacter->GetActorLocation());
 		}
+		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
+		{
+			Seeker->GetSkillComp()->ResetAllowedSkillsMask();
+		}
 	}
-	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
-	{
-		Seeker->GetSkillComp()->ResetAllowedSkillsMask();
-	}
-	
 }
 
 void UGS_HealSkill::InterruptSkill()
