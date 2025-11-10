@@ -335,7 +335,7 @@ void AGS_CustomLobbyPC::RequestOpenJobSelectionPopup()
 	if (CurrentModalWidget)
 	{
 		CurrentModalWidget->AddToViewport();
-		CurrentModalWidget->SetPadding(FVector4(240.0, 100.0, 0.0, 0.0));
+		CurrentModalWidget->SetPadding(FVector4(240.0, 97.5, 0.0, 0.0));
 		if (UGS_CharacterSelectList* CharacterSelectList = Cast<UGS_CharacterSelectList>(CurrentModalWidget))
 		{
 			CharacterSelectList->CreateChildWidgets(PS->CurrentPlayerRole);
