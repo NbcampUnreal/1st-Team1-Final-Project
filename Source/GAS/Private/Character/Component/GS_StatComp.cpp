@@ -13,6 +13,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Sound/GS_SeekerAudioComponent.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Character/Component/GS_DrakharAudioComponent.h"
 
 UGS_StatComp::UGS_StatComp()
 {
@@ -59,7 +61,6 @@ void UGS_StatComp::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);	
 
 	DOREPLIFETIME(ThisClass, CurrentHealth);
-	DOREPLIFETIME(ThisClass, bIsInvincible);
 }
 
 void UGS_StatComp::InitStat(FName RowName)
@@ -135,13 +136,27 @@ void UGS_StatComp::UpdateStat_Implementation(const FGS_StatRow& RuneStats)
 	}
 }
 
-float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
+void UGS_StatComp::ApplyHealthFromPlayerState(float InHealth)
 {
-	if (bIsInvincible)
+	if (!IsValid(GetOwner()) || !GetOwner()->HasAuthority())
 	{
-		return 0.f;
+		return;
 	}
 
+	// PS에 저장된 값을 신뢰하되, 스탯 범위 안으로만 클램프
+	const float Clamped = FMath::Clamp(InHealth, 0.f, MaxHealth);
+	CurrentHealth = Clamped;
+
+	// UI / PlayerState 쪽과 동기화
+	OnCurrentHPChanged.Broadcast(this);
+
+	UE_LOG(LogTemp, Log,
+		TEXT("UGS_StatComp(%s)::ApplyHealthFromPlayerState - Synced HP to %f"),
+		*GetName(), CurrentHealth);
+}
+
+float UGS_StatComp::CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient, float SlopeCoefficient)
+{
 	float Damage = 0.f;
 	float DamagedCharacterDefense = InDamagedCharacter->GetStatComp()->GetDefense();
 	float DamageCauserAttack = InDamageCauser->GetStatComp()->GetAttackPower();
@@ -175,20 +190,8 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
     {
         MulticastRPCPlayTakeDamageMontage();
 
-        if (AGS_Monster* DamagedMonster = Cast<AGS_Monster>(GetOwner()))
-        {
-            if (IsValid(DamagedMonster) && IsValid(DamagedMonster->MonsterAudioComponent))
-            {
-                // 이번 데미지로 몬스터가 죽을지 미리 체크
-                bool bWillDieFromThisDamage = (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER);
-
-                // 몬스터가 죽지 않을 때만 타격 소리 재생
-                if (DamagedMonster->MonsterAudioComponent->GetCurrentAudioState() != EMonsterAudioState::Death && !bWillDieFromThisDamage)
-                {
-                    DamagedMonster->MonsterAudioComponent->PlayHurtSound();
-                }
-            }
-        }
+        // 서버/리슨 서버에서도 로컬 Hurt 사운드 재생 (RPC 제거)
+        HandleHealthDamage(PreviousHealth, CurrentHealth);
 
 		//dead
 		if (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER)
@@ -277,14 +280,13 @@ void UGS_StatComp::MulticastRPCPlayTakeDamageMontage_Implementation()
 	}
 }
 
-void UGS_StatComp::OnRep_CurrentHealth()
+void UGS_StatComp::OnRep_CurrentHealth(float OldHealth)
 {
-	OnCurrentHPChanged.Broadcast(this);
-}
+	// 클라이언트에서 Health 변화 처리
+	HandleHealthDamage(OldHealth, CurrentHealth);
 
-void UGS_StatComp::SetInvincible(bool bEnable)
-{
-	bIsInvincible = bEnable;
+	// UI 업데이트 델리게이트 (기존 기능 유지)
+	OnCurrentHPChanged.Broadcast(this);
 }
 
 void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -295,11 +297,64 @@ void UGS_StatComp::OnDamageMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	{
 		return;
 	}
-	
+
 	if (OwnerCharacter->HasAuthority())
 	{
 		//can move
 		OwnerCharacter->GetCharacterMovement()->MaxWalkSpeed = CharacterWalkSpeed;
+	}
+}
+
+// === Health 변화 처리 헬퍼 함수 (클라이언트 전용 오디오) ===
+void UGS_StatComp::HandleHealthDamage(float OldHealth, float NewHealth)
+{
+	// 피격 판정: 체력 감소 시에만
+	if (NewHealth >= OldHealth)
+	{
+		return;  // 체력 증가(힐링) 또는 변화 없음
+	}
+
+	// 오너 캐릭터 가져오기
+	AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+
+	// 죽음 판정: Death 사운드는 OnDeath()에서 처리하므로 여기서는 스킵
+	if (NewHealth <= KINDA_SMALL_NUMBER && OldHealth > KINDA_SMALL_NUMBER)
+	{
+		return;  // 죽음 판정 - OnDeath()에서 PlayDeathSound() 호출
+	}
+
+	// Hurt 사운드 재생 (클라이언트 로컬 재생 - RPC 없음!)
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
+	{
+		if (Seeker->SeekerAudioComponent)
+		{
+			// 로컬 전용 Hurt 사운드 재생
+			Seeker->SeekerAudioComponent->PlayHurtSoundLocal();
+		}
+	}
+	else if (AGS_Monster* Monster = Cast<AGS_Monster>(OwnerCharacter))
+	{
+		if (Monster->MonsterAudioComponent)
+		{
+			// Death 상태가 아닐 때만 Hurt 사운드 재생
+			if (Monster->MonsterAudioComponent->GetCurrentAudioState() != EMonsterAudioState::Death)
+			{
+				// 로컬 전용 Hurt 사운드 재생
+				Monster->MonsterAudioComponent->PlayHurtSoundLocal();
+			}
+		}
+	}
+	else if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(OwnerCharacter))
+	{
+		if (Drakhar->GetAudioComponent())
+		{
+			// 로컬 전용 Hurt 사운드 재생
+			Drakhar->GetAudioComponent()->PlayHurtSoundLocal();
+		}
 	}
 }
 

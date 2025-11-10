@@ -35,18 +35,19 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	//virtual void SetupInputComponent() override; // 키보드 기능. 나중에 esc 넣을때 주석 해제
 	virtual void OnRep_PlayerState() override;
 	UFUNCTION(Server, Reliable)
 	void Server_NotifyPlayerReadyInLobby();
+	UFUNCTION(Server, Reliable)
+	void Server_RequestServerTravel();
 
 	UPROPERTY()
 	AGS_PlayerState* CachedPlayerState;
 
 	AGS_PlayerState* GetCachedPlayerState();
 
-	UPROPERTY(VisibleAnywhere, Category = "Actors")
-	TObjectPtr<ADirectionalLight> LobbyDirectionalLight;
+	// UPROPERTY(VisibleAnywhere, Category = "Actors")
+	// TObjectPtr<ADirectionalLight> LobbyDirectionalLight;
 	
 	//ui 관련
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
@@ -126,7 +127,6 @@ protected:
 
 	// 서버가 클라이언트에게 모드 변경이 완료되었음을 알리는 RPC를 오버라이드
 	virtual void Client_OnEnteredEditorMode_Implementation() override;
-	virtual void Client_OnExitedEditorMode_Implementation() override;
 
 	// 던전 정보 넘기기
 public:

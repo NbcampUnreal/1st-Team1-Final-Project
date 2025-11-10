@@ -31,5 +31,10 @@ Saved/
 .claude/
 *.md
 
+# Windsurf
+Documentation/windsurf-guide.txt
+Config/WindsurfSettings.ini
 
 Plugins/GameLiftPlugin/
+
+Content/Player/TEST/BP_SJEGM.uasset

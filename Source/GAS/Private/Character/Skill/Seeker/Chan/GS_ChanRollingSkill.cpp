@@ -10,35 +10,11 @@
 
 UGS_ChanRollingSkill::UGS_ChanRollingSkill()
 {
-	CurrentSkillType = ESkillSlot::Rolling;
 }
 
 void UGS_ChanRollingSkill::ActiveSkill()
 {
 	Super::ActiveSkill();
-	StartCoolDown();
-	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
-	{
-		// 스킬 시작 사운드 재생
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
-		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
-		}
-		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
-		OwnerPlayer->CanChangeSeekerGait = false;
-		
-		const FName RollDirection = CalRollDirection();
-		if (RollDirection == FName("00"))
-		{
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], FName("F0"));
-		}
-		else
-		{
-			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[0], RollDirection);
-		}
-
-		OwnerPlayer->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	}
 }
 
 void UGS_ChanRollingSkill::OnSkillCanceledByDebuff()
@@ -52,19 +28,22 @@ void UGS_ChanRollingSkill::OnSkillAnimationEnd()
 
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
-		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
-		OwnerPlayer->CanChangeSeekerGait = true;
-
-		// SeekerAudioComponent를 통한 스킬 종료 사운드
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		if (OwnerPlayer->HasAuthority())
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+			OwnerPlayer->Multicast_StopSkillMontage(SkillAnimMontages[0]);
+			OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+			OwnerPlayer->CanChangeSeekerGait = true;
+
+			// 스킬 종료 사운드 재생 (멀티캐스트)
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 1);
+			}
+
+			SetIsActive(false);
+
+			OwnerPlayer->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 		}
-
-		SetIsActive(false);
-
-		OwnerPlayer->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	}
 }
 

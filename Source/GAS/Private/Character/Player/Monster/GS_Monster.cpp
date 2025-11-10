@@ -81,7 +81,7 @@ void AGS_Monster::BeginPlay()
 	}
 	
 	// AkComponent Occlusion 비활성화
-	if (AkComponent)
+	if (IsValid(AkComponent))
 	{
 		AkComponent->OcclusionRefreshInterval = 0.0f;
 	}
@@ -150,12 +150,8 @@ void AGS_Monster::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AGS_Monster::OnDeath()
 {
+	// Death 사운드는 부모 클래스(GS_Character::OnDeath)에서 통합 처리됨
 	Super::OnDeath();
-
-	if (MonsterAudioComponent)
-	{
-		MonsterAudioComponent->PlayDeathSound();
-	}
 
 	if (UCharacterMovementComponent* MoveComp = GetCharacterMovement())
 	{
@@ -214,6 +210,14 @@ void AGS_Monster::UseSkill()
 {	
 }
 
+void AGS_Monster::ApplyStiffness()
+{
+}
+
+void AGS_Monster::EndStiffness()
+{
+}
+
 void AGS_Monster::ShowTargetUI(bool bIsActive)
 {
 	if (TargetedUIComponent)
@@ -270,12 +274,7 @@ void AGS_Monster::Attack()
 			}
 		}*/
 
-		// 공격 모션 시작 시 전투/스윙 사운드 트리거 (서버)
-		if (MonsterAudioComponent)
-		{
-			MonsterAudioComponent->PlaySound(EMonsterAudioState::Combat, /*bForcePlay=*/false);
-			MonsterAudioComponent->PlaySwingSound();
-		}
+		// 공격 모션 및 사운드 재생 (모든 클라이언트)
 		Multicast_PlayAttackMontage();
 	}
 }
@@ -283,6 +282,13 @@ void AGS_Monster::Attack()
 void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 {
 	MonsterAnim->Montage_Play(AttackMontage);
+
+	// 모든 클라이언트에서 공격 사운드 재생
+	if (MonsterAudioComponent && GetWorld() && GetWorld()->GetNetMode() != NM_DedicatedServer)
+	{
+		MonsterAudioComponent->PlaySound(EMonsterAudioState::Combat, /*bForcePlay=*/false);
+		MonsterAudioComponent->PlaySwingSound();
+	}
 }
 
 

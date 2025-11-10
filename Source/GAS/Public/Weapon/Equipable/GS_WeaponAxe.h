@@ -6,7 +6,6 @@
 #include "GS_WeaponEquipable.h"
 #include "Engine/HitResult.h"
 #include "AkAudioEvent.h"
-#include "NiagaraSystem.h"
 #include "GS_WeaponAxe.generated.h"
 
 UENUM(BlueprintType)

@@ -6,9 +6,12 @@
 #include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
 #include "Character/Component/GS_StatComp.h"
 
-#include "Animation/Character/GS_SeekerAnimInstance.h"
+/*#include "Animation/Character/GS_SeekerAnimInstance.h"
 #include "Character/GS_TpsController.h"
-#include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"
+#include "Character/Component/Seeker/GS_AresSkillInputHandlerComp.h"*/
+#include "Character/Skill/GS_SkillComp.h"
+#include "Character/Skill/Seeker/Ares/GS_AresMovingSkill.h"
+#include "Components/CapsuleComponent.h"
 
 
 // Sets default values
@@ -20,6 +23,9 @@ AGS_Ares::AGS_Ares()
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_AresSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
 
 	// 사운드 배열들은 GS_SeekerAudioComponent에서 관리됨
+
+	// KeyManual에서 쓰일 캐릭터 타입 저장
+	ManualRowName = FName("Ares");
 }
 
 // Called when the game starts or when spawned
@@ -29,6 +35,22 @@ void AGS_Ares::BeginPlay()
 
 	SetReplicateMovement(true);
 	GetMesh()->SetIsReplicated(true);
+	
+	// Moving 스킬 객체를 가져와서 카메라 설정값 전달
+	if (SkillComp)
+	{
+		UGS_AresMovingSkill* MovingSkill = Cast<UGS_AresMovingSkill>(SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving));
+		if (MovingSkill)
+		{
+			MovingSkill->SetCameraSettings(
+				MovingSkill_ZoomOutDistance,
+				MovingSkill_CameraZoomCurve,
+				MovingSkill_EnableMotionBlur,
+				MovingSkill_MotionBlurPeakAmount,
+				MovingSkill_MotionBlurCurve,
+				MovingSkill_MotionBlurExponent);
+		}
+	}
 }
 
 // Called every frame
@@ -103,15 +125,24 @@ float AGS_Ares::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 	// Call parent implementation
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	// Play hurt sound if we actually took damage and are still alive
-	if (ActualDamage > 0.0f && GetStatComp() && GetStatComp()->GetCurrentHealth() > 0.0f)
+	return ActualDamage;
+}
+
+void AGS_Ares::Multicast_RestoreDashCameraZoom_Implementation()
+{
+	// 로컬 클라이언트에서만 카메라 복원 실행
+	if (!IsLocallyControlled())
 	{
-		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
-		{
-			SeekerAudio->PlayHurtSound();
-		}
+		return;
 	}
 
-	return ActualDamage;
+	if (SkillComp)
+	{
+		UGS_AresMovingSkill* MovingSkill = Cast<UGS_AresMovingSkill>(SkillComp->GetSkillFromSkillMap(ESkillSlot::Moving));
+		if (MovingSkill)
+		{
+			MovingSkill->RestoreCameraZoom(true);
+		}
+	}
 }
 

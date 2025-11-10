@@ -43,6 +43,9 @@ AGS_Merci::AGS_Merci()
 	
 	CharacterType = ECharacterType::Merci;
 	SkillInputHandlerComponent = CreateDefaultSubobject<UGS_MerciSkillInputHandlerComp>(TEXT("SkillInputHandlerComp"));
+
+	// KeyManual에서 쓰일 캐릭터 타입 저장
+	ManualRowName = FName("Merci");
 }
 
 void AGS_Merci::Client_UpdateTargetUI_Implementation(AActor* NewTarget, AActor* OldTarget)
@@ -141,8 +144,8 @@ void AGS_Merci::DrawBow(UAnimMontage* DrawMontage)
 		SetDrawState(true);
 		SetAimState(false);
 		Multicast_SetMustTurnInPlace(true);
-		
-		// 활 당기는 사운드 재생 (SeekerAudioComponent에서 처리)
+
+		// 활 당기는 사운드 재생
 		if (SeekerAudioComponent)
 		{
 			SeekerAudioComponent->PlayBowDrawSound();
@@ -183,7 +186,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 	// 조준 완료 시(활을 끝까지 당겼을 때)
 	if (GetAimState())
 	{
-		// 활 놓는 사운드 재생 (SeekerAudioComponent에서 처리)
+		// 활 놓는 사운드 재생 (서버에서 직접 오디오 컴포넌트의 RPC 호출)
 		if (SeekerAudioComponent)
 		{
 			SeekerAudioComponent->PlayBowReleaseSound();
@@ -194,7 +197,7 @@ void AGS_Merci::ReleaseArrow(TSubclassOf<AGS_SeekerMerciArrow> ArrowClass, float
 		bIsFullyDrawn = false;  // 상태 초기화
 	}
 
-	GetSkillComp()->ResetAllowedSkillsMask(); // SJE
+	GetSkillComp()->ResetAllowedSkillsMask();
 	
 	// 달리기 상태 설정
 	SetSeekerGait(EGait::Run);
@@ -460,7 +463,7 @@ void AGS_Merci::UpdateZoom(float Alpha)
 		return;
 	}
 
-	float TargetArmLength = FMath::Lerp(400.0f, 180.0f, Alpha);
+	float TargetArmLength = FMath::Lerp(320.0f, 180.0f, Alpha);
 	float SocketOffsetY = FMath::Lerp(67.f, 87.f, Alpha);
 	float SocketOffsetZ = FMath::Lerp(174.f, 134.f, Alpha);
 
@@ -616,6 +619,7 @@ float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 		// 활 쏘기 조준 상태 해제
 		SetDrawState(false);
 		SetAimState(false);
+		bIsFullyDrawn = false;
 
 		// 키 제한
 		GetSkillComp()->SetCurAllowedSkillsMask(0);
@@ -631,18 +635,6 @@ float AGS_Merci::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent,
 	{
 		// 죽었는지 확인 (체력이 0 이하인지)
 		float CurrentHealth = GetStatComp() ? GetStatComp()->GetCurrentHealth() : -1.0f;
-		
-		if (GetStatComp() && GetStatComp()->GetCurrentHealth() <= 0.0f)
-		{
-			// Death Sound는 OnDeath()에서 재생되므로 여기서는 재생하지 않음
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Merci::TakeDamage - Character died, Death sound will be played in OnDeath()"));
-		}
-		else
-		{
-			// 살아있으면 Hurt Sound 재생
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Merci::TakeDamage - Character hurt, calling PlayHurtSound()"));
-			SeekerAudioComponent->PlayHurtSound();
-		}
 	}
 	
 	return ActualDamage;

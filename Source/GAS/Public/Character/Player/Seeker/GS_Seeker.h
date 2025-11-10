@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Character/Player/GS_Player.h"
+#include "Character/Interface/GS_ManualDataInterface.h"
 #include "NiagaraComponent.h"
 #include "Animation/Character/E_SeekerAnim.h"
+#include "Props/Item/E_ItemType.h"
 #include "Character/Skill/GS_SkillComp.h"
+
 #include "GS_Seeker.generated.h"
 
 class UGS_SkillInputHandlerComp;
@@ -20,6 +23,7 @@ class UGS_SeekerAudioComponent;
 class UUserWidget;
 class UGS_LowHealthEffectComponent;
 class UGS_DetectionEffectComponent;
+class AGS_Item;
 
 USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
@@ -53,7 +57,7 @@ enum class ECollisionSoundType : uint8
 };
 
 UCLASS()
-class GAS_API AGS_Seeker : public AGS_Player
+class GAS_API AGS_Seeker : public AGS_Player, public IGS_ManualDataInterface
 {
 	GENERATED_BODY()
 
@@ -146,8 +150,29 @@ public:
 	FTimerHandle AttackSoundResetTimerHandle;
 
 	// Weapon
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon") 
 	UChildActorComponent* Weapon;
+
+	// Item
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TMap<EItemType, UGS_ItemData*> ItemDatas;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TMap<EItemType, AGS_Item*> Items;
+
+	/*UFUNCTION()
+	void ItemInit();
+
+
+
+	UFUNCTION()
+	void SetItem(EItemType ItemType);*/
+
+	UFUNCTION()
+	UGS_ItemData* GetItemData(EItemType ItemType);
+
+	UFUNCTION()
+	AGS_Item* GetItem(EItemType ItemType);
 
 	// State
 	UPROPERTY(Replicated)
@@ -268,6 +293,9 @@ protected:
 	void InitializeCameraManager();
 	void UpdatePostProcessEffect(float EffectStrength);
 
+	// KeyManual을 위한 인터페이스 함수
+	virtual FName GetManualRowName_Implementation() const override;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Input")
 	UGS_SkillInputHandlerComp* SkillInputHandlerComponent;
@@ -283,6 +311,10 @@ protected:
 	// 카메라 매니저 참조 추가
 	UPROPERTY()
 	APlayerCameraManager* LocalCameraManager;
+
+	// KeyManual을 위한 캐릭터 타입 저장
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Manual")
+	FName ManualRowName;
 
 	// ===================================
 	// LowHP 스크린 효과 (효과 보간 관련 변수)
@@ -344,8 +376,16 @@ private:
 	float LastDetectionSoundTime = 0.0f;
 
 	// 감지 사운드 최소 간격 (초)
-	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "0.5", ClampMax = "5.0"))
-	float DetectionSoundCooldown = 5.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "1.0", ClampMax = "10.0"))
+	float DetectionSoundCooldown = 7.0f;
+
+	// 퇴장 감지 사운드 쿨다운 (마지막 재생 시간 추적)
+	UPROPERTY()
+	float LastExitDetectionSoundTime = 0.0f;
+
+	// 퇴장 감지 사운드 최소 간격 (초)
+	UPROPERTY(EditDefaultsOnly, Category = "Detection|Audio", meta = (ClampMin = "1.0", ClampMax = "10.0"))
+	float ExitDetectionSoundCooldown = 7.0f;
 
 	// 화면 중앙 근접도 (0.0 = 가장자리, 1.0 = 중앙)
 	UPROPERTY(ReplicatedUsing = OnRep_DetectionIntensity)
@@ -373,6 +413,10 @@ private:
 
 	// 플레이어 상태 변경 처리
 	void HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, bool bIsNowAlive);
+	
+public:
+	// RequiredCurState 가 현재 캐릭터의 상태와 같다면 캐릭터의 상태를 NextState 로 변경하고 TargetAM 을 재생한다.
+	void TransWeaponHandingState(EWeaponHandlingState RequiredCurState, EWeaponHandlingState NextState, UAnimMontage* TargetAM, ESeekerMontageSlot TargetMontageSlot);
 
 public:
 	UFUNCTION(Server, Reliable)

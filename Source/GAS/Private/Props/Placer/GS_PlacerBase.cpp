@@ -155,15 +155,20 @@ void AGS_PlacerBase::BuildObject()
 		
 		bUpdatePlaceIndicators = true;
 
+		FActorSpawnParameters SpawnParams;
+		//SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		FIntPoint CursorPoint = BuildManagerRef->GetCellUnderCursor();
 		FVector2d CenterLocation = BuildManagerRef->GetCenterOfRectArea(CursorPoint, ObjectSize, RotateYaw);
 		FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, ObjectData.OffSet.Z);
 		FVector2D SpawnOffset = FVector2D(ObjectData.OffSet.X, ObjectData.OffSet.Y);
-		//FVector SpawnLocation = FVector(CenterLocation.X, CenterLocation.Y, BuildManagerRef->GetLocationUnderCursorCamera().Z);
 		FRotator SpawnRotator = GetActorRotation();
-		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator);
-
-
+		AActor* NewActor = GetWorld()->SpawnActor<AActor>(ObjectData.PlaceableObjectClass, SpawnLocation, FRotator::ZeroRotator, SpawnParams);
+	
+		if (!NewActor)
+		{
+			UE_LOG(LogTemp,Warning,TEXT("SpawnActor Fail"));
+			return;
+		}
 
 		NewActor->SetActorRotation(NewActor->GetActorRotation() + FRotator(0.0f, RotateYaw, 0.0f));
 		SpawnOffset = SpawnOffset.GetRotated(RotateYaw);

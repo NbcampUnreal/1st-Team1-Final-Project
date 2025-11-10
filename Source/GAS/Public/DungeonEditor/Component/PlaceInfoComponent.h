@@ -13,14 +13,16 @@ class GAS_API UPlaceInfoComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="CellInfo")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="CellInfo")
 	TArray<FIntPoint> CellCoord;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="CellInfo")
+	UPROPERTY(ReplicatedUsing = OnRep_UpdateObjectType, VisibleAnywhere, BlueprintReadOnly, Category="CellInfo")
 	EObjectType ObjectType;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="CellInfo")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category="CellInfo")
 	ETrapPlacement TrapPlacement;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "CellInfo")
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "CellInfo")
 	float ConstructionCost;
+	UPROPERTY(VisibleAnywhere, Category = "CellInfo")
+	bool Is_ObjectTypeSynchronization;
 
 	UPlaceInfoComponent();
 
@@ -33,7 +35,11 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-public:	
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UFUNCTION()
+	void OnRep_UpdateObjectType();
 		
 };

@@ -20,4 +20,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Settings")
 	float BGMVolume;
+
+	UPROPERTY(VisibleAnywhere, Category = "Settings")
+	float SFXVolume;
+
+	UPROPERTY(VisibleAnywhere, Category = "Settings")
+	FString LanguageSet;
 };

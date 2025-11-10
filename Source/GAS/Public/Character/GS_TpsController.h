@@ -14,35 +14,6 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
-/*USTRUCT(BlueprintType)
-struct FControlValue
-{
-	GENERATED_BODY()
-public:
-	FControlValue()
-	{
-		bCanLookUp = true;
-		bCanLookRight = true;
-		bCanMoveForward = true;
-		bCanMoveRight = true;
-	}
-
-	bool CanMove() const { return bCanMoveForward || bCanMoveRight; }
-	bool CanLook() const { return bCanLookUp || bCanLookRight; }
-	
-	UPROPERTY(EditAnywhere)
-	bool bCanLookUp;
-
-	UPROPERTY(EditAnywhere)
-	bool bCanLookRight;
-
-	UPROPERTY(EditAnywhere)
-	bool bCanMoveForward;
-
-	UPROPERTY(EditAnywhere)
-	bool bCanMoveRight;
-};*/
-
 UCLASS()
 class GAS_API AGS_TpsController : public AGS_BasePlayerController
 {
@@ -110,6 +81,9 @@ public:
 	void SetMoveControlValue(bool CanMoveRight, bool CanMoveForward);
 
 	UFUNCTION()
+	FControlValue GetMoveControlValue();
+
+	UFUNCTION()
 	void SetLookControlValue(bool CanLookRight, bool CanLookUp);
 	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Control")
@@ -149,11 +123,14 @@ public:
 	UFUNCTION(Client, Unreliable)
 	void Client_DrawAimAssistDebug(const FVector& Start, const FVector& End, const FVector& TargetLocation, float Duration); // SJE
 	
+	void SetIsAutoMoving(bool InIsAutoMoving);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void PostSeamlessTravel() override;
 	virtual void BeginPlayingState() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	//게임 인스턴스 참조
 	UPROPERTY(BlueprintReadOnly, Category = "Settings")

@@ -33,14 +33,20 @@ void UGS_ChanUltimateSkill::ActiveSkill()
 	// 구조물 충돌 확인 변수 초기화
 	bInStructureCrash = false;
 	
+	// 무적 설정
+	OwnerCharacter->SetInvincible(true);
+
 	if (AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
 	{
-		// 궁극기 사운드 재생
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		// 궁극기 사운드 재생 (멀티캐스트)
+		if (OwnerPlayer->HasAuthority())
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
+			}
 		}
-		
+
 		// 입력 제한 설정
 		//OwnerPlayer->SetSkillInputControl(false, false, false);
 		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::FullBody);
@@ -61,11 +67,35 @@ void UGS_ChanUltimateSkill::OnSkillAnimationEnd()
 {
 	Super::OnSkillAnimationEnd();
 
-	AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter);
+	UE_LOG(LogTemp, Error, TEXT("OnSkillAnimationEnd ChanUltimateSkill"));
 	
-	OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
-	OwnerPlayer->SetMoveControlValue(true, true);
-	OwnerPlayer->CanChangeSeekerGait = true;
+	// 무적 해제
+	OwnerCharacter->SetInvincible(false);
+
+	if(AGS_Chan* OwnerPlayer = Cast<AGS_Chan>(OwnerCharacter))
+	{
+		OwnerPlayer->Multicast_SetMontageSlot(ESeekerMontageSlot::None);
+		OwnerPlayer->SetMoveControlValue(true, true);
+		OwnerPlayer->CanChangeSeekerGait = true;
+	}
+	
+	if(AGS_TpsController* Controller = Cast<AGS_TpsController>(OwnerCharacter->GetController()))
+	{
+		Controller->SetIsAutoMoving(false);
+		Controller->SetLookControlValue(true, true);
+	}
+
+	// =======================
+	// VFX 정리 및 종료 VFX 재생
+	// =======================
+	if (OwningComp)
+	{
+		FVector SkillLocation = OwnerCharacter->GetActorLocation();
+		FRotator SkillRotation = OwnerCharacter->GetActorRotation();
+
+		// 스킬 종료 VFX 재생 (PlayEndVFX 내부에서 Cast VFX도 정리됨)
+		OwningComp->Multicast_PlayEndVFX(CurrentSkillType, SkillLocation, SkillRotation);
+	}
 
 	// 스킬 상태 업데이트
 	SetIsActive(false);
@@ -206,12 +236,15 @@ void UGS_ChanUltimateSkill::DeactiveSkill()
 	// 충돌 이력 초기화
 	HitActors.Empty();
 
-	// SeekerAudioComponent를 통한 스킬 종료 사운드
-	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	// 스킬 종료 사운드 재생 (멀티캐스트)
+	if (OwnerCharacter->HasAuthority())
 	{
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 1);
+			}
 		}
 	}
 
@@ -278,14 +311,34 @@ void UGS_ChanUltimateSkill::EndCharge()
 			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[2]);
 		}
 	}
-			else // 구조물이 아닌 곳에 부딪혔을 때
+	else // 구조물이 아닌 곳에 부딪혔을 때
+	{
+		if (OwnerPlayer && SkillAnimMontages[1])
 		{
-			if (OwnerPlayer && SkillAnimMontages[1])
-			{
-				// 애니메이션 재생 (방패 공격은 애님님노티파이로 처리)
-				OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
-			}
+			// 애니메이션 재생 (방패 공격은 애님님노티파이로 처리)
+			OwnerPlayer->Multicast_PlaySkillMontage(SkillAnimMontages[1]);
 		}
+	}
 
 	DeactiveSkill();
+}
+
+void UGS_ChanUltimateSkill::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (!OwnerCharacter) return;
+
+	if (SkillAnimMontages.Contains(Montage))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Montage Ended: %s (Interrupted: %s)"),
+			*Montage->GetName(),
+			bInterrupted ? TEXT("True") : TEXT("False"));
+
+		// 애니메이션 종료 처리 (Notify가 빠졌을 경우에도 안전하게)
+		OnSkillAnimationEnd();
+
+		if (UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance())
+		{
+			AnimInstance->OnMontageEnded.RemoveDynamic(this, &UGS_ChanUltimateSkill::OnMontageEnded);
+		}
+	}
 }

@@ -2,7 +2,6 @@
 
 #include "EngineUtils.h"
 #include "Character/Player/Monster/GS_Monster.h"
-#include "Components/BillboardComponent.h"
 #include "Components/DecalComponent.h"
 #include "DungeonEditor/GS_DEController.h"
 #include "DungeonEditor/Component/PlaceInfoComponent.h"
@@ -19,10 +18,6 @@ AGS_BuildManager::AGS_BuildManager()
 	DefaultSceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	SetRootComponent(DefaultSceneRoot);
 	
-#if WITH_EDITORONLY_DATA
-	BillboardCompo = CreateDefaultSubobject<UBillboardComponent>("BillBoard");
-	BillboardCompo->SetupAttachment(RootComponent);
-#endif
 	StaticMeshCompo = CreateDefaultSubobject<UStaticMeshComponent>("GridMesh");
 	StaticMeshCompo->SetupAttachment(RootComponent);
 	DecalCompo = CreateDefaultSubobject<UDecalComponent>("Decal");
@@ -725,6 +720,7 @@ void AGS_BuildManager::PressedDel()
 			if (DEPC->GetHitResultUnderCursor(ECC_GameTraceChannel6, bTraceComplex, HitResult))
 			{
 				AActor* DelActorUnderCursor = HitResult.GetActor();
+				UE_LOG(LogTemp, Warning, TEXT("DelActor: %s"), *DelActorUnderCursor->GetName());
 
 				if (UPlaceInfoComponent* PlaceInfoComp = DelActorUnderCursor->GetComponentByClass<UPlaceInfoComponent>())
 				{

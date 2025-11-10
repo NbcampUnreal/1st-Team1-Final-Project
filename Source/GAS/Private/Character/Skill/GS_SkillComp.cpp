@@ -117,16 +117,21 @@ void UGS_SkillComp::BeginPlay()
 
 bool UGS_SkillComp::IsSkillAllowed(ESkillSlot CompareSkillType)
 {
-	uint8 BitFlag = 0;
+	uint16 BitFlag = 0;
 	BitFlag |= (1 << static_cast<int32>(CompareSkillType));
 	UE_LOG(LogTemp, Warning, TEXT("UGS_SkillComp::IsSkillAllowed BitFlag :%d"), BitFlag);
 	UE_LOG(LogTemp, Warning, TEXT("UGS_SkillComp::IsSkillAllowed CurAllowedSkillsMask :%d"), CurAllowedSkillsMask);
 	return CurAllowedSkillsMask & BitFlag;
 }
 
-void UGS_SkillComp::SetCurAllowedSkillsMask(int8 BitMask)
+void UGS_SkillComp::SetCurAllowedSkillsMask(int16 BitMask)
 {
-	CurAllowedSkillsMask = BitMask;	
+	CurAllowedSkillsMask = BitMask;
+}
+
+int16 UGS_SkillComp::GetCurAllowedSkillsMask()
+{
+	return CurAllowedSkillsMask;
 }
 
 void UGS_SkillComp::InitSkills()
@@ -239,6 +244,9 @@ void UGS_SkillComp::SetSkill(ESkillSlot Slot, const FSkillInfo& Info)
 	Skill->EndVFXOffset = Info.EndVFXOffset;
 	
 	SkillMap.Add(Slot, Skill);
+
+	// Init Delegate
+	Skill->InitializeDelegate();
 }
 
 void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
@@ -249,24 +257,23 @@ void UGS_SkillComp::Server_TryActivateSkill_Implementation(ESkillSlot Slot)
 		return;
 	}
 	
-	// IsSkillActive 는?
 	if (SkillMap.Contains(Slot))
 	{
-		if (SkillMap[Slot]->CanActive()) // 지금 쿨다운 중이 아닌 경우 true
+		if (SkillMap[Slot]->CanActive())
 		{
-			// 여기에서 검사해야 하네 지금 자신의 스킬은 사용할 수 있지만 이게 다른 스킬 도중에 호출된 건지는 알 수 없기 때문에
-
-			// 여기에서 Control flag 들 검사. 
 			AGS_Player* OwnerPlayer = Cast<AGS_Player>(GetOwner());
 			if(OwnerPlayer)
 			{
-				if (IsSkillAllowed(Slot)) // 현재 내가 허용하고 있는 스킬인지 검색.
+				if (IsSkillAllowed(Slot))
 				{
 					UE_LOG(LogTemp, Warning, TEXT("허용된 스킬이 Active 되기를 원한다."));
 					
 					SkillsInterrupt();
 					SkillMap[Slot]->ActiveSkill();
+					UE_LOG(LogTemp, Warning, TEXT("AllowSkillMask : %d"), SkillMap[Slot]->AllowSkillsMask);
+					ResetAllowedSkillsMask();
 					SetCurAllowedSkillsMask(SkillMap[Slot]->AllowSkillsMask);
+					UE_LOG(LogTemp, Warning, TEXT("CurAllowedSkillsMask : %d"),GetCurAllowedSkillsMask());
 
 					// 스킬 활성화 알림
 					if (GetOwner()->GetLocalRole() == ROLE_Authority)
@@ -377,6 +384,22 @@ bool UGS_SkillComp::IsSkillActive(ESkillSlot Slot) const
 	return false;
 }
 
+UGS_SkillBase* UGS_SkillComp::GetActiveSkill() const
+{
+	for (const auto& Pair : SkillStates)
+	{
+		if (Pair.Value.bIsActive)
+		{
+			if (UGS_SkillBase* const* SkillPtr = SkillMap.Find(Pair.Key))
+			{
+				return *SkillPtr;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
 void UGS_SkillComp::StartCooldownForSkill(ESkillSlot Slot)
 {
 	if (!GetOwner()->HasAuthority())
@@ -449,20 +472,13 @@ void UGS_SkillComp::SkillsInterrupt()
 	
 	for (TPair<ESkillSlot, UGS_SkillBase*> slot : SkillMap)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *slot.Value->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *slot.Value->GetName());
 
 		if (Seeker->GetSkillComp()->IsSkillActive(slot.Key))
 		{
-			slot.Value->InterruptSkill(); // 모든 스킬 interruptSkill()
-			/*if (Seeker->GetCharacterType() != ECharacterType::Merci)
-			{
-				//Seeker->SetSkillInputControl(false, false, false);
-				
-			}*/
+			slot.Value->InterruptSkill();
 		}
 	}
-
-	//Seeker->GetSkillComp()->ResetAllowedSkillsMask(); // 모든 입력 가능 상태.
 }
 
 void UGS_SkillComp::HandleCooldownComplete(ESkillSlot Slot)

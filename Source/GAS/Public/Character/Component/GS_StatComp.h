@@ -41,6 +41,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void UpdateStat(const FGS_StatRow& RuneStats);
 
+	void ApplyHealthFromPlayerState(float InHealth);
+
 	float CalculateDamage(AGS_Character* InDamageCauser, AGS_Character* InDamagedCharacter, float InSkillCoefficient = 1.f, float SlopeCoefficient = 1.f);
 
 	//getter
@@ -65,14 +67,11 @@ public:
 	void MulticastRPCPlayTakeDamageMontage();
 
 	UFUNCTION()
-	void OnRep_CurrentHealth();
+	void OnRep_CurrentHealth(float OldHealth);
 
 	// heal system
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerRPCHeal(float InHealAmount);
-
-	// 무적 상태
-	void SetInvincible(bool bEnable);
 	
 protected:
 	float CharacterWalkSpeed;
@@ -99,7 +98,6 @@ private:
 	UFUNCTION()
 	ECharacterClass MapCharacterTypeToCharacterClass(ECharacterType CharacterType);
 
-	// 무적 상태
-	UPROPERTY(Replicated)
-	bool bIsInvincible = false;
+	// Health 변화 처리 헬퍼 함수 (RepNotify + Server 공통)
+	void HandleHealthDamage(float OldHealth, float NewHealth);
 };

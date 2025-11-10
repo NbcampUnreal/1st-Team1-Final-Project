@@ -17,6 +17,7 @@
 #include "GameFramework/Pawn.h"
 #include "DrawDebugHelpers.h"
 #include "HAL/IConsoleManager.h"
+#include "Sound/GS_AudioComponentBase.h"
 
 #if WITH_EDITOR
 // Console variable for debug visualization
@@ -67,12 +68,12 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	MaxConcurrentWaterEffects = 3;
 
 	// Initialize water VFX systems with default PS_Splash
-	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> DefaultWaterSplash(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
-	if (DefaultWaterSplash.Succeeded())
-	{
-		WaterSplashEffect = DefaultWaterSplash.Object;
-		DeepWaterSplashEffect = DefaultWaterSplash.Object; // Default to same effect
-	}
+	//static ConstructorHelpers::FObjectFinder<UNiagaraSystem> DefaultWaterSplash(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
+	//if (DefaultWaterSplash.Succeeded())
+	//{
+	//	WaterSplashEffect = DefaultWaterSplash.Object;
+	//	DeepWaterSplashEffect = DefaultWaterSplash.Object; // Default to same effect
+	//}
 
 	// Initialize additional water VFX (can be set in Blueprint)
 	WaterRippleEffect = nullptr;
@@ -122,11 +123,11 @@ UGS_FootManagerComponent::UGS_FootManagerComponent()
 	}
 
 	// Water splash effect
-	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> WaterEffect(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
+	/*static ConstructorHelpers::FObjectFinder<UNiagaraSystem> WaterEffect(TEXT("/Game/VFX/WaterInteractSystem/FX/PS_Splash"));
 	if (WaterEffect.Succeeded())
 	{
 		FootDustEffects.Add(SurfaceType6, WaterEffect.Object);
-	}
+	}*/
 }
 
 // Called when the game starts
@@ -462,8 +463,16 @@ void UGS_FootManagerComponent::PlayFootstepSound(EPhysicalSurface Surface, const
 	);
 
 	UAkComponent* AkComp = GetOwner()->FindComponentByClass<UAkComponent>();
-	if (!AkComp)
+	if (!IsValid(AkComp))
 	{
+		return;
+	}
+
+	// Transform 검증
+	if (!UGS_AudioComponentBase::IsLocationValid(Location))
+	{
+		UE_LOG(LogTemp, Error, TEXT("[GS_FootManagerComponent] Invalid footstep location - %s"),
+		       GetOwner() ? *GetOwner()->GetName() : TEXT("None"));
 		return;
 	}
 

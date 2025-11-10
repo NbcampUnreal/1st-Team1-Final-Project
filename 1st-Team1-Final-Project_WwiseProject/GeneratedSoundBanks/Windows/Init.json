@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{701ECBBD-9C7B-4030-8CDB-749EE5D1C7B9}",
     "Language": "SFX",
-    "Hash": "{2A8A52E8-7D0A-51E8-C9D6-987424484BE5}",
+    "Hash": "{3E6B2D9A-B844-B70C-5436-8B800C65B040}",
     "ObjectPath": "Init",
     "ShortName": "Init",
     "Path": "Init.bnk",
@@ -100,6 +100,12 @@
       "Name": "LowHPSound",
       "ObjectPath": "\\Game Parameters\\Default Work Unit\\LowHPSound",
       "GUID": "{499A8A01-58CD-471A-A182-6ECADC86A50E}"
+     },
+     {
+      "Id": "988953028",
+      "Name": "SFXVolume",
+      "ObjectPath": "\\Game Parameters\\Default Work Unit\\SFXVolume",
+      "GUID": "{AE614B2E-3E2C-4A32-BE85-A2A4A2B87041}"
      },
      {
       "Id": "1111830101",
@@ -272,6 +278,6 @@
     ]
    }
   ],
-  "FileHash": "{F6558DEF-173C-7292-53CE-E2E600EF8080}"
+  "FileHash": "{CEA7DEC4-BB7F-7597-EB89-E71A9791C3FA}"
  }
 }

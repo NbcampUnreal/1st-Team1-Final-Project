@@ -12,6 +12,8 @@ class AGS_WeaponAxe;
 class UGS_ChanAimingSkillBar;
 class UAkAudioEvent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStaminaDepleted, bool, bByDamage);
+
 UCLASS()
 class GAS_API AGS_Chan : public AGS_Seeker
 {
@@ -100,7 +102,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Chan|Defense")
 	void SetDefending(bool bDefending);
 
+	// =============
 	// 스테미나 관리
+	// =============
+	UPROPERTY(BlueprintAssignable, Category = "Stamina")
+	FOnStaminaDepleted OnStaminaDepleted;
+
 	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
 	float MaxStamina = 100.f;
 
@@ -108,12 +115,17 @@ public:
 	float CurrentStamina = 0.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
-	float StaminaDrainRate = 0.1f;
+	float StaminaDrainRate = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Chan|Stamina")
+	float StaminaRegenRate = 1.0f;
 
 	float GetCurrentStamina() const { return CurrentStamina; }
 	void ResetCurrentStamina();
 	void SetCurrentStamina(float NewValue, bool SetbyDamage = false);
 	bool HasEnoughStamina(float Cost) const { return CurrentStamina >= Cost; }
+	void DrainStaminaTick();
+	void RegenStaminaTick();
 
 protected:
 	// Called when the game starts or when spawned
@@ -133,7 +145,7 @@ private:
 	UGS_ChanAimingSkillBar* ChanAimingSkillBarWidget;
 
 	// 스테미나 관리
-	FTimerHandle StaminaDrainHandle;
+	FTimerHandle StaminaHandle;
 
 	// 체력 관리
 	float MaxHealth;

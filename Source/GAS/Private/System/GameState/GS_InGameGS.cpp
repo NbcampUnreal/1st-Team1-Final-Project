@@ -141,7 +141,9 @@ void AGS_InGameGS::Client_VerifyRoomSpawning()
 		if (UPlaceInfoComponent* InfoComponent = CurrentActor->FindComponentByClass<UPlaceInfoComponent>())
 		{
 			EObjectType ObjectType = InfoComponent->GetObjectType();
-			if (ObjectType == EObjectType::Room || ObjectType == EObjectType::DoorAndWall)
+			if (InfoComponent->Is_ObjectTypeSynchronization &&
+				(ObjectType == EObjectType::Room ||
+				ObjectType == EObjectType::DoorAndWall))
 			{
 				CurrentLocalRoomCount++;
 			}

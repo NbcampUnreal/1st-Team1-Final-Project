@@ -9,6 +9,8 @@
 class UBoxComponent;
 class USphereComponent;
 class UNiagaraSystem;
+class UNiagaraComponent;
+class UAkAudioEvent;
 
 UENUM(BlueprintType)
 enum class ESwordAuraEffectType : uint8
@@ -17,6 +19,16 @@ enum class ESwordAuraEffectType : uint8
 	RightNormal,
 	LeftBuff,
 	RightBuff
+};
+
+UENUM(BlueprintType)
+enum class ESwordAuraHitTargetType : uint8
+{
+	Guardian,
+	Seeker,
+	Character,
+	Structure,
+	Other
 };
 
 UCLASS()
@@ -33,6 +45,11 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_StartSwordSlashVFX();
 	void Multicast_StartSwordSlashVFX_Implementation();
+
+	// VFX와 사운드를 하나의 RPC로 통합 (네트워크 최적화)
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayHitEffects(ESwordAuraHitTargetType TargetType, const FVector& HitLocation);
+	void Multicast_PlayHitEffects_Implementation(ESwordAuraHitTargetType TargetType, const FVector& HitLocation);
 
 
 protected:
@@ -53,7 +70,32 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Attack")
 	UNiagaraSystem* RightBuffSlashVFX;
 
+	// 타격 시 VFX
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Hit")
+	UNiagaraSystem* NormalHitVFX;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Hit")
+	UNiagaraSystem* BuffHitVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Hit")
+	UNiagaraSystem* NormalBloodSplatterVFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "VFX|Hit")
+	UNiagaraSystem* BuffBloodSplatterVFX;
+
+	// VFX 컴포넌트 관리
+	UPROPERTY()
+	UNiagaraComponent* SlashVFXComponent;
+
+	// 타격 사운드 이벤트
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio|Hit")
+	UAkAudioEvent* HitPawnSoundEvent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio|Hit")
+	UAkAudioEvent* HitSeekerSoundEvent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio|Hit")
+	UAkAudioEvent* HitStructureSoundEvent;
 
 	UPROPERTY()
 	TSet<AActor*> HitActors;

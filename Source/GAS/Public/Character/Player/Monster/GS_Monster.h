@@ -80,6 +80,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Skill")
 	virtual void UseSkill();
+	
+	UFUNCTION()
+	virtual void ApplyStiffness();
+
+	UFUNCTION()
+	virtual void EndStiffness();
 
 	void ShowTargetUI(bool bIsActive);
 	

@@ -23,10 +23,13 @@ void UGS_AresAimingSkill::ActiveSkill()
 
 	if (AGS_Seeker* OwnerPlayer = Cast<AGS_Ares>(OwnerCharacter))
 	{
-		// 스킬 시작 사운드 재생
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+		// 스킬 시작 사운드 재생 (멀티캐스트)
+		if (OwnerPlayer->HasAuthority())
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, true);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerPlayer->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 0);
+			}
 		}
 
 		// 스킬 애니메이션 재생
@@ -63,12 +66,15 @@ void UGS_AresAimingSkill::DeactiveSkill()
 	// 입력 제한 설정
 	AresCharacter->SetLookControlValue(true, true);*/
 
-	// SeekerAudioComponent를 통한 스킬 종료 사운드
-	if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
+	// 스킬 종료 사운드 재생 (멀티캐스트)
+	if (OwnerCharacter->HasAuthority())
 	{
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+		if (AGS_Seeker* OwnerSeeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			AudioComp->PlaySkillSoundFromDataTable(CurrentSkillType, false);
+			if (UGS_SeekerAudioComponent* AudioComp = OwnerSeeker->SeekerAudioComponent)
+			{
+				AudioComp->RequestSkillAudio(CurrentSkillType, 1);
+			}
 		}
 	}
 
@@ -129,6 +135,7 @@ void UGS_AresAimingSkill::SpawnFirstProjectile()
 		ProjectileA->EffectType = bIsBerserker
 			? ESwordAuraEffectType::LeftBuff
 			: ESwordAuraEffectType::LeftNormal;
+		UGameplayStatics::FinishSpawningActor(ProjectileA, SpawnTransform);
 		ProjectileA->Multicast_StartSwordSlashVFX();
 	}
 

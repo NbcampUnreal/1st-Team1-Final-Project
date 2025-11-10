@@ -141,6 +141,8 @@ public:
 	class UBoxComponent* DefenseHitBox;
 
 protected:
+	AGS_Character* FindUltimateAttacker(AActor* InActor);
+	
 	// Called when the game starts or when spawned
 	virtual void PostInitializeComponents() override;
 	

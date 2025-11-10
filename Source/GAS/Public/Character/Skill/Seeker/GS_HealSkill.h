@@ -19,6 +19,7 @@ public:
 
 	virtual void ActiveSkill() override;
 	virtual void DeactiveSkill() override;
+	virtual void InterruptSkill() override;
 	virtual bool CanActive() const override; // 포션 개수와 체력 상태를 고려한 활성화 가능 여부
 
 protected:
@@ -35,10 +36,6 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Heal")
 	bool bIsPotionDepletedOrHealthFull;
-
-protected:
-	// 초기화 함수
-	void InitializeDamageBinding();
 
 public:
 	// 리플리케이션 함수
@@ -75,6 +72,19 @@ public:
 
 	// 포션 부족 시 쿨다운 효과 표시
 	void ShowPotionDepletedEffect();
+
+	// Delegate
+	virtual void InitializeDelegate() override;
+
+	// Get
+	float GetHealAmount();
+	int32 GetCurrentHealCount();
+	void DecreaseCurrentHealCount();
+	int32 GetMaxHealCount();
+
+	/*// 포션 이후 무기 확인
+	UFUNCTION()
+	void CheckWeaponStateAndPlayWielding();*/
 
 	// ===================
 	// VFX/SFX 참고

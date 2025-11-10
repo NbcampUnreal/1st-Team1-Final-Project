@@ -66,9 +66,27 @@ void UGS_MonsterAudioComponent::BeginPlay()
 
 void UGS_MonsterAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-    StopSoundTimer();
-    
-    
+    // 타이머 안전 정리 (SafeClearTimer 패턴)
+    if (IdleSoundTimer.IsValid())
+    {
+        UWorld* World = GetWorld();
+        if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+        {
+            World->GetTimerManager().ClearTimer(IdleSoundTimer);
+        }
+        IdleSoundTimer.Invalidate();
+    }
+
+    if (CombatSoundTimer.IsValid())
+    {
+        UWorld* World = GetWorld();
+        if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+        {
+            World->GetTimerManager().ClearTimer(CombatSoundTimer);
+        }
+        CombatSoundTimer.Invalidate();
+    }
+
     Super::EndPlay(EndPlayReason);
 }
 
@@ -98,11 +116,35 @@ void UGS_MonsterAudioComponent::SetMonsterAudioState(EMonsterAudioState NewState
 
 void UGS_MonsterAudioComponent::PlaySound(EMonsterAudioState SoundType, bool bForcePlay)
 {
-    if (!OwnerMonster || !GetOwner()->HasAuthority())
+    // 컴포넌트 유효성 검증
+    if (!IsValid(this))
+    {
         return;
+    }
+
+    // 월드 컨텍스트 유효성 검증
+    UWorld* World = GetWorld();
+    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+    {
+        return;
+    }
+
+    // 오너 유효성 검증
+    AActor* Owner = GetOwner();
+    if (!IsValid(Owner) || !Owner->HasAuthority())
+    {
+        return;
+    }
+
+    if (!OwnerMonster)
+    {
+        return;
+    }
 
     if (!CanSendRPC())
+    {
         return;
+    }
 
     if (!bForcePlay)
     {
@@ -111,65 +153,33 @@ void UGS_MonsterAudioComponent::PlaySound(EMonsterAudioState SoundType, bool bFo
         else if (SoundType == EMonsterAudioState::Combat) Interval = CombatSoundInterval;
         else Interval = 1.0f;
 
-        float CurrentTime = GetWorld()->GetTimeSeconds();
+        float CurrentTime = World->GetTimeSeconds();
         if ((CurrentTime - ServerLastBroadcastTime.FindOrAdd(SoundType, 0.0f)) < Interval)
         {
             return;
         }
         ServerLastBroadcastTime.Emplace(SoundType, CurrentTime);
     }
-    
-    LastMulticastTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+
+    LastMulticastTime = World->GetTimeSeconds();
     Multicast_TriggerSound(SoundType, bForcePlay);
 }
 
 void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAudioState SoundTypeToTrigger, bool bIsImmediate)
 {
-    // 오디오 시스템 검증 (데디케이티드 서버 및 Wwise 초기화 체크)
-    if (!IsAudioSystemValid())
+    if (!OwnerMonster)
     {
         return;
     }
 
-    if (!OwnerMonster || !GetWorld())
+    // 죽음 사운드는 거리/시야각 체크 없이 항상 재생 (bSkipViewFrustumCheck = true)
+    // 다른 사운드는 정상 체크 수행 (bSkipViewFrustumCheck = false)
+    const bool bSkipCheck = (SoundTypeToTrigger == EMonsterAudioState::Death);
+
+    // 통합 체크 및 Distance Scaling 설정 (중복 로직 제거)
+    if (!PrepareMulticastSound(OwnerMonster, bSkipCheck))
     {
         return;
-    }
-
-    FVector ListenerLocation;
-    if (!GetListenerLocation(ListenerLocation))
-    {
-        return;
-    }
-
-    // RTS 모드 체크 (모든 사운드에 공통 적용)
-    const bool bRTS = IsRTSMode();
-
-    // 죽음 사운드는 거리/시야각 체크 없이 항상 재생
-    if (SoundTypeToTrigger != EMonsterAudioState::Death)
-    {
-        // RTS 모드와 TPS 모드에 따른 거리 체크
-        const float MaxDistance = GetMaxDistanceForMode(bRTS);
-
-        float DistanceToListener = FVector::Dist(OwnerMonster->GetActorLocation(), ListenerLocation);
-
-        // RTS 모드에서는 화면 시야각 기반 체크, TPS 모드에서는 거리 기반 체크
-        if (bRTS)
-        {
-            // RTS 모드: View Frustum 체크 (화면에 보이는지 확인)
-            if (!IsInViewFrustum(OwnerMonster->GetActorLocation()))
-            {
-                return;
-            }
-        }
-        else
-        {
-            // TPS 모드: 기존 거리 기반 체크
-            if (DistanceToListener > MaxDistance)
-            {
-                return;
-            }
-        }
     }
 
     UAkAudioEvent* SoundEvent = GetSoundEvent(SoundTypeToTrigger);
@@ -178,9 +188,6 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
         return;
     }
 
-    // RTS 모드에 따른 Distance Scaling 설정 (통일된 시스템 사용)
-    SetDistanceScaling(bRTS);
-
     if (!bIsImmediate)
     {
         float Interval;
@@ -188,14 +195,15 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
         else if (SoundTypeToTrigger == EMonsterAudioState::Combat) Interval = CombatSoundInterval;
         else Interval = 1.0f;
 
-        float CurrentTime = GetWorld()->GetTimeSeconds();
-        if ((CurrentTime - LocalLastSoundPlayTimes.FindOrAdd(SoundTypeToTrigger, 0.0f)) < (Interval * LocalSoundCooldownMultiplier)) 
+        UWorld* World = GetWorld();
+        float CurrentTime = World->GetTimeSeconds();
+        if ((CurrentTime - LocalLastSoundPlayTimes.FindOrAdd(SoundTypeToTrigger, 0.0f)) < (Interval * LocalSoundCooldownMultiplier))
         {
-            return; 
+            return;
         }
         LocalLastSoundPlayTimes.Emplace(SoundTypeToTrigger, CurrentTime);
     }
-    
+
     AkPlayingID NewPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerMonster, 0, FOnAkPostEventCallback());
     RegisterPlayingID(NewPlayingID);
 
@@ -208,36 +216,139 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
 
 void UGS_MonsterAudioComponent::PlayHurtSound()
 {
-    if (GetOwner() && GetOwner()->HasAuthority())
+    // 컴포넌트 유효성 검증
+    if (!IsValid(this))
     {
-        SetMonsterAudioState(EMonsterAudioState::Hurt);
-        PlaySound(EMonsterAudioState::Hurt, true);
+        return;
     }
+
+    // 월드 컨텍스트 유효성 검증
+    UWorld* World = GetWorld();
+    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+    {
+        return;
+    }
+
+    // 오너 유효성 검증
+    AActor* Owner = GetOwner();
+    if (!IsValid(Owner) || !Owner->HasAuthority())
+    {
+        return;
+    }
+
+    SetMonsterAudioState(EMonsterAudioState::Hurt);
+    PlaySound(EMonsterAudioState::Hurt, true);
 }
 
 void UGS_MonsterAudioComponent::PlayDeathSound()
 {
-    if (GetOwner() && GetOwner()->HasAuthority())
+    // 컴포넌트 유효성 검증
+    if (!IsValid(this))
     {
-        // 죽음 사운드 재생 전에 현재 재생 중인 모든 사운드 중단
-        StopAllActiveSounds();
-
-        SetMonsterAudioState(EMonsterAudioState::Death);
-        PlaySound(EMonsterAudioState::Death, true);
+        return;
     }
+
+    // 월드 컨텍스트 유효성 검증
+    UWorld* World = GetWorld();
+    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+    {
+        return;
+    }
+
+    // 오너 유효성 검증
+    AActor* Owner = GetOwner();
+    if (!IsValid(Owner) || !Owner->HasAuthority())
+    {
+        return;
+    }
+
+    // 죽음 사운드 재생 전에 현재 재생 중인 모든 사운드 중단
+    StopAllActiveSounds();
+
+    SetMonsterAudioState(EMonsterAudioState::Death);
+    PlaySound(EMonsterAudioState::Death, true);
+}
+
+// 로컬 전용 Hurt 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+void UGS_MonsterAudioComponent::PlayHurtSoundLocal()
+{
+    if (!OwnerMonster)
+    {
+        return;
+    }
+
+    // 통합 체크 및 Distance Scaling 설정 (피격 사운드는 ViewFrustum 체크 제외)
+    if (!PrepareMulticastSound(OwnerMonster, true))
+    {
+        return;
+    }
+
+    // Hurt 사운드 가져오기
+    UAkAudioEvent* SoundEvent = GetSoundEvent(EMonsterAudioState::Hurt);
+    if (!SoundEvent)
+    {
+        return;
+    }
+
+    // 사운드 재생
+    AkPlayingID NewPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerMonster, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(NewPlayingID);
+}
+
+// 로컬 전용 Death 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+void UGS_MonsterAudioComponent::PlayDeathSoundLocal()
+{
+    if (!OwnerMonster)
+    {
+        return;
+    }
+
+    // 죽음 사운드는 ViewFrustum 체크 제외
+    if (!PrepareMulticastSound(OwnerMonster, true))
+    {
+        return;
+    }
+
+    // Death 사운드 가져오기
+    UAkAudioEvent* SoundEvent = GetSoundEvent(EMonsterAudioState::Death);
+    if (!SoundEvent)
+    {
+        return;
+    }
+
+    // 사운드 재생
+    AkPlayingID NewPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerMonster, 0, FOnAkPostEventCallback());
+    RegisterPlayingID(NewPlayingID);
 }
 
 void UGS_MonsterAudioComponent::PlaySwingSound()
 {
-    if (!GetOwner() || !GetOwner()->HasAuthority())
+    // 컴포넌트 유효성 검증
+    if (!IsValid(this))
+    {
+        return;
+    }
+
+    // 월드 컨텍스트 유효성 검증
+    UWorld* World = GetWorld();
+    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+    {
+        return;
+    }
+
+    // 오너 유효성 검증
+    AActor* Owner = GetOwner();
+    if (!IsValid(Owner) || !Owner->HasAuthority())
     {
         return;
     }
 
     if (!CanSendRPC())
+    {
         return;
+    }
 
-    const float CurrentTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+    const float CurrentTime = World->GetTimeSeconds();
     if (CurrentTime - ServerLastSwingBroadcastTime < SwingResetTime)
     {
         return;

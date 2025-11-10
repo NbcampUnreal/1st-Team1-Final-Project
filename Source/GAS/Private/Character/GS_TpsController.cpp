@@ -80,6 +80,12 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 
 void AGS_TpsController::Look(const FInputActionValue& InputValue)
 {
+	if (bIsAutoMoving)
+	{
+		// 자동 이동 중에는 마우스 회전 무시
+		return;
+	}
+
 	const FVector2D InputAxisVector = InputValue.Get<FVector2D>();
 	if (AGS_Character* ControlledPawn = Cast<AGS_Character>(GetPawn()))
 	{
@@ -103,7 +109,7 @@ void AGS_TpsController::Look(const FInputActionValue& InputValue)
 				NewPitch = FMath::ClampAngle(NewPitch, PitchMin, PitchMax);
 
 				CurrentRot.Pitch = NewPitch;
-				SetControlRotation(CurrentRot); // SJE
+				SetControlRotation(CurrentRot);
 				
 				//ControlledPawn->AddControllerPitchInput(InputAxisVector.Y * SensitivityMultiplier);
 			}
@@ -153,6 +159,11 @@ void AGS_TpsController::SetMoveControlValue(bool CanMoveRight, bool CanMoveForwa
 {
 	ControlValues.bCanMoveForward = CanMoveForward;
 	ControlValues.bCanMoveRight = CanMoveRight;
+}
+
+FControlValue AGS_TpsController::GetMoveControlValue()
+{
+	return ControlValues;
 }
 
 void AGS_TpsController::SetLookControlValue(bool CanLookRight, bool CanLookUp)
@@ -335,7 +346,7 @@ void AGS_TpsController::StartAutoMoveForward()
 
 void AGS_TpsController::StopAutoMoveForward()
 {
-	bIsAutoMoving = false;
+	//bIsAutoMoving = false;
 	Client_StopAutoMoveForward();
 }
 
@@ -360,7 +371,7 @@ void AGS_TpsController::Client_StopAutoMoveForward_Implementation()
 		return;
 	}
 
-	bIsAutoMoving = false;
+	//bIsAutoMoving = false;
 	GetWorld()->GetTimerManager().ClearTimer(AutoMoveTickHandle);
 	RestoreOriginalCameraSettings();
 }
@@ -380,10 +391,30 @@ void AGS_TpsController::SnapCameraToCharacterYaw()
 	}
 }
 
+void AGS_TpsController::SetIsAutoMoving(bool InIsAutoMoving)
+{
+	if(HasAuthority())
+	{
+		bIsAutoMoving = InIsAutoMoving;
+	}
+}
+
 void AGS_TpsController::AutoMoveTick()
 {
+	if (!IsValid(this) || !IsLocalController())
+	{
+		return;
+	}
+	
 	if (!bIsAutoMoving)
 	{
+		return;
+	}
+
+	ACharacter* ControlledCharacter = Cast<ACharacter>(GetPawn());
+	if (!IsValid(ControlledCharacter) || !ControlledCharacter->GetCharacterMovement())
+	{
+		StopAutoMoveForward(); // 안전하게 정지
 		return;
 	}
 
@@ -572,5 +603,15 @@ void AGS_TpsController::BeginPlayingState()
 	{
 		Server_NotifyPlayerIsReady();
 		TestFunction();
+	}
+}
+
+void AGS_TpsController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AutoMoveTickHandle);
 	}
 }

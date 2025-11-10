@@ -25,7 +25,7 @@ public:
     void InitializeDefaults();
     virtual void BeginPlay() override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-    virtual void CopyProperties(APlayerState* OtherPlayerState) override;
+    //virtual void CopyProperties(APlayerState* OtherPlayerState) override;
     virtual void SeamlessTravelTo(APlayerState* NewPlayerState) override;
 
 	// Steam Avatar
@@ -100,6 +100,9 @@ public:
 	
     UPROPERTY(ReplicatedUsing = OnRep_IsAlive, EditAnywhere, BlueprintReadWrite, Category = "PlayerStatus")
     bool bIsAlive = true;
+
+	UPROPERTY()
+	bool bHasInitializedStats = false;
 	
     UPROPERTY(Replicated, BlueprintReadOnly, Category = "Game Result")
     EGameResult CurrentGameResult;
@@ -112,9 +115,6 @@ public:
     void SetIsAlive(bool bNewIsAlive);
     void SetupStatCompBinding(UGS_StatComp* InStatComp);
     void OnPawnStatInitialized();
-
-    UFUNCTION(BlueprintCallable, Category = "PlayerState")
-    void SetPlayerRole(EPlayerRole NewRole);
 
     UFUNCTION()
     void HandleCurrentHPChanged(UGS_StatComp* StatComp);

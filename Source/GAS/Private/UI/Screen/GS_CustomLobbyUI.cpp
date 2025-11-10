@@ -8,6 +8,8 @@
 #include "UI/Popup/GS_FriendListWidget.h"
 #include "Components/Overlay.h"
 #include "System/GS_GameInstance.h"
+#include "System/GS_PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 
 
 void UGS_CustomLobbyUI::NativeConstruct()
@@ -96,6 +98,9 @@ void UGS_CustomLobbyUI::OnPerkOrDungeonButtonClicked()
 
 void UGS_CustomLobbyUI::OnReadyButtonClicked()
 {
+	// 캐릭터별 준비 사운드 재생
+	PlayCharacterReadySound();
+	
 	AGS_CustomLobbyPC* PC = GetOwningPlayer<AGS_CustomLobbyPC>();
 	if (PC)
 	{
@@ -135,7 +140,9 @@ void UGS_CustomLobbyUI::OnBackButtonClicked()
 		}
 	}
 	CommonPopUpUI->SetVisibility(ESlateVisibility::Visible);
-	CommonPopUpUI->SetDescription(FText::FromString(TEXT("세션을 나가시겠습니까?")));
+	CommonPopUpUI->SetDescription(
+		NSLOCTEXT("CustomLobby", "LeaveSessionConfirm", "Do you want to leave\nthe session?")
+	);
 	CommonPopUpUI->OnYesClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupYesButtonClicked);
 	CommonPopUpUI->OnNoClicked.BindUObject(this, &UGS_CustomLobbyUI::OnBackPopupNoButtonClicked);
 }
@@ -278,7 +285,9 @@ void UGS_CustomLobbyUI::ShowPerkSaveConfirmPopup()
 	if (CommonPopUpUI)
 	{
 		CommonPopUpUI->SetVisibility(ESlateVisibility::Visible);
-		CommonPopUpUI->SetDescription(FText::FromString(TEXT("변경사항을\n저장하시겠습니까?")));
+		CommonPopUpUI->SetDescription(
+			NSLOCTEXT("CustomLobby", "PerkSaveConfirm", "Do you want to save\nthe changes?")
+		);
 
 		AGS_CustomLobbyPC* PC = GetOwningPlayer<AGS_CustomLobbyPC>();
 		if (PC)
@@ -286,5 +295,66 @@ void UGS_CustomLobbyUI::ShowPerkSaveConfirmPopup()
 			CommonPopUpUI->OnYesClicked.BindUObject(PC, &AGS_CustomLobbyPC::OnPerkSaveYes);
 			CommonPopUpUI->OnNoClicked.BindUObject(PC, &AGS_CustomLobbyPC::OnPerkSaveNo);
 		}
+	}
+}
+
+void UGS_CustomLobbyUI::PlayCharacterReadySound()
+{
+	AGS_PlayerState* PS = GetOwningPlayerState<AGS_PlayerState>();
+	if (!PS)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayCharacterReadySound: Failed to get PlayerState"));
+		return;
+	}
+
+	USoundBase* SoundToPlay = nullptr;
+	
+	// 현재 준비 상태 확인 (버튼을 누르기 전 상태이므로 반대로 체크)
+	bool bIsCurrentlyReady = PS->bIsReady;
+
+	// 현재 역할에 따라 적절한 사운드 선택
+	if (PS->CurrentPlayerRole == EPlayerRole::PR_Seeker)
+	{
+		switch (PS->CurrentSeekerJob)
+		{
+		case ESeekerJob::Ares:
+			SoundToPlay = bIsCurrentlyReady ? AresCancelSound : AresReadySound;
+			break;
+		case ESeekerJob::Chan:
+			SoundToPlay = bIsCurrentlyReady ? ChanCancelSound : ChanReadySound;
+			break;
+		case ESeekerJob::Merci:
+			SoundToPlay = bIsCurrentlyReady ? MerciCancelSound : MerciReadySound;
+			break;
+		case ESeekerJob::Reina:
+			SoundToPlay = bIsCurrentlyReady ? ReinaCancelSound : ReinaReadySound;
+			break;
+		default:
+			break;
+		}
+	}
+	else if (PS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+	{
+		switch (PS->CurrentGuardianJob)
+		{
+		case EGuardianJob::Drakhar:
+			SoundToPlay = bIsCurrentlyReady ? DrakharCancelSound : DrakharReadySound;
+			break;
+		default:
+			break;
+		}
+	}
+
+	// 사운드 재생
+	if (SoundToPlay)
+	{
+		UGameplayStatics::PlaySound2D(this, SoundToPlay);
+		//UE_LOG(LogTemp, Log, TEXT("PlayCharacterReadySound: Playing %s sound for role %s"), 
+		//	bIsCurrentlyReady ? TEXT("cancel") : TEXT("ready"),
+		//	*UEnum::GetValueAsString(PS->CurrentPlayerRole));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayCharacterReadySound: No sound assigned for current character"));
 	}
 }

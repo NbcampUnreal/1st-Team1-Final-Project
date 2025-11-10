@@ -28,12 +28,14 @@
 #include "Character/GS_TpsController.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "AkAudioEvent.h"
-#include "AkComponent.h"
-#include "AkAudioDevice.h"
+/*#include "AkComponent.h"
+#include "AkAudioDevice.h"*/
 #include "UI/Character/GS_HPTextWidgetComp.h"
 #include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/Component/GS_LowHealthEffectComponent.h"
 #include "Character/Component/GS_DetectionEffectComponent.h"
+#include "Props/Item/SeekerItem/GS_HP_Potion.h"
+#include "Props/Item/GS_ItemData.h"
 
 // Sets default values
 AGS_Seeker::AGS_Seeker()
@@ -104,6 +106,20 @@ AGS_Seeker::AGS_Seeker()
 	SeekerGait = EGait::Run;
 	LastSeekerGait = SeekerGait;
 	CanChangeSeekerGait = true;
+
+	// Item (hard coding) -> 나중에 SkillSet DataTable 과 같이 ItemSet DataTable 를 가지고 초기화 할 수 있도록 한다. // SJE
+	UGS_ItemData* ItemData = CreateDefaultSubobject<UGS_ItemData>(TEXT("HP_Potion_Data"));
+	ItemData->ItemName = TEXT("HP_Potion");
+	ItemData->ItemType = EItemType::HP_Potion;
+	ItemData->MaxCount = 5;
+	ItemData->CurCount = 5;
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> FullPotionMesh(TEXT("/Game/Props/Item/Stuff/Mesh/HP_Potion_Full.HP_Potion_Full"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> EmptyPotionMesh(TEXT("/Game/Props/Item/Stuff/Mesh/HP_Potion_Empty.HP_Potion_Empty"));
+	
+	ItemData->ItemMeshs.Add(FName(TEXT("HP_Potion_Full")), FullPotionMesh.Object);
+	ItemData->ItemMeshs.Add(FName(TEXT("HP_Potion_Empty")), EmptyPotionMesh.Object);
+
+	ItemDatas.Add(EItemType::HP_Potion, ItemData);
 }
 
 void AGS_Seeker::BeginPlay()
@@ -148,7 +164,20 @@ void AGS_Seeker::BeginPlay()
 void AGS_Seeker::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	/*const ECollisionResponse CurrentResponse = GetCapsuleComponent()->GetCollisionResponseToChannel(ECC_Pawn);
+
+	FString ResponseString = UEnum::GetValueAsString(TEXT("Engine.ECollisionResponse"), CurrentResponse);
 	
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			3,
+			FColor::Red,
+			FString::Printf(TEXT("Response to ECC_Pawn : %s"), *ResponseString)
+			);
+	}*/ // SJE
 }
 
 // Called to bind functionality to input
@@ -177,6 +206,16 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, SeekerState);
 	DOREPLIFETIME(AGS_Seeker, bIsDetectedByGuardian);
 	DOREPLIFETIME(AGS_Seeker, DetectionIntensity);
+}
+
+AGS_Item* AGS_Seeker::GetItem(EItemType ItemType)
+{
+	return Items[ItemType];
+}
+
+UGS_ItemData* AGS_Seeker::GetItemData(EItemType ItemType)
+{
+	return ItemDatas[ItemType];
 }
 
 void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -418,6 +457,11 @@ void AGS_Seeker::SetLookControlValue(bool bLookUp, bool bLookRight)
 	}
 }
 
+FName AGS_Seeker::GetManualRowName_Implementation() const
+{
+	return ManualRowName;
+}
+
 void AGS_Seeker::UpdatePostProcessEffect(float EffectStrength)
 {
     if (LowHealthEffectComp)
@@ -568,15 +612,18 @@ void AGS_Seeker::OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedCompon
 
 void AGS_Seeker::AddCombatMonster(AGS_Monster* Monster)
 {
-	if (!Monster)
+	if (!IsValid(Monster))
 	{
 		return;
 	}
-	
+
+	// 무효한 몬스터 제거
+	NearbyMonsters.RemoveAll([](AGS_Monster* M) { return !IsValid(M); });
+
 	if (!NearbyMonsters.Contains(Monster))
 	{
 		NearbyMonsters.Add(Monster);
-		
+
 		// 첫 번째 몬스터가 추가되면 음악 시작
 		if (NearbyMonsters.Num() == 1)
 		{
@@ -587,13 +634,14 @@ void AGS_Seeker::AddCombatMonster(AGS_Monster* Monster)
 
 void AGS_Seeker::RemoveCombatMonster(AGS_Monster* Monster)
 {
-	if (!Monster)
+	if (Monster)
 	{
-		return;
+		NearbyMonsters.Remove(Monster);
 	}
-	
-	NearbyMonsters.Remove(Monster);
-	
+
+	// 무효한 몬스터 제거
+	NearbyMonsters.RemoveAll([](AGS_Monster* M) { return !IsValid(M); });
+
 	// 모든 몬스터가 제거되면 음악 중지
 	if (NearbyMonsters.Num() == 0)
 	{
@@ -603,7 +651,16 @@ void AGS_Seeker::RemoveCombatMonster(AGS_Monster* Monster)
 
 void AGS_Seeker::StartCombatMusic()
 {
-	if (!IsLocallyControlled() || NearbyMonsters.Num() == 0 || !NearbyMonsters[0])
+	// 로컬 제어 확인
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	// 무효한 몬스터 제거 후 배열 체크
+	NearbyMonsters.RemoveAll([](AGS_Monster* M) { return !IsValid(M); });
+
+	if (NearbyMonsters.Num() == 0)
 	{
 		return;
 	}
@@ -616,7 +673,7 @@ void AGS_Seeker::StartCombatMusic()
             UAkAudioEvent* CombatStartEvent = nullptr;
             UAkAudioEvent* CombatStopEvent = nullptr;
 
-            // 유효 이벤트를 가진 몬스터를 우선 탐색
+            // 유효한 이벤트를 가진 몬스터를 우선 탐색
             for (AGS_Monster* Monster : NearbyMonsters)
             {
                 if (!IsValid(Monster))
@@ -637,9 +694,17 @@ void AGS_Seeker::StartCombatMusic()
             }
             else
             {
-                UE_LOG(LogTemp, Warning, TEXT("AGS_Seeker::StartCombatMusic - No valid CombatMusicEvent in NearbyMonsters."));
+                UE_LOG(LogTemp, Warning, TEXT("[Seeker] StartCombatMusic - 유효한 CombatMusicEvent가 없습니다. (NearbyMonsters: %d)"), NearbyMonsters.Num());
             }
 		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("[Seeker] StartCombatMusic - AudioManager를 찾을 수 없습니다!"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Seeker] StartCombatMusic - GameInstance를 찾을 수 없습니다!"));
 	}
 }
 
@@ -692,14 +757,9 @@ void AGS_Seeker::UpdateCombatMusicState()
 
 void AGS_Seeker::OnDeath()
 {
-	// 시커 죽음 사운드 재생
-	if (SeekerAudioComponent)
-	{
-		SeekerAudioComponent->PlayDeathSound();
-	}
-	
+	// Death 사운드는 부모 클래스(GS_Character::OnDeath)에서 통합 처리됨
 	Super::OnDeath();
-	
+
 	ClientRPCStopCombatMusic();
 	NearbyMonsters.Empty();
 }
@@ -722,6 +782,17 @@ void AGS_Seeker::HandleAliveStatusChanged(AGS_PlayerState* ChangedPlayerState, b
 	{
 		ClientRPCStopCombatMusic();
 		NearbyMonsters.Empty();
+	}
+}
+
+void AGS_Seeker::TransWeaponHandingState(EWeaponHandlingState RequiredCurState, EWeaponHandlingState NextState,
+	UAnimMontage* TargetAM, ESeekerMontageSlot TargetMontageSlot)
+{
+	if (WeaponHandlingState == RequiredCurState)
+	{
+		Multicast_SetMontageSlot(TargetMontageSlot);
+		Multicast_PlaySkillMontage(TargetAM);
+		SetWeaponHandlingState(NextState);
 	}
 }
 
@@ -814,11 +885,18 @@ void AGS_Seeker::OnRep_IsDetectedByGuardian()
 		return;
 	}
 
-	float CurrentTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
-	float TimeSinceLastSound = CurrentTime - LastDetectionSoundTime;
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	float CurrentTime = World->GetTimeSeconds();
 
     if (bIsDetectedByGuardian)
 	{
+		// 입장 감지 사운드 제한 적용
+		float TimeSinceLastSound = CurrentTime - LastDetectionSoundTime;
 		if (TimeSinceLastSound >= DetectionSoundCooldown)
 		{
 			SeekerAudioComponent->PlayDetectionWarningSound();
@@ -827,8 +905,13 @@ void AGS_Seeker::OnRep_IsDetectedByGuardian()
 	}
 	else
 	{
-		SeekerAudioComponent->PlayDetectionClearedSound();
-		LastDetectionSoundTime = CurrentTime;
+		// 퇴장 감지 사운드 제한 적용
+		float TimeSinceLastExitSound = CurrentTime - LastExitDetectionSoundTime;
+		if (TimeSinceLastExitSound >= ExitDetectionSoundCooldown)
+		{
+			SeekerAudioComponent->PlayDetectionClearedSound();
+			LastExitDetectionSoundTime = CurrentTime;
+		}
 	}
 }
 

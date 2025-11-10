@@ -10,16 +10,16 @@
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_ChanAimingSkillBar.h"
 #include "Animation/Character/GS_SeekerAnimInstance.h"
-#include "Character/GS_TpsController.h"
+/*#include "Character/GS_TpsController.h"
 #include "AkComponent.h"
 #include "AkAudioEvent.h"
 #include "AkGameplayStatics.h"
-#include "AkAudioDevice.h"
+#include "AkAudioDevice.h"*/
 #include "Animation/Character/Seeker/GS_ChooserInputObj.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/Skill/GS_SkillComp.h"
 #include "Character/Skill/Seeker/Chan/GS_ChanUltimateSkill.h"
-#include "Engine/DamageEvents.h"
+/*#include "Engine/DamageEvents.h"*/
 
 
 // Sets default values
@@ -38,11 +38,16 @@ AGS_Chan::AGS_Chan()
 	UltimateCollision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
 	UltimateCollision->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 	UltimateCollision->SetGenerateOverlapEvents(true);
+
+	// KeyManual에서 쓰일 캐릭터 타입 저장
+	ManualRowName = FName("Chan");
 }
 
 void AGS_Chan::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AGS_Chan, bIsDefending);
 }
 
 void AGS_Chan::ResetCurrentStamina()
@@ -50,24 +55,33 @@ void AGS_Chan::ResetCurrentStamina()
 	CurrentStamina = MaxStamina;
 }
 
-void AGS_Chan::SetCurrentStamina(float NewValue, bool SetbyDamage)
+void AGS_Chan::SetCurrentStamina(float NewValue, bool bByDamage)
 {
 	CurrentStamina = FMath::Clamp(NewValue, 0.f, MaxStamina);
 	Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
-	// UI 반영
-	/*if (SetbyDamage)
-	{
-		Client_UpdateChanAimingSkillBarDealy(CurrentStamina / MaxStamina);
-	}
-	else
-	{
-		Client_UpdateChanAimingSkillBar(CurrentStamina / MaxStamina);
-	}*/
 
-	// 스테미나가 다 떨어지면 스킬
-	if (CurrentStamina <= 0.f && SkillComp && CurrentStamina > 0.f) // 직전 값 기준 체크
+	// 스테미나가 다 떨어지면 애니메이션 설정 후 Deactive
+	if (HasAuthority())
 	{
-		SkillComp->Server_TryDeactiveSkill(ESkillSlot::Aiming);
+		if (CurrentStamina <= 0.f && SkillComp) // 직전 값 기준 체크
+		{
+			OnStaminaDepleted.Broadcast(bByDamage);
+			SkillComp->Server_TryDeactiveSkill(ESkillSlot::Ready);
+		}
+	}
+}
+
+void AGS_Chan::DrainStaminaTick()
+{
+	SetCurrentStamina(CurrentStamina - StaminaDrainRate * 0.1f, false);
+}
+
+void AGS_Chan::RegenStaminaTick()
+{
+	SetCurrentStamina(CurrentStamina + StaminaRegenRate * 0.1f, false);
+	if (CurrentStamina >= MaxStamina)
+	{
+		GetWorldTimerManager().ClearTimer(StaminaHandle);
 	}
 }
 
@@ -232,15 +246,6 @@ float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 	// 방어 상태일 때는 스테미나 감소 (피격 애니메이션 방지)
 	if (bIsDefending)
 	{
-		// 방어 효과음 재생
-		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
-		{
-			SeekerAudio->PlayDefenseSound();
-		}
-		
-		// 방어 VFX 재생 (나중에 구현)
-		// PlayDefenseVFX();
-		
 		// 방어 성공 시 데미지 0으로 설정하여 피격 애니메이션 방지
 		ActualDamage = 0.0f;
 
@@ -259,15 +264,6 @@ float AGS_Chan::TakeDamage(float DamageAmount, struct FDamageEvent const& Damage
 		ActualDamage = Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
 	}
 
-	// Play hurt sound if we actually took damage and are still alive
-	if (ActualDamage > 0.0f && GetStatComp() && GetStatComp()->GetCurrentHealth() > 0.0f)
-	{
-		if (UGS_SeekerAudioComponent* SeekerAudio = GetComponentByClass<UGS_SeekerAudioComponent>())
-		{
-			SeekerAudio->PlayHurtSound();
-		}
-	}
-
 	return ActualDamage;
 }
 
@@ -275,7 +271,11 @@ void AGS_Chan::SetDefending(bool bDefending)
 {
 	if (HasAuthority())
 	{
+		if (bIsDefending == bDefending) return;
+
 		bIsDefending = bDefending;
+
+		GetWorldTimerManager().ClearTimer(StaminaHandle);
 		
 		// 방패의 방어용 콜리전 제어
 		for (int32 i = 0; i < 5; ++i)
@@ -286,11 +286,16 @@ void AGS_Chan::SetDefending(bool bDefending)
 				{
 					// 방어 시작 - 방어용 콜리전 활성화
 					Shield->ServerEnableDefenseHit();
+
+					// 스테미나 감소
+					GetWorldTimerManager().SetTimer(StaminaHandle, this, &AGS_Chan::DrainStaminaTick, 0.05f, true);
 				}
 				else
 				{
 					// 방어 해제 - 방어용 콜리전 비활성화
 					Shield->ServerDisableDefenseHit();
+
+					GetWorldTimerManager().SetTimer(StaminaHandle, this, &AGS_Chan::RegenStaminaTick, 0.05f, true);
 				}
 				break;
 			}

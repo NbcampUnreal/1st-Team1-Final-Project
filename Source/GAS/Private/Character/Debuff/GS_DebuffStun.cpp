@@ -6,6 +6,7 @@
 #include "Character/GS_Character.h"
 #include "Character/GS_TpsController.h"
 #include "AI/GS_AIController.h"
+#include "Character/Player/Monster/GS_Monster.h"
 
 void UGS_DebuffStun::OnApply()
 {
@@ -26,6 +27,11 @@ void UGS_DebuffStun::OnApply()
 		{
 			MaxSpeed = TargetCharacter->GetCharacterMovement()->MaxWalkSpeed;
 			TargetCharacter->GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+			AGS_Monster* Monster = Cast<AGS_Monster>(TargetCharacter);
+			if (Monster)
+			{
+				Monster->ApplyStiffness();
+			}
 		}
 		// 스킬 못쓰고
 		// 스킬을 끊지는 않음
@@ -54,6 +60,12 @@ void UGS_DebuffStun::OnExpire()
 		else
 		{
 			TargetCharacter->GetCharacterMovement()->MaxWalkSpeed = MaxSpeed;
+		}
+
+		AGS_Monster* Monster = Cast<AGS_Monster>(TargetCharacter);
+		if (Monster)
+		{
+			Monster->EndStiffness();
 		}
 
 		// 스킬 사용 가능

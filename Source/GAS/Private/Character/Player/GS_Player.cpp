@@ -6,6 +6,7 @@
 #include "Components/PostProcessComponent.h"
 #include "Character/Component/GS_StatComp.h"
 #include "Character/Skill/GS_SkillComp.h"
+#include "Character/Skill/GS_SkillBase.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/Controller.h"
 #include "System/GS_PlayerState.h"
@@ -16,6 +17,8 @@
 #include "Net/UnrealNetwork.h"
 #include "UI/Character/GS_SteamNameWidgetComp.h"
 #include "AkAudioDevice.h"
+#include "Sound/GS_AudioComponentBase.h"
+#include "Components/CapsuleComponent.h"
 
 AGS_Player::AGS_Player()
 {
@@ -63,18 +66,10 @@ AGS_Player::AGS_Player()
 	AkComponent = CreateDefaultSubobject<UAkComponent>(TEXT("AkComponent"));
 	AkComponent->SetupAttachment(GetRootComponent());
 
-	// 머리 위치 오디오 리스너 컴포넌트 생성
-	HeadAudioListenerComponent = CreateDefaultSubobject<UAkComponent>(TEXT("HeadAudioListenerComponent"));
-	// 스켈레탈 메시가 아직 설정되지 않았으므로 RootComponent에 임시로 attach
-	HeadAudioListenerComponent->SetupAttachment(GetRootComponent());
-
-	// 기본 후보 세팅 (프로젝트 표준 본/소켓명 우선순위)
-	HeadListenerCandidates = {
-		TEXT("head"),
-		TEXT("Head"),
-		TEXT("neck_01"),
-		TEXT("spine_03")
-	};
+	// 카메라 위치 오디오 리스너 컴포넌트 생성 (TPS 표준)
+	CameraAudioListenerComponent = CreateDefaultSubobject<UAkComponent>(TEXT("CameraAudioListenerComponent"));
+	// CameraComp에 Attach하여 카메라 위치에서 오디오 리스닝
+	CameraAudioListenerComponent->SetupAttachment(CameraComp);
 
 	bIsObscuring = false;
 }
@@ -101,17 +96,23 @@ void AGS_Player::BeginPlay()
 	BlurMID = UMaterialInstanceDynamic::Create(PostProcessMat, this);
 	PostProcessComponent->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, BlurMID));
 
-	// 머리 위치에 오디오 리스너 설정 (모든 클라이언트에서)
-	SetupHeadAudioListener();
+	// 카메라 위치에 오디오 리스너 설정 (모든 클라이언트에서)
+	SetupCameraAudioListener();
 	
 	// 로컬 플레이어만 추가 오디오 설정
 	if (IsLocalPlayer())
 	{
 		// 자체 AkComponent의 Occlusion도 비활성화
-		if (AkComponent)
+		if (IsValid(AkComponent))
 		{
-			AkComponent->OcclusionRefreshInterval = 0.0f;
-			UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Player AkComponent occlusion DISABLED."));
+			// Transform 검증
+			const FVector Location = GetActorLocation();
+			const FRotator Rotation = GetActorRotation();
+
+			if (UGS_AudioComponentBase::IsTransformValid(Location, Rotation))
+			{
+				AkComponent->OcclusionRefreshInterval = 0.0f;
+			}
 		}
 	}
 }
@@ -136,18 +137,14 @@ void AGS_Player::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>();
-
-	if (PS && StatComp)
+	if (AGS_PlayerState* PS = GetPlayerState<AGS_PlayerState>())
 	{
-		StatComp->SetCurrentHealth(PS->CurrentHealth, true);
 		PS->OnPawnStatInitialized();
 		UE_LOG(LogTemp, Warning, TEXT("AGS_Player::PossessedBy: Synced StatComp health from PlayerState. PS Health: %f, StatComp Health set to: %f"), PS->CurrentHealth, StatComp->GetCurrentHealth());
 	}
 	else
 	{
-		if (!PS) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: PlayerState is NULL!"), *GetName());
-		if (!StatComp) UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: StatComp is NULL!"), *GetName());
+		UE_LOG(LogTemp, Error, TEXT("AGS_Player (%s) PossessedBy: PlayerState is NULL!"), *GetName());
 	}
 }
 
@@ -205,16 +202,16 @@ void AGS_Player::BeginDestroy()
 		AkComponent->Stop();
 	}
 
-	// 4. HeadAudioListenerComponent 정리
-	if (IsValid(HeadAudioListenerComponent) && !HeadAudioListenerComponent->IsBeingDestroyed())
+	// 4. CameraAudioListenerComponent 정리
+	if (IsValid(CameraAudioListenerComponent) && !CameraAudioListenerComponent->IsBeingDestroyed())
 	{
 		// 기본 리스너에서 제거
 		FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-		if (AudioDevice && HeadAudioListenerComponent->IsDefaultListener)
+		if (AudioDevice != nullptr && CameraAudioListenerComponent->IsDefaultListener)
 		{
-			AudioDevice->RemoveDefaultListener(HeadAudioListenerComponent);
+			AudioDevice->RemoveDefaultListener(CameraAudioListenerComponent);
 		}
-		HeadAudioListenerComponent->Stop();
+		CameraAudioListenerComponent->Stop();
 	}
 
 	// 5. 타임라인 정리
@@ -308,6 +305,17 @@ void AGS_Player::OnDeath()
 
 	// 추가적인 플레이어 죽음 처리 로직을 여기에 구현할 수 있다
 	// 예: 카메라 연출, UI 변경, 리스폰 타이머 등
+
+	// TODO: 추후 빈사 상태 등 복잡한 사망 처리가 필요할 시, 이 로직은 해당 상태 전환 함수로 이동해야 함.
+	
+	// 현재 사용 중인 스킬 강제 중단 및 VFX 정리
+	if (SkillComp)
+	{
+		if(UGS_SkillBase* CurrentSkill = SkillComp->GetActiveSkill())
+		{
+			CurrentSkill->InterruptSkill();
+		}
+	}
 	
 	GetCharacterMovement()->DisableMovement();
 
@@ -321,6 +329,12 @@ void AGS_Player::OnDeath()
 	{
 		GS_PC->ServerRPCSpectatePlayer();
 	}
+}
+
+void AGS_Player::Multicast_SetCollisionResponseToChannel_Implementation(ECollisionChannel Channel,
+	ECollisionResponse NewResponse)
+{
+	GetCapsuleComponent()->SetCollisionResponseToChannel(Channel, NewResponse);
 }
 
 void AGS_Player::SetSkillInputControl(bool CanLeftClick, bool CanRightClick, bool CanRollClick, bool CanCtrlClick)
@@ -362,122 +376,47 @@ void AGS_Player::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 void AGS_Player::SetupLocalAudioListener()
 {
-	APlayerController* PC = Cast<APlayerController>(GetController());
-	if (PC && PC->IsLocalPlayerController())
-	{
-		// 카메라 매니저에서 기본 리스너 컴포넌트를 찾습니다.
-		APlayerCameraManager* CameraManager = PC->PlayerCameraManager;
-		if (CameraManager)
-		{
-			UAkComponent* ListenerComponent = nullptr;
-			TArray<UAkComponent*> AkComponents;
-			CameraManager->GetComponents<UAkComponent>(AkComponents);
-
-			for (UAkComponent* Component : AkComponents)
-			{
-				if (Component && Component->IsDefaultListener)
-				{
-					ListenerComponent = Component;
-					break;
-				}
-			}
-
-			// 만약 카메라 매니저에 리스너가 없다면 새로 생성하여 추가합니다.
-			if (!ListenerComponent)
-			{
-				ListenerComponent = NewObject<UAkComponent>(CameraManager);
-				if (ListenerComponent)
-				{
-					ListenerComponent->AttachToComponent(CameraManager->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-					ListenerComponent->RegisterComponent();
-					FAkAudioDevice* AudioDevice = FAkAudioDevice::Get();
-					if(AudioDevice)
-					{
-						AudioDevice->AddDefaultListener(ListenerComponent);
-					}
-				}
-			}
-
-			if (ListenerComponent)
-			{
-				// 가장 중요한 부분: 카메라 리스너의 Occlusion을 비활성화합니다.
-				ListenerComponent->OcclusionRefreshInterval = 0.0f;
-				UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Camera audio listener occlusion DISABLED for local player."));
-			}
-		}
-	}
+	// 카메라 오디오 리스너 설정으로 통합됨 (TPS 표준)
+	SetupCameraAudioListener();
 }
 
-void AGS_Player::SetupHeadAudioListener()
+void AGS_Player::SetupCameraAudioListener()
 {
-	if (!HeadAudioListenerComponent)
+	// 로컬 플레이어만 리스너 설정
+	if (!IsLocalPlayer())
 	{
-		UE_LOG(LogTemp, Error, TEXT("AGS_Player::SetupHeadAudioListener: HeadAudioListenerComponent is null!"));
 		return;
 	}
 
-	// 스켈레탈 메시에서 머리 본이나 head 소켓을 찾아 리스너를 부착
-	USkeletalMeshComponent* MeshComp = GetMesh();
-	if (MeshComp)
+	// 카메라 컴포넌트 검증
+	if (!IsValid(CameraComp))
 	{
-		bool bAttached = false;
-		for (const FName& Candidate : HeadListenerCandidates)
-		{
-			if (MeshComp->DoesSocketExist(Candidate))
-			{
-				HeadAudioListenerComponent->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale, Candidate);
-				// UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Head audio listener attached to socket '%s'."), *Candidate.ToString());
-				bAttached = true;
-				break;
-			}
-			if (MeshComp->GetBoneIndex(Candidate) != INDEX_NONE)
-			{
-				HeadAudioListenerComponent->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale, Candidate);
-				// UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Head audio listener attached to bone '%s'."), *Candidate.ToString());
-				bAttached = true;
-				break;
-			}
-		}
-
-		if (!bAttached)
-		{
-			HeadAudioListenerComponent->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetIncludingScale);
-			HeadAudioListenerComponent->SetRelativeLocation(FVector(0.0f, 0.0f, HeadListenerZOffset));
-			// UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Head audio listener attached to mesh root with offset Z=%.1f."), HeadListenerZOffset);
-		}
-
-		// 로컬 플레이어만 기본 리스너로 설정
-		if (IsLocalPlayer())
-		{
-			if (CachedAudioDevice)
-			{
-				// 기존 카메라 리스너 제거
-				APlayerController* PC = Cast<APlayerController>(GetController());
-				if (PC && PC->PlayerCameraManager)
-				{
-					TArray<UAkComponent*> CameraAkComponents;
-					PC->PlayerCameraManager->GetComponents<UAkComponent>(CameraAkComponents);
-					for (UAkComponent* Component : CameraAkComponents)
-					{
-						if (Component && Component->IsDefaultListener)
-						{
-							CachedAudioDevice->RemoveDefaultListener(Component);
-							// UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Removed camera audio listener."));
-						}
-					}
-				}
-
-				// 새로운 머리 위치 리스너를 기본 리스너로 설정
-				CachedAudioDevice->AddDefaultListener(HeadAudioListenerComponent);
-				HeadAudioListenerComponent->OcclusionRefreshInterval = 0.0f; // Occlusion 비활성화
-				// UE_LOG(LogTemp, Warning, TEXT("AGS_Player: Head audio listener set as default listener for local player."));
-			}
-		}
+		UE_LOG(LogTemp, Error, TEXT("[AGS_Player] SetupCameraAudioListener: CameraComp is invalid - %s"), *GetName());
+		return;
 	}
-	else
+
+	// CameraAudioListenerComponent 검증
+	if (!IsValid(CameraAudioListenerComponent))
 	{
-		UE_LOG(LogTemp, Error, TEXT("AGS_Player::SetupHeadAudioListener: Skeletal mesh component is null!"));
+		UE_LOG(LogTemp, Error, TEXT("[AGS_Player] SetupCameraAudioListener: CameraAudioListenerComponent is invalid - %s"), *GetName());
+		return;
 	}
+
+	// 오디오 디바이스 검증
+	if (CachedAudioDevice == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[AGS_Player] SetupCameraAudioListener: CachedAudioDevice is null - %s"), *GetName());
+		return;
+	}
+
+	// TPS 리스너 설정: 위치와 방향 모두 카메라 따라가기
+	CameraAudioListenerComponent->bUseReverbVolumes = true;
+
+	// Occlusion 비활성화 (캐릭터 메시 차폐 방지)
+	CameraAudioListenerComponent->OcclusionRefreshInterval = 0.0f;
+
+	// 카메라 위치 리스너를 기본 리스너로 설정 (TPS 표준)
+	CachedAudioDevice->AddDefaultListener(CameraAudioListenerComponent);
 }
 
 // 로컬 플레이어 확인 함수
@@ -490,14 +429,14 @@ bool AGS_Player::IsLocalPlayer() const
 	return false;
 }
 
-void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage, FName Section)
+void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage, FName Section, int32 PlayRate)
 {
 	UGS_SeekerAnimInstance* AnimInstance = Cast<UGS_SeekerAnimInstance>(GetMesh()->GetAnimInstance());
 	if (AnimInstance && Montage)
 	{
 		if (Section == NAME_None)
 		{
-			AnimInstance->Montage_Play(Montage);
+			AnimInstance->Montage_Play(Montage, PlayRate);
 		}
 		else
 		{
@@ -514,9 +453,19 @@ void AGS_Player::Multicast_PlaySkillMontage_Implementation(UAnimMontage* Montage
 
 void AGS_Player::PlaySound(UAkAudioEvent* SoundEvent)
 {
-	if (!AkComponent || !SoundEvent)
+	if (!IsValid(AkComponent) || !SoundEvent)
 	{
 		UE_LOG(LogAudio, Warning, TEXT("AkComponent or SoundEvent is null in PlaySound"));
+		return;
+	}
+
+	// Transform 검증
+	const FVector Location = GetActorLocation();
+	const FRotator Rotation = GetActorRotation();
+
+	if (!UGS_AudioComponentBase::IsTransformValid(Location, Rotation))
+	{
+		UE_LOG(LogAudio, Error, TEXT("[AGS_Player] PlaySound: Invalid Transform - %s"), *GetName());
 		return;
 	}
 
@@ -525,9 +474,19 @@ void AGS_Player::PlaySound(UAkAudioEvent* SoundEvent)
 
 void AGS_Player::PlaySoundWithCallback(UAkAudioEvent* SoundEvent, const FOnAkPostEventCallback& Callback)
 {
-	if (!AkComponent || !SoundEvent)
+	if (!IsValid(AkComponent) || !SoundEvent)
 	{
 		UE_LOG(LogAudio, Warning, TEXT("AkComponent or SoundEvent is null in PlaySoundWithCallback"));
+		return;
+	}
+
+	// Transform 검증
+	const FVector Location = GetActorLocation();
+	const FRotator Rotation = GetActorRotation();
+
+	if (!UGS_AudioComponentBase::IsTransformValid(Location, Rotation))
+	{
+		UE_LOG(LogAudio, Error, TEXT("[AGS_Player] PlaySoundWithCallback: Invalid Transform - %s"), *GetName());
 		return;
 	}
 

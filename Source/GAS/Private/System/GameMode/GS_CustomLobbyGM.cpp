@@ -217,14 +217,7 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady()
                 break;
             }
         }
-        
-        UWorld* World = GetWorld();
-        if (World)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("LobbyGM: ServerTravel Start ***"));
-            FTimerHandle TravelDelayHandle;
-            World->GetTimerManager().SetTimer(TravelDelayHandle, this, &AGS_CustomLobbyGM::DoServerTravel, 2.0f, false);
-        }
+        // TODO: 화면 가리개 on
     }
 }
 
@@ -322,7 +315,7 @@ void AGS_CustomLobbyGM::SpawnLobbyActorForPlayer(AGS_PlayerState* PlayerState, A
         FTransform SpawnTransform = SpawnSlot->GetActorTransform();
         if (PlayerState->CurrentPlayerRole == EPlayerRole::PR_Guardian)
         {
-            SpawnTransform.SetScale3D(FVector(3.f));
+            SpawnTransform.SetScale3D(FVector(1.8f));
         }
 
         AGS_LobbyDisplayActor* NewDisplayActor = GetWorld()->SpawnActor<AGS_LobbyDisplayActor>(

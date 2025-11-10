@@ -99,7 +99,7 @@ AGS_Drakhar::AGS_Drakhar()
 	if (!FindComponentByClass<UAkComponent>())
 	{
 		UAkComponent* AkComp = CreateDefaultSubobject<UAkComponent>(TEXT("AkAudioComponent"));
-		if (AkComp)
+		if (IsValid(AkComp))
 		{
 			AkComp->SetupAttachment(RootComponent);
 		}
@@ -136,6 +136,10 @@ AGS_Drakhar::AGS_Drakhar()
 	}
 
 	FlyingDustTraceDistance = 2000.f;
+
+	// KeyManual에서 쓰일 캐릭터 타입 저장
+	ManualRowName = FName("Drakhar");
+	FlyingStaminaCoolTime = MaxFlyingStaminaCoolTime;
 }
 
 void AGS_Drakhar::BeginPlay()
@@ -152,7 +156,7 @@ void AGS_Drakhar::BeginPlay()
 void AGS_Drakhar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	if (SpringArmComp && bIsFlying)
 	{
 		if (FMath::IsNearlyEqual(SpringArmComp->TargetArmLength, TargetSpringArmLength, 1.0f))
@@ -174,6 +178,7 @@ void AGS_Drakhar::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	DOREPLIFETIME(ThisClass, bCanCombo);
 	DOREPLIFETIME(ThisClass, CurrentFeverGauge);
 	DOREPLIFETIME(ThisClass, IsFeverMode);
+	DOREPLIFETIME(ThisClass, FlyingStaminaCoolTime);
 }
 
 void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -182,6 +187,7 @@ void AGS_Drakhar::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	// 타이머 정리 (레벨 전환 시 크래시 방지)
 	SafeClearTimer(FeverTimer);
+	SafeClearTimer(FeverStateSoundDelayTimer);
 	SafeClearTimer(ResetAttackTimer);
 	SafeClearTimer(HealthRegenTimer);
 	SafeClearTimer(HealthDelayTimer);
@@ -194,18 +200,12 @@ void AGS_Drakhar::OnDamageStart()
 	bIsDamaged = true;
 
 	StopHealRegeneration();
-	
+
 	//timer start (타이머 설정)
 	UWorld* World = GetWorld();
 	if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
 	{
 		World->GetTimerManager().SetTimer(HealthDelayTimer, this, &AGS_Drakhar::BeginHealRegeneration, 5.f, false);
-	}
-	
-	// 피격 사운드 재생
-	if (HasAuthority())
-	{
-		MulticastPlayHurtSound();
 	}
 }
 
@@ -215,8 +215,14 @@ void AGS_Drakhar::Ctrl()
 	
 	if (!HasAuthority() && IsLocallyControlled())
 	{
+		if (FMath::IsNearlyZero(FlyingStaminaCoolTime))
+		{
+			//UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("!!!!!!!STOP!!!!!!!!!!")));
+			return;
+		}
+
 		//not flying
-		if (GuardianState == EGuardianCtrlState::CtrlEnd)
+		if (GuardianState == EGuardianCtrlState::CtrlEnd && FlyingStaminaCoolTime >= ValidFlyingStaminaCoolTime)
 		{
 			//if execute flying skill, prevent change state
 			if (GuardianDoSkillState != EGuardianDoSkill::None)
@@ -369,7 +375,7 @@ void AGS_Drakhar::MeleeAttackCheck()
 					}
 					
 					// 히트 사운드 재생
-					MulticastPlayAttackHitSound();
+					if (AudioComponent) AudioComponent->PlayAttackHitSound();
 				}
 			}
 		}
@@ -409,7 +415,7 @@ void AGS_Drakhar::ComboLastAttack()
 					}
 					
 					MulticastRPC_PlayAttackHitVFX(DamagedPlayer->GetActorLocation());
-					MulticastPlayAttackHitSound();
+					if (AudioComponent) AudioComponent->PlayAttackHitSound();
 					
 					// 공격 성공 시 공격자에게 강한 카메라 쉐이크 적용
 					if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
@@ -438,7 +444,7 @@ void AGS_Drakhar::ServerRPCNewComboAttack_Implementation()
 {
 	bCanCombo = false;
 	MulticastRPCComboAttack();
-	MulticastPlayComboAttackSound();
+	if (AudioComponent) AudioComponent->PlayComboAttackSound();
 }
 
 void AGS_Drakhar::MulticastRPCComboAttack_Implementation()
@@ -479,7 +485,7 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 	GuardianDoSkillState = EGuardianDoSkill::None;
 
 	// Skill Input Reset
-	GetSkillComp()->ResetAllowedSkillsMask(); // SJE
+	GetSkillComp()->ResetAllowedSkillsMask();
 	
 	if (DamagedCharactersFromDash.IsEmpty())
 	{
@@ -510,7 +516,7 @@ void AGS_Drakhar::ServerRPCEndDash_Implementation()
 		}
 
 		MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
-		MulticastPlayAttackHitSound();
+		if (AudioComponent) AudioComponent->PlayAttackHitSound();
 		
 		// 공격 성공 시 공격자에게 카메라 쉐이크 적용
 		if (APlayerController* AttackerPC = Cast<APlayerController>(GetController()))
@@ -542,7 +548,7 @@ void AGS_Drakhar::ServerRPCCalculateDashLocation_Implementation()
 	DashStartLocation = GetActorLocation();
 	DashEndLocation = DashStartLocation + GetActorForwardVector() * DashPower;
 
-	MulticastPlayDashSkillSound();
+	if (AudioComponent) AudioComponent->PlayDashSkillSound();
 	MulticastStartWingRushVFX();
 	MulticastStartDustVFX();
 }
@@ -560,7 +566,7 @@ void AGS_Drakhar::DashAttackCheck()
 void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 {
 	MulticastRPC_OnEarthquakeStart();
-	MulticastPlayEarthquakeSkillSound();
+	if (AudioComponent) AudioComponent->PlayEarthquakeSkillSound();
 
 	const FVector Start = GetActorLocation() + 100.f;
 	TSet<AGS_Character*> EarthquakeDamagedCharacters = DetectPlayerInRange(Start, 200.f, EarthquakeRadius);
@@ -604,7 +610,7 @@ void AGS_Drakhar::ServerRPCEarthquakeAttackCheck_Implementation()
 			
 			// === 어스퀘이크 스킬 히트 사운드 재생 ===
 			MulticastRPC_PlayAttackHitVFX(DamagedCharacter->GetActorLocation());
-			MulticastPlayAttackHitSound();
+			if (AudioComponent) AudioComponent->PlayAttackHitSound();
 
 			FVector DrakharLocation = GetActorLocation();
 			FVector DamagedLocation = DamagedCharacter->GetActorLocation();
@@ -619,6 +625,18 @@ void AGS_Drakhar::ServerRPCStartCtrl_Implementation()
 {
 	GuardianState = EGuardianCtrlState::CtrlUp;
 	MoveSpeed = SpeedUpMoveSpeed;
+
+	if (isStartCoolTime)
+	{
+		SafeClearTimer(FlyingEndStaminaCoolTimeHandler);
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->GetTimerManager().SetTimer(FlyingStartStaminaCoolTimeHandler, this, &AGS_Drakhar::StartFlyingStaminaTimer, 1.f, true);
+		}
+		isStartCoolTime = false;
+	}
+	
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
 
@@ -628,6 +646,16 @@ void AGS_Drakhar::ServerRPCStopCtrl_Implementation()
 	GuardianDoSkillState = EGuardianDoSkill::None;
 	
 	MoveSpeed = NormalMoveSpeed;
+
+	isStartCoolTime = true;
+	SafeClearTimer(FlyingStartStaminaCoolTimeHandler);
+	
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->GetTimerManager().SetTimer(FlyingEndStaminaCoolTimeHandler, this, &AGS_Drakhar::EndFlyingStaminaTimer, 1.f, true);
+	}
+	
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 
 	GetSkillComp()->ResetAllowedSkillsMask();
@@ -674,7 +702,7 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 	}
 
 	// 사운드 재생 (월드 검증 후)
-	MulticastPlayDraconicFurySkillSound();
+	if (AudioComponent) AudioComponent->PlayDraconicFurySkillSound();
 
 	FActorSpawnParameters Params;
 	Params.Instigator = this;
@@ -728,7 +756,7 @@ void AGS_Drakhar::ServerRPCSpawnDraconicFury_Implementation()
 				DrakharProjectile->SetIndicatorVFX(DraconicFuryIndicatorVFX, NormalIndicatorRadius);
 			}
 
-			MulticastPlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
+			if (AudioComponent) AudioComponent->PlayDraconicProjectileSound(DrakharProjectile->GetActorLocation());
 		}
 	}
 }
@@ -817,12 +845,11 @@ void AGS_Drakhar::SetFeverGauge(float InValue)
 			SafeClearTimer(FeverTimer);
 			if (IsFeverMode)
 			{
-				MulticastPlayFeverModeEndEffects();
-
 				FGS_StatRow Stat;
 				Stat.ATK = 50.f;
 				GetStatComp()->ResetStat(Stat);
 				MulticastRPC_OnFeverModeEnd();
+				MulticastPlayFeverModeEndEffects();  // 피버 모드 종료 사운드 & 카메라 효과
 			}
 
 			IsFeverMode = false;
@@ -921,8 +948,26 @@ void AGS_Drakhar::FeverComoLastAttack()
 				}
 			}
 		}
-		
-		MulticastPlayComboFinisherSound();
+
+		// 피버 모드 콤보 피니셔 사운드 재생 (타격 소리와 함께)
+		// RPC 호출 제한을 피하기 위해 약간 지연 후 사운드 재생
+		FTimerHandle ComboFinisherSoundTimer;
+		GetWorld()->GetTimerManager().SetTimer(
+			ComboFinisherSoundTimer,
+			this,
+			&AGS_Drakhar::PlayDelayedComboFinisherSounds,
+			0.125f, // 0.15초 지연 (RPC 제한 0.1초보다 길게)
+			false
+		);
+	}
+}
+
+void AGS_Drakhar::PlayDelayedComboFinisherSounds()
+{
+	if (AudioComponent)
+	{
+		AudioComponent->PlayComboFinisherSound();
+		AudioComponent->PlayAttackHitSound();
 	}
 }
 
@@ -934,8 +979,24 @@ void AGS_Drakhar::StartFeverMode()
 
 	GetStatComp()->ChangeStat(Stat);
 	MulticastRPCFeverMontagePlay();
-	MulticastPlayFeverModeStartSound();
-	MulticastPlayFeverModeStateSound();
+	if (AudioComponent)
+	{
+		AudioComponent->PlayFeverModeStartSound();
+
+		// FeverModeStateSound는 0.15초 후에 재생 (RPC 간격 제한 회피)
+		UWorld* World = GetWorld();
+		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+		{
+			SafeClearTimer(FeverStateSoundDelayTimer);
+			World->GetTimerManager().SetTimer(
+				FeverStateSoundDelayTimer,
+				this,
+				&AGS_Drakhar::PlayFeverModeStateSoundDelayed,
+				0.15f,
+				false
+			);
+		}
+	}
 	MulticastRPC_OnFeverModeStart();
 }
 
@@ -990,6 +1051,32 @@ void AGS_Drakhar::StopHealRegeneration()
 	SafeClearTimer(HealthRegenTimer);
 }
 
+void AGS_Drakhar::StartFlyingStaminaTimer()
+{
+	SafeClearTimer(FlyingEndStaminaCoolTimeHandler);
+	
+	FlyingStaminaCoolTime -= 1.f;
+	
+	if (FlyingStaminaCoolTime <= 0.f)
+	{
+		FlyingStaminaCoolTime = 0.f;
+	}
+	UE_LOG(LogTemp, Error, TEXT("start flying stamina %f"), FlyingStaminaCoolTime);
+}
+
+void AGS_Drakhar::EndFlyingStaminaTimer()
+{
+	SafeClearTimer(FlyingStartStaminaCoolTimeHandler);
+	
+	FlyingStaminaCoolTime += 1.f;
+
+	if (FlyingStaminaCoolTime >= MaxFlyingStaminaCoolTime)
+	{
+		FlyingStaminaCoolTime = MaxFlyingStaminaCoolTime;
+	}
+	UE_LOG(LogTemp, Error, TEXT("end flying stamina %f"), FlyingStaminaCoolTime);
+}
+
 void AGS_Drakhar::GenerateDraconicFuryTargets()
 {
 	// 피버 모드일 경우 피버 모드 위치 생성
@@ -1026,81 +1113,49 @@ void AGS_Drakhar::GetRandomDraconicFuryTarget()
 	}
 }
 
-// === Multicast 사운드 RPC 함수들 구현 ===
-
-void AGS_Drakhar::MulticastPlayComboAttackSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayComboAttackSound();
-}
-
-void AGS_Drakhar::MulticastPlayDashSkillSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayDashSkillSound();
-}
-
-void AGS_Drakhar::MulticastPlayEarthquakeSkillSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayEarthquakeSkillSound();
-}
-
-void AGS_Drakhar::MulticastPlayDraconicFurySkillSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayDraconicFurySkillSound();
-}
-
-void AGS_Drakhar::MulticastPlayDraconicProjectileSound_Implementation(const FVector& Location)
-{
-	if (AudioComponent) AudioComponent->PlayDraconicProjectileSound(Location);
-}
-
 void AGS_Drakhar::OnRep_FeverGauge()
 {
 	OnCurrentFeverGaugeChanged.Broadcast(CurrentFeverGauge);
 }
 
-void AGS_Drakhar::MulticastPlayAttackHitSound_Implementation()
+void AGS_Drakhar::OnAttackHit(AGS_Character* HitCharacter)
 {
-	if (!AudioComponent)
+	// 공격 히트 사운드 재생
+	if (AudioComponent)
 	{
-		return;
+		AudioComponent->PlayAttackHitSound();
 	}
-	
-	AudioComponent->PlayAttackHitSound();
 }
 
-void AGS_Drakhar::MulticastPlayComboFinisherSound_Implementation()
+void AGS_Drakhar::OnFeverGaugeUpdate(float DeltaGauge)
 {
-    if (AudioComponent)
-    {
-        AudioComponent->PlayComboFinisherSound();
-    }
+	// 피버 게이지 업데이트 로직
+	if (!GetIsFeverMode())
+	{
+		SetFeverGauge(DeltaGauge);
+	}
+	else if (GetIsFeverMode())
+	{
+		bIsAttckingDuringFever = true;
+		ResetIsAttackingDuringFeverMode();
+	}
 }
 
-void AGS_Drakhar::MulticastPlayFeverModeStartSound_Implementation()
+void AGS_Drakhar::OnQuitSkill()
 {
-	if (AudioComponent) AudioComponent->PlayFeverModeStartSound();
-}
-
-void AGS_Drakhar::MulticastPlayFeverModeStateSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayFeverModeStateSound();
-}
-
-void AGS_Drakhar::MulticastStopFeverModeStateSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->StopFeverModeStateSound();
+	// 스킬 종료 시 값 리셋
+	ServerRPCResetValue();
 }
 
 void AGS_Drakhar::MulticastPlayFeverModeEndEffects_Implementation()
 {
-	// 피버 모드 스테이트 사운드 중지
-	if (AudioComponent) AudioComponent->StopFeverModeStateSound();
-
-	// 피버 모드 종료 사운드 재생
-	if (AudioComponent) AudioComponent->PlayFeverModeEndSound();
-
-	// 피버 모드 종료 VFX 비활성화
-	// MulticastPlayFeverModeEndVFX();
+	// 피버 모드 스테이트 사운드 중지 및 종료 사운드 재생
+	if (AudioComponent)
+	{
+		// Multicast RPC 내부에서 호출되므로 _Implementation을 직접 호출
+		AudioComponent->Multicast_StopFeverModeStateSound_Implementation();
+		AudioComponent->Multicast_PlayFeverModeEndSound_Implementation();
+	}
 
 	// 카메라 쉐이크 효과 (피버 모드 종료시 쉐이크)
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -1109,11 +1164,6 @@ void AGS_Drakhar::MulticastPlayFeverModeEndEffects_Implementation()
 		EndFeverShake.Intensity *= 0.5f;
 		Client_PlayAttackSuccessShakeWithInfo(PC, EndFeverShake);
 	}
-}
-
-void AGS_Drakhar::MulticastPlayHurtSound_Implementation()
-{
-	if (AudioComponent) AudioComponent->PlayHurtSound();
 }
 
 /*
@@ -1210,17 +1260,9 @@ void AGS_Drakhar::MulticastStartDustCloudVFX_Implementation()
 
 void AGS_Drakhar::HandleDraconicProjectileImpact(const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
 {
-	if (HasAuthority())
-	{
-		MulticastPlayDraconicProjectileImpactEffects(ImpactLocation, ImpactNormal, bHitCharacter);
-	}
-}
-
-void AGS_Drakhar::MulticastPlayDraconicProjectileImpactEffects_Implementation(
-	const FVector& ImpactLocation, const FVector& ImpactNormal, bool bHitCharacter)
-{
+	// 로컬 재생 (모든 클라이언트에서 OnHit이 호출되므로 RPC 불필요)
 	if (DrakharVFXComponent) DrakharVFXComponent->HandleDraconicProjectileImpact(ImpactLocation, ImpactNormal, bHitCharacter);
-	if (AudioComponent) AudioComponent->HandleDraconicProjectileImpact(ImpactLocation, bHitCharacter);
+	if (AudioComponent) AudioComponent->PlayDraconicProjectileImpactSoundLocal(ImpactLocation, bHitCharacter);
 }
 
 void AGS_Drakhar::MulticastPlayFeverEarthquakeImpactVFX_Implementation(const FVector& ImpactLocation)
@@ -1275,6 +1317,19 @@ void AGS_Drakhar::OnRep_IsFeverMode()
 	}
 }
 
+void AGS_Drakhar::OnRep_FlyingStaminaCoolTime()
+{
+	if (FMath::IsNearlyZero(FlyingStaminaCoolTime))
+	{
+		StopCtrl();
+	}
+	if (FlyingStaminaCoolTime == MaxFlyingStaminaCoolTime)
+	{
+		SafeClearTimer(FlyingStartStaminaCoolTimeHandler);
+		SafeClearTimer(FlyingEndStaminaCoolTimeHandler);
+	}
+}
+
 void AGS_Drakhar::MulticastRPC_PlayAttackHitVFX_Implementation(FVector ImpactPoint)
 {
 	if (DrakharVFXComponent) DrakharVFXComponent->PlayAttackHitVFX(ImpactPoint);
@@ -1317,6 +1372,17 @@ void AGS_Drakhar::SafeClearTimer(FTimerHandle& TimerHandle)
 			World->GetTimerManager().ClearTimer(TimerHandle);
 		}
 		TimerHandle.Invalidate();
+	}
+}
+
+// === FeverModeStateSound 딜레이 재생 콜백 ===
+void AGS_Drakhar::PlayFeverModeStateSoundDelayed()
+{
+	if (!IsValid(this)) return;
+
+	if (AudioComponent && IsFeverMode)
+	{
+		AudioComponent->PlayFeverModeStateSound();
 	}
 }
 

@@ -4,6 +4,7 @@
 #include "Character/GS_BasePlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "UI/Screen/Option/GS_InGameMenuUI.h"
+#include "UI/Screen/Option/GS_QuickManualUI.h"
 
 void AGS_BasePlayerController::BeginPlay()
 {
@@ -16,9 +17,15 @@ void AGS_BasePlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
+	
 	if (MenuAction)
 	{
 		EnhancedInputComponent->BindAction(MenuAction, ETriggerEvent::Triggered, this, &AGS_BasePlayerController::OpenMenuUI);
+	}
+
+	if (KeyManualAction)
+	{
+		EnhancedInputComponent->BindAction(KeyManualAction, ETriggerEvent::Triggered, this, &AGS_BasePlayerController::OpenKeyManual);
 	}
 }
 
@@ -39,4 +46,47 @@ void AGS_BasePlayerController::OpenMenuUI(const FInputActionValue& InputValue)
 
 	SetInputMode(FInputModeUIOnly());
 	bShowMouseCursor = true;
+}
+
+void AGS_BasePlayerController::OpenKeyManual(const FInputActionValue& InputValue)
+{
+	if (!QuickManualUI)
+	{
+		if (QuickManualUIClass)
+		{
+			QuickManualUI = CreateWidget<UGS_QuickManualUI>(this, QuickManualUIClass);
+			QuickManualUI->InitImage();
+			QuickManualUI->AddToViewport(1);
+			
+			// UI와 게임 입력을 모두 받을 수 있도록 설정
+			FInputModeGameAndUI InputMode;
+			InputMode.SetHideCursorDuringCapture(false);
+			SetInputMode(InputMode);
+			bShowMouseCursor = true;
+		}
+		else
+		{
+			return;
+		}
+	}
+	else
+	{
+		// UI가 이미 보이는 상태면 닫기, 안 보이면 열기
+		if (QuickManualUI->IsVisible())
+		{
+			QuickManualUI->SetVisibility(ESlateVisibility::Hidden);
+			SetInputMode(FInputModeGameOnly());
+			bShowMouseCursor = false;
+		}
+		else
+		{
+			QuickManualUI->SetVisibility(ESlateVisibility::Visible);
+			
+			// UI와 게임 입력을 모두 받을 수 있도록 설정
+			FInputModeGameAndUI InputMode;
+			InputMode.SetHideCursorDuringCapture(false);
+			SetInputMode(InputMode);
+			bShowMouseCursor = true;
+		}
+	}
 }

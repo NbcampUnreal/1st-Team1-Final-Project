@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/ChildActorComponent.h"
 #include "GS_RoomBase.generated.h"
 
 UCLASS()
@@ -18,6 +19,9 @@ public:
 	TObjectPtr<UStaticMeshComponent> Ceiling;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> Wall;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UChildActorComponent> BGMTrigger;
 	
 	void HideCeiling();
 	void ShowCeiling();

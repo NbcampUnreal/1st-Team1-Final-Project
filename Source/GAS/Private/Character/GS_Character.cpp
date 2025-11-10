@@ -20,6 +20,12 @@
 // #include "Components/CapsuleComponent.h"
 #include "UI/Character/GS_PlayerInfoWidget.h"
 #include "Character/F_GS_DamageEvent.h"
+#include "Character/Player/Seeker/GS_Seeker.h"
+#include "Character/Player/Monster/GS_Monster.h"
+#include "Sound/GS_SeekerAudioComponent.h"
+#include "Sound/GS_MonsterAudioComponent.h"
+#include "Character/Player/Guardian/GS_Drakhar.h"
+#include "Character/Component/GS_DrakharAudioComponent.h"
 
 AGS_Character::AGS_Character()
 {
@@ -43,11 +49,14 @@ AGS_Character::AGS_Character()
 
 	bIsDead = false;
 	bIsHovered = false;
+	bIsInvincible = false;
 }
 
 void AGS_Character::BeginPlay()
 {
 	Super::BeginPlay();
+
+	bIsInvincible = false;
 
 	//Set Default Stats to Character
 	const UEnum* CharacterEnum = FindObject<UEnum>(ANY_PACKAGE, TEXT("ECharacterType"), true);
@@ -107,7 +116,9 @@ void AGS_Character::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& 
 	DOREPLIFETIME(AGS_Character, WeaponSlots);
 	DOREPLIFETIME(AGS_Character, CharacterSpeed);
 	DOREPLIFETIME(AGS_Character, bIsDead);
+	DOREPLIFETIME(AGS_Character, bIsInvincible);
 	DOREPLIFETIME(AGS_Character, bLockRotationToController);
+	DOREPLIFETIME(AGS_Character, WeaponHandlingState);
 }
 
 
@@ -161,6 +172,10 @@ void AGS_Character::BeginDestroy()
 
 float AGS_Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (bIsInvincible)
+	{
+		return 0.0f;
+	}
 	// 이미 죽은 캐릭터는 추가 데미지를 받지 않음
 	if (IsDead())
 	{
@@ -244,8 +259,41 @@ void AGS_Character::OnDeath()
 
 	OnDeathDelegate.Broadcast();
 
-	// 죽음 사운드는 각 캐릭터 타입별 오디오 컴포넌트에서 처리됨
-	// 시커: GS_SeekerAudioComponent, 가디언: GS_GuardianAudioComponent, 몬스터: GS_MonsterAudioComponent
+	// 서버/리슨 서버에서 로컬 Death 사운드 재생 (RPC 제거)
+	// 클라이언트는 OnRep_IsDead()에서 재생됨
+	if (HasAuthority())
+	{
+		// Seeker Death 사운드 (로컬 재생)
+		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(this))
+		{
+			if (Seeker->SeekerAudioComponent)
+			{
+				Seeker->SeekerAudioComponent->PlayDeathSoundLocal();
+			}
+		}
+		// Monster Death 사운드 (로컬 재생)
+		else if (AGS_Monster* Monster = Cast<AGS_Monster>(this))
+		{
+			if (Monster->MonsterAudioComponent)
+			{
+				Monster->MonsterAudioComponent->PlayDeathSoundLocal();
+			}
+		}
+		// Drakhar Death 사운드 (로컬 재생)
+		else if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this))
+		{
+			if (Drakhar->GetAudioComponent())
+			{
+				Drakhar->GetAudioComponent()->PlayDeathSoundLocal();
+			}
+		}
+	}
+
+	// 모든 디버프 제거 (VFX 포함)
+	if (DebuffComp)
+	{
+		DebuffComp->ClearAllDebuffs();
+	}
 
 	DestroyAllWeapons();
 	MulticastRPCCharacterDeath();
@@ -340,6 +388,19 @@ bool AGS_Character::IsEnemy(const AGS_Character* Other) const
 AGS_Weapon* AGS_Character::GetWeaponByIndex(int32 Index) const
 {
 	return WeaponSlots.IsValidIndex(Index) ? WeaponSlots[Index].WeaponInstance : nullptr;
+}
+
+AGS_Weapon* AGS_Character::GetWeaponBySocketName(FName SocketName)
+{
+	for (FWeaponSlot WeaponSlot : WeaponSlots)
+	{
+		if (WeaponSlot.SocketName == SocketName)
+		{
+			return WeaponSlot.WeaponInstance;
+		}
+	}
+	
+	return nullptr;
 }
 
 void AGS_Character::SetCharacterSpeed(float InRatio)
@@ -459,6 +520,40 @@ void AGS_Character::OnRep_CharacterSpeed()
 	GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
 }
 
+void AGS_Character::OnRep_IsDead()
+{
+	// 클라이언트에서 Death 사운드 재생 (RPC 없음!)
+	if (!bIsDead)
+	{
+		return;  // 죽지 않은 상태면 무시
+	}
+
+	// Seeker Death 사운드 (로컬 재생)
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(this))
+	{
+		if (Seeker->SeekerAudioComponent)
+		{
+			Seeker->SeekerAudioComponent->PlayDeathSoundLocal();
+		}
+	}
+	// Monster Death 사운드 (로컬 재생)
+	else if (AGS_Monster* Monster = Cast<AGS_Monster>(this))
+	{
+		if (Monster->MonsterAudioComponent)
+		{
+			Monster->MonsterAudioComponent->PlayDeathSoundLocal();
+		}
+	}
+	// Drakhar Death 사운드 (로컬 재생)
+	else if (AGS_Drakhar* Drakhar = Cast<AGS_Drakhar>(this))
+	{
+		if (Drakhar->GetAudioComponent())
+		{
+			Drakhar->GetAudioComponent()->PlayDeathSoundLocal();
+		}
+	}
+}
+
 
 void AGS_Character::Server_SetCanHitReact_Implementation(bool bCanReact)
 {
@@ -468,6 +563,11 @@ void AGS_Character::Server_SetCanHitReact_Implementation(bool bCanReact)
 void AGS_Character::SetCanHitReact(bool bCanReact)
 {
 	CanHitReact = bCanReact;
+}
+
+void AGS_Character::SetInvincible(bool bEnable)
+{
+	bIsInvincible = bEnable;
 }
 
 void AGS_Character::NotifyActorBeginCursorOver()
@@ -546,4 +646,14 @@ void AGS_Character::OnHoverBegin()
 
 void AGS_Character::OnHoverEnd()
 {
+}
+
+EWeaponHandlingState AGS_Character::GetWeaponHandlingState()
+{
+	return WeaponHandlingState;
+}
+
+void AGS_Character::SetWeaponHandlingState(EWeaponHandlingState InputWeaponHandlingState)
+{
+	WeaponHandlingState = InputWeaponHandlingState;
 }
