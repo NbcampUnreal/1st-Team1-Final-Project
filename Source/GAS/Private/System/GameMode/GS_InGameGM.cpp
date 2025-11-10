@@ -457,21 +457,45 @@ void AGS_InGameGM::EndGame(EGameResult Result)
         }
     }
     
-    // **중요: Seamless Travel 전에 동적으로 스폰된 모든 던전 액터를 파괴합니다.**
-    for (TWeakObjectPtr<AActor> ActorPtr : SpawnedDungeonActors)
+    // // 던전 동적 스폰 액터 삭제
+    // for (TWeakObjectPtr<AActor> ActorPtr : SpawnedDungeonActors)
+    // {
+    //     if (ActorPtr.IsValid())
+    //     {
+    //         UE_LOG(LogTemp, Warning, TEXT("Destroying dynamically spawned dungeon actor: %s"), *ActorPtr->GetName());
+    //         ActorPtr->Destroy(); // 서버에서 액터 파괴
+    //     }
+    //     else
+    //     {
+    //         // 이미 유효하지 않은 포인터 (이미 파괴되었거나, 월드가 정리된 경우 등)
+    //         UE_LOG(LogTemp, Warning, TEXT("Attempted to destroy invalid dungeon actor pointer."));
+    //     }
+    // }
+    // SpawnedDungeonActors.Empty(); // 리스트 비우기
+
+    // 가디언 던전 데이터 PlayerState에서 삭제
+    if (GameState)
     {
-        if (ActorPtr.IsValid())
+        for (APlayerState* PS : GameState->PlayerArray)
         {
-            UE_LOG(LogTemp, Warning, TEXT("Destroying dynamically spawned dungeon actor: %s"), *ActorPtr->GetName());
-            ActorPtr->Destroy(); // 서버에서 액터 파괴
-        }
-        else
-        {
-            // 이미 유효하지 않은 포인터 (이미 파괴되었거나, 월드가 정리된 경우 등)
-            UE_LOG(LogTemp, Warning, TEXT("Attempted to destroy invalid dungeon actor pointer."));
+            if (AGS_PlayerState* GPS = Cast<AGS_PlayerState>(PS))
+            {
+                if (GPS && GPS->CurrentPlayerRole == EPlayerRole::PR_Guardian)
+                {
+                    GPS->ObjectData.Empty();
+                    UE_LOG(LogTemp, Warning, TEXT("[던전 데이터 삭제] Guardian Player '%s' 완료."), *GPS->GetPlayerName());
+                }
+            }
+            else
+            {
+                UE_LOG(LogTemp, Warning, TEXT("[던전 데이터 삭제] AGS_PlayerState 케스팅 실패 Player : '%s'."), *PS->GetPlayerName());
+            }
         }
     }
-    SpawnedDungeonActors.Empty(); // 리스트 비우기
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[던전 데이터 삭제] GameState 없음."));
+    }
 
     if (!NextLevelName.IsEmpty())
     {

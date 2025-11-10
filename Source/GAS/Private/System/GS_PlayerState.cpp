@@ -92,11 +92,8 @@ void AGS_PlayerState::SeamlessTravelTo(APlayerState* NewPlayerState)
         UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 6. %s : NewIsAlive = %d, CurIsAlive = %d"), *GetPlayerName(), NewPS->bIsAlive, bIsAlive);
         NewPS->MySteamAvatar = MySteamAvatar;
         UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 7. %s : MySteamAvatar복사 완료"), *GetPlayerName());
-        if (GetWorld()->GetAuthGameMode<AGS_CustomLobbyGM>())
-        {
-            NewPS->ObjectData = ObjectData;
-            UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 8. %s : ObjectData복사 완료"), *GetPlayerName());
-        }
+        NewPS->ObjectData = ObjectData;
+        UE_LOG(LogTemp,Warning,TEXT("[PS 이동] 8. %s : ObjectData복사 완료"), *GetPlayerName());
     }
 }
 
