@@ -260,10 +260,59 @@ void UGS_BossHP::OnBossHPChanged(UGS_StatComp* InStatComp)
 	// HP 비율 업데이트
 	LastHPPercent = HPPercent;
 
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(InterpTimerHandle);
+		GetWorld()->GetTimerManager().ClearTimer(DelayBeforeInterpTimerHandle);
+	}
+
 	// Progress Bar 업데이트
 	if (IsValid(BossHPBar))
 	{
 		BossHPBar->SetPercent(HPPercent);
+	}
+
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().SetTimer(DelayBeforeInterpTimerHandle, this, &UGS_BossHP::StartDelayBarInterp, 0.1f, false);
+	}
+}
+
+void UGS_BossHP::StartDelayBarInterp()
+{
+	if (!GetWorld()) return;
+
+	if (DelayedHPPercent > LastHPPercent)
+	{
+		//데미지
+		const float Duration = 0.03f;
+		float Delta = FMath::Abs(DelayedHPPercent - LastHPPercent);
+		InterpSpeed = FMath::Max(Delta / Duration, 0.5f);
+		GetWorld()->GetTimerManager().SetTimer(InterpTimerHandle, this, &UGS_BossHP::UpdateDelayedHP, 0.01f, true);
+	}
+}
+
+void UGS_BossHP::UpdateDelayedHP()
+{
+	if (DelayedHPPercent > LastHPPercent)
+	{
+		DelayedHPPercent = FMath::FInterpTo(DelayedHPPercent, LastHPPercent, 0.01f, InterpSpeed);
+		if (HPDelayBarWidget)
+		{
+			HPDelayBarWidget->SetPercent(DelayedHPPercent);
+		}
+	}
+	else
+	{
+		DelayedHPPercent = LastHPPercent;
+		if (HPDelayBarWidget)
+		{
+			HPDelayBarWidget->SetPercent(DelayedHPPercent);
+		}
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(InterpTimerHandle);
+		}
 	}
 }
 
