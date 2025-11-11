@@ -24,6 +24,7 @@ void UGS_GameResultBoardUI::NativeConstruct()
 void UGS_GameResultBoardUI::OnArcaneBoardButtonClicked()
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnArcaneBoardButtonClicked"));
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("지원 예정"));
 }
 
 void UGS_GameResultBoardUI::SetupResultBoard(AGS_PlayerState* TargetPlayerState, UGS_PawnMappingDataAsset* PawnMappingDataAsset)
@@ -102,5 +103,5 @@ void UGS_GameResultBoardUI::SetupResultBoard(AGS_PlayerState* TargetPlayerState,
     }
 
 	//레벨
-	Text_Level->SetText(FText::FromString(FString::Printf(TEXT("Lv.%d"), TargetPlayerState->GetLevel())));
+	Text_Level->SetText(FText::FromString(FString::Printf(TEXT("Lv.1")/*, TargetPlayerState->GetLevel()*/)));
 }
