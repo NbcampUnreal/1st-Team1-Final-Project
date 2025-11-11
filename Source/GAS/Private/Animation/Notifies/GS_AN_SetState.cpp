@@ -50,4 +50,12 @@ void UGS_AN_SetState::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 	{
 		Seeker->SetSeekerGait(Gait);
 	}
+
+	if (bResetAllowedSkills)
+	{
+		if (Seeker->GetSkillComp())
+		{
+			Seeker->GetSkillComp()->ResetAllowedSkillsMask();
+		}
+	}
 }

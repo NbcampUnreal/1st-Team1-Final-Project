@@ -16,7 +16,7 @@ class GAS_API UGS_ChanAimingSkillBar : public UUserWidget
 	
 public:
 	virtual void NativeConstruct() override;
-	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	// virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	void SetOwningActor(AGS_Character* InOwningCharacter);
 
@@ -44,6 +44,21 @@ protected:
 	TObjectPtr<AGS_Character> OwningCharacter;
 
 private:
-	float TargetBackPercent = 1.0f;
-	float BackBarInterpSpeed = 2.0f; // 보간 속도
+	// float TargetBackPercent = 1.0f;
+	// float BackBarInterpSpeed = 2.0f; // 보간 속도
+
+	float TargetPercent = 1.0f;
+	float DelayedPercent = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	float BackBarInterpSpeed = 2.0f;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	float InterpDelayTime = 0.1f;
+
+	FTimerHandle DelayBeforeInterpTimerHandle;
+	FTimerHandle InterpTimerHandle;
+	
+	void StartDelayBarInterp();
+	void UpdateDelayedBackBar();
 };
