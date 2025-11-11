@@ -10,7 +10,7 @@
 								<Value>False</Value>
 							</ValueList>
 						</Property>
-						<Property Name="RadiusMax" Type="Real64" Value="1700"/>
+						<Property Name="RadiusMax" Type="Real64" Value="1800"/>
 					</PropertyList>
 					<ObjectLists>
 						<ObjectList Name="RTPC">
@@ -66,18 +66,18 @@
 											<SegmentShape>Exp3</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>1375.72982</XPos>
-											<YPos>-0.86896</YPos>
+											<XPos>1235.93552</XPos>
+											<YPos>-0.77954</YPos>
 											<Flags>0</Flags>
 										</Point>
 										<Point>
-											<XPos>1595.93591</XPos>
-											<YPos>-1.79606</YPos>
+											<XPos>1628.48571</XPos>
+											<YPos>-2.16378</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>1700</XPos>
+											<XPos>1800</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>
@@ -232,7 +232,7 @@
 				</Attenuation>
 				<Attenuation Name="RTS_Attenuation" ID="{BA588512-4963-42D7-AD9C-A02AD9F2F4F8}" ShortID="845504517">
 					<PropertyList>
-						<Property Name="RadiusMax" Type="Real64" Value="3600"/>
+						<Property Name="RadiusMax" Type="Real64" Value="3800"/>
 					</PropertyList>
 					<ObjectLists>
 						<ObjectList Name="RTPC">
@@ -288,13 +288,13 @@
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>2807.99135</XPos>
-											<YPos>-1.2161</YPos>
+											<XPos>3074.54275</XPos>
+											<YPos>-1.04932</YPos>
 											<Flags>0</Flags>
 											<SegmentShape>Exp2</SegmentShape>
 										</Point>
 										<Point>
-											<XPos>3600</XPos>
+											<XPos>3800</XPos>
 											<YPos>-200</YPos>
 											<Flags>37</Flags>
 										</Point>
@@ -321,7 +321,7 @@
 											<Flags>5</Flags>
 										</Point>
 										<Point>
-											<XPos>3600</XPos>
+											<XPos>3800</XPos>
 											<YPos>100</YPos>
 											<Flags>37</Flags>
 										</Point>

@@ -405,10 +405,19 @@ AGS_Weapon* AGS_Character::GetWeaponBySocketName(FName SocketName)
 
 void AGS_Character::SetCharacterSpeed(float InRatio)
 {
+	if (InRatio >= 0.4f && this->GetDebuffComp()->IsDebuffActive(EDebuffType::Slow))
+	{
+		//UE_LOG(LogTemp, Error, TEXT("Character Speed(제한됨) = %f"), CharacterSpeed);
+		return;
+	}
+
 	if (InRatio >= 0 && InRatio <= 1)
 	{
 		CharacterSpeed = DefaultCharacterSpeed * InRatio;
 		GetCharacterMovement()->MaxWalkSpeed = CharacterSpeed;
+		//UE_LOG(LogTemp, Error, TEXT("Character Speed(변경됨) = %f"), CharacterSpeed);
+		//UE_LOG(LogTemp, Warning, TEXT("SpeedCheck: Slow=%s"),
+			//this->GetDebuffComp()->IsDebuffActive(EDebuffType::Slow) ? TEXT("True") : TEXT("False"));
 	}
 }
 
@@ -419,7 +428,16 @@ bool AGS_Character::IsDead() const
 
 void AGS_Character::Server_SetCharacterSpeed_Implementation(float InRatio)
 {
+	if (InRatio >= 0.8f && this->GetDebuffComp()->IsDebuffActive(EDebuffType::Slow))
+	{
+		//UE_LOG(LogTemp, Error, TEXT("Character Speed(제한됨) = %f"), CharacterSpeed);
+		return;
+	}
+
 	CharacterSpeed = DefaultCharacterSpeed * InRatio;
+	//UE_LOG(LogTemp, Error, TEXT("Character Speed(변경됨) = %f"), CharacterSpeed);
+	//UE_LOG(LogTemp, Warning, TEXT("SpeedCheck: Slow=%s"),
+		//this->GetDebuffComp()->IsDebuffActive(EDebuffType::Slow) ? TEXT("True") : TEXT("False"));
 
 	if (HasAuthority())
 	{

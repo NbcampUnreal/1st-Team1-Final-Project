@@ -58,7 +58,9 @@ void UGS_HealSkill::DeactiveSkill()
 	// 서버 권한에서만 종료 사운드 재생 (Multicast로 모든 클라이언트에 동기화)
 	if (OwnerCharacter && OwnerCharacter->HasAuthority())
 	{
-		if (UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>())
+		//if (UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>()) // SJE
+		UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>();
+		if (IsValid(AudioComp))
 		{
 			// Multicast RPC 직접 호출 (CanSendRPC 체크 우회)
 			// AudioEventType 1 = 스킬 종료 사운드
@@ -82,6 +84,11 @@ void UGS_HealSkill::InterruptSkill()
 
 	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
+		if (Seeker->IsDead())
+		{
+			return;
+		}
+		
 		if (Seeker->GetSkillComp())
 		{
 			Seeker->Multicast_SetMontageSlot(ESeekerMontageSlot::None);

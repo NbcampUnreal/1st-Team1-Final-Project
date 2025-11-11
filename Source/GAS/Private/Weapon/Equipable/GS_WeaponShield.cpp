@@ -108,7 +108,7 @@ AGS_Character* AGS_WeaponShield::FindUltimateAttacker(AActor* InActor)
 
 		// 3. (Original) Instigator가 없으면, Owner를 탐색 (무기, 몬스터 콜리전 케이스)
 		AActor* OwnerActor = CurrentActor->GetOwner();
-		if (Owner)
+		if (OwnerActor)
 		{
 			// 3a. 소유자가 컨트롤러인지 확인 (몬스터 콜리전 케이스)
 			AController* OwnerAsController = Cast<AController>(OwnerActor);
@@ -713,11 +713,10 @@ void AGS_WeaponShield::ServerEnableAttackHit_Implementation()
 	// 레벨 전환 중이 아닌 경우에만 타이머 설정
 	if (UWorld* World = GetWorld(); World && !World->bIsTearingDown && IsValid(World))
 	{
-		// 추가로 타이머 매니저의 유효성도 확인
 		FTimerManager& TimerManager = World->GetTimerManager();
 		if (&TimerManager)
 		{
-			TimerManager.SetTimer(SafetyTimerHandle, this, &AGS_WeaponShield::DisableAttackHit, 3.0f, false);
+			TimerManager.SetTimer(SafetyTimerHandle, this, &AGS_WeaponShield::DisableAttackHit, 0.2f, false);
 		}
 	}
 }
@@ -796,16 +795,18 @@ void AGS_WeaponShield::OnDefenseHit(UPrimitiveComponent* OverlappedComponent, AA
 	// 충돌한 컴포넌트가 방어가 가능한 공격인지 확인
 	if (!OtherComp->ComponentHasTag("DEFENSIBLE_ATTACK"))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[찬 방어] DEFENSIBLE_ATTACK 태그 없음: %s"), *OtherComp->GetName());
 		return;
 	}
 	
-	// OwnerChar 유효성 확인 (레벨 전환 시 null일 수 있음)
+	// OwnerChar 유효성 확인 (레벨 전환 시 null일 수 있음.)
 	if (!IsOwnerCharValid())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[찬 방어] OwnerChar 유효하지 않음"));
 		return;
 	}
 	
-	// 실제 공격자(캐릭터)를 찾습니다. OtherActor는 무기일 수 있습니다.
+	// 실제 공격자(캐릭터)를 찾기. OtherActor는 무기일 수 있음.
 	AActor* AttackerActor = FindUltimateAttacker(OtherActor);
 	
 	// 중복 방어 히트 방지
@@ -832,7 +833,6 @@ void AGS_WeaponShield::OnDefenseHit(UPrimitiveComponent* OverlappedComponent, AA
 	{
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("[방어] 가드 성공"));
 	// === 가드 성공 이펙트 재생 ===
 	// 방어 성공 시 방패에서 이펙트와 사운드 재생
 	Multicast_PlayGuardSuccessVFX(TargetType, CorrectHitResult);
@@ -862,7 +862,6 @@ void AGS_WeaponShield::OnDefenseHit(UPrimitiveComponent* OverlappedComponent, AA
 				}
 				//DefenseHitActors.Remove(FindUltimateAttacker(OtherActor));
 				DefenseHitActors.Remove(AttackerActor);
-				UE_LOG(LogTemp, Warning, TEXT("[방어] 중복 해제 성공"));
 			}, 0.1f, false);
 		}
 	}
@@ -881,12 +880,12 @@ void AGS_WeaponShield::OnDefenseEndOverlap(UPrimitiveComponent* OverlappedCompon
 		return;
 	}
 	
-	// 실제 공격자(캐릭터)를 찾습니다
+	// 실제 공격자(캐릭터)를 찾기
 	AActor* AttackerActor = FindUltimateAttacker(OtherActor);
 	
 	// 방어용 히트 액터 목록에서 제거하여 다음 공격 시 가드 이펙트가 다시 나올 수 있도록 함
 	DefenseHitActors.Remove(AttackerActor);
-	UE_LOG(LogTemp, Warning, TEXT("[방어] 중복 해제 성공"));
+	UE_LOG(LogTemp, Warning, TEXT("[찬 방어] 중복 해제 성공"));
 }
 
 void AGS_WeaponShield::EnableDefenseHit()
