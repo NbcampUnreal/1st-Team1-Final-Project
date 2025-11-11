@@ -60,7 +60,7 @@ void UGS_HealSkill::DeactiveSkill()
 	{
 		//if (UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>()) // SJE
 		UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>();
-		if (!IsValid(AudioComp))
+		if (IsValid(AudioComp))
 		{
 			// Multicast RPC 직접 호출 (CanSendRPC 체크 우회)
 			// AudioEventType 1 = 스킬 종료 사운드
