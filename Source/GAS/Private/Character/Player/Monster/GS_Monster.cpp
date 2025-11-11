@@ -274,7 +274,13 @@ void AGS_Monster::Attack()
 			}
 		}*/
 
-		// 공격 모션 및 사운드 재생 (모든 클라이언트)
+		// 공격 사운드 재생 (서버에서만 호출, Multicast로 전파)
+		if (MonsterAudioComponent)
+		{
+			MonsterAudioComponent->PlaySwingSound();
+		}
+
+		// 공격 모션 재생 (모든 클라이언트)
 		Multicast_PlayAttackMontage();
 	}
 }
@@ -283,12 +289,9 @@ void AGS_Monster::Multicast_PlayAttackMontage_Implementation()
 {
 	MonsterAnim->Montage_Play(AttackMontage);
 
-	// 모든 클라이언트에서 공격 사운드 재생
-	if (MonsterAudioComponent && GetWorld() && GetWorld()->GetNetMode() != NM_DedicatedServer)
-	{
-		MonsterAudioComponent->PlaySound(EMonsterAudioState::Combat, /*bForcePlay=*/false);
-		MonsterAudioComponent->PlaySwingSound();
-	}
+	// 주의: PlaySound()는 서버에서만 호출 가능 (HasAuthority 체크)
+	// Multicast에서는 직접 호출하지 않음
+	// 공격 사운드는 애니메이션 노티파이나 별도 로직에서 처리해야 함
 }
 
 

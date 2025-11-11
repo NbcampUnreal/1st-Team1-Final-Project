@@ -122,23 +122,15 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Monster Audio")
     void SetMonsterAudioState(EMonsterAudioState NewState);
 
-    /** 즉시 사운드 재생 */
+    /** 즉시 사운드 재생 (Idle/Combat만 사용) */
     UFUNCTION(BlueprintCallable, Category = "Monster Audio")
     void PlaySound(EMonsterAudioState SoundType, bool bForcePlay = false);
 
-    /** 피해받을 때 사운드 */
-    UFUNCTION(BlueprintCallable, Category = "Monster Audio")
-    void PlayHurtSound();
-
-    /** 죽을 때 사운드 */
-    UFUNCTION(BlueprintCallable, Category = "Monster Audio")
-    void PlayDeathSound();
-
-    /** 피해받을 때 사운드 (로컬 전용 - RPC 없음) */
+    /** 피해받을 때 사운드 (로컬 전용 - RepNotify에서 자동 호출) */
     UFUNCTION(BlueprintCallable, Category = "Monster Audio")
     void PlayHurtSoundLocal();
 
-    /** 죽을 때 사운드 (로컬 전용 - RPC 없음) */
+    /** 죽을 때 사운드 (로컬 전용 - RepNotify에서 자동 호출) */
     UFUNCTION(BlueprintCallable, Category = "Monster Audio")
     void PlayDeathSoundLocal();
 
