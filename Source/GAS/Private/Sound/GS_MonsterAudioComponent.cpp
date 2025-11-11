@@ -172,12 +172,14 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
         return;
     }
 
-    // 죽음 사운드는 거리/시야각 체크 없이 항상 재생 (bSkipViewFrustumCheck = true)
-    // 다른 사운드는 정상 체크 수행 (bSkipViewFrustumCheck = false)
-    const bool bSkipCheck = (SoundTypeToTrigger == EMonsterAudioState::Death);
+    // Hurt/Death는 RepNotify 시스템으로 처리되므로 여기서는 Idle/Combat만 처리
+    if (SoundTypeToTrigger == EMonsterAudioState::Hurt || SoundTypeToTrigger == EMonsterAudioState::Death)
+    {
+        return;
+    }
 
-    // 통합 체크 및 Distance Scaling 설정 (중복 로직 제거)
-    if (!PrepareMulticastSound(OwnerMonster, bSkipCheck))
+    // 통합 체크 및 Distance Scaling 설정
+    if (!PrepareMulticastSound(OwnerMonster, false))
     {
         return;
     }
@@ -206,70 +208,9 @@ void UGS_MonsterAudioComponent::Multicast_TriggerSound_Implementation(EMonsterAu
 
     AkPlayingID NewPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerMonster, 0, FOnAkPostEventCallback());
     RegisterPlayingID(NewPlayingID);
-
-    // Combat 사운드인 경우 PlayingID 추적
-    /*if (SoundTypeToTrigger == EMonsterAudioState::Combat)
-    {
-        CurrentCombatPlayingID = NewPlayingID;
-    }*/
 }
 
-void UGS_MonsterAudioComponent::PlayHurtSound()
-{
-    // 컴포넌트 유효성 검증
-    if (!IsValid(this))
-    {
-        return;
-    }
-
-    // 월드 컨텍스트 유효성 검증
-    UWorld* World = GetWorld();
-    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-    {
-        return;
-    }
-
-    // 오너 유효성 검증
-    AActor* Owner = GetOwner();
-    if (!IsValid(Owner) || !Owner->HasAuthority())
-    {
-        return;
-    }
-
-    SetMonsterAudioState(EMonsterAudioState::Hurt);
-    PlaySound(EMonsterAudioState::Hurt, true);
-}
-
-void UGS_MonsterAudioComponent::PlayDeathSound()
-{
-    // 컴포넌트 유효성 검증
-    if (!IsValid(this))
-    {
-        return;
-    }
-
-    // 월드 컨텍스트 유효성 검증
-    UWorld* World = GetWorld();
-    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-    {
-        return;
-    }
-
-    // 오너 유효성 검증
-    AActor* Owner = GetOwner();
-    if (!IsValid(Owner) || !Owner->HasAuthority())
-    {
-        return;
-    }
-
-    // 죽음 사운드 재생 전에 현재 재생 중인 모든 사운드 중단
-    StopAllActiveSounds();
-
-    SetMonsterAudioState(EMonsterAudioState::Death);
-    PlaySound(EMonsterAudioState::Death, true);
-}
-
-// 로컬 전용 Hurt 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+// 로컬 전용 Hurt 사운드 재생 (GS_StatComp::HandleHealthDamage에서 호출)
 void UGS_MonsterAudioComponent::PlayHurtSoundLocal()
 {
     if (!OwnerMonster)
@@ -293,15 +234,19 @@ void UGS_MonsterAudioComponent::PlayHurtSoundLocal()
     // 사운드 재생
     AkPlayingID NewPlayingID = UAkGameplayStatics::PostEvent(SoundEvent, OwnerMonster, 0, FOnAkPostEventCallback());
     RegisterPlayingID(NewPlayingID);
+
 }
 
-// 로컬 전용 Death 사운드 재생 (RPC 없음 - RepNotify에서 호출)
+// 로컬 전용 Death 사운드 재생 (GS_Character::OnDeath/OnRep_IsDead에서 호출)
 void UGS_MonsterAudioComponent::PlayDeathSoundLocal()
 {
     if (!OwnerMonster)
     {
         return;
     }
+
+    // 죽음 사운드 재생 전에 모든 사운드 중단
+    StopAllActiveSounds();
 
     // 죽음 사운드는 ViewFrustum 체크 제외
     if (!PrepareMulticastSound(OwnerMonster, true))
