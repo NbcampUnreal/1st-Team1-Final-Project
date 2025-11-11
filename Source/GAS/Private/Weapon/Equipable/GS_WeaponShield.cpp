@@ -713,11 +713,10 @@ void AGS_WeaponShield::ServerEnableAttackHit_Implementation()
 	// 레벨 전환 중이 아닌 경우에만 타이머 설정
 	if (UWorld* World = GetWorld(); World && !World->bIsTearingDown && IsValid(World))
 	{
-		// 추가로 타이머 매니저의 유효성도 확인
 		FTimerManager& TimerManager = World->GetTimerManager();
 		if (&TimerManager)
 		{
-			TimerManager.SetTimer(SafetyTimerHandle, this, &AGS_WeaponShield::DisableAttackHit, 3.0f, false);
+			TimerManager.SetTimer(SafetyTimerHandle, this, &AGS_WeaponShield::DisableAttackHit, 0.2f, false);
 		}
 	}
 }
