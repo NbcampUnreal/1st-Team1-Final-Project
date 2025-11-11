@@ -15,6 +15,17 @@ UGS_MerciRollingSkill::UGS_MerciRollingSkill()
 
 void UGS_MerciRollingSkill::ActiveSkill()
 {
+	if (!OwnerCharacter)
+	{
+		return;
+	}
+	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter);
+	if (!Seeker)
+	{
+		return;
+	}
+	Seeker->SetAimState(false);
+	Seeker->SetDrawState(false);
 	Super::ActiveSkill();
 }
 

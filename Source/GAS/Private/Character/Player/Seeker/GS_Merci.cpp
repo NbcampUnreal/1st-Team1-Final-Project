@@ -457,15 +457,19 @@ void AGS_Merci::ZoomTimelineReverse()
 
 void AGS_Merci::UpdateZoom(float Alpha)
 {
-	if (!SpringArmComp)
+	if (!SpringArmComp || !CameraComp)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("SpringArmComp null"));
+		UE_LOG(LogTemp, Warning, TEXT("SpringArmComp or CameraComp null"));
 		return;
 	}
 
-	float TargetArmLength = FMath::Lerp(320.0f, 180.0f, Alpha);
+	/*float TargetArmLength = FMath::Lerp(320.0f, 180.0f, Alpha);
 	float SocketOffsetY = FMath::Lerp(67.f, 87.f, Alpha);
-	float SocketOffsetZ = FMath::Lerp(174.f, 134.f, Alpha);
+	float SocketOffsetZ = FMath::Lerp(174.f, 134.f, Alpha);*/
+
+	float TargetArmLength = FMath::Lerp(350.0f, 180.0f, Alpha);
+	float SocketOffsetY = FMath::Lerp(0.f, 55.f, Alpha);
+	float SocketOffsetZ = FMath::Lerp(145.0f, 110.f, Alpha);
 
 	SpringArmComp->TargetArmLength = TargetArmLength;
 	FVector OffSet(0.f, SocketOffsetY, SocketOffsetZ);
