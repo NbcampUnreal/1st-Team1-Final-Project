@@ -170,6 +170,9 @@ void AGS_InGameGM::SpawnDungeonFromArray(const TArray<FDESaveData>& SaveData)
         // 모든 클라이언트에게 '검증 시작' 신호를 보냅니다.
         InGameGS->SetDungeonData(RoomCount);
     }
+
+    FTimerHandle DelayedRestartPlayerHandle;
+    GetWorld()->GetTimerManager().SetTimer(DelayedRestartPlayerHandle, this, &AGS_InGameGM::DelayedRestartPlayer, 0.3f, false);
     
     // 내비메시 재빌드 요청
     UNavigationSystemV1* NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
@@ -252,9 +255,6 @@ void AGS_InGameGM::OnNavMeshBuildComplete()
     //         }
     //     }
     // }
-    
-    FTimerHandle DelayedRestartPlayerHandle;
-    GetWorld()->GetTimerManager().SetTimer(DelayedRestartPlayerHandle, this, &AGS_InGameGM::DelayedRestartPlayer, 2.f, false);
 }
 
 void AGS_InGameGM::DelayedRestartPlayer()
