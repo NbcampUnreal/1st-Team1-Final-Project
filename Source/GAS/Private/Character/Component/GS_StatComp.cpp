@@ -81,14 +81,12 @@ void UGS_StatComp::InitStat(FName RowName)
 		Agility = FoundRow->AGL;
 		AttackSpeed = FoundRow->ATS;
 
-		if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
+		AGS_Character* OwnerChar = Cast<AGS_Character>(GetOwner());
+		if (AGS_PlayerState* PS = OwnerChar->GetPlayerState<AGS_PlayerState>())
 		{
-			if (AGS_PlayerState* PS = OwnerPawn->GetPlayerState<AGS_PlayerState>())
-			{
-				CurrentHealth = FMath::Clamp(PS->CurrentHealth, 0.f, MaxHealth);
-				UE_LOG(LogTemp, Warning, TEXT("StatComp InitStat 성공: RowName=%s, HP=%.1f, ATK=%.1f, DEF=%.1f, AGL=%.1f, ATS=%.1f"),
-				*RowName.ToString(), MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
-			}
+			CurrentHealth = FMath::Clamp(PS->CurrentHealth, 0.f, MaxHealth);
+			UE_LOG(LogTemp, Warning, TEXT("StatComp InitStat 성공: RowName=%s, HP=%.1f, ATK=%.1f, DEF=%.1f, AGL=%.1f, ATS=%.1f"),
+			*RowName.ToString(), MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
 		}
 		else
 		{
