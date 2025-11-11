@@ -395,39 +395,6 @@
 								</Event>
 							</ChildrenList>
 						</Folder>
-						<Event Name="EV_AttackSwingSound_RTS" ID="{F1A00B00-0267-4C92-9B88-3C06D6765898}">
-							<ChildrenList>
-								<Action Name="" ID="{86718CB1-08A8-4EC7-9CCC-F2C20CF4EEF4}" ShortID="310534848">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_AttackSwingSound_RTS" ID="{29F52B23-AFEB-4BC7-AFC8-BA269A78CA52}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="EV_MeleeAttack_RTS" ID="{4F1663D5-6BFF-4898-B54C-9E58EA29967C}">
-							<ChildrenList>
-								<Action Name="" ID="{3FA5CF07-2997-4404-856A-939892045F8D}" ShortID="651924657">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_MeleeHit_RTS" ID="{7870EEF6-D2C8-42C4-B006-244B463F35F6}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="EV_MeleeAttack_Sword_RTS" ID="{6D494C81-1D1F-44C2-B295-125B55A1A565}">
-							<ChildrenList>
-								<Action Name="" ID="{2345C2EA-D9FE-4993-9725-2D6242E0A75D}" ShortID="568858769">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_MeleeHit_Sword_RTS" ID="{7151371B-06C6-41CB-B421-0CFFF6523E4E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
 						<Folder Name="RTS_UISound" ID="{EFF542EC-35E3-40F6-8600-C55C04300918}" ShortID="263167326">
 							<ChildrenList>
 								<Event Name="EV_UI_Mon_ShadowFang" ID="{C1167BDD-D31B-471D-BCBE-F6C4EE8E8309}">
@@ -572,7 +539,7 @@
 												</Action>
 											</ChildrenList>
 										</Event>
-										<Event Name="Props_CrystalSpike_Hit_RTS" ID="{1B363824-F4F9-461B-992A-C8F06200B4AB}">
+										<Event Name="Props_CrystalWallTrap_Hit_RTS" ID="{1B363824-F4F9-461B-992A-C8F06200B4AB}">
 											<ChildrenList>
 												<Action Name="" ID="{4B275146-4A7B-458C-A80B-1F3C8633766A}" ShortID="677030094">
 													<ReferenceList>
@@ -776,6 +743,58 @@
 										</Action>
 									</ChildrenList>
 								</Event>
+								<Folder Name="CrystalSpike" ID="{8907FE52-63F5-4655-BB8E-B85C459255A9}" ShortID="38125622">
+									<ChildrenList>
+										<Event Name="Props_CrystalSpike_Warn_RTS" ID="{EE4B901C-F7FB-4862-A3DE-F62376B50838}">
+											<ChildrenList>
+												<Action Name="" ID="{A36368B5-22FA-438A-87B6-8C415CF64954}" ShortID="932946116">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_FloorCrystalSpikeTrap_Warning_RTS" ID="{0A8C1766-03A6-4FEA-9D9E-B1C315DC8F50}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_CrystalSpike_Hit_RTS" ID="{33129910-2E39-4432-9766-CD3911D009E0}">
+											<ChildrenList>
+												<Action Name="" ID="{75388F7C-FF9A-47AC-B9F1-2FD64EBF6614}" ShortID="711921250">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_FloorCrystalSpikeTrap_Hit_RTS" ID="{FC3C7615-014F-46B3-A69D-85AB6E710CCA}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
+								<Folder Name="StoneDoor" ID="{D939A807-1D1D-4A62-8B8A-DFF276C9597A}" ShortID="1051493187">
+									<ChildrenList>
+										<Event Name="Props_StoneDooor_Close_RTS" ID="{E24EAC7D-D49E-401C-A7F5-88C664E7851F}">
+											<ChildrenList>
+												<Action Name="" ID="{C6187B37-2831-499B-9034-5027919B7C90}" ShortID="814125031">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_StoneDooor_Close_RTS" ID="{BDC1596D-3FBE-4C14-B040-5469F07A8FB4}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+										<Event Name="Props_StoneDooor_Open_RTS" ID="{16F5B11D-5D54-4C85-8173-353A54ABBB8F}">
+											<ChildrenList>
+												<Action Name="" ID="{02C01AF2-B5B5-42D0-8B3C-392D28FEC8CE}" ShortID="404148934">
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_StoneDooor_Open_RTS" ID="{AC0BC271-1095-44A4-A41C-56D5675AC3BD}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
+									</ChildrenList>
+								</Folder>
 							</ChildrenList>
 						</Folder>
 						<Folder Name="Props_TPS" ID="{83734475-9FAB-43AB-B635-06B7E4FBFDB8}" ShortID="796313646">
@@ -859,7 +878,7 @@
 												<Action Name="" ID="{E6C62417-2644-4E29-8195-2B6FB59355D9}" ShortID="812565130">
 													<ReferenceList>
 														<Reference Name="Target">
-															<ObjectRef Name="SFX_FloorSpikeTrap_Warning" ID="{ADB4D0DF-B762-4889-B913-F72B23027F8E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+															<ObjectRef Name="SFX_FloorCrystalSpikeTrap_Warning" ID="{ADB4D0DF-B762-4889-B913-F72B23027F8E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
 														</Reference>
 													</ReferenceList>
 												</Action>
@@ -2492,109 +2511,165 @@
 						</Event>
 					</ChildrenList>
 				</Folder>
-				<Event Name="EV_MeleeAttack" ID="{711FAB82-E203-463E-846A-2577FBDF70FA}">
+				<Folder Name="Weapon" ID="{C260B304-8B16-4D34-A4E7-B3FAB8A15F23}" ShortID="724701857">
 					<ChildrenList>
-						<Action Name="" ID="{A74AE3FC-B1FD-4EAB-84E8-C47C63FCDD41}" ShortID="774880259">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="SFX_MeleeHit" ID="{903F1C7F-7380-44A5-8CE5-F4126AF4F991}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
-				<Event Name="EV_MeleeAttack_Sword" ID="{A67DE738-BB1A-4729-B91D-5E4BB5B7BB89}">
-					<ChildrenList>
-						<Action Name="" ID="{3BFAE52B-38AF-4F02-BDA6-BA90C3EFEA01}" ShortID="925927761">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="SFX_MeleeHit_Sword" ID="{4D8A780C-6708-48EC-A15C-60AB91CA2774}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
-				<Folder Name="Projectile" ID="{CD6C75B5-CBFB-4408-9D5A-7347C9346BEF}" ShortID="398140123">
-					<ChildrenList>
-						<Event Name="EV_ArrowBy" ID="{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}">
+						<Folder Name="Projectile" ID="{CD6C75B5-CBFB-4408-9D5A-7347C9346BEF}" ShortID="398140123">
 							<ChildrenList>
-								<Action Name="" ID="{7690A502-0437-4229-95E9-27A8C3C30382}" ShortID="206145139">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_Arrow_By" ID="{3AF9A3F0-DE14-4EB3-AA03-2EBCC8FB07A2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
+								<Event Name="EV_ArrowBy" ID="{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}">
+									<ChildrenList>
+										<Action Name="" ID="{7690A502-0437-4229-95E9-27A8C3C30382}" ShortID="206145139">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_Arrow_By" ID="{3AF9A3F0-DE14-4EB3-AA03-2EBCC8FB07A2}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_ArrowImpact_Stone" ID="{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}">
+									<ChildrenList>
+										<Action Name="" ID="{3C81E8EE-4321-4A80-AB47-1CCE3A98E483}" ShortID="188686223">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_ArrowImpact_Stone" ID="{5B4DA841-68C7-48EF-90AB-20E344778912}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_ArrowImpact_Body" ID="{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}">
+									<ChildrenList>
+										<Action Name="" ID="{CE09FBC0-9B03-435A-9514-1053E61903DE}" ShortID="245893075">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_ArrowImpact_Body" ID="{DE6A5A1B-DCBE-4500-9C0F-8B184E9F72B3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_NeedleFang_Shot" ID="{D5FB5933-2F9E-4265-BBF0-828FF4BF9D19}">
+									<ChildrenList>
+										<Action Name="" ID="{B3FE94C1-F44C-40C9-B0C6-F1D5980D9233}" ShortID="162307270">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_NeedleFang_Shot" ID="{76B3A57C-592E-4604-9450-2E663883051A}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_NeedleFang_Shot_By" ID="{D8116CA9-51E2-49B6-A563-0721E17ECC81}">
+									<ChildrenList>
+										<Action Name="" ID="{726732D4-D6DD-4DB4-A7F0-134F3E5D6FE6}" ShortID="109018602">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_NeedleFangShot_By" ID="{1166EF79-2BD7-4B5F-B531-D73B5B9B2D9D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
-						</Event>
-						<Event Name="EV_ArrowImpact_Stone" ID="{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}">
+						</Folder>
+						<Folder Name="Weapon_TPS" ID="{000A2B40-7012-4C67-9AF6-9944716E39B1}" ShortID="271488601">
 							<ChildrenList>
-								<Action Name="" ID="{3C81E8EE-4321-4A80-AB47-1CCE3A98E483}" ShortID="188686223">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_ArrowImpact_Stone" ID="{5B4DA841-68C7-48EF-90AB-20E344778912}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
+								<Event Name="EV_AttackSwingSound" ID="{97596B2C-ABE8-48F4-9B0E-808FB5CC13E3}">
+									<ChildrenList>
+										<Action Name="" ID="{071D5569-5C95-4A30-8826-D4558F054E6A}" ShortID="334226775">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_AttackSwingSound" ID="{38F6F7AF-274A-43AB-9171-C04D736CB2AD}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_MeleeAttack_Shield" ID="{CA274296-6F15-4B60-88E7-FEAA253294EE}">
+									<ChildrenList>
+										<Action Name="" ID="{E804BA1F-E90C-4C0A-B470-4B59F9168123}" ShortID="55584841">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_MeleeHit_Shield" ID="{00AB26FC-EF14-49A1-8A8C-DCD96A8A642C}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_MeleeAttack" ID="{711FAB82-E203-463E-846A-2577FBDF70FA}">
+									<ChildrenList>
+										<Action Name="" ID="{A74AE3FC-B1FD-4EAB-84E8-C47C63FCDD41}" ShortID="774880259">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_MeleeHit" ID="{903F1C7F-7380-44A5-8CE5-F4126AF4F991}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_MeleeAttack_Sword" ID="{A67DE738-BB1A-4729-B91D-5E4BB5B7BB89}">
+									<ChildrenList>
+										<Action Name="" ID="{3BFAE52B-38AF-4F02-BDA6-BA90C3EFEA01}" ShortID="925927761">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_MeleeHit_Sword" ID="{4D8A780C-6708-48EC-A15C-60AB91CA2774}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
-						</Event>
-						<Event Name="EV_ArrowImpact_Body" ID="{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}">
+						</Folder>
+						<Folder Name="Weapon_RTS" ID="{17FFB51D-E8D5-40B1-A2B5-35E2AC0873D6}" ShortID="869984691">
 							<ChildrenList>
-								<Action Name="" ID="{CE09FBC0-9B03-435A-9514-1053E61903DE}" ShortID="245893075">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_ArrowImpact_Body" ID="{DE6A5A1B-DCBE-4500-9C0F-8B184E9F72B3}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
+								<Event Name="EV_MeleeAttack_Shield_RTS" ID="{C1DA445F-49A4-4028-AE79-AFF6CA458150}">
+									<ChildrenList>
+										<Action Name="" ID="{4AC8FD74-F615-4A73-9CE8-772DEA100287}" ShortID="694475126">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_MeleeHit_Shield" ID="{00AB26FC-EF14-49A1-8A8C-DCD96A8A642C}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_MeleeAttack_Sword_RTS" ID="{6D494C81-1D1F-44C2-B295-125B55A1A565}">
+									<ChildrenList>
+										<Action Name="" ID="{2345C2EA-D9FE-4993-9725-2D6242E0A75D}" ShortID="568858769">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_MeleeHit_Sword_RTS" ID="{7151371B-06C6-41CB-B421-0CFFF6523E4E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_AttackSwingSound_RTS" ID="{F1A00B00-0267-4C92-9B88-3C06D6765898}">
+									<ChildrenList>
+										<Action Name="" ID="{86718CB1-08A8-4EC7-9CCC-F2C20CF4EEF4}" ShortID="310534848">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_AttackSwingSound_RTS" ID="{29F52B23-AFEB-4BC7-AFC8-BA269A78CA52}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
+								<Event Name="EV_MeleeAttack_RTS" ID="{4F1663D5-6BFF-4898-B54C-9E58EA29967C}">
+									<ChildrenList>
+										<Action Name="" ID="{3FA5CF07-2997-4404-856A-939892045F8D}" ShortID="651924657">
+											<ReferenceList>
+												<Reference Name="Target">
+													<ObjectRef Name="SFX_MeleeHit_RTS" ID="{7870EEF6-D2C8-42C4-B006-244B463F35F6}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+												</Reference>
+											</ReferenceList>
+										</Action>
+									</ChildrenList>
+								</Event>
 							</ChildrenList>
-						</Event>
-						<Event Name="EV_NeedleFang_Shot" ID="{D5FB5933-2F9E-4265-BBF0-828FF4BF9D19}">
-							<ChildrenList>
-								<Action Name="" ID="{B3FE94C1-F44C-40C9-B0C6-F1D5980D9233}" ShortID="162307270">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_NeedleFang_Shot" ID="{76B3A57C-592E-4604-9450-2E663883051A}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
-						<Event Name="EV_NeedleFang_Shot_By" ID="{D8116CA9-51E2-49B6-A563-0721E17ECC81}">
-							<ChildrenList>
-								<Action Name="" ID="{726732D4-D6DD-4DB4-A7F0-134F3E5D6FE6}" ShortID="109018602">
-									<ReferenceList>
-										<Reference Name="Target">
-											<ObjectRef Name="SFX_NeedleFangShot_By" ID="{1166EF79-2BD7-4B5F-B531-D73B5B9B2D9D}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-										</Reference>
-									</ReferenceList>
-								</Action>
-							</ChildrenList>
-						</Event>
+						</Folder>
 					</ChildrenList>
 				</Folder>
-				<Event Name="EV_AttackSwingSound" ID="{97596B2C-ABE8-48F4-9B0E-808FB5CC13E3}">
-					<ChildrenList>
-						<Action Name="" ID="{071D5569-5C95-4A30-8826-D4558F054E6A}" ShortID="334226775">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="SFX_AttackSwingSound" ID="{38F6F7AF-274A-43AB-9171-C04D736CB2AD}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
-				<Event Name="EV_MeleeAttack_Shield" ID="{CA274296-6F15-4B60-88E7-FEAA253294EE}">
-					<ChildrenList>
-						<Action Name="" ID="{E804BA1F-E90C-4C0A-B470-4B59F9168123}" ShortID="55584841">
-							<ReferenceList>
-								<Reference Name="Target">
-									<ObjectRef Name="SFX_MeleeHit_Shield" ID="{00AB26FC-EF14-49A1-8A8C-DCD96A8A642C}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
-								</Reference>
-							</ReferenceList>
-						</Action>
-					</ChildrenList>
-				</Event>
 			</ChildrenList>
 		</WorkUnit>
 	</Events>
