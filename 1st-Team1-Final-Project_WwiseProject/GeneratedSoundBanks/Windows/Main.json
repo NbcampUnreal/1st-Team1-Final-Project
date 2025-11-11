@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{CE3A80E8-88B8-8B40-91E3-A59A6837A325}",
+    "Hash": "{F4904D6C-E600-60B7-6D62-396C7FB0CD71}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -261,7 +261,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_PotionSippin.wav",
-      "CachePath": "3B/{3B33CE52-E90F-9FEB-4D07-A836D8EE0380}.wem"
+      "CachePath": "7A/{7A9BFEF0-56D1-A8F8-4F11-D46FC5A386C9}.wem"
      },
      {
       "Id": "111629751",
@@ -7313,7 +7313,7 @@
       "Name": "Props_Portal",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_TPS\\Portal\\Props_Portal",
       "GUID": "{9141DA7A-2D2F-449C-88E2-C9754D09EDA8}",
-      "MaxAttenuation": "2700",
+      "MaxAttenuation": "2880",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -8302,6 +8302,6 @@
     ]
    }
   ],
-  "FileHash": "{018386A6-32F7-8796-3D58-93DB721EAB20}"
+  "FileHash": "{4231B3D0-752E-22DD-CFA2-EFCBCB17D757}"
  }
 }
