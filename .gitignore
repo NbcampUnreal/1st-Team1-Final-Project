@@ -36,6 +36,9 @@ Documentation/windsurf-guide.txt
 Config/WindsurfSettings.ini
 
 #Plugins/GameLiftPlugin/
+Plugins/GameLiftPlugin/Binaries
+Plugins/GameLiftPlugin/Intermediate
+
 GAS.uproject.DotSettings.user
 
 Content/Player/TEST/BP_SJEGM.uasset
