@@ -153,6 +153,12 @@ void AGS_Drakhar::BeginPlay()
 	{
 		Anim->OnPlayMontageNotifyBegin.AddDynamic(this, &ThisClass::OnMontageNotifyBegin);
 	}
+
+	// 드라카의 공격이 찬의 방어 콜리전에 감지될 수 있도록 태그 추가
+	if (UPrimitiveComponent* CapsuleComp = GetCapsuleComponent())
+	{
+		CapsuleComp->ComponentTags.AddUnique(FName("DEFENSIBLE_ATTACK"));
+	}
 }
 
 void AGS_Drakhar::Tick(float DeltaTime)
