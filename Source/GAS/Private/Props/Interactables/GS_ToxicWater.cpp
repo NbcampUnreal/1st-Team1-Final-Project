@@ -1,4 +1,6 @@
 #include "Props/Interactables/GS_ToxicWater.h"
+#include "GameFramework/Character.h"
+#include "Components/CapsuleComponent.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 
 
@@ -35,14 +37,21 @@ void AGS_ToxicWater::OnTWaterBeginOverlap(UPrimitiveComponent* OverlappedComp, A
 		return;
 	}
 	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
-	if (Seeker)
+	if (AGS_Character* GSChar = Cast<AGS_Character>(OtherActor))
 	{
-		if (UGS_DebuffComp* DebuffComp = Seeker->FindComponentByClass<UGS_DebuffComp>())
+		if (OtherComp == GSChar->GetCapsuleComponent())
 		{
-			DebuffComp->ApplyDebuff(EDebuffType::Slow, nullptr);
-			//DebuffComp->ApplyDebuff(EDebuffType::Lava, nullptr);
+			if (Seeker)
+			{
+				if (UGS_DebuffComp* DebuffComp = Seeker->FindComponentByClass<UGS_DebuffComp>())
+				{
+					DebuffComp->ApplyDebuff(EDebuffType::Slow, nullptr);
+					//DebuffComp->ApplyDebuff(EDebuffType::Lava, nullptr);
+				}
+			}
 		}
 	}
+	
 }
 
 void AGS_ToxicWater::OnTWaterEndOverlap(UPrimitiveComponent* OverlappedComp,
@@ -51,14 +60,19 @@ void AGS_ToxicWater::OnTWaterEndOverlap(UPrimitiveComponent* OverlappedComp,
 	int32 OtherBodyIndex)
 {
 	AGS_Seeker* Seeker = Cast<AGS_Seeker>(OtherActor);
-	if (Seeker)
+	if (AGS_Character* GSChar = Cast<AGS_Character>(OtherActor))
 	{
-		if (UGS_DebuffComp* DebuffComp = Seeker->FindComponentByClass<UGS_DebuffComp>())
+		if (OtherComp == GSChar->GetCapsuleComponent())
 		{
-			DebuffComp->RemoveDebuff(EDebuffType::Slow);
-			//임시
-			//DebuffComp->RemoveDebuff(EDebuffType::Lava);
+			if (Seeker)
+			{
+				if (UGS_DebuffComp* DebuffComp = Seeker->FindComponentByClass<UGS_DebuffComp>())
+				{
+					DebuffComp->RemoveDebuff(EDebuffType::Slow);
+					//임시
+					//DebuffComp->RemoveDebuff(EDebuffType::Lava);
+				}
+			}
 		}
 	}
-	
 }
