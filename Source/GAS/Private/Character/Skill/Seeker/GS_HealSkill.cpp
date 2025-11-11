@@ -66,9 +66,14 @@ void UGS_HealSkill::DeactiveSkill()
 			// AudioEventType 1 = 스킬 종료 사운드
 			AudioComp->Multicast_RequestSkillAudio(CurrentSkillType, 1, OwnerCharacter->GetActorLocation());
 		}
-		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
+		AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter);
+		if (Seeker)
 		{
-			Seeker->GetSkillComp()->ResetAllowedSkillsMask();
+			if (Seeker->GetSkillComp())
+			{
+				Seeker->GetSkillComp()->SetCurAllowedSkillsMask(0);
+				Seeker->GetSkillComp()->SetCurAllowedSkillsMask(static_cast<int16>(ESkillSlot::HealPotion));
+			}
 		}
 	}
 }
