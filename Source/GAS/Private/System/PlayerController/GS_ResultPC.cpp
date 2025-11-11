@@ -14,7 +14,7 @@ void AGS_ResultPC::Client_ShowResultUI_Implementation()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("AGS_ResultPC::Client_ShowResultUI_Implementation() - Trying to Add to Viewport"));
 			ResultWidget->AddToViewport();
-			FInputModeGameAndUI InputModeData;
+			FInputModeUIOnly InputModeData;
 			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 			SetInputMode(InputModeData);
 			bShowMouseCursor = true;
