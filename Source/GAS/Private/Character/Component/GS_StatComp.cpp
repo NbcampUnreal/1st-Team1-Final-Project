@@ -81,14 +81,12 @@ void UGS_StatComp::InitStat(FName RowName)
 		Agility = FoundRow->AGL;
 		AttackSpeed = FoundRow->ATS;
 
-		if (APawn* OwnerPawn = Cast<APawn>(GetOwner()))
+		AGS_Character* OwnerChar = Cast<AGS_Character>(GetOwner());
+		if (AGS_PlayerState* PS = OwnerChar->GetPlayerState<AGS_PlayerState>())
 		{
-			if (AGS_PlayerState* PS = OwnerPawn->GetPlayerState<AGS_PlayerState>())
-			{
-				CurrentHealth = FMath::Clamp(PS->CurrentHealth, 0.f, MaxHealth);
-				UE_LOG(LogTemp, Warning, TEXT("StatComp InitStat 성공: RowName=%s, HP=%.1f, ATK=%.1f, DEF=%.1f, AGL=%.1f, ATS=%.1f"),
-				*RowName.ToString(), MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
-			}
+			CurrentHealth = FMath::Clamp(PS->CurrentHealth, 0.f, MaxHealth);
+			UE_LOG(LogTemp, Warning, TEXT("StatComp InitStat 성공: RowName=%s, HP=%.1f, ATK=%.1f, DEF=%.1f, AGL=%.1f, ATS=%.1f"),
+			*RowName.ToString(), MaxHealth, AttackPower, Defense, Agility, AttackSpeed);
 		}
 		else
 		{
@@ -319,7 +317,7 @@ void UGS_StatComp::HandleHealthDamage(float OldHealth, float NewHealth)
 	// 죽음 판정: Death 사운드는 OnDeath()에서 처리하므로 여기서는 스킵
 	if (NewHealth <= KINDA_SMALL_NUMBER && OldHealth > KINDA_SMALL_NUMBER)
 	{
-		return;  // 죽음 판정 - OnDeath()에서 PlayDeathSound() 호출
+		return;  // 죽음 판정 - OnDeath()에서 PlayDeathSoundLocal() 호출
 	}
 
 	// Hurt 사운드 재생 (클라이언트 로컬 재생 - RPC 없음!)

@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{1A901E6C-AC66-87BB-E4AC-0D538588082D}",
+    "Hash": "{CE3A80E8-88B8-8B40-91E3-A59A6837A325}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -261,7 +261,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "SFX_PotionSippin.wav",
-      "CachePath": "63/{63003E3C-1743-E4C6-E38B-A1138B1BFF2D}.wem"
+      "CachePath": "3B/{3B33CE52-E90F-9FEB-4D07-A836D8EE0380}.wem"
      },
      {
       "Id": "111629751",
@@ -1741,7 +1741,7 @@
       "Streaming": "false",
       "Location": "Memory",
       "ShortName": "ESM_Fantasy_Game_Material_Stone_Magic_Debris_Hit_4_Magic_RPG_Apothecary_Ancient_Medieval_Element_Accent_Impact.wav",
-      "CachePath": "9E/{9E498C33-9249-3C61-2384-E04160255A3C}.wem"
+      "CachePath": "8A/{8A75BE85-F055-01A0-F2E2-044C6606C4F0}.wem"
      },
      {
       "Id": "797000384",
@@ -2437,7 +2437,7 @@
       {
        "Id": "5204649",
        "Name": "Time Stretch (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Projectile\\SFX_Arrow_By\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Weapon\\Projectile\\SFX_Arrow_By\\[Effect Slot [0]: (Time Stretch)]\\Time Stretch (Custom)",
        "GUID": "{AFAA64B4-BCA6-414C-AB98-3F33A17A2102}",
        "LibName": "Wwise Time Stretch",
        "LibId": "8519683"
@@ -2461,7 +2461,7 @@
       {
        "Id": "60855020",
        "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_MeleeHit_Sword\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Weapon\\Weapon_TPS\\SFX_MeleeHit_Sword\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
        "GUID": "{6B6113D9-2E4E-4D5C-9CE9-52FA3AE7B3D9}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -2661,7 +2661,7 @@
       {
        "Id": "391986448",
        "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Projectile\\EV_Drakhar_Projectile\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Weapon\\Projectile\\EV_Drakhar_Projectile\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
        "GUID": "{F17832F5-ECD4-4305-A6AA-C3254B47881A}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -2751,6 +2751,14 @@
        "Name": "Octave_Up (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\IronFang\\SFX_Mon_IronFang_Death\\[Effect Slot [1]: (Pitch Shifter)]\\Octave_Up (Custom)",
        "GUID": "{9F2091F6-6079-431C-9BCF-B9AFF87AEEDC}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
+      },
+      {
+       "Id": "540921925",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Weapon\\Weapon_RTS\\SFX_MeleeHit_Sword_RTS\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{8C4BF63C-29F7-4DDC-919D-DB782D14298E}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
       },
@@ -2923,6 +2931,14 @@
        "LibId": "8519683"
       },
       {
+       "Id": "871886609",
+       "Name": "Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Weapon\\Weapon_RTS\\SFX_MeleeHit_RTS\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "GUID": "{FBFB6851-DEAE-4478-93E5-7344DD3C4743}",
+       "LibName": "Wwise Pitch Shifter",
+       "LibId": "8912899"
+      },
+      {
        "Id": "901116983",
        "Name": "Octave_Up (Custom)",
        "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Monster\\RTS_MonsterSound\\SFX_Mon_IronFang_RTS_Death\\[Effect Slot [1]: (Pitch Shifter)]\\Octave_Up (Custom)",
@@ -2957,7 +2973,7 @@
       {
        "Id": "956691143",
        "Name": "Pitch Shifter (Custom)",
-       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\SFX_MeleeHit\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\Default Work Unit\\Weapon\\Weapon_TPS\\SFX_MeleeHit\\[Effect Slot [0]: (Pitch Shifter)]\\Pitch Shifter (Custom)",
        "GUID": "{C1F03FC2-B995-452B-80B2-40FC1DB50C92}",
        "LibName": "Wwise Pitch Shifter",
        "LibId": "8912899"
@@ -3848,7 +3864,7 @@
      {
       "Id": "3432958693",
       "Name": "EV_ArrowBy",
-      "ObjectPath": "\\Events\\Default Work Unit\\Projectile\\EV_ArrowBy",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Projectile\\EV_ArrowBy",
       "GUID": "{B5485037-8A6F-4DD4-BCFE-EBD7E03C86D0}",
       "DurationType": "OneShot",
       "DurationMin": "0.6343975",
@@ -3891,7 +3907,7 @@
      {
       "Id": "598060403",
       "Name": "EV_ArrowImpact_Body",
-      "ObjectPath": "\\Events\\Default Work Unit\\Projectile\\EV_ArrowImpact_Body",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Projectile\\EV_ArrowImpact_Body",
       "GUID": "{630AD5C5-AB82-4AFB-81AE-098F89BAEBAD}",
       "MaxAttenuation": "1000",
       "DurationType": "OneShot",
@@ -3906,7 +3922,7 @@
      {
       "Id": "3834184178",
       "Name": "EV_ArrowImpact_Stone",
-      "ObjectPath": "\\Events\\Default Work Unit\\Projectile\\EV_ArrowImpact_Stone",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Projectile\\EV_ArrowImpact_Stone",
       "GUID": "{C0E4251E-79CC-43B2-94E9-0D9F95C47B45}",
       "MaxAttenuation": "1000",
       "DurationType": "OneShot",
@@ -3924,7 +3940,7 @@
      {
       "Id": "293231240",
       "Name": "EV_AttackSwingSound",
-      "ObjectPath": "\\Events\\Default Work Unit\\EV_AttackSwingSound",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Weapon_TPS\\EV_AttackSwingSound",
       "GUID": "{97596B2C-ABE8-48F4-9B0E-808FB5CC13E3}",
       "MaxAttenuation": "1800",
       "DurationType": "OneShot",
@@ -3942,7 +3958,7 @@
      {
       "Id": "419441600",
       "Name": "EV_AttackSwingSound_RTS",
-      "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_AttackSwingSound_RTS",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Weapon_RTS\\EV_AttackSwingSound_RTS",
       "GUID": "{F1A00B00-0267-4C92-9B88-3C06D6765898}",
       "MaxAttenuation": "3800",
       "DurationType": "OneShot",
@@ -4916,7 +4932,7 @@
      {
       "Id": "2908138241",
       "Name": "EV_MeleeAttack",
-      "ObjectPath": "\\Events\\Default Work Unit\\EV_MeleeAttack",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Weapon_TPS\\EV_MeleeAttack",
       "GUID": "{711FAB82-E203-463E-846A-2577FBDF70FA}",
       "MaxAttenuation": "1800",
       "DurationType": "OneShot",
@@ -4947,9 +4963,9 @@
      {
       "Id": "2900096721",
       "Name": "EV_MeleeAttack_RTS",
-      "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_MeleeAttack_RTS",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Weapon_RTS\\EV_MeleeAttack_RTS",
       "GUID": "{4F1663D5-6BFF-4898-B54C-9E58EA29967C}",
-      "MaxAttenuation": "3800",
+      "MaxAttenuation": "3420",
       "DurationType": "OneShot",
       "DurationMin": "0.37351164",
       "DurationMax": "0.502778",
@@ -4966,12 +4982,19 @@
        {
         "Id": "842637062"
        }
-      ]
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "871886609"
+        }
+       ]
+      }
      },
      {
       "Id": "4008089511",
       "Name": "EV_MeleeAttack_Shield",
-      "ObjectPath": "\\Events\\Default Work Unit\\EV_MeleeAttack_Shield",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Weapon_TPS\\EV_MeleeAttack_Shield",
       "GUID": "{CA274296-6F15-4B60-88E7-FEAA253294EE}",
       "MaxAttenuation": "1800",
       "DurationType": "OneShot",
@@ -4989,7 +5012,7 @@
      {
       "Id": "1315079743",
       "Name": "EV_MeleeAttack_Sword",
-      "ObjectPath": "\\Events\\Default Work Unit\\EV_MeleeAttack_Sword",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Weapon_TPS\\EV_MeleeAttack_Sword",
       "GUID": "{A67DE738-BB1A-4729-B91D-5E4BB5B7BB89}",
       "MaxAttenuation": "1800",
       "DurationType": "OneShot",
@@ -5017,9 +5040,9 @@
      {
       "Id": "695999579",
       "Name": "EV_MeleeAttack_Sword_RTS",
-      "ObjectPath": "\\Events\\Default Work Unit\\Monster\\EV_MeleeAttack_Sword_RTS",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Weapon_RTS\\EV_MeleeAttack_Sword_RTS",
       "GUID": "{6D494C81-1D1F-44C2-B295-125B55A1A565}",
-      "MaxAttenuation": "3800",
+      "MaxAttenuation": "3420",
       "DurationType": "OneShot",
       "DurationMin": "0.42777082",
       "DurationMax": "0.6666667",
@@ -5033,7 +5056,14 @@
        {
         "Id": "993356452"
        }
-      ]
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "540921925"
+        }
+       ]
+      }
      },
      {
       "Id": "2442023259",
@@ -6171,7 +6201,7 @@
      {
       "Id": "1604229051",
       "Name": "EV_NeedleFang_Shot",
-      "ObjectPath": "\\Events\\Default Work Unit\\Projectile\\EV_NeedleFang_Shot",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Projectile\\EV_NeedleFang_Shot",
       "GUID": "{D5FB5933-2F9E-4265-BBF0-828FF4BF9D19}",
       "MaxAttenuation": "1000",
       "DurationType": "OneShot",
@@ -6192,7 +6222,7 @@
      {
       "Id": "2939816977",
       "Name": "EV_NeedleFang_Shot_By",
-      "ObjectPath": "\\Events\\Default Work Unit\\Projectile\\EV_NeedleFang_Shot_By",
+      "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Projectile\\EV_NeedleFang_Shot_By",
       "GUID": "{D8116CA9-51E2-49B6-A563-0721E17ECC81}",
       "MaxAttenuation": "1440",
       "DurationType": "OneShot",
@@ -6215,9 +6245,10 @@
       "Name": "EV_PotionSippin",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_PotionSippin",
       "GUID": "{0960A90B-D49D-42D6-BE63-0838B5CE21D1}",
+      "MaxAttenuation": "1800",
       "DurationType": "OneShot",
-      "DurationMin": "2.9913483",
-      "DurationMax": "3.0086768",
+      "DurationMin": "1.8678377",
+      "DurationMax": "1.8786578",
       "MediaRefs": [
        {
         "Id": "111489786"
@@ -6229,6 +6260,7 @@
       "Name": "EV_PotionSippin_End",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_PotionSippin_End",
       "GUID": "{E9CEFABE-C0C0-4EC6-9889-C8D830E21CBF}",
+      "MaxAttenuation": "1800",
       "DurationType": "OneShot",
       "DurationMin": "0.6413188",
       "DurationMax": "0.64503384",
@@ -6716,7 +6748,7 @@
       "Name": "Props_CrystalCeilTrap_Warn",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_TPS\\CrystalWall\\Props_CrystalCeilTrap_Warn",
       "GUID": "{B04602E2-FB96-44B6-8F1F-73807B6D663A}",
-      "MaxAttenuation": "1800",
+      "MaxAttenuation": "2340",
       "DurationType": "OneShot",
       "DurationMin": "1.8649746",
       "DurationMax": "1.9196225",
@@ -6856,24 +6888,21 @@
      {
       "Id": "3694610938",
       "Name": "Props_CrystalSpike_Hit_RTS",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_RTS\\CrystalWall\\Props_CrystalSpike_Hit_RTS",
-      "GUID": "{1B363824-F4F9-461B-992A-C8F06200B4AB}",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_RTS\\CrystalSpike\\Props_CrystalSpike_Hit_RTS",
+      "GUID": "{33129910-2E39-4432-9766-CD3911D009E0}",
       "MaxAttenuation": "3800",
       "DurationType": "OneShot",
-      "DurationMin": "1.8",
-      "DurationMax": "1.9070336",
+      "DurationMin": "0.57722557",
+      "DurationMax": "0.61154914",
       "MediaRefs": [
        {
-        "Id": "107540085"
+        "Id": "15081757"
        },
        {
-        "Id": "313983704"
+        "Id": "141938875"
        },
        {
-        "Id": "602204976"
-       },
-       {
-        "Id": "811340583"
+        "Id": "418165151"
        }
       ]
      },
@@ -6899,11 +6928,32 @@
       ]
      },
      {
+      "Id": "3406342503",
+      "Name": "Props_CrystalSpike_Warn_RTS",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_RTS\\CrystalSpike\\Props_CrystalSpike_Warn_RTS",
+      "GUID": "{EE4B901C-F7FB-4862-A3DE-F62376B50838}",
+      "MaxAttenuation": "4560",
+      "DurationType": "OneShot",
+      "DurationMin": "0.62017554",
+      "DurationMax": "0.67630625",
+      "MediaRefs": [
+       {
+        "Id": "265430466"
+       },
+       {
+        "Id": "552526360"
+       },
+       {
+        "Id": "709751505"
+       }
+      ]
+     },
+     {
       "Id": "446941167",
       "Name": "Props_CrystalWallTrap",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_TPS\\CrystalWall\\Props_CrystalWallTrap",
       "GUID": "{9C89005A-CF4E-46F0-9A26-2606EC93E64B}",
-      "MaxAttenuation": "660",
+      "MaxAttenuation": "2160",
       "DurationType": "OneShot",
       "DurationMin": "1.8",
       "DurationMax": "1.9070336",
@@ -6924,7 +6974,7 @@
       "Name": "Props_CrystalWallTrap_End",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_TPS\\CrystalWall\\Props_CrystalWallTrap_End",
       "GUID": "{89711335-193C-46E0-A2F3-AF1AC6E56925}",
-      "MaxAttenuation": "660",
+      "MaxAttenuation": "2160",
       "DurationType": "OneShot",
       "DurationMin": "1.2887006",
       "DurationMax": "1.3653308",
@@ -6961,6 +7011,30 @@
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_TPS\\CrystalWall\\Props_CrystalWallTrap_Hit",
       "GUID": "{B21DE69E-40F0-4E26-A3A1-FD3ACBE3F2B1}",
       "MaxAttenuation": "2160",
+      "DurationType": "OneShot",
+      "DurationMin": "1.8",
+      "DurationMax": "1.9070336",
+      "MediaRefs": [
+       {
+        "Id": "107540085"
+       },
+       {
+        "Id": "313983704"
+       },
+       {
+        "Id": "602204976"
+       },
+       {
+        "Id": "811340583"
+       }
+      ]
+     },
+     {
+      "Id": "3416255437",
+      "Name": "Props_CrystalWallTrap_Hit_RTS",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_RTS\\CrystalWall\\Props_CrystalWallTrap_Hit_RTS",
+      "GUID": "{1B363824-F4F9-461B-992A-C8F06200B4AB}",
+      "MaxAttenuation": "3800",
       "DurationType": "OneShot",
       "DurationMin": "1.8",
       "DurationMax": "1.9070336",
@@ -7067,27 +7141,6 @@
       ]
      },
      {
-      "Id": "4173805632",
-      "Name": "Props_FloorCrystalSpike_Hit_RTS",
-      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_RTS\\Props_FloorCrystalSpike_Hit_RTS",
-      "GUID": "{E6498CA0-C3F7-467C-9409-2BDEA70741F5}",
-      "MaxAttenuation": "3800",
-      "DurationType": "OneShot",
-      "DurationMin": "0.57722557",
-      "DurationMax": "0.61154914",
-      "MediaRefs": [
-       {
-        "Id": "15081757"
-       },
-       {
-        "Id": "141938875"
-       },
-       {
-        "Id": "418165151"
-       }
-      ]
-     },
-     {
       "Id": "2021162518",
       "Name": "Props_Lava",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_TPS\\Lava\\Props_Lava",
@@ -7134,7 +7187,7 @@
       "Name": "Props_Lava_RTS",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_RTS\\Lava\\Props_Lava_RTS",
       "GUID": "{6144C6B4-4A0D-46E5-AB26-EBD812E4DC21}",
-      "MaxAttenuation": "6840",
+      "MaxAttenuation": "5700",
       "DurationType": "Infinite",
       "MediaRefs": [
        {
@@ -7291,7 +7344,37 @@
       "Name": "Props_StoneDooor_Close",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_TPS\\StoneDoor\\Props_StoneDooor_Close",
       "GUID": "{CAF2368B-2B31-4894-B890-6034FC2E534C}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "2160",
+      "DurationType": "OneShot",
+      "DurationMin": "4.24407",
+      "DurationMax": "4.3244777",
+      "MediaRefs": [
+       {
+        "Id": "140100063"
+       },
+       {
+        "Id": "141516163"
+       },
+       {
+        "Id": "525096005"
+       },
+       {
+        "Id": "721567443"
+       },
+       {
+        "Id": "933149701"
+       },
+       {
+        "Id": "966061855"
+       }
+      ]
+     },
+     {
+      "Id": "681661981",
+      "Name": "Props_StoneDooor_Close_RTS",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_RTS\\StoneDoor\\Props_StoneDooor_Close_RTS",
+      "GUID": "{E24EAC7D-D49E-401C-A7F5-88C664E7851F}",
+      "MaxAttenuation": "4560",
       "DurationType": "OneShot",
       "DurationMin": "4.24407",
       "DurationMax": "4.3244777",
@@ -7321,7 +7404,40 @@
       "Name": "Props_StoneDooor_Open",
       "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_TPS\\StoneDoor\\Props_StoneDooor_Open",
       "GUID": "{A5598EC5-E8E1-4CE5-83AF-3F8909B45F09}",
-      "MaxAttenuation": "1200",
+      "MaxAttenuation": "2160",
+      "DurationType": "OneShot",
+      "DurationMin": "3.527469",
+      "DurationMax": "3.572227",
+      "MediaRefs": [
+       {
+        "Id": "140776273"
+       },
+       {
+        "Id": "141516163"
+       },
+       {
+        "Id": "230669099"
+       },
+       {
+        "Id": "356621308"
+       },
+       {
+        "Id": "387328789"
+       },
+       {
+        "Id": "756075964"
+       },
+       {
+        "Id": "933149701"
+       }
+      ]
+     },
+     {
+      "Id": "140452675",
+      "Name": "Props_StoneDooor_Open_RTS",
+      "ObjectPath": "\\Events\\Default Work Unit\\Props\\Props_RTS\\StoneDoor\\Props_StoneDooor_Open_RTS",
+      "GUID": "{16F5B11D-5D54-4C85-8173-353A54ABBB8F}",
+      "MaxAttenuation": "4560",
       "DurationType": "OneShot",
       "DurationMin": "3.527469",
       "DurationMax": "3.572227",
@@ -7641,7 +7757,7 @@
       "Name": "Voice_Ares_Hit",
       "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\Voice_Ares_Hit",
       "GUID": "{87F36914-441D-497C-A206-E42B977BF28F}",
-      "MaxAttenuation": "1980",
+      "MaxAttenuation": "1800",
       "DurationType": "OneShot",
       "DurationMin": "0.58821356",
       "DurationMax": "0.75236434",
@@ -8186,6 +8302,6 @@
     ]
    }
   ],
-  "FileHash": "{CA38E138-C808-0E7C-044D-50E431E9F866}"
+  "FileHash": "{018386A6-32F7-8796-3D58-93DB721EAB20}"
  }
 }

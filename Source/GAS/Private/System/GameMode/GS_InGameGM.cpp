@@ -15,6 +15,7 @@
 #include "GameFramework/HUD.h"
 #include "UI/Character/GS_HPBoardWidget.h"
 #include "Character/Player/Monster/GS_Monster.h"
+#include "Character/Component/GS_StatComp.h"
 #include "DungeonEditor/Component/PlaceInfoComponent.h"
 #include "DungeonEditor/Data/GS_DungeonEditorSaveGame.h"
 #include "Props/GS_RoomBase.h"
@@ -272,10 +273,14 @@ void AGS_InGameGM::DelayedRestartPlayer()
                     {
                         Pawn->SetActorLocation(FoundStart->GetActorLocation());
                         Pawn->SetActorRotation(FoundStart->GetActorRotation());
-                    }
-                    else
-                    {
-                        RestartPlayerAtPlayerStart(PC, FoundStart);
+
+                        if (AGS_Character* GSChar = Cast<AGS_Character>(Pawn))
+                        {
+                            if (UGS_StatComp* StatComp = GSChar->GetStatComp())
+                            {
+                                StatComp->ServerRPCHeal(1000.f);
+                            }
+                        }
                     }
                 }
             }

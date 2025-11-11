@@ -39,8 +39,7 @@ void UGS_AN_ShieldAttack::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 	{
 		if (AGS_WeaponShield* Shield = Cast<AGS_WeaponShield>(Chan->GetWeaponByIndex(i)))
 		{
-			// EnableAttackHit()가 내부적으로 안전 타이머를 관리함
-			Shield->EnableAttackHit();
+			Shield->ServerEnableAttackHit();
 			break;
 		}
 	}
