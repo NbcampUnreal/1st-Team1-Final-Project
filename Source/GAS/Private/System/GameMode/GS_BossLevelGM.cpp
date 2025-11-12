@@ -243,6 +243,8 @@ void AGS_BossLevelGM::EndGame(EGameResult Result)
 
     if (!NextLevelName.IsEmpty())
     {
+        ShowSeamlessLoadingCoverOnAllPlayers();
+        
         FTimerHandle TravelDelayHandle;
         TWeakObjectPtr<UWorld> WeakWorld = World;
 

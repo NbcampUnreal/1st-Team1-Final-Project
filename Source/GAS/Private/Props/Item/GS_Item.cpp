@@ -2,6 +2,9 @@
 
 
 #include "Props/Item/GS_Item.h"
+#if WITH_EDITOR
+#include "ContentBrowserItemData.h"
+#endif
 #include "Props/Item/GS_ItemData.h"
 
 

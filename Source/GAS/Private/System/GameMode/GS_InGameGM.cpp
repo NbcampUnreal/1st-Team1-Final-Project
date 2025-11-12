@@ -513,6 +513,8 @@ void AGS_InGameGM::EndGame(EGameResult Result)
 
     if (!NextLevelName.IsEmpty())
     {
+        ShowSeamlessLoadingCoverOnAllPlayers();
+        
         FTimerHandle TravelDelayHandle;
         TWeakObjectPtr<AGS_InGameGM> WeakThis = this;
         

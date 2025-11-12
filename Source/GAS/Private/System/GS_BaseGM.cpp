@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "AI/RTS/GS_RTSController.h"
 #include "Character/GS_TpsController.h"
+#include "Character/GS_BasePlayerController.h"
 #if WITH_GAMELIFT
 #include "GameLiftServerSDK.h"
 #endif
@@ -73,15 +74,42 @@ void AGS_BaseGM::StartMatchWhenAllReady() // Travel 시작해주는 함수 아�
         {
             if (APlayerController* PC = PlayerState->GetPlayerController())
             {
-                if (AGS_TpsController* SeekerPC = Cast<AGS_TpsController>(PC))
+                if (AGS_BasePlayerController* BPC = Cast<AGS_BasePlayerController>(PC))
                 {
-                    SeekerPC->Client_StartGame();
-                }
-                else if (AGS_RTSController* GuardianPC = Cast<AGS_RTSController>(PC))
-                {
-                    GuardianPC->Client_StartGame();
+                    BPC->Client_StartGame();
                 }
             }
+        }
+    }
+    HideSeamlessLoadingCoverOnAllPlayers();
+}
+
+void AGS_BaseGM::ShowSeamlessLoadingCoverOnAllPlayers() const
+{
+    UWorld* World = GetWorld();
+    if (!World) return;
+    UE_LOG(LogTemp, Warning, TEXT("화면 가리개 ON"));
+
+    for (FConstPlayerControllerIterator It = World->GetPlayerControllerIterator(); It; ++It)
+    {
+        if (AGS_BasePlayerController* GS_PC = Cast<AGS_BasePlayerController>(It->Get()))
+        {
+            GS_PC->Client_ShowSeamlessLoadingCover();
+        }
+    }
+}
+
+void AGS_BaseGM::HideSeamlessLoadingCoverOnAllPlayers() const
+{
+    UWorld* World = GetWorld();
+    if (!World) return;
+    UE_LOG(LogTemp, Warning, TEXT("화면 가리개 OFF"));
+
+    for (FConstPlayerControllerIterator It = World->GetPlayerControllerIterator(); It; ++It)
+    {
+        if (AGS_BasePlayerController* GS_PC = Cast<AGS_BasePlayerController>(It->Get()))
+        {
+            GS_PC->Client_HideSeamlessLoadingCover();
         }
     }
 }

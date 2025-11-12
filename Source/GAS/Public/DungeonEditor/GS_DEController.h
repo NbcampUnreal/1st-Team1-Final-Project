@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GS_BuildManager.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/GS_BasePlayerController.h"
 #include "GS_DEController.generated.h"
 
 struct FInputActionValue;
@@ -12,7 +12,7 @@ class UInputMappingContext;
 class UInputAction;
 
 UCLASS()
-class GAS_API AGS_DEController : public APlayerController
+class GAS_API AGS_DEController : public AGS_BasePlayerController
 {
 	GENERATED_BODY()
 
