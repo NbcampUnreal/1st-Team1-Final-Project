@@ -816,6 +816,7 @@ void AGS_Seeker::TransWeaponHandingState(EWeaponHandlingState RequiredCurState, 
 {
 	if (WeaponHandlingState == RequiredCurState)
 	{
+		GetSkillComp()->SetCurAllowedSkillsMask(0);
 		Multicast_SetMontageSlot(TargetMontageSlot);
 		Multicast_PlaySkillMontage(TargetAM);
 		SetWeaponHandlingState(NextState);
