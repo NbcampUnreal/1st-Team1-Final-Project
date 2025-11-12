@@ -321,7 +321,7 @@ void UGS_SkillBase::PlaySkillEndSound() const
 void UGS_SkillBase::BeginDestroy()
 {
 	Super::BeginDestroy();
-	if(bIsActive)
+	if(IsValid(GetWorld()) && bIsActive)
 	{
 		DeactiveSkill();
 		OnSkillAnimationEnd();
