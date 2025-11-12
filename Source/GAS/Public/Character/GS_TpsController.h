@@ -63,12 +63,6 @@ public:
 	void PageDown(const FInputActionValue& InputValue);
 
 	void InitControllerPerWorld();
-
-	UFUNCTION(Server, Reliable)
-	void Server_NotifyPlayerIsReady();
-
-	UFUNCTION(Client, Reliable)
-	void Client_StartGame();
 	
 	//[Spectate Other Player]
 	UFUNCTION(Server, Unreliable)

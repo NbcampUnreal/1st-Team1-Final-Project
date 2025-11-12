@@ -206,12 +206,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_RTSSkill(const TArray<AGS_Monster*>& Units);
 
-	UFUNCTION(Server, Reliable)
-	void Server_NotifyPlayerIsReady();
-
 	// Client
-	UFUNCTION(Client, Reliable)
-	void Client_StartGame();
 	// UFUNCTION(Client, Reliable)
 	// void Client_HideDungeonElements();
 
@@ -235,6 +230,8 @@ public:
 
 	//마우스 설정 함수
 	void ApplyRTSInputMode();
+
+	virtual void Client_StartGame_Implementation() override;
 
 protected:
 	virtual void BeginPlay() override;

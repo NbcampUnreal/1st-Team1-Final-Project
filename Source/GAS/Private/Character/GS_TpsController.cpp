@@ -237,20 +237,6 @@ void AGS_TpsController::InitControllerPerWorld()
 	}
 }
 
-void AGS_TpsController::Server_NotifyPlayerIsReady_Implementation()
-{
-	if (AGS_BaseGM* GM = GetWorld()->GetAuthGameMode<AGS_BaseGM>())
-	{
-		GM->NotifyPlayerIsReady(this);
-	}
-}
-
-void AGS_TpsController::Client_StartGame_Implementation()
-{
-	UE_LOG(LogTemp, Warning, TEXT("준비 완료. TODO: 화면 가리개 제거"));
-	//TODO: 로딩스크린 제거
-}
-
 void AGS_TpsController::ServerRPCSpectatePlayer_Implementation()
 {
 	if (GetWorld()->GetGameState()->PlayerArray.IsEmpty())
@@ -613,7 +599,6 @@ void AGS_TpsController::BeginPlayingState()
 	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s) --- BeginPlayingState CALLED ---"), *GetNameSafe(this));
 	if (IsLocalController())
 	{
-		Server_NotifyPlayerIsReady();
 		TestFunction();
 	}
 }

@@ -1,13 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/GS_BasePlayerController.h"
 #include "GS_ResultPC.generated.h"
 
 class UGS_GameResultUI;
 
 UCLASS()
-class GAS_API AGS_ResultPC : public APlayerController
+class GAS_API AGS_ResultPC : public AGS_BasePlayerController
 {
 	GENERATED_BODY()
 	

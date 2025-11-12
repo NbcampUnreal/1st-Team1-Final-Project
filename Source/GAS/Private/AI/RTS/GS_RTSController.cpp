@@ -87,8 +87,6 @@ void AGS_RTSController::BeginPlay()
 			}
 		}
 	}
-	
-	Server_NotifyPlayerIsReady();
 
 	//[Aether] 준비 완료 시 broadcast
 	if (IsValid(AetherComp))
@@ -378,16 +376,10 @@ void AGS_RTSController::OnRightMousePressed(const FInputActionValue& InputValue)
 	Server_RTSMove(Units, GroundHit.Location);
 }
 
-void AGS_RTSController::Server_NotifyPlayerIsReady_Implementation()
-{
-	if (AGS_BaseGM* GM = GetWorld()->GetAuthGameMode<AGS_BaseGM>())
-	{
-		GM->NotifyPlayerIsReady(this);
-	}
-}
-
 void AGS_RTSController::Client_StartGame_Implementation()
 {
+	Super::Client_StartGame_Implementation();
+	
 	for (AGS_Seeker* Seeker : TActorRange<AGS_Seeker>(GetWorld()))
 	{
 		if (IsValid(Seeker))

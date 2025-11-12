@@ -12,6 +12,7 @@
 #include "Animation/AnimInstance.h"
 #include "Animation/Character/GS_LobbyAnimInstance.h"
 #include "Character/Player/GS_LobbyDisplayActor.h"
+#include "System/GISubsys/GS_SeamlessTravelLoadingSubsystem.h"
 
 AGS_CustomLobbyGM::AGS_CustomLobbyGM()
 {
@@ -223,6 +224,7 @@ void AGS_CustomLobbyGM::CheckAllPlayersReady()
 
 void AGS_CustomLobbyGM::DoServerTravel()
 {
+    ShowSeamlessLoadingCoverOnAllPlayers();
     UWorld* World = GetWorld();
     if (World)
     {
