@@ -994,6 +994,30 @@ void UGS_SeekerAudioComponent::PlayDefenseSound()
         return;
     }
 
+    // 서버 권한 체크 및 멀티캐스트 호출
+    if (!ValidateServerRPCCall())
+    {
+        return;
+    }
+
+    LastMulticastTime = GetWorld()->GetTimeSeconds();
+    Multicast_PlayDefenseSound();
+}
+
+void UGS_SeekerAudioComponent::Multicast_PlayDefenseSound_Implementation()
+{
+    // 리슨 서버 중복 재생 방지 및 통합 체크
+    if (ShouldSkipListenServerRPC() || !PrepareMulticastSound(OwnerSeeker, false))
+    {
+        return;
+    }
+
+    // 찬만 방어 사운드 재생 가능
+    if (!OwnerSeeker || !OwnerSeeker->IsChan())
+    {
+        return;
+    }
+
     // TPS 모드와 RTS 모드에 따른 방어 사운드 선택
     UAkAudioEvent* DefenseSoundToPlay = nullptr;
     
