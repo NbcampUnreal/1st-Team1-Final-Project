@@ -29,10 +29,27 @@ public:
 	UFUNCTION()
 	void OnCurrentStaminaGaugeChanged(float InCurrentGauge);
 
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr <UProgressBar> DrakharStaminaGauge;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
+	TObjectPtr <UProgressBar> DrakharStaminaDelayGauge;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<AGS_Drakhar> Drakhar;
+
+	float TargetStaminaPercent = 1.f;
+	float CurrentStaminaPercent = 1.f;
+	float DelayedStaminaPercent = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category="StaminaBar")
+	float InterpSpeed = 0.5f;
+	
+	FTimerHandle DelayBeforeInterpTimerHandle;
+	FTimerHandle InterpTimerHandle;
+	
+private:
+	void StartDelayBarInterp();
+	void UpdateDelayedStamina();
 };

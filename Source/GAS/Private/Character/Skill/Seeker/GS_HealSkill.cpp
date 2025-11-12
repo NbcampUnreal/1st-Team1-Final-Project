@@ -59,16 +59,20 @@ void UGS_HealSkill::DeactiveSkill()
 	if (OwnerCharacter && OwnerCharacter->HasAuthority())
 	{
 		//if (UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>()) // SJE
-		UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>();
-		if (IsValid(AudioComp))
-		{
-			// Multicast RPC 직접 호출 (CanSendRPC 체크 우회)
-			// AudioEventType 1 = 스킬 종료 사운드
-			AudioComp->Multicast_RequestSkillAudio(CurrentSkillType, 1, OwnerCharacter->GetActorLocation());
-		}
+		// UGS_SeekerAudioComponent* AudioComp = OwnerCharacter->FindComponentByClass<UGS_SeekerAudioComponent>();
+		// if (IsValid(AudioComp))
+		// {
+		// 	// Multicast RPC 직접 호출 (CanSendRPC 체크 우회)
+		// 	// AudioEventType 1 = 스킬 종료 사운드
+		// 	AudioComp->Multicast_RequestSkillAudio(CurrentSkillType, 1, OwnerCharacter->GetActorLocation());
+		// }
 		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			Seeker->GetSkillComp()->ResetAllowedSkillsMask();
+			if (Seeker->GetSkillComp())
+			{
+				Seeker->GetSkillComp()->SetCurAllowedSkillsMask(0);
+				Seeker->GetSkillComp()->SetCurAllowedSkillsMask(static_cast<int16>(ESkillSlot::HealPotion));
+			}
 		}
 	}
 }

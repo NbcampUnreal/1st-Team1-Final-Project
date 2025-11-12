@@ -47,22 +47,37 @@ protected:
 	// 보스 HP UI 요소들
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<class UProgressBar> BossHPBar;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UProgressBar> HPDelayBarWidget;
 	
 	//Guardian HP
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UGS_HPWidget> HPWidgetClass;
 	UPROPERTY()
 	TObjectPtr<UGS_HPWidget> HPWidgetInstance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category="HPBar")
+	float InterpSpeed = 0.5f;
+	// float TargetHPPercent;
+	FTimerHandle DelayBeforeInterpTimerHandle;
+	FTimerHandle InterpTimerHandle;
+
+	//Gurdian DelayHP
+	float DelayedHPPercent = 1.f;
 	
 	UPROPERTY()
 	TObjectPtr<AGS_Guardian> Guardian;
 	UPROPERTY()
 	TObjectPtr<AGS_Character> WidgetOwner;
-
+	
 private:
 	// HP 업데이트를 위한 함수
 	UFUNCTION()
 	void OnBossHPChanged(class UGS_StatComp* InStatComp);
+
+	// HPbarDelayedHP
+	void UpdateDelayedHP();
+	// StartDelayBarInterp
+	void StartDelayBarInterp();
 	
 	// 피버모드 상태 변경 감지
 	UFUNCTION()

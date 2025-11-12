@@ -33,8 +33,8 @@ private:
 	void StrengthenDefense();
 
 	FTimerHandle DEFBuffHandle;
-	float StrengthenDefenseDuration = 20.0f;
-	float ExtraDefense = 200.0f;
+	float StrengthenDefenseDuration = 20.0f; // 방어력 증가 지속 시간, 장판 VFX 지속 시간과 일치시킬 것.
+	float ExtraDefense = 200.0f; // 방어력 증가 수치
 	void DeactiveDEFBuff();
 	FGS_StatRow BuffAmount;
 

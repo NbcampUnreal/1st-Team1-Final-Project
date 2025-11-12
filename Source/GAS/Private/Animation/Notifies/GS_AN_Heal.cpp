@@ -33,7 +33,7 @@ void UGS_AN_Heal::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* An
 		return;
 	}
 
-	if (Seeker->HasAuthority())
+	if (Seeker->HasAuthority() && !Seeker->IsDead())
 	{
 		float NewHealth = FMath::Min(StatComp->GetCurrentHealth() + HealSkill->GetHealAmount(), StatComp->GetMaxHealth());
 		StatComp->SetCurrentHealth(NewHealth, true);

@@ -52,7 +52,7 @@ void AGS_TpsController::Move(const FInputActionValue& InputValue)
 		{
 			if (!FMath::IsNearlyZero(InputAxisVector.Y))
 			{
-				float TurnSpeed = 0.4f;
+				float TurnSpeed = 0.7f;
 
 				if (IsLocalController())
 				{

@@ -37,5 +37,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition="bChangeSeekerGait"))
 	EGait Gait = EGait::Walk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanResetAllowedSkills = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition="bCanResetAllowedSkills"))
+	bool bResetAllowedSkills;
 };
 

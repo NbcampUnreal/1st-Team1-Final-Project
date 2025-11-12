@@ -317,7 +317,7 @@ void UGS_StatComp::HandleHealthDamage(float OldHealth, float NewHealth)
 	// 죽음 판정: Death 사운드는 OnDeath()에서 처리하므로 여기서는 스킵
 	if (NewHealth <= KINDA_SMALL_NUMBER && OldHealth > KINDA_SMALL_NUMBER)
 	{
-		return;  // 죽음 판정 - OnDeath()에서 PlayDeathSound() 호출
+		return;  // 죽음 판정 - OnDeath()에서 PlayDeathSoundLocal() 호출
 	}
 
 	// Hurt 사운드 재생 (클라이언트 로컬 재생 - RPC 없음!)
@@ -359,6 +359,14 @@ void UGS_StatComp::ServerRPCHeal_Implementation(float InHealAmount)
         return;
     }
 
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(GetOwner()))
+    {
+	    if (Seeker->IsDead())
+	    {
+		    return;
+	    }
+    }
+    
     float NewHealth = FMath::Min(CurrentHealth + InHealAmount, MaxHealth);
     SetCurrentHealth(NewHealth, true);
 }

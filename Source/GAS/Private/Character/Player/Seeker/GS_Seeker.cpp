@@ -362,6 +362,14 @@ void AGS_Seeker::StateReset()
 		}
 	}
 
+	if (AController* PlayerController = GetController())
+	{
+		if (AGS_TpsController* TPSController = Cast<AGS_TpsController>(PlayerController))
+		{
+			TPSController->SetIsAutoMoving(false);
+		}
+	}
+	
 	CanChangeSeekerGait = true;
 	CanAcceptComboInput = true;
 	SetMoveControlValue(true, true);
@@ -617,6 +625,15 @@ void AGS_Seeker::OnCombatTriggerEndOverlap(UPrimitiveComponent* OverlappedCompon
 			}
 		}
 	}
+}
+
+void AGS_Seeker::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// 상태 초기화
+	StateReset();
+	UE_LOG(LogTemp,Warning,TEXT("[상태 초기화] Seeker PossessedBy 호출 후 상태 초기화 완료."));
 }
 
 void AGS_Seeker::AddCombatMonster(AGS_Monster* Monster)
