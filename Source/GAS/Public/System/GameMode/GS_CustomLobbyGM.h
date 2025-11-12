@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
+#include "System/GS_BaseGM.h"
 #include "GS_CustomLobbyGM.generated.h"
 
 class AGS_SpawnSlot;
@@ -11,7 +11,7 @@ class UGS_PawnMappingDataAsset;
 class AGS_LobbyDisplayActor;
 
 UCLASS()
-class GAS_API AGS_CustomLobbyGM : public AGameMode
+class GAS_API AGS_CustomLobbyGM : public AGS_BaseGM
 {
 	GENERATED_BODY()
 	
