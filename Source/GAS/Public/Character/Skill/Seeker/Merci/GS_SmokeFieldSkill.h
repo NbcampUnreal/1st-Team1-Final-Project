@@ -25,6 +25,7 @@ protected:
 	virtual void ApplyFieldEffectToGuardian(AGS_Guardian* Target);
 	virtual void RemoveFieldEffectFromGuardian(AGS_Guardian* Target);
 
+
 private:
 	bool bShouldDescendToGround = false;
 	FVector TargetGroundLocation;
