@@ -68,7 +68,11 @@ void UGS_HealSkill::DeactiveSkill()
 		// }
 		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
 		{
-			Seeker->GetSkillComp()->ResetAllowedSkillsMask();
+			if (Seeker->GetSkillComp())
+			{
+				Seeker->GetSkillComp()->SetCurAllowedSkillsMask(0);
+				Seeker->GetSkillComp()->SetCurAllowedSkillsMask(static_cast<int16>(ESkillSlot::HealPotion));
+			}
 		}
 	}
 }

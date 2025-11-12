@@ -7,6 +7,11 @@
 					<PropertyList>
 						<Property Name="3DSpatialization" Type="int16" Value="2"/>
 						<Property Name="AttenuationDistanceScaling" Type="Real32" Value="0.9"/>
+						<Property Name="MakeUpGain" Type="Real64">
+							<ValueList>
+								<Value>-2</Value>
+							</ValueList>
+						</Property>
 						<Property Name="MaxSoundPerInstance" Type="int16">
 							<ValueList>
 								<Value>2</Value>
@@ -8155,7 +8160,7 @@
 									<PropertyList>
 										<Property Name="3DPosition" Type="int16" Value="1"/>
 										<Property Name="3DSpatialization" Type="int16" Value="2"/>
-										<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.5"/>
+										<Property Name="AttenuationDistanceScaling" Type="Real32" Value="1.6"/>
 										<Property Name="Highpass" Type="int16">
 											<ValueList>
 												<Value>16</Value>
@@ -8168,7 +8173,7 @@
 										</Property>
 										<Property Name="MakeUpGain" Type="Real64">
 											<ValueList>
-												<Value>-4</Value>
+												<Value>-3</Value>
 											</ValueList>
 										</Property>
 										<Property Name="Pitch" Type="int32">
@@ -8383,7 +8388,7 @@
 																			</Point>
 																			<Point>
 																				<XPos>100</XPos>
-																				<YPos>0.01</YPos>
+																				<YPos>1</YPos>
 																				<Flags>37</Flags>
 																			</Point>
 																		</PointList>
@@ -8606,20 +8611,6 @@
 										</Reference>
 									</ReferenceList>
 									<ChildrenList>
-										<AudioFileSource Name="Portal" ID="{3F39039B-2671-4717-8ADC-F3D159B4CB8F}">
-											<PropertyList>
-												<Property Name="FadeInDuration" Type="Real64" Value="0.429906879201296"/>
-												<Property Name="FadeOutDuration" Type="Real64" Value="3.07076342286641"/>
-												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
-												<Property Name="TrimBegin" Type="Real64" Value="0.663284899339144"/>
-												<Property Name="TrimEnd" Type="Real64" Value="6.05554510622475"/>
-											</PropertyList>
-											<Language>SFX</Language>
-											<AudioFile>Portal.wav</AudioFile>
-											<MediaIDList>
-												<MediaID ID="795056826"/>
-											</MediaIDList>
-										</AudioFileSource>
 										<AudioFileSource Name="ESM_Ancient_Game_Fire_Strike_Spell_3_Hit_Fantasy_Tonal_Accent_Hit_Stab" ID="{98AA38C3-01FC-456F-8FDF-B94986788D07}">
 											<PropertyList>
 												<Property Name="FadeInDuration" Type="Real64" Value="0.141935753706326"/>
@@ -8986,7 +8977,7 @@
 																			</Point>
 																			<Point>
 																				<XPos>100</XPos>
-																				<YPos>0.01</YPos>
+																				<YPos>1</YPos>
 																				<Flags>37</Flags>
 																			</Point>
 																		</PointList>
@@ -58374,33 +58365,38 @@
 								</Property>
 								<Property Name="Highpass" Type="int16">
 									<ValueList>
-										<Value>22</Value>
+										<Value>30</Value>
 									</ValueList>
 								</Property>
 								<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
 								<Property Name="Lowpass" Type="int16">
 									<ValueList>
-										<Value>15</Value>
+										<Value>30</Value>
 									</ValueList>
 								</Property>
 								<Property Name="MakeUpGain" Type="Real64">
 									<ValueList>
-										<Value>-7</Value>
+										<Value>-8</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
-											<Modifier Name="" ID="{8765CF80-EE93-4FAC-84CE-80A5864273E7}"/>
+											<Modifier Name="" ID="{8765CF80-EE93-4FAC-84CE-80A5864273E7}">
+												<PropertyList>
+													<Property Name="Enabled" Type="bool" Value="True"/>
+													<Property Name="Min" Type="Real64" Value="-1"/>
+												</PropertyList>
+											</Modifier>
 										</ModifierInfo>
 									</ModifierList>
 								</Property>
 								<Property Name="Pitch" Type="int32">
 									<ValueList>
-										<Value>50</Value>
+										<Value>-100</Value>
 									</ValueList>
 								</Property>
 								<Property Name="Volume" Type="Real64">
 									<ValueList>
-										<Value>-7</Value>
+										<Value>-8</Value>
 									</ValueList>
 									<ModifierList>
 										<ModifierInfo>
@@ -58773,6 +58769,11 @@
 				<SwitchContainer Name="BossFootSteps" ID="{1F3B3240-4756-44A0-AE04-1486BF591ADD}" ShortID="460748889">
 					<PropertyList>
 						<Property Name="3DSpatialization" Type="int16" Value="2"/>
+						<Property Name="MakeUpGain" Type="Real64">
+							<ValueList>
+								<Value>-2</Value>
+							</ValueList>
+						</Property>
 						<Property Name="MaxSoundPerInstance" Type="int16">
 							<ValueList>
 								<Value>2</Value>

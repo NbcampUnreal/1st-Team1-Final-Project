@@ -11,12 +11,13 @@
 AGS_SmokeFieldSkill::AGS_SmokeFieldSkill()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	Duration = 8.0f;
 }
 
 void AGS_SmokeFieldSkill::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	FHitResult Hit;
 	FVector Start = GetActorLocation();
 	FVector End = Start - FVector(0, 0, 10000); // 아래로 충분히 긴 거리

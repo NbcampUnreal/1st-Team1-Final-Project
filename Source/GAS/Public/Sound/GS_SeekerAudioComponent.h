@@ -392,6 +392,10 @@ public:
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_PlayAresComboAttackSoundWithExtra(int32 ComboIndex);
 
+    // 찬 전용 방어 사운드 멀티캐스트 RPC
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_PlayDefenseSound();
+
     // ===================
     // RTS 콤보 사운드 통합 함수들
     // ===================
