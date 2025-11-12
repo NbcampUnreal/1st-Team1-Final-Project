@@ -46,8 +46,11 @@ public:
 	UPROPERTY()
 	UGS_QuickManualUI* QuickManualUI;
 
+	UFUNCTION(Server, Reliable)
+	void Server_NotifyPlayerIsReady();
+
 	UFUNCTION(Client, Reliable)
-	virtual void Client_StartGame();
+	void Client_StartGame();
 
 	UFUNCTION(Client, Reliable)
 	void Client_ShowSeamlessLoadingCover();

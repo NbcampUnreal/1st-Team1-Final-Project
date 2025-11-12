@@ -124,8 +124,10 @@ void AGS_LavaTrap::OnSeekerExitLava(AGS_Seeker* Seeker)
 			}
 		}
 	);
-	
-	GetWorld()->GetTimerManager().SetTimer(GraceTimer, GraceDel, 0.3f, false);
-	
-	
+
+	UWorld* World = GetWorld();
+	if (IsValid(World))
+	{
+		World->GetTimerManager().SetTimer(GraceTimer, GraceDel, 0.3f, false);
+	}
 }

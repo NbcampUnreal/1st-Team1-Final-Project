@@ -82,18 +82,13 @@ void UGS_SeamlessTravelLoadingSubsystem::ShowLoadingCover(ULocalPlayer* LP)
             UE_LOG(LogTemp, Warning, TEXT("[SeamlessLoading] CreateWidget failed."));
             return;
         }
-
-        if (LP)
-        {
-            LoadingCoverWidget->SetOwningLocalPlayer(LP);
-            LoadingCoverWidget->AddToPlayerScreen(10000);   // LP 기준으로 추가
-        }
-        else
-        {
-            LoadingCoverWidget->AddToViewport(10000);       // LP가 없으면 전역 뷰포트에 추가
-        }
+    }
+    if (LoadingCoverWidget->IsInViewport())
+    {
+        LoadingCoverWidget->RemoveFromParent();
     }
 
+    LoadingCoverWidget->AddToViewport(10001);
     LoadingCoverWidget->SetVisibility(ESlateVisibility::Visible);
     bIsCoverVisible = true;
 #endif
