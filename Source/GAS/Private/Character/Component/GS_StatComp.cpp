@@ -359,6 +359,14 @@ void UGS_StatComp::ServerRPCHeal_Implementation(float InHealAmount)
         return;
     }
 
+	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(GetOwner()))
+    {
+	    if (Seeker->IsDead())
+	    {
+		    return;
+	    }
+    }
+    
     float NewHealth = FMath::Min(CurrentHealth + InHealAmount, MaxHealth);
     SetCurrentHealth(NewHealth, true);
 }
