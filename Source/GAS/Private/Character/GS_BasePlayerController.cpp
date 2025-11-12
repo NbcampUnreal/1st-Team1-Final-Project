@@ -7,12 +7,14 @@
 #include "UI/Screen/Option/GS_QuickManualUI.h"
 #include "System/GISubsys//GS_SeamlessTravelLoadingSubsystem.h"
 #include "Engine/GameInstance.h"
+#include "System/GS_BaseGM.h"
 
 void AGS_BasePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	
 	MenuAction = nullptr;
+	Server_NotifyPlayerIsReady();
 }
 
 void AGS_BasePlayerController::SetupInputComponent()
@@ -90,6 +92,14 @@ void AGS_BasePlayerController::OpenKeyManual(const FInputActionValue& InputValue
 			SetInputMode(InputMode);
 			bShowMouseCursor = true;
 		}
+	}
+}
+
+void AGS_BasePlayerController::Server_NotifyPlayerIsReady_Implementation()
+{
+	if (AGS_BaseGM* GM = GetWorld()->GetAuthGameMode<AGS_BaseGM>())
+	{
+		GM->NotifyPlayerIsReady(this);
 	}
 }
 
