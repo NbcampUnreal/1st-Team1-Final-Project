@@ -388,6 +388,8 @@ void AGS_RTSController::Server_NotifyPlayerIsReady_Implementation()
 
 void AGS_RTSController::Client_StartGame_Implementation()
 {
+	Super::Client_StartGame_Implementation();
+	
 	for (AGS_Seeker* Seeker : TActorRange<AGS_Seeker>(GetWorld()))
 	{
 		if (IsValid(Seeker))

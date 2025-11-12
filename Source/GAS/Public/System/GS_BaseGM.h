@@ -16,6 +16,9 @@ protected:
 	virtual void Logout(AController* Exiting) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	void ShowSeamlessLoadingCoverOnAllPlayers() const;
+	void HideSeamlessLoadingCoverOnAllPlayers() const;
+
 	UPROPERTY()
 	TSet<TObjectPtr<APlayerState>> ReadyPlayers;
 	

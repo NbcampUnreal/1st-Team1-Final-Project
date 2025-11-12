@@ -22,6 +22,7 @@ class GAS_API AGS_BasePlayerController : public APlayerController
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+	virtual void Client_StartGame_Implementation();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
@@ -44,4 +45,13 @@ public:
 
 	UPROPERTY()
 	UGS_QuickManualUI* QuickManualUI;
+
+	UFUNCTION(Client, Reliable)
+	virtual void Client_StartGame();
+
+	UFUNCTION(Client, Reliable)
+	void Client_ShowSeamlessLoadingCover();
+
+	UFUNCTION(Client, Reliable)
+	void Client_HideSeamlessLoadingCover();
 };
