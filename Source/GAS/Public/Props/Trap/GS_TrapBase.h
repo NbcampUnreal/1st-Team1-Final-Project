@@ -163,6 +163,11 @@ public:
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 		bool bFromSweep, const FHitResult& SweepResult);
 
+	//Damage Box가 충돌했을 때 (바닥, 천장 등)
+	UFUNCTION()
+	virtual void OnDamageBoxHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 	UFUNCTION(BlueprintNativeEvent)
 	void DamageBoxEffect(AActor* OtherActor);
 	void DamageBoxEffect_Implementation(AActor* OtherActor);

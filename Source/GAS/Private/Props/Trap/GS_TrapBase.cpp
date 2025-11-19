@@ -52,11 +52,13 @@ AGS_TrapBase::AGS_TrapBase()
 	DamageBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("DamageBox"));
 	DamageBoxComp->SetupAttachment(MeshParentSceneComp);
 	// DamageBox 콜리전 설정
-	DamageBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	DamageBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	//ECC_GameTraceChannel4 : Trap 전용 콜리전
 	DamageBoxComp->SetCollisionObjectType(ECC_GameTraceChannel4);
 	DamageBoxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 	DamageBoxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	// 바닥/벽/천장 충돌은 기본적으로 무시 (활성화 시에만 켜짐)
+	DamageBoxComp->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Ignore);
 	//"OptimizedCollision" 태그가 있는 경우, 플레이어가 근접한 경우에만 콜리전 활성화됨
     DamageBoxComp->ComponentTags.Add("OptimizedCollision");
 
@@ -113,6 +115,7 @@ void AGS_TrapBase::BeginPlay()
 	}*/
 
 	DamageBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrapBase::OnDamageBoxOverlap);
+	DamageBoxComp->OnComponentHit.AddDynamic(this, &AGS_TrapBase::OnDamageBoxHit);
 	ActivateSphereComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_TrapBase::OnActivSCompBeginOverlap);
 }
 
@@ -311,9 +314,8 @@ void AGS_TrapBase::Multicast_EnableOptimizedCollision_Implementation()
 		{
 			if (Prim->ComponentHasTag("OptimizedCollision"))
 			{
-				Prim->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+				Prim->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 			}
-			
 		}
 	}
 }
@@ -357,7 +359,6 @@ void AGS_TrapBase::Multicast_DisableOptimizedCollision_Implementation()
 			{
 				Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			}
-			
 		}
 	}
 }
@@ -446,6 +447,68 @@ void AGS_TrapBase::OnDamageBoxOverlap(UPrimitiveComponent* OverlappedComp, AActo
             PlayHitSound();
         }
     }
+}
+
+void AGS_TrapBase::OnDamageBoxHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	// 유효성 체크
+	if (!OtherActor || OtherActor == this)
+	{
+		return;
+	}
+
+	// 서버에서만 실행
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// 함정이 활성화되지 않았으면 Hit 사운드 무시 (초기 스폰 시 충돌 방지)
+	if (!bIsActivated)
+	{
+		return;
+	}
+
+	// 환경 충돌 사운드 재생 여부 체크
+	if (!bPlayHitSoundOnEnvironmentImpact)
+	{
+		return;
+	}
+
+	// 환경 오브젝트 체크 (바닥, 천장, 벽 등)
+	auto IsEnvironmentHit = [](AActor* HitActor, UPrimitiveComponent* HitComponent) -> bool
+	{
+		if (!IsValid(HitActor))
+		{
+			return false;
+		}
+
+		if (HitComponent && IsValid(HitComponent))
+		{
+			const ECollisionChannel Channel = HitComponent->GetCollisionObjectType();
+			return Channel == ECC_WorldStatic || Channel == ECC_WorldDynamic;
+		}
+
+		// RootComponent 체크
+		if (const UPrimitiveComponent* RootPrim = Cast<UPrimitiveComponent>(HitActor->GetRootComponent()))
+		{
+			if (IsValid(RootPrim))
+			{
+				const ECollisionChannel Channel = RootPrim->GetCollisionObjectType();
+				return Channel == ECC_WorldStatic || Channel == ECC_WorldDynamic;
+			}
+		}
+
+		return false;
+	};
+
+	// 환경에 부딪힌 경우 충돌 사운드 재생
+	if (IsEnvironmentHit(OtherActor, OtherComp))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[TrapBase] Environment Hit detected - Trap: %s, Hit: %s"), *GetName(), *GetNameSafe(OtherActor));
+		PlayHitSound();
+	}
 }
 
 void AGS_TrapBase::Server_HandleTrapDamage_Implementation(AActor* OtherActor)
