@@ -2,6 +2,7 @@
 
 
 #include "Character/GS_TpsController.h"
+#include "Character/Component/Seeker/GS_MarkerPlacementComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "Blueprint/UserWidget.h"
@@ -135,6 +136,17 @@ void AGS_TpsController::WalkToggle(const FInputActionValue& InputValue)
 			{
 				ControlledPawn->Server_SetSeekerGait(EGait::Walk);
 			}
+		}
+	}
+}
+
+void AGS_TpsController::PlaceMarker(const FInputActionValue& InputValue)
+{
+	if (AGS_Seeker* ControlledPawn = Cast<AGS_Seeker>(GetPawn()))
+	{
+		if (ControlledPawn->MarkerPlacementComponent)
+		{
+			ControlledPawn->MarkerPlacementComponent->TryPlaceMarker();
 		}
 	}
 }
@@ -582,6 +594,10 @@ void AGS_TpsController::SetupInputComponent()
 	if (WalkToggleAction)
 	{
 		EnhancedInputComponent->BindAction(WalkToggleAction, ETriggerEvent::Started, this, &AGS_TpsController::WalkToggle);
+	}
+	if (PlaceMarkerAction)
+	{
+		EnhancedInputComponent->BindAction(PlaceMarkerAction, ETriggerEvent::Started, this, &AGS_TpsController::PlaceMarker);
 	}
 }
 

@@ -22,10 +22,11 @@ class AGS_Monster;
 class UGS_SeekerAudioComponent;
 class UUserWidget;
 class UGS_LowHealthEffectComponent;
-class UGS_DetectionEffectComponent;
-class AGS_Item;
+	class UGS_DetectionEffectComponent;
+	class AGS_Item;
+	class UGS_MarkerPlacementComponent;
 
-USTRUCT(BlueprintType) // Current Action
+	USTRUCT(BlueprintType) // Current Action
 struct FSeekerState
 {
 	GENERATED_BODY()
@@ -243,6 +244,12 @@ public:
 	// =======================
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio")
 	UGS_SeekerAudioComponent* SeekerAudioComponent;
+
+	// =======================
+	// 마커 배치 컴포넌트
+	// =======================
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Marker")
+	UGS_MarkerPlacementComponent* MarkerPlacementComponent;
 
 	// ================
 	// 함정 VFX 컴포넌트

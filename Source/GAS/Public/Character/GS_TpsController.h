@@ -34,6 +34,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* WalkToggleAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	UInputAction* PlaceMarkerAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* RClickAction;
@@ -59,6 +61,7 @@ public:
 	void Move(const FInputActionValue& InputValue);
 	void Look(const FInputActionValue& InputValue);
 	void WalkToggle(const FInputActionValue& InputValue);
+	void PlaceMarker(const FInputActionValue& InputValue);
 	void PageUp(const FInputActionValue& InputValue);
 	void PageDown(const FInputActionValue& InputValue);
 

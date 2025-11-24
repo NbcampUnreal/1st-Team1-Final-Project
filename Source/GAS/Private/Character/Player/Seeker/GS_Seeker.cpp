@@ -34,6 +34,7 @@
 #include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/Component/GS_LowHealthEffectComponent.h"
 #include "Character/Component/GS_DetectionEffectComponent.h"
+#include "Character/Component/Seeker/GS_MarkerPlacementComponent.h"
 #include "Props/Item/SeekerItem/GS_HP_Potion.h"
 #include "Props/Item/GS_ItemData.h"
 
@@ -71,6 +72,11 @@ AGS_Seeker::AGS_Seeker()
 	// 시커 오디오 컴포넌트 생성 (RTS/TPS 지원)
 	// =======================
 	SeekerAudioComponent = CreateDefaultSubobject<UGS_SeekerAudioComponent>("SeekerAudioComponent");
+
+	// =======================
+	// 마커 배치 컴포넌트 생성
+	// =======================
+	MarkerPlacementComponent = CreateDefaultSubobject<UGS_MarkerPlacementComponent>("MarkerPlacementComponent");
 
 	// Fire Effect 생성 및 설정
 	FeetLavaVFX_L = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FeetLavaVFX_L"));
