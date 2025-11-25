@@ -34,6 +34,21 @@ void AGS_BossRoomBGMTrigger::BeginPlay()
 		TriggerBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_BossRoomBGMTrigger::OnTriggerBeginOverlap);
 		TriggerBoxComp->OnComponentEndOverlap.AddDynamic(this, &AGS_BossRoomBGMTrigger::OnTriggerEndOverlap);
 	}
+
+	// 서버에서만 RTS 컨트롤러 캐싱
+	if (HasAuthority())
+	{
+		CacheRTSController();
+	}
+}
+
+void AGS_BossRoomBGMTrigger::CacheRTSController()
+{
+	for (TActorIterator<AGS_RTSController> It(GetWorld()); It; ++It)
+	{
+		CachedRTSController = *It;
+		break;
+	}
 }
 
 void AGS_BossRoomBGMTrigger::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -80,12 +95,9 @@ void AGS_BossRoomBGMTrigger::OnTriggerBeginOverlap(UPrimitiveComponent* Overlapp
 		// 첫 번째 시커가 들어왔을 때만 RTS 플레이어에게 BGM 재생 요청
 		if (OverlappingActors.Num() == 1)
 		{
-			for (TActorIterator<AGS_RTSController> It(GetWorld()); It; ++It)
+			if (AGS_RTSController* RTSController = CachedRTSController.Get())
 			{
-				if (AGS_RTSController* RTSController = *It)
-				{
-					RTSController->Client_PlayBossBGM(BossMusicStartEvent, BossMusicStopEvent);
-				}
+				RTSController->Client_PlayBossBGM(BossMusicStartEvent, BossMusicStopEvent);
 			}
 		}
 	}
@@ -122,12 +134,9 @@ void AGS_BossRoomBGMTrigger::OnTriggerEndOverlap(UPrimitiveComponent* Overlapped
 		// 마지막 시커가 나갔을 때만 RTS 플레이어에게 BGM 종료 요청
 		if (OverlappingActors.Num() == 0)
 		{
-			for (TActorIterator<AGS_RTSController> It(GetWorld()); It; ++It)
+			if (AGS_RTSController* RTSController = CachedRTSController.Get())
 			{
-				if (AGS_RTSController* RTSController = *It)
-				{
-					RTSController->Client_StopBossBGM();
-				}
+				RTSController->Client_StopBossBGM();
 			}
 		}
 	}

@@ -6,6 +6,7 @@
 
 class UAkAudioEvent;
 class UBoxComponent;
+class AGS_RTSController;
 
 UCLASS()
 class GAS_API AGS_BossRoomBGMTrigger : public AActor
@@ -43,4 +44,10 @@ private:
 
 	void TriggerBossRoomBGMForLocalPlayer(AActor* TargetActor, UAkAudioEvent* StartEvent, UAkAudioEvent* StopEvent);
 	void EndBossRoomBGMForLocalPlayer(AActor* TargetActor);
+
+	// 캐싱된 RTS 컨트롤러 (서버에서만 유효)
+	UPROPERTY()
+	TWeakObjectPtr<AGS_RTSController> CachedRTSController;
+
+	void CacheRTSController();
 };
