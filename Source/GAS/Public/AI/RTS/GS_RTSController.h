@@ -210,6 +210,13 @@ public:
 	// UFUNCTION(Client, Reliable)
 	// void Client_HideDungeonElements();
 
+	// BGM Control
+	UFUNCTION(Client, Reliable)
+	void Client_PlayBossBGM(UAkAudioEvent* StartEvent, UAkAudioEvent* StopEvent);
+
+	UFUNCTION(Client, Reliable)
+	void Client_StopBossBGM();
+
 	UFUNCTION()
 	void HideDungeonElements();
 	

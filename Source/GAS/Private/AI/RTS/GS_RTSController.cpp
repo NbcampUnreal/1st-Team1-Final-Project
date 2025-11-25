@@ -1335,3 +1335,25 @@ void AGS_RTSController::Server_UpdateSeekerProximity_Implementation(AGS_Seeker* 
 	// 시커에 강도 설정
 	Seeker->SetDetectionIntensity(Intensity);
 }
+
+void AGS_RTSController::Client_PlayBossBGM_Implementation(UAkAudioEvent* StartEvent, UAkAudioEvent* StopEvent)
+{
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
+		{
+			AudioManager->StartBossSequenceLocal(this, StartEvent, StopEvent);
+		}
+	}
+}
+
+void AGS_RTSController::Client_StopBossBGM_Implementation()
+{
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UGS_AudioManager* AudioManager = GameInstance->GetSubsystem<UGS_AudioManager>())
+		{
+			AudioManager->EndBossSequenceLocal(this, 2.0f);
+		}
+	}
+}
