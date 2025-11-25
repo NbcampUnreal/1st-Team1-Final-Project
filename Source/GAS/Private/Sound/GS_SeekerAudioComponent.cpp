@@ -1761,37 +1761,6 @@ void UGS_SeekerAudioComponent::PlayRTSMerciArrowShotSound()
 // 공통 헬퍼 함수들 구현
 // ===================
 
-bool UGS_SeekerAudioComponent::ValidateServerRPCCall() const
-{
-    // 컴포넌트 유효성 검증
-    if (!IsValid(this))
-    {
-        return false;
-    }
-
-    // 월드 컨텍스트 유효성 검증
-    UWorld* World = GetWorld();
-    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-    {
-        return false;
-    }
-
-    // 오너 유효성 검증
-    AActor* Owner = GetOwner();
-    if (!IsValid(Owner) || !Owner->HasAuthority())
-    {
-        return false;
-    }
-
-    // RPC 호출 빈도 체크
-    if (!CanSendRPC())
-    {
-        return false;
-    }
-
-    return true;
-}
-
 void UGS_SeekerAudioComponent::PlayComboSounds(int32 ArrayIndex, const TArray<UAkAudioEvent*>& SwingSounds, 
                                                 const TArray<UAkAudioEvent*>& VoiceSounds, 
                                                 const TArray<UAkAudioEvent*>* ExtraSounds,

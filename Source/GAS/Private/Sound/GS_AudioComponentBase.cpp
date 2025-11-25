@@ -551,9 +551,40 @@ float UGS_AudioComponentBase::GetDistanceScalingForMode(bool bIsRTS) const
 bool UGS_AudioComponentBase::CanSendRPC() const
 {
     if (!GetWorld()) return false;
-    
+
     const float CurrentTime = GetWorld()->GetTimeSeconds();
     return (CurrentTime - LastMulticastTime) >= MinRPCInterval;
+}
+
+bool UGS_AudioComponentBase::ValidateServerRPCCall() const
+{
+    // 컴포넌트 유효성 검증
+    if (!IsValid(this))
+    {
+        return false;
+    }
+
+    // 월드 컨텍스트 유효성 검증
+    UWorld* World = GetWorld();
+    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
+    {
+        return false;
+    }
+
+    // 오너 유효성 검증
+    AActor* Owner = GetOwner();
+    if (!IsValid(Owner) || !Owner->HasAuthority())
+    {
+        return false;
+    }
+
+    // RPC 호출 빈도 체크
+    if (!CanSendRPC())
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void UGS_AudioComponentBase::CleanupFinishedSounds()
