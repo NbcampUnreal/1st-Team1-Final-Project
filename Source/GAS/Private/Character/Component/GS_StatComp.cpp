@@ -189,9 +189,30 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 		//dead
 		if (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("death"));
 			CurrentHealth = 0.f;
 
+			// 시커인 경우 빈사 상태로 전환 (즉시 사망 대신)
+			if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(GetOwner()))
+			{
+				// 이미 빈사 상태가 아닌 경우에만 빈사 상태로 전환
+				if (!Seeker->IsInDyingState())
+				{
+					Seeker->EnterDyingState();
+					// HP를 약간 남겨서 빈사 상태 유지 (0보다 약간 큰 값으로 설정)
+					CurrentHealth = 1.0f;
+					return;  // OnDeath 호출하지 않음
+				}
+				else
+				{
+					// 이미 빈사 상태인 시커가 추가 데미지를 받은 경우
+					// 빈사 상태에서는 추가 데미지를 무시 (이미 쓰러져 있음)
+					CurrentHealth = 1.0f;
+					return;
+				}
+			}
+
+			// 시커가 아닌 캐릭터는 기존대로 즉시 사망
+			UE_LOG(LogTemp, Warning, TEXT("death"));
 			AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
 			if (IsValid(OwnerCharacter))
 			{
@@ -201,8 +222,6 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 			{
 				AetherExtractor->DestroyAetherExtractor();
 			}
-
-
 		}
 		else if (CurrentHealth <= KINDA_SMALL_NUMBER)
 		{

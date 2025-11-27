@@ -15,6 +15,7 @@ enum class EGait : uint8
 	Walk,
 	Run,
 	Sprint,
+	Crawl,  // 빈사 상태 기어다니기
 };
 
 UENUM(BlueprintType)

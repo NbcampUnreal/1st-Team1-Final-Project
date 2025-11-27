@@ -13,6 +13,8 @@ class UGS_GameInstance;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+class AGS_Seeker;
+class UGS_ReviveIndicatorWidget;
 
 UCLASS()
 class GAS_API AGS_TpsController : public AGS_BasePlayerController
@@ -45,6 +47,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	UInputAction* PageDownAction;
+
+	// ==========================================
+	// 빈사 플레이어 구조 시스템
+	// ==========================================
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input|Revive")
+	UInputAction* ReviveAction;
 	
 	UPROPERTY()
 	TObjectPtr<UUserWidget> PlayerWidgetInstance;
@@ -122,8 +130,43 @@ public:
 	
 	void SetIsAutoMoving(bool InIsAutoMoving);
 
+	// ==========================================
+	// 빈사 플레이어 구조 시스템
+	// ==========================================
+	
+	/** E키 누름 - 구조 시작 시도 */
+	void TryStartRevive(const FInputActionValue& InputValue);
+	
+	/** E키 떼기 - 구조 취소 */
+	void StopRevive(const FInputActionValue& InputValue);
+	
+	/** 현재 구조 중인지 확인 */
+	UFUNCTION(BlueprintPure, Category = "Revive")
+	bool IsReviving() const { return bIsReviving; }
+
+	/** E키를 누르고 있는지 확인 */
+	UFUNCTION(BlueprintPure, Category = "Revive")
+	bool IsHoldingReviveKey() const { return bIsHoldingReviveKey; }
+
+	/** 현재 구조 대상 확인 */
+	UFUNCTION(BlueprintPure, Category = "Revive")
+	AGS_Seeker* GetReviveTarget() const { return ReviveTarget.Get(); }
+
+	/** 구조 시작 서버 RPC */
+	UFUNCTION(Server, Reliable, Category = "Revive")
+	void Server_RequestRevive(AGS_Seeker* Target);
+	
+	/** 구조 취소 서버 RPC */
+	UFUNCTION(Server, Reliable, Category = "Revive")
+	void Server_CancelRevive();
+
+	/** E키 홀드 상태 서버로 전달 */
+	UFUNCTION(Server, Unreliable, Category = "Revive")
+	void Server_SetHoldingReviveKey(bool bIsHolding);
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
 	virtual void PostSeamlessTravel() override;
 	virtual void BeginPlayingState() override;
@@ -139,12 +182,50 @@ protected:
 
 	void SnapCameraToCharacterYaw();
 
+	/** 근처 빈사 시커 감지 및 위젯 업데이트 (Tick에서 호출) */
+	void UpdateReviveIndicatorVisibility();
+
 private:
 	// Auto Moving (KCY)
 	FTimerHandle AutoMoveTickHandle;
 	
 	UPROPERTY(Replicated)
 	bool bIsAutoMoving = false;
+
+	// ==========================================
+	// 빈사 플레이어 구조 시스템 변수들
+	// ==========================================
+	
+	/** 현재 구조 중인지 여부 */
+	bool bIsReviving = false;
+
+	/** E키를 누르고 있는지 여부 (서버로 복제됨) */
+	UPROPERTY(Replicated)
+	bool bIsHoldingReviveKey = false;
+
+	/** 현재 구조 대상 */
+	TWeakObjectPtr<AGS_Seeker> ReviveTarget;
+
+	/** 근처에 빈사 시커가 있는지 여부 (위젯 표시 제어) */
+	bool bNearbyDyingSeekerDetected = false;
+
+	/** 마지막으로 감지된 빈사 시커 */
+	TWeakObjectPtr<AGS_Seeker> LastDetectedDyingSeeker;
+
+	/** 근처 빈사 상태 시커 찾기 */
+	AGS_Seeker* FindNearbyDyingSeeker() const;
+	
+	/** 구조 가능 거리 */
+	UPROPERTY(EditDefaultsOnly, Category = "Revive", meta = (ClampMin = "100.0", ClampMax = "500.0"))
+	float ReviveDistance = 200.0f;
+
+	/** 구조 표시 위젯 클래스 (BP에서 할당) */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Revive", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UGS_ReviveIndicatorWidget> ReviveIndicatorWidgetClass;
+
+	/** 현재 생성된 구조 표시 위젯 */
+	UPROPERTY()
+	UGS_ReviveIndicatorWidget* ReviveIndicatorWidget;
 
 	void AutoMoveTick();
 	void ApplyChargeCameraSettings(bool bCharging);
