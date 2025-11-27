@@ -1311,7 +1311,7 @@
 												</Action>
 											</ChildrenList>
 										</Event>
-										<Event Name="Voice_Chan_Sick" ID="{E1DDF8F5-475F-4246-811D-FF8BB1D8636C}">
+										<Event Name="Voice_Chan_Pain_Play" ID="{E1DDF8F5-475F-4246-811D-FF8BB1D8636C}">
 											<ChildrenList>
 												<Action Name="" ID="{20860976-0936-475C-AD36-523C3F674023}" ShortID="662819928">
 													<ReferenceList>
@@ -1494,6 +1494,20 @@
 												</Action>
 											</ChildrenList>
 										</Event>
+										<Event Name="Voice_Chan_Pain_Stop" ID="{8CFC1702-7483-4971-A4AA-19D22B2E15F7}">
+											<ChildrenList>
+												<Action Name="" ID="{101122AA-E212-4FFB-9DB8-1EE270DF2A93}" ShortID="392354572">
+													<PropertyList>
+														<Property Name="ActionType" Type="int16" Value="2"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_ChanSick" ID="{67DF5CEC-5E49-4F32-AB14-6164E018E873}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
 									</ChildrenList>
 								</Folder>
 								<Folder Name="Merci" ID="{B1592F05-6F45-48E2-9C57-F34C2178CBE0}" ShortID="365961453">
@@ -1520,7 +1534,7 @@
 												</Action>
 											</ChildrenList>
 										</Event>
-										<Event Name="Voice_Merci_Sick" ID="{7573A416-C37E-4A3F-8DDC-F3B908D97302}">
+										<Event Name="Voice_Merci_Pain_Play" ID="{7573A416-C37E-4A3F-8DDC-F3B908D97302}">
 											<ChildrenList>
 												<Action Name="" ID="{C7D3518C-22B4-49F7-BAB6-5A69E97759D0}" ShortID="1068866103">
 													<ReferenceList>
@@ -1701,6 +1715,20 @@
 												</Event>
 											</ChildrenList>
 										</Folder>
+										<Event Name="Voice_Merci_Pain_Stop" ID="{B2AE2A18-C8F1-404B-A4D8-D1AF69707B04}">
+											<ChildrenList>
+												<Action Name="" ID="{0344DCD7-D7F7-457E-8E77-5A63D3E11158}" ShortID="148801379">
+													<PropertyList>
+														<Property Name="ActionType" Type="int16" Value="2"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_MerciSick" ID="{18CE2D14-C053-4977-847A-B7147EB374A5}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
 									</ChildrenList>
 								</Folder>
 								<Folder Name="Ares" ID="{7942C9FC-4398-4E98-8724-CC169407C1E5}" ShortID="151693662">
@@ -1774,7 +1802,7 @@
 												</Action>
 											</ChildrenList>
 										</Event>
-										<Event Name="Voice_Ares_Sick" ID="{D7B07F59-9755-4CF3-86F4-D2EF768F8E2F}">
+										<Event Name="Voice_Ares_Pain_Play" ID="{D7B07F59-9755-4CF3-86F4-D2EF768F8E2F}">
 											<ChildrenList>
 												<Action Name="" ID="{7C5B0EEE-DAAA-4925-8F73-5A633EC087B0}" ShortID="310438977">
 													<ReferenceList>
@@ -2128,6 +2156,20 @@
 												</Event>
 											</ChildrenList>
 										</Folder>
+										<Event Name="Voice_Ares_Pain_Stop" ID="{5EB134F5-5887-41E3-B0AE-0AD68E13680A}">
+											<ChildrenList>
+												<Action Name="" ID="{85A2BA0E-68D1-4056-9000-9F7D057583F0}" ShortID="23168875">
+													<PropertyList>
+														<Property Name="ActionType" Type="int16" Value="2"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Target">
+															<ObjectRef Name="SFX_AresSick" ID="{99F8572F-5350-484C-AE39-9C55F92E7E0E}" WorkUnitID="{B98F67B3-ECA3-4E0B-9B7B-3AB8F39F683B}"/>
+														</Reference>
+													</ReferenceList>
+												</Action>
+											</ChildrenList>
+										</Event>
 									</ChildrenList>
 								</Folder>
 								<Event Name="EV_PotionSippin" ID="{0960A90B-D49D-42D6-BE63-0838B5CE21D1}">

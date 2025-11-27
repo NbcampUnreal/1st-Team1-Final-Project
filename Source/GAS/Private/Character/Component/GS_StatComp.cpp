@@ -316,18 +316,36 @@ void UGS_StatComp::HandleHealthDamage(float OldHealth, float NewHealth)
 	// 죽음 판정: Death 사운드는 OnDeath()에서 처리하므로 여기서는 스킵
 	if (NewHealth <= KINDA_SMALL_NUMBER && OldHealth > KINDA_SMALL_NUMBER)
 	{
+		// 시커인 경우 LowHP Pain 사운드 중지
+		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
+		{
+			if (Seeker->SeekerAudioComponent)
+			{
+				Seeker->SeekerAudioComponent->StopLowHPPainSound();
+			}
+		}
 		return;  // 죽음 판정 - OnDeath()에서 PlayDeathSoundLocal() 호출
 	}
 
-	// Hurt 사운드 재생 (클라이언트 로컬 재생 - RPC 없음!)
+	// === 시커 LowHP Pain 사운드 시작 체크 ===
 	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
 		if (Seeker->SeekerAudioComponent)
 		{
-			// 로컬 전용 Hurt 사운드 재생
+			const float HealthRatio = NewHealth / FMath::Max(1.0f, MaxHealth);
+			const float LowHPThreshold = Seeker->SeekerAudioComponent->LowHPThreshold;
+
+			// HP 30% 이하 진입 시 시작 (죽지 않은 경우만)
+			if (HealthRatio <= LowHPThreshold && NewHealth > KINDA_SMALL_NUMBER)
+			{
+				Seeker->SeekerAudioComponent->StartLowHPPainSound();
+			}
+
+			// Hurt 사운드 재생 (로컬 전용 - LowHP Pain과 동시 재생)
 			Seeker->SeekerAudioComponent->PlayHurtSoundLocal();
 		}
 	}
+	// Hurt 사운드 재생 (몬스터/가디언)
 	else if (AGS_Monster* Monster = Cast<AGS_Monster>(OwnerCharacter))
 	{
 		if (Monster->MonsterAudioComponent)

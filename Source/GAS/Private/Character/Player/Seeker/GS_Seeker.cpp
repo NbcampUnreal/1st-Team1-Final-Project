@@ -827,6 +827,12 @@ void AGS_Seeker::UpdateCombatMusicState()
 
 void AGS_Seeker::OnDeath()
 {
+	// LowHP Pain 사운드 즉시 중지
+	if (SeekerAudioComponent)
+	{
+		SeekerAudioComponent->StopLowHPPainSound();
+	}
+
 	// Death 사운드는 부모 클래스(GS_Character::OnDeath)에서 통합 처리됨
 	Super::OnDeath();
 
@@ -1085,6 +1091,8 @@ void AGS_Seeker::EnterDyingState()
 
 	// 스킬 사용 불가
 	SetCanUseSkill(false);
+
+	// LowHP Pain 사운드는 빈사 상태에서도 계속 재생 (더 긴박한 분위기)
 
 	// 델리게이트 브로드캐스트
 	OnDyingStateChanged.Broadcast(true, DyingTimeRemaining);

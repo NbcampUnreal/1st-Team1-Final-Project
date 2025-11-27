@@ -200,10 +200,34 @@ public:
     // ===================
     // Common Sounds (공통 사운드)
     // ===================
-    
+
     // 스킬 관련 사운드
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|Common Sounds", meta = (DisplayName = "Default Skill Event"))
     UAkAudioEvent* SkillEvent = nullptr;
+
+    // ===================
+    // LowHP Pain Sound System (LowHP 통증 사운드 시스템)
+    // ===================
+
+    /** LowHP 루핑 사운드 (HP 30% 이하 시 재생) */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|LowHP Pain", meta = (DisplayName = "🩸 LowHP Pain Loop Sound"))
+    UAkAudioEvent* LowHPPainLoopSound = nullptr;
+
+    /** LowHP 중지 이벤트 (페이드아웃 포함) */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|LowHP Pain", meta = (DisplayName = "🩸 LowHP Pain Stop Event"))
+    UAkAudioEvent* LowHPPainStopSound = nullptr;
+
+    /** LowHP 볼륨 제어 RTPC */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|LowHP Pain", meta = (DisplayName = "🩸 LowHP Pain Volume RTPC"))
+    UAkRtpc* LowHPPainVolumeRTPC = nullptr;
+
+    /** LowHP 필터 제어 RTPC */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|LowHP Pain", meta = (DisplayName = "🩸 LowHP Pain Filter RTPC"))
+    UAkRtpc* LowHPPainFilterRTPC = nullptr;
+
+    /** LowHP 임계값 (기본 30%) */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Seeker Audio|LowHP Pain", meta = (ClampMin = "0.0", ClampMax = "1.0", DisplayName = "🩸 LowHP Threshold (0.0~1.0)"))
+    float LowHPThreshold = 0.3f;
 
     // ===================
     // UI Sounds
@@ -284,6 +308,22 @@ public:
     /** 가디언 감지 해제 안도음 재생 (UI Sound) */
     UFUNCTION(BlueprintCallable, Category = "Seeker Audio|UI Sounds")
     void PlayDetectionClearedSound();
+
+    // ===================
+    // LowHP Pain Sound 제어 함수
+    // ===================
+
+    /** LowHP 통증 사운드 시작 (로컬 전용 - RPC 없음) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|LowHP Pain")
+    void StartLowHPPainSound();
+
+    /** LowHP 통증 사운드 중지 (로컬 전용 - RPC 없음) */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|LowHP Pain")
+    void StopLowHPPainSound();
+
+    /** LowHP 통증 사운드 볼륨/필터 업데이트 */
+    UFUNCTION(BlueprintCallable, Category = "Seeker Audio|LowHP Pain")
+    void UpdateLowHPPainVolume(float CurrentHP, float MaxHP);
 
     // ===================
     // 스킬 관련 함수
@@ -469,10 +509,40 @@ private:
     // 컴포넌트 셧다운 상태 플래그 (레벨 전환/액터 파괴 시 RPC 크래시 방지)
     bool bIsComponentShuttingDown;
 
+    // ===================
+    // LowHP Pain Sound 내부 상태 변수
+    // ===================
+
+    /** LowHP Pain 사운드 재생 중 여부 */
+    bool bIsLowHPPainPlaying = false;
+
+    /** LowHP Pain Playing ID (중지 시 사용) */
+    AkPlayingID LowHPPainPlayingID = AK_INVALID_PLAYING_ID;
+
+    /** LowHP 체크 타이머 핸들 (0.5초마다 HP 체크) */
+    FTimerHandle LowHPCheckTimerHandle;
+
+    /** 마지막 볼륨 비율 (중복 RTPC 호출 방지) */
+    float LastLowHPVolumeRatio = -1.0f;
+
+    /** 마지막 필터 비율 (중복 RTPC 호출 방지) */
+    float LastLowHPFilterRatio = -1.0f;
+
     /** 타이머 관리 */
     void StartSoundTimer();
     void StopSoundTimer();
     void UpdateSoundTimer();
+
+    // ===================
+    // LowHP Pain Sound 타이머 콜백 및 헬퍼
+    // ===================
+
+    /** LowHP 체크 타이머 콜백 (0.5초마다 호출) */
+    UFUNCTION()
+    void OnLowHPPainCheck();
+
+    /** LowHP Pain 사운드 강제 중지 (EndPlay() 호출용) */
+    void ForceStopLowHPPainSound();
 
     /** Wwise 이벤트 실제 재생 (Wwise가 거리 감쇠 자동 처리) */
     UAkAudioEvent* GetSoundEvent(ESeekerAudioState SoundType) const;
