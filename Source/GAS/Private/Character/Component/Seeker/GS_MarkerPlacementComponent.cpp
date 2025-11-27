@@ -4,6 +4,8 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "AkGameplayStatics.h"
+#include "AkAudioEvent.h"
 
 UGS_MarkerPlacementComponent::UGS_MarkerPlacementComponent()
 {
@@ -144,7 +146,40 @@ void UGS_MarkerPlacementComponent::Server_SpawnMarker_Implementation(FVector Loc
 		{
 			RemoveOldestMarker();
 		}
+
+		// 마커 배치 사운드 재생 (모든 클라이언트에 멀티캐스트)
+		Multicast_PlayMarkerPlacementSound(Location);
 	}
+}
+
+void UGS_MarkerPlacementComponent::Multicast_PlayMarkerPlacementSound_Implementation(FVector Location)
+{
+	// 마커 배치 사운드가 설정되어 있는지 확인
+	if (!MarkerPlacementSound)
+	{
+		return;
+	}
+
+	// Wwise 오디오 시스템이 초기화되어 있는지 확인
+	if (!FAkAudioDevice::Get() || !FAkAudioDevice::Get()->IsInitialized())
+	{
+		return;
+	}
+
+	// 월드 유효성 검사
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	// 마커 위치에서 사운드 재생 (3D 공간 사운드)
+	UAkGameplayStatics::PostEventAtLocation(
+		MarkerPlacementSound,
+		Location,
+		FRotator::ZeroRotator,
+		World
+	);
 }
 
 void UGS_MarkerPlacementComponent::RemoveOldestMarker()

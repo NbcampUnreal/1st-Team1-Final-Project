@@ -49,32 +49,12 @@ void UGS_DrakharAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason
 // === 사운드 재생 함수 구현 ===
 void UGS_DrakharAudioComponent::PlayComboAttackSound()
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
+	if (!ValidateServerRPCCall())
 	{
 		return;
 	}
 
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
+	LastMulticastTime = GetWorld()->GetTimeSeconds();
 	Multicast_PlayComboAttackSound();
 }
 
@@ -96,32 +76,12 @@ void UGS_DrakharAudioComponent::Multicast_PlayComboAttackSound_Implementation()
 
 void UGS_DrakharAudioComponent::PlayDashSkillSound()
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
+	if (!ValidateServerRPCCall())
 	{
 		return;
 	}
 
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
+	LastMulticastTime = GetWorld()->GetTimeSeconds();
 	Multicast_PlayDashSkillSound();
 }
 
@@ -143,32 +103,12 @@ void UGS_DrakharAudioComponent::Multicast_PlayDashSkillSound_Implementation()
 
 void UGS_DrakharAudioComponent::PlayEarthquakeSkillSound()
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
+	if (!ValidateServerRPCCall())
 	{
 		return;
 	}
 
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
+	LastMulticastTime = GetWorld()->GetTimeSeconds();
 	Multicast_PlayEarthquakeSkillSound();
 }
 
@@ -190,37 +130,12 @@ void UGS_DrakharAudioComponent::Multicast_PlayEarthquakeSkillSound_Implementatio
 
 void UGS_DrakharAudioComponent::PlayDraconicFurySkillSound()
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
+	if (bDraconicFurySoundPlayed || !ValidateServerRPCCall())
 	{
 		return;
 	}
 
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (bDraconicFurySoundPlayed)
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
+	LastMulticastTime = GetWorld()->GetTimeSeconds();
 	Multicast_PlayDraconicFurySkillSound();
 }
 
@@ -258,32 +173,12 @@ void UGS_DrakharAudioComponent::Multicast_PlayDraconicFurySkillSound_Implementat
 
 void UGS_DrakharAudioComponent::PlayDraconicProjectileSound(const FVector& Location)
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
+	if (!ValidateServerRPCCall())
 	{
 		return;
 	}
 
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
+	LastMulticastTime = GetWorld()->GetTimeSeconds();
 	Multicast_PlayDraconicProjectileSound(Location);
 }
 
@@ -305,32 +200,12 @@ void UGS_DrakharAudioComponent::Multicast_PlayDraconicProjectileSound_Implementa
 
 void UGS_DrakharAudioComponent::PlayAttackHitSound()
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
+	if (!ValidateServerRPCCall())
 	{
 		return;
 	}
 
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
+	LastMulticastTime = GetWorld()->GetTimeSeconds();
 	Multicast_PlayAttackHitSound();
 }
 
@@ -422,32 +297,12 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeStartSound_Implementation
 
 void UGS_DrakharAudioComponent::PlayFeverModeEndSound()
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
+	if (!ValidateServerRPCCall())
 	{
 		return;
 	}
 
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
+	LastMulticastTime = GetWorld()->GetTimeSeconds();
 	Multicast_PlayFeverModeEndSound();
 }
 
@@ -552,32 +407,12 @@ void UGS_DrakharAudioComponent::Multicast_PlayFeverModeStateSound_Implementation
 
 void UGS_DrakharAudioComponent::StopFeverModeStateSound()
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
+	if (!ValidateServerRPCCall())
 	{
 		return;
 	}
 
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
+	LastMulticastTime = GetWorld()->GetTimeSeconds();
 	Multicast_StopFeverModeStateSound();
 }
 
@@ -682,32 +517,12 @@ void UGS_DrakharAudioComponent::PlayDraconicProjectileImpactSoundLocal(const FVe
 
 void UGS_DrakharAudioComponent::PlayComboFinisherSound()
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
+	if (!ValidateServerRPCCall())
 	{
 		return;
 	}
 
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
+	LastMulticastTime = GetWorld()->GetTimeSeconds();
 	Multicast_PlayComboFinisherSound();
 }
 
@@ -754,32 +569,12 @@ void UGS_DrakharAudioComponent::ResetHurtSoundCooldown()
 
 void UGS_DrakharAudioComponent::PlayLandingSound()
 {
-	// 컴포넌트 유효성 검증
-	if (!IsValid(this))
+	if (!ValidateServerRPCCall())
 	{
 		return;
 	}
 
-	// 월드 컨텍스트 유효성 검증
-	UWorld* World = GetWorld();
-	if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-	{
-		return;
-	}
-
-	// 오너 유효성 검증
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner) || !Owner->HasAuthority())
-	{
-		return;
-	}
-
-	if (!CanSendRPC())
-	{
-		return;
-	}
-
-	LastMulticastTime = World->GetTimeSeconds();
+	LastMulticastTime = GetWorld()->GetTimeSeconds();
 	Multicast_PlayLandingSound();
 }
 

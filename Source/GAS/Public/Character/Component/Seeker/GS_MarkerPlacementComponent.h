@@ -36,6 +36,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
 	TSubclassOf<UGS_MarkerSelectionWidget> MarkerSelectionWidgetClass;
 
+	// 마커 배치 사운드
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Audio")
+	class UAkAudioEvent* MarkerPlacementSound;
+
 	// 마커 배치 시도 (Input Action에서 호출)
 	UFUNCTION(BlueprintCallable, Category = "Marker")
 	void TryPlaceMarker();
@@ -51,6 +55,10 @@ public:
 	// 서버에 마커 스폰 요청
 	UFUNCTION(Server, Reliable)
 	void Server_SpawnMarker(FVector Location, FRotator Rotation, EMarkerType Type);
+
+	// 마커 배치 사운드 재생 (Multicast)
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayMarkerPlacementSound(FVector Location);
 
 private:
 	// 현재 소유한 마커 목록

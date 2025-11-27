@@ -191,6 +191,10 @@ public:
 	
 	/** RPC 호출 빈도 체크 */
 	bool CanSendRPC() const;
+
+	/** Server RPC 호출 전 공통 검증 로직 (컴포넌트, 월드, 오너, RPC 빈도 체크) */
+	UFUNCTION(BlueprintPure, Category = "Audio|Network")
+	bool ValidateServerRPCCall() const;
 	
 	/** 실제 카메라 위치 가져오기 (캐싱 포함) */
 	UFUNCTION(BlueprintPure, Category = "Audio")

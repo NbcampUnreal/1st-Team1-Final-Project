@@ -108,6 +108,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trajectory")
 	float PreviousDesiredController;
 
+	// ========================================
+	// 빈사 상태
+	// ========================================
+
+	/** 빈사 상태인지 확인 (Animation Blueprint에서 사용) */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "State")
+	bool bIsDying = false;
+
 	UFUNCTION(BlueprintPure, Category = "Montage")
 	bool IsMontageSlotActive(ESeekerMontageSlot InputMontageSlot);
 };

@@ -98,4 +98,11 @@ private:
 
 	// Health 변화 처리 헬퍼 함수 (RepNotify + Server 공통)
 	void HandleHealthDamage(float OldHealth, float NewHealth);
+
+	/**
+	 * 시커의 빈사 상태 진입 처리
+	 *
+	 * @param Seeker 빈사 상태로 전환할 시커
+	 */
+	void HandleSeekerDyingTransition(AGS_Seeker* Seeker);
 };

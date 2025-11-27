@@ -72,6 +72,9 @@ void UGS_SeekerAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
     // 가장 먼저 셧다운 플래그 설정 (RPC 크래시 방지)
     bIsComponentShuttingDown = true;
 
+    // LowHP Pain 사운드 정리 (최우선)
+    ForceStopLowHPPainSound();
+
     StopSoundTimer();
 
     if (AttackSoundResetTimerHandle.IsValid())
@@ -82,6 +85,17 @@ void UGS_SeekerAudioComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
             World->GetTimerManager().ClearTimer(AttackSoundResetTimerHandle);
         }
         AttackSoundResetTimerHandle.Invalidate();
+    }
+
+    // LowHP 체크 타이머 정리
+    if (LowHPCheckTimerHandle.IsValid())
+    {
+        UWorld* World = GetWorld();
+        if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+        {
+            World->GetTimerManager().ClearTimer(LowHPCheckTimerHandle);
+        }
+        LowHPCheckTimerHandle.Invalidate();
     }
 
     StopAllActiveSounds();
@@ -1761,37 +1775,6 @@ void UGS_SeekerAudioComponent::PlayRTSMerciArrowShotSound()
 // 공통 헬퍼 함수들 구현
 // ===================
 
-bool UGS_SeekerAudioComponent::ValidateServerRPCCall() const
-{
-    // 컴포넌트 유효성 검증
-    if (!IsValid(this))
-    {
-        return false;
-    }
-
-    // 월드 컨텍스트 유효성 검증
-    UWorld* World = GetWorld();
-    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-    {
-        return false;
-    }
-
-    // 오너 유효성 검증
-    AActor* Owner = GetOwner();
-    if (!IsValid(Owner) || !Owner->HasAuthority())
-    {
-        return false;
-    }
-
-    // RPC 호출 빈도 체크
-    if (!CanSendRPC())
-    {
-        return false;
-    }
-
-    return true;
-}
-
 void UGS_SeekerAudioComponent::PlayComboSounds(int32 ArrayIndex, const TArray<UAkAudioEvent*>& SwingSounds, 
                                                 const TArray<UAkAudioEvent*>& VoiceSounds, 
                                                 const TArray<UAkAudioEvent*>* ExtraSounds,
@@ -1920,9 +1903,199 @@ void UGS_SeekerAudioComponent::PlayDetectionClearedSound()
     {
         return;
     }
-    
+
     if (OwnerSeeker && OwnerSeeker->IsLocallyControlled())
     {
         UGameplayStatics::PlaySound2D(GetWorld(), DetectionClearedSound);
     }
+}
+
+// =========================
+// LowHP Pain Sound 시스템
+// =========================
+
+void UGS_SeekerAudioComponent::StartLowHPPainSound()
+{
+    // 오디오 시스템 유효성 검증
+    if (!IsAudioSystemValid() || bIsLowHPPainPlaying || !LowHPPainLoopSound)
+    {
+        return;
+    }
+
+    // Owner 검증
+    if (!IsValid(OwnerSeeker))
+    {
+        return;
+    }
+
+    // Distance Scaling 설정
+    if (!PrepareMulticastSound(OwnerSeeker, true))
+    {
+        return;
+    }
+
+    // 루핑 사운드 재생
+    LowHPPainPlayingID = UAkGameplayStatics::PostEvent(
+        LowHPPainLoopSound,
+        OwnerSeeker,
+        0,
+        FOnAkPostEventCallback()
+    );
+
+    if (LowHPPainPlayingID != AK_INVALID_PLAYING_ID)
+    {
+        RegisterPlayingID(LowHPPainPlayingID);
+        bIsLowHPPainPlaying = true;
+
+        // 0.5초마다 HP 체크 타이머 시작
+        UWorld* World = GetWorld();
+        if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+        {
+            World->GetTimerManager().SetTimer(
+                LowHPCheckTimerHandle,
+                this,
+                &UGS_SeekerAudioComponent::OnLowHPPainCheck,
+                0.5f,
+                true  // 반복
+            );
+        }
+    }
+}
+
+void UGS_SeekerAudioComponent::StopLowHPPainSound()
+{
+    if (!bIsLowHPPainPlaying)
+    {
+        return;
+    }
+
+    // 정지 이벤트가 있으면 재생
+    if (LowHPPainStopSound && IsValid(OwnerSeeker))
+    {
+        UAkGameplayStatics::PostEvent(
+            LowHPPainStopSound,
+            OwnerSeeker,
+            0,
+            FOnAkPostEventCallback()
+        );
+    }
+    // 정지 이벤트가 없으면 Playing ID로 직접 중지
+    else if (LowHPPainPlayingID != AK_INVALID_PLAYING_ID)
+    {
+        if (FAkAudioDevice* AkDevice = FAkAudioDevice::Get())
+        {
+            AkDevice->StopPlayingID(LowHPPainPlayingID, 500);  // 500ms 페이드아웃
+        }
+    }
+
+    // 상태 초기화
+    bIsLowHPPainPlaying = false;
+    LowHPPainPlayingID = AK_INVALID_PLAYING_ID;
+    LastLowHPVolumeRatio = -1.0f;
+    LastLowHPFilterRatio = -1.0f;
+
+    // 타이머 중지
+    if (LowHPCheckTimerHandle.IsValid())
+    {
+        UWorld* World = GetWorld();
+        if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+        {
+            World->GetTimerManager().ClearTimer(LowHPCheckTimerHandle);
+        }
+        LowHPCheckTimerHandle.Invalidate();
+    }
+}
+
+void UGS_SeekerAudioComponent::UpdateLowHPPainVolume(float CurrentHP, float MaxHP)
+{
+    if (!bIsLowHPPainPlaying)
+    {
+        return;
+    }
+
+    // HP 비율 계산 (30% 이하에서 0~1로 정규화)
+    const float SafeMax = FMath::Max(1.0f, MaxHP);
+    const float LowHPThresholdValue = SafeMax * LowHPThreshold;
+    const float CurrentHPRatio = FMath::Clamp(CurrentHP / LowHPThresholdValue, 0.0f, 1.0f);
+
+    // 볼륨/필터 비율 (HP 낮을수록 증가: 30% HP = 0.0, 0% HP = 1.0)
+    const float VolumeRatio = 1.0f - CurrentHPRatio;
+    const float FilterRatio = 1.0f - CurrentHPRatio;
+
+    // 볼륨 RTPC 업데이트 (변화가 0.05 이상일 때만)
+    if (LowHPPainVolumeRTPC && FMath::Abs(VolumeRatio - LastLowHPVolumeRatio) >= 0.05f)
+    {
+        SetUnifiedRTPCValue(LowHPPainVolumeRTPC, VolumeRatio);
+        LastLowHPVolumeRatio = VolumeRatio;
+    }
+
+    // 필터 RTPC 업데이트 (변화가 0.05 이상일 때만)
+    if (LowHPPainFilterRTPC && FMath::Abs(FilterRatio - LastLowHPFilterRatio) >= 0.05f)
+    {
+        SetUnifiedRTPCValue(LowHPPainFilterRTPC, FilterRatio);
+        LastLowHPFilterRatio = FilterRatio;
+    }
+}
+
+void UGS_SeekerAudioComponent::OnLowHPPainCheck()
+{
+    // 컴포넌트/Owner 유효성 검증
+    if (!IsValid(this) || !IsValid(OwnerSeeker))
+    {
+        StopLowHPPainSound();
+        return;
+    }
+
+    // StatComp 가져오기
+    UGS_StatComp* StatComp = OwnerSeeker->GetStatComp();
+    if (!StatComp)
+    {
+        StopLowHPPainSound();
+        return;
+    }
+
+    const float CurrentHP = StatComp->GetCurrentHealth();
+    const float MaxHP = StatComp->GetMaxHealth();
+    const float HPRatio = CurrentHP / FMath::Max(1.0f, MaxHP);
+
+    // HP 30% 이상 회복 시 중지
+    if (HPRatio > LowHPThreshold)
+    {
+        StopLowHPPainSound();
+        return;
+    }
+
+    // HP 0 이하 시 중지 (사망 판정)
+    if (CurrentHP <= KINDA_SMALL_NUMBER)
+    {
+        StopLowHPPainSound();
+        return;
+    }
+
+    // RTPC 볼륨/필터 업데이트
+    UpdateLowHPPainVolume(CurrentHP, MaxHP);
+}
+
+void UGS_SeekerAudioComponent::ForceStopLowHPPainSound()
+{
+    // 재생 중이 아니면 스킵
+    if (!bIsLowHPPainPlaying)
+    {
+        return;
+    }
+
+    // Playing ID로 즉시 중지 (StopEvent 사용 안함)
+    if (LowHPPainPlayingID != AK_INVALID_PLAYING_ID)
+    {
+        if (FAkAudioDevice* AkDevice = FAkAudioDevice::Get())
+        {
+            AkDevice->StopPlayingID(LowHPPainPlayingID, 100);  // 100ms 빠른 페이드아웃
+        }
+    }
+
+    // 상태 초기화
+    bIsLowHPPainPlaying = false;
+    LowHPPainPlayingID = AK_INVALID_PLAYING_ID;
+    LastLowHPVolumeRatio = -1.0f;
+    LastLowHPFilterRatio = -1.0f;
 }

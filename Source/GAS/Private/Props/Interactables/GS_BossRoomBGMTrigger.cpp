@@ -5,6 +5,8 @@
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Components/BoxComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "AI/RTS/GS_RTSController.h"
+#include "EngineUtils.h"
 
 
 AGS_BossRoomBGMTrigger::AGS_BossRoomBGMTrigger()
@@ -31,6 +33,21 @@ void AGS_BossRoomBGMTrigger::BeginPlay()
 	{
 		TriggerBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AGS_BossRoomBGMTrigger::OnTriggerBeginOverlap);
 		TriggerBoxComp->OnComponentEndOverlap.AddDynamic(this, &AGS_BossRoomBGMTrigger::OnTriggerEndOverlap);
+	}
+
+	// 서버에서만 RTS 컨트롤러 캐싱
+	if (HasAuthority())
+	{
+		CacheRTSController();
+	}
+}
+
+void AGS_BossRoomBGMTrigger::CacheRTSController()
+{
+	for (TActorIterator<AGS_RTSController> It(GetWorld()); It; ++It)
+	{
+		CachedRTSController = *It;
+		break;
 	}
 }
 
@@ -62,14 +79,28 @@ void AGS_BossRoomBGMTrigger::OnTriggerBeginOverlap(UPrimitiveComponent* Overlapp
 		return;
 	}
 
-	// 로컬 플레이어가 조종하는 시커인지 확인
-	if (!Seeker->IsLocallyControlled())
+	// 1. 로컬 플레이어(시커) 로직
+	if (Seeker->IsLocallyControlled())
 	{
-		return;
+		// 로컬 플레이어만 BGM 변경
+		TriggerBossRoomBGMForLocalPlayer(Seeker, BossMusicStartEvent, BossMusicStopEvent);
 	}
-	
-	// 로컬 플레이어만 BGM 변경
-	TriggerBossRoomBGMForLocalPlayer(Seeker, BossMusicStartEvent, BossMusicStopEvent);
+
+	// 2. 가디언(RTS) 플레이어 로직 (서버 권한 필요)
+	if (HasAuthority())
+	{
+		TArray<AActor*> OverlappingActors;
+		TriggerBoxComp->GetOverlappingActors(OverlappingActors, AGS_Seeker::StaticClass());
+
+		// 첫 번째 시커가 들어왔을 때만 RTS 플레이어에게 BGM 재생 요청
+		if (OverlappingActors.Num() == 1)
+		{
+			if (AGS_RTSController* RTSController = CachedRTSController.Get())
+			{
+				RTSController->Client_PlayBossBGM(BossMusicStartEvent, BossMusicStopEvent);
+			}
+		}
+	}
 }
 
 void AGS_BossRoomBGMTrigger::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -87,14 +118,28 @@ void AGS_BossRoomBGMTrigger::OnTriggerEndOverlap(UPrimitiveComponent* Overlapped
 		return;
 	}
 
-	// 로컬 플레이어가 조종하는 시커인지 확인
-	if (!Seeker->IsLocallyControlled())
+	// 1. 로컬 플레이어(시커) 로직
+	if (Seeker->IsLocallyControlled())
 	{
-		return;
+		// 로컬 플레이어만 BGM 종료
+		EndBossRoomBGMForLocalPlayer(Seeker);
 	}
-	
-	// 로컬 플레이어만 BGM 종료
-	EndBossRoomBGMForLocalPlayer(Seeker);
+
+	// 2. 가디언(RTS) 플레이어 로직 (서버 권한 필요)
+	if (HasAuthority())
+	{
+		TArray<AActor*> OverlappingActors;
+		TriggerBoxComp->GetOverlappingActors(OverlappingActors, AGS_Seeker::StaticClass());
+
+		// 마지막 시커가 나갔을 때만 RTS 플레이어에게 BGM 종료 요청
+		if (OverlappingActors.Num() == 0)
+		{
+			if (AGS_RTSController* RTSController = CachedRTSController.Get())
+			{
+				RTSController->Client_StopBossBGM();
+			}
+		}
+	}
 }
 
 void AGS_BossRoomBGMTrigger::TriggerBossRoomBGMForLocalPlayer(AActor* TargetActor, UAkAudioEvent* StartEvent, UAkAudioEvent* StopEvent)

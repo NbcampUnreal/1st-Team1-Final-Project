@@ -164,53 +164,52 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 	{
 		return;
 	}
-	
-	float PreviousHealth = CurrentHealth;
-	
-	//update health
+
+	const float PreviousHealth = CurrentHealth;
 	CurrentHealth = InHealth;
-	
-	//healing
+
+	// 1. 힐링 처리
 	if (bIsHealing)
 	{
-		if (CurrentHealth >= MaxHealth)
+		CurrentHealth = FMath::Min(CurrentHealth, MaxHealth);
+		OnCurrentHPChanged.Broadcast(this);
+		return;
+	}
+
+	// 2. 피격 처리
+	MulticastRPCPlayTakeDamageMontage();
+	HandleHealthDamage(PreviousHealth, CurrentHealth);
+
+	// 3. 체력 0 도달 시 처리
+	if (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER)
+	{
+		// 시커인 경우 빈사 상태로 전환
+		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(GetOwner()))
 		{
-			CurrentHealth = MaxHealth;
+			HandleSeekerDyingTransition(Seeker);
+			OnCurrentHPChanged.Broadcast(this);
+			return;
+		}
+
+		// 시커가 아닌 캐릭터는 즉시 사망
+		CurrentHealth = 0.f;
+		UE_LOG(LogTemp, Warning, TEXT("death"));
+
+		if (AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner()))
+		{
+			OwnerCharacter->OnDeath();
+		}
+		else if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(GetOwner()))
+		{
+			AetherExtractor->DestroyAetherExtractor();
 		}
 	}
-	//damaged
-    else
-    {
-        MulticastRPCPlayTakeDamageMontage();
-
-        // 서버/리슨 서버에서도 로컬 Hurt 사운드 재생 (RPC 제거)
-        HandleHealthDamage(PreviousHealth, CurrentHealth);
-
-		//dead
-		if (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("death"));
-			CurrentHealth = 0.f;
-
-			AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-			if (IsValid(OwnerCharacter))
-			{
-				OwnerCharacter->OnDeath();
-			}
-			else if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(GetOwner()))
-			{
-				AetherExtractor->DestroyAetherExtractor();
-			}
-
-
-		}
-		else if (CurrentHealth <= KINDA_SMALL_NUMBER)
-		{
-			// 이미 죽은 상태에서 추가 데미지를 받은 경우 HP를 0으로 고정만 하고 OnDeath()는 호출하지 않음
-			CurrentHealth = 0.f;
-		}
+	else if (CurrentHealth <= KINDA_SMALL_NUMBER)
+	{
+		// 이미 죽은 상태에서 추가 데미지 무시
+		CurrentHealth = 0.f;
 	}
-	
+
 	OnCurrentHPChanged.Broadcast(this);
 }
 
@@ -317,18 +316,36 @@ void UGS_StatComp::HandleHealthDamage(float OldHealth, float NewHealth)
 	// 죽음 판정: Death 사운드는 OnDeath()에서 처리하므로 여기서는 스킵
 	if (NewHealth <= KINDA_SMALL_NUMBER && OldHealth > KINDA_SMALL_NUMBER)
 	{
+		// 시커인 경우 LowHP Pain 사운드 중지
+		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
+		{
+			if (Seeker->SeekerAudioComponent)
+			{
+				Seeker->SeekerAudioComponent->StopLowHPPainSound();
+			}
+		}
 		return;  // 죽음 판정 - OnDeath()에서 PlayDeathSoundLocal() 호출
 	}
 
-	// Hurt 사운드 재생 (클라이언트 로컬 재생 - RPC 없음!)
+	// === 시커 LowHP Pain 사운드 시작 체크 ===
 	if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
 	{
 		if (Seeker->SeekerAudioComponent)
 		{
-			// 로컬 전용 Hurt 사운드 재생
+			const float HealthRatio = NewHealth / FMath::Max(1.0f, MaxHealth);
+			const float LowHPThreshold = Seeker->SeekerAudioComponent->LowHPThreshold;
+
+			// HP 30% 이하 진입 시 시작 (죽지 않은 경우만)
+			if (HealthRatio <= LowHPThreshold && NewHealth > KINDA_SMALL_NUMBER)
+			{
+				Seeker->SeekerAudioComponent->StartLowHPPainSound();
+			}
+
+			// Hurt 사운드 재생 (로컬 전용 - LowHP Pain과 동시 재생)
 			Seeker->SeekerAudioComponent->PlayHurtSoundLocal();
 		}
 	}
+	// Hurt 사운드 재생 (몬스터/가디언)
 	else if (AGS_Monster* Monster = Cast<AGS_Monster>(OwnerCharacter))
 	{
 		if (Monster->MonsterAudioComponent)
@@ -385,4 +402,25 @@ ECharacterClass UGS_StatComp::MapCharacterTypeToCharacterClass(ECharacterType Ch
 		UE_LOG(LogTemp, Warning, TEXT("MapCharacterTypeToCharacterClass: 알 수 없는 캐릭터 타입, 기본값 Ares 반환"));
 		return ECharacterClass::Ares;
 	}
+}
+
+void UGS_StatComp::HandleSeekerDyingTransition(AGS_Seeker* Seeker)
+{
+	if (!IsValid(Seeker))
+	{
+		return;
+	}
+
+	// 이미 빈사 상태인 경우 추가 데미지 무시
+	if (Seeker->IsInDyingState())
+	{
+		CurrentHealth = 1.0f;  // 최소 HP 유지
+		UE_LOG(LogTemp, Warning, TEXT("[Seeker] 이미 빈사 상태 - 추가 데미지 무시"));
+		return;
+	}
+
+	// 빈사 상태 진입
+	Seeker->EnterDyingState();
+	CurrentHealth = 1.0f;  // 최소 HP 유지
+	UE_LOG(LogTemp, Log, TEXT("[Seeker] 빈사 상태 진입"));
 }

@@ -116,38 +116,14 @@ void UGS_MonsterAudioComponent::SetMonsterAudioState(EMonsterAudioState NewState
 
 void UGS_MonsterAudioComponent::PlaySound(EMonsterAudioState SoundType, bool bForcePlay)
 {
-    // 컴포넌트 유효성 검증
-    if (!IsValid(this))
-    {
-        return;
-    }
-
-    // 월드 컨텍스트 유효성 검증
-    UWorld* World = GetWorld();
-    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-    {
-        return;
-    }
-
-    // 오너 유효성 검증
-    AActor* Owner = GetOwner();
-    if (!IsValid(Owner) || !Owner->HasAuthority())
-    {
-        return;
-    }
-
-    if (!OwnerMonster)
-    {
-        return;
-    }
-
-    if (!CanSendRPC())
+    if (!OwnerMonster || !ValidateServerRPCCall())
     {
         return;
     }
 
     if (!bForcePlay)
     {
+        UWorld* World = GetWorld(); // ValidateServerRPCCall에서 이미 검증됨
         float Interval;
         if (SoundType == EMonsterAudioState::Idle) Interval = IdleSoundInterval;
         else if (SoundType == EMonsterAudioState::Combat) Interval = CombatSoundInterval;
@@ -161,7 +137,7 @@ void UGS_MonsterAudioComponent::PlaySound(EMonsterAudioState SoundType, bool bFo
         ServerLastBroadcastTime.Emplace(SoundType, CurrentTime);
     }
 
-    LastMulticastTime = World->GetTimeSeconds();
+    LastMulticastTime = GetWorld()->GetTimeSeconds();
     Multicast_TriggerSound(SoundType, bForcePlay);
 }
 
@@ -268,32 +244,12 @@ void UGS_MonsterAudioComponent::PlayDeathSoundLocal()
 
 void UGS_MonsterAudioComponent::PlaySwingSound()
 {
-    // 컴포넌트 유효성 검증
-    if (!IsValid(this))
+    if (!ValidateServerRPCCall())
     {
         return;
     }
 
-    // 월드 컨텍스트 유효성 검증
-    UWorld* World = GetWorld();
-    if (!World || !World->IsValidLowLevel() || World->bIsTearingDown)
-    {
-        return;
-    }
-
-    // 오너 유효성 검증
-    AActor* Owner = GetOwner();
-    if (!IsValid(Owner) || !Owner->HasAuthority())
-    {
-        return;
-    }
-
-    if (!CanSendRPC())
-    {
-        return;
-    }
-
-    const float CurrentTime = World->GetTimeSeconds();
+    const float CurrentTime = GetWorld()->GetTimeSeconds();
     if (CurrentTime - ServerLastSwingBroadcastTime < SwingResetTime)
     {
         return;

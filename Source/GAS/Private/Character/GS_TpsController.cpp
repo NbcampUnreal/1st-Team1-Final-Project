@@ -5,6 +5,7 @@
 #include "Character/Component/Seeker/GS_MarkerPlacementComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/Controller.h"
 #include "Character/GS_Character.h"
@@ -26,6 +27,8 @@
 #include "GameFramework/PlayerController.h"
 #include "Character/Component/GS_DebuffComp.h"
 #include "System/GameMode/GS_InGameGM.h"
+#include "EngineUtils.h"  // TActorIterator
+#include "UI/Character/GS_ReviveIndicatorWidget.h"
 
 
 AGS_TpsController::AGS_TpsController()
@@ -202,6 +205,7 @@ void AGS_TpsController::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 	DOREPLIFETIME(AGS_TpsController, ControlValues);
 	DOREPLIFETIME(AGS_TpsController, MoveInputValue);
 	DOREPLIFETIME(AGS_TpsController, bIsAutoMoving);
+	DOREPLIFETIME(AGS_TpsController, bIsHoldingReviveKey);
 }
 
 float AGS_TpsController::GetCurrentMouseSensitivity() const
@@ -219,22 +223,19 @@ void AGS_TpsController::InitControllerPerWorld()
 
 	if (!HasAuthority() && IsLocalController())
 	{
-		check(InputMappingContext);
-
-		// 가디언 테스트용 코드
-		//if (!InputMappingContext)
-		//{
-		//	UE_LOG(LogTemp, Error, TEXT("InputMappingContext is null! Please set it in Blueprint."));
-		//	return;
-		//}
+		if (!InputMappingContext)
+		{
+			UE_LOG(LogTemp, Error, TEXT("[Revive] InputMappingContext is NULL! Please assign IMC_Seeker in BP_PlayerController!"));
+			return;
+		}
 
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-		check(Subsystem);
-		//if (!Subsystem)
-		//{
-		//	UE_LOG(LogTemp, Error, TEXT("Failed to get EnhancedInputLocalPlayerSubsystem"));
-		//	return;
-		//}
+		if (!Subsystem)
+		{
+			UE_LOG(LogTemp, Error, TEXT("[Revive] Failed to get EnhancedInputLocalPlayerSubsystem"));
+			return;
+		}
+
 		Subsystem->AddMappingContext(InputMappingContext, 0);
 
 		// 오디오 리스너 설정 (약간의 지연을 두고 실행)
@@ -544,8 +545,18 @@ void AGS_TpsController::BeginPlay()
 	//{
 	//	UE_LOG(LogTemp, Warning, TEXT("AGS_TpsController (%s): InputMappingContext is not set! Please configure it in Blueprint."), *GetNameSafe(this));
 	//}
-	
+
 	InitControllerPerWorld();
+
+	// 구조 표시 위젯 생성 (로컬 컨트롤러만)
+	if (IsLocalController() && ReviveIndicatorWidgetClass)
+	{
+		ReviveIndicatorWidget = CreateWidget<UGS_ReviveIndicatorWidget>(this, ReviveIndicatorWidgetClass);
+		if (ReviveIndicatorWidget)
+		{
+			ReviveIndicatorWidget->AddToViewport();
+		}
+	}
 }
 
 UUserWidget* AGS_TpsController::GetPlayerWidget()
@@ -599,6 +610,17 @@ void AGS_TpsController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(PlaceMarkerAction, ETriggerEvent::Started, this, &AGS_TpsController::PlaceMarker);
 	}
+	
+	// 빈사 플레이어 구조 (E키)
+	if (ReviveAction)
+	{
+		EnhancedInputComponent->BindAction(ReviveAction, ETriggerEvent::Started, this, &AGS_TpsController::TryStartRevive);
+		EnhancedInputComponent->BindAction(ReviveAction, ETriggerEvent::Completed, this, &AGS_TpsController::StopRevive);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[Revive] ReviveAction is NULL! Please assign IA_ReviveAction in BP_PlayerController!"));
+	}
 }
 
 void AGS_TpsController::PostSeamlessTravel()
@@ -627,4 +649,286 @@ void AGS_TpsController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(AutoMoveTickHandle);
 	}
+}
+
+void AGS_TpsController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	// 빈사 시커 감지 및 위젯 업데이트
+	UpdateReviveIndicatorVisibility();
+
+	// 기존 구조 중 로직 (변경 없음)
+	if (bIsReviving && ReviveTarget.IsValid())
+	{
+		AGS_Seeker* Target = ReviveTarget.Get();
+
+		// 구조 완료: 대상이 더 이상 빈사 상태가 아님
+		if (!Target->IsInDyingState())
+		{
+			bIsReviving = false;
+			bIsHoldingReviveKey = false;
+			ReviveTarget = nullptr;
+
+			if (ReviveIndicatorWidget)
+			{
+				ReviveIndicatorWidget->StopRevive();
+			}
+			return;
+		}
+
+		// 거리 체크: 너무 멀리 떨어짐
+		if (AGS_Seeker* MySeeker = Cast<AGS_Seeker>(GetPawn()))
+		{
+			float Distance = FVector::Dist(MySeeker->GetActorLocation(), Target->GetActorLocation());
+			if (Distance > ReviveDistance)
+			{
+				StopRevive(FInputActionValue());
+				return;
+			}
+		}
+	}
+}
+
+// ==========================================
+// 빈사 플레이어 구조 시스템 구현
+// ==========================================
+
+void AGS_TpsController::UpdateReviveIndicatorVisibility()
+{
+	// 자신이 시커가 아니면 무시
+	AGS_Seeker* MySeeker = Cast<AGS_Seeker>(GetPawn());
+	if (!IsValid(MySeeker))
+	{
+		return;
+	}
+
+	// 구조 중이면 위젯 상태를 건드리지 않음 (StopRevive에서 처리)
+	if (bIsReviving)
+	{
+		return;
+	}
+
+	// 자신이 빈사 상태면 무시
+	if (MySeeker->IsInDyingState())
+	{
+		if (bNearbyDyingSeekerDetected && ReviveIndicatorWidget)
+		{
+			bNearbyDyingSeekerDetected = false;
+			ReviveIndicatorWidget->HideNearbyIndicator();
+		}
+		return;
+	}
+
+	// 근처 빈사 시커 찾기
+	AGS_Seeker* NearbyDyingSeeker = FindNearbyDyingSeeker();
+
+	if (IsValid(NearbyDyingSeeker))
+	{
+		// 빈사 시커 감지됨
+		if (!bNearbyDyingSeekerDetected || LastDetectedDyingSeeker != NearbyDyingSeeker)
+		{
+			// 새로운 빈사 시커 감지 또는 대상 변경
+			bNearbyDyingSeekerDetected = true;
+			LastDetectedDyingSeeker = NearbyDyingSeeker;
+
+			if (ReviveIndicatorWidget)
+			{
+				// E키 안내만 표시 (진행도 바는 표시 안 함)
+				ReviveIndicatorWidget->ShowNearbyIndicator(NearbyDyingSeeker);
+			}
+		}
+	}
+	else
+	{
+		// 빈사 시커 없음
+		if (bNearbyDyingSeekerDetected)
+		{
+			bNearbyDyingSeekerDetected = false;
+			LastDetectedDyingSeeker = nullptr;
+
+			if (ReviveIndicatorWidget)
+			{
+				ReviveIndicatorWidget->HideNearbyIndicator();
+			}
+		}
+	}
+}
+
+void AGS_TpsController::TryStartRevive(const FInputActionValue& InputValue)
+{
+	// 로컬 컨트롤러에서만 처리
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	// 현재 조종 중인 캐릭터가 시커인지 확인
+	AGS_Seeker* MySeeker = Cast<AGS_Seeker>(GetPawn());
+	if (!IsValid(MySeeker))
+	{
+		return;
+	}
+
+	// 자신이 빈사 상태면 구조할 수 없음
+	if (MySeeker->IsInDyingState())
+	{
+		return;
+	}
+
+	// 근처에 빈사 상태인 시커 찾기
+	AGS_Seeker* DyingSeeker = FindNearbyDyingSeeker();
+	if (!IsValid(DyingSeeker))
+	{
+		return;
+	}
+
+	// 구조 시작
+	bIsReviving = true;
+	bIsHoldingReviveKey = true;  // E키 누르기 시작 (로컬)
+	ReviveTarget = DyingSeeker;
+
+	// 위젯에 구조 시작 알림
+	if (ReviveIndicatorWidget)
+	{
+		ReviveIndicatorWidget->StartRevive(DyingSeeker);
+	}
+
+	// 서버에 홀드 상태 전달
+	Server_SetHoldingReviveKey(true);
+
+	// 서버에 구조 요청
+	Server_RequestRevive(DyingSeeker);
+}
+
+void AGS_TpsController::StopRevive(const FInputActionValue& InputValue)
+{
+	if (!bIsReviving)
+	{
+		return;
+	}
+
+	bIsReviving = false;
+	bIsHoldingReviveKey = false;  // E키 떼기 (로컬)
+
+	// 위젯은 즉시 숨기지 않음 - 진행도만 숨김 (진행도 감소를 보여주기 위해)
+	if (ReviveIndicatorWidget)
+	{
+		ReviveIndicatorWidget->StopReviveProgress();
+		// CurrentTarget은 유지 (NativeTick에서 진행도 감소를 계속 표시하기 위함)
+	}
+
+	// 서버에 구조 취소 요청 (ReviveTarget을 nullptr로 설정하기 전에 호출!)
+	if (ReviveTarget.IsValid())
+	{
+		Server_CancelRevive();
+	}
+
+	// 서버에 홀드 상태 전달
+	Server_SetHoldingReviveKey(false);
+
+	// ReviveTarget은 nullptr로 설정 (구조 중이 아니므로)
+	ReviveTarget = nullptr;
+}
+
+AGS_Seeker* AGS_TpsController::FindNearbyDyingSeeker() const
+{
+	AGS_Seeker* MySeeker = Cast<AGS_Seeker>(GetPawn());
+	if (!IsValid(MySeeker))
+	{
+		return nullptr;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return nullptr;
+	}
+
+	FVector MyLocation = MySeeker->GetActorLocation();
+	AGS_Seeker* ClosestDyingSeeker = nullptr;
+	float ClosestDistance = ReviveDistance;
+
+	// 모든 시커를 순회하여 빈사 상태인 시커 찾기
+	for (TActorIterator<AGS_Seeker> It(World); It; ++It)
+	{
+		AGS_Seeker* OtherSeeker = *It;
+
+		// 자기 자신 제외
+		if (OtherSeeker == MySeeker)
+		{
+			continue;
+		}
+
+		// 빈사 상태가 아니면 스킵
+		if (!OtherSeeker->IsInDyingState())
+		{
+			continue;
+		}
+
+		// 거리 확인
+		float Distance = FVector::Dist(MyLocation, OtherSeeker->GetActorLocation());
+
+		if (Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+			ClosestDyingSeeker = OtherSeeker;
+		}
+	}
+
+	return ClosestDyingSeeker;
+}
+
+void AGS_TpsController::Server_RequestRevive_Implementation(AGS_Seeker* Target)
+{
+	if (!IsValid(Target))
+	{
+		return;
+	}
+
+	AGS_Seeker* MySeeker = Cast<AGS_Seeker>(GetPawn());
+	if (!IsValid(MySeeker))
+	{
+		return;
+	}
+
+	// 거리 재확인 (서버 검증)
+	float Distance = FVector::Dist(MySeeker->GetActorLocation(), Target->GetActorLocation());
+	if (Distance > ReviveDistance)
+	{
+		return;
+	}
+
+	// 서버에서도 ReviveTarget 설정 (Server_CancelRevive에서 사용)
+	ReviveTarget = Target;
+
+	// 서버에서 홀드 상태 설정 (타이밍 문제 해결)
+	bIsHoldingReviveKey = true;
+
+	// 대상에게 구조 시작 알림
+	Target->Server_StartRevive(MySeeker);
+}
+
+void AGS_TpsController::Server_CancelRevive_Implementation()
+{
+	// 서버에서 홀드 상태 해제
+	bIsHoldingReviveKey = false;
+
+	if (ReviveTarget.IsValid())
+	{
+		ReviveTarget->Server_CancelRevive();
+	}
+
+	// 서버에서도 ReviveTarget 초기화
+	ReviveTarget = nullptr;
+}
+
+void AGS_TpsController::Server_SetHoldingReviveKey_Implementation(bool bIsHolding)
+{
+	bIsHoldingReviveKey = bIsHolding;
 }

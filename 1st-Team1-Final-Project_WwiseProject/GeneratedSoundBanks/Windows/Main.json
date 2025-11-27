@@ -10,7 +10,7 @@
     "Type": "User",
     "GUID": "{950C1703-E2FF-4ADA-A9A2-8A07DCE3D0E8}",
     "Language": "SFX",
-    "Hash": "{F4904D6C-E600-60B7-6D62-396C7FB0CD71}",
+    "Hash": "{7414B71B-36A6-B7BC-A4F9-628132B4F91A}",
     "ObjectPath": "\\SoundBanks\\Default Work Unit\\Main",
     "ShortName": "Main",
     "Path": "Main.bnk",
@@ -518,6 +518,14 @@
       "Location": "Memory",
       "ShortName": "SFX_BearTrap_In1.wav",
       "CachePath": "D5/{D570C748-BD7E-8229-9BEE-F42962377B5B}.wem"
+     },
+     {
+      "Id": "213964109",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Battle_Game_Foley_Stone_Pickup_4_Rock_Slide_Collect_Material_Crafting_Supplies_One_Shot.wav",
+      "CachePath": "2B/{2BE085F6-B664-ECA0-6A3F-5EAAF1F92522}.wem"
      },
      {
       "Id": "222843135",
@@ -1240,6 +1248,14 @@
       "CachePath": "C2/{C215DE86-6874-4006-861E-8C97D51A1A68}.wem"
      },
      {
+      "Id": "543649103",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Battle_Game_Foley_Stone_Pickup_3_Rock_Slide_Collect_Material_Crafting_Supplies_One_Shot.wav",
+      "CachePath": "C6/{C68C8966-5AEC-4EC2-CB3F-E4BEA7778600}.wem"
+     },
+     {
       "Id": "548015621",
       "Language": "SFX",
       "Streaming": "false",
@@ -1822,6 +1838,14 @@
       "Location": "Memory",
       "ShortName": "ESM_CH_fx_combat_punch_swing_hit_bone_shatter_06.wav",
       "CachePath": "30/{30374D3B-D8E4-543A-1A53-D7BA0C608A32}.wem"
+     },
+     {
+      "Id": "823687105",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Memory",
+      "ShortName": "ESM_Battle_Game_Foley_Stone_Pickup_1_Rock_Slide_Collect_Material_Crafting_Supplies_One_Shot.wav",
+      "CachePath": "89/{89D5D328-0A14-64B4-F88E-A6C2D6757BA6}.wem"
      },
      {
       "Id": "829138029",
@@ -4930,6 +4954,27 @@
       "DurationMax": "0"
      },
      {
+      "Id": "2950892237",
+      "Name": "EV_MarkingSound",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\EV_MarkingSound",
+      "GUID": "{D82B6D9A-B976-47E1-A844-73CF3BF174EF}",
+      "MaxAttenuation": "1800",
+      "DurationType": "OneShot",
+      "DurationMin": "0.42741802",
+      "DurationMax": "0.6968785",
+      "MediaRefs": [
+       {
+        "Id": "213964109"
+       },
+       {
+        "Id": "543649103"
+       },
+       {
+        "Id": "823687105"
+       }
+      ]
+     },
+     {
       "Id": "2908138241",
       "Name": "EV_MeleeAttack",
       "ObjectPath": "\\Events\\Default Work Unit\\Weapon\\Weapon_TPS\\EV_MeleeAttack",
@@ -7795,9 +7840,9 @@
       ]
      },
      {
-      "Id": "326001922",
-      "Name": "Voice_Ares_Sick",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\Voice_Ares_Sick",
+      "Id": "2569923529",
+      "Name": "Voice_Ares_Pain_Play",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\Voice_Ares_Pain_Play",
       "GUID": "{D7B07F59-9755-4CF3-86F4-D2EF768F8E2F}",
       "MaxAttenuation": "1800",
       "DurationType": "Infinite",
@@ -7816,6 +7861,16 @@
         }
        ]
       }
+     },
+     {
+      "Id": "4092443631",
+      "Name": "Voice_Ares_Pain_Stop",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Ares\\Voice_Ares_Pain_Stop",
+      "GUID": "{5EB134F5-5887-41E3-B0AE-0AD68E13680A}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "197987059",
@@ -7923,9 +7978,9 @@
       ]
      },
      {
-      "Id": "524349233",
-      "Name": "Voice_Chan_Sick",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\Voice_Chan_Sick",
+      "Id": "1017389108",
+      "Name": "Voice_Chan_Pain_Play",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\Voice_Chan_Pain_Play",
       "GUID": "{E1DDF8F5-475F-4246-811D-FF8BB1D8636C}",
       "MaxAttenuation": "1800",
       "DurationType": "Infinite",
@@ -7944,6 +7999,16 @@
         }
        ]
       }
+     },
+     {
+      "Id": "2721394702",
+      "Name": "Voice_Chan_Pain_Stop",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Chan\\Voice_Chan_Pain_Stop",
+      "GUID": "{8CFC1702-7483-4971-A4AA-19D22B2E15F7}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "2779071563",
@@ -8101,9 +8166,9 @@
       ]
      },
      {
-      "Id": "108894333",
-      "Name": "Voice_Merci_Sick",
-      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Merci\\Voice_Merci_Sick",
+      "Id": "2704088880",
+      "Name": "Voice_Merci_Pain_Play",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Merci\\Voice_Merci_Pain_Play",
       "GUID": "{7573A416-C37E-4A3F-8DDC-F3B908D97302}",
       "MaxAttenuation": "1800",
       "DurationType": "Infinite",
@@ -8122,6 +8187,16 @@
         }
        ]
       }
+     },
+     {
+      "Id": "1052570834",
+      "Name": "Voice_Merci_Pain_Stop",
+      "ObjectPath": "\\Events\\Default Work Unit\\Player\\Seeker\\Merci\\Voice_Merci_Pain_Stop",
+      "GUID": "{B2AE2A18-C8F1-404B-A4D8-D1AF69707B04}",
+      "MaxAttenuation": "0",
+      "DurationType": "OneShot",
+      "DurationMin": "0",
+      "DurationMax": "0"
      },
      {
       "Id": "447907810",
@@ -8302,6 +8377,6 @@
     ]
    }
   ],
-  "FileHash": "{4231B3D0-752E-22DD-CFA2-EFCBCB17D757}"
+  "FileHash": "{7F609E27-21ED-6E03-BFEE-A07497FA8363}"
  }
 }

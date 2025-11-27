@@ -45,6 +45,12 @@ void UGS_SeekerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		UpdateEssentialValue();
 		UpdateTrajectory();
 		UpdateState();
+
+		// 빈사 상태 업데이트 (Animation Blueprint에서 사용)
+		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(OwnerCharacter))
+		{
+			bIsDying = Seeker->IsInDyingState();
+		}
 	}
 }
 

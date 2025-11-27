@@ -64,6 +64,14 @@ AGS_Seeker::AGS_Seeker()
     DetectionEffectComp = CreateDefaultSubobject<UGS_DetectionEffectComponent>(TEXT("DetectionEffectComp"));
 
 	// =======================
+	// Post Process Component 생성 (빈사 상태 - Dying)
+	// =======================
+	DyingPostProcessComp = CreateDefaultSubobject<UPostProcessComponent>(TEXT("DyingPostProcessComp"));
+	DyingPostProcessComp->SetupAttachment(CameraComp);
+	DyingPostProcessComp->bEnabled = false;
+	DyingPostProcessComp->Priority = 12; // 다른 효과보다 높은 우선순위
+
+	// =======================
 	// VFX 컴포넌트 생성 (디버프, 힐링 등 모든 VFX)
 	// =======================
 	VFXComponent = CreateDefaultSubobject<UGS_VFXComponent>("VFXComponent");
@@ -112,6 +120,7 @@ AGS_Seeker::AGS_Seeker()
 	SeekerGait = EGait::Run;
 	LastSeekerGait = SeekerGait;
 	CanChangeSeekerGait = true;
+	GaitBeforeDying = EGait::Run;
 
 	// Item (hard coding) -> 나중에 SkillSet DataTable 과 같이 ItemSet DataTable 를 가지고 초기화 할 수 있도록 한다. // SJE
 	UGS_ItemData* ItemData = CreateDefaultSubobject<UGS_ItemData>(TEXT("HP_Potion_Data"));
@@ -171,19 +180,17 @@ void AGS_Seeker::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/*const ECollisionResponse CurrentResponse = GetCapsuleComponent()->GetCollisionResponseToChannel(ECC_Pawn);
-
-	FString ResponseString = UEnum::GetValueAsString(TEXT("Engine.ECollisionResponse"), CurrentResponse);
-	
-	if (GEngine)
+	// 빈사 상태 업데이트 (서버에서만)
+	if (HasAuthority() && bIsInDyingState)
 	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			3,
-			FColor::Red,
-			FString::Printf(TEXT("Response to ECC_Pawn : %s"), *ResponseString)
-			);
-	}*/ // SJE
+		UpdateDyingState(DeltaTime);
+	}
+
+	// 빈사 상태 화면 효과 업데이트 (로컬 플레이어만)
+	if (IsLocallyControlled() && bIsInDyingState)
+	{
+		UpdateDyingPostProcessEffect();
+	}
 }
 
 // Called to bind functionality to input
@@ -212,6 +219,13 @@ void AGS_Seeker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AGS_Seeker, SeekerState);
 	DOREPLIFETIME(AGS_Seeker, bIsDetectedByGuardian);
 	DOREPLIFETIME(AGS_Seeker, DetectionIntensity);
+	
+	// 빈사 상태 변수들
+	DOREPLIFETIME(AGS_Seeker, bIsInDyingState);
+	DOREPLIFETIME(AGS_Seeker, DyingTimeRemaining);
+	DOREPLIFETIME(AGS_Seeker, CurrentDyingCount);
+	DOREPLIFETIME(AGS_Seeker, bIsBeingRevived);
+	DOREPLIFETIME(AGS_Seeker, ReviveProgress);
 }
 
 AGS_Item* AGS_Seeker::GetItem(EItemType ItemType)
@@ -259,6 +273,15 @@ void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		{
 			PS->OnPlayerAliveStatusChangedDelegate.RemoveAll(this);
 		}
+	}
+
+	// 빈사/구조 관련 타이머 정리
+	SafeClearTimer(ReviveDecayTimerHandle);
+
+	// 포스트 프로세스 비활성화
+	if (DyingPostProcessComp)
+	{
+		DyingPostProcessComp->bEnabled = false;
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -322,6 +345,9 @@ void AGS_Seeker::Server_SetSeekerGait_Implementation(EGait Gait)
 	case EGait::Sprint :
 		SetCharacterSpeed(1.0f);
 		break;
+	case EGait::Crawl :
+		SetCharacterSpeed(0.15f);  // 빈사 상태 기어다니기 - 매우 느린 속도
+		break;
 	}
 }
 
@@ -344,6 +370,9 @@ void AGS_Seeker::SetSeekerGait(EGait Gait)
 		break;
 	case EGait::Sprint :
 		SetCharacterSpeed(1.0f);
+		break;
+	case EGait::Crawl :
+		SetCharacterSpeed(0.15f);  // 빈사 상태 기어다니기 - 매우 느린 속도
 		break;
 	}
 }
@@ -406,6 +435,15 @@ void AGS_Seeker::InitializeCameraManager()
         {
             DetectionEffectComp->InitializeForOwner(this, DetectionPostProcessComp, DetectionEffectMaterial);
         }
+
+		// Dying: PostProcess 초기화
+		if (DyingPostProcessComp && DyingEffectMaterial)
+		{
+			DyingDynamicMaterial = UMaterialInstanceDynamic::Create(DyingEffectMaterial, this);
+			DyingPostProcessComp->Settings.WeightedBlendables.Array.Empty();
+			DyingPostProcessComp->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, DyingDynamicMaterial));
+			DyingPostProcessComp->bEnabled = false;
+		}
 	}
 }
 
@@ -789,6 +827,12 @@ void AGS_Seeker::UpdateCombatMusicState()
 
 void AGS_Seeker::OnDeath()
 {
+	// LowHP Pain 사운드 즉시 중지
+	if (SeekerAudioComponent)
+	{
+		SeekerAudioComponent->StopLowHPPainSound();
+	}
+
 	// Death 사운드는 부모 클래스(GS_Character::OnDeath)에서 통합 처리됨
 	Super::OnDeath();
 
@@ -1003,4 +1047,449 @@ void AGS_Seeker::UpdateDetectionPostProcessEffect(float Intensity)
 void AGS_Seeker::UpdateDetectionHUD()
 {
 	// 실제 HUD 표시/숨김은 블루프린트에서 이벤트로 처리됨
+}
+
+// ==========================================
+// 빈사 (Dying) 상태 시스템 구현
+// ==========================================
+
+void AGS_Seeker::EnterDyingState()
+{
+	// 서버에서만 호출
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// 이미 빈사 상태면 무시
+	if (bIsInDyingState)
+	{
+		return;
+	}
+
+	// 빈사 횟수 증가
+	CurrentDyingCount++;
+
+	// 최대 빈사 횟수에 도달하면 즉시 사망
+	if (CurrentDyingCount >= MaxDyingCount)
+	{
+		OnDeath();
+		return;
+	}
+
+	// 빈사 상태 진입
+	bIsInDyingState = true;
+	DyingTimeRemaining = MaxDyingTime;
+	bIsBeingRevived = false;
+	ReviveProgress = 0.0f;
+
+	// 현재 Gait 저장
+	GaitBeforeDying = SeekerGait;
+
+	// 기어다니기 모드로 전환
+	Server_SetSeekerGait(EGait::Crawl);
+
+	// 스킬 사용 불가
+	SetCanUseSkill(false);
+
+	// LowHP Pain 사운드는 빈사 상태에서도 계속 재생 (더 긴박한 분위기)
+
+	// 델리게이트 브로드캐스트
+	OnDyingStateChanged.Broadcast(true, DyingTimeRemaining);
+}
+
+void AGS_Seeker::ExitDyingState(bool bWasRevived)
+{
+	// 서버에서만 호출
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	if (!bIsInDyingState)
+	{
+		return;
+	}
+
+	// 빈사 상태 해제
+	bIsInDyingState = false;
+	bIsBeingRevived = false;
+	ReviveProgress = 0.0f;
+	CurrentReviver = nullptr;
+
+	// 델리게이트 브로드캐스트
+	OnDyingStateChanged.Broadcast(false, 0.0f);
+
+	if (bWasRevived)
+	{
+		// 구조된 경우 - 이전 Gait로 복구
+		Server_SetSeekerGait(GaitBeforeDying);
+		
+		// 스킬 사용 가능
+		SetCanUseSkill(true);
+	}
+	// 사망한 경우는 OnDyingTimeExpired에서 처리
+}
+
+void AGS_Seeker::OnRevived()
+{
+	// 서버에서만 호출
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// 25% HP로 회복
+	if (UGS_StatComp* Stat = GetStatComp())
+	{
+		float MaxHP = Stat->GetMaxHealth();
+		float ReviveHP = MaxHP * ReviveHealthPercent;
+		Stat->SetCurrentHealth(ReviveHP, true);  // true = healing
+	}
+
+	// 빈사 상태 해제
+	ExitDyingState(true);
+}
+
+void AGS_Seeker::OnDyingTimeExpired()
+{
+	// 서버에서만 호출
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// 빈사 상태 해제 (구조 실패)
+	bIsInDyingState = false;
+	bIsBeingRevived = false;
+	ReviveProgress = 0.0f;
+	CurrentReviver = nullptr;
+
+	// 실제 사망 처리
+	OnDeath();
+}
+
+void AGS_Seeker::UpdateDyingState(float DeltaTime)
+{
+	// 서버에서만 호출
+	if (!HasAuthority() || !bIsInDyingState)
+	{
+		return;
+	}
+
+	// 구조 중이어도 죽음 타이머는 계속 감소
+	DyingTimeRemaining -= DeltaTime;
+
+	if (DyingTimeRemaining <= 0.0f)
+	{
+		DyingTimeRemaining = 0.0f;
+		OnDyingTimeExpired();
+		return;
+	}
+
+	// 구조 중이면 구조 진행도 업데이트
+	if (bIsBeingRevived)
+	{
+		UpdateReviveProgress(DeltaTime);
+	}
+}
+
+void AGS_Seeker::UpdateDyingPostProcessEffect()
+{
+	// 로컬 플레이어만
+	if (!IsLocallyControlled() || !DyingPostProcessComp)
+	{
+		return;
+	}
+
+	if (bIsInDyingState)
+	{
+		DyingPostProcessComp->bEnabled = true;
+
+		// 남은 시간에 따라 효과 강도 조절 (시간이 적을수록 강해짐)
+		float TimeRatio = DyingTimeRemaining / MaxDyingTime;
+		float EffectStrength = 1.0f - TimeRatio;  // 0~1 범위
+
+		if (DyingDynamicMaterial)
+		{
+			DyingDynamicMaterial->SetScalarParameterValue(TEXT("EffectStrength"), EffectStrength);
+		}
+	}
+	else
+	{
+		DyingPostProcessComp->bEnabled = false;
+	}
+}
+
+void AGS_Seeker::Server_StartRevive_Implementation(AGS_Seeker* Reviver)
+{
+	if (!bIsInDyingState || bIsBeingRevived)
+	{
+		return;
+	}
+
+	if (!IsValid(Reviver) || Reviver == this)
+	{
+		return;
+	}
+
+	// 구조 시작 시 진행도 감소 중지
+	StopReviveDecay();
+
+	bIsBeingRevived = true;
+	// ReviveProgress는 유지 (점진적 감소로 남아있던 값)
+	CurrentReviver = Reviver;
+}
+
+void AGS_Seeker::Server_CancelRevive_Implementation()
+{
+	if (!bIsBeingRevived)
+	{
+		return;
+	}
+
+	bIsBeingRevived = false;
+	CurrentReviver = nullptr;
+
+	// 즉시 초기화 대신 점진적 감소 시작
+	StartReviveDecay();
+}
+
+bool AGS_Seeker::CanContinueRevive() const
+{
+	// 구조자 유효성 확인
+	if (!CurrentReviver.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Revive] 구조자가 유효하지 않음"));
+		return false;
+	}
+
+	// 거리 확인
+	if (!IsReviverInRange(CurrentReviver.Get()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Revive] 구조자가 범위 밖으로 나감"));
+		return false;
+	}
+
+	// E키 홀드 상태 확인
+	if (!IsReviverValid(CurrentReviver.Get()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Revive] E키가 떼어짐"));
+		return false;
+	}
+
+	return true;
+}
+
+void AGS_Seeker::UpdateReviveProgress(float DeltaTime)
+{
+	if (!HasAuthority() || !bIsBeingRevived)
+	{
+		return;
+	}
+
+	// 1. 구조 진행 조건 검증
+	if (!CanContinueRevive())
+	{
+		Server_CancelRevive();
+		return;
+	}
+
+	// 2. 진행도 업데이트
+	ReviveProgress += DeltaTime / ReviveTime;
+	ReviveProgress = FMath::Clamp(ReviveProgress, 0.0f, 1.0f);
+
+	// 3. UI 업데이트
+	OnReviveProgressChanged.Broadcast(ReviveProgress);
+
+	// 4. 완료 확인
+	if (ReviveProgress >= 1.0f)
+	{
+		CompleteRevive();
+	}
+}
+
+void AGS_Seeker::CompleteRevive()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// 구조 완료 처리
+	OnRevived();
+}
+
+void AGS_Seeker::StartReviveDecay()
+{
+	// 서버에서만 호출
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	// 이미 감소 중이면 무시
+	if (bIsReviveDecaying)
+	{
+		return;
+	}
+
+	// 진행도가 0이면 시작 안 함
+	if (ReviveProgress <= 0.0f)
+	{
+		return;
+	}
+
+	bIsReviveDecaying = true;
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->GetTimerManager().SetTimer(
+			ReviveDecayTimerHandle,
+			this,
+			&AGS_Seeker::OnReviveDecayTick,
+			REVIVE_DECAY_TICK_INTERVAL,  // 100ms마다 업데이트
+			true   // 반복
+		);
+	}
+}
+
+void AGS_Seeker::StopReviveDecay()
+{
+	// 서버에서만 호출
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	if (!bIsReviveDecaying)
+	{
+		return;
+	}
+
+	bIsReviveDecaying = false;
+
+	UWorld* World = GetWorld();
+	if (World && ReviveDecayTimerHandle.IsValid())
+	{
+		World->GetTimerManager().ClearTimer(ReviveDecayTimerHandle);
+	}
+}
+
+void AGS_Seeker::OnReviveDecayTick()
+{
+	// 서버에서만 호출
+	if (!HasAuthority() || !bIsReviveDecaying)
+	{
+		return;
+	}
+
+	// 진행도 감소 (0.25 * 0.1초 = 초당 0.25 감소 = 4초에 0%)
+	ReviveProgress -= ReviveDecayRate * REVIVE_DECAY_TICK_INTERVAL;
+	ReviveProgress = FMath::Max(ReviveProgress, 0.0f);
+
+	// 진행도 변화 델리게이트 브로드캐스트 (UI 업데이트)
+	OnReviveProgressChanged.Broadcast(ReviveProgress);
+
+	// 0%에 도달하면 감소 중지
+	if (ReviveProgress <= 0.0f)
+	{
+		StopReviveDecay();
+	}
+}
+
+// ========================================
+// 헬퍼 함수 구현
+// ========================================
+
+void AGS_Seeker::SafeClearTimer(FTimerHandle& TimerHandle)
+{
+	if (TimerHandle.IsValid())
+	{
+		UWorld* World = GetWorld();
+		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+		{
+			World->GetTimerManager().ClearTimer(TimerHandle);
+		}
+		TimerHandle.Invalidate();
+	}
+}
+
+bool AGS_Seeker::IsReviverInRange(const AGS_Seeker* Reviver) const
+{
+	if (!IsValid(Reviver))
+	{
+		return false;
+	}
+
+	const float Distance = FVector::Dist(GetActorLocation(), Reviver->GetActorLocation());
+	return Distance <= MaxReviveDistance;
+}
+
+bool AGS_Seeker::IsReviverValid(const AGS_Seeker* Reviver) const
+{
+	if (!IsValid(Reviver))
+	{
+		return false;
+	}
+
+	const AGS_TpsController* ReviverController = Cast<AGS_TpsController>(Reviver->GetController());
+	if (!ReviverController)
+	{
+		return false;
+	}
+
+	return ReviverController->IsHoldingReviveKey();
+}
+
+void AGS_Seeker::OnRep_IsInDyingState()
+{
+	// 클라이언트에서 빈사 상태 변화 처리
+	if (IsLocallyControlled())
+	{
+		if (bIsInDyingState)
+		{
+			// 빈사 상태 화면 효과 활성화
+			if (DyingPostProcessComp)
+			{
+				DyingPostProcessComp->bEnabled = true;
+
+				// 동적 머티리얼 생성 (첫 진입 시)
+				if (!DyingDynamicMaterial && DyingEffectMaterial)
+				{
+					DyingDynamicMaterial = UMaterialInstanceDynamic::Create(DyingEffectMaterial, this);
+					DyingPostProcessComp->Settings.WeightedBlendables.Array.Empty();
+					DyingPostProcessComp->Settings.WeightedBlendables.Array.Add(FWeightedBlendable(1.0f, DyingDynamicMaterial));
+				}
+			}
+		}
+		else
+		{
+			// 빈사 상태 화면 효과 비활성화
+			if (DyingPostProcessComp)
+			{
+				DyingPostProcessComp->bEnabled = false;
+			}
+		}
+	}
+
+	// 델리게이트 브로드캐스트 (UI 업데이트용)
+	OnDyingStateChanged.Broadcast(bIsInDyingState, DyingTimeRemaining);
+}
+
+void AGS_Seeker::OnRep_IsBeingRevived()
+{
+	// 구조 상태 변화 시 UI 업데이트 등 처리
+	if (!bIsBeingRevived)
+	{
+		// 구조 취소됨 - 진행도 초기화 (삭제: 점진적 감소를 위해 0으로 초기화하지 않음)
+		// OnReviveProgressChanged.Broadcast(0.0f);
+	}
+}
+
+void AGS_Seeker::OnRep_ReviveProgress()
+{
+	// 구조 진행도 UI 업데이트
+	OnReviveProgressChanged.Broadcast(ReviveProgress);
 }
