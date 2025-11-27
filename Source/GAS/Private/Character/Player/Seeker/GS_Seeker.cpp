@@ -275,15 +275,13 @@ void AGS_Seeker::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		}
 	}
 
-	// 진행도 감소 타이머 정리
-	if (ReviveDecayTimerHandle.IsValid())
+	// 빈사/구조 관련 타이머 정리
+	SafeClearTimer(ReviveDecayTimerHandle);
+
+	// 포스트 프로세스 비활성화
+	if (DyingPostProcessComp)
 	{
-		UWorld* World = GetWorld();
-		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
-		{
-			World->GetTimerManager().ClearTimer(ReviveDecayTimerHandle);
-		}
-		ReviveDecayTimerHandle.Invalidate();
+		DyingPostProcessComp->bEnabled = false;
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -1249,52 +1247,54 @@ void AGS_Seeker::Server_CancelRevive_Implementation()
 	StartReviveDecay();
 }
 
-void AGS_Seeker::UpdateReviveProgress(float DeltaTime)
+bool AGS_Seeker::CanContinueRevive() const
 {
-	if (!bIsBeingRevived || !HasAuthority())
-	{
-		return;
-	}
-
-	// 구조하는 플레이어가 유효한지 확인
+	// 구조자 유효성 확인
 	if (!CurrentReviver.IsValid())
 	{
-		Server_CancelRevive();
+		UE_LOG(LogTemp, Warning, TEXT("[Revive] 구조자가 유효하지 않음"));
+		return false;
+	}
+
+	// 거리 확인
+	if (!IsReviverInRange(CurrentReviver.Get()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Revive] 구조자가 범위 밖으로 나감"));
+		return false;
+	}
+
+	// E키 홀드 상태 확인
+	if (!IsReviverValid(CurrentReviver.Get()))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[Revive] E키가 떼어짐"));
+		return false;
+	}
+
+	return true;
+}
+
+void AGS_Seeker::UpdateReviveProgress(float DeltaTime)
+{
+	if (!HasAuthority() || !bIsBeingRevived)
+	{
 		return;
 	}
 
-	// 거리 확인 (구조하는 플레이어가 너무 멀리 가면 취소)
-	float Distance = FVector::Dist(GetActorLocation(), CurrentReviver->GetActorLocation());
-	const float MaxReviveDistance = 200.0f;  // 2m 이내
-
-	if (Distance > MaxReviveDistance)
+	// 1. 구조 진행 조건 검증
+	if (!CanContinueRevive())
 	{
 		Server_CancelRevive();
 		return;
 	}
 
-	// E키를 누르고 있는지 확인 (홀드 방식)
-	AGS_TpsController* ReviverController = Cast<AGS_TpsController>(CurrentReviver->GetController());
-	if (!ReviverController)
-	{
-		return;
-	}
-
-	bool bIsHolding = ReviverController->IsHoldingReviveKey();
-	if (!bIsHolding)
-	{
-		// E키를 떼면 진행도가 올라가지 않음 (유지만 됨)
-		return;
-	}
-
-	// 구조 진행도 업데이트 (E키를 누르고 있을 때만)
+	// 2. 진행도 업데이트
 	ReviveProgress += DeltaTime / ReviveTime;
 	ReviveProgress = FMath::Clamp(ReviveProgress, 0.0f, 1.0f);
 
-	// 진행도 브로드캐스트
+	// 3. UI 업데이트
 	OnReviveProgressChanged.Broadcast(ReviveProgress);
 
-	// 구조 완료
+	// 4. 완료 확인
 	if (ReviveProgress >= 1.0f)
 	{
 		CompleteRevive();
@@ -1341,7 +1341,7 @@ void AGS_Seeker::StartReviveDecay()
 			ReviveDecayTimerHandle,
 			this,
 			&AGS_Seeker::OnReviveDecayTick,
-			0.1f,  // 100ms마다 업데이트 (부드러운 감소)
+			REVIVE_DECAY_TICK_INTERVAL,  // 100ms마다 업데이트
 			true   // 반복
 		);
 	}
@@ -1378,7 +1378,7 @@ void AGS_Seeker::OnReviveDecayTick()
 	}
 
 	// 진행도 감소 (0.25 * 0.1초 = 초당 0.25 감소 = 4초에 0%)
-	ReviveProgress -= ReviveDecayRate * 0.1f;
+	ReviveProgress -= ReviveDecayRate * REVIVE_DECAY_TICK_INTERVAL;
 	ReviveProgress = FMath::Max(ReviveProgress, 0.0f);
 
 	// 진행도 변화 델리게이트 브로드캐스트 (UI 업데이트)
@@ -1389,6 +1389,50 @@ void AGS_Seeker::OnReviveDecayTick()
 	{
 		StopReviveDecay();
 	}
+}
+
+// ========================================
+// 헬퍼 함수 구현
+// ========================================
+
+void AGS_Seeker::SafeClearTimer(FTimerHandle& TimerHandle)
+{
+	if (TimerHandle.IsValid())
+	{
+		UWorld* World = GetWorld();
+		if (World && World->IsValidLowLevel() && !World->bIsTearingDown)
+		{
+			World->GetTimerManager().ClearTimer(TimerHandle);
+		}
+		TimerHandle.Invalidate();
+	}
+}
+
+bool AGS_Seeker::IsReviverInRange(const AGS_Seeker* Reviver) const
+{
+	if (!IsValid(Reviver))
+	{
+		return false;
+	}
+
+	const float Distance = FVector::Dist(GetActorLocation(), Reviver->GetActorLocation());
+	return Distance <= MaxReviveDistance;
+}
+
+bool AGS_Seeker::IsReviverValid(const AGS_Seeker* Reviver) const
+{
+	if (!IsValid(Reviver))
+	{
+		return false;
+	}
+
+	const AGS_TpsController* ReviverController = Cast<AGS_TpsController>(Reviver->GetController());
+	if (!ReviverController)
+	{
+		return false;
+	}
+
+	return ReviverController->IsHoldingReviveKey();
 }
 
 void AGS_Seeker::OnRep_IsInDyingState()

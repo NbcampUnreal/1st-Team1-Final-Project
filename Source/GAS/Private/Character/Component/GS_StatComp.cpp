@@ -164,72 +164,52 @@ void UGS_StatComp::SetCurrentHealth(float InHealth, bool bIsHealing)
 	{
 		return;
 	}
-	
-	float PreviousHealth = CurrentHealth;
-	
-	//update health
+
+	const float PreviousHealth = CurrentHealth;
 	CurrentHealth = InHealth;
-	
-	//healing
+
+	// 1. 힐링 처리
 	if (bIsHealing)
 	{
-		if (CurrentHealth >= MaxHealth)
+		CurrentHealth = FMath::Min(CurrentHealth, MaxHealth);
+		OnCurrentHPChanged.Broadcast(this);
+		return;
+	}
+
+	// 2. 피격 처리
+	MulticastRPCPlayTakeDamageMontage();
+	HandleHealthDamage(PreviousHealth, CurrentHealth);
+
+	// 3. 체력 0 도달 시 처리
+	if (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER)
+	{
+		// 시커인 경우 빈사 상태로 전환
+		if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(GetOwner()))
 		{
-			CurrentHealth = MaxHealth;
+			HandleSeekerDyingTransition(Seeker);
+			OnCurrentHPChanged.Broadcast(this);
+			return;
+		}
+
+		// 시커가 아닌 캐릭터는 즉시 사망
+		CurrentHealth = 0.f;
+		UE_LOG(LogTemp, Warning, TEXT("death"));
+
+		if (AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner()))
+		{
+			OwnerCharacter->OnDeath();
+		}
+		else if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(GetOwner()))
+		{
+			AetherExtractor->DestroyAetherExtractor();
 		}
 	}
-	//damaged
-    else
-    {
-        MulticastRPCPlayTakeDamageMontage();
-
-        // 서버/리슨 서버에서도 로컬 Hurt 사운드 재생 (RPC 제거)
-        HandleHealthDamage(PreviousHealth, CurrentHealth);
-
-		//dead
-		if (CurrentHealth <= KINDA_SMALL_NUMBER && PreviousHealth > KINDA_SMALL_NUMBER)
-		{
-			CurrentHealth = 0.f;
-
-			// 시커인 경우 빈사 상태로 전환 (즉시 사망 대신)
-			if (AGS_Seeker* Seeker = Cast<AGS_Seeker>(GetOwner()))
-			{
-				// 이미 빈사 상태가 아닌 경우에만 빈사 상태로 전환
-				if (!Seeker->IsInDyingState())
-				{
-					Seeker->EnterDyingState();
-					// HP를 약간 남겨서 빈사 상태 유지 (0보다 약간 큰 값으로 설정)
-					CurrentHealth = 1.0f;
-					return;  // OnDeath 호출하지 않음
-				}
-				else
-				{
-					// 이미 빈사 상태인 시커가 추가 데미지를 받은 경우
-					// 빈사 상태에서는 추가 데미지를 무시 (이미 쓰러져 있음)
-					CurrentHealth = 1.0f;
-					return;
-				}
-			}
-
-			// 시커가 아닌 캐릭터는 기존대로 즉시 사망
-			UE_LOG(LogTemp, Warning, TEXT("death"));
-			AGS_Character* OwnerCharacter = Cast<AGS_Character>(GetOwner());
-			if (IsValid(OwnerCharacter))
-			{
-				OwnerCharacter->OnDeath();
-			}
-			else if (AGS_AetherExtractor* AetherExtractor = Cast<AGS_AetherExtractor>(GetOwner()))
-			{
-				AetherExtractor->DestroyAetherExtractor();
-			}
-		}
-		else if (CurrentHealth <= KINDA_SMALL_NUMBER)
-		{
-			// 이미 죽은 상태에서 추가 데미지를 받은 경우 HP를 0으로 고정만 하고 OnDeath()는 호출하지 않음
-			CurrentHealth = 0.f;
-		}
+	else if (CurrentHealth <= KINDA_SMALL_NUMBER)
+	{
+		// 이미 죽은 상태에서 추가 데미지 무시
+		CurrentHealth = 0.f;
 	}
-	
+
 	OnCurrentHPChanged.Broadcast(this);
 }
 
@@ -404,4 +384,25 @@ ECharacterClass UGS_StatComp::MapCharacterTypeToCharacterClass(ECharacterType Ch
 		UE_LOG(LogTemp, Warning, TEXT("MapCharacterTypeToCharacterClass: 알 수 없는 캐릭터 타입, 기본값 Ares 반환"));
 		return ECharacterClass::Ares;
 	}
+}
+
+void UGS_StatComp::HandleSeekerDyingTransition(AGS_Seeker* Seeker)
+{
+	if (!IsValid(Seeker))
+	{
+		return;
+	}
+
+	// 이미 빈사 상태인 경우 추가 데미지 무시
+	if (Seeker->IsInDyingState())
+	{
+		CurrentHealth = 1.0f;  // 최소 HP 유지
+		UE_LOG(LogTemp, Warning, TEXT("[Seeker] 이미 빈사 상태 - 추가 데미지 무시"));
+		return;
+	}
+
+	// 빈사 상태 진입
+	Seeker->EnterDyingState();
+	CurrentHealth = 1.0f;  // 최소 HP 유지
+	UE_LOG(LogTemp, Log, TEXT("[Seeker] 빈사 상태 진입"));
 }

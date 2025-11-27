@@ -584,10 +584,50 @@ protected:
 	UFUNCTION()
 	void OnReviveDecayTick();
 
+	// ========================================
+	// 헬퍼 함수들
+	// ========================================
+
+	/**
+	 * 안전한 타이머 정리 헬퍼 함수
+	 * - EndPlay나 레벨 전환 시 안전하게 타이머 정리
+	 *
+	 * @param TimerHandle 정리할 타이머 핸들
+	 */
+	void SafeClearTimer(FTimerHandle& TimerHandle);
+
+	/**
+	 * 구조자가 유효 거리 내에 있는지 확인
+	 *
+	 * @param Reviver 구조자 (Seeker)
+	 * @return 유효 거리 내 여부
+	 */
+	bool IsReviverInRange(const AGS_Seeker* Reviver) const;
+
+	/**
+	 * 구조자가 유효한 상태인지 확인
+	 * - IsValid 체크 + E키 홀드 상태 확인
+	 *
+	 * @param Reviver 구조자 (Seeker)
+	 * @return 유효 여부
+	 */
+	bool IsReviverValid(const AGS_Seeker* Reviver) const;
+
+	/**
+	 * 구조 진행 조건을 검증
+	 * - 구조자 유효성, 거리, E키 홀드 상태 확인
+	 *
+	 * @return 구조를 계속 진행할 수 있는지 여부
+	 */
+	bool CanContinueRevive() const;
+
 private:
 	// ========================================
 	// 빈사 상태 변수들
 	// ========================================
+
+	/** 타이머 주기 상수 */
+	static constexpr float REVIVE_DECAY_TICK_INTERVAL = 0.1f;  // 100ms
 
 	/** 빈사 상태 여부 */
 	UPROPERTY(ReplicatedUsing = OnRep_IsInDyingState)
@@ -624,6 +664,10 @@ private:
 	/** 구조 후 회복되는 HP 비율 (25%) */
 	UPROPERTY(EditDefaultsOnly, Category = "Dying", meta = (ClampMin = "0.1", ClampMax = "1.0"))
 	float ReviveHealthPercent = 0.25f;
+
+	/** 구조 가능 최대 거리 (cm) */
+	UPROPERTY(EditDefaultsOnly, Category = "Dying|Revive", meta = (ClampMin = "50.0", ClampMax = "500.0"))
+	float MaxReviveDistance = 200.0f;
 
 	/** 빈사 상태 PostProcess 컴포넌트 */
 	UPROPERTY(VisibleAnywhere, Category = "Dying|Effects")
