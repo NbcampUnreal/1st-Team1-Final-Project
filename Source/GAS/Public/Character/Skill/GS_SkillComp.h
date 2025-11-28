@@ -118,6 +118,12 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayEndVFX(ESkillSlot Slot, FVector Location, FRotator Rotation);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayLoopVFX(ESkillSlot Slot, AActor* AttachTarget);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StopLoopVFX(ESkillSlot Slot);
+
 	// 쿨타임 변경
 	void ApplyCooldownModifier(ESkillSlot SkillSlot, float Modifier);
 	
@@ -131,12 +137,16 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	// skill 
+	// skill
 	UPROPERTY()
 	TMap<ESkillSlot, UGS_SkillBase*> SkillMap;
 
 	UPROPERTY()
 	TMap<ESkillSlot, FSkillRuntimeState> SkillStates;
+
+	// Loop VFX 컴포넌트 추적 (궁극기 아우라 등)
+	UPROPERTY()
+	TMap<ESkillSlot, class UNiagaraComponent*> ActiveLoopVFXComponents;
 	
 	UPROPERTY(ReplicatedUsing = OnRep_SkillStates)
 	TArray<FSkillRuntimeState> ReplicatedSkillStates;

@@ -124,6 +124,9 @@ struct GAS_API FSkillInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
 	TObjectPtr<UNiagaraSystem> SkillEndVFX;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+	TObjectPtr<UNiagaraSystem> SkillLoopVFX; // 스킬 지속 중 루프 VFX (궁극기 아우라 등)
+
 	// VFX 설정
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
 	FVector SkillVFXScale = FVector(1.0f, 1.0f, 1.0f);

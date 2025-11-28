@@ -9,6 +9,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
 #include "Character/E_Character.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 
 UGS_SkillComp::UGS_SkillComp()
@@ -611,6 +613,82 @@ void UGS_SkillComp::Multicast_PlayEndVFX_Implementation(ESkillSlot Slot, FVector
 	if (UGS_SkillBase* Skill = GetSkillFromSkillMap(Slot))
 	{
 		Skill->PlayEndVFX(Location, Rotation);
+	}
+}
+
+void UGS_SkillComp::Multicast_PlayLoopVFX_Implementation(ESkillSlot Slot, AActor* AttachTarget)
+{
+	// 데디케이티드 서버에서는 VFX 재생하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	// 유효성 검사
+	if (!AttachTarget || !IsValid(AttachTarget))
+	{
+		UE_LOG(LogTemp, Error, TEXT("[SkillComp] Multicast_PlayLoopVFX: AttachTarget이 유효하지 않습니다!"));
+		return;
+	}
+
+	// SkillInfo에서 LoopVFX 가져오기
+	UGS_SkillBase* Skill = GetSkillFromSkillMap(Slot);
+	if (!Skill)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[SkillComp] Multicast_PlayLoopVFX: Skill을 찾을 수 없습니다!"));
+		return;
+	}
+
+	const FSkillInfo* SkillInfo = Skill->GetCurrentSkillInfo();
+	if (!SkillInfo || !SkillInfo->SkillLoopVFX)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[SkillComp] Multicast_PlayLoopVFX: SkillLoopVFX가 DT_SkillSet에 할당되지 않았습니다!"));
+		return;
+	}
+
+	// 기존 Loop VFX가 있으면 먼저 정리
+	Multicast_StopLoopVFX(Slot);
+
+	// 새로운 Loop VFX 생성 (AttachTarget에 부착)
+	UNiagaraComponent* LoopVFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+		SkillInfo->SkillLoopVFX,
+		AttachTarget->GetRootComponent(),
+		NAME_None,
+		FVector::ZeroVector,
+		FRotator::ZeroRotator,
+		EAttachLocation::KeepRelativeOffset,
+		true  // bAutoDestroy
+	);
+
+	if (LoopVFXComponent)
+	{
+		ActiveLoopVFXComponents.Add(Slot, LoopVFXComponent);
+		UE_LOG(LogTemp, Warning, TEXT("[SkillComp] Loop VFX 생성 성공: %s"), *SkillInfo->SkillLoopVFX->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[SkillComp] Loop VFX 컴포넌트 생성 실패!"));
+	}
+}
+
+void UGS_SkillComp::Multicast_StopLoopVFX_Implementation(ESkillSlot Slot)
+{
+	// 데디케이티드 서버에서는 처리하지 않음
+	if (GetWorld() && GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	// 해당 슬롯의 Loop VFX 컴포넌트 찾기
+	if (UNiagaraComponent** FoundComponent = ActiveLoopVFXComponents.Find(Slot))
+	{
+		if (*FoundComponent && IsValid(*FoundComponent))
+		{
+			(*FoundComponent)->Deactivate();
+			(*FoundComponent)->DestroyComponent();
+			UE_LOG(LogTemp, Warning, TEXT("[SkillComp] Loop VFX 정지 성공"));
+		}
+		ActiveLoopVFXComponents.Remove(Slot);
 	}
 }
 

@@ -9,6 +9,8 @@
 #include "Sound/GS_SeekerAudioComponent.h"
 #include "Character/Player/Seeker/GS_Ares.h"
 #include "Character/Player/Seeker/GS_Seeker.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 UGS_AresUltimateSkill::UGS_AresUltimateSkill()
 {
@@ -62,6 +64,12 @@ void UGS_AresUltimateSkill::ActiveSkill()
 
 	// 광전사화
 	BecomeBerserker();
+
+	// 궁극기 아우라 VFX 재생 (SkillComp를 통한 멀티캐스트)
+	if (OwnerCharacter->HasAuthority() && OwningComp)
+	{
+		OwningComp->Multicast_PlayLoopVFX(CurrentSkillType, OwnerCharacter);
+	}
 }
 
 void UGS_AresUltimateSkill::OnSkillCanceledByDebuff()
@@ -112,6 +120,12 @@ void UGS_AresUltimateSkill::BecomeBerserker()
 
 void UGS_AresUltimateSkill::DeactiveSkill()
 {
+	// 궁극기 아우라 VFX 정지 (SkillComp를 통한 멀티캐스트)
+	if (OwnerCharacter->HasAuthority() && OwningComp)
+	{
+		OwningComp->Multicast_StopLoopVFX(CurrentSkillType);
+	}
+
 	// 궁극기 루프 사운드 정지 및 종료 사운드 재생 (멀티캐스트)
 	if (OwnerCharacter->HasAuthority())
 	{
@@ -140,6 +154,6 @@ void UGS_AresUltimateSkill::DeactiveSkill()
 		SkillComp->ResetCooldownModifier(ESkillSlot::Moving);
 		OriginalMovingSkillCooltime = -1.f; // 초기화
 	}
-	
+
 	Super::DeactiveSkill();
 }
