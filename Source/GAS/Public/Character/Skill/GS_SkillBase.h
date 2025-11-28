@@ -98,8 +98,11 @@ public:
 	void SetCoolingDown(bool bInCoolingDown) { bIsCoolingDown = bInCoolingDown; }
 	
 	// Delegate Binding 함수
-	virtual void InitializeDelegate(); 
-	
+	virtual void InitializeDelegate();
+
+	// 데이터 테이블에서 현재 스킬 정보 가져오기
+	const FSkillInfo* GetCurrentSkillInfo() const;
+
 protected:
 	bool bIsActive = false;
 	bool bIsCoolingDown;
@@ -111,11 +114,8 @@ protected:
 	// Cast VFX 컴포넌트 추적 (스킬 종료 시 정리를 위해)
 	UPROPERTY()
 	TObjectPtr<UNiagaraComponent> ActiveCastVFXComponent;
-	
+
 	void StartCoolDown();
-	
-	// 데이터 테이블에서 현재 스킬 정보 가져오기
-	const FSkillInfo* GetCurrentSkillInfo() const;
 
 	// 스킬 오디오 재생 헬퍼 함수들
 	void PlaySkillStartSound() const;
